@@ -1,0 +1,11 @@
+# Large shipped artifacts.  Keep them on disk, out of git.
+*.pkg
+
+# Extracted originals, generated inventories, and analysis output.
+work/
+
+# Python bytecode cache.
+__pycache__/
+
+# macOS
+.DS_Store
