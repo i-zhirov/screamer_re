@@ -994,6 +994,28 @@ audio tracks.  The game plays the tracks through the CD audio path.
   that
   state is not observed, so this route needs the state address first.
 - The sprite count, the dimensions, and the palette stay open.
+## Corrections to the wait and the mouse
+
+- Correction: the run-time address `0150:1E1C40` is not an input wait.  The
+  function that contains it starts at the module address `0x21BA0`, and it reads
+  the
+  reference points `0x13CCC` and `0x13CD0`, calls the floating point helper
+  `0x4D9F4`, and calls `0x2218C`.  It is a graphics or motion function, so the
+  game was running rather than waiting at that point.
+  Evidence: the disassembly of `0x21C40` and the function list.
+- `mouse_init` at `0x1F1A0` resets the mouse through interrupt 33h and installs
+  a
+  user-defined event handler with the far pointer `CS:0x18D8C`.  The menu is
+  therefore mouse driven, and the handler at `0x18D8C` receives the menu events.
+  Evidence: the disassembly of `0x1F1A0`.
+- The next step is to disassemble the function that contains `0x18D8C`, the
+  mouse
+  handler, which should name the menu state address that the menu reads and
+  writes.
+  With that address, `SMV` can set the menu selection and the `BPPM` probe can
+  watch the sprite loader.
+  Evidence: the disassembly of `0x1F1A0`.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
