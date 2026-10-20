@@ -33,11 +33,13 @@ Session script commands, one per line:
     sleep <seconds>                wait
     stop                          end the script
     wait <marker> [timeout]        wait for a marker in the emulator output
+    key <text>                    write text to the emulator console, \\r for Enter
 """
 
 from __future__ import annotations
 
 import argparse
+import codecs
 import fcntl
 import os
 import pty
@@ -306,6 +308,19 @@ class ScriptRunner:
             self._fail(step, f"sleep needs a number, got '{step.arguments}'")
             return False
         time.sleep(seconds)
+        return True
+
+    def _step_key(self, step: ScriptStep) -> bool:
+        if self.child is None:
+            self._fail(step, "key needs --launch")
+            return False
+        text = codecs.decode(step.arguments, "unicode_escape")
+        data = text.encode("latin-1", "replace")
+        if not data:
+            self._fail(step, "key needs text")
+            return False
+        os.write(self.child.master, data)
+        print(f"key {data!r} -> sent")
         return True
 
     def _step_stop(self, step: ScriptStep) -> bool:

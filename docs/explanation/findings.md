@@ -403,15 +403,28 @@ Authority.
   plausible count or size for `GAMEL.SPR`, and the port of the decoded structure
   is not confirmed, so the tool reports the raw member.
   Evidence: the port attempt and the classic variant test.
-- A debugger dump of the decoder state did not reach the decoder.  A breakpoint
-  at
-  the run-time address `0150:1FF4C4`, the entry of the block decoder `0x4d4c4`,
-  did not hit within 25 seconds.  The game sat in the input wait at
-  `0150:1E1C40`, the static address `0x21c40`, so no file load runs before an
-  input event.  The dump needs a driven session: a key press into the emulator,
-  or a
-  breakpoint on the input handler to step past the wait.
+- A driven debugger probe reaches the game after an input event.  The session
+  script gained a `key <text>` step, which writes to the emulator console. 
+  Sending
+  Enter moved the game from the input wait at `0150:1E1C40` to `0150:29AB85`,
+  the
+  static address `0x19ab85`, inside `player_update` at `0x19ab0`, so the key
+  press
+  leaves the menu and starts the game.  The registers at that point were
+  EAX `0x2d5ffd8`, EBX `0x1fc003c`, ECX `0x1fc003c`, and EDX `0x3003c`.
   Evidence: the probe session `tools/scripts/probe_lzss_state.dbg`.
+- The decoder breakpoint at `0150:1FF4C4` still did not hit in the driven run,
+  and the emulator closed the control connection during the 45-second window. 
+  The
+  race path loads its graphics through the whole-file open `0x4c485`, not the
+  member
+  open `0x4c08d`, so the LZSS decoder may not run on that path at all.
+  Evidence: the driven probe run and the decompiled `FUN_00025aac`.
+- The mask table at `+0x8050` stays the missing piece of the LZSS port.  The bit
+  reader masks the code with the entry of that table for the shift count, and
+  the
+  decompiled code does not show how the table is initialized.
+  Evidence: the decompiled `FUN_0004d844`.
 - The mask table at `+0x8050` is the missing piece of the LZSS port.  The bit
   reader masks the code with the entry of that table for the shift count, and
   the

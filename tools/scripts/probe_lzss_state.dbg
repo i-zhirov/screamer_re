@@ -1,9 +1,24 @@
+# Dump the LZSS decoder state.
+#
+# The block decoder 0x4d4c4 runs only after an input event, so the script sends
+# Enter to the emulator console to leave the menu input wait, then breaks at the
+# decoder entry.  The decoder takes its context in EAX, so a second run can dump the
+# mask table at the context plus 0x8050.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/probe_lzss_state.dbg \
+#     --port 9876 --cwd work/entry/run --timeout 300 \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+
 break
 exec BP 0150:1FF4C4
 clear
 exec RUN
-sleep 25
+sleep 8
+key \r
+sleep 45
 break
-read CS EIP EAX EBX ECX EDX
+read CS EIP EAX EBX ECX EDX ESI EDI EBP
 exec BPDEL *
 exec RUN
