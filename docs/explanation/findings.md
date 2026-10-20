@@ -1016,6 +1016,37 @@ audio tracks.  The game plays the tracks through the CD audio path.
   watch the sprite loader.
   Evidence: the disassembly of `0x1F1A0`.
 - The sprite count, the dimensions, and the palette stay open.
+## The menu state address
+
+- The game wrote `CONFIG/CHOICE.DAT` during a probe, and the file holds 1120
+  bytes,
+  the value `0x460`.  That is the exact size that `config_save` at `0x1BE6C`
+  writes, the structure at `DAT_001203C4`, so the menu state address is the
+  module
+  address `0x1203C4` and the run-time address `0x1E23C4`.
+  Evidence: the probe-created file and the decompiled `FUN_0001be6c`.
+- The structure holds the car name `GRA` at `+0x08`, the value 2 at `+0x0C`, the
+  value 1 at `+0x10`, and the value `-1` at `+0x3C`.  The first field is a car
+  name of three characters, so the menu writes the player choice there.
+  Evidence: the field dump of the probe-created file.
+- The game wrote the choice file, so the menu accepts the scripted keys.  The
+  file is
+  the last-choice memory, and the game reads it at startup, which is why a later
+  run
+  can start a race directly.
+  Evidence: the file date and the decompiled `FUN_0001b840`.
+- Rule: the probe created `CONFIG/CHOICE.DAT` inside the shipped game directory,
+  which the project rule forbids.  The file was removed to restore the shipped
+  artifact, and a copy stays under `work/`.  Probes must run against a copy of
+  the
+  game directory.
+  Evidence: the file dates, where every shipped file is dated Dec 9 2019 and the
+  probe file is dated today.
+- The sprite count, the dimensions, and the palette stay open.  The next probe
+  sets
+  the structure at `0x1E23C4` with `SMV`, or leaves the choice file in the probe
+  copy, and then re-runs the `BPPM` probe with a longer window.
+  Evidence: the probe results.
 ## Method
 
 The investigation uses these steps:
