@@ -292,6 +292,24 @@ Authority.
 - The font record is 12 bytes and the font bitmap is 1280 bytes.  The loader
   increments the font count `DAT_00025440`.
   Evidence: the decompiled `FUN_00025658`.
+- The sprite structure is decoded from the disassembly of `0x257b0`: the head of
+  the file holds the sprite count at `+0x00` and the pixel data size at `+0x04`,
+  then `count * 0x14` bytes of 20-byte sprite records fill the first `SPRITES`
+  resource, and the pixel data fills the second.  The loader reads 4 bytes into
+  `DAT_00025cd4`, 4 bytes into `DAT_00025cdc`, then `count * 0x14` bytes, then
+  the size in bytes.  A missing file closes the stream and calls `exit(0)`.
+  Evidence: the disassembly of `0x257b0` at `0x257cd` to `0x258b4`.
+- Verification against `GFX/GAME.DAT`: the first dword is `0xfbf05b00`, which is
+  not a plausible sprite count for a file of 637267 bytes, and the head bytes do
+  not hold text.  The file does not match the plain sprite structure at its
+  head.
+  Evidence: the byte scan of `GFX/GAME.DAT`.
+- Verification against `GFX/MENU.DAT`: the first dword is `0x03000000` and the
+  first word is 0, so the file does not match the plain sprite structure either.
+  Both files are compressed or encoded, so the record structures are the layouts
+  of
+  the loaded resources, not of the file bytes.
+  Evidence: the byte scans of both files.
 - Verification of the member layout: `GFX/MENU.DAT` holds no member names.  A
   scan of the 2230684 bytes finds no `menu`, `.spr`, `.fnt`, or `.pcx` text.
   The file is not a name-indexed container; the names `menu%c.spr` and

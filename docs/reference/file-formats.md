@@ -120,16 +120,39 @@ the format `%s\%s` and opens it in the mode `rb`.
 Evidence: the decompiled `FUN_0001b5a4` and the strings at `0x1009f5` and
 `0x1007f80`.
 
-### The menu sprite and font data
+### The sprite and font structures
 
 `menu_space_init` at `0x29d08` loads the sprite and font data through two
-loaders.  The sprite loader at `0x257b0` reads two header blocks into
-`DAT_00025cd4` and `DAT_00025cdc` and then reads the `SPRITES` resource twice.
-The font loader at `0x25658` reads a count into `DAT_00025440`, then per font a
-12-byte descriptor at `DAT_0011ca98`, then per font a 0x500-byte bitmap at
-`DAT_00119898`, and finally the `FONTS` resource.  The loader increments the
-font count `DAT_00025440`.
-Evidence: the decompiled `FUN_000257b0` and `FUN_00025658`.
+loaders.
+
+**The sprite structure.**  The sprite loader at `0x257b0` reads the head of the
+file and fills two `SPRITES` resources.
+
+| Offset | Size | Content |
+| --- | ---: | --- |
+| `+0x00` | 4 | the sprite count `DAT_00025cd4` |
+| `+0x04` | 4 | the pixel data size `DAT_00025cdc` |
+| `+0x08` | `count * 0x14` | the sprite records, one `SPRITES` resource |
+| after | the size | the pixel data, the second `SPRITES` resource |
+
+A sprite record is 20 bytes.  When the file is missing, the loader closes the
+stream and calls `exit(0)`.
+Evidence: the disassembly of `0x257b0` at `0x257cd` to `0x258b4`.
+
+**The font structure.**  The font loader at `0x25658` reads a count into
+`DAT_00025440`, then per font a 12-byte descriptor at `DAT_0011ca98`, then per
+font a 0x500-byte bitmap at `DAT_00119898`, and finally the `FONTS` resource.
+The loader increments the font count `DAT_00025440`.
+Evidence: the decompiled `FUN_00025658`.
+
+**Verification.**  `GFX/GAME.DAT` does not match the plain sprite structure at
+its head.  The first dword is `0xfbf05b00`, which is not a plausible sprite
+count for a file of 637267 bytes, and the head bytes do not hold text.
+`GFX/MENU.DAT` does not match it either: the first dword is `0x03000000` and the
+first word is 0.  Both files are compressed or encoded, so the record structures
+above are the layouts of the loaded resources, not of the file bytes.  The
+container
+layout of both files stays open.  Evidence: the byte scans of both files.
 
 `menu_space_init` also loads the named lists `menu`, `cardat`, `trackdat` (with
 the separator `-----`), and `champ` through the list loader at `0x1b394`, and it
