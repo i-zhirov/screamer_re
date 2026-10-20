@@ -210,13 +210,13 @@ Evidence: the exclusive-OR decode of both directories.
 
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and
 the names resolve, but the member data does not match the plain sprite
-structure.  The head of `GAMEL.SPR` and `GAMEH.SPR` holds neither a plausible
-sprite count nor a plausible pixel data size, in the raw form and in the
-exclusive-OR form.  The same holds for `GAMEL.FNT` and `GAMEH.FNT` and the font
-structure.  So the member data carries a further encoding, the block format of
-the
-decoder at `0x4c128` with the control bytes, and the re-verification stays open
-at the member data.  Evidence: the decode of the four members of `GFX/GAME.DAT`.
+structure.
+The head of `GAMEL.SPR` and `GAMEH.SPR` holds neither a plausible sprite count
+nor a plausible pixel data size, in the plain form and in the exclusive-OR form.
+The same holds for `GAMEL.FNT` and `GAMEH.FNT` and the font structure, and for
+the 32-byte block form with the control bytes.  So the member data carries a
+further compression, and the re-verification stays open at the member data.
+Evidence: the decode of the four members of `GFX/GAME.DAT`.
 
 ## Table data
 

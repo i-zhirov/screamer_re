@@ -357,12 +357,18 @@ Authority.
   Evidence: the exclusive-OR decode of the directory.
 - `GFX/MENU.DAT` holds the palette `MENU.COL` of 768 bytes at the offset 0,
   which is 256 colours of 3 bytes.  Evidence: the decode of the directory.
+- The decoder at `0x4c128` returns one member: it reads the directory size
+  from the last 4 bytes, seeks back by the size plus 4 bytes, reads 32-byte
+  records forward, exclusive-ORs every record byte with `0x3a`, and compares
+  the record name with the wanted name.  So the exclusive-OR applies to the
+  directory records and the member data is stored plain.
+  Evidence: the decompiled `FUN_0004c128`.
 - Re-verification of the sprite layout stays open at the member data.  The
   member offsets, the sizes, and the names resolve, but the data of the sprite
   and font members matches neither the sprite structure nor the font structure,
-  in the raw form and in the exclusive-OR form.  So the member data carries a
-  further encoding, the block format of the decoder at `0x4c128` with the
-  control bytes.  Evidence: the decode of the four members of `GFX/GAME.DAT`.
+  in the plain form, in the exclusive-OR form, and in the 32-byte block form.
+  So the member data carries a further compression.
+  Evidence: the decode of the four members of `GFX/GAME.DAT`.
 - `FUN_000131a8` at `0x131a8`, the mode initializer that
   `race_session_start` calls, loads the object list through `0x15460` with the
   record size 0x590, so the object array `DAT_00110d9c` holds 0x590-byte
