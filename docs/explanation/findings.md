@@ -739,13 +739,29 @@ Authority.
   comes out wrong and every later code follows it.
   Evidence: the port diagnostic, which printed `buf[0..3]` as `[0, 0, 0, 0]` and
   the first six codes as zero.
-- The port is not fixed yet.  The initial bit position or the initial buffer
-  fill
-  must account for the one-byte read of the driver, and the bit reader must read
-  three bytes rather than two.  The port now reads three bytes, and the
-  remaining
-  gap is the initial state.
-  Evidence: the port diagnostic.
+- The first code now lands on the literal `0x100`.  The fix seeds the bit buffer
+  with the member bytes from the start and sets the bit position to zero, which
+  is
+  the effect of the driver's one-byte read plus the first refill.  The
+  diagnostic
+  then prints `code0: 0x100`, the literal, and `code1: 0x03f`, the first literal
+  byte.  Evidence: the port diagnostic.
+- The decode still diverges after the second code.  The third code comes out as
+  `0x000`, a zero-length match, and the ring index then runs past the ring,
+  which
+  raises an index error.  So the bit reader and the first code are right, and
+  the
+  remaining gap is the match decoding: the table at `+0x0000` and the ring at
+  `+0x4074`.
+  Evidence: the port diagnostic and the index error.
+- The sprite count, the dimensions, and the palette of `GAMEL.SPR` and
+  `GAMEH.SPR`
+  therefore stay unreported.  Evidence: the port result.
+- The next step is a run-time dump of the ring at `+0x4074` and the table at
+  `+0x0000` after the first literal, through the interrupt breakpoint method
+  that
+  works, with the corrected dump addressing `MEMDUMP 0150:<module address>`.
+  Evidence: the probe results.
 - The sprite count, the dimensions, and the palette of `GAMEL.SPR` and
   `GAMEH.SPR`
   therefore stay unreported.  Evidence: the port result.

@@ -123,8 +123,9 @@ class _Lzss:
         self.raw = raw
         self.limit = limit
         self.buf = bytearray(0x400)
-        self.buf[0] = raw[0]
-        self.read_pos = 1
+        prefill = min(len(raw), 0x400)
+        self.buf[:prefill] = raw[:prefill]
+        self.read_pos = prefill
         self.bits = 0
         self.shift = 9
         self.threshold = 0x200
