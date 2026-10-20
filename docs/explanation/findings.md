@@ -131,6 +131,29 @@ Authority.
   `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
 - See [Program map](../reference/program-map.md) for the addresses.
 
+## The .3dx resource loader
+
+- The `.3dx` loader is at module address `0x10bfc`.  It walks the object list and
+  loads every record with the load flag at `+0x14` set.  Evidence: the decompiled
+  `FUN_00010bfc` and the `3D_HEADER` and `3D_BLKOBJ` string references from
+  `tools/ghidra/FindReferences.java`.
+- The file name is the record name plus the suffix `3dx`.  Evidence: the format
+  `%s.3DX` at `0x1003ac`, the `rb` mode at `0x1003b3`, and the decompiled
+  `FUN_00010bfc`.
+- The loader reports failures with return codes: `2` when the open fails, `3` when the
+  `3D_HEADER` chunk is missing, and `5` when the `3D_BLKOBJ` chunk is missing.
+  Evidence: the decompiled `FUN_00010bfc`.
+- The error reporter at `0x10978` dispatches on the code through a jump table and
+  prints the `3dx` messages.  Evidence: the Ghidra references to `0x100074`,
+  `0x1000a3`, `0x1000d1`, and `0x1000ff`, all from `FUN_00010978`.
+- `resource_get` at `0x2eed0` looks a resource up by name and loads it from the
+  file when missing.  The same function serves `3D_HEADER`, `3D_BLKOBJ`,
+  `MELODIC_BANK`, `DRUM_BANK`, and `NET_SPACE`.  Evidence: the decompiled
+  `FUN_0002eed0`, `FUN_0002f9e0`, and `FUN_00029d08`.
+- `object_init_from_file` at `0x4cc10` binds the loaded file to the object record
+  and copies the chunk table.  Evidence: the decompiled `FUN_0004cc10`.
+- The loader's callees are named in [Program map](../reference/program-map.md).
+
 ## Function names
 
 - The Watcom startup at `0xd4324` calls `main` at `0x10020` with `argc` in EAX

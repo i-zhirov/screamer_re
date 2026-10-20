@@ -118,6 +118,41 @@ original Watcom symbol names.
 same object.  The four run-time helpers sit at the end of the object, after the
 program code.
 
+## Resource loader
+
+`object_load` at module address `0x10bfc` loads the `.3dx` object files.  It
+walks the object list and loads every record with the load flag at `+0x14` set.
+For each record it:
+
+1. builds the file name from the record name with `sprintf`,
+2. opens the file with `fopen`,
+3. looks the `3D_HEADER` chunk up through `resource_get`,
+4. looks the `3D_BLKOBJ` chunk up,
+5. binds the file to the object record with `object_init_from_file`.
+
+It returns `2` when the open fails, `3` when the `3D_HEADER` chunk is missing,
+and `5` when the `3D_BLKOBJ` chunk is missing.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x10bfc` | `object_load` | reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records | observed |
+| `0x4d32c` | `sprintf` | formats into a buffer through the run-time `vsprintf` and writes the terminator | derived |
+| `0x4c08d` | `fopen` | opens the path through the run-time file layer and fills the stream record; returns `-1` on failure | derived |
+| `0x4c7e0` | `stream_status` | returns the word at `stream + 0x70` | inferred |
+| `0x2eed0` | `resource_get` | looks a resource up by name in the engine resource list and loads it from its file when missing | observed |
+| `0x4c4e5` | `stream_read` | buffered read; advances the position and clamps it to the stream size | derived |
+| `0x4c38d` | `stream_close` | frees the buffers and closes the handle; the counterpart of `fopen` | derived |
+| `0x4cc10` | `object_init_from_file` | bounds the file index, initializes the object record, and copies the chunk table from the file record | observed |
+
+The chunk table in the object record holds eight words per chunk: the file
+record, the chunk count, and six words of the chunk header.  Evidence: the
+decompiled `FUN_0004cc10`.
+
+The loader returns codes that the error reporter at `0x10978` prints.  The
+reporter dispatches through a jump table to one message stub per code, and the
+stubs print the `3dx` messages.  Evidence: the decompiled `FUN_00010978` and
+the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
+
 ## Engine strings
 
 The decompiler shows the engine interface.  The strings sit in object 3:

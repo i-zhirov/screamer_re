@@ -64,8 +64,8 @@ current host.
 
 1. Follow the calls from `main` into the game subsystems.  The named functions
    give the entry points: `engine_init`, `race_loop`, and `frame_update`.
-2. Decode the 3D object format from the strings: `%s.3dx`, `3D_HEADER`,
-   `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
+2. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
+   the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
 3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
    graphics file.
 4. Set up the OpenWatcom V2 build harness under `work/`.

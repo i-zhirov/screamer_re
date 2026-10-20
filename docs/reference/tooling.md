@@ -13,6 +13,7 @@
 | `tools/ghidra/install_loader.sh` | install the LX/LE loader into Ghidra |
 | `tools/ghidra/decompile.sh` | decompile functions by address with Ghidra |
 | `tools/ghidra/DecompileFunctions.java` | the Ghidra headless decompile script |
+| `tools/ghidra/FindReferences.java` | the Ghidra headless reference listing script |
 
 ### `tools/le.py`
 
@@ -257,6 +258,20 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 The script imports the executable into the `work/ghidra/proj` project, runs the
 `tools/ghidra/DecompileFunctions.java` script, and writes the decompiled C to
 `work/ghidra/decompiled.txt`.  Set `SCREAMER_EXE` to use another executable.
+
+List every reference to an address, for example to resolve a string that a fixup
+points at:
+
+```sh
+nix develop .#ghidra --command analyzeHeadless work/ghidra/proj Screamer \
+  -import ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE -overwrite \
+  -scriptPath tools/ghidra \
+  -postScript FindReferences.java 0x1000a3
+```
+
+The loader applies the LE fixups, so a reference that is a low offset in the file
+resolves to the full address.  radare2 needs `-e bin.relocs.apply=true` for the same
+result.
 
 The loader reports the same addresses as `tools/le.py` and radare2, so the three
 views agree.  See [Program map](program-map.md) for the named functions.
