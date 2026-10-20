@@ -175,6 +175,9 @@ Authority.
 - `frame_update` clears the key state, reads the clock, advances a 6-frame counter,
   waits for the frame flag `DAT_0011d234`, and handles input.  Evidence: the
   decompiled `FUN_00027f94`.
+- `main` calls `error_report` at `0x10978` on the session error path, with the
+  error code in EAX.  The reporter dispatches through a jump table to one message
+  stub per code.  Evidence: the decompiled `FUN_00010020` and `FUN_00010978`.
 - `main` calls `engine_shutdown` at `0x128ac` after the loop.  That function is
   the counterpart of `engine_init`: it stops the music with `FUN_00014e20(0)`.
   Evidence: the decompiled `FUN_000128ac`.

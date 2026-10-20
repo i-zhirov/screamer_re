@@ -107,8 +107,8 @@ original Watcom symbol names.
 | `0x128ac` | `engine_shutdown` | counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down | derived |
 | `0x27700` | `race_loop` | starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4 | derived |
 | `0x27f94` | `frame_update` | clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input | derived |
-| `0x108e4` | `sound_select` | builds a request record with the index and calls the sound runtime | inferred |
-| `0x10978` | `sound_play` | dispatches on the index through the sound runtime | inferred |
+| `0x108e4` | `bios_video` | builds a record with the argument and calls interrupt 10h through the run-time | inferred |
+| `0x10978` | `error_report` | dispatches on the code through a jump table to one message stub per code | observed |
 | `0x30050` | `memory_alloc` | allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8` | derived |
 | `0x3009b` | `printf` | passes the argument list and the output table `DAT_00102fd2` to the run-time print engine | inferred |
 | `0x300be` | `exit` | calls the run-time pair `PTR_FUN_00102f84` and `PTR_FUN_00102f88`; `main` calls it with the error code | inferred |
