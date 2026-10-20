@@ -344,11 +344,25 @@ Authority.
 - The members of `GFX/MENU.DAT`: `MENU.COL`, `MENU.MLB`, `ALETTER.3DX`,
   `AMAP1.3DX` to `AMAP6.3DX`, `AAUTO00.3DX`, `AAUTO01.3DX`, and
   `AAUTO02.3DX`, with 7 more.  Evidence: the exclusive-OR decode.
-- Re-verification of the sprite layout stays open.  The member names decode,
-  but the block offset and the block count of a record do not yet resolve the
-  start of the member data, and the first 64 bytes of `GFX/GAME.DAT` decode to
-  neither a plausible sprite count nor a plausible pixel data size.
-  Evidence: the exclusive-OR decode of `GFX/GAME.DAT`.
+- The directory record holds the member name at `+0x00` (16 bytes), the
+  member offset at `+0x10`, the member size at `+0x14`, the end offset at
+  `+0x18`, and a flag at `+0x1c`.  The offsets form one chain:
+  `offset + size` of a member is the `offset` of the next member, and the last
+  member ends at the start of the directory.
+  Evidence: the decode of both directories.
+- `GFX/GAME.DAT` holds the sprite members `GAMEL.SPR` (559712, 10010 bytes)
+  and `GAMEH.SPR` (569722, 28736) and the font members `GAMEL.FNT`
+  (598458, 11565) and `GAMEH.FNT` (610023, 25992), so the members that
+  `sprite_load` and `font_load` read are present.
+  Evidence: the exclusive-OR decode of the directory.
+- `GFX/MENU.DAT` holds the palette `MENU.COL` of 768 bytes at the offset 0,
+  which is 256 colours of 3 bytes.  Evidence: the decode of the directory.
+- Re-verification of the sprite layout stays open at the member data.  The
+  member offsets, the sizes, and the names resolve, but the data of the sprite
+  and font members matches neither the sprite structure nor the font structure,
+  in the raw form and in the exclusive-OR form.  So the member data carries a
+  further encoding, the block format of the decoder at `0x4c128` with the
+  control bytes.  Evidence: the decode of the four members of `GFX/GAME.DAT`.
 - `FUN_000131a8` at `0x131a8`, the mode initializer that
   `race_session_start` calls, loads the object list through `0x15460` with the
   record size 0x590, so the object array `DAT_00110d9c` holds 0x590-byte
