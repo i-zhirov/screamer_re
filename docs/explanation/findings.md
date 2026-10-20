@@ -903,9 +903,26 @@ audio tracks.  The game plays the tracks through the CD audio path.
 
 ## The ring and table dump blocker
 
-- The run-time dump of the ring at `+0x4074` and the table at `+0x0000` needs
-  the
-  address of the decoder context, and that address is not yet observed.
+- The linear memory breakpoint `BPLM` works on this DOSBox-X build and fires on
+  a write to a linear address, so the protected-mode code of the game can be
+  watched.  This is the tool the earlier probes needed: `BP <seg>:<off>` is a
+  real-mode breakpoint and never matched the DOS/4GW code.
+  Evidence: the probe with `BPLM 0x1E7CCC`.
+- The probe watched the linear address `0x1E7CCC`, the run-time address of the
+  module address `0x25CCC`, and it fired five times: at the DOS boot
+  `F000:C9B4`, then at `0150:2439FE`, `0150:297D30`, `0150:29EB58`, and
+  `0150:1E1C40`.  Several functions write the address, so it is a shared
+  buffer, not the single `SPRITES` static.  The dumps of the loader statics
+  therefore show the byte pattern `89 89 89 89` and `8A 8A 8A 8A`, not a sprite
+  count or a pixel size, and the statics of the sprite loader stay unlocated.
+  Evidence: the probe with `BPLM` and `MEMDUMPBIN`.
+- The next probe should watch the read buffer that the sprite loader fills,
+  which
+  the interrupt breakpoint on the file read already reports in EDX, and then
+  walk
+  the loader state from that buffer.  The `BPLM` method can watch any linear
+  address once it is known.
+  Evidence: the read probes and the `BPLM` probe.
 - Code breakpoints do not stop this DOSBox-X build, so the decoder cannot be
   stopped at its entry to read the context from EAX.  The interrupt breakpoint
   on
