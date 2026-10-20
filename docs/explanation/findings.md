@@ -403,16 +403,36 @@ Authority.
   plausible count or size for `GAMEL.SPR`, and the port of the decoded structure
   is not confirmed, so the tool reports the raw member.
   Evidence: the port attempt and the classic variant test.
-- A driven debugger probe reaches the game after an input event.  The session
-  script gained a `key <text>` step, which writes to the emulator console. 
-  Sending
-  Enter moved the game from the input wait at `0150:1E1C40` to `0150:29AB85`,
+- Correction to the run-time address formula.  The run-time address is the
+  module
+  address plus the module load base `0x1c2000`, not minus `0x10000`.  The entry
+  at the
+  module address `0x300f8` runs at `0150:1F20F8`, and `0x300f8 + 0x1c2000` is
+  `0x1f20f8`, so the formula holds.  The earlier probes used the wrong formula
+  and
+  therefore set breakpoints at addresses that never run.  The corrected run-time
+  addresses are the member open `0x20e08d` for the module `0x4c08d`, the decoder
+  `0x20e128` for `0x4c128`, and the block decoder `0x20f4c4` for `0x4d4c4`.
+  Evidence: the entry evidence and the probe sessions.
+- The driven probe with the corrected decoder address still did not hit, and the
+  game
+  sat in the video library at the run-time address `0150:245D90`, the module
+  address `0x83d90`, while it drew the menu.  So the container member open does
+  not run while the menu draws, and the decoder may run only on a container
+  load.
+  Evidence: the probe run with the corrected address.
+- The session script gained a `key <text>` step that writes to the emulator
+  console, so a probe can leave an input wait.  Sending Enter moved the game
+  from
+  the input wait at `0150:1E1C40` to `0150:29AB85`, the module address
+  `0xdab85`,
+  inside the C run-time, so the key press starts the game.
+  Evidence: `tools/scripts/probe_lzss_state.dbg`.
+- The mask table at `+0x8050` stays the missing piece of the LZSS port.  The bit
+  reader masks the code with the entry of that table for the shift count, and
   the
-  static address `0x19ab85`, inside `player_update` at `0x19ab0`, so the key
-  press
-  leaves the menu and starts the game.  The registers at that point were
-  EAX `0x2d5ffd8`, EBX `0x1fc003c`, ECX `0x1fc003c`, and EDX `0x3003c`.
-  Evidence: the probe session `tools/scripts/probe_lzss_state.dbg`.
+  decompiled code does not show how the table is initialized.
+  Evidence: the decompiled `FUN_0004d844`.
 - The decoder breakpoint at `0150:1FF4C4` still did not hit in the driven run,
   and the emulator closed the control connection during the 45-second window. 
   The
