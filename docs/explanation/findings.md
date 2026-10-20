@@ -1049,12 +1049,28 @@ audio tracks.  The game plays the tracks through the CD audio path.
   Evidence: the probe results.
 ## The race started and the probe artifacts
 
-- A race did start.  The game wrote `REPLAYS/REPLAY01.RPL` of 32612 bytes with a
-  record head of `01 00 00 00 00 00 00 00`, which is the replay recorder
-  `replay_write` at `0x22F54` and the 20-byte records of `replay_read`.  The
-  sprite
-  loader therefore ran as well.
-  Evidence: the captured replay file under `work/probe_artifacts/`.
+- Correction: the `CONFIG/CHOICE.DAT` and `REPLAYS/REPLAY01.RPL` files are most
+  likely from a manual session in the installed game, not from the probes.  The
+  probe configuration mounts nothing, so the probes depend on the relative mount
+  `mount C "game"` of the game configuration, and that resolution was never
+  verified.  More decisively, the probes never reached the sprite loader: the
+  `BPPM`
+  dumps stayed fill patterns, and a race start writes a replay, so a probe race
+  start would have shown loader writes.
+  Evidence: the probe configuration, the game configuration, and the probe
+  dumps.
+- The files still prove that the game starts a race and writes a replay of 32612
+  bytes with 20-byte records, and that the menu state file holds 1120 bytes with
+  the car name `GRA` at `+0x08`.  They do not prove that a probe reached the
+  loader.
+  Evidence: the captured files under `work/probe_artifacts/`.
+- The earlier note that "a race did start" therefore needs a qualifier: a race
+  started in that game directory, in a session that was most likely manual.
+  Evidence: the correction above.
+- The probe configuration mounts nothing, so a probe may run the game inside the
+  shipped directory through the relative mount.  The next probe must mount an
+  explicit copy, and the finding stays a rule risk until that is verified.
+  Evidence: the probe configuration.
 - The menu state file `CONFIG/CHOICE.DAT` holds 1120 bytes and the car name
   `GRA`
   at `+0x08`, so the game reads the last choice at startup.  A later run with
