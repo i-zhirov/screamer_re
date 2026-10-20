@@ -10,6 +10,10 @@ Usage:
     python3 tools/le.py info <file>
     python3 tools/le.py map <file> <linear-address>
     python3 tools/le.py disasm <file> <linear-address> [--count N]
+    python3 tools/le.py calls <file> <linear-address> [--max N]
+    python3 tools/le.py tree <file> <linear-address> [--depth N]
+    python3 tools/le.py funcs <file> [--from ADDR] [--to ADDR]
+    python3 tools/le.py near <file> <linear-address>
 """
 
 from __future__ import annotations
@@ -351,11 +355,33 @@ def _load_capstone() -> ctypes.CDLL | None:
     return None
 
 
-def disasm(exe: LinearExecutable, linear_address: int, count: int) -> int:
+@dataclass
+class Insn:
+    address: int
+    size: int
+    mnemonic: str
+    operands: str
+    raw: bytes
+
+    @property
+    def text(self) -> str:
+        return f"{self.mnemonic} {self.operands}".strip()
+
+
+# The Watcom compiler ends a function with one of these instructions.
+TERMINATORS = {"ret", "retf", "iret", "iretd", "hlt", "int3"}
+MAX_INSTRUCTION_SIZE = 15
+
+_CAPSTONE: tuple[ctypes.CDLL, ctypes.c_void_p] | None = None
+
+
+def _capstone() -> tuple[ctypes.CDLL, ctypes.c_void_p]:
+    global _CAPSTONE
+    if _CAPSTONE is not None:
+        return _CAPSTONE
     lib = _load_capstone()
     if lib is None:
-        print("capstone library not found", file=sys.stderr)
-        return 1
+        raise ValueError("capstone library not found")
     lib.cs_open.restype = ctypes.c_int
     lib.cs_open.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
     lib.cs_disasm.restype = ctypes.c_size_t
@@ -370,24 +396,195 @@ def disasm(exe: LinearExecutable, linear_address: int, count: int) -> int:
     lib.cs_free.argtypes = [ctypes.POINTER(_CsInsn), ctypes.c_size_t]
     handle = ctypes.c_void_p()
     if lib.cs_open(3, 4, ctypes.byref(handle)) != 0:  # CS_ARCH_X86, CS_MODE_32
-        print("capstone open failed", file=sys.stderr)
-        return 1
-    chunk = exe.read(linear_address, 512)
+        raise ValueError("capstone open failed")
+    _CAPSTONE = (lib, handle)
+    return _CAPSTONE
+
+
+def decode(exe: LinearExecutable, address: int, max_instructions: int = 64) -> list[Insn]:
+    """Decode up to max_instructions from a linear address."""
+    lib, handle = _capstone()
+    size = min(max_instructions * MAX_INSTRUCTION_SIZE + 16, 1 << 20)
+    chunk = exe.read(address, size)
     if chunk is None:
-        print("address is not mapped to a file offset", file=sys.stderr)
-        return 1
-    buf = (ctypes.c_ubyte * len(chunk)).from_buffer_copy(chunk)
-    insn_pointer = ctypes.POINTER(_CsInsn)()
-    decoded = lib.cs_disasm(
-        handle, buf, len(chunk), linear_address, count, ctypes.byref(insn_pointer)
+        raise ValueError(f"address {address:#x} is not mapped to a file offset")
+    buffer = (ctypes.c_ubyte * len(chunk)).from_buffer_copy(chunk)
+    pointer = ctypes.POINTER(_CsInsn)()
+    count = lib.cs_disasm(
+        handle, buffer, len(chunk), address, max_instructions, ctypes.byref(pointer)
     )
-    for index in range(decoded):
-        insn = insn_pointer[index]
-        raw = bytes(insn.bytes[: insn.size]).hex()
-        print(
-            f"{insn.address:#010x}: {raw:<20} {insn.mnemonic.decode()} {insn.op_str.decode()}"
+    instructions = [
+        Insn(
+            address=pointer[index].address,
+            size=pointer[index].size,
+            mnemonic=pointer[index].mnemonic.decode(),
+            operands=pointer[index].op_str.decode(),
+            raw=bytes(pointer[index].bytes[: pointer[index].size]),
         )
-    lib.cs_free(insn_pointer, decoded)
+        for index in range(count)
+    ]
+    lib.cs_free(pointer, count)
+    return instructions
+
+
+def function_body(
+    exe: LinearExecutable, address: int, max_instructions: int = 4000
+) -> list[Insn]:
+    """Decode a function body from its start until a terminator.
+
+    A leading unconditional jump is followed, because the linker puts a jump over the
+    run-time banner string at the entry point.  The sweep then stops at the first
+    `ret`, `retf`, `iret`, `hlt`, or `int3`, or after max_instructions.  A function
+    that ends with a tail call has no terminator, so the sweep continues into the
+    next function.
+    """
+    body: list[Insn] = []
+    current = address
+    for _ in range(4):
+        instructions = decode(exe, current, 1)
+        if not instructions:
+            return body
+        first = instructions[0]
+        operand = first.operands.strip()
+        if first.mnemonic == "jmp" and operand.startswith("0x"):
+            body.append(first)
+            current = int(operand.split()[0], 16)
+            continue
+        break
+    remaining = max_instructions - len(body)
+    if remaining <= 0:
+        return body
+    for insn in decode(exe, current, remaining):
+        body.append(insn)
+        if insn.mnemonic in TERMINATORS:
+            break
+    return body
+
+
+@dataclass
+class CallSite:
+    address: int
+    target: int | None
+    text: str
+
+
+def call_sites(instructions: list[Insn]) -> list[CallSite]:
+    """List the call sites of a decoded body.  An indirect call has no target."""
+    sites: list[CallSite] = []
+    for insn in instructions:
+        if insn.mnemonic != "call":
+            continue
+        operand = insn.operands.strip()
+        target = int(operand.split()[0], 16) if operand.startswith("0x") else None
+        sites.append(CallSite(insn.address, target, insn.text))
+    return sites
+
+
+def print_calls(exe: LinearExecutable, address: int, max_instructions: int) -> int:
+    body = function_body(exe, address, max_instructions)
+    print(f"function {address:#x}: {len(body)} instructions")
+    for insn in body:
+        print(f"{insn.address:#010x}: {insn.raw.hex():<18} {insn.text}")
+    sites = call_sites(body)
+    print()
+    print(f"calls: {len(sites)}")
+    for site in sites:
+        target = f"{site.target:#010x}" if site.target is not None else "indirect"
+        print(f"  {site.address:#010x} -> {target}  {site.text}")
+    return 0
+
+
+def print_call_tree(
+    exe: LinearExecutable,
+    address: int,
+    depth: int,
+    max_instructions: int,
+    max_nodes: int,
+) -> int:
+    visited: set[int] = set()
+    budget = [max_nodes]
+
+    def walk(node: int, level: int) -> None:
+        if budget[0] <= 0:
+            return
+        budget[0] -= 1
+        indent = "  " * level
+        body = function_body(exe, node, max_instructions)
+        sites = call_sites(body)
+        repeats = node in visited
+        visited.add(node)
+        note = " (seen)" if repeats else ""
+        print(f"{indent}{node:#010x}: {len(body)} instructions, {len(sites)} calls{note}")
+        if repeats or level >= depth:
+            return
+        for site in sites:
+            if site.target is None:
+                print(f"{indent}  indirect call at {site.address:#010x}")
+                continue
+            print(f"{indent}  call at {site.address:#010x} ->")
+            walk(site.target, level + 2)
+
+    walk(address, 0)
+    if budget[0] <= 0:
+        print(f"node budget {max_nodes} reached")
+    return 0
+
+
+def print_functions(
+    exe: LinearExecutable, start: int | None, end: int | None, limit: int
+) -> int:
+    """List candidate function starts: the Watcom prologue `push ebp; mov ebp,esp`."""
+    obj = exe.object_at(exe.entry_linear)
+    if obj is None:
+        print("the entry object is missing", file=sys.stderr)
+        return 1
+    low = obj.reloc_base if start is None else start
+    high = obj.reloc_base + obj.virtual_size if end is None else end
+    data = exe.read(low, high - low)
+    if data is None:
+        print("the range is not mapped to a file offset", file=sys.stderr)
+        return 1
+    pattern = b"\x55\x89\xe5"
+    found: list[int] = []
+    position = data.find(pattern)
+    while position != -1 and len(found) < limit:
+        found.append(low + position)
+        position = data.find(pattern, position + 1)
+    print(f"candidate function starts: {len(found)}")
+    for candidate in found:
+        print(f"  {candidate:#010x}")
+    return 0
+
+
+def print_nearest_function(exe: LinearExecutable, address: int) -> int:
+    """Print the candidate function start nearest below an address."""
+    obj = exe.object_at(address)
+    if obj is None:
+        print("the address is unmapped", file=sys.stderr)
+        return 1
+    low = obj.reloc_base
+    data = exe.read(low, address - low + 1)
+    if data is None:
+        print("the range is not mapped to a file offset", file=sys.stderr)
+        return 1
+    pattern = b"\x55\x89\xe5"
+    position = data.rfind(pattern)
+    if position == -1:
+        print(f"no prologue below {address:#x}")
+        return 1
+    start = low + position
+    print(f"nearest prologue: {start:#x} ({address - start:#x} bytes below {address:#x})")
+    return 0
+
+
+def disasm(exe: LinearExecutable, linear_address: int, count: int) -> int:
+    try:
+        instructions = decode(exe, linear_address, count)
+    except ValueError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+    for insn in instructions:
+        print(f"{insn.address:#010x}: {insn.raw.hex():<20} {insn.text}")
     return 0
 
 
@@ -407,6 +604,28 @@ def main() -> int:
     disasm_parser.add_argument("address", type=lambda value: int(value, 0))
     disasm_parser.add_argument("--count", type=int, default=16)
 
+    calls_parser = subparsers.add_parser("calls", help="disassemble a function and list its calls")
+    calls_parser.add_argument("file", type=Path)
+    calls_parser.add_argument("address", type=lambda value: int(value, 0))
+    calls_parser.add_argument("--max", dest="max_instructions", type=int, default=4000)
+
+    tree_parser = subparsers.add_parser("tree", help="follow the call tree of a function")
+    tree_parser.add_argument("file", type=Path)
+    tree_parser.add_argument("address", type=lambda value: int(value, 0))
+    tree_parser.add_argument("--depth", type=int, default=2)
+    tree_parser.add_argument("--max", dest="max_instructions", type=int, default=4000)
+    tree_parser.add_argument("--max-nodes", type=int, default=64)
+
+    funcs_parser = subparsers.add_parser("funcs", help="list candidate function starts")
+    funcs_parser.add_argument("file", type=Path)
+    funcs_parser.add_argument("--from", dest="start", type=lambda value: int(value, 0))
+    funcs_parser.add_argument("--to", dest="end", type=lambda value: int(value, 0))
+    funcs_parser.add_argument("--limit", type=int, default=500)
+
+    near_parser = subparsers.add_parser("near", help="show the nearest function start below")
+    near_parser.add_argument("file", type=Path)
+    near_parser.add_argument("address", type=lambda value: int(value, 0))
+
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
@@ -424,6 +643,17 @@ def main() -> int:
     elif args.command == "disasm":
         print_map(exe, args.address)
         return disasm(exe, args.address, args.count)
+    elif args.command == "calls":
+        print_map(exe, args.address)
+        return print_calls(exe, args.address, args.max_instructions)
+    elif args.command == "tree":
+        return print_call_tree(
+            exe, args.address, args.depth, args.max_instructions, args.max_nodes
+        )
+    elif args.command == "funcs":
+        return print_functions(exe, args.start, args.end, args.limit)
+    elif args.command == "near":
+        return print_nearest_function(exe, args.address)
     return 0
 
 

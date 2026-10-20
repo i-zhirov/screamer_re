@@ -68,6 +68,7 @@ screamer_re/
 │       ├── executables.md     # LE header metadata and runtime facts
 │       ├── file-formats.md    # observed data formats
 │       ├── inventory.md       # game files with sizes and SHA-256 digests
+│       ├── program-map.md      # the recovered startup path and functions
 │       └── tooling.md         # tools, commands, host tools, and limits
 ├── tools/
 │   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket

@@ -27,8 +27,9 @@ current host.
 ### M1: Program map
 
 - Resolve the entry alignment with a DOSBox debugger session (done).
-- Find `main` and the subsystem entry points.
-- Map the code object into functions with names and roles.
+- Find `main` and the subsystem entry points (done: `main` is at object
+  offset `0x10020`).
+- Map the code object into functions with names and roles (in progress).
 - Map the data references: video, sound, input, file I/O, network.
 - Record the call graph for the main loop and the menu system.
 
@@ -60,10 +61,9 @@ current host.
 
 ## Next steps
 
-1. Trace the start path from the entry point to `main`.  The entry jumps
-   to `0x03a970`, which sets up the stack, checks the DOS version, and
-   calls the Watcom run-time startup.
-2. Map the Watcom startup code and find the call to the program `main`.
+1. Name the `main` callees and their roles: `0x2ecf8`, `0x2f8ca`, `0x127a0`,
+   `0x27700`, `0x108e4`, `0x10978`, `0x27f94`, `0x128ac`, and `0x2ed77`.
+2. Follow the calls from `main` into the game subsystems.
 3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
    graphics file.
 4. Set up the OpenWatcom V2 build harness under `work/`.

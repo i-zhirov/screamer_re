@@ -108,6 +108,28 @@ Authority.
   `int 21` with `EAX=0x4b03` (AH `0x4b`, AL `0x03`).  Evidence: the
   first log line `9fe0:00000002  int  21  EAX:00004B03`.
 
+## Program map
+
+- The program `main` sits at object offset `0x10020`.  The startup at
+  `0xd4324` loads `argc` from `[0x27e24]` and `argv` from `[0x27e28]`
+  and calls `main` with EAX=`argc` and EDX=`argv`.  Evidence:
+  `tools/le.py calls STARTH.EXE 0x10020` and
+  `tools/le.py disasm STARTH.EXE 0xd4324`.
+- The run-time log confirms the path.  The log line
+  `0150:296359  mov  edx,[002D5E28]` matches the file instruction
+  `0x000d4359  mov edx, dword ptr [0x27e28]`, and the next game
+  instruction is `0150:1D2020  push ebx` (`main`).  The object 1 load base
+  is `0x1c2000`.  Evidence: `work/entry/run/LOGCPU.TXT` from
+  `tools/entry_probe.py`.
+- The entry path is `0x300f8` (jump) to `0x30170` (startup) to `0xd4324`
+  (main invoker) to `0x10020` (`main`).  Evidence:
+  `tools/le.py tree STARTH.EXE 0x300f8 --depth 3`.
+- `main` holds 56 instructions and 15 calls.  The program calls are at
+  `0x2ecf8`, `0x2f8ca`, `0x127a0`, `0x27700`, `0x108e4`, `0x10978`,
+  `0x27f94`, `0x128ac`, and `0x2ed77`.  Evidence:
+  `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
+- See [Program map](../reference/program-map.md) for the addresses.
+
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.

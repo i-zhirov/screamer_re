@@ -1,0 +1,23 @@
+# Break at the program main and read its arguments.
+#
+# main is at module offset 0x10020.  The startup code at 0xd4324 loads argc from
+# [0x27e24] and argv from [0x27e28] and calls main with EAX=argc, EDX=argv.
+# The module load base is 0x1c2000, so the run-time address is 0x1d2020 and the
+# code selector is 0x0150.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/break_at_main.dbg \
+#     --port 9876 --cwd work/entry/run --timeout 180 \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+
+break
+exec BP 0150:1D2020
+clear
+exec RUN
+wait I-> 120
+read CS EIP
+exec EV EAX EDX
+exec BPLIST
+exec BPDEL *
+exec RUN

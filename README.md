@@ -46,6 +46,8 @@ Inspect a DOS/4GW linear executable:
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py tree  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 ```
 
 Find the program entry at run time.  The tool needs DOSBox-X:
@@ -108,5 +110,7 @@ repository variable `SCREAMER_SELF_HOSTED` to `true` to enable that job.
   SHA-256 digests.
 - [Executables](docs/reference/executables.md) — linear executable
   metadata.
+- [Program map](docs/reference/program-map.md) — the recovered startup
+  path and the program functions.
 - [File formats](docs/reference/file-formats.md) — observed data formats.
 - [Tooling](docs/reference/tooling.md) — tools, commands, and limits.

@@ -30,7 +30,23 @@ looks for the library in these paths:
 python3 tools/le.py info   <file>
 python3 tools/le.py map    <file> <linear-address>
 python3 tools/le.py disasm <file> <linear-address> [--count N]
+python3 tools/le.py calls  <file> <linear-address> [--max N]
+python3 tools/le.py tree   <file> <linear-address> [--depth N] [--max-nodes N]
+python3 tools/le.py funcs  <file> [--from ADDR] [--to ADDR] [--limit N]
+python3 tools/le.py near   <file> <linear-address>
 ```
+
+The `calls` command decodes one function body from its start and lists the call
+sites.  A leading unconditional jump is followed, because the linker puts a jump over
+the run-time banner string at the entry point.  The `tree` command follows the call
+targets recursively.  The `funcs` command lists the candidate function starts from
+the Watcom prologue `push ebp; mov ebp, esp`.  The `near` command prints the
+candidate function start nearest below an address.
+
+The body sweep stops at the first `ret`, `retf`, `iret`, `hlt`, or `int3`, or
+after `--max` instructions.  A function that ends with a tail call has no
+terminator, so the sweep continues into the next function.  An indirect call has no
+static target.  See [Program map](program-map.md) for the recovered structure.
 
 ### `tools/extract_cd_image.py`
 
