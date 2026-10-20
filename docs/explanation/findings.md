@@ -375,9 +375,19 @@ Authority.
   The shift count range 9 to 12 is the classic LZSS length coding.
   Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d844`.
 - So the member data of `GFX/GAME.DAT` and `GFX/MENU.DAT` is LZSS-compressed.
-  This explains the failed re-verification: the sprite and font members hold
-  compressed bytes, not a sprite or font structure.
-  Evidence: the decompiled read path.
+- The bit reader `0x4d844` holds a bit buffer of 0x400 bytes at `+0x8086`, the
+  bit position at `+0x406c`, and a mask table at `+0x8050`.  It returns the
+  16-bit value at the bit position, shifted right by the low 3 bits of the
+  position and masked with the mask of the shift count.  The mask table holds
+  `(1 << n) - 1` for the shift counts 9 to 12.
+  Evidence: the decompiled `FUN_0004d844`.
+- The literal code `0x100` and the end code `0x101` mark a literal byte and the
+  end of the stream.  Evidence: the decompiled `FUN_0004d4c4`.
+- The confirmation of the sprite count at `+0x00` and the pixel data size at
+  `+0x04` stays open.  A run-time probe of the sprite loader at the run-time
+  address `0150:31AA1` did not reach the loader within the probe window of 300
+  ticks, so the confirmation needs a longer window or a different entry point.
+  Evidence: the probe session `work/probe2.dbg`.
 
 ## The session start and the game modes
 
