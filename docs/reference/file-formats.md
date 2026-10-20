@@ -120,14 +120,31 @@ the format `%s\%s` and opens it in the mode `rb`.
 Evidence: the decompiled `FUN_0001b5a4` and the strings at `0x1009f5` and
 `0x1007f80`.
 
-### The menu members
+### The menu sprite and font data
 
-`GFX/MENU.DAT` holds the sprite and font members.  `menu_space_init` at
-`0x29d08` loads the file `%s\gfx\menu.dat` and the members `menu%c.spr` and
-`menu%c.fnt`.  The observed head of the file is a list of 16-bit little-endian
-values that grow in steps; the member layout is open.
-Evidence: the strings at `0x100f5d`, `0x100f68`, and `0x100f73`, and the
-decompiled `FUN_00029d08`.
+`menu_space_init` at `0x29d08` loads the sprite and font data through two
+loaders.  The sprite loader at `0x257b0` reads two header blocks into
+`DAT_00025cd4` and `DAT_00025cdc` and then reads the `SPRITES` resource twice.
+The font loader at `0x25658` reads a count into `DAT_00025440`, then per font a
+12-byte descriptor at `DAT_0011ca98`, then per font a 0x500-byte bitmap at
+`DAT_00119898`, and finally the `FONTS` resource.  The loader increments the
+font count `DAT_00025440`.
+Evidence: the decompiled `FUN_000257b0` and `FUN_00025658`.
+
+`menu_space_init` also loads the named lists `menu`, `cardat`, `trackdat` (with
+the separator `-----`), and `champ` through the list loader at `0x1b394`, and it
+stores the `OPT_PCX` resource in `DAT_0011fad0`, the back buffer.
+Evidence: the decompiled `FUN_00029d08`, `FUN_0001b394`, and `FUN_0002eed0`.
+
+Verification: `GFX/MENU.DAT` holds no member names.  A scan of the 2230684
+bytes finds no `menu`, `.spr`, `.fnt`, or `.pcx` text, so the file is not a
+name-indexed container.  The names `menu%c.spr` and `menu%c.fnt` belong to the
+resource layer, which resolves a name inside a file the same way `pcx_load`
+resolves `gfx\graf.dat` and `menu1h.pcx`.  The member layout of the file is
+open; the font structure above is the layout of the loaded `FONTS` resource, not
+of
+the file bytes.
+Evidence: the byte scan of `GFX/MENU.DAT` and the decompiled `FUN_00025658`.
 
 ## Table data
 

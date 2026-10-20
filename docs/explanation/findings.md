@@ -283,10 +283,35 @@ Authority.
   `menu3h.pcx`, `menu4h.pcx`, `champ5h.pcx`, `load%d%c.pcx`, and
   `net%c.pcx`.  Evidence: the strings at `0x100fd5`, `0x101014`, `0x101054`,
   `0x101114`, `0x101132`, `0x101152`, and `0x1011bc`.
-- `GFX/MENU.DAT` holds the sprite members `menu%c.spr` and the font members
-  `menu%c.fnt`.  `menu_space_init` at `0x29d08` loads them.
-  Evidence: the strings at `0x100f5d` and `0x100f68`, and the Ghidra
-  references to them.
+- `menu_space_init` at `0x29d08` loads the menu data through two loaders.
+  The sprite loader at `0x257b0` reads two header blocks and then the `SPRITES`
+  resource twice.  The font loader at `0x25658` reads a count, then per font a
+  12-byte descriptor at `DAT_0011ca98`, then per font a 0x500-byte bitmap at
+  `DAT_00119898`, and finally the `FONTS` resource.
+  Evidence: the decompiled `FUN_000257b0` and `FUN_00025658`.
+- The font record is 12 bytes and the font bitmap is 1280 bytes.  The loader
+  increments the font count `DAT_00025440`.
+  Evidence: the decompiled `FUN_00025658`.
+- Verification of the member layout: `GFX/MENU.DAT` holds no member names.  A
+  scan of the 2230684 bytes finds no `menu`, `.spr`, `.fnt`, or `.pcx` text.
+  The file is not a name-indexed container; the names `menu%c.spr` and
+  `menu%c.fnt`
+  belong to the resource layer, which resolves a name inside a file the same way
+  `pcx_load` resolves `gfx\graf.dat` and `menu1h.pcx`.
+  Evidence: the byte scan of `GFX/MENU.DAT` and the strings at `0x100f5d` and
+  `0x100f68`.
+- The member layout of `GFX/MENU.DAT` stays open.  The observed head is a list
+  of
+  16-bit little-endian values that grow in steps, and the tail holds the value
+  0x2163e8, which is close to the file size.  The font structure above is the
+  layout of the loaded `FONTS` resource, not of the file bytes.
+  Evidence: the head and tail hex dumps of `GFX/MENU.DAT`.
+- `menu_space_init` stores the `OPT_PCX` resource in `DAT_0011fad0`, the back
+  buffer that `race_frame` copies into the screen buffer.
+  Evidence: the decompiled `FUN_00029d08` and `FUN_0002807c`.
+- `menu_space_init` loads the named lists `menu`, `cardat`, `trackdat` (with the
+  separator `-----`), and `champ` through the list loader at `0x1b394`.
+  Evidence: the decompiled `FUN_00029d08` and `FUN_0001b394`.
 - `loading_screen` at `0x2a364` clears the screen, sets the palette, builds
   `load%d%c.pcx` with the letter H, and loads it from `gfx\graf.dat`.
   Evidence: the decompiled `FUN_0002a364` and the string at `0x101014`.
