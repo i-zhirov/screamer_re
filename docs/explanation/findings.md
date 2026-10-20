@@ -363,50 +363,21 @@ Authority.
   the record name with the wanted name.  So the exclusive-OR applies to the
   directory records and the member data is stored plain.
   Evidence: the decompiled `FUN_0004c128`.
-- Re-verification of the sprite layout stays open at the member data.  The
-  member offsets, the sizes, and the names resolve, but the data of the sprite
-  and font members matches neither the sprite structure nor the font structure,
-  in the plain form, in the exclusive-OR form, and in the 32-byte block form.
-  So the member data carries a further compression.
-  Evidence: the decode of the four members of `GFX/GAME.DAT`.
-- `FUN_000131a8` at `0x131a8`, the mode initializer that
-  `race_session_start` calls, loads the object list through `0x15460` with the
-  record size 0x590, so the object array `DAT_00110d9c` holds 0x590-byte
-  records and the count `DAT_0010f8ec` counts them.  It loads the opponent list
-  with the record size 0xbc, so the opponent array `DAT_0010f180` holds
-  0xbc-byte records.  Evidence: `FUN_000131a8`.
-- `FUN_0001b840` loads the session file: two 28-byte control records, a
-  4-byte value, a 24-byte setup record, and, when the flag is set, a 20-byte
-  replay record.  The setup record feeds the game mode `DAT_0011d260` and the
-  display flags `_DAT_0011d274`.  Evidence: `FUN_0001b840`.
-- Verification of the member layout: `GFX/MENU.DAT` holds no member names.  A
-  scan of the 2230684 bytes finds no `menu`, `.spr`, `.fnt`, or `.pcx` text.
-  The file is not a name-indexed container; the names `menu%c.spr` and
-  `menu%c.fnt`
-  belong to the resource layer, which resolves a name inside a file the same way
-  `pcx_load` resolves `gfx\graf.dat` and `menu1h.pcx`.
-  Evidence: the byte scan of `GFX/MENU.DAT` and the strings at `0x100f5d` and
-  `0x100f68`.
-- The member layout of `GFX/MENU.DAT` stays open.  The observed head is a list
-  of
-  16-bit little-endian values that grow in steps, and the tail holds the value
-  0x2163e8, which is close to the file size.  The font structure above is the
-  layout of the loaded `FONTS` resource, not of the file bytes.
-  Evidence: the head and tail hex dumps of `GFX/MENU.DAT`.
-- `menu_space_init` stores the `OPT_PCX` resource in `DAT_0011fad0`, the back
-  buffer that `race_frame` copies into the screen buffer.
-  Evidence: the decompiled `FUN_00029d08` and `FUN_0002807c`.
-- `menu_space_init` loads the named lists `menu`, `cardat`, `trackdat` (with the
-  separator `-----`), and `champ` through the list loader at `0x1b394`.
-  Evidence: the decompiled `FUN_00029d08` and `FUN_0001b394`.
-- `loading_screen` at `0x2a364` clears the screen, sets the palette, builds
-  `load%d%c.pcx` with the letter H, and loads it from `gfx\graf.dat`.
-  Evidence: the decompiled `FUN_0002a364` and the string at `0x101014`.
-- `menu_space_init` sets the screen size globals `DAT_00025ce8` to 0x280 and
-  `DAT_00025cf0` to 400, so the screen is 640 by 400.
-  Evidence: the decompiled `FUN_00029d08`.
-- The earlier note that `GFX/MENU.DAT` is a 16-bit field list stays open: the
-  file holds the sprite and font members, and the member layout is not decoded.
+- The read path of the member data is traced.  The read wrapper `0x4c4e5`
+  tests the stream flag at `+0x10`: a clear flag reads the bytes raw and a set
+  flag calls the expander `0x4d3fc`.  The expander reads one header byte and
+  loops on the block decoder `0x4d4c4` until it returns 0.
+  Evidence: the decompiled `FUN_0004c4e5` and `FUN_0004d3fc`.
+- The block decoder `0x4d4c4` is an LZSS decoder.  It holds a ring buffer at
+  `+0x4074` with a window of 0x200 bytes, a shift count at `+0x4068` that
+  starts at 9 and grows to 12, and the output count at `+0x4070`.  The bit
+  reader `0x4d844` returns `0x100` for a literal and `0x101` for the end.
+  The shift count range 9 to 12 is the classic LZSS length coding.
+  Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d844`.
+- So the member data of `GFX/GAME.DAT` and `GFX/MENU.DAT` is LZSS-compressed.
+  This explains the failed re-verification: the sprite and font members hold
+  compressed bytes, not a sprite or font structure.
+  Evidence: the decompiled read path.
 
 ## The session start and the game modes
 

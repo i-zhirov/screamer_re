@@ -208,15 +208,30 @@ that `sprite_load` and `font_load` read.  `GFX/MENU.DAT` holds the palette
 `AMAP6.3DX`, `AAUTO00.3DX` to `AAUTO06.3DX`, and `ASHADOW.3DX`.
 Evidence: the exclusive-OR decode of both directories.
 
+### The member data compression
+
+The member data is LZSS-compressed.  The read path is:
+
+| Module address | Name | Evidence |
+| --- | --- | --- |
+| `0x4c4e5` | `stream_read` | tests the stream flag at `+0x10`; a clear flag reads raw and a set flag calls the expander |
+| `0x4d3fc` | `lzss_expand` | reads one header byte and loops on the block decoder until it returns 0 |
+| `0x4d4c4` | `lzss_block` | the LZSS block decoder |
+| `0x4d844` | `lzss_bit_read` | returns `0x100` for a literal and `0x101` for the end |
+
+The block decoder holds a ring buffer at `+0x4074` with a window of 0x200 bytes,
+a shift count at `+0x4068` that starts at 9 and grows to 12, and the output
+count
+at `+0x4070`.  The shift count range 9 to 12 is the classic LZSS length coding.
+Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d3fc`.
+
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and
-the names resolve, but the member data does not match the plain sprite
-structure.
-The head of `GAMEL.SPR` and `GAMEH.SPR` holds neither a plausible sprite count
-nor a plausible pixel data size, in the plain form and in the exclusive-OR form.
-The same holds for `GAMEL.FNT` and `GAMEH.FNT` and the font structure, and for
-the 32-byte block form with the control bytes.  So the member data carries a
-further compression, and the re-verification stays open at the member data.
-Evidence: the decode of the four members of `GFX/GAME.DAT`.
+the names resolve.  The member data does not match the plain sprite structure,
+because it is LZSS-compressed; the expansion runs when the member is read, not
+when
+the directory is read.  The re-verification of the sprite layout therefore needs
+the expanded member bytes.  Evidence: the decompiled `FUN_0004c4e5`,
+`FUN_0004d3fc`, and `FUN_0004d4c4`.
 
 ## Table data
 
