@@ -1,0 +1,51 @@
+break
+exec BPINT 21 "3F"
+clear
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 5
+break
+exec MEMDUMP 0150:1E7CCC 8 C.BIN
+exec MEMDUMP 0150:1E7CD4 8 A.BIN
+exec MEMDUMP 0150:1E7CDC 8 B.BIN
+exec BPDEL *
+exec RUN

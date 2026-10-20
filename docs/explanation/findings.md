@@ -428,14 +428,32 @@ Authority.
   member bytes of `GAMEL.SPR` into 7935 bytes.  The output head is zero, so the
   count at `+0x00` and the pixel size at `+0x04` still do not appear, and the
   hypothesis is not confirmed.  Evidence: the `head` output of the tool.
-- Code breakpoints do not stop this DOSBox-X build.  Six probes set a `BP
-  <seg>:<off>` at a verified run-time address, and none of them stopped the
-  emulator: the member open `0150:20E08D`, the decoder `0150:20E128`, the block
-  decoder `0150:20F4C4`, and the resource get `0150:1F0ED0`.  The interrupt
-  breakpoint `BPINT 21 "4B"` did stop the emulator in the entry probe, so code
-  breakpoints appear not to work in this environment while interrupt breakpoints
+- Code breakpoints do not stop this DOSBox-X build, but interrupt breakpoints
   do.
-  Evidence: the six probe sessions.
+  Six probes set a `BP <seg>:<off>` at a verified run-time address and none of
+  them stopped the emulator: the member open `0150:20E08D`, the decoder
+  `0150:20E128`, the block decoder `0150:20F4C4`, and the resource get
+  `0150:1F0ED0`.  The interrupt breakpoint `BPINT 21 "3F"` stops at the file
+  read, so the working probe method is an interrupt breakpoint.
+  Evidence: the six probe sessions and the read probe.
+- The file read sequence of the single-player start is mapped through the
+  interrupt
+  breakpoint: 28 bytes, then 28 bytes, then 6 bytes, then 176 bytes on the
+  handle
+  5, and then the same 176-byte read repeats on the handle 5 at the buffer
+  `0x136c`.  The repeated read shows the game polling one file, so the probe
+  window
+  holds the menu idle and never reaches the graphics loads.
+  Evidence: the read probe with the interrupt breakpoint.
+- The loader statics at `0x1E7CD4` and `0x1E7CDC` hold the pattern
+  `00 F0 80 CE` in the menu idle, not a sprite count or a pixel size, so the
+  sprite loader has not run.  The ring at `+0x4074` and the table at `+0x0000`
+  therefore have no dump yet and their semantics stay open.
+  Evidence: the memory dumps of the read probe.
+- The next probe should break on the read with the size `0x271A`, the 10010-byte
+  sprite member, or on the seek `AH=42h` at the member boundary, and then dump
+  the ring and the table.
+  Evidence: the read probe sizes.
 - The ring at `+0x4074` and the table at `+0x0000` therefore have no dump yet,
   and their semantics stay open.  The next probe should use an interrupt
   breakpoint, for example `BPINT 21` on the file read `AH=3Fh`, to stop when the
