@@ -104,6 +104,36 @@ expansion follows the decoded LZSS structure but does not yet reproduce the
 member
 bytes, so the tool reports the raw member.
 
+## Debugger limits and the alternatives
+
+The DOSBox-X debugger does offer more than the probes used.  `BP <seg>:<off>` is
+a
+real-mode breakpoint, which is why it never hit the protected-mode DOS/4GW code
+of
+this game.  The debugger also offers `BPLM <linear address>` for a linear memory
+breakpoint, `BPPM <selector>:<off>` for a protected-mode memory breakpoint,
+`BPM <seg>:<off>` for a memory change breakpoint, `MEMDUMPBIN` for a binary
+memory
+dump, `IV` to name a memory address, `SMV` to write memory at a linear address,
+and
+`LOG`, `LOGS`, `LOGL`, and `HEAVYLOG` for CPU logs.  The next probe should use
+`BPLM` and `MEMDUMPBIN` rather than `BP` and the text `MEMDUMP`.
+
+The alternatives, if DOSBox-X still falls short:
+
+| Emulator | Debugger | Runs DOS/4GW | macOS arm64 | Cost |
+| --- | --- | --- | --- | --- |
+| DOSBox-X | the command set above; real-mode breakpoints and linear memory breakpoints | yes | yes, Homebrew | none, already in place |
+| Bochs (`bochsdbg`) | the strongest: linear and physical breakpoints, watchpoints, memory dumps, a command file for scripts | yes, it boots DOS | yes, source or Homebrew | medium: a bootable DOS disk image and an install step |
+| QEMU plus GDB | strong: the gdb stub with hardware breakpoints, memory dumps, and GDB Python scripting | yes, with FreeDOS | yes, Homebrew | medium: a bootable DOS image and a GDB script |
+| 86Box | accurate hardware; the debugger is weaker than Bochs and QEMU | yes | yes, Homebrew | medium: a bootable DOS image |
+
+The recommendation is to try `BPLM` and `MEMDUMPBIN` in DOSBox-X first, because
+the
+work is already in place.  Bochs is the fallback with the best debugger for
+protected-mode DOS code, and QEMU with GDB is the fallback with the best
+scripting.
+
 ## Host tools
 
 | Tool | Version | Use |
