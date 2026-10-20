@@ -427,8 +427,20 @@ Authority.
   `tools/gfx_container.py` and the port runs to completion: it turns the 10010
   member bytes of `GAMEL.SPR` into 7935 bytes.  The output head is zero, so the
   count at `+0x00` and the pixel size at `+0x04` still do not appear, and the
-  hypothesis is not confirmed.  The ring and table semantics and the output loop
-  source stay open.  Evidence: the `head` output of `tools/gfx_container.py`.
+  hypothesis is not confirmed.  Evidence: the `head` output of the tool.
+- Code breakpoints do not stop this DOSBox-X build.  Six probes set a `BP
+  <seg>:<off>` at a verified run-time address, and none of them stopped the
+  emulator: the member open `0150:20E08D`, the decoder `0150:20E128`, the block
+  decoder `0150:20F4C4`, and the resource get `0150:1F0ED0`.  The interrupt
+  breakpoint `BPINT 21 "4B"` did stop the emulator in the entry probe, so code
+  breakpoints appear not to work in this environment while interrupt breakpoints
+  do.
+  Evidence: the six probe sessions.
+- The ring at `+0x4074` and the table at `+0x0000` therefore have no dump yet,
+  and their semantics stay open.  The next probe should use an interrupt
+  breakpoint, for example `BPINT 21` on the file read `AH=3Fh`, to stop when the
+  game reads a member, then dump the memory around the decoder.
+  Evidence: the probe results.
 - The mask table at `+0x8050` is no longer the only unknown.  The bit reader
   matches the decompiled code, so the remaining gap is in the match decoding:
   the
