@@ -325,11 +325,30 @@ Authority.
   `GFX/MENU.DAT` returns `MENU.COL`, `SHADOW.3DX`, `AUTO06.3DX`, and
   `DOW.3DX`.  So the directory of a file sits at the end, before the 4-byte
   decompressed size.  Evidence: the exclusive-OR decode of both tails.
-- The first decoded block of `GFX/GAME.DAT` holds a block header and then the
-  member name `TEMPLET_L.PCX`, so the sprite count and the pixel data size
-  follow the member name in the decoded stream.  The full re-verification of the
-  sprite layout needs the block decoder `0xd9ba`; it stays open.
-  Evidence: the exclusive-OR decode of the head of `GFX/GAME.DAT`.
+- The decoder `0x4c128` is a member search, not a block decoder.  It reads
+  32-byte blocks from the end and compares each block with the wanted member
+  name through the case-insensitive compare `0x4d9ba`.  The open wrapper
+  `0x4c08d` calls the decoder, so the file layer decodes a file when it opens
+  it.  Evidence: the decompiled `FUN_0004c128`, `FUN_0004d9ba`, and
+  `FUN_0004c08d`.
+- The last 4 bytes hold the size of the directory, and the directory holds
+  `size / 32` records of 32 bytes.  A record holds the name at `+0x00`
+  (26 bytes, exclusive-ORed with `0x3a`, NUL-terminated), a 16-bit block
+  offset at `+0x1a`, a 16-bit block count at `+0x1c`, and two flags at
+  `+0x1d`.  `GFX/GAME.DAT` holds 39 members and `GFX/MENU.DAT` holds 18.
+  Evidence: the exclusive-OR decode of both files.
+- The members of `GFX/GAME.DAT`: `IMPLET_L.PKC`, `IMPLET_H.PKC`,
+  `IMPRES_L.PKC`, `IMPRES_H.PKC`, `CDFRONTL.PKC`, `CDFRONTH.PKC`, and
+  `COCK00AL.PKC`, with 32 more.  The names form low and high resolution
+  pairs.  Evidence: the exclusive-OR decode of the directory.
+- The members of `GFX/MENU.DAT`: `MENU.COL`, `MENU.MLB`, `ALETTER.3DX`,
+  `AMAP1.3DX` to `AMAP6.3DX`, `AAUTO00.3DX`, `AAUTO01.3DX`, and
+  `AAUTO02.3DX`, with 7 more.  Evidence: the exclusive-OR decode.
+- Re-verification of the sprite layout stays open.  The member names decode,
+  but the block offset and the block count of a record do not yet resolve the
+  start of the member data, and the first 64 bytes of `GFX/GAME.DAT` decode to
+  neither a plausible sprite count nor a plausible pixel data size.
+  Evidence: the exclusive-OR decode of `GFX/GAME.DAT`.
 - `FUN_000131a8` at `0x131a8`, the mode initializer that
   `race_session_start` calls, loads the object list through `0x15460` with the
   record size 0x590, so the object array `DAT_00110d9c` holds 0x590-byte
