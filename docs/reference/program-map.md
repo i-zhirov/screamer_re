@@ -219,6 +219,35 @@ loops until that flag is set.
 The race state `DAT_001203b8` selects the overlay: 0 calls `race_panel_0`, 2
 calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 
+## Third level: object transform, physics, and overlay dispatch
+
+### object_transform callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1ccd8` | `object_state_save` | saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418` | derived |
+| `0x1d6bc` | `object_integrate` | integrates the position at `+0x454` and `+0x45c` from the float velocity at `+0x460` and `+0x468` and the factor at `+0x450` with the frame delta `DAT_00118e04`, damps the factor with `DAT_0010cf08 + 0x13c`, and clamps it at 0 | derived |
+
+### object_physics callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1d834` | `object_gear_step` | switches on the state at `+0x2f8`; case 2 sets the float fields `+0x2fc`, `+0x300`, `+0x304`, `+0x308`, and `+0x30c` to 3000.0 and 12.0 and moves to case 1; case 1 integrates the position `+0x49c` and the three velocities with the damping `DAT_0010cf08 + 0x184` | derived |
+| `0x1db38` | `object_gear_state` | sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4` | derived |
+| `0x1df34` | `object_slide_step` | computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0` | derived |
+| `0x1e00c` | `object_collision` | calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec` | inferred |
+
+### overlay_dispatch callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1f718` | `table_lookup` | calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058` | inferred |
+| `0x289bc` | `overlay_queue_update` | walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4 | inferred |
+| `0x28b5c` | `menu_enter` | saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value | derived |
+| `0x28ba4` | `net_race_screen` | the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `net_space_init`, `0x2e82c`, and `0x29bac` | inferred |
+| `0x294c8` | `race_state_begin` | sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
+| `0x2dddc` | `net_player_add` | takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it | inferred |
+
 ## Resource loader
 
 `object_load` at module address `0x10bfc` loads the `.3dx` object files.  It

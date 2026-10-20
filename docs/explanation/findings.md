@@ -228,6 +228,77 @@ Authority.
   values.  Evidence: the decompiled `FUN_00015720`.
 - See [Program map](../reference/program-map.md) for the table.
 
+## The .3dx chunk layout
+
+- The object records are 28 bytes.  The record holds the object name at `+0x00`
+  and the load flag at `+0x14`; the value 1 selects the record for loading.
+  The 28-byte size matches the engine list from `list_create(engine, 150)`.
+  Evidence: the decompiled `FUN_00010bfc`.
+- The loader loads the `3D_HEADER` chunk and the `3D_BLKOBJ` chunk through the
+  resource layer and then calls `object_init_from_file`.
+  Evidence: the decompiled `FUN_00010bfc`.
+- `object_init_from_file` at `0x4cc10` fills the chunk table of the object
+  record.  The table holds eight words per chunk: the file record, the chunk
+  count, and the six words of the chunk header.  The table ends with -1.
+  Evidence: the decompiled `FUN_0004cc10`.
+- The file header holds the chunk count at `+0x14` and the chunk offset table at
+  `+0x18`, one 32-bit file-relative offset per chunk.  A chunk offset points
+  12 bytes before the chunk header, so the six chunk words lie at `+0x10`,
+  `+0x14`,
+  `+0x18`, `+0x1c`, `+0x20`, and `+0x24` of the chunk.
+  Evidence: the decompiled `FUN_0004cc10`.
+- The `3D_HEADER` chunk holds the object count at `+0x14`.  The `3D_BLKOBJ`
+  chunk holds a 0x60-byte header and `count` block objects of 0x20 bytes, so the
+  size is `count * 0x20 + 0x60`.  Evidence: the decompiled `FUN_00010bfc`.
+- The loader clears the six list words at `+0x24`, `+0x28`, `+0x2c`, `+0x30`,
+  `+0x34`, and `+0x38` of the `3D_BLKOBJ` header.  Evidence: the decompiled
+  `FUN_00010bfc`.
+- The resource layer stages the loaded chunks in the main file.  The unit is 16
+  bytes.  The layer asks the DOS service for a block through the DPMI real-mode
+  interrupt path; the block number times 16 is the file offset.  The layer
+  stores
+  the buffer at chunk table entry `+0x0c` and the size at `+0x14`.
+  Evidence: the decompiled `FUN_0002f0fc`, `FUN_0002f172`, and `FUN_0002f062`.
+- The resource object holds the record array at `+0x00`, the loaded count at
+  `+0x04`, the limit at `+0x08`, and the status at `+0x0c`; the status 2 marks
+  the end.  Evidence: the decompiled `FUN_0002eed0`.
+- The identity of the DOS service is open.  The layer passes the values `0x100`
+  and `0x501` in the request and calls the interrupt `0x31`.
+  Evidence: the decompiled `FUN_0002f0fc` and `FUN_0002f172`.
+
+## The third level of the program map
+
+- `object_transform` at `0x1cd44` saves the previous state with
+  `object_state_save` at `0x1ccd8` and integrates the position with
+  `object_integrate` at `0x1d6bc`.  Evidence: the decompiled `FUN_0001cd44`.
+- `object_integrate` integrates the position from the float velocity and the
+  factor at `+0x450`, damps the factor, and clamps it at 0.  It compares the
+  new position with the target at `+0x160` and `+0x168` and accumulates the
+  float at `+0x46c`.  Evidence: the decompiled `FUN_0001d6bc`.
+- `object_physics` at `0x1c810` runs `object_gear_step` at `0x1d834` and
+  `object_gear_state` at `0x1db38` when the state at `+0x414` is set, then
+  `object_slide_step` at `0x1df34` and `object_collision` at `0x1e00c`.
+  Evidence: the decompiled `FUN_0001c810`.
+- `object_gear_step` holds the states 1 and 2 at `+0x2f8`.  State 2 sets the
+  float fields to 3000.0 and 12.0; state 1 integrates the position at `+0x49c`
+  and the three velocities at `+0x304`, `+0x308`, and `+0x30c` with the damping
+  `DAT_0010cf08 + 0x184`.  Evidence: the decompiled `FUN_0001d834`.
+- `object_gear_state` sets the value at `+0x4e8` to 0, `0xff00`, or `0x8000`
+  from the value at `+0x3f4`.  Evidence: the decompiled `FUN_0001db38`.
+- `object_slide_step` computes a slide value from `+0x418` and `+0x2f4`, clamps
+  it between -2.0 and 2.0, and calls `0x22b80` for three parts.
+  Evidence: the decompiled `FUN_0001df34`.
+- `overlay_dispatch` at `0x28160` reads the option flags in `DAT_000f0002`,
+  the block that `default_data_copy` copies from object 1, and calls the overlay
+  for the set flag.  Evidence: the decompiled `FUN_00028160`.
+- `race_state_begin` at `0x294c8` sets the race constants 2.0, 0.6, 1.0, 20000,
+  and -12.566, then moves the state machine to the state 1.
+  Evidence: the decompiled `FUN_000294c8`.
+- `net_race_screen` at `0x28ba4` handles the race state 2 and uses the
+  0x2c-byte record table `DAT_001022c4`.  `net_player_add` at `0x2dddc`
+  takes a 0x38-byte record and copies the player name `DAT_001203cc` into it.
+  Evidence: the decompiled `FUN_00028ba4` and `FUN_0002dddc`.
+
 ## The .3dx resource loader
 
 - The `.3dx` loader is at module address `0x10bfc`.  It walks the object list
