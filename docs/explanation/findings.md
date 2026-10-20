@@ -974,6 +974,26 @@ audio tracks.  The game plays the tracks through the CD audio path.
 - The sprite count, the dimensions, and the palette stay open.  Every number in
   this
   record is observed; no value is inferred.
+## The menu input
+
+- A scripted key sequence of four Enter presses did not start a race.  The game
+  stayed at the input wait `0150:1E1C40` through all four presses, and the
+  loader
+  statics still hold a fill pattern, `E7 E7 E7 E7`.
+- The earlier single Enter press did move the game once, to `0150:29AB85`, so
+  the
+  keyboard reaches the game and the effect depends on the menu state.
+- The menu may be mouse driven: `mouse_init` installs the interrupt 33h handler
+  in
+  `engine_init`, and the input poll `0x26448` reads the mouse and the keyboard.
+  The debugger offers no mouse injection command, so a keyboard-only script may
+  not
+  navigate the menu.
+- The remaining debugger tool is `SMV`, which writes memory at a linear address.
+  It could set the menu selection or the start flag directly, but the address of
+  that
+  state is not observed, so this route needs the state address first.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
