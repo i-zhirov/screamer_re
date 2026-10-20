@@ -91,6 +91,50 @@ The body reads two globals: `[0x7ed8]` and `[0x62ac]`.  The loop at
 
 The roles of the program functions are unknown.  The next step maps them.
 
+## Program functions
+
+The names come from the Ghidra decompilation, the radare2 call graph, and the
+run-time log.  The names of the run-time functions describe their shape, not the
+original Watcom symbol names.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x10020` | `main` | called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX | derived |
+| `0x2ecf8` | `list_create` | allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block | derived |
+| `0x2ed77` | `list_destroy` | releases the block when the pointer is set; counterpart of `list_create` | observed |
+| `0x2f8ca` | `memory_available` | probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000` | derived |
+| `0x127a0` | `engine_init` | calls 17 setup functions, loads `MENU` from `%s\DATA\MUSIC.DAT`, and reads the video mode | derived |
+| `0x128ac` | `engine_shutdown` | counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down | derived |
+| `0x27700` | `race_loop` | starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4 | derived |
+| `0x27f94` | `frame_update` | clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input | derived |
+| `0x108e4` | `sound_select` | builds a request record with the index and calls the sound runtime | inferred |
+| `0x10978` | `sound_play` | dispatches on the index through the sound runtime | inferred |
+| `0x30050` | `memory_alloc` | allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8` | derived |
+| `0x3009b` | `printf` | passes the argument list and the output table `DAT_00102fd2` to the run-time print engine | inferred |
+| `0x300be` | `exit` | calls the run-time pair `PTR_FUN_00102f84` and `PTR_FUN_00102f88`; `main` calls it with the error code | inferred |
+| `0x300ec` | `free` | walks the heap block list `DAT_001031d0` and releases the block | inferred |
+
+`main` calls the run-time helpers because the Watcom run-time is linked into the
+same object.  The four run-time helpers sit at the end of the object, after the
+program code.
+
+## Engine strings
+
+The decompiler shows the engine interface.  The strings sit in object 3:
+
+| String | Meaning |
+| --- | --- |
+| `%s.3dx` | the 3D object file name |
+| `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, `OBJ_LIST` | the 3D object chunk names |
+| `OSTACLES`, `TRACK_DATA`, `OPPONENTS`, `ANIMATIONS`, `CARS_DATA` | the track resources |
+| `Cannot create sprite: object not loaded.` | the sprite interface |
+| `Object not present in visual-list, cannot get out it.` | the visual list interface |
+| `%s\DATA\MUSIC.DAT`, `%s\gfx\%s%c.dat`, `%s\gfx\graf.dat`, `%s\gfx\game.dat` | the data files |
+| `%s.smg`, `attr%c.fnt`, `logo%c.spr`, `game%c.fnt`, `game%c.spr` | the asset files |
+| `MELODIC_BANK`, `DRUM_BANK` | the HMI sound banks |
+
+Evidence: `r2 -q -c "iz"` in the Nix dev shell and the Ghidra decompilation.
+
 ## Method
 
 Follow the call path with the `le.py` subcommands:

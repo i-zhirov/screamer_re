@@ -10,6 +10,9 @@
 | `tools/dosboxx_control.py` | drive the DOSBox-X debugger over its control socket |
 | `tools/entry_probe.py` | find the program entry in a DOSBox-X instruction log |
 | `tools/pipeline_check.py` | run the pipeline end to end and check the stages agree |
+| `tools/ghidra/install_loader.sh` | install the LX/LE loader into Ghidra |
+| `tools/ghidra/decompile.sh` | decompile functions by address with Ghidra |
+| `tools/ghidra/DecompileFunctions.java` | the Ghidra headless decompile script |
 
 ### `tools/le.py`
 
@@ -226,6 +229,37 @@ The addresses are module addresses.  They agree with `tools/le.py` and with the
 run-time log.  See
 [Program map](program-map.md) for the recovered structure and
 [Findings](../explanation/findings.md) for the cross-check table.
+
+## Decompilation with Ghidra
+
+Ghidra needs an LX/LE loader for the DOS/4GW executables.  Without the loader,
+Ghidra reads the file as a 16-bit MZ image and misses the 32-bit code.  The
+`ghidra` dev shell pins Ghidra 12.0.4, because the loader extension is released
+for the 12.0.x series.  Ghidra 12.1.x removed an API the loader uses.
+
+Install the loader once per user:
+
+```sh
+nix develop .#ghidra --command sh tools/ghidra/install_loader.sh
+```
+
+The script downloads the `yetmorecode/ghidra-lx-loader` release into `work/ghidra/`
+and installs it into the Ghidra user directory.  The Nix store is read-only, so the
+extension lives outside the store.  The user directory is
+`~/Library/ghidra/ghidra_12.0.4_NIX` on this host.
+
+Decompile the functions that contain the given addresses:
+
+```sh
+nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
+```
+
+The script imports the executable into the `work/ghidra/proj` project, runs the
+`tools/ghidra/DecompileFunctions.java` script, and writes the decompiled C to
+`work/ghidra/decompiled.txt`.  Set `SCREAMER_EXE` to use another executable.
+
+The loader reports the same addresses as `tools/le.py` and radare2, so the three
+views agree.  See [Program map](program-map.md) for the named functions.
 
 ## Run the game
 

@@ -90,7 +90,12 @@ r2 -v
 ```
 
 `flake.nix` and `flake.lock` pin Python, capstone, and radare2.  DOSBox-X comes
-from Homebrew.
+from Homebrew.  A second shell carries Ghidra with the LX/LE loader:
+
+```sh
+nix develop .#ghidra --command sh tools/ghidra/install_loader.sh
+nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
+```
 
 ## Checks
 

@@ -29,7 +29,8 @@ current host.
 - Resolve the entry alignment with a DOSBox debugger session (done).
 - Find `main` and the subsystem entry points (done: `main` is at object
   offset `0x10020`).
-- Map the code object into functions with names and roles (in progress).
+- Map the code object into functions with names and roles (in progress:
+  `main` and its 13 callees carry names).
 - Map the data references: video, sound, input, file I/O, network.
 - Record the call graph for the main loop and the menu system.
 
@@ -61,9 +62,10 @@ current host.
 
 ## Next steps
 
-1. Name the `main` callees and their roles: `0x2ecf8`, `0x2f8ca`, `0x127a0`,
-   `0x27700`, `0x108e4`, `0x10978`, `0x27f94`, `0x128ac`, and `0x2ed77`.
-2. Follow the calls from `main` into the game subsystems.
+1. Follow the calls from `main` into the game subsystems.  The named functions
+   give the entry points: `engine_init`, `race_loop`, and `frame_update`.
+2. Decode the 3D object format from the strings: `%s.3dx`, `3D_HEADER`,
+   `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
 3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
    graphics file.
 4. Set up the OpenWatcom V2 build harness under `work/`.

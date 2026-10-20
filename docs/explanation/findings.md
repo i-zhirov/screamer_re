@@ -131,6 +131,41 @@ Authority.
   `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
 - See [Program map](../reference/program-map.md) for the addresses.
 
+## Function names
+
+- The Watcom startup at `0xd4324` calls `main` at `0x10020` with `argc` in EAX
+  and `argv` in EDX.  Evidence: `tools/ghidra/decompile.sh 0x10020`.
+- `main` calls `list_create` with `0x96` (150) and stores the result in the
+  global `DAT_001062ac`.  The list holds 150 records of `0x1c` (28) bytes.
+  Evidence: the decompiled `FUN_0002ecf8`.
+- `main` calls `memory_available` and compares the result with `6400000`.
+  Below that value it calls `printf` and `memory_available` again, which reports
+  the shortfall.  Evidence: the decompiled `FUN_0002f8ca` and the strings
+  `Not enough memory to play SCREAMER` and `You need another %d bytes`.
+- `main` calls `engine_init` at `0x127a0`.  That function calls 17 setup
+  functions and loads the `MENU` music from `%s\DATA\MUSIC.DAT`.  Evidence: the
+  decompiled `FUN_000127a0`.
+- The main loop runs `race_loop` and `frame_update` until the quit flag
+  `DAT_00107ed8` is 1.  Evidence: the decompiled `FUN_00010020`.
+- `race_loop` starts a race through `FUN_00027770` and loops until the session
+  state `DAT_0011ce44` reaches 4.  Evidence: the decompiled `FUN_00027700`.
+- `frame_update` clears the key state, reads the clock, advances a 6-frame counter,
+  waits for the frame flag `DAT_0011d234`, and handles input.  Evidence: the
+  decompiled `FUN_00027f94`.
+- `main` calls `engine_shutdown` at `0x128ac` after the loop.  That function is
+  the counterpart of `engine_init`: it stops the music with `FUN_00014e20(0)`.
+  Evidence: the decompiled `FUN_000128ac`.
+- Four of the callees are Watcom run-time helpers: `memory_alloc` (`0x30050`),
+  `printf` (`0x3009b`), `exit` (`0x300be`), and `free` (`0x300ec`).  They sit
+  at the end of the object, after the program code.  Evidence: the decompiled
+  bodies and the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`.
+- The engine strings name the resource interface: `%s.3dx` object files, the
+  `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST` chunks, the track
+  resources `OSTACLES`, `TRACK_DATA`, `OPPONENTS`, `ANIMATIONS`, and `CARS_DATA`,
+  the sprite and visual-list interface, and the HMI banks `MELODIC_BANK` and
+  `DRUM_BANK`.  Evidence: `r2 -q -c "iz"`.
+- See [Program map](../reference/program-map.md) for the table.
+
 ## Static cross-check with radare2
 
 radare2 6.2.4 reads the same LE image through its `bin_le` plugin.  Its view

@@ -33,7 +33,8 @@ original DOS platform first and modern platforms later.
 - **Primary Dependencies**: the Python standard library and capstone 5.0.9
   (loaded through `ctypes`).  The run-time probe uses DOSBox-X 2026.10.01
   from Homebrew.  The static cross-check uses radare2 6.2.4 from the Nix
-  dev shell.
+  dev shell.  The decompilation uses Ghidra 12.0.4 from the `ghidra` dev
+  shell with the `yetmorecode/ghidra-lx-loader` extension.
 - **Storage**: files on disk.  `work/` holds extracted artifacts and
   generated output.  The project uses no database.
 - **Testing**: no test framework.  Each tool is verified against the
@@ -75,6 +76,7 @@ screamer_re/
 │       └── tooling.md         # tools, commands, host tools, and limits
 ├── tools/
 │   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket
+│   ├── ghidra/                # Ghidra loader install and decompile scripts
 │   ├── entry_probe.py         # find the program entry in a CPU log
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
@@ -101,6 +103,13 @@ seconds and reports 28 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
+
+- **Decompile**: run the Ghidra decompiler on the functions of interest:
+
+```sh
+nix develop .#ghidra --command sh tools/ghidra/install_loader.sh
+nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 ```
 
 - **Lint**: N/A.  The project configures no linter and no formatter.
@@ -218,7 +227,9 @@ shipped artifacts -> tools -> stdout / work/ -> docs/
 
 - Pin every dependency version explicitly.  Record the version in the docs.
   `flake.nix` with `flake.lock` pins the Python, capstone, and radare2
-  versions.  Run the tools inside `nix develop`.
+  versions.  Run the tools inside `nix develop`.  The `ghidra` dev shell
+  pins Ghidra 12.0.4 through a second nixpkgs input, because the LX/LE
+  loader extension is released for the 12.0.x series.
 - Prefer the Python standard library.  Add a dependency only for
   significant value.
 - Use reputable and maintained sources only.  capstone comes from
