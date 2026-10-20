@@ -44,8 +44,15 @@ Inspect a DOS/4GW linear executable:
 
 ```sh
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
-python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x200f8
-python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x200f8
+python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+```
+
+Find the program entry at run time.  The tool needs DOSBox-X:
+
+```sh
+python3 tools/entry_probe.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
 Extract the data track of the CD image:

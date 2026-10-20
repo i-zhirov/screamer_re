@@ -26,7 +26,7 @@ current host.
 
 ### M1: Program map
 
-- Resolve the entry alignment with a DOSBox debugger session.
+- Resolve the entry alignment with a DOSBox debugger session (done).
 - Find `main` and the subsystem entry points.
 - Map the code object into functions with names and roles.
 - Map the data references: video, sound, input, file I/O, network.
@@ -60,11 +60,10 @@ current host.
 
 ## Next steps
 
-1. Add a DOSBox debugger build.  The bundled DOSBox 0.74-2 has no
-   debugger, so the project needs a debug-enabled build.
-2. Dump the code at the entry point at runtime.  Resolve the entry
-   alignment question.
-3. Trace the start path from the entry point to `main`.
-4. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
+1. Trace the start path from the entry point to `main`.  The entry jumps
+   to `0x03a970`, which sets up the stack, checks the DOS version, and
+   calls the Watcom run-time startup.
+2. Map the Watcom startup code and find the call to the program `main`.
+3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
    graphics file.
-5. Set up the OpenWatcom V2 build harness under `work/`.
+4. Set up the OpenWatcom V2 build harness under `work/`.

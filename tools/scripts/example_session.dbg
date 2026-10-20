@@ -1,0 +1,13 @@
+# Break into the debugger, report the CPU state, and resume.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/example_session.dbg \
+#     --port 9876 --cwd work/entry/run \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+
+break
+read CS EIP
+exec CPU
+exec GDT
+exec RUN

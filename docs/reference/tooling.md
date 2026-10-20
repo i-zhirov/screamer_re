@@ -7,6 +7,8 @@
 | `tools/le.py` | parse an LE image and disassemble x86 code |
 | `tools/extract_cd_image.py` | extract the data track of the CD image |
 | `tools/inventory.py` | build a file inventory with SHA-256 digests |
+| `tools/dosboxx_control.py` | drive the DOSBox-X debugger over its control socket |
+| `tools/entry_probe.py` | find the program entry in a DOSBox-X instruction log |
 
 ### `tools/le.py`
 
@@ -62,10 +64,83 @@ python3 tools/inventory.py <directory> [--title TITLE]
 | --- | --- | --- |
 | `python3` | 3.14.7 | project tools |
 | `capstone` | 5.0.9 | x86 disassembly library |
+| `dosbox-x` | 2026.10.01 | DOS emulator with a debugger |
 | `objdump` | LLVM 21.1.8 | object inspection |
 | `otool`, `nm`, `strings`, `xxd` | macOS | binary inspection |
 | `hdiutil` | macOS 15.5 | ISO mount |
 | `xar`, `tar` | macOS | package extraction |
+
+## Debugger control
+
+The bundled DOSBox 0.74-2 carries no debugger.  The project uses DOSBox-X
+from Homebrew.  DOSBox-X connects to a control socket on `127.0.0.1:<port>`
+when the `[dosbox] mcp_server` option is set.  The protocol is line based:
+
+```text
+REQ <id> PING                 -> BEGIN <id> OK / PONG / END <id>
+REQ <id> BREAK                -> break into the debugger
+REQ <id> EXEC <debug command>  -> run one debugger command
+```
+
+`tools/dosboxx_control.py` is the server side of the protocol.  It listens
+on the port, sends requests, and prints the responses.  It holds three
+commands:
+
+```sh
+python3 tools/dosboxx_control.py listen --port 9876
+python3 tools/dosboxx_control.py run --port 9876 \
+  --command BREAK --command "EV CS EIP"
+python3 tools/dosboxx_control.py script --file SCRIPT \
+  --port 9876 --cwd WORKDIR \
+  --launch "dosbox-x -nogui -break-start -conf probe.conf -conf game.conf"
+```
+
+The `script` command runs a session script.  It starts DOSBox-X when
+`--launch` is given, and it attaches to a running DOSBox-X when `--launch`
+is absent.  The script holds one command per line:
+
+| Command | Effect |
+| --- | --- |
+| `break` | break into the debugger |
+| `clear` | clear the captured emulator output |
+| `exec <command>` | run one debugger command |
+| `expect <text>` | fail when the last response lacks the text |
+| `note <text>` | print a note |
+| `read <register> ...` | read registers |
+| `sleep <seconds>` | wait |
+| `stop` | end the script |
+| `wait <marker> [timeout]` | wait for a marker in the emulator output |
+
+The tool exits with code 0 when every step succeeds.  It exits with code 1
+when a step fails.  `tools/scripts/example_session.dbg` is a working example.
+
+```sh
+python3 tools/dosboxx_control.py script \
+  --file tools/scripts/example_session.dbg \
+  --port 9876 --cwd work/entry/run \
+  --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+```
+
+`tools/entry_probe.py` runs the game in DOSBox-X, breaks into the debugger,
+sets an interrupt breakpoint on the game stub's DOS4GW exec call
+(`BPINT 21 "4B"`), starts a CPU instruction log, and reports the first
+game instruction.  The tool needs a terminal for the DOSBox-X debugger, so it
+runs the emulator under a pseudo terminal.  It writes only under `work/`.
+
+```sh
+python3 tools/entry_probe.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
+
+Useful debugger commands: `EV CS EIP` reads the current address, `CPU` shows
+the CPU state, `GDT` lists the descriptors, `BPLIST` lists breakpoints,
+`BPDEL *` removes all breakpoints, `LOGS <count>` writes an instruction log
+to `LOGCPU.TXT` in the DOSBox-X working directory.
+
+The `dosbox-debugger` agent skill carries the generic workflow: the
+connection direction, the terminal requirement, the command list, and the
+common traps.  Use the skill for another DOS program.  Use this page for the
+project commands.
 
 ## Run the game
 

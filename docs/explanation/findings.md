@@ -76,20 +76,46 @@ Authority.
 - The single-player path runs `STARTH.EXE`.  The client and server paths
   run the same executable with an IPX network configuration.
 
+## Entry point
+
+- The LE header entry value is an offset inside the start object.  The file
+  offset follows this rule:
+
+  ```text
+  file_offset = data_pages_offset
+              + (page_table_index - 1 + entry_offset // page_size) * page_size
+              + entry_offset % page_size
+  ```
+
+  Evidence: `tools/le.py` and the run-time log below.
+- The entry code is a short jump over the Watcom run-time banner string:
+  `jmp short +0x76` at `0x03a8f8`, then `sti`, `and esp,-4`,
+  `mov ebx,esp`, `mov ah,0x30`, `int 0x21`.  Evidence: `tools/le.py
+  disasm STARTH.EXE 0x300f8`.
+- All three executables share the entry pattern.  The entry file offsets are
+  `0x3a8f8` (`STARTH.EXE`), `0x3a6b8` (`STARTL.EXE`), and `0x20628`
+  (`SETUP.EXE`).
+- A DOSBox-X instruction log of `STARTH.EXE` shows the game code start at
+  selector `0x0150`, EIP `0x1f20f8`, with all registers zero.  The first
+  instructions are `jmp short 001f2170`, `sti`, `mov ebx,esp`, and `int 21`
+  with `EAX=0x3000`.  Evidence: `tools/entry_probe.py` and the log line
+  `0150:1F20F8  jmp  short 001F2170 ($+76)  EAX:00000000 ...`.
+- The run-time module load base is `0x1c2000`: `0x1f20f8 - 0x200f8 =
+  0x1c2000`.  The module-relative entry is `0x300f8`, which equals the
+  object base `0x10000` plus the header entry `0x200f8`.  Evidence: the log
+  line above and the LE object table.
+- The DOS4GW stub of `STARTH.EXE` loads the extender as an overlay:
+  `int 21` with `EAX=0x4b03` (AH `0x4b`, AL `0x03`).  Evidence: the
+  first log line `9fe0:00000002  int  21  EAX:00004B03`.
+
 ## Open questions
 
-### Entry alignment
+### Entry alignment (resolved)
 
-The `STARTH.EXE` header entry `0x200f8` maps to file offset `0x2a8f8`.
-The byte at that offset is `0x00`, and a disassembly at that offset is
-mid-instruction.  A disassembly at offset `+1` gives clean code.  The
-`SETUP.EXE` entry shows the same pattern.  The `STARTL.EXE` entry maps to
-file offset `0x2a6b8`, and a disassembly at that offset is clean.
-
-The page mapping is confirmed, so the question stays: either the header
-entry value carries a one-byte bias, or the code at the entry starts with a
-zero byte.  A runtime observation in the DOSBox debugger can settle the
-question.
+The entry alignment question is resolved.  The header entry is an offset
+inside the start object, not a module-relative address.  The run-time log
+shows the entry instruction `jmp short +0x76`, and that instruction sits at
+file offset `0x3a8f8`.  See the Entry point section above.
 
 ### Data formats
 
@@ -123,7 +149,10 @@ The investigation uses these steps:
 3. inventory the files with SHA-256 digests,
 4. parse the LE headers and the tables with `tools/le.py`,
 5. disassemble the code at selected addresses with capstone,
-6. record every claim with its evidence and its limits.
+6. run the game in DOSBox-X and drive its debugger over the control
+   socket with `tools/dosboxx_control.py` and `tools/entry_probe.py`,
+7. record every claim with its evidence and its limits.
 
 REA covers the package identity and the Mach-O targets.  REA does not
 open the DOS LE executables, so the project carries its own LE parser.
+The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.

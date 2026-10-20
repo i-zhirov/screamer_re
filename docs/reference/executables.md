@@ -2,7 +2,7 @@
 
 ## Summary
 
-| File | Format | Bytes | Entry (linear) | Entry object | Module name |
+| File | Format | Bytes | Entry (object offset) | Entry object | Module name |
 | --- | --- | ---: | ---: | --- | --- |
 | `STARTH.EXE` | LE | 1034923 | `0x200f8` | 1 | `start` |
 | `STARTL.EXE` | LE | 1034919 | `0x1feb8` | 1 | `start` |
@@ -99,25 +99,45 @@ runtime code.
 The three `.386` files carry HMI (Human Machine Interfaces, Inc.) driver
 banners.  They hold Gravis Ultrasound and MPU-401/OPL2 support code.
 
-## Open question: entry alignment
+## Entry point
 
-The header entry value of `STARTH.EXE` maps to file offset `0x2a8f8`.
-The bytes at that offset are `00 a1 4c 63 00 00`.  A disassembly at the
-offset is mid-instruction.  A disassembly at offset `+1` gives clean code:
+The LE header entry value is an offset inside the start object.  The file
+offset of the entry is:
 
 ```text
-0x0200f9: a14c630000      mov eax, dword ptr [0x634c]
-0x0200fe: 39f8            cmp eax, edi
-0x020100: 7d12            jge 0x20114
-0x020102: 69c090050000    imul eax, eax, 0x590
-0x020108: 05b80a0100      add eax, 0x10ab8
-0x02010d: e8fec6ffff      call 0x1c810
+file_offset = data_pages_offset
+            + (page_table_index - 1 + entry_offset // page_size) * page_size
+            + entry_offset % page_size
 ```
 
-The header entry value of `STARTL.EXE` maps to file offset `0x2a6b8`, and a
-disassembly at that offset is clean.  The header entry value of
-`SETUP.EXE` maps to file offset `0x10628`, and a disassembly at that offset
-starts with a zero byte.
+The entry code is a short jump over the Watcom run-time banner string:
 
-The page mapping is confirmed: the last page ends at the end of the file.  The
-entry alignment of `STARTH.EXE` and `SETUP.EXE` stays an open question.
+```text
+0x03a8f8: eb76      jmp short +0x76
+0x03a8fa: 57 41 54 43 4f 4d ...   "WATCOM C/C++32 Run-Time system. ..."
+0x03a970: fb        sti
+0x03a971: 83e4fc    and esp, 0xfffffffc
+0x03a974: 89e3      mov ebx, esp
+0x03a976: 891d94420000  mov [0x4294], ebx
+0x03a97c: 891d80420000  mov [0x4280], ebx
+0x03a982: 66b82400  mov ax, 0x24
+0x03a986: 66a38c420000  mov [0x428c], ax
+0x03a98c: bb52414850  mov ebx, 0x50484152
+0x03a991: 29c0      sub eax, eax
+0x03a993: b430      mov ah, 0x30
+0x03a995: cd21      int 0x21
+```
+
+All three executables use the same entry pattern.  The entry file offsets
+are:
+
+| File | Header entry | Entry file offset | First instruction |
+| --- | ---: | ---: | --- |
+| `STARTH.EXE` | `0x200f8` | `0x3a8f8` | `jmp short +0x76` |
+| `STARTL.EXE` | `0x1feb8` | `0x3a6b8` | `jmp short +0x76` |
+| `SETUP.EXE` | `0x12c28` | `0x20628` | `jmp short +0x76` |
+
+The run-time log confirms the rule.  The game code starts at selector
+`0x0150` and EIP `0x1f20f8` with all registers zero.  The module load base
+is `0x1c2000`.  The module-relative entry is `0x300f8`, which equals the
+object base `0x10000` plus the header entry `0x200f8`.

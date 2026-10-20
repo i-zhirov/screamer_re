@@ -135,7 +135,7 @@ class LinearExecutable:
             "module_flags": u32(0x10),
             "page_count": u32(0x14),
             "start_object": u32(0x18),
-            "entry_linear": u32(0x1C),
+            "entry_offset": u32(0x1C),
             "stack_object": u32(0x20),
             "stack_pointer": u32(0x24),
             "page_size": u32(0x28),
@@ -157,7 +157,6 @@ class LinearExecutable:
         }
 
         header = self.header
-        self.entry_linear = header["entry_linear"]
         self.entry_object = header["start_object"]
 
         for index in range(header["object_count"]):
@@ -169,17 +168,17 @@ class LinearExecutable:
                 Object(index + 1, virtual_size, reloc_base, flags, page_index, page_count, reserved)
             )
 
+        # The header entry value is an offset inside the start object.  The
+        # object-relative offset maps to a page index of the object page table.
+        start = self.object_by_index(self.entry_object)
+        self.entry_offset = header["entry_offset"]
+        self.entry_linear = (start.reloc_base if start else 0) + self.entry_offset
+
         for obj in self.objects:
             for page_index in range(obj.page_count):
                 table_index = obj.page_table_index - 1 + page_index
                 page = self._read_page(obj, page_index, table_index)
                 self.pages.append(page)
-
-        entry_object = self.object_at(self.entry_linear)
-        if entry_object is not None:
-            self.entry_offset = self.entry_linear - entry_object.reloc_base
-        else:
-            self.entry_offset = self.entry_linear
 
         self.module_name = self._read_resident_name(header["resident_name_table_offset"])
         self.symbols = self._read_symbols()
@@ -254,6 +253,12 @@ class LinearExecutable:
                 return obj
         return None
 
+    def object_by_index(self, index: int) -> Object | None:
+        for obj in self.objects:
+            if obj.index == index:
+                return obj
+        return None
+
     def page_at(self, linear_address: int) -> Page | None:
         for page in self.pages:
             if page.virtual_address <= linear_address < page.virtual_address + page.virtual_size:
@@ -287,7 +292,8 @@ def print_info(exe: LinearExecutable) -> None:
     print(f"module name:     {exe.module_name}")
     print(f"pages:           {header['page_count']} x {header['page_size']} bytes (last {header['last_page_size']})")
     print(f"data pages at:   {header['data_pages_offset']:#x}")
-    print(f"entry:           linear {exe.entry_linear:#x} (object {exe.entry_object}, offset {exe.entry_offset:#x})")
+    print(f"entry:           object {exe.entry_object} offset {exe.entry_offset:#x} "
+          f"(module linear {exe.entry_linear:#x})")
     entry_file = exe.to_file_offset(exe.entry_linear)
     print(f"entry file off:  {entry_file:#x}" if entry_file is not None else "entry file off:  unmapped")
     print(f"stack:           object {header['stack_object']}, esp {header['stack_pointer']:#x}")

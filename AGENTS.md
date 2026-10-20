@@ -31,7 +31,8 @@ original DOS platform first and modern platforms later.
   game source does not exist yet.  The planned target is C or C++ for
   32-bit DOS with OpenWatcom V2.
 - **Primary Dependencies**: the Python standard library and capstone 5.0.9
-  (loaded through `ctypes`).
+  (loaded through `ctypes`).  The run-time probe uses DOSBox-X 2026.10.01
+  from Homebrew.
 - **Storage**: files on disk.  `work/` holds extracted artifacts and
   generated output.  The project uses no database.
 - **Testing**: no test framework.  Each tool is verified against the
@@ -41,8 +42,9 @@ original DOS platform first and modern platforms later.
 - **Project Type**: CLI tools plus a documentation set.
 - **Performance Goals**: N/A.
 - **Constraints**: the game uses Watcom C/C++ 32-bit and the DOS/4GW
-  extender.  REA does not open the DOS LE executables.  Large artifacts
-  stay out of git.
+  extender.  REA does not open the DOS LE executables.  The bundled
+  DOSBox 0.74-2 has no debugger, so the run-time probe needs DOSBox-X.
+  Large artifacts stay out of git.
 - **Scale/Scope**: one game, 56 game files, 4 executables, 3 sound
   drivers, and 1 CD image.
 
@@ -64,9 +66,12 @@ screamer_re/
 │       ├── inventory.md       # game files with sizes and SHA-256 digests
 │       └── tooling.md         # tools, commands, host tools, and limits
 ├── tools/
+│   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket
+│   ├── entry_probe.py         # find the program entry in a CPU log
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
-│   └── le.py                  # parse an LE image and disassemble x86 code
+│   ├── le.py                  # parse an LE image and disassemble x86 code
+│   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
 ```
 
@@ -77,7 +82,7 @@ screamer_re/
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 ```
@@ -96,7 +101,7 @@ open ~/Documents/Screamer.app
   Build And Test Commands.
 
   Use the following commands:
-    - `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py` to check the syntax
+    - `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py` to check the syntax
     - `python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the LE parser
     - `python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game` to check the inventory tool
 
