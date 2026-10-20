@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import re
 import shutil
 import subprocess
@@ -106,6 +107,77 @@ def check_inventory(checks: Checks, game_dir: Path) -> None:
         digest == STARTH_SHA256,
         digest[:16],
     )
+    verify_reference_digests(checks, game_dir)
+
+
+def reference_digests() -> dict[str, str]:
+    """Read the path and digest pairs of the reference inventory."""
+    table = (Path(__file__).parent.parent / "docs/reference/inventory.md").read_text()
+    digests: dict[str, str] = {}
+    for line in table.splitlines():
+        cells = [cell.strip().strip("`") for cell in line.split("|")]
+        if len(cells) < 5:
+            continue
+        path, _size, digest = cells[1], cells[2], cells[3]
+        if not path.upper().endswith(
+            (".EXE", ".386", ".DAT", ".CFG", ".ICO", ".TXT", ".PDF", ".RPL", ".TAB", ".GOG", ".CONF")
+        ):
+            continue
+        if len(digest) == 64 and all(c in "0123456789abcdef" for c in digest):
+            digests[path] = digest
+    return digests
+
+
+def is_expected_extra(relative: str) -> bool:
+    """Tell the game state files and the wrapper files from a regression.
+
+    The game writes the choice file and the replays during play, and the distribution
+    wrapper ships its own DOSBox configuration.  Both are expected, and neither is a
+    regression.  Any other file outside the reference inventory is a regression.
+    """
+    name = relative.replace(os.sep, "/").rsplit("/", 1)[-1].upper()
+    if name.endswith(".RPL"):
+        return True
+    if name == "CHOICE.DAT":
+        return True
+    return name.startswith("DOSBOX") and name.endswith(".CONF")
+
+
+def verify_reference_digests(checks: Checks, game_dir: Path) -> None:
+    """Verify every shipped file, and name the files the game writes itself.
+
+    A shipped file that changes is a regression.  A file that the game writes and the
+    distribution does not ship, such as the choice file and the replays, is game state
+    and not a regression, so it is reported on its own.
+    """
+    digests = reference_digests()
+    mismatched = []
+    for path, digest in sorted(digests.items()):
+        target = game_dir / path.replace("/", os.sep)
+        if not target.is_file():
+            mismatched.append(f"{path} (missing)")
+            continue
+        if sha256(target) != digest:
+            mismatched.append(path)
+    checks.check(
+        "stage 2: every shipped file digest matches the reference",
+        not mismatched,
+        ", ".join(mismatched[:3]) if mismatched else f"{len(digests)} files",
+    )
+    shipped = {path.replace("/", os.sep) for path in digests}
+    written = []
+    for target in sorted(game_dir.rglob("*")):
+        if not target.is_file():
+            continue
+        relative = str(target.relative_to(game_dir))
+        if relative not in shipped:
+            written.append(relative)
+    checks.check(
+        "stage 2: only the game writes its own state files",
+        all(is_expected_extra(name) for name in written),
+        f"outside the reference: {', '.join(written[:3])}" if written else "none",
+    )
+
 
 
 def check_cd_image(checks: Checks, game_dir: Path, work_dir: Path) -> None:
