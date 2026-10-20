@@ -403,6 +403,25 @@ Authority.
   plausible count or size for `GAMEL.SPR`, and the port of the decoded structure
   is not confirmed, so the tool reports the raw member.
   Evidence: the port attempt and the classic variant test.
+- A debugger dump of the decoder state did not reach the decoder.  A breakpoint
+  at
+  the run-time address `0150:1FF4C4`, the entry of the block decoder `0x4d4c4`,
+  did not hit within 25 seconds.  The game sat in the input wait at
+  `0150:1E1C40`, the static address `0x21c40`, so no file load runs before an
+  input event.  The dump needs a driven session: a key press into the emulator,
+  or a
+  breakpoint on the input handler to step past the wait.
+  Evidence: the probe session `tools/scripts/probe_lzss_state.dbg`.
+- The mask table at `+0x8050` is the missing piece of the LZSS port.  The bit
+  reader masks the code with the entry of that table for the shift count, and
+  the
+  decompiled code does not show how the table is initialized, so the mask values
+  are
+  unknown.  The literal code `0x100` and the end code `0x101` stay constant
+  while
+  the shift count grows from 9 to 12, which fits a table of shifted masks rather
+  than the values `(1 << n) - 1`.
+  Evidence: the decompiled `FUN_0004d844` and `FUN_0004d4c4`.
 - The member `MENU.MLB` holds a plausible head: the value 16 at `+0x00` and
   the value 2960 at `+0x04`.  `GAMEL.SPR` holds the values `0x18007f00` at
   `+0x00` and `0xc0cb4af8` at `+0x04`, which are not plausible, so the sprite

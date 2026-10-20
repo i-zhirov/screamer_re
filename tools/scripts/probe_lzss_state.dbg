@@ -1,0 +1,9 @@
+break
+exec BP 0150:1FF4C4
+clear
+exec RUN
+sleep 25
+break
+read CS EIP EAX EBX ECX EDX
+exec BPDEL *
+exec RUN
