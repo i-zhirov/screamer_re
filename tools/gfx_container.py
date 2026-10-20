@@ -153,9 +153,11 @@ class _Lzss:
             self.bits &= 7
         old = self.bits
         self.bits += self.shift
-        low = self.buf[old >> 3]
-        high = self.buf[(old >> 3) + 1]
-        return ((low | (high << 8)) >> (old & 7)) & MASK
+        byte0 = self.buf[old >> 3]
+        byte1 = self.buf[(old >> 3) + 1]
+        byte2 = self.buf[(old >> 3) + 2]
+        value = byte0 | (byte1 << 8) | (byte2 << 16)
+        return (value >> (old & 7)) & MASK
 
     def block(self) -> bool:
         state = self.state
@@ -211,6 +213,7 @@ class _Lzss:
             self.out.append(self.ring[self.ring_index] & 0xFF)
             self.out_count += 1
             if self.out_count == self.limit:
+                self.state = 2
                 return False
             if self.ring_index == 0:
                 if self.index >= len(self.table_byte) - 1:

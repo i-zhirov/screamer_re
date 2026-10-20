@@ -717,6 +717,39 @@ Authority.
   `GAMEL.SPR` holds 10010 bytes, which fits the resolution difference.
   Evidence: the member list of `GFX/GAME.DAT`.
 
+## The LZSS port bug
+
+- The output loop of the block decoder is decoded: the driver `0x4d3fc` reads
+  one
+  byte into the bit buffer, then loops on the block decoder `0x4d4c4`.  The
+  block
+  decoder reads a code through the bit reader, treats `0x100` as a literal and
+  `0x101` as the end, walks the table at `+0x0000` through the ushort field
+  until
+  the code falls to `0xff` or less, fills the ring at `+0x4074`, and then copies
+  the
+  low byte of each ring entry to the output while the ring index counts down.
+  Evidence: the decompiled `FUN_0004d4c4`, lines 56 to 80.
+- The port returns zeros because of the initial buffer state.  The driver fills
+  only
+  `buf[0]` before the first read, and the bit reader computes the remaining
+  bytes as
+  `0x400 - (bits >> 3)`, which is 0x400 at the start, so the refill does not run
+  and the reader reads `buf[1]` and `buf[2]` as zero.  The first code therefore
+  comes out wrong and every later code follows it.
+  Evidence: the port diagnostic, which printed `buf[0..3]` as `[0, 0, 0, 0]` and
+  the first six codes as zero.
+- The port is not fixed yet.  The initial bit position or the initial buffer
+  fill
+  must account for the one-byte read of the driver, and the bit reader must read
+  three bytes rather than two.  The port now reads three bytes, and the
+  remaining
+  gap is the initial state.
+  Evidence: the port diagnostic.
+- The sprite count, the dimensions, and the palette of `GAMEL.SPR` and
+  `GAMEH.SPR`
+  therefore stay unreported.  Evidence: the port result.
+
 ## The low and high sprite members
 
 - The SPR parser cannot report the sprite count, the dimensions, or the palette
