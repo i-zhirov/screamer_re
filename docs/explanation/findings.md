@@ -307,9 +307,39 @@ Authority.
 - Verification against `GFX/MENU.DAT`: the first dword is `0x03000000` and the
   first word is 0, so the file does not match the plain sprite structure either.
   Both files are compressed or encoded, so the record structures are the layouts
-  of
-  the loaded resources, not of the file bytes.
+  of the loaded resources, not of the file bytes.
   Evidence: the byte scans of both files.
+- The encoding of both files is decoded.  Every byte is exclusive-ORed with
+  `0x3a`,
+  and the decoder at `0x4c128` reads the file from the end: it seeks 4 bytes
+  before the end, reads the decompressed size, seeks back by the size plus 4
+  bytes, reads 32-byte blocks forward, exclusive-ORs every byte with `0x3a`, and
+  decodes each block through `0xd9ba`.  Evidence: `FUN_0004c128`.
+- The block header is the first byte of a block; the value 0 ends the data.  The
+  bytes at `+0x1a` and `+0x1c` are two 16-bit lengths whose sum is the
+  decompressed block size, and the byte at `+0x1d` holds two flags in bit 0 and
+  bit 1.  A member name follows at `+0x58`.  Evidence: `FUN_0004c128`.
+- The decode of the file tails confirms the encoding.  `GFX/GAME.DAT` returns
+  the
+  member names `TEMPLET_L.PCX`, `GAMEH.FNT`, `L.FNT`, and `H.FNT`.
+  `GFX/MENU.DAT` returns `MENU.COL`, `SHADOW.3DX`, `AUTO06.3DX`, and
+  `DOW.3DX`.  So the directory of a file sits at the end, before the 4-byte
+  decompressed size.  Evidence: the exclusive-OR decode of both tails.
+- The first decoded block of `GFX/GAME.DAT` holds a block header and then the
+  member name `TEMPLET_L.PCX`, so the sprite count and the pixel data size
+  follow the member name in the decoded stream.  The full re-verification of the
+  sprite layout needs the block decoder `0xd9ba`; it stays open.
+  Evidence: the exclusive-OR decode of the head of `GFX/GAME.DAT`.
+- `FUN_000131a8` at `0x131a8`, the mode initializer that
+  `race_session_start` calls, loads the object list through `0x15460` with the
+  record size 0x590, so the object array `DAT_00110d9c` holds 0x590-byte
+  records and the count `DAT_0010f8ec` counts them.  It loads the opponent list
+  with the record size 0xbc, so the opponent array `DAT_0010f180` holds
+  0xbc-byte records.  Evidence: `FUN_000131a8`.
+- `FUN_0001b840` loads the session file: two 28-byte control records, a
+  4-byte value, a 24-byte setup record, and, when the flag is set, a 20-byte
+  replay record.  The setup record feeds the game mode `DAT_0011d260` and the
+  display flags `_DAT_0011d274`.  Evidence: `FUN_0001b840`.
 - Verification of the member layout: `GFX/MENU.DAT` holds no member names.  A
   scan of the 2230684 bytes finds no `menu`, `.spr`, `.fnt`, or `.pcx` text.
   The file is not a name-indexed container; the names `menu%c.spr` and
