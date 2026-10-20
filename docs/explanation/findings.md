@@ -414,13 +414,20 @@ Authority.
   addresses are the member open `0x20e08d` for the module `0x4c08d`, the decoder
   `0x20e128` for `0x4c128`, and the block decoder `0x20f4c4` for `0x4d4c4`.
   Evidence: the entry evidence and the probe sessions.
-- The driven probe with the corrected decoder address still did not hit, and the
-  game
-  sat in the video library at the run-time address `0150:245D90`, the module
-  address `0x83d90`, while it drew the menu.  So the container member open does
-  not run while the menu draws, and the decoder may run only on a container
-  load.
-  Evidence: the probe run with the corrected address.
+- The driven probe with the three corrected breakpoints did not hit any of them
+  within a 24-second window: the member open `0150:20E08D`, the decoder
+  `0150:20E128`, and the block decoder `0150:20F4C4`.  The game sat at the input
+  wait `0150:1E1C40` both before and after the Enter key in that run, so the key
+  effect depends on the menu state.  The member open therefore does not run
+  while the
+  menu draws, and the container member path needs a container load, not a menu
+  draw.
+  Evidence: the probe run with the corrected addresses.
+- The mask table at `+0x8050` stays the missing piece of the LZSS port.  The bit
+  reader masks the code with the entry of that table for the shift count, and
+  the
+  decompiled code does not show how the table is initialized.
+  Evidence: the decompiled `FUN_0004d844`.
 - The session script gained a `key <text>` step that writes to the emulator
   console, so a probe can leave an input wait.  Sending Enter moved the game
   from
