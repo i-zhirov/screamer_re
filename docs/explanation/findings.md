@@ -954,6 +954,26 @@ audio tracks.  The game plays the tracks through the CD audio path.
   commands.  The missing input is the loader state address, and every remaining
   route needs it observed rather than inferred.
 - The sprite count, the dimensions, and the palette stay open.
+## The protected-mode breakpoint
+
+- `BPPM 0150:25CCC` works and fires on a write in the protected-mode address
+  space.  It stopped the emulator at `CS=a5c EIP=32d`, a different code
+  selector,
+  so the watch matched the linear address that the selector and offset pair maps
+  to.
+- The dumps at that point hold `55 55 55 55`, a fill pattern, so the game has
+  not
+  written the loader statics in the probe window.  The sprite loader has not
+  run.
+- The debugger therefore offers three working breakpoint classes for this game:
+  `BPINT` for the DOS calls, `BPLM` for a linear address, and `BPPM` for a
+  protected-mode selector and offset.  The limit is no longer the tool; it is
+  the
+  game progress, because the sprite loader runs only after a race starts and the
+  probes reach only the menu.
+- The sprite count, the dimensions, and the palette stay open.  Every number in
+  this
+  record is observed; no value is inferred.
 ## Method
 
 The investigation uses these steps:
