@@ -1,0 +1,37 @@
+# Start a race with the keyboard and watch the sprite loader.
+#
+# The game runs a demo first, so the script lets it run, presses Enter to leave the demo,
+# then walks the menu with further Enter presses.  The game is keyboard driven, so no mouse
+# input is needed.  The last step watches the sprite loader statics with BPPM and dumps them
+# with MEMDUMPBIN.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/probe_start_race.dbg \
+#     --port 9876 --cwd work/entry/run --timeout 500 \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+
+break
+clear
+exec RUN
+sleep 20
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
+break
+read CS EIP
+exec BPPM 0150:25CCC
+exec RUN
+sleep 20
+break
+read CS EIP
+exec MEMDUMPBIN 0150:25CCC 4 C.BIN
+exec MEMDUMPBIN 0150:25CD4 8 A.BIN
+exec MEMDUMPBIN 0150:25CDC 8 B.BIN
+exec BPDEL *
+exec RUN

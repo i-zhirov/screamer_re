@@ -983,12 +983,30 @@ audio tracks.  The game plays the tracks through the CD audio path.
 - The earlier single Enter press did move the game once, to `0150:29AB85`, so
   the
   keyboard reaches the game and the effect depends on the menu state.
-- The menu may be mouse driven: `mouse_init` installs the interrupt 33h handler
-  in
-  `engine_init`, and the input poll `0x26448` reads the mouse and the keyboard.
-  The debugger offers no mouse injection command, so a keyboard-only script may
-  not
-  navigate the menu.
+- Correction: the menu is keyboard driven.  A single Enter press moved the game
+  from
+  the run-time address `0150:1E1C40` to `0150:29AB85`, and a manual playthrough
+  navigated the menu and started a race with the keyboard alone, so the scripted
+  keys do
+  reach the menu and the earlier failure was the sequence and the timing rather
+  than the
+  input device.
+  Evidence: the driven probe and the manual playthrough.
+- `mouse_init` at `0x1F1A0` still installs an interrupt 33h handler, but the
+  menu does
+  not require it.  The handler serves another screen, most likely a race screen.
+  Evidence: the disassembly of `0x1F1A0` and the correction above.
+- The game runs a demo before the menu.  The address that the probes first saw,
+  `0150:1E1C40`, lies in the function at the module address `0x21BA0`, which
+  reads the
+  reference points `0x13CCC` and `0x13CD0` and calls the floating point helper
+  `0x4D9F4`, so the game was running a motion routine, not waiting for input. 
+  The
+  probe should let the demo run, press Enter to leave it, and then walk the menu
+  with
+  further key presses.
+  Evidence: the disassembly of `0x21BA0` and the driven probe.
+- The sprite count, the dimensions, and the palette stay open.
 - The remaining debugger tool is `SMV`, which writes memory at a linear address.
   It could set the menu selection or the start flag directly, but the address of
   that
