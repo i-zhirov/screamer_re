@@ -165,6 +165,18 @@ python3 tools/pipeline_check.py \
 A run takes about 15 seconds and reports 24 checks.  Use `--skip-runtime` to run
 the static stages only.
 
+The check runs in three places:
+
+- the `.githooks/pre-push` hook runs the syntax gate and the full check before
+  every push.  Enable it once per clone with
+  `git config core.hooksPath .githooks`.  Set `SCREAMER_GAME_DIR` to use another
+  game directory,
+- GitHub Actions runs the syntax gate on every push and pull request,
+- GitHub Actions runs the full check on a self-hosted runner that holds the
+  game and DOSBox-X.  Register the runner with the labels `macOS` and
+  `screamer-artifacts`, and set the repository variable `SCREAMER_SELF_HOSTED`
+  to `true` to enable the job.
+
 The `dosbox-debugger` agent skill carries the generic workflow: the
 connection direction, the terminal requirement, the command list, and the
 common traps.  Use the skill for another DOS program.  Use this page for the

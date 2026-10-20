@@ -148,6 +148,13 @@ def build_conf(source: Path, target: Path, port: int) -> None:
     target.write_text(text)
 
 
+def clone_tree(source: Path, target: Path) -> None:
+    """Copy a directory tree.  Use an APFS clone when the host supports it."""
+    result = subprocess.run(["cp", "-cR", str(source), str(target)], capture_output=True)
+    if result.returncode != 0:
+        subprocess.run(["cp", "-R", str(source), str(target)], check=True)
+
+
 def run_probe(
     game_dir: Path,
     count: int,
@@ -168,7 +175,7 @@ def run_probe(
     if (run_dir / "game").exists():
         shutil.rmtree(run_dir / "game")
     run_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["cp", "-cR", str(game_dir.resolve()), str(run_dir / "game")], check=True)
+    clone_tree(game_dir.resolve(), run_dir / "game")
 
     env = dict(os.environ)
     env["SDL_VIDEODRIVER"] = "dummy"

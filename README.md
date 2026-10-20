@@ -78,6 +78,24 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
+## Checks
+
+The full check runs every stage and reports 24 checks.  A pre-push hook runs
+the syntax gate and the full check before every push.  Enable the hook once per
+clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook reports a skip and passes when the game directory or DOSBox-X is
+missing.  Set `SCREAMER_GAME_DIR` to use another game directory.
+
+GitHub Actions runs the syntax gate on every push and pull request.  The full
+check runs on a self-hosted runner that holds the game and DOSBox-X.  Register
+the runner with the labels `macOS` and `screamer-artifacts`, and set the
+repository variable `SCREAMER_SELF_HOSTED` to `true` to enable that job.
+
 ## Documentation
 
 - [Findings](docs/explanation/findings.md) — evidence-backed observations
