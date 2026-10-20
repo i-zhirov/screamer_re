@@ -1047,6 +1047,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   the structure at `0x1E23C4` with `SMV`, or leaves the choice file in the probe
   copy, and then re-runs the `BPPM` probe with a longer window.
   Evidence: the probe results.
+## The race started and the probe artifacts
+
+- A race did start.  The game wrote `REPLAYS/REPLAY01.RPL` of 32612 bytes with a
+  record head of `01 00 00 00 00 00 00 00`, which is the replay recorder
+  `replay_write` at `0x22F54` and the 20-byte records of `replay_read`.  The
+  sprite
+  loader therefore ran as well.
+  Evidence: the captured replay file under `work/probe_artifacts/`.
+- The menu state file `CONFIG/CHOICE.DAT` holds 1120 bytes and the car name
+  `GRA`
+  at `+0x08`, so the game reads the last choice at startup.  A later run with
+  that
+  file present starts a race without menu input.
+  Evidence: the captured choice file.
+- Rule violation: the probes ran the game inside the shipped game directory, and
+  the
+  game wrote `CONFIG/CHOICE.DAT` and `REPLAYS/REPLAY01.RPL` there.  Both files
+  were removed to restore the shipped directory, and copies stay under
+  `work/probe_artifacts/`.  The probe configuration must mount a copy of the
+  game
+  directory.
+  Evidence: the file dates, where every shipped file is dated Dec 9 2019 and
+  both
+  probe files are dated today.
+- The next probe fixes the mount to a copy of the game directory, keeps the
+  choice
+  file so the race starts at once, and watches the sprite loader statics with
+  `BPPM`.
+  Evidence: the probe results.
 ## Method
 
 The investigation uses these steps:
