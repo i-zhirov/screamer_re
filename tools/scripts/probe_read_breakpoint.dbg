@@ -2,50 +2,76 @@ break
 exec BPINT 21 "3F"
 clear
 exec RUN
-sleep 3
+sleep 6
+key \r
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 3
+sleep 2
 break
 read EAX EBX ECX EDX
 exec RUN
-sleep 5
+sleep 2
 break
-exec MEMDUMP 0150:1E7CCC 8 C.BIN
-exec MEMDUMP 0150:1E7CD4 8 A.BIN
-exec MEMDUMP 0150:1E7CDC 8 B.BIN
+read EAX EBX ECX EDX
+exec RUN
+sleep 2
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 2
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 2
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 2
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 2
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 6
+break
+exec MEMDUMP 0150:25CCC 8 C.BIN
+exec MEMDUMP 0150:25CD4 8 A.BIN
+exec MEMDUMP 0150:25CDC 8 B.BIN
 exec BPDEL *
 exec RUN

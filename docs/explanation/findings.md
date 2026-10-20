@@ -437,14 +437,26 @@ Authority.
   read, so the working probe method is an interrupt breakpoint.
   Evidence: the six probe sessions and the read probe.
 - The file read sequence of the single-player start is mapped through the
-  interrupt
-  breakpoint: 28 bytes, then 28 bytes, then 6 bytes, then 176 bytes on the
-  handle
-  5, and then the same 176-byte read repeats on the handle 5 at the buffer
-  `0x136c`.  The repeated read shows the game polling one file, so the probe
-  window
-  holds the menu idle and never reaches the graphics loads.
-  Evidence: the read probe with the interrupt breakpoint.
+  interrupt breakpoint: 28 bytes, then 28 bytes, then 6 bytes, then 176 bytes on
+  the handle 5, and then the same 176-byte read repeats at the buffer `0x136c`.
+  After the Enter key the sequence moves to 28 bytes, 4 bytes, 16 bytes, then a
+  7852-byte read, and then 8192-byte reads repeat.  The 176-byte repeats are the
+  menu idle; the 8192-byte reads are the graphics loads.
+  Evidence: the read probes with the interrupt breakpoint.
+- The memory dump command adds the selector base.  `MEMDUMP 0150:<off>` reads
+  the
+  linear address `0x1c2000 + <off>`, so a dump of a run-time address must pass
+  the
+  module address instead.  The earlier dumps passed the run-time address and
+  therefore read the wrong memory.  Evidence: the dump addresses.
+- The loader statics at the module addresses `0x25CCC`, `0x25CD4`, and `0x25CDC`
+  are zero in the window, so the sprite loader has not run and the ring at
+  `+0x4074` and the table at `+0x0000` have no dump yet.  Their semantics stay
+  open.  Evidence: the corrected memory dumps.
+- The next probe should continue the read sequence past the 8192-byte graphics
+  loads until the read of the size `0x271A`, the 10010-byte sprite member, then
+  dump the loader statics at the module address `0x25CD4` and `0x25CDC`.
+  Evidence: the read sequence.
 - The loader statics at `0x1E7CD4` and `0x1E7CDC` hold the pattern
   `00 F0 80 CE` in the menu idle, not a sprite count or a pixel size, so the
   sprite loader has not run.  The ring at `+0x4074` and the table at `+0x0000`
