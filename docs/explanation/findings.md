@@ -901,6 +901,23 @@ therefore redundant.  The reason is not known.
 The CD image holds seven audio tracks.  The project holds no extractor for
 audio tracks.  The game plays the tracks through the CD audio path.
 
+## The ring and table dump blocker
+
+- The run-time dump of the ring at `+0x4074` and the table at `+0x0000` needs
+  the
+  address of the decoder context, and that address is not yet observed.
+- Code breakpoints do not stop this DOSBox-X build, so the decoder cannot be
+  stopped at its entry to read the context from EAX.  The interrupt breakpoint
+  on
+  the file read works, but it shows the read buffer, not the context.
+- Two routes remain: break on the interrupt `AH=42h`, the seek inside the member
+  open `0x4c08d`, and walk the caller frame from the stack; or read the caller
+  of
+  the decoder from the stack at the read breakpoint and follow the context
+  through
+  that frame.
+- The match decoding and the sprite count, the dimensions, and the palette
+  therefore stay open.
 ## Method
 
 The investigation uses these steps:
