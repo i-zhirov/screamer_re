@@ -394,8 +394,20 @@ Authority.
 - `menu_space_init` loads the `NET_SPACE` resource and the network menu, so the
   single-player start may not call it.  The confirmation should therefore break
   at the race init call sites `0x13426` and `0x134b6` of `FUN_000131a8` and
-  drive the game into a race, or port the LZSS decoder and expand the members
-  offline.  Evidence: the decompiled `FUN_00029d08` and `FUN_000131a8`.
+- The container parser is ported to `tools/gfx_container.py`.  It lists the
+  members of a graphics container and writes a raw member.  The offsets, the
+  sizes, and the names of `GFX/GAME.DAT` and `GFX/MENU.DAT` match the earlier
+  decode.  Evidence: the tool output.
+- The LZSS port does not yet reproduce the member bytes.  The classic LZSS
+  variants with the flags byte and the position and length pairs do not yield a
+  plausible count or size for `GAMEL.SPR`, and the port of the decoded structure
+  is not confirmed, so the tool reports the raw member.
+  Evidence: the port attempt and the classic variant test.
+- The member `MENU.MLB` holds a plausible head: the value 16 at `+0x00` and
+  the value 2960 at `+0x04`.  `GAMEL.SPR` holds the values `0x18007f00` at
+  `+0x00` and `0xc0cb4af8` at `+0x04`, which are not plausible, so the sprite
+  member is compressed and the count and the pixel size do not appear in the raw
+  bytes.  Evidence: the `head` output of `tools/gfx_container.py`.
 
 ## The session start and the game modes
 

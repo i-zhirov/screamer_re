@@ -41,6 +41,7 @@ TOOLS = (
     "extract_cd_image.py",
     "dosboxx_control.py",
     "entry_probe.py",
+    "gfx_container.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
