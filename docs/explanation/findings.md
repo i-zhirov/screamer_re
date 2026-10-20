@@ -266,6 +266,54 @@ Authority.
   and `0x501` in the request and calls the interrupt `0x31`.
   Evidence: the decompiled `FUN_0002f0fc` and `FUN_0002f172`.
 
+## The graphics decoder
+
+- `pcx_load` at `0x1b5a4` decodes a PCX member.  It builds the member name
+  with the format `%s\%s` and opens it in the mode `rb`.
+  Evidence: the decompiled `FUN_0001b5a4` and the strings at `0x1007f80`,
+  `0x1009f5`, and `0x1009f5`.
+- The loader seeks 0x300 bytes before the end of the member and reads the
+  256-colour palette.  It then shifts every palette byte right by 2, so the
+  palette becomes the 6-bit VGA form.  Evidence: the decompiled `FUN_0001b5a4`.
+- The loader rewinds, reads the 128-byte PCX header, and computes the pixel
+  count as `(xmax - xmin + 1) * (ymax - ymin + 1)`.  It then decodes the RLE
+  runs: a byte with the mask `0xc0` equal to `0xc0` repeats the next byte
+  `byte & 0x3f` times.  Evidence: the decompiled `FUN_0001b5a4`.
+- `GFX/GRAF.DAT` holds the PCX members `menu1h.pcx`, `menu2h.pcx`,
+  `menu3h.pcx`, `menu4h.pcx`, `champ5h.pcx`, `load%d%c.pcx`, and
+  `net%c.pcx`.  Evidence: the strings at `0x100fd5`, `0x101014`, `0x101054`,
+  `0x101114`, `0x101132`, `0x101152`, and `0x1011bc`.
+- `GFX/MENU.DAT` holds the sprite members `menu%c.spr` and the font members
+  `menu%c.fnt`.  `menu_space_init` at `0x29d08` loads them.
+  Evidence: the strings at `0x100f5d` and `0x100f68`, and the Ghidra
+  references to them.
+- `loading_screen` at `0x2a364` clears the screen, sets the palette, builds
+  `load%d%c.pcx` with the letter H, and loads it from `gfx\graf.dat`.
+  Evidence: the decompiled `FUN_0002a364` and the string at `0x101014`.
+- `menu_space_init` sets the screen size globals `DAT_00025ce8` to 0x280 and
+  `DAT_00025cf0` to 400, so the screen is 640 by 400.
+  Evidence: the decompiled `FUN_00029d08`.
+- The earlier note that `GFX/MENU.DAT` is a 16-bit field list stays open: the
+  file holds the sprite and font members, and the member layout is not decoded.
+
+## The session start and the game modes
+
+- `race_session_start` at `0x128e0` sets the flags `_DAT_00118e1c = 0x102`, the
+  signature `DAT_0011521c = 0x1234`, and `_DAT_0011cb14 = 1`, then dispatches on
+  the game mode `DAT_0011d260`.  Evidence: the decompiled `FUN_000128e0`.
+- The game mode `DAT_0011d260` has the values 1, 2, 3 (the handler `0x12c0c`), 4
+  (`0x12e18`), 0x10 (`0x12d0c`), 0x20 (`0x13120`), 0x40 (`0x130a0`), and
+  0x100 (`0x12f50`).  The other values take the default path `view_move(0, 0)`
+  at `0x1f94c` and `0x21da8(param ^ 1)`.
+  Evidence: the decompiled `FUN_000128e0`.
+- `object_player_input` tests the mode against the value 0x10 and
+  `net_race_screen` against the value 2, so the field selects the race type.
+  Evidence: the decompiled `FUN_0001c760` and `FUN_00028ba4`.
+- `timing_update` at `0x22df8` drives the replay: the flag
+  `DAT_00118e1c & 0x40` selects a playback, the flag `DAT_00118e6c` gates it,
+  and the write path uses the flag `DAT_00118e60`.
+  Evidence: the decompiled `FUN_00022df8`.
+
 ## The fifth level: the vehicle chain and the timing filter
 
 - `object_drive_step` at `0x1cee0` computes the drive force from `+0x2e4`,

@@ -92,15 +92,42 @@ The values look like offsets or counts.  The format is not decoded yet.
 
 ## Graphics data
 
+The graphics files are containers with named members.
+
 | File | Content |
 | --- | --- |
-| `GFX/GRAF.DAT` | 32-bit little-endian field list |
-| `GFX/MENU.DAT` | 16-bit field list |
+| `GFX/GRAF.DAT` | the PCX images `menu1h.pcx`, `menu2h.pcx`, `menu3h.pcx`, `menu4h.pcx`, `champ5h.pcx`, `load%d%c.pcx`, and `net%c.pcx` |
+| `GFX/MENU.DAT` | the sprites `menu%c.spr` and the fonts `menu%c.fnt` |
 | `GFX/GAME.DAT` | compressed data |
 | `GFX/MAP1H.DAT` to `GFX/MAP6H.DAT` | high-resolution map graphics |
 | `GFX/MAP1L.DAT` to `GFX/MAP6L.DAT` | low-resolution map graphics |
 
 `GFX/MAP5H.DAT` and `GFX/MAP5L.DAT` hold the same bytes.
+
+### The PCX decoder
+
+`pcx_load` at `0x1b5a4` loads a PCX member.  It builds the member name with
+the format `%s\%s` and opens it in the mode `rb`.
+
+| Step | Action |
+| --- | --- |
+| 1 | seeks 0x300 bytes before the end and reads the 256-colour palette |
+| 2 | shifts every palette byte right by 2, so the palette becomes 6-bit VGA values |
+| 3 | rewinds and reads the 128-byte PCX header |
+| 4 | computes the pixel count as `(xmax - xmin + 1) * (ymax - ymin + 1)` |
+| 5 | decodes the RLE runs: a byte with the mask `0xc0` equal to `0xc0` repeats the next byte `byte & 0x3f` times |
+
+Evidence: the decompiled `FUN_0001b5a4` and the strings at `0x1009f5` and
+`0x1007f80`.
+
+### The menu members
+
+`GFX/MENU.DAT` holds the sprite and font members.  `menu_space_init` at
+`0x29d08` loads the file `%s\gfx\menu.dat` and the members `menu%c.spr` and
+`menu%c.fnt`.  The observed head of the file is a list of 16-bit little-endian
+values that grow in steps; the member layout is open.
+Evidence: the strings at `0x100f5d`, `0x100f68`, and `0x100f73`, and the
+decompiled `FUN_00029d08`.
 
 ## Table data
 

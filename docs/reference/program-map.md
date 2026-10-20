@@ -248,6 +248,73 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 | `0x294c8` | `race_state_begin` | sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
 | `0x2dddc` | `net_player_add` | takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it | inferred |
 
+## The session start, the replay records, and the graphics decoders
+
+### race_session_start
+
+`race_session_start` at `0x128e0` sets the flags `_DAT_00118e1c = 0x102`, the
+signature `DAT_0011521c = 0x1234`, and `_DAT_0011cb14 = 1`, clears the state
+globals, and then dispatches on the game mode `DAT_0011d260`.
+
+| Mode | Handler | Name | Confidence |
+| --- | --- | --- | --- |
+| 1, 2, 3 | `0x12c0c` | `game_mode_1_start` | inferred |
+| 4 | `0x12e18` | `game_mode_4_start` | inferred |
+| 0x10 | `0x12d0c` | `game_mode_10_start` | inferred |
+| 0x20 | `0x13120` | `game_mode_20_start` | inferred |
+| 0x40 | `0x130a0` | `game_mode_40_start` | inferred |
+| 0x100 | `0x12f50` | `game_mode_100_start` | inferred |
+| other | default | `view_move(0, 0)` at `0x1f94c` and `0x21da8(param ^ 1)` | derived |
+
+`DAT_0011d260` is the game mode.  `object_player_input` tests it against the
+value 0x10 and `net_race_screen` against the value 2, so the same field selects
+the race type.
+
+### The replay records
+
+`timing_update` at `0x22df8` drives the replay.  It tests the flag
+`DAT_00118e1c & 0x40` for a playback and the flag `DAT_00118e6c`; the write path
+uses `DAT_00118e60`.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x22e94` | `replay_read` | reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers | derived |
+| `0x22f54` | `replay_write` | writes the 20-byte record and advances the index with a wrap | derived |
+
+A record holds the frame delta at `+0x00`, a state word at `+0x04`, and six
+16-bit state words at `+0x08`.  The frame delta `DAT_00118e04` and the state
+`_DAT_00119880` are the fields that `timing_update` writes into the record and
+reads back.
+
+### The graphics decoders
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1b5a4` | `pcx_load` | seeks 0x300 bytes before the end, reads the palette, shifts every palette byte right by 2, reads the 128-byte PCX header, and decodes the RLE runs | observed |
+| `0x29d08` | `menu_space_init` | loads the `NET_SPACE` resource, sets the screen to 640 by 400, and loads `%s\gfx\menu.dat` | derived |
+| `0x2a364` | `loading_screen` | clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\graf.dat` | derived |
+| `0x10ba4` | `graphics_load` | loads a graphics file by name | inferred |
+
+`pcx_load` takes a file name, an entry name, and an output palette.  It builds
+the name with the format `%s\%s`, opens it in the mode `rb`, seeks 0x300 bytes
+before the end for the palette, converts the palette to 6-bit values, reads the
+128-byte header, computes the pixel count as `(xmax - xmin + 1) * (ymax - ymin +
+1)`,
+and decodes the RLE runs: a byte with the mask 0xc0 equal to 0xc0 repeats the
+next byte `byte & 0x3f` times.
+
+### The graphics assets
+
+| Asset | Content | Loader |
+| --- | --- | --- |
+| `%s\gfx\graf.dat` | the PCX images `menu1h.pcx`, `menu2h.pcx`, `menu3h.pcx`, `menu4h.pcx`, `champ5h.pcx`, `load%d%c.pcx`, and `net%c.pcx` | `pcx_load` |
+| `%s\gfx\menu.dat` | the sprites `menu%c.spr` and the fonts `menu%c.fnt` | `menu_space_init` |
+| `OPT_PCX` | an optional PCX image | `race_cleanup` |
+
+Evidence: the strings at `0x100f4d`, `0x100f5d`, `0x100f68`, `0x100f73`,
+`0x100fd5`, `0x101014`, `0x1011a2`, `0x1011bc`, and the decompiled
+`FUN_0001b5a4`, `FUN_00029d08`, and `FUN_0002a364`.
+
 ## Fifth level: the vehicle states, the timing filter, and the runtime
 
 ### The vehicle state chain

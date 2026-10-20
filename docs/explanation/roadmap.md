@@ -64,8 +64,7 @@ current host.
 
 1. Follow the calls from `main` into the game subsystems (done for the first
    level: `engine_init`, `race_loop`, and `frame_update` carry names).
-2. Decode the replay records of `replay_read` at `0x22e94` and the session
-   start at `0x128e0`.
+2. Decode the `MENU.DAT` member layout and the `GAME.DAT` container.
 3. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
    the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
 4. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
