@@ -717,6 +717,30 @@ Authority.
   `GAMEL.SPR` holds 10010 bytes, which fits the resolution difference.
   Evidence: the member list of `GFX/GAME.DAT`.
 
+## The low and high sprite members
+
+- The SPR parser cannot report the sprite count, the dimensions, or the palette
+  for
+  either member yet, because the LZSS expansion is not confirmed.  `head` on
+  `GAMEL.SPR` and `GAMEH.SPR` expands to 7935 and 7937 bytes of zeros, so the
+  count and the size fields stay unreadable.  The near-equal output counts are a
+  symptom of the broken port, not a property of the data.
+  Evidence: the `head` output of `tools/gfx_container.py`.
+- The observable difference is the size: `GAMEH.SPR` holds 28736 bytes against
+  10010 for `GAMEL.SPR`, a ratio of 2.87, and `GAMEH.FNT` holds 25992 bytes
+  against 11565 for `GAMEL.FNT`, a ratio of 2.25.  The high members are two to
+  three times the low members, which fits the resolution difference.
+  Evidence: the member list of `GFX/GAME.DAT`.
+- The compressed members share little: `GAMEL.SPR` and `GAMEH.SPR` share the
+  first 4 bytes, the value `00 7f 00 18`, and only 134 of 10010 bytes in the
+  overlap.  `GAMEL.FNT` and `GAMEH.FNT` share 14 of the first 16 bytes and only
+  99 of 11565 bytes in the overlap.  The two members therefore hold different
+  image data, and the shared head is a header, not data.
+  Evidence: the byte compare of the members.
+- The next step stays the confirmed LZSS decoder: it is the only way to read the
+  count, the dimensions, and the palette of either member.
+  Evidence: the port result.
+
 ## Function names
 
 - The Watcom startup at `0xd4324` calls `main` at `0x10020` with `argc` in EAX
