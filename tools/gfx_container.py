@@ -113,18 +113,140 @@ def member_bytes(container: Container, member: Member) -> bytes:
     return container.data[member.offset : member.offset + member.size]
 
 
-def expand(raw: bytes) -> bytes:
+MASK = 0x1FF
+
+
+class _Lzss:
+    """The LZSS decoder of the game, ported from `0x4d3fc`, `0x4d4c4`, and `0x4d844`."""
+
+    def __init__(self, raw: bytes, limit: int) -> None:
+        self.raw = raw
+        self.limit = limit
+        self.buf = bytearray(0x400)
+        self.buf[0] = raw[0]
+        self.read_pos = 1
+        self.bits = 0
+        self.shift = 9
+        self.threshold = 0x200
+        self.index = 0x102
+        self.code = 0
+        self.value = 0
+        self.code2 = 0
+        self.ring = [0] * 0x200
+        self.ring_index = 0
+        self.cur = 0
+        self.cur2 = 0
+        self.state = 0
+        self.table_ushort = [0] * 0x2000
+        self.table_byte = [0] * 0x2000
+        self.out = bytearray()
+        self.out_count = 0
+
+    def _read_bits(self) -> int:
+        remaining = 0x400 - (self.bits >> 3)
+        if remaining < 5:
+            for i in range(remaining):
+                self.buf[i] = self.buf[(self.bits >> 3) + i]
+            if self.read_pos < len(self.raw):
+                self.buf[remaining] = self.raw[self.read_pos]
+                self.read_pos += 1
+            self.bits &= 7
+        old = self.bits
+        self.bits += self.shift
+        low = self.buf[old >> 3]
+        high = self.buf[(old >> 3) + 1]
+        return ((low | (high << 8)) >> (old & 7)) & MASK
+
+    def block(self) -> bool:
+        state = self.state
+        self.state = 0
+        if state != 2:
+            code = self._read_bits()
+            if code == 0x101:
+                return False
+            if code == 0x100:
+                self.shift = 9
+                self.threshold = 0x200
+                self.index = 0x102
+                value = self._read_bits()
+                self.code = value
+                self.value = value
+                self.cur2 = value & 0xFF
+                self.cur = value & 0xFF
+                self.out.append(value & 0xFF)
+                self.out_count += 1
+                if self.out_count != self.limit:
+                    return True
+                self.state = 1
+                return False
+            self.code = code
+            self.code2 = code
+            if self.index <= code:
+                self.code = self.value
+                entry = (self.code >> 8) | self.cur
+                self.ring[self.ring_index] = entry
+                self.ring_index += 1
+            while 0xFF < self.code:
+                entry = (self.code >> 8) | self.table_byte[self.code]
+                self.ring[self.ring_index] = entry
+                self.ring_index += 1
+                self.code = self.table_ushort[self.code]
+            self.cur = self.code & 0xFF
+            self.cur2 = self.cur
+            self.ring[self.ring_index] = self.code
+            self.ring_index += 1
+        while True:
+            if self.ring_index == 0:
+                if self.index >= len(self.table_byte) - 1:
+                    return False
+                self.table_byte[self.index] = self.cur2
+                self.index += 1
+                self.table_ushort[self.index] = self.value
+                self.value = self.code2
+                if self.threshold <= self.index and self.shift != 0xC:
+                    self.shift += 1
+                    self.threshold *= 2
+                return True
+            self.ring_index -= 1
+            self.out.append(self.ring[self.ring_index] & 0xFF)
+            self.out_count += 1
+            if self.out_count == self.limit:
+                return False
+            if self.ring_index == 0:
+                if self.index >= len(self.table_byte) - 1:
+                    return False
+                self.table_byte[self.index] = self.cur2
+                self.index += 1
+                self.table_ushort[self.index] = self.value
+                self.value = self.code2
+                if self.threshold <= self.index and self.shift != 0xC:
+                    self.shift += 1
+                    self.threshold *= 2
+                return True
+
+
+def expand(raw: bytes, limit: int = 1 << 20) -> bytes:
     """Expand the LZSS member data.
 
-    The port follows the decoded structure: a bit buffer of 0x400 bytes, a bit
-    position, a shift count that starts at 9 and grows to 12, a mask table with
-    `(1 << n) - 1` for the shift counts 9 to 12, a ring buffer of 0x200 bytes,
-    the literal code 0x100, and the end code 0x101.  The bit order and the match
-    decoding are not confirmed, so the result is marked unconfirmed.
+    The port follows the decoded structure: a bit buffer of 0x400 bytes with the
+    unread bytes at the front, a bit position, a shift count that starts at 9 and
+    grows to 12, a ring buffer of 0x200 entries, the literal code 0x100, and the end
+    code 0x101.  The mask hypothesis is `table[shift] = 0x1ff` for every shift, so
+    the code is always 9 significant bits and the shift count controls only the bit
+    position advance.
+
+    The port runs to completion but the output head is zero, so the hypothesis is not
+    confirmed.  The ring and table semantics and the output loop source stay open.
     """
     if len(raw) < 2:
         raise ValueError("the member is too short to expand")
-    return raw
+    decoder = _Lzss(raw, limit)
+    guard = 0
+    while decoder.block():
+        guard += 1
+        if guard > len(raw) * 64 + 0x1000:
+            break
+    return bytes(decoder.out)
 
 
 def print_info(container: Container) -> int:
@@ -149,6 +271,17 @@ def print_head(container: Container, name: str) -> int:
     print(f"offset: {member.offset}")
     print(f"size:   {member.size}")
     print(f"head:   {raw[:16].hex(' ')}")
+    try:
+        expanded = expand(raw)
+        print(f"expand: {len(expanded)} bytes")
+        print(f"head:   {expanded[:16].hex(' ')}")
+        if len(expanded) >= 8:
+            count, size = struct.unpack_from("<II", expanded, 0)
+            print(f"count at +0x00: {count}")
+            print(f"size at +0x04:  {size}")
+            print(f"8 + count * 0x14 + size = {8 + count * 0x14 + size}")
+    except ValueError as error:
+        print(f"expand: {error}")
     if len(raw) >= 8:
         count, size = struct.unpack_from("<II", raw, 0)
         expected = 8 + count * 0x14 + size

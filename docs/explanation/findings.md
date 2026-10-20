@@ -423,11 +423,17 @@ Authority.
   menu draws, and the container member path needs a container load, not a menu
   draw.
   Evidence: the probe run with the corrected addresses.
-- The mask table at `+0x8050` stays the missing piece of the LZSS port.  The bit
-  reader masks the code with the entry of that table for the shift count, and
+- The fixed-mask hypothesis `table[shift] = 0x1ff` is implemented in
+  `tools/gfx_container.py` and the port runs to completion: it turns the 10010
+  member bytes of `GAMEL.SPR` into 7935 bytes.  The output head is zero, so the
+  count at `+0x00` and the pixel size at `+0x04` still do not appear, and the
+  hypothesis is not confirmed.  The ring and table semantics and the output loop
+  source stay open.  Evidence: the `head` output of `tools/gfx_container.py`.
+- The mask table at `+0x8050` is no longer the only unknown.  The bit reader
+  matches the decompiled code, so the remaining gap is in the match decoding:
   the
-  decompiled code does not show how the table is initialized.
-  Evidence: the decompiled `FUN_0004d844`.
+  table at `+0x0000` and the ring at `+0x4074` need a confirmed meaning.
+  Evidence: the port result.
 - The session script gained a `key <text>` step that writes to the emulator
   console, so a probe can leave an input wait.  Sending Enter moved the game
   from
