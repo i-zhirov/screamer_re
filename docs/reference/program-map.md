@@ -153,6 +153,30 @@ reporter dispatches through a jump table to one message stub per code, and the
 stubs print the `3dx` messages.  Evidence: the decompiled `FUN_00010978` and
 the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 
+## Subsystem initialisation
+
+`engine_init` at `0x127a0` runs the subsystem setup in order.  The callees:
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1bf38` | `config_load` | reads `screamer.cfg` and sets a flag from a character | observed |
+| `0x15460` | `list_file_load` | builds a file name, opens it, and parses records until `END_LIST` | observed |
+| `0x1bb58` | `setup_load` | reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure | observed |
+| `0x1b304` | `controls_load` | reads three 28-byte records from a `cfg` file | derived |
+| `0x1f1a0` | `mouse_init` | calls interrupt 33h and delays | observed |
+| `0x25db0` | `dpmi_real_int` | calls the DOS/4GW real-mode interrupt dispatcher with `0x1500` | derived |
+| `0x262a8` | `sound_driver_set` | fills an HMI request block and calls the sound driver | inferred |
+| `0x15720` | `palette_build` | fills a 50-entry table with floating-point ramp values | derived |
+| `0x14e20` | `keyboard_hook` | hooks interrupt 9 and drives the keyboard LEDs | observed |
+| `0x10810` | `engine_interface_init` | allocates the engine object and creates its list | derived |
+| `0x4c810` | `stream_layer_init` | binds the engine pointer to the stream layer | derived |
+| `0x4c8f0` | `video_buf_load` | loads the `VIDEO_BUF` resource | observed |
+| `0x8bdec` | `vesa_set_mode` | calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call | derived |
+
+The init order is: the configuration, the list files, the setup, the controls, the
+mouse, the keyboard, the palette, the video buffer, the VESA mode, the sound
+banks, and the engine interface.
+
 ## Engine strings
 
 The decompiler shows the engine interface.  The strings sit in object 3:

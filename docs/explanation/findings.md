@@ -131,6 +131,32 @@ Authority.
   `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
 - See [Program map](../reference/program-map.md) for the addresses.
 
+## Subsystem initialisation
+
+- `engine_init` at `0x127a0` runs the subsystem setup in this order:
+  `config_load`, `list_file_load`, `setup_load`, `controls_load`, `mouse_init`,
+  `keyboard_hook`, `palette_build`, `video_buf_load`, `vesa_set_mode`,
+  `hmi_sound_init`, `engine_interface_init`, and `stream_layer_init`.
+  Evidence: the decompiled `FUN_000127a0` and its callees.
+- `config_load` at `0x1bf38` reads `screamer.cfg`.  On failure it reports
+  `Files damaged. Re-install Screamer.` and exits with `-1`.  Evidence: the
+  decompiled `FUN_0001bf38`.
+- `setup_load` at `0x1bb58` reads `CONFIG/SETUP.CFG` into a 144-byte
+  structure, which matches the shipped file size.  On failure it reports
+  `Run SETUP before.`.
+  Evidence: the decompiled `FUN_0001bb58` and `docs/reference/inventory.md`.
+- `keyboard_hook` at `0x14e20` installs a handler on interrupt 9 and drives the
+  keyboard LEDs through port `0x60`.  `engine_init` calls it with `1` and
+  `engine_shutdown` with `0`.  Evidence: the decompiled `FUN_00014e20`.
+- `vesa_set_mode` at `0x8bdec` calls the DOS/4GW real-mode interrupt
+  dispatcher with `0x4f01`, the VBE get-mode-information call.  Evidence: the
+  decompiled `FUN_0008bdec`.
+- `mouse_init` at `0x1f1a0` calls interrupt 33h.  Evidence: the decompiled
+  `FUN_0001f1a0`.
+- `palette_build` at `0x15720` fills a 50-entry table with floating-point ramp
+  values.  Evidence: the decompiled `FUN_00015720`.
+- See [Program map](../reference/program-map.md) for the table.
+
 ## The .3dx resource loader
 
 - The `.3dx` loader is at module address `0x10bfc`.  It walks the object list and

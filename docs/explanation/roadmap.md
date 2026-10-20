@@ -62,8 +62,9 @@ current host.
 
 ## Next steps
 
-1. Follow the calls from `main` into the game subsystems.  The named functions
-   give the entry points: `engine_init`, `race_loop`, and `frame_update`.
+1. Follow the calls from `main` into the game subsystems (in progress:
+   `engine_init` and its setup order carry names; `race_loop` and `frame_update`
+   are next).
 2. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
    the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
 3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
