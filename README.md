@@ -70,6 +70,14 @@ python3 tools/inventory.py \
   ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
+Run the full pipeline end to end.  The check needs DOSBox-X and takes about
+15 seconds:
+
+```sh
+python3 tools/pipeline_check.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
+
 ## Documentation
 
 - [Findings](docs/explanation/findings.md) — evidence-backed observations

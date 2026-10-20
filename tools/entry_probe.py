@@ -31,11 +31,9 @@ LOG_LINE_RE = re.compile(
     r"^\s*(?:[\d.]+\s+)?([0-9A-F]{4}):([0-9A-F]{1,8})\s+(.*?)\s+EAX:([0-9A-F]{8})"
 )
 
-# Text signatures of the entry sequence.  The entry is a short jump over the
-# Watcom run-time banner string.  The code after the jump starts with `sti` and
-# `mov ebx,esp`.
+# Fallback signature only.  The entry is a short jump over the Watcom run-time
+# banner string.  The code after the jump starts with `sti` and `mov ebx,esp`.
 CANDIDATES = [
-    # Fallback only.  A plain short jump is too common to be a signature.
     ("entry code after the jump", "mov  ebx,esp"),
 ]
 
@@ -150,27 +148,27 @@ def build_conf(source: Path, target: Path, port: int) -> None:
     target.write_text(text)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--game-dir", type=Path, required=True)
-    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x100000)
-    parser.add_argument("--port", type=int, default=9876)
-    parser.add_argument("--timeout", type=float, default=300.0)
-    parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
-    parser.add_argument("--dosboxx", default="dosbox-x")
-    args = parser.parse_args()
-
-    work_root = args.work_root.resolve()
+def run_probe(
+    game_dir: Path,
+    count: int,
+    port: int,
+    timeout: float,
+    work_root: Path,
+    dosboxx: str,
+    verbose: bool = True,
+) -> dict:
+    """Run the game in DOSBox-X and return the entry result."""
+    work_root = work_root.resolve()
     work_root.mkdir(parents=True, exist_ok=True)
     conf = work_root / "probe.conf"
-    build_conf(args.game_dir.resolve() / "dosboxScreamer.conf", conf, args.port)
+    build_conf(game_dir.resolve() / "dosboxScreamer.conf", conf, port)
     # The conf mounts the relative path "game", so the working directory needs a
     # game copy below it.  A clone keeps the copy fast and space efficient.
     run_dir = work_root / "run"
     if (run_dir / "game").exists():
         shutil.rmtree(run_dir / "game")
     run_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["cp", "-cR", str(args.game_dir.resolve()), str(run_dir / "game")], check=True)
+    subprocess.run(["cp", "-cR", str(game_dir.resolve()), str(run_dir / "game")], check=True)
 
     env = dict(os.environ)
     env["SDL_VIDEODRIVER"] = "dummy"
@@ -178,7 +176,7 @@ def main() -> int:
     env["TERM"] = "xterm-256color"
     child = PtyProcess(
         [
-            args.dosboxx,
+            dosboxx,
             "-nogui",
             "-break-start",
             "-conf",
@@ -195,21 +193,23 @@ def main() -> int:
 
     result: dict[str, object] = {"log": str(log_file)}
     try:
-        with ControlSession(args.port, timeout=args.timeout) as session:
+        with ControlSession(port, timeout=timeout) as session:
             time.sleep(2.0)
             for command in ('BPINT 21 "4B"', "BPLIST"):
                 response = session.request("EXEC", command, timeout=30)
-                print(f"$ {command} -> ok={response.ok}")
-                for line in response.lines[:5]:
-                    print(f"   {line}")
+                if verbose:
+                    print(f"$ {command} -> ok={response.ok}")
+                    for line in response.lines[:5]:
+                        print(f"   {line}")
             session.request("EXEC", "RUN", timeout=30)
             at_stub_exec = False
             for _ in range(20):
-                if not child.wait_for("I->", args.timeout):
+                if not child.wait_for("I->", timeout):
                     result["note"] = "the debugger did not stop"
                     break
                 selector, offset = read_cs_eip(session)
-                print(f"break at {selector}:{offset}")
+                if verbose:
+                    print(f"break at {selector}:{offset}")
                 if selector.lower() == "f000":
                     # The BIOS installs its interrupt stubs through INT 21h.
                     child.clear()
@@ -223,20 +223,20 @@ def main() -> int:
             else:
                 for command in ("EV CS EIP", "CPU"):
                     response = session.request("EXEC", command, timeout=30)
-                    for line in response.lines[:8]:
-                        print(f"   {line}")
+                    if verbose:
+                        for line in response.lines[:8]:
+                            print(f"   {line}")
                 # Remove the breakpoint first, or it triggers again on the same
                 # instruction and stops the log.
                 session.request("EXEC", "BPDEL *", timeout=30)
-                session.request("EXEC", f"LOGS {args.count:x}", timeout=30)
+                session.request("EXEC", f"LOGS {count:x}", timeout=30)
                 scanner = LogScanner(CANDIDATES)
                 found = None
-                deadline = time.time() + args.timeout
+                deadline = time.time() + timeout
                 while time.time() < deadline:
                     time.sleep(2.0)
                     found = scanner.feed(log_file)
                     if found:
-                        print("entry found in the log")
                         break
                     if "LOGCPU.TXT created" in child.text():
                         found = scanner.feed(log_file)
@@ -253,7 +253,10 @@ def main() -> int:
                     result.setdefault("note", "the entry is not in the log")
     finally:
         child.close()
+    return result
 
+
+def print_result(result: dict) -> None:
     for key, value in result.items():
         if key == "following":
             print(f"{key}:")
@@ -261,6 +264,27 @@ def main() -> int:
                 print(f"   {line}")
         else:
             print(f"{key}: {value}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--game-dir", type=Path, required=True)
+    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x100000)
+    parser.add_argument("--port", type=int, default=9876)
+    parser.add_argument("--timeout", type=float, default=300.0)
+    parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
+    parser.add_argument("--dosboxx", default="dosbox-x")
+    args = parser.parse_args()
+
+    result = run_probe(
+        args.game_dir,
+        args.count,
+        args.port,
+        args.timeout,
+        args.work_root,
+        args.dosboxx,
+    )
+    print_result(result)
     return 0 if result.get("found") else 1
 
 

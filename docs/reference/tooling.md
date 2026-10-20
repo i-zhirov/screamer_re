@@ -9,6 +9,7 @@
 | `tools/inventory.py` | build a file inventory with SHA-256 digests |
 | `tools/dosboxx_control.py` | drive the DOSBox-X debugger over its control socket |
 | `tools/entry_probe.py` | find the program entry in a DOSBox-X instruction log |
+| `tools/pipeline_check.py` | run the pipeline end to end and check the stages agree |
 
 ### `tools/le.py`
 
@@ -147,6 +148,22 @@ Useful debugger commands: `EV CS EIP` reads the current address, `CPU` shows
 the CPU state, `GDT` lists the descriptors, `BPLIST` lists breakpoints,
 `BPDEL *` removes all breakpoints, `LOGS <count>` writes an instruction log
 to `LOGCPU.TXT` in the DOSBox-X working directory.
+
+### `tools/pipeline_check.py`
+
+The tool runs every stage of the pipeline and checks that the stages agree: the
+syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
+debugger session script, and the cross-checks between the file view and the
+run-time view.  The check pins the reference values from the reference pages.
+The tool exits with code 0 when every check passes.
+
+```sh
+python3 tools/pipeline_check.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
+
+A run takes about 15 seconds and reports 24 checks.  Use `--skip-runtime` to run
+the static stages only.
 
 The `dosbox-debugger` agent skill carries the generic workflow: the
 connection direction, the terminal requirement, the command list, and the

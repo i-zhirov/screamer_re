@@ -108,6 +108,22 @@ Authority.
   `int 21` with `EAX=0x4b03` (AH `0x4b`, AL `0x03`).  Evidence: the
   first log line `9fe0:00000002  int  21  EAX:00004B03`.
 
+## Pipeline confirmation
+
+`tools/pipeline_check.py` runs every stage and checks the cross-stage links.
+The check reports 24 checks and 0 failures.  Evidence: the tool output.
+
+- The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
+  matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
+  matches the file target.
+- The module load base is `0x1c2000`.  The base is page aligned.  Evidence:
+  `0x1f20f8 - 0x300f8 = 0x1c2000`.
+- The run-time startup calls the DOS version service with `EAX=0x3000`
+  (`AH=0x30`).  Evidence: the log line after the entry.
+- The stub exec break `9fe0:0002` is outside the BIOS, and the log shows
+  `int 21` with `EAX=0x4b03` (`AH=0x4b`, `AL=0x03`, load overlay).  Evidence:
+  the first log line.
+
 ## Open questions
 
 ### Entry alignment (resolved)

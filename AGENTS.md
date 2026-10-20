@@ -71,6 +71,7 @@ screamer_re/
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
 │   ├── le.py                  # parse an LE image and disassemble x86 code
+│   ├── pipeline_check.py      # run the pipeline end to end
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
 ```
@@ -82,9 +83,16 @@ screamer_re/
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
+```
+
+The full check runs every stage and needs DOSBox-X.  It takes about 15
+seconds and reports 24 checks:
+
+```sh
+python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
 - **Lint**: N/A.  The project configures no linter and no formatter.
@@ -101,9 +109,10 @@ open ~/Documents/Screamer.app
   Build And Test Commands.
 
   Use the following commands:
-    - `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py` to check the syntax
+    - `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the LE parser
     - `python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game` to check the inventory tool
+    - `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
 
 - You MUST run the changed tool against the shipped artifacts and
   confirm the output.
