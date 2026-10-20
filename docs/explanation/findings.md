@@ -266,6 +266,45 @@ Authority.
   and `0x501` in the request and calls the interrupt `0x31`.
   Evidence: the decompiled `FUN_0002f0fc` and `FUN_0002f172`.
 
+## The fifth level: the vehicle chain and the timing filter
+
+- `object_drive_step` at `0x1cee0` computes the drive force from `+0x2e4`,
+  `+0x2f0`, and the throttle `+0x3fc`.  It sets the brake flag `+0x2c0` when
+  the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times
+  the frame delta.  Evidence: the decompiled `FUN_0001cee0`.
+- `object_proximity_check` at `0x1e30c` measures the distance from the
+  reference `DAT_00113ccc` and `DAT_00113cd0`.  Inside 35000 units it sets the
+  gate `+0x414` from `+0x4e4` and `_DAT_00100b98`; outside it clears the
+  gate.  Evidence: the decompiled `FUN_0001e30c`.
+- The gate `+0x414` is the same field that `object_physics` and
+  `object_prepare` test, so the chain closes.
+  Evidence: the decompiled `FUN_0001e30c` and `FUN_0001c810`.
+- `object_revolution_step` at `0x1d30c` accumulates the revolution counter
+  `+0x250` from the speed and the frame delta, wraps it at 1.0, and reads the
+  gear `+0x254`.  Evidence: the decompiled `FUN_0001d30c`.
+- `timing_update` at `0x22df8` divides 1 by the frame delta `DAT_00118e04` and
+  selects a 400-byte block of the coefficient table `DAT_001080e8`.  The block
+  index is the frame rate, so the filter table holds one coefficient set per
+  frame
+  rate.  Evidence: the decompiled `FUN_00022df8`.
+- `replay_read` at `0x22e94` and `replay_write` at `0x22f54` use 20-byte
+  records at `DAT_00118e5c + index * 0x14`.  A record holds the frame delta at
+  `+0x00` and six 16-bit state words at `+0x08`.  This is the replay format of
+  the `REPLAYS` directory.  Evidence: the decompiled `FUN_00022e94` and
+  `FUN_00022f54`.
+- The filter table `DAT_0010cf08` has two writers, `frame_timer` at `0x1fc38`
+  and `timing_update` at `0x22df8`, and six readers in the object functions.
+  Evidence: the Ghidra references to `0x10cf08`.
+- The frame delta `DAT_00118e04` has three writers: `frame_timer` at `0x1fc38`,
+  `race_session_start` at `0x128e0`, and `timing_update` at `0x22df8`.
+  Evidence: the Ghidra references to `0x118e04`.
+- The runtime memory manager is in object 3: `malloc` at `0xd1f25`, `memset` at
+  `0xd1ec0`, `free` at `0xd2008`, and `memmove` at `0xd2066`.  `malloc`
+  rounds the size up to 4 bytes and walks the free list `DAT_001031d0`.
+  Evidence: the decompiled `FUN_000d1f25` and `FUN_000d2008`.
+- `race_session_start` at `0x128e0` sets the signature `DAT_0011521c` to 0x1234
+  and clears the state globals.  Evidence: the decompiled `FUN_000128e0`.
+
 ## The resource layer and the DPMI services
 
 - The resource layer allocates its buffers through the DPMI services of

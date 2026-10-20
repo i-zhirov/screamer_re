@@ -182,7 +182,19 @@ Evidence: the decompiled `FUN_0002f0fc`, `FUN_0002f172`, and `FUN_0002f062`.
 ## Replays
 
 `REPLAYS/DUMMY.DAT` holds the ASCII text `replays` and CRLF.  It is a
-placeholder.  The replay format is not known yet.
+placeholder.
+
+`replay_read` at `0x22e94` and `replay_write` at `0x22f54` use 20-byte records
+at `DAT_00118e5c + index * 0x14`.
+
+| Offset | Size | Content |
+| --- | ---: | --- |
+| `+0x00` | 4 | the frame delta |
+| `+0x04` | 4 | a state word |
+| `+0x08` | 2 each | six 16-bit state words |
+
+`replay_read` returns 1 at the end markers `DAT_00118e68` and `DAT_00118e70`.
+Evidence: the decompiled `FUN_00022e94` and `FUN_00022f54`.
 
 ## Documents
 

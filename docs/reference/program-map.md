@@ -248,6 +248,59 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 | `0x294c8` | `race_state_begin` | sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
 | `0x2dddc` | `net_player_add` | takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it | inferred |
 
+## Fifth level: the vehicle states, the timing filter, and the runtime
+
+### The vehicle state chain
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1cee0` | `object_drive_step` | computes the drive force from `+0x2e4`, `+0x2f0`, and the throttle `+0x3fc`; sets the brake flag `+0x2c0` when the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times the frame delta | derived |
+| `0x1d30c` | `object_revolution_step` | accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254` | derived |
+| `0x1e30c` | `object_proximity_check` | measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate | derived |
+
+`object_proximity_check` sets the gate at `+0x414`.  `object_physics` and
+`object_prepare` run only when that gate is set, so the chain closes: the
+proximity check enables the physics of the objects near the reference point.
+
+### The timing and filter layer
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x22df8` | `timing_update` | reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400` | derived |
+| `0x22e94` | `replay_read` | reads the 20-byte record at `DAT_00118e5c + index * 0x14`; the record holds the frame delta at `+0x00` and six 16-bit state words at `+0x08`; returns 1 at the end markers | derived |
+| `0x22f54` | `replay_write` | writes the same 20-byte record and advances the index with a wrap | derived |
+| `0x128e0` | `race_session_start` | sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540` | inferred |
+
+`timing_update` divides 1 by the frame delta `DAT_00118e04` and selects a
+400-byte block of the table `DAT_001080e8`.  The block index is the frame rate
+in frames per second, so the table holds one filter coefficient set per frame
+rate.
+
+The filter table has two writers: `frame_timer` at `0x1fc38` and `timing_update`
+at `0x22df8`.  The object functions read it: `0x18db0`, `0x19980`, `0x22f54`,
+`0x1d834`, `0x18528`, and `0x1c84c`.  Evidence: the Ghidra references to
+`0x10cf08`.
+
+The frame delta `DAT_00118e04` has three writers: `frame_timer` at `0x1fc38`,
+`race_session_start` at `0x128e0`, and `timing_update` at `0x22df8`.
+Evidence: the Ghidra references to `0x118e04`.
+
+### The runtime memory manager
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0xd1f25` | `malloc` | rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0` | observed |
+| `0xd1ec0` | `memset` | replicates the byte through the dword and calls `0xe0860` | observed |
+| `0xd2008` | `free` | walks the free list and keeps the largest free block in `DAT_001031d8` | observed |
+| `0xd2066` | `memmove` | copies the dwords and then the bytes | observed |
+| `0x4bf64` | `dpmi_real_copy` | wraps `0xd429f` with the real-mode buffer and the protected-mode buffer | inferred |
+| `0xd429f` | `dpmi_issue_int` | clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0` | inferred |
+| `0xd4410` | `dpmi_int31_entry` | saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block | inferred |
+
+`list_create` allocates the record array through `malloc`, so the engine lists
+and the `.3dx` object records come from the game heap at `0xd1f25`.  The DPMI
+services allocate the separate buffers for the real-mode drivers.
+
 ## Fourth level: the gear step, the slide step, and the resource layer
 
 ### object_gear_step and object_slide_step callees
