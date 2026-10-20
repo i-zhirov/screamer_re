@@ -1,0 +1,13 @@
+break
+exec BP 0150:3BDB9
+clear
+exec RUN
+sleep 45
+break
+read CS EIP
+exec MEMDUMP 0150:31CCC 4 C.BIN
+exec MEMDUMP 0150:31CD4 4 A.BIN
+exec MEMDUMP 0150:31CDC 4 B.BIN
+exec MEMDUMP 0150:31CE0 4 D.BIN
+exec BPDEL *
+exec RUN

@@ -384,10 +384,18 @@ Authority.
 - The literal code `0x100` and the end code `0x101` mark a literal byte and the
   end of the stream.  Evidence: the decompiled `FUN_0004d4c4`.
 - The confirmation of the sprite count at `+0x00` and the pixel data size at
-  `+0x04` stays open.  A run-time probe of the sprite loader at the run-time
-  address `0150:31AA1` did not reach the loader within the probe window of 300
-  ticks, so the confirmation needs a longer window or a different entry point.
-  Evidence: the probe session `work/probe2.dbg`.
+  `+0x04` stays open.  Two run-time probes did not reach the loader: the race
+  path at `0150:31AA1` did not hit within 300 ticks, and the menu path at
+  `0150:3BDB9` did not hit within 45 seconds.  At the second probe the game
+  sat in the input wait at the run-time address `0150:1E1C40`, which is the
+  static address `0x21c40`.  The memory dumps of the four loader globals hold
+  the values `0xdb` and `0x25`, not a plausible count or size.
+  Evidence: the probe sessions `work/probe2.dbg` and `work/probe3.dbg`.
+- `menu_space_init` loads the `NET_SPACE` resource and the network menu, so the
+  single-player start may not call it.  The confirmation should therefore break
+  at the race init call sites `0x13426` and `0x134b6` of `FUN_000131a8` and
+  drive the game into a race, or port the LZSS decoder and expand the members
+  offline.  Evidence: the decompiled `FUN_00029d08` and `FUN_000131a8`.
 
 ## The session start and the game modes
 
