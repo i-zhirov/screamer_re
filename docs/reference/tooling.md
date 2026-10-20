@@ -123,13 +123,24 @@ python3 tools/dosboxx_control.py script \
 
 `tools/entry_probe.py` runs the game in DOSBox-X, breaks into the debugger,
 sets an interrupt breakpoint on the game stub's DOS4GW exec call
-(`BPINT 21 "4B"`), starts a CPU instruction log, and reports the first
-game instruction.  The tool needs a terminal for the DOSBox-X debugger, so it
-runs the emulator under a pseudo terminal.  It writes only under `work/`.
+(`BPINT 21 "4B"`), and starts a CPU instruction log.  The tool reads the
+growing log, reports the first game instruction, and then stops the emulation.
+The tool needs a terminal for the DOSBox-X debugger, so it runs the emulator
+under a pseudo terminal.  It writes only under `work/`.  It exits with code 0
+when it finds the entry and code 1 when it does not.
 
 ```sh
 python3 tools/entry_probe.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
+
+A run takes about 15 seconds.  It reports the entry, for example:
+
+```text
+found: True
+selector: 0150
+eip: 1F20F8
+instruction: jmp  short 001F2170 ($+76)
 ```
 
 Useful debugger commands: `EV CS EIP` reads the current address, `CPU` shows

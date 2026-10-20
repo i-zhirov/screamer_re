@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Resolve the LE entry alignment with a DOSBox-X instruction log.
+"""Find the program entry with a DOSBox-X instruction log.
 
 The tool runs the game in DOSBox-X, breaks into the debugger, sets an interrupt
 breakpoint on the game stub's DOS4GW exec call (INT 21h AH=4B), and starts a CPU
 instruction log.  The log covers the DOS4GW load and the first game instruction.
-The tool then finds the first game instruction in the log and reports its address.
+The tool reads the growing log, finds the entry sequence, stops the emulation, and
+reports the entry address.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
-    python3 tools/entry_probe.py --game-dir DIR [--count 0x40000]
+    python3 tools/entry_probe.py --game-dir DIR [--count 0x100000]
 """
 
 from __future__ import annotations
@@ -30,6 +31,14 @@ LOG_LINE_RE = re.compile(
     r"^\s*(?:[\d.]+\s+)?([0-9A-F]{4}):([0-9A-F]{1,8})\s+(.*?)\s+EAX:([0-9A-F]{8})"
 )
 
+# Text signatures of the entry sequence.  The entry is a short jump over the
+# Watcom run-time banner string.  The code after the jump starts with `sti` and
+# `mov ebx,esp`.
+CANDIDATES = [
+    # Fallback only.  A plain short jump is too common to be a signature.
+    ("entry code after the jump", "mov  ebx,esp"),
+]
+
 
 def read_cs_eip(session: ControlSession) -> tuple[str, str]:
     """Read the current CS and EIP through the debugger EV command."""
@@ -40,19 +49,12 @@ def read_cs_eip(session: ControlSession) -> tuple[str, str]:
     return values[0], values[1]
 
 
-def find_entry(log: str, candidates: list[tuple[str, str]], window: int = 6) -> dict:
-    """Find the first entry sequence in a LOGS instruction log.
-
-    The entry is a short jump over the Watcom run-time banner string.  The code
-    after the jump starts with `sti`, `and esp,-4`, `mov ebx,esp`.
-    """
-    lines = log.splitlines()
-    parsed: list[tuple[str, str, str]] = []
-    for line in lines:
-        match = LOG_LINE_RE.search(line)
-        if not match:
-            continue
-        parsed.append((match.group(1), match.group(2), match.group(3)))
+def detect_entry(
+    parsed: list[tuple[str, str, str]],
+    candidates: list[tuple[str, str]],
+    window: int = 6,
+) -> dict | None:
+    """Find the entry sequence in parsed log lines."""
     for index, (selector, eip, body) in enumerate(parsed):
         if "jmp  short" not in body:
             continue
@@ -66,7 +68,7 @@ def find_entry(log: str, candidates: list[tuple[str, str]], window: int = 6) -> 
             if len(following) == window:
                 break
         if len(following) >= 3 and "sti" in following[0] and any(
-            "mov  ebx,esp" in line for line in following[1:4]
+            "mov  ebx,esp" in line for line in following[1:3]
         ):
             return {
                 "found": True,
@@ -92,15 +94,68 @@ def find_entry(log: str, candidates: list[tuple[str, str]], window: int = 6) -> 
                     "instruction": body[:70],
                     "following": following,
                 }
+    return None
+
+
+class LogScanner:
+    """Read a growing instruction log and find the entry sequence."""
+
+    def __init__(self, candidates: list[tuple[str, str]], window: int = 6) -> None:
+        self.candidates = candidates
+        self.window = window
+        self.parsed: list[tuple[str, str, str]] = []
+        self._offset = 0
+        self._pending = ""
+
+    @property
+    def lines(self) -> int:
+        return len(self.parsed)
+
+    def feed(self, path: Path) -> dict | None:
+        """Read the new part of the log and return the entry when it is present."""
+        if not path.exists():
+            return None
+        with path.open("rb") as stream:
+            stream.seek(self._offset)
+            chunk = stream.read()
+            self._offset = stream.tell()
+        text = self._pending + chunk.decode("utf-8", "replace")
+        lines = text.split("\n")
+        self._pending = lines.pop()
+        for line in lines:
+            match = LOG_LINE_RE.search(line)
+            if match:
+                self.parsed.append((match.group(1), match.group(2), match.group(3)))
+        return detect_entry(self.parsed, self.candidates, self.window)
+
+
+def find_entry(log: str, candidates: list[tuple[str, str]], window: int = 6) -> dict:
+    """Find the entry sequence in a complete instruction log."""
+    parsed: list[tuple[str, str, str]] = []
+    for line in log.splitlines():
+        match = LOG_LINE_RE.search(line)
+        if match:
+            parsed.append((match.group(1), match.group(2), match.group(3)))
+    found = detect_entry(parsed, candidates, window)
+    if found:
+        return found
     return {"found": False, "lines": len(parsed)}
+
+
+def build_conf(source: Path, target: Path, port: int) -> None:
+    text = source.read_text()
+    text = text.replace("fullscreen=true", "fullscreen=false")
+    text = text.replace("output=opengl", "output=surface")
+    text = text.replace("[dosbox]\n", f"[dosbox]\nmcp_server={port}\n", 1)
+    target.write_text(text)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--game-dir", type=Path, required=True)
-    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x40000)
+    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x100000)
     parser.add_argument("--port", type=int, default=9876)
-    parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--timeout", type=float, default=300.0)
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
     parser.add_argument("--dosboxx", default="dosbox-x")
     args = parser.parse_args()
@@ -174,24 +229,31 @@ def main() -> int:
                 # instruction and stops the log.
                 session.request("EXEC", "BPDEL *", timeout=30)
                 session.request("EXEC", f"LOGS {args.count:x}", timeout=30)
-                if not child.wait_for("LOGCPU.TXT created", args.timeout):
-                    result["note"] = "the log did not finish; the log holds the instructions so far"
-                time.sleep(1.0)
+                scanner = LogScanner(CANDIDATES)
+                found = None
+                deadline = time.time() + args.timeout
+                while time.time() < deadline:
+                    time.sleep(2.0)
+                    found = scanner.feed(log_file)
+                    if found:
+                        print("entry found in the log")
+                        break
+                    if "LOGCPU.TXT created" in child.text():
+                        found = scanner.feed(log_file)
+                        break
+                # Stop the emulation and read the rest of the log.
+                session.request("BREAK", "", timeout=30)
+                time.sleep(0.5)
+                if found is None:
+                    found = scanner.feed(log_file)
+                result["lines"] = scanner.lines
+                if found:
+                    result.update(found)
+                else:
+                    result.setdefault("note", "the entry is not in the log")
     finally:
         child.close()
 
-    if not log_file.exists():
-        result["note"] = result.get("note", "no LOGCPU.TXT")
-        print(result)
-        return 1
-
-    candidates = [
-        # Text signatures of the entry sequence, used as a fallback.
-        ("entry jump over the Watcom banner", "jmp  short"),
-        ("entry code after the jump", "mov  ebx,esp"),
-    ]
-    found = find_entry(log_file.read_text(errors="replace"), candidates)
-    result.update(found)
     for key, value in result.items():
         if key == "following":
             print(f"{key}:")
@@ -199,7 +261,7 @@ def main() -> int:
                 print(f"   {line}")
         else:
             print(f"{key}: {value}")
-    return 0
+    return 0 if result.get("found") else 1
 
 
 if __name__ == "__main__":
