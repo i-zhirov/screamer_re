@@ -157,6 +157,51 @@ Authority.
   Evidence: the decompiled `FUN_00027770`.
 - See [Program map](../reference/program-map.md) for the tables.
 
+## The object pipeline and the race frame
+
+- `object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x164 bytes
+  at
+  `DAT_00110ab8`.  Every record passes `object_transform` (`0x1cd44`),
+  `object_player_input` (`0x1c760`), `object_physics` (`0x1c810`), and
+  `object_prepare` (`0x1c79c`).  Evidence: the decompiled `FUN_0002786c`.
+- `object_transform` writes the world position at `+0x498`, `+0x49c`, and
+  `+0x4a0`
+  and the float fields at `+0x4a4` to `+0x4ac` from the position and the
+  velocity.
+  Evidence: the decompiled `FUN_0001cd44`.
+- `object_player_input` reads the input bits `DAT_00118e1c` and the state at
+  `+0x2f8`; `object_physics` and `object_prepare` run only when the state at
+  `+0x414` is set.  Evidence: the decompiled `FUN_0001c760`, `FUN_0001c810`, and
+  `FUN_0001c79c`.
+- `object_car_link` at `0x1c84c` indexes the 28-byte record tables
+  `DAT_0010653c` and `DAT_00106540` with the object field `+0x4dc`.  The 28-byte
+  record size matches the list created by `list_create(engine, 150)`.
+  Evidence: the decompiled `FUN_0001c84c`.
+- `race_frame` at `0x2807c` copies the back buffer `DAT_0011fad0` into the video
+  buffer `DAT_00121528` with `memcpy` at `0x8c150`, so `DAT_00121528` is the
+  screen buffer and `DAT_0011fad0` is the back buffer.
+  Evidence: the decompiled `FUN_0002807c`.
+- `video_block_swap_a` at `0x1075f` and `video_block_swap_b` at `0x107a1`
+  byte-swap every dword and swap two regions of the screen buffer.  The flags
+  `0x10` and `0x20` of `DAT_0011d274` gate them.  The purpose is open; the
+  rear-view mirror and the split screen are candidates.
+  Evidence: the decompiled `FUN_0001075f` and `FUN_000107a1`.
+- `race_state_update` at `0x29564` switches on `DAT_0011fac4`.  Case 1 advances
+  `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into
+  `DAT_0011fac4` and `DAT_001203b8`.  The value `DAT_001203b8` then selects
+  the overlay in `race_frame`.  Evidence: the decompiled `FUN_00029564` and
+  `FUN_0002807c`.
+- `fade_update` at `0x29818` ramps `DAT_0011d224` toward 1.0 or down to 0.0 by
+  the frame delta, so `DAT_0011d224` is a fade level and `DAT_0011fac8` is the
+  direction.  Evidence: the decompiled `FUN_00029818`.
+- `race_frame` sets the frame flag `DAT_0011d234` when
+  `_DAT_00100ee0 < _DAT_0011d24c` and `DAT_0011fac4` is 0.  `frame_update`
+  loops until that flag is set.  Evidence: the decompiled `FUN_0002807c` and
+  `FUN_00027f94`.
+- `fp_helper` at `0x4d9f4` is a Watcom floating-point helper.  It takes no
+  arguments in the decompiled output and appears between float operations.
+  Evidence: the decompiled `FUN_00021e6c` and `FUN_0004d9f4`.
+
 ## Subsystem initialisation
 
 - `engine_init` at `0x127a0` runs the subsystem setup in this order:

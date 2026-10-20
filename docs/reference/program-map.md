@@ -160,6 +160,65 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 `input_poll` is shared by both loops.  `default_data_copy` and
 `motion_update` are shared by `race_loop` and `frame_step`.
 
+## Second level: object update, motion update, and race frame
+
+### object_update_all callees
+
+`object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x164 bytes at
+`DAT_00110ab8` and runs four passes over every record.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1cd44` | `object_transform` | writes the world position at `+0x498`, `+0x49c`, and `+0x4a0` and the float fields at `+0x4a4` to `+0x4ac` from the position and the velocity | derived |
+| `0x1c760` | `object_player_input` | reads the input bits `DAT_00118e1c` and the state at `+0x2f8` | derived |
+| `0x1c810` | `object_physics` | runs the physics and collision steps, gated on the state at `+0x414` | derived |
+| `0x1c79c` | `object_prepare` | runs the preparation steps, gated on the state at `+0x414` | derived |
+| `0x1c84c` | `object_car_link` | indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position | derived |
+| `0x19ab0` | `player_update` | runs five steps on the player structure `DAT_00110a20` | inferred |
+| `0x205c4` | `ai_update` | float computation through `0x11c00` and `0x2218c` | inferred |
+| `0x20954` | `opponent_update` | walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180` | inferred |
+| `0x27a34` | `hud_update` | gated on the session state `DAT_0011ce44` | inferred |
+| `0x27f44` | `race_timeout` | compares the frame counter with `FUN_0001fa04` and sets `DAT_00101e04` after 1000 | derived |
+| `0x81ab0` | `sound_effects_update` | a sound library update in the `0x8xxxx` region | inferred |
+
+### motion_update callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1f94c` | `view_move` | calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8` | derived |
+| `0x27ec8` | `video_present` | called after every draw step | inferred |
+| `0x4d9f4` | `fp_helper` | a Watcom floating-point helper, called with no arguments between float operations | observed |
+
+### race_frame callees
+
+`race_frame` at `0x2807c` runs every frame of a race.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x8c150` | `memcpy` | copies `param_2` dwords to `param_1` | observed |
+| `0x1075f` | `video_block_swap_a` | byte-swaps and swaps dwords between the buffer and the region 0x9f dwords ahead, 80 by 400 dwords; gated on the flag 0x10 | derived |
+| `0x107a1` | `video_block_swap_b` | byte-swaps and swaps dwords between the front and the region at 0xf960, 200 by 160 dwords; gated on the flag 0x20 | derived |
+| `0x28160` | `overlay_dispatch` | reads the option flags in `DAT_000f0002` and calls the overlay for the set flag | derived |
+| `0x29610` | `race_heading_update` | angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap | inferred |
+| `0x29564` | `race_state_update` | switches on `DAT_0011fac4`; case 1 advances `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_001203b8` | derived |
+| `0x8ac78` | `camera_update` | sets the position vector at `+0x3c`, `+0x40`, and `+0x44` and clears the velocity at `+0x6c`, `+0x70`, and `+0x74` | inferred |
+| `0x81a70` | `sound_update` | a sound library update with the driver block `DAT_00106350` | inferred |
+| `0x2e0b4` | `race_panel_0` | the overlay for the race state 0 | inferred |
+| `0x2e21c` | `race_panel_2` | the overlay for the race state 2 | inferred |
+| `0x2e58c` | `race_panel_3` | the overlay for the race state 3 | inferred |
+| `0x2e724` | `race_panel_4` | the overlay for the race state 4 | inferred |
+| `0x29818` | `fade_update` | ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present` | derived |
+| `0x2dfac` | `panel_show` | sets a panel position and the visible flag, then calls `0x25af0` | inferred |
+| `0x2e7cc` | `panel_draw_centered` | reads the size through `0x254a8`, centers it on 0x140, and draws through `0x25020` | derived |
+
+`race_frame` copies the back buffer `DAT_0011fad0` into the video buffer
+`DAT_00121528` with `memcpy`.  It sets the frame flag `DAT_0011d234` when
+`_DAT_00100ee0 < _DAT_0011d24c` and `DAT_0011fac4` is 0; `frame_update`
+loops until that flag is set.
+
+The race state `DAT_001203b8` selects the overlay: 0 calls `race_panel_0`, 2
+calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
+
 ## Resource loader
 
 `object_load` at module address `0x10bfc` loads the `.3dx` object files.  It
