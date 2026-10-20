@@ -118,6 +118,48 @@ original Watcom symbol names.
 same object.  The four run-time helpers sit at the end of the object, after the
 program code.
 
+## Race loop and frame update
+
+`main` alternates `race_loop` at `0x27700` and `frame_update` at `0x27f94`
+until the quit flag `DAT_00107ed8` is 1.
+
+### race_loop callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x27770` | `race_start` | sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)` | derived |
+| `0x21e6c` | `motion_update` | scales the object position with the time base, calls `FUN_0001f94c`, and advances the time base with a wrap at 1.0 | derived |
+| `0x10193` | `default_data_copy` | copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2 | observed |
+| `0x24da0` | `joystick_update` | walks the 28-byte control records at `DAT_001197d8` with floating-point scaling | derived |
+| `0x26448` | `input_poll` | counts to 8 and reads the mouse and keyboard state; the shared input poll | observed |
+| `0x1fc38` | `frame_timer` | waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02 | derived |
+| `0x211e0` | `input_map` | reads the control bits `DAT_00118e1c` and dispatches the game action | inferred |
+| `0x2786c` | `object_update_all` | walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record | derived |
+| `0x2aa98` | `video_fill` | fills 480 by 400 | inferred |
+| `0x279a4` | `race_end` | tears the race down through 13 calls | derived |
+
+### frame_update callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x2f8ca` | `memory_available` | the memory probe, named earlier | derived |
+| `0x29d08` | `net_space_init` | loads the `NET_SPACE` resource and sets the 640x400 screen | observed |
+| `0x29f80` | `menu_frame` | loads `gfx\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits | observed |
+| `0x2aa84` | `frame_step` | calls `default_data_copy`, `frame_timer`, and `joystick_update` | derived |
+| `0x2807c` | `race_frame` | blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8` | derived |
+| `0x26448` | `input_poll` | the shared input poll | observed |
+| `0x2ff14` | `music_play` | processes a music request record and sets a state from 0 to 6 | derived |
+| `0x2aa98` | `video_fill` | fills 480 by 400 | inferred |
+| `0x8c160` | `memset` | fills `count >> 2` dwords with one value | observed |
+| `0x2a1b0` | `race_cleanup` | tears the race down and releases the `OPT_PCX` resource | observed |
+
+`frame_update` clears the screen with `memset(DAT_00121528, 0, 0x3e800)`.
+The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
+640 by 400 bytes.  Evidence: the decompiled `FUN_00027f94` and `FUN_0008c160`.
+
+`input_poll` is shared by both loops.  `default_data_copy` and
+`motion_update` are shared by `race_loop` and `frame_step`.
+
 ## Resource loader
 
 `object_load` at module address `0x10bfc` loads the `.3dx` object files.  It
@@ -173,8 +215,8 @@ the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 | `0x4c8f0` | `video_buf_load` | loads the `VIDEO_BUF` resource | observed |
 | `0x8bdec` | `vesa_set_mode` | calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call | derived |
 
-The init order is: the configuration, the list files, the setup, the controls, the
-mouse, the keyboard, the palette, the video buffer, the VESA mode, the sound
+The init order is: the configuration, the list files, the setup, the controls,
+the mouse, the keyboard, the palette, the video buffer, the VESA mode, the sound
 banks, and the engine interface.
 
 ## Engine strings

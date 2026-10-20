@@ -131,6 +131,32 @@ Authority.
   `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
 - See [Program map](../reference/program-map.md) for the addresses.
 
+## Race loop and frame update
+
+- `main` alternates `race_loop` at `0x27700` and `frame_update` at `0x27f94`.
+  Evidence: the decompiled `FUN_00010020`.
+- `race_loop` starts the race with `race_start` at `0x27770`, runs the inner
+  loop (`motion_update`, `default_data_copy`, `joystick_update`) until the
+  session state `DAT_0011ce44` reaches 4, and ends with `race_end` at `0x279a4`.
+  Evidence: the decompiled `FUN_00027700`.
+- `frame_update` clears the screen, runs `net_space_init` and `menu_frame`, then
+  loops on `frame_step` until the frame flag `DAT_0011d234` is set, and ends
+  with
+  `race_frame` and `race_cleanup`.
+  Evidence: the decompiled `FUN_00027f94`.
+- `frame_update` clears the screen with `memset(DAT_00121528, 0, 0x3e800)`.  The
+  count `0x3e800` is 256000, which is 640 times 400, so the screen buffer is 640
+  by 400 bytes.  Evidence: the decompiled `FUN_00027f94` and `FUN_0008c160`.
+- `input_poll` at `0x26448` counts to 8 and reads the mouse and keyboard state.
+  Both loops call it.  Evidence: the decompiled `FUN_00026448`.
+- `default_data_copy` at `0x10193` copies 32 dwords from object 1 into object 2,
+  the data object at `0xf0000`.  Evidence: the decompiled `FUN_00010193` and the
+  object table.
+- `race_start` at `0x27770` sets the 640x400 screen and copies the state
+  globals.
+  Evidence: the decompiled `FUN_00027770`.
+- See [Program map](../reference/program-map.md) for the tables.
+
 ## Subsystem initialisation
 
 - `engine_init` at `0x127a0` runs the subsystem setup in this order:
@@ -159,24 +185,29 @@ Authority.
 
 ## The .3dx resource loader
 
-- The `.3dx` loader is at module address `0x10bfc`.  It walks the object list and
-  loads every record with the load flag at `+0x14` set.  Evidence: the decompiled
+- The `.3dx` loader is at module address `0x10bfc`.  It walks the object list
+  and
+  loads every record with the load flag at `+0x14` set.  Evidence: the
+  decompiled
   `FUN_00010bfc` and the `3D_HEADER` and `3D_BLKOBJ` string references from
   `tools/ghidra/FindReferences.java`.
 - The file name is the record name plus the suffix `3dx`.  Evidence: the format
   `%s.3DX` at `0x1003ac`, the `rb` mode at `0x1003b3`, and the decompiled
   `FUN_00010bfc`.
-- The loader reports failures with return codes: `2` when the open fails, `3` when the
+- The loader reports failures with return codes: `2` when the open fails, `3`
+  when the
   `3D_HEADER` chunk is missing, and `5` when the `3D_BLKOBJ` chunk is missing.
   Evidence: the decompiled `FUN_00010bfc`.
-- The error reporter at `0x10978` dispatches on the code through a jump table and
+- The error reporter at `0x10978` dispatches on the code through a jump table
+  and
   prints the `3dx` messages.  Evidence: the Ghidra references to `0x100074`,
   `0x1000a3`, `0x1000d1`, and `0x1000ff`, all from `FUN_00010978`.
 - `resource_get` at `0x2eed0` looks a resource up by name and loads it from the
   file when missing.  The same function serves `3D_HEADER`, `3D_BLKOBJ`,
   `MELODIC_BANK`, `DRUM_BANK`, and `NET_SPACE`.  Evidence: the decompiled
   `FUN_0002eed0`, `FUN_0002f9e0`, and `FUN_00029d08`.
-- `object_init_from_file` at `0x4cc10` binds the loaded file to the object record
+- `object_init_from_file` at `0x4cc10` binds the loaded file to the object
+  record
   and copies the chunk table.  Evidence: the decompiled `FUN_0004cc10`.
 - The loader's callees are named in [Program map](../reference/program-map.md).
 
@@ -198,11 +229,13 @@ Authority.
   `DAT_00107ed8` is 1.  Evidence: the decompiled `FUN_00010020`.
 - `race_loop` starts a race through `FUN_00027770` and loops until the session
   state `DAT_0011ce44` reaches 4.  Evidence: the decompiled `FUN_00027700`.
-- `frame_update` clears the key state, reads the clock, advances a 6-frame counter,
+- `frame_update` clears the key state, reads the clock, advances a 6-frame
+  counter,
   waits for the frame flag `DAT_0011d234`, and handles input.  Evidence: the
   decompiled `FUN_00027f94`.
 - `main` calls `error_report` at `0x10978` on the session error path, with the
-  error code in EAX.  The reporter dispatches through a jump table to one message
+  error code in EAX.  The reporter dispatches through a jump table to one
+  message
   stub per code.  Evidence: the decompiled `FUN_00010020` and `FUN_00010978`.
 - `main` calls `engine_shutdown` at `0x128ac` after the loop.  That function is
   the counterpart of `engine_init`: it stops the music with `FUN_00014e20(0)`.
@@ -210,10 +243,12 @@ Authority.
 - Four of the callees are Watcom run-time helpers: `memory_alloc` (`0x30050`),
   `printf` (`0x3009b`), `exit` (`0x300be`), and `free` (`0x300ec`).  They sit
   at the end of the object, after the program code.  Evidence: the decompiled
-  bodies and the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`.
+  bodies and the out-of-memory handler pointers `DAT_001274ac` and
+  `DAT_001274a8`.
 - The engine strings name the resource interface: `%s.3dx` object files, the
   `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST` chunks, the track
-  resources `OSTACLES`, `TRACK_DATA`, `OPPONENTS`, `ANIMATIONS`, and `CARS_DATA`,
+  resources `OSTACLES`, `TRACK_DATA`, `OPPONENTS`, `ANIMATIONS`, and
+  `CARS_DATA`,
   the sprite and visual-list interface, and the HMI banks `MELODIC_BANK` and
   `DRUM_BANK`.  Evidence: `r2 -q -c "iz"`.
 - See [Program map](../reference/program-map.md) for the table.
@@ -235,7 +270,8 @@ agrees with `tools/le.py` and with the run-time log:
 
 Evidence: `r2 -A -q -c "ie" -c "iS" -c "afl"` and
 `r2 -A -q -c "s 0x10020; pdf"` from the Nix dev shell.  The function counts
-differ because the two methods differ: the prologue scan finds the Watcom prologue,
+differ because the two methods differ: the prologue scan finds the Watcom
+prologue,
 and radare2 also recovers functions from call targets.
 
 ## Pipeline confirmation

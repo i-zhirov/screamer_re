@@ -62,11 +62,12 @@ current host.
 
 ## Next steps
 
-1. Follow the calls from `main` into the game subsystems (in progress:
-   `engine_init` and its setup order carry names; `race_loop` and `frame_update`
-   are next).
-2. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
+1. Follow the calls from `main` into the game subsystems (done for the first
+   level: `engine_init`, `race_loop`, and `frame_update` carry names).
+2. Follow the second level: the object update at `0x2786c`, the motion update at
+   `0x21e6c`, and the game state dispatch at `0x2807c`.
+3. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
    the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
-3. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
+4. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
    graphics file.
-4. Set up the OpenWatcom V2 build harness under `work/`.
+5. Set up the OpenWatcom V2 build harness under `work/`.

@@ -126,10 +126,17 @@ open ~/Documents/Screamer.app
   Build And Test Commands.
 
   Use the following commands:
-    - `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/pipeline_check.py` to check the syntax
-    - `python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the LE parser
-    - `python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game` to check the inventory tool
-    - `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
+    - `python3 -m py_compile tools/le.py tools/inventory.py
+      tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
+      tools/pipeline_check.py` to check the syntax
+    - `python3 tools/le.py info
+      ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
+      LE parser
+    - `python3 tools/inventory.py
+      ~/Documents/Screamer.app/Contents/Resources/game` to check the inventory
+      tool
+    - `python3 tools/pipeline_check.py --game-dir
+      ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
 
 - You MUST run the changed tool against the shipped artifacts and
   confirm the output.

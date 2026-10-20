@@ -41,15 +41,19 @@ python3 tools/le.py near   <file> <linear-address>
 ```
 
 The `calls` command decodes one function body from its start and lists the call
-sites.  A leading unconditional jump is followed, because the linker puts a jump over
-the run-time banner string at the entry point.  The `tree` command follows the call
-targets recursively.  The `funcs` command lists the candidate function starts from
+sites.  A leading unconditional jump is followed, because the linker puts a jump
+over
+the run-time banner string at the entry point.  The `tree` command follows the
+call
+targets recursively.  The `funcs` command lists the candidate function starts
+from
 the Watcom prologue `push ebp; mov ebp, esp`.  The `near` command prints the
 candidate function start nearest below an address.
 
 The body sweep stops at the first `ret`, `retf`, `iret`, `hlt`, or `int3`, or
 after `--max` instructions.  A function that ends with a tail call has no
-terminator, so the sweep continues into the next function.  An indirect call has no
+terminator, so the sweep continues into the next function.  An indirect call has
+no
 static target.  See [Program map](program-map.md) for the recovered structure.
 
 ### `tools/extract_cd_image.py`
@@ -212,13 +216,15 @@ nix develop
 r2 -v
 ```
 
-The shell provides Python 3.14.8, capstone 5.0.9, and radare2 6.2.4.  `flake.lock`
+The shell provides Python 3.14.8, capstone 5.0.9, and radare2 6.2.4. 
+`flake.lock`
 pins the nixpkgs revision.  DOSBox-X stays on Homebrew, because the run-time
 probe depends on the debugger control socket of the tested version.
 
 ## Static cross-check with radare2
 
-radare2 carries a native LE parser (`bin_le`).  Use it to cross-check the project
+radare2 carries a native LE parser (`bin_le`).  Use it to cross-check the
+project
 parser and to recover functions that the `le.py` prologue scan misses:
 
 ```sh
@@ -244,8 +250,10 @@ Install the loader once per user:
 nix develop .#ghidra --command sh tools/ghidra/install_loader.sh
 ```
 
-The script downloads the `yetmorecode/ghidra-lx-loader` release into `work/ghidra/`
-and installs it into the Ghidra user directory.  The Nix store is read-only, so the
+The script downloads the `yetmorecode/ghidra-lx-loader` release into
+`work/ghidra/`
+and installs it into the Ghidra user directory.  The Nix store is read-only, so
+the
 extension lives outside the store.  The user directory is
 `~/Library/ghidra/ghidra_12.0.4_NIX` on this host.
 
@@ -269,8 +277,10 @@ nix develop .#ghidra --command analyzeHeadless work/ghidra/proj Screamer \
   -postScript FindReferences.java 0x1000a3
 ```
 
-The loader applies the LE fixups, so a reference that is a low offset in the file
-resolves to the full address.  radare2 needs `-e bin.relocs.apply=true` for the same
+The loader applies the LE fixups, so a reference that is a low offset in the
+file
+resolves to the full address.  radare2 needs `-e bin.relocs.apply=true` for the
+same
 result.
 
 The loader reports the same addresses as `tools/le.py` and radare2, so the three
