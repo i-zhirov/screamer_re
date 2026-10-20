@@ -227,16 +227,22 @@ Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d3fc`.
 
 The bit reader `0x4d844` holds a bit buffer of 0x400 bytes at `+0x8086`, the bit
 position at `+0x406c`, the shift count at `+0x4068`, and a mask table at
-`+0x8050`.  It returns the 16-bit value at the bit position, shifted right by the
-low 3 bits of the position and masked with the mask of the shift count.  The mask
-table holds the values `(1 << n) - 1` for the shift counts 9 to 12, so the reader
-returns 9 to 12 bits at a time.  The literal code `0x100` and the end code `0x101`
+`+0x8050`.  It returns the 16-bit value at the bit position, shifted right by
+the
+low 3 bits of the position and masked with the mask of the shift count.  The
+mask
+table holds the values `(1 << n) - 1` for the shift counts 9 to 12, so the
+reader
+returns 9 to 12 bits at a time.  The literal code `0x100` and the end code
+`0x101`
 mark a literal byte and the end of the stream.
 Evidence: the decompiled `FUN_0004d844`.
 
-The confirmation of the sprite count at `+0x00` and the pixel data size at `+0x04`
+The confirmation of the sprite count at `+0x00` and the pixel data size at
+`+0x04`
 needs the expanded member bytes.  A run-time probe of the sprite loader at the
-run-time address `0150:31AA1` did not reach the loader within the probe window, so
+run-time address `0150:31AA1` did not reach the loader within the probe window,
+so
 the confirmation stays open.
 Evidence: the probe session `work/probe2.dbg`.
 
@@ -247,6 +253,26 @@ when
 the directory is read.  The re-verification of the sprite layout therefore needs
 the expanded member bytes.  Evidence: the decompiled `FUN_0004c4e5`,
 `FUN_0004d3fc`, and `FUN_0004d4c4`.
+
+### The resolution modes
+
+The game ships two executables, `STARTH.EXE` and `STARTL.EXE`.  They differ only
+in the resolution letter of the hardcoded graphics names: the high executable
+names
+`menu1h.pcx`, `menu2h.pcx`, `menu3h.pcx`, `menu4h.pcx`, and `champ5h.pcx`, and
+the low executable names the same files with the letter `l`.
+
+The members of the graphics containers come in low and high pairs, and the
+executable picks the pair that fits its mode: `GAMEL.SPR` and `GAMEH.SPR`,
+`GAMEL.FNT` and `GAMEH.FNT`, `IMPLET_L.PKC` and `IMPLET_H.PKC`,
+`IMPRES_L.PKC` and `IMPRES_H.PKC`, `CDFRONTL.PKC` and `CDFRONTH.PKC`, and
+`COCK00AL.PKC` and `COCK00AH.PKC`.  The map files follow the same rule:
+`GFX/MAP1L.DAT` to `GFX/MAP6L.DAT` and `GFX/MAP1H.DAT` to
+`GFX/MAP6H.DAT`.
+
+The other names take the letter at run time through the `%c` field, as in
+`game%c.spr` and `menu%c.pcx`.  The GOG configuration launches `starth.exe`,
+so the installed single-player start is the high-resolution one.
 
 ## Table data
 

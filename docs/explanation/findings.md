@@ -689,6 +689,34 @@ Authority.
   and copies the chunk table.  Evidence: the decompiled `FUN_0004cc10`.
 - The loader's callees are named in [Program map](../reference/program-map.md).
 
+## The resolution modes
+
+- `STARTH.EXE` and `STARTL.EXE` differ only in the resolution letter of the
+  hardcoded asset names.  `STARTH.EXE` names `menu1h.pcx`, `menu2h.pcx`,
+  `menu3h.pcx`, `menu4h.pcx`, and `champ5h.pcx`; `STARTL.EXE` names
+  `menu1l.pcx`, `menu2l.pcx`, `menu3l.pcx`, `menu4l.pcx`, and `champ5l.pcx`.
+  Every other asset string is identical, so the suffix `H` means high resolution
+  and the suffix `L` means low resolution.  The string scan of both executables
+  is the evidence.
+- The members of the graphics containers come in low and high pairs for the same
+  reason: `GAMEL.SPR` and `GAMEH.SPR`, `GAMEL.FNT` and `GAMEH.FNT`,
+  `IMPLET_L.PKC` and `IMPLET_H.PKC`, `IMPRES_L.PKC` and `IMPRES_H.PKC`,
+  `CDFRONTL.PKC` and `CDFRONTH.PKC`, and `COCK00AL.PKC` and `COCK00AH.PKC`.
+  `GFX/MAP1L.DAT` and `GFX/MAP1H.DAT` follow the same rule.  Evidence: the
+  member lists of `tools/gfx_container.py`.
+- The other asset names carry the letter at run time: `game%c.spr`,
+  `game%c.fnt`,
+  `menu%c.spr`, `menu%c.fnt`, `attr%c.fnt`, `logo%c.spr`, `load%d%c.pcx`,
+  `net%c.pcx`, and `?%s%c.pcx`.  The letter in `%c` is `H` or `L` and the
+  executable picks it, so `GAMEL.SPR` is the low-mode sprite member and
+  `GAMEH.SPR` is the high-mode member.  Evidence: the shared strings of both
+  executables.
+- The GOG configuration launches `starth.exe`, so the installed single-player
+  start is the high-resolution one.  Evidence: `dosboxScreamer_single.conf`.
+- The high-resolution member is larger: `GAMEH.SPR` holds 28736 bytes and
+  `GAMEL.SPR` holds 10010 bytes, which fits the resolution difference.
+  Evidence: the member list of `GFX/GAME.DAT`.
+
 ## Function names
 
 - The Watcom startup at `0xd4324` calls `main` at `0x10020` with `argc` in EAX
