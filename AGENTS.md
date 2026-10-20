@@ -32,7 +32,8 @@ original DOS platform first and modern platforms later.
   32-bit DOS with OpenWatcom V2.
 - **Primary Dependencies**: the Python standard library and capstone 5.0.9
   (loaded through `ctypes`).  The run-time probe uses DOSBox-X 2026.10.01
-  from Homebrew.
+  from Homebrew.  The static cross-check uses radare2 6.2.4 from the Nix
+  dev shell.
 - **Storage**: files on disk.  `work/` holds extracted artifacts and
   generated output.  The project uses no database.
 - **Testing**: no test framework.  Each tool is verified against the
@@ -53,6 +54,8 @@ original DOS platform first and modern platforms later.
 ```text
 screamer_re/
 ├── AGENTS.md                  # this file
+├── flake.nix                  # pinned project tools for the Nix dev shell
+├── flake.lock                 # the pinned nixpkgs revision
 ├── README.md                  # landing page: status, layout, quick start
 ├── task.md                    # the original task definition
 ├── .githooks/
@@ -94,7 +97,7 @@ python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
 The full check runs every stage and needs DOSBox-X.  It takes about 15
-seconds and reports 24 checks:
+seconds and reports 28 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -214,6 +217,8 @@ shipped artifacts -> tools -> stdout / work/ -> docs/
 ### Dependency Management
 
 - Pin every dependency version explicitly.  Record the version in the docs.
+  `flake.nix` with `flake.lock` pins the Python, capstone, and radare2
+  versions.  Run the tools inside `nix develop`.
 - Prefer the Python standard library.  Add a dependency only for
   significant value.
 - Use reputable and maintained sources only.  capstone comes from

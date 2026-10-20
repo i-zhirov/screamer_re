@@ -169,16 +169,17 @@ to `LOGCPU.TXT` in the DOSBox-X working directory.
 
 The tool runs every stage of the pipeline and checks that the stages agree: the
 syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
-debugger session script, and the cross-checks between the file view and the
-run-time view.  The check pins the reference values from the reference pages.
-The tool exits with code 0 when every check passes.
+debugger session script, the cross-checks between the file view and the run-time
+view, and the radare2 cross-check.  The check pins the reference values from the
+reference pages.  The tool exits with code 0 when every check passes.  The
+radare2 stage is skipped when `r2` is not on PATH.
 
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 15 seconds and reports 24 checks.  Use `--skip-runtime` to run
+A run takes about 20 seconds and reports 28 checks.  Use `--skip-runtime` to run
 the static stages only.
 
 The check runs in three places:
@@ -197,6 +198,34 @@ The `dosbox-debugger` agent skill carries the generic workflow: the
 connection direction, the terminal requirement, the command list, and the
 common traps.  Use the skill for another DOS program.  Use this page for the
 project commands.
+
+## Development environment
+
+`flake.nix` pins the project tools for a Nix shell:
+
+```sh
+nix develop
+r2 -v
+```
+
+The shell provides Python 3.14.8, capstone 5.0.9, and radare2 6.2.4.  `flake.lock`
+pins the nixpkgs revision.  DOSBox-X stays on Homebrew, because the run-time
+probe depends on the debugger control socket of the tested version.
+
+## Static cross-check with radare2
+
+radare2 carries a native LE parser (`bin_le`).  Use it to cross-check the project
+parser and to recover functions that the `le.py` prologue scan misses:
+
+```sh
+r2 -A -q -c "ie" -c "iS" -c "afl" -c "q" STARTH.EXE
+r2 -A -q -c "s 0x10020; pdf" -c "q" STARTH.EXE
+```
+
+The addresses are module addresses.  They agree with `tools/le.py` and with the
+run-time log.  See
+[Program map](program-map.md) for the recovered structure and
+[Findings](../explanation/findings.md) for the cross-check table.
 
 ## Run the game
 

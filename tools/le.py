@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import ctypes.util
 import struct
 import sys
 from dataclasses import dataclass, field
@@ -349,9 +350,17 @@ class _CsInsn(ctypes.Structure):
 
 
 def _load_capstone() -> ctypes.CDLL | None:
-    for path in CAPSTONE_PATHS:
-        if Path(path).exists():
-            return ctypes.CDLL(path)
+    """Load the capstone library from the loader path or a known location."""
+    candidates: list[str] = []
+    found = ctypes.util.find_library("capstone")
+    if found:
+        candidates.append(found)
+    candidates.extend(CAPSTONE_PATHS)
+    for candidate in candidates:
+        try:
+            return ctypes.CDLL(candidate)
+        except OSError:
+            continue
     return None
 
 

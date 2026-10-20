@@ -80,9 +80,21 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
+## Development environment
+
+The project tools run inside a Nix shell:
+
+```sh
+nix develop
+r2 -v
+```
+
+`flake.nix` and `flake.lock` pin Python, capstone, and radare2.  DOSBox-X comes
+from Homebrew.
+
 ## Checks
 
-The full check runs every stage and reports 24 checks.  A pre-push hook runs
+The full check runs every stage and reports 28 checks.  A pre-push hook runs
 the syntax gate and the full check before every push.  Enable the hook once per
 clone:
 

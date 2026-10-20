@@ -110,7 +110,8 @@ Authority.
 
 ## Program map
 
-- The program `main` sits at object offset `0x10020`.  The startup at
+- The program `main` sits at module address `0x10020` (object offset
+  `0x20`).  The startup at
   `0xd4324` loads `argc` from `[0x27e24]` and `argv` from `[0x27e28]`
   and calls `main` with EAX=`argc` and EDX=`argv`.  Evidence:
   `tools/le.py calls STARTH.EXE 0x10020` and
@@ -130,10 +131,30 @@ Authority.
   `tools/le.py tree STARTH.EXE 0x10020 --depth 1`.
 - See [Program map](../reference/program-map.md) for the addresses.
 
+## Static cross-check with radare2
+
+radare2 6.2.4 reads the same LE image through its `bin_le` plugin.  Its view
+agrees with `tools/le.py` and with the run-time log:
+
+| Check | `tools/le.py` | radare2 | Match |
+| --- | --- | --- | --- |
+| entry point | module `0x300f8` | `0x000300f8` | yes |
+| page 0 mapping | file `0x1a800` to module `0x10000` | paddr `0x1a800`, vaddr `0x10000` | yes |
+| `main` | module `0x10020` | `fcn.00010020` | yes |
+| `main` caller | `0xd4324`, call at `0xd4364` | `fcn.000d4324`, xref at `0xd4364` | yes |
+| `main` prologue | `push ebx; push edx; push ebp; mov ebp,esp` | the same | yes |
+| `main` callees | 13 unique targets | 13 identical targets | yes |
+| function count | 642 (prologue scan) | 923 (call analysis) | different methods |
+
+Evidence: `r2 -A -q -c "ie" -c "iS" -c "afl"` and
+`r2 -A -q -c "s 0x10020; pdf"` from the Nix dev shell.  The function counts
+differ because the two methods differ: the prologue scan finds the Watcom prologue,
+and radare2 also recovers functions from call targets.
+
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 24 checks and 0 failures.  Evidence: the tool output.
+The check reports 28 checks and 0 failures.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -189,7 +210,8 @@ The investigation uses these steps:
 5. disassemble the code at selected addresses with capstone,
 6. run the game in DOSBox-X and drive its debugger over the control
    socket with `tools/dosboxx_control.py` and `tools/entry_probe.py`,
-7. record every claim with its evidence and its limits.
+7. cross-check the static view with radare2 in the Nix dev shell,
+8. record every claim with its evidence and its limits.
 
 REA covers the package identity and the Mach-O targets.  REA does not
 open the DOS LE executables, so the project carries its own LE parser.

@@ -7,18 +7,24 @@ investigation.
 
 The path from the DOS stub to the program `main`:
 
-| Step | Object offset | Run-time address | Evidence |
-| --- | ---: | --- | --- |
-| entry jump | `0x300f8` | `0150:1f20f8` | `jmp short +0x76` over the banner string |
-| startup | `0x30170` | `0150:1f2170` | `sti`, stack setup, DOS version check |
-| main invoker | `0xd4324` | `0150:296324` | loads `argc` and `argv`, calls `main` |
-| program `main` | `0x10020` | `0150:1d2020` | 56 instructions, 15 calls |
+| Step | Module address | Object offset | Run-time address | Evidence |
+| --- | ---: | ---: | --- | --- |
+| entry jump | `0x300f8` | `0x200f8` | `0150:1f20f8` | `jmp short +0x76` over the banner string |
+| startup | `0x30170` | `0x20170` | `0150:1f2170` | `sti`, stack setup, DOS version check |
+| main invoker | `0xd4324` | `0xc4324` | `0150:296324` | loads `argc` and `argv`, calls `main` |
+| program `main` | `0x10020` | `0x20` | `0150:1d2020` | 56 instructions, 15 call sites |
 
-The object 1 load base is `0x1c2000`.  A run-time address is
+A module address is the address in the LE module address space.  `tools/le.py`
+reports this space, and radare2 reports it as the section `vaddr`.  The object 1
+relocation base is `0x10000`, so the object offset is the module address minus
+`0x10000`.
+
+The object 1 load base is `0x1c2000` at run time.  A run-time address is
 `0x1c2000 + object offset`.  The run-time evidence is the log line
 `0150:296359  mov  edx,[002D5E28]`, which matches the file instruction
-`0x000d4359  mov edx, dword ptr [0x27e28]` with the same `0x1c2000`
-difference.
+`0x000d4359  mov edx, dword ptr [0x27e28]`: the module address `0xd4359`
+minus the object base `0x10000` is the object offset `0xc4359`, and
+`0x1c2000 + 0xc4359 = 0x296359`.
 
 ### Main invoker
 
@@ -58,8 +64,8 @@ EAX (`argc`) and the second in EDX (`argv`).
 
 ## Program main
 
-`main` sits at object offset `0x10020`.  It holds 56 instructions and 15
-calls.
+`main` sits at module address `0x10020` (object offset `0x20`).  It holds 56
+instructions and 15 call sites.
 
 | Call site | Target | Target size | Role |
 | --- | --- | ---: | --- |

@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -74,8 +75,8 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def run(command: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(command, capture_output=True, text=True)
+def run(command: list[str], timeout: float = 300.0) -> subprocess.CompletedProcess:
+    return subprocess.run(command, capture_output=True, text=True, timeout=timeout)
 
 
 def check_syntax(checks: Checks) -> None:
@@ -266,6 +267,40 @@ def check_cross(
     )
 
 
+def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float) -> None:
+    """Cross-check the parser against radare2 when it is on PATH."""
+    if shutil.which("r2") is None:
+        print("radare2 is not on PATH; the static cross-check is skipped")
+        return
+    target = str(game_dir / exe_name)
+    info = run(["r2", "-A", "-q", "-c", "ie", "-c", "iS", "-c", "q", target], timeout=timeout)
+    output = re.sub(r"\x1b\[[0-9;]*m", "", info.stdout)
+    checks.check(
+        "stage 8: radare2 reports the entry point",
+        "0x000300f8" in output,
+        "0x000300f8",
+    )
+    checks.check(
+        "stage 8: radare2 maps page 0 to the reference addresses",
+        "0x0001a800" in output and "0x00010000" in output,
+        "paddr 0x1a800, vaddr 0x10000",
+    )
+    listing = run(
+        ["r2", "-A", "-q", "-c", "s 0x10020; pdf", "-c", "q", target], timeout=timeout
+    )
+    text = re.sub(r"\x1b\[[0-9;]*m", "", listing.stdout)
+    checks.check(
+        "stage 8: radare2 finds the main function",
+        "fcn.00010020" in text,
+        "fcn.00010020",
+    )
+    checks.check(
+        "stage 8: radare2 reports the main caller",
+        "fcn.000d4324" in text and "0xd4364" in text,
+        "call from 0xd4364",
+    )
+
+
 def check_session_script(checks: Checks, work_root: Path, port: int, timeout: float) -> None:
     script = Path("tools/scripts/example_session.dbg")
     launch = (
@@ -326,6 +361,7 @@ def main() -> int:
         runtime = check_runtime(checks, game_dir, work_root, args.port, args.timeout)
         check_session_script(checks, work_root, args.port, args.timeout)
         check_cross(checks, parser_result, runtime, Path(runtime.get("log", "")))
+        check_radare2(checks, game_dir, args.exe, args.timeout)
 
     print()
     print(f"{len(checks.results)} checks, {len(checks.failures)} failures")
