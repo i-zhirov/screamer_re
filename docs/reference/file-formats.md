@@ -170,10 +170,13 @@ The loader clears the six list words at `+0x24`, `+0x28`, `+0x2c`, `+0x30`,
 
 ### Main file
 
-The resource layer stages the loaded chunks in the main file.  The unit is 16
-bytes.  The layer asks the DOS service for a block through the DPMI real-mode
-interrupt path, and the block number times 16 is the file offset.  The layer
-stores the loaded buffer at chunk table entry `+0x0c` and the size at `+0x14`.
+The main file is a container with named members.  The loader reports
+`Cannot open main file: %s` and `File %s not present in main file.`
+
+The resource layer allocates the buffers through the DPMI services of interrupt
+31h: the service `0x0100` allocates a DOS memory block with the size in 16-byte
+paragraphs, and the service `0x0501` allocates a memory block.  The layer stores
+the buffer at the file record `+0x0c` and the size at `+0x14`.
 Evidence: the decompiled `FUN_0002f0fc`, `FUN_0002f172`, and `FUN_0002f062`.
 
 ## Replays

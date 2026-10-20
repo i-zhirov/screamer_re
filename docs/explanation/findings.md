@@ -266,6 +266,61 @@ Authority.
   and `0x501` in the request and calls the interrupt `0x31`.
   Evidence: the decompiled `FUN_0002f0fc` and `FUN_0002f172`.
 
+## The resource layer and the DPMI services
+
+- The resource layer allocates its buffers through the DPMI services of
+  interrupt
+  31h.  The service `0x0100` allocates a DOS memory block: the layer passes
+  `(size >> 4) + 1` in the size field, which is a count of 16-byte paragraphs,
+  and converts the returned segment to a linear address with a shift of 4.
+  Evidence: the decompiled `FUN_0002f0fc` and `FUN_0004bf4b`.
+- The service `0x0501` allocates a memory block.  The layer passes the size in
+  the EBX and ECX register pair and reassembles the returned address from the
+  same pair.  Evidence: the decompiled `FUN_0002f172`.
+- The service `0x0502` frees a memory block with the address in EBX and ECX.
+  Evidence: the decompiled `FUN_0002f205`.
+- Correction: the 16-byte unit is the DPMI paragraph of the DOS memory block,
+  not a unit of the main file.  The earlier note in the `.3dx` section was
+  wrong.
+  Evidence: the decompiled `FUN_0002f0fc` and `FUN_0004bf4b`.
+- `list_create` at `0x2ecf8` allocates `count * 0x1c` bytes, so the engine
+  lists hold 28-byte records.  This matches the object records of the `.3dx`
+  loader.  The list holds the array at `+0x00`, the count at `+0x04`, and the
+  limit at `+0x08`.  Evidence: the decompiled `FUN_0002ecf8`.
+- `resource_find` at `0x2f25f` walks the records, matches the key at record
+  `+0xc`, and removes the match by shifting the array with the memmove at
+  `0xd2066`.  Evidence: the decompiled `FUN_0002f25f`.
+- The service `0x0500` reports the free memory.  `pool_init` at `0x2f904` calls
+  it
+  and keeps the pool size at `+0x24` in 4 KB pages, so the pool counts pages of
+  4096 bytes.  Evidence: the decompiled `FUN_0002f904`.
+- `resource_free` at `0x2f470` frees a record through `memory_free` when the
+  flag
+  at `+0x18` bit 0 is clear and through `0x2f40b` otherwise.
+  Evidence: the decompiled `FUN_0002f470`.
+- `dpmi_fill_regs` at `0x4bf23` fills a 12-byte block with the real-mode
+  segment registers ES, CS, SS, DS, FS, and GS.  `dpmi_call` at `0x4bf4b` calls
+  the interrupt through `0xd4410` and returns the value from EBX.
+  Evidence: the decompiled `FUN_0004bf23` and `FUN_0004bf4b`.
+
+## The fourth level of the program map
+
+- `object_slide_step` at `0x1df34` computes a slide value from the speed
+  `+0x418`, the steering `+0x2f4`, and the float pair `+0x27c` and `+0x280`,
+  clamps the value between -2.0 and 2.0, and calls `filter_update` for the
+  three parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`.
+  Evidence: the decompiled `FUN_0001df34`.
+- `filter_update` at `0x22b80` applies the one-pole filter
+  `*p = (*p - f) * table[i] + f` with the coefficient table
+  `DAT_0010cf08`.  Evidence: the decompiled `FUN_00022b80`.
+- `object_gear_step` at `0x1d834` holds the vehicle states 1 and 2.  State 2
+  sets the float fields to 3000.0 and 12.0; state 1 integrates the position
+  `+0x49c` and the three velocities with the damping `DAT_0010cf08 + 0x184`.
+  Evidence: the decompiled `FUN_0001d834`.
+- The resource layer sits at the addresses `0x2ecf8` to `0x2f25f`.  It holds the
+  list, the file records, and the DPMI buffer services.  See
+  [Program map](../reference/program-map.md) for the table.
+
 ## The third level of the program map
 
 - `object_transform` at `0x1cd44` saves the previous state with

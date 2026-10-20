@@ -248,6 +248,59 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 | `0x294c8` | `race_state_begin` | sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
 | `0x2dddc` | `net_player_add` | takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it | inferred |
 
+## Fourth level: the gear step, the slide step, and the resource layer
+
+### object_gear_step and object_slide_step callees
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x4d9f4` | `fp_helper` | the Watcom floating-point helper, named earlier | observed |
+| `0x22b80` | `filter_update` | applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08` | derived |
+
+`object_gear_step` holds the vehicle states 1 and 2 at `+0x2f8`.  State 2 sets
+the float fields `+0x2fc` and `+0x300` to 3000.0 and the three velocities
+`+0x304`, `+0x308`, and `+0x30c` to 12.0, then falls through to state 1.
+State 1 integrates the position `+0x49c` and the three velocities with the
+damping `DAT_0010cf08 + 0x184`, decrements the value at `+0x2fc` by the frame
+delta, and counts the value at `+0x300` when the position passes `+0x238`.
+Evidence: the decompiled `FUN_0001d834`.
+
+`object_slide_step` computes the slide from the speed `+0x418`, the steering
+`+0x2f4`, and the float pair `+0x27c` and `+0x280`, clamps the slide between
+-2.0 and 2.0, and filters the three parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`.
+Evidence: the decompiled `FUN_0001df34`.
+
+### The resource layer
+
+The resource layer holds the list, the file records, and the DPMI buffer
+services.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x2ecf8` | `list_create` | allocates `count * 0x1c` bytes through `0xd1f25`; `+0x00` is the array, `+0x04` the count, and `+0x08` the limit | derived |
+| `0x2f904` | `pool_init` | queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages | inferred |
+| `0x2f470` | `resource_free` | frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise | derived |
+| `0x2ed77` | `list_destroy` | frees the array through `0xd2008` | derived |
+| `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls the DPMI helper `0x4bf64` for each case | inferred |
+| `0x2efc2` | `resource_read` | reads the current record and caches it through `0x2f062` | inferred |
+| `0x2f0fc` | `dos_memory_alloc` | calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address | derived |
+| `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
+| `0x2f205` | `memory_free` | calls INT 31h AX=0x0502 with the address in EBX:ECX | derived |
+| `0x2f25f` | `resource_find` | walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066` | derived |
+| `0x4bf23` | `dpmi_fill_regs` | fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS | observed |
+| `0x4bf4b` | `dpmi_call` | calls the interrupt through `0xd4410` and returns the value from EBX | inferred |
+| `0x4bf64` | `dpmi_real_copy` | wraps `0xd429f` with the real-mode buffer and the protected-mode buffer | inferred |
+
+`list_create` allocates `count * 0x1c` bytes.  This confirms the 28-byte record
+size of the engine lists and of the object records.
+
+`dos_memory_alloc` computes the paragraph count as `(size >> 4) + 1` and
+converts
+the returned segment to a linear address with a shift of 4.  `memory_alloc`
+splits
+the size into the high and the low word for EBX and ECX and reassembles the
+returned address.  `memory_free` splits the address the same way.
+
 ## Resource loader
 
 `object_load` at module address `0x10bfc` loads the `.3dx` object files.  It
