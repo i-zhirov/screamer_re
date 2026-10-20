@@ -179,28 +179,44 @@ decoder, so the file layer decodes a file when it opens it.
 
 | Offset | Size | Content |
 | --- | ---: | --- |
-| `+0x00` | 26 | the member name, exclusive-ORed with `0x3a`, NUL-terminated |
-| `+0x1a` | 2 | a 16-bit block offset |
-| `+0x1c` | 2 | a 16-bit block count |
-| `+0x1d` | 1 | two flags in bit 0 and bit 1 |
+| `+0x00` | 16 | the member name, exclusive-ORed with `0x3a`, NUL-terminated |
+| `+0x10` | 4 | the member offset in bytes |
+| `+0x14` | 4 | the member size in bytes |
+| `+0x18` | 4 | the end offset of the member |
+| `+0x1c` | 4 | a flag |
 
+The offsets form one chain: `offset + size` of a member is the `offset` of the
+next member, and the last member ends at the start of the directory.
 `GFX/GAME.DAT` holds 39 members, because `1248 / 32` is 39.
-`GFX/MENU.DAT` holds 18 members, because `576 / 32` is 18.
+`GFX/MENU.DAT` holds 18 members, because `576 / 32` is 18, with two empty
+records at the end.  Evidence: the decode of both directories.
 
-| File | Members |
-| --- | --- |
-| `GFX/GAME.DAT` | `IMPLET_L.PKC`, `IMPLET_H.PKC`, `IMPRES_L.PKC`, `IMPRES_H.PKC`, `CDFRONTL.PKC`, `CDFRONTH.PKC`, `COCK00AL.PKC`, and 32 more |
-| `GFX/MENU.DAT` | `MENU.COL`, `MENU.MLB`, `ALETTER.3DX`, `AMAP1.3DX` to `AMAP6.3DX`, `AAUTO00.3DX`, `AAUTO01.3DX`, `AAUTO02.3DX`, and 7 more |
+### The members
+
+| Member | Offset | Size |
+| --- | ---: | ---: |
+| `GAMEL.SPR` | 559712 | 10010 |
+| `GAMEH.SPR` | 569722 | 28736 |
+| `GAMEL.FNT` | 598458 | 11565 |
+| `GAMEH.FNT` | 610023 | 25992 |
 
 The names of `GFX/GAME.DAT` form low and high resolution pairs, as in
-`IMPLET_L.PKC` and `IMPLET_H.PKC`.  Evidence: the exclusive-OR decode of both
-directories.
+`GAMEL.SPR` and `GAMEH.SPR`, and the sprite and font members are the ones
+that `sprite_load` and `font_load` read.  `GFX/MENU.DAT` holds the palette
+`MENU.COL` of 768 bytes at the offset 0, which is 256 colours of 3 bytes, the
+`MENU.MLB` member, and the 3D objects `ALETTER.3DX`, `AMAP1.3DX` to
+`AMAP6.3DX`, `AAUTO00.3DX` to `AAUTO06.3DX`, and `ASHADOW.3DX`.
+Evidence: the exclusive-OR decode of both directories.
 
-**Re-verification of the sprite layout.**  The member names decode, but the
-block offset and the block count of a record do not yet resolve the start of the
-member data.  The first 64 bytes of `GFX/GAME.DAT` decode to neither a plausible
-sprite count nor a plausible pixel data size, so the re-verification stays open.
-Evidence: the exclusive-OR decode of `GFX/GAME.DAT`.
+**Re-verification of the sprite layout.**  The member offsets, the sizes, and
+the names resolve, but the member data does not match the plain sprite
+structure.  The head of `GAMEL.SPR` and `GAMEH.SPR` holds neither a plausible
+sprite count nor a plausible pixel data size, in the raw form and in the
+exclusive-OR form.  The same holds for `GAMEL.FNT` and `GAMEH.FNT` and the font
+structure.  So the member data carries a further encoding, the block format of
+the
+decoder at `0x4c128` with the control bytes, and the re-verification stays open
+at the member data.  Evidence: the decode of the four members of `GFX/GAME.DAT`.
 
 ## Table data
 
