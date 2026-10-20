@@ -935,6 +935,25 @@ audio tracks.  The game plays the tracks through the CD audio path.
   that frame.
 - The match decoding and the sprite count, the dimensions, and the palette
   therefore stay open.
+## The interrupt stack walk
+
+- The stack at the interrupt breakpoint is the real-mode stack.  The probe read
+  `SS=a86 ESP=9d8 EBP=9e6 CS=824 EIP=17a5` at the file read, and the dump of
+  `SS:ESP` holds real-mode segment and offset pairs, not protected-mode
+  addresses.
+  DOS/4GW switches to real mode for the DOS call, so the game's protected-mode
+  frames are not on that stack.
+- The caller frame walk therefore cannot reach the loader stream pointer through
+  the
+  interrupt breakpoint.  The DPMI boundary hides the game frames.
+- The remaining route is a protected-mode memory breakpoint, `BPPM
+  <selector>:<offset>`, on the game buffer.  The `BPLM` probe showed that the
+  linear address `0x1E7CCC` is a shared buffer written by five functions, so the
+  loader output address is still unknown.
+- The debugger offers `BPLM`, `BPPM`, `MEMDUMPBIN`, `IV`, `SMV`, and the log
+  commands.  The missing input is the loader state address, and every remaining
+  route needs it observed rather than inferred.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
