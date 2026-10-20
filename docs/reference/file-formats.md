@@ -225,6 +225,21 @@ count
 at `+0x4070`.  The shift count range 9 to 12 is the classic LZSS length coding.
 Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d3fc`.
 
+The bit reader `0x4d844` holds a bit buffer of 0x400 bytes at `+0x8086`, the bit
+position at `+0x406c`, the shift count at `+0x4068`, and a mask table at
+`+0x8050`.  It returns the 16-bit value at the bit position, shifted right by the
+low 3 bits of the position and masked with the mask of the shift count.  The mask
+table holds the values `(1 << n) - 1` for the shift counts 9 to 12, so the reader
+returns 9 to 12 bits at a time.  The literal code `0x100` and the end code `0x101`
+mark a literal byte and the end of the stream.
+Evidence: the decompiled `FUN_0004d844`.
+
+The confirmation of the sprite count at `+0x00` and the pixel data size at `+0x04`
+needs the expanded member bytes.  A run-time probe of the sprite loader at the
+run-time address `0150:31AA1` did not reach the loader within the probe window, so
+the confirmation stays open.
+Evidence: the probe session `work/probe2.dbg`.
+
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and
 the names resolve.  The member data does not match the plain sprite structure,
 because it is LZSS-compressed; the expansion runs when the member is read, not
