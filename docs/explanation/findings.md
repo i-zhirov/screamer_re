@@ -2319,6 +2319,81 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, which matches the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## The loader callers and the member
+
+- The race init `FUN_000131a8` calls the loader twice with the file and the
+  member.
+  At `0x13426` it builds the file `%s\gfx\graf.dat` at `0x1004F1` and the member
+  `logo%c.spr` at `0x100501` with the letter `H`, and at `0x134B6` it builds the
+  file `%s\gfx\game.dat` at `0x100524` and the member `game%c.spr` at `0x100534`
+  with the letter `H`.  The font loads follow the same shape with `attr%c.fnt`
+  at
+  `0x1004E6` and `game%c.fnt` at `0x100519`.
+  Evidence: the disassembly of `0x133A0` to `0x134CA`.
+- The file is therefore `gfx\game.dat`, the container the port reads, and the
+  member
+  is `gameH.spr` for the high build and `gameL.spr` for the low build.  The
+  letter is
+  the same `H` the asset strings use, so the high executable loads the high
+  member.
+  Evidence: the call sites and the strings.
+- The port decodes the wrong member.  It decodes `GAMEL.SPR`, the low member of
+  10010 compressed bytes, while the runtime under `STARTH.EXE` loads
+  `gameH.spr`,
+  the high member of 28736 compressed bytes.  The two are different members of
+  the
+  same container, so the plaintext can never match the port expansion.
+  Evidence: the member list, the call sites, and the plaintext.
+- The plaintext at `0150:6BD00` holds 208568 pixel bytes, which is the high
+  member
+  expansion, and the sprite dimensions 200 by 240, 466 by 188, and 640 by 114
+  sum to
+  exactly that count.
+  Evidence: the plaintext and the record decode.
+- The next step decodes `GAMEH.SPR` instead of `GAMEL.SPR` and compares the
+  expansion with the plaintext again.  The member choice was the last
+  difference, and the
+  decoder itself is read from the instructions.
+  Evidence: the call sites and the disassembly chain.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
+## The loader callers and the member
+
+- The race init `FUN_000131a8` calls the loader twice with the file and the
+  member.
+  At `0x13426` it builds the file `%s\gfx\graf.dat` at `0x1004F1` and the member
+  `logo%c.spr` at `0x100501` with the letter `H`, and at `0x134B6` it builds the
+  file `%s\gfx\game.dat` at `0x100524` and the member `game%c.spr` at `0x100534`
+  with the letter `H`.  The font loads follow the same shape with `attr%c.fnt`
+  at
+  `0x1004E6` and `game%c.fnt` at `0x100519`.
+  Evidence: the disassembly of `0x133A0` to `0x134CA`.
+- The file is therefore `gfx\game.dat`, the container the port reads, and the
+  member
+  is `gameH.spr` for the high build and `gameL.spr` for the low build.
+  Evidence: the call sites and the strings.
+- The port decodes the wrong member.  It decodes `GAMEL.SPR`, the low member of
+  10010 compressed bytes, while the runtime under `STARTH.EXE` loads
+  `gameH.spr`,
+  the high member of 28736 compressed bytes.  The two are different members of
+  the
+  same container, so the plaintext can never match the port expansion.
+  Evidence: the member list, the call sites, and the plaintext.
+- The plaintext at `0150:6BD00` holds 208568 pixel bytes, which is the high
+  member
+  expansion, and the sprite dimensions 200 by 240, 466 by 188, and 640 by 114
+  sum to
+  exactly that count.
+  Evidence: the plaintext and the record decode.
+- The next step decodes `GAMEH.SPR` instead of `GAMEL.SPR` and compares the
+  expansion with the plaintext again.
+  Evidence: the call sites and the disassembly chain.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
