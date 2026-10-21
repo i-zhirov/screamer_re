@@ -174,7 +174,7 @@ class _Lzss:
                 self.index = 0x102
                 saved = self.shift
                 self.shift = LITERAL_BITS
-                value = self._read_bits()
+                value = self._read_bits() & ((1 << LITERAL_BITS) - 1)
                 self.shift = saved
                 self.code = value
                 self.value = value

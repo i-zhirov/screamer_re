@@ -1567,6 +1567,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The literal mask
+
+- The literal mask was the branch.  The reader masks with the constant `MASK` of
+  `0x1FF`, so the literal width parameter changed only the bit advance and never
+  the
+  value, which is why the first byte stayed `3F` at every width in the first
+  sweep.
+  With the literal value masked by its own width, the width 2 gives the first
+  byte
+  `0x03`, the value the plaintext holds.
+  Evidence: the corrected literal sweep.
+- The head is `03 0F 0F 0F 00 01 0F 00` at the width 2 against the expected
+  `03 00 00 00 B8 2E 03 00`, so the first byte matches and the rest do not.
+  Evidence: the corrected literal sweep.
+- The remaining mismatch is the item framing.  The plaintext wants four literals
+  of
+  `03 00 00 00` in a row, and the coded stream holds the bits `1 1` at positions
+  eight and nine, which is the first literal, and then ones at positions ten and
+  beyond, where the plaintext wants zeros.  The items are therefore interleaved
+  with
+  framing bits, the flag scheme of the classic LZSS, and the framing is the next
+  branch
+  to test.
+  Evidence: the corrected literal sweep and the coded head.
+- The tool carries the literal width and its mask, so a sweep is one command and
+  the diff
+  script reports the first divergence with the decoder state.
+  Evidence: the port and the diff script.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
