@@ -1718,6 +1718,42 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The stream structure layout
+
+- The open wrapper writes the stream structure at fixed offsets: the file handle
+  at
+  `+0x00`, the mode string at `+0x20`, the file name at `+0x24`, the name copy
+  at
+  `+0x78`, and a flag at `+0xAC` on the failure path.  It then calls the decoder
+  with the stream in EAX and the fourth argument in EDX.
+  Evidence: the disassembly of `0x4C08D`.
+- The read wrapper passes the driver four values: the context in EAX, which is
+  the
+  stream field at `+0xB0`, the destination buffer in EDX, the size in EBX, and
+  the
+  file handle in ECX, which is the stream field at `+0x00`.
+  Evidence: the read wrapper and the driver disassembly.
+- The mask table address is therefore the stream structure plus `0xB0` plus
+  `0x8050`,
+  which is the stream plus `0x8100`, and the stream structure is the large local
+  of
+  the loader.
+  Evidence: the stream layout and the driver.
+- The practical way to read the table is a memory search.  The stream holds the
+  file
+  name at `+0x24`, so a search for the name finds the stream, and the table then
+  lies
+  at the found address plus `0x80DC` for forty eight bytes, twelve 32 bit
+  entries.
+  Evidence: the stream layout.
+- The next step runs that search at the breakpoint of the file read, reads the
+  found
+  address, and dumps the table.
+  Evidence: the stream layout.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
