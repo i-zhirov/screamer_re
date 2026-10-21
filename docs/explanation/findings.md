@@ -1503,6 +1503,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The literal branch
+
+- The first code reads correctly as `0x100`, the literal, and the port reads it
+  with
+  nine bits and the mask `0x1FF` at the bit position zero.
+  Evidence: the port diagnostic.
+- The literal that follows comes out `0x3F`, while the plaintext holds `0x03` at
+  the
+  first pixel.  The compressed head holds `00 7F 00 18`, so the bits from
+  position
+  eight are `1 1 1 1 1 1 1 0`, and a nine bit read from position nine yields
+  `0x3F`.  The plaintext value `0x03` sits in the two bits at positions eight
+  and
+  nine.
+  Evidence: the compressed head and the plaintext head.
+- The branch is therefore the literal read offset, not the width: an eight bit
+  read at
+  the same position yields `0x3F` as well, because the ninth bit is zero there,
+  while
+  the plaintext wants the two bits at positions eight and nine.
+  Evidence: the bit comparison.
+- The plaintext is the decoded output, not the coded stream, so the two bit
+  sequences
+  do not compare directly.  The next iteration must compare the port output with
+  the
+  plaintext at each step and move the read offset until the first pixel matches,
+  which the diff script already reports.
+  Evidence: the bit comparison.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
