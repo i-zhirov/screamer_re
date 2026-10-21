@@ -1110,6 +1110,34 @@ audio tracks.  The game plays the tracks through the CD audio path.
   file so the race starts at once, and watches the sprite loader statics with
   `BPPM`.
   Evidence: the probe results.
+## The refined probe result
+
+- The explicit mount is confirmed.  The probe configuration now mounts the copy
+  of the
+  game directory with an absolute path, and the run wrote no state file into the
+  copy, so
+  the probes run against the copy and the shipped directory is safe.  This
+  confirms that the
+  choice file and the replay in the shipped directory came from the manual
+  playthrough.
+  Evidence: the probe configuration and the run.
+- The race did not start in the run.  The game stayed at the run-time address
+  `0150:1E1C40`, the motion routine of the demo, through all four Enter presses,
+  and
+  the game wrote no choice file and no replay, so no race started.
+  Evidence: the probe run.
+- The sprite loader statics were not captured.  The `BPPM` dumps hold the fill
+  pattern
+  `E7 E7 E7 E7`, so the loader has not run.
+  Evidence: the probe dumps.
+- The key effect depends on the demo timing.  One earlier run left the demo
+  after a single
+  Enter press at 12 seconds, and this run did not leave it after a press at 20
+  seconds, so
+  the probe should press Enter repeatedly over a longer window rather than at
+  fixed points.
+  Evidence: the two driven runs.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:

@@ -1,0 +1,15 @@
+[ipx]
+# ipx -- Enable ipx over UDP/IP emulation.
+
+ipx=false
+
+[autoexec]
+# Lines in this section will be run at startup.
+
+@ECHO OFF
+mount C "/Users/iliazhirov/stuff/projects/screamer_re/work/entry/run/game"
+imgmount d "/Users/iliazhirov/stuff/projects/screamer_re/work/entry/run/game/scream.dat" -t iso -fs iso
+c:
+cls
+starth.exe
+exit
