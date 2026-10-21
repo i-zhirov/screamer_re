@@ -1262,6 +1262,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   same location, and only then trust `EV` for the game state.
   Evidence: the cross-check probe.
 - The sprite count, the dimensions, and the palette stay open.
+## The debug variable semantics
+
+- The cross-check is settled, and the answer is no: `EV` does not agree with the
+  dump.  On the same selector and offset, `0150:118E1C`, `EV INFLAG` returns
+  `A31C` while `MEMDUMPBIN` returns `00 00 00 00`, so the debug variable and the
+  binary dump read different values for the same pair.  `EV` cannot be used as
+  evidence
+  for the game state.
+  Evidence: the semantics probe.
+- The binary dump works on loaded memory.  After the game boots, the dump at
+  `0150:25CCC` returns `88 88 88 88`, the dump at `0150:118E1C` returns
+  `00 00 00 00`, and the dump at `0150:300F8` returns `39 39 35 25`, so the
+  memory is loaded and the dump reads it.
+  Evidence: the semantics probe.
+- The selector and offset mapping is not yet settled.  The entry at the module
+  address
+  `0x300F8` holds `EB 76` in the file, and the dump of `0150:300F8` returns
+  `39 39 35 25`, so the selector `0150` does not map the offset `0x300F8` to the
+  entry as assumed.  The run-time entry evidence gives the pair `0150:1F20F8`
+  for the
+  module address `0x300F8`, so the mapping holds for the code pair, and the dump
+  disagrees with it.
+  Evidence: the semantics probe and the entry evidence.
+- The usable read path is the binary dump, and its addressing must be settled
+  against a
+  known byte before it is used to read the game state.  The `EV` form is not
+  usable.
+  Evidence: the semantics probe.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
