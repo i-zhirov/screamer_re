@@ -1291,6 +1291,47 @@ audio tracks.  The game plays the tracks through the CD audio path.
   usable.
   Evidence: the semantics probe.
 - The sprite count, the dimensions, and the palette stay open.
+## The addressing rule and the game state
+
+- The addressing rule is settled.  The binary dump must take the run-time pair,
+  the
+  module address plus the load base `0x1C2000`, as the offset in the selector
+  `0150`.
+  The dump of `0150:1F20F8` returns `EB 76 57 41`, which is the entry jump of
+  the
+  file and the start of the Watcom banner, while the dump of the module address
+  `0150:300F8` returns unrelated bytes.  Every earlier dump and watch that used
+  a bare
+  module address therefore read the wrong memory.
+  Evidence: the entry dump probe.
+- The game state now reads.  With the run-time pairs, the dump returns:
+  the input flags `0` at `0150:2DAE1C`, the sprite record pointer
+  `0x0008D800` at `0150:1E7CCC`, the sprite count `3` at `0150:1E7CD4`, and the
+  pixel data size `208568` at `0150:1E7CDC`.
+  Evidence: the corrected state probe.
+- The sprite structure is confirmed.  The loader reads the count and the size
+  into
+  `DAT_00025CD4` and `DAT_00025CDC`, eight bytes apart with the record pointer
+  at
+  `DAT_00025CCC` and the pixel data pointer at `DAT_00025CE0`, so the structure
+  is
+  the pointer, a field, the count, a field, the size, a field, and the second
+  pointer.
+  Evidence: the corrected state probe and the decompiled `FUN_000257b0`.
+- The values agree with the member sizes: the sprite records take
+  `8 + 3 * 0x14 + 208568`, which is `208636` bytes, against the compressed
+  member
+  of `10010` bytes, a ratio of about 20.8 for the LZSS member.
+  Evidence: the corrected state probe and the member list.
+- The game was in the sprite loading code at the dump: the run-time address
+  `0150:1E7CB7` is the module address `0x25CB7`, which lies just before the
+  sprite
+  statics at `0x25CCC`.
+  Evidence: the corrected state probe.
+- The sprite count at `+0x00` is 3 and the pixel data size at `+0x04` is 208568,
+  so
+  the two values the parser needed are now observed.
+  Evidence: the corrected state probe.
 ## Method
 
 The investigation uses these steps:
