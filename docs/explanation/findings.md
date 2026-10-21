@@ -1599,6 +1599,40 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The flag framing sweep
+
+- The classic flag framing scheme is refuted.  A sweep of the flag byte before
+  and
+  after each group of eight items, both polarities, the literal width eight, the
+  position
+  widths eight to twelve, and the length widths four and five finds no variant
+  that decodes
+  the four leading literals `03 00 00 00` of the plaintext.
+  Evidence: the flag framing sweep.
+- The first item framing that does work is the one the port already has: a nine
+  bit code
+  that reads `0x100`, the literal marker, followed by a two bit literal that
+  gives `0x03`,
+  the first plaintext byte.  The framing of the first item is therefore a nine
+  bit code and
+  a two bit value, and it is not the classic one flag bit and eight bit literal.
+  Evidence: the literal mask result and the flag framing sweep.
+- The two bit literal is small for a byte, so the literal field may not be a
+  byte at all, or
+  the two bits may be part of a longer field that the next item completes.  The
+  next branch
+  is the item structure around the nine bit code, for example a code that
+  carries a length and
+  a distance, with the two bit value as part of it.
+  Evidence: the literal mask result.
+- The tool carries the literal width and its mask and the diff script reports
+  the first
+  divergence with the decoder state, so each branch test is one command.
+  Evidence: the port and the diff script.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
