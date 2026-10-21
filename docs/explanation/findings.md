@@ -1332,6 +1332,47 @@ audio tracks.  The game plays the tracks through the CD audio path.
   so
   the two values the parser needed are now observed.
   Evidence: the corrected state probe.
+## The sprite records
+
+- The sprite record pointer `0x0008D800` is a selector relative offset, not a
+  linear
+  address: the dump of `0150:8D800` returns data while the linear form returns
+  nothing.
+  The record pointer therefore addresses the game data object.
+  Evidence: the record probe.
+- The three records decode as five 32-bit fields each: x, y, width, height, and
+  the
+  data offset into the pixel buffer.
+  Evidence: the record dump and the field decode.
+- The dimensions are read.  Sprite 0 is 200 by 240 at the offset 0, sprite 1 is
+  466 by
+  188 at the offset 48000, and sprite 2 is 640 by 114 at the offset 135608.
+  Evidence: the record decode.
+- The offsets are cumulative pixel counts, so the structure agrees with itself:
+  sprite 0
+  takes 200 times 240, which is 48000 pixels and the offset of sprite 1; sprite
+  1 takes
+  466 times 188, which is 87608 pixels and puts sprite 2 at 135608; and sprite 2
+  takes
+  640 times 114, which is 72960 pixels and ends the buffer at 208568, the exact
+  size the
+  loader read.
+  Evidence: the record decode and the state probe.
+- The pixel data is one byte per pixel, so the member holds 208568 pixels of an
+  8-bit
+  paletted image, and the palette is separate and set through the video calls.
+  Evidence: the record decode.
+- The expanded member and the compressed member are now a plaintext and
+  ciphertext pair,
+  the 208636 expanded bytes against the 10010 compressed bytes, so the LZSS
+  match
+  decoding can be derived from the pair rather than guessed from the ring and
+  the table.
+  Evidence: the state probe and the member list.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
