@@ -1179,6 +1179,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   the key, and reports which flag changes.
   Evidence: the input flag probe and the driven runs.
 - The sprite count, the dimensions, and the palette stay open.
+## The three watched flags
+
+- The key press provokes two writes from the keyboard handler: `CS=3DB8
+  EIP=5222`
+  and then `CS=3DB8 EIP=7FA0`.  Both come after the key, so the key reaches the
+  game
+  and writes the watched state in two places, most likely the key-down and the
+  key-up
+  path of the same handler.
+  Evidence: the three flag probe.
+- The other two hits are `CS=A5C EIP=32D` before the key, the init or DOS path,
+  and
+  `CS=18 EIP=334` after the key, a different writer.
+  Evidence: the three flag probe.
+- The dumps do not separate the three flags.  Every dump at `0150:118E1C`,
+  `0150:11D274`, and `0150:11FAC4` holds the same value at each hit, the fill
+  pattern `55 55 55 55` at the first two hits and zero at the third, so the
+  watch
+  address and the dump address do not resolve to the same memory for at least
+  two of the
+  three.  That addressing subtlety must be settled before the flags can be read.
+  Evidence: the dump comparison.
+- The next step settles the addressing: set one `BPPM` at a time, dump the one
+  address
+  that the watch names, and compare with the value the debugger reports for the
+  same
+  selector and offset through `IV` and `EV`.
+  Evidence: the dump comparison.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
