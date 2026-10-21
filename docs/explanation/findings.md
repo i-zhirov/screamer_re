@@ -1469,6 +1469,40 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The first divergence
+
+- The first divergence is the first pixel.  The port writes `0x17` at the output
+  offset 68, the first pixel, while the plaintext holds `0x00`.  The block that
+  produced it is block 35, a match with the code `0x022`, the shift 9, the bit
+  position 324, and the ring index 0, so the match decoding diverges before any
+  pixel is right.
+  Evidence: the diff script `tools/scripts/diff_port_vs_dump.py`.
+- The plaintext is stitched from the two pixel dumps at the split `0x7FD2C` and
+  holds
+  208568 bytes, the size the loader read.
+  Evidence: the diff script.
+- The whole member is compressed, including the count and the size head.  The
+  member
+  head holds `00 7F 00 18 F8 4A CB C0`, not the plain count of 3 and size of
+  208568, so the file layer decompresses the stream and the loader reads the
+  plain
+  count and size from the decompressed stream.  A hypothesis that the head was
+  stored
+  plain is refuted.
+  Evidence: the member head and the loader code.
+- The diff script is the working tool: it runs the port block by block, compares
+  each
+  new byte with the plaintext, and reports the first differing byte with the
+  decoder
+  state that produced it.  The next iteration compares the port bit consumption
+  with
+  the plaintext bytes to find the branch, rather than guess the ring and the
+  table.
+  Evidence: the diff script.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
