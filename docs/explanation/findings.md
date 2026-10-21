@@ -1407,6 +1407,39 @@ audio tracks.  The game plays the tracks through the CD audio path.
   needs a
   clean dump before the port can be checked against it.
   Evidence: the record decode.
+## The pixel data location
+
+- The pixel data is at `0150:6BD00`.  The dump returns
+  `00 00 00 00 98 B9 FF FF FF 00 00 00 94 EA FE FF`, which reads as 8-bit
+  pixel indices and not as a count and a size, so the earlier expectation of a
+  count and a size at the pixel pointer was wrong.  The loader reads the count
+  and
+  the size from the file head into the statics, and the pixel resource holds the
+  pixels alone.
+  Evidence: the pixel dump probe.
+- The pixel pointer is therefore a selector relative offset in the selector
+  `0150`,
+  the same base as the record pointer.
+  Evidence: the pixel dump probe.
+- The neighbouring addresses do not hold the pixels.  The real mode segment
+  `6BD0:0000` holds the fill pattern `55 55 55 55`, and the address
+  `0150:7FD2C` holds 3D geometry data with the value `0x1FFFFFFF`.
+  Evidence: the pixel dump probe.
+- The dump length rule stands: `MEMDUMPBIN` produced 1065604 bytes for a request
+  of
+  104284, so a dump is only trusted after its size is checked against the
+  request.
+  Evidence: the expanded dump sizes.
+- The next step is the byte for byte check: expand the compressed member with
+  the
+  port in `tools/gfx_container.py` and compare the result with the dump at
+  `0150:6BD00` for 208568 bytes.  The plaintext is now available, so the match
+  decoding can be derived from the pair instead of guessed.
+  Evidence: the pixel dump probe.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
