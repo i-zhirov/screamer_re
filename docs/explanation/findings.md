@@ -2099,6 +2099,45 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The complete block decoder
+
+- The block decoder is now read in full, `0x4D4C4` to `0x4D843`, and it matches
+  the
+  port instruction for instruction: the state check, the code read, the end code
+  `0x101`, the literal code `0x100`, the match path with the high bits kept in
+  place, the ring, the output loop with the ring index counted down, the table
+  update with the byte and the word, and the shift growth with the threshold
+  doubled while the shift is not twelve.
+  Evidence: the disassembly of `0x4D4C4`.
+- The reader is read in full as well, `0x4D844` to `0x4D9B4`: the bit position,
+  the byte index, the bit offset, the word with the low byte replaced by the
+  byte at
+  the index plus two, the shift right with a bit of that third byte pulled into
+  bit
+  fifteen, the position advanced by the shift, the mask table entry, the buffer
+  slide,
+  the refill with the read size `min(0x400 - the remaining, the length - the
+  bytes
+  read)`, and the bit position masked with seven.
+  Evidence: the disassembly of `0x4D844`.
+- The driver is read in full: the four state fields, the state test, the initial
+  read
+  of `min(stream length, 0x400)` bytes, the loop on the block decoder, and the
+  output count returned.
+  Evidence: the disassembly of `0x4D3FC`.
+- The port therefore matches the machine code in the driver, the reader, the
+  block
+  decoder, the mask table, the init state, the literal branch, the match path,
+  the
+  table update, the shift growth, and the output loop.  The expansion still ends
+  after 185 bytes and the first byte is wrong, so the difference is the input
+  bytes or
+  the first code advance.
+  Evidence: the disassembly chain and the diff script.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
