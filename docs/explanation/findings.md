@@ -2426,6 +2426,31 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, matching the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## The loader breakpoint
+
+- The breakpoint on the loader statics fires once, at `CS=A5C EIP=32D`, an early
+  write during initialisation, and the statics then hold the fill pattern
+  `55 55 55`, so the loader never ran in the probe window.
+  Evidence: the loader breakpoint probe.
+- The loader runs on two paths only: the network menu through
+  `menu_space_init` at `0x29D08`, which loads `menu%c.spr` from `gfx\menu.dat`,
+  and the race through the race init at `0x134B6`, which loads `game%c.spr` from
+  `gfx\game.dat`.  A single player start reaches neither, which is why every
+  probe saw fill patterns in the loader statics.
+  Evidence: the loader call sites and the probe.
+- The driver fields therefore cannot be dumped in the menu idle.  A probe that
+  wants
+  them must first drive the game into a race or into the network menu, and the
+  earlier driven runs reached neither.
+  Evidence: the driven runs.
+- The next step drives the game into a race with the key sequence and then dumps
+  the driver fields at `+0x4048` and `+0x4044`, which the decoder sets from the
+  record `+0x70` plus one and `+0x6C`.
+  Evidence: the call sites and the driver.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
