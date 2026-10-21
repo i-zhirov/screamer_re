@@ -1,0 +1,19 @@
+break
+exec IV 0150:118E1C INFLAG
+exec MEMDUMPBIN 0150:118E1C 4 BASE.BIN
+exec BPLM 0x2DAE1C
+clear
+exec RUN
+sleep 8
+break
+read CS EIP INFLAG
+exec MEMDUMPBIN 0150:118E1C 4 BEFORE.BIN
+exec RUN
+sleep 4
+key \r
+sleep 6
+break
+read CS EIP INFLAG
+exec MEMDUMPBIN 0150:118E1C 4 AFTER.BIN
+exec BPDEL *
+exec RUN

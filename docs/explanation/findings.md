@@ -1239,6 +1239,29 @@ audio tracks.  The game plays the tracks through the CD audio path.
   memory in both steps.
   Evidence: the linear watch probe and the cross-check probe.
 - The sprite count, the dimensions, and the palette stay open.
+## The linear watch probe
+
+- The linear watch `BPLM 0x2DAE1C` fires, twice in one run: at the DOS boot
+  `CS=F000 EIP=C9B4` and in the game at `CS=150 EIP=1E1C40`, the demo motion
+  routine.  The linear form therefore watches the game data object.
+  Evidence: the linear watch probe.
+- The debug variable `IV 0150:118E1C INFLAG` is created, and `EV INFLAG` returns
+  `A31C` both before and after the key press, while the memory dumps at
+  `0150:118E1C` are zero before and after.  The value from `EV` and the value
+  from
+  the dump still disagree, so the cross-check is not yet settled.
+  Evidence: the cross-check probe.
+- The key press did not change the reported value, so this probe cannot confirm
+  that
+  the key advances the input flags.  The result is negative rather than
+  positive.
+  Evidence: the cross-check probe.
+- The next step is to settle the debug variable semantics: read the value the
+  debugger reports for a known memory location, compare it with a binary dump of
+  the
+  same location, and only then trust `EV` for the game state.
+  Evidence: the cross-check probe.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
