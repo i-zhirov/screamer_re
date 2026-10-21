@@ -1754,6 +1754,49 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The instruction accurate reader
+
+- The reader is rewritten from the instructions.  It takes the byte index as the
+  bit
+  position shifted right three, the bit offset as the position masked with
+  seven, loads
+  the 16 bit word at the byte index, replaces the low byte with the byte at the
+  byte
+  index plus two, shifts right once per bit offset while pulling a bit of that
+  third
+  byte into bit 15, advances the position by the shift, and masks the value with
+  the
+  table entry for the shift.
+  Evidence: the disassembly of `0x4D844` and the reader in
+  `tools/gfx_container.py`.
+- The result changes.  The expansion now ends after 185 bytes instead of 208636,
+  and
+  the first pixel is `0xAC` instead of `0x17`, so the decode still diverges and
+  it now
+  stops early as well.
+  Evidence: the diff script.
+- The mask table remains the unknown.  The reader is instruction accurate, and
+  the mask
+  entry for the shift decides every code, so the values of the table at
+  `+0x8050` settle
+  the decode.
+  Evidence: the disassembly of `0x4D844` and the diff script.
+- A correction to the previous note: the first divergence at output 68 means the
+  first
+  pixel is wrong, not that the first 68 bytes are right.  The diff script starts
+  its
+  comparison at the pixel offset, so it does not check the count, the size, or
+  the
+  records.
+  Evidence: the diff script.
+- The next step reads the mask table at the derived address, the stream plus
+  `0x80DC`,
+  found by a memory search for the file name that the stream holds at `+0x24`.
+  Evidence: the stream layout.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:

@@ -153,13 +153,19 @@ class _Lzss:
                 self.buf[remaining] = self.raw[self.read_pos]
                 self.read_pos += 1
             self.bits &= 7
-        old = self.bits
+        # the instructions: load the 16 bit word, replace the low byte with the
+        # byte at +2, then shift right once per bit offset while pulling a bit of
+        # that third byte into bit 15
+        byte_index = self.bits >> 3
+        offset = self.bits & 7
+        word = self.buf[byte_index] | (self.buf[byte_index + 1] << 8)
+        low = self.buf[byte_index + 2]
+        value = (word & 0xFF00) | low
+        for _ in range(offset):
+            value = (value >> 1) | ((low & 1) << 15)
+            low >>= 1
         self.bits += self.shift
-        byte0 = self.buf[old >> 3]
-        byte1 = self.buf[(old >> 3) + 1]
-        byte2 = self.buf[(old >> 3) + 2]
-        value = byte0 | (byte1 << 8) | (byte2 << 16)
-        return (value >> (old & 7)) & MASK
+        return value & MASK
 
     def block(self) -> bool:
         state = self.state
