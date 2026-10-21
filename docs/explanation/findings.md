@@ -1827,6 +1827,36 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The memory search syntax
+
+- The memory search takes a size and one value: `MEMFIND [seg]:[off] [size]
+  [value]`.
+  The debugger reports the size, the start address, and the range it searches,
+  and a
+  call without a size uses one byte.  A call with several values takes the first
+  as the
+  value and ignores the rest, so the search finds one value and not a byte
+  sequence.
+  Evidence: the memory search probe.
+- `MEMS` without a value compares with the previous values and reports how many
+  addresses match, which is a refinement step and not a new search.
+  Evidence: the memory search probe.
+- The search therefore finds the file name only if it is split into single value
+  steps, or
+  if the debugger offers a string form.  The practical alternative is a dump of
+  the game
+  data region followed by an offline search for the name and for the table.
+  Evidence: the memory search probe.
+- The mask table constraints stand: the entry for the initial shift keeps bit
+  eight and the
+  entry for the shift nine keeps bits zero and one, so the entries differ and
+  the initial
+  shift is not nine.
+  Evidence: the compressed head and the plaintext.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:

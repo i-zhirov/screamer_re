@@ -1,0 +1,10 @@
+break
+exec BPINT 21 "3F"
+clear
+exec RUN
+sleep 12
+break
+read CS EIP EBX ECX EDX
+exec MEMFIND 0150:0 1 67 61 6D 65 2E 64 61 74
+exec BPDEL *
+exec RUN
