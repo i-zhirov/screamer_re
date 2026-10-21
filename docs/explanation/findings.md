@@ -1373,6 +1373,40 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The expanded member dump
+
+- The sprite records dumped correctly.  The dump at `0150:8D800` returns the
+  three
+  records with the dimensions, so the record pointer is an offset in the
+  selector
+  `0150`.
+  Evidence: the record dump.
+- The pixel data did not dump at the pointer.  The second pointer at
+  `0150:1E7CE0` holds `0x0006BD00`, and the dump at `0150:6BD00` returns
+  `00 00 00 00 98 B9 FF FF`, which is not the pixel data head of a count and a
+  size, so the pixel pointer does not use the selector `0150` as its base.  The
+  two
+  pointers therefore use different bases, and the pixel pointer needs one more
+  addressing step.
+  Evidence: the expanded dump.
+- `MEMDUMPBIN` writes a binary file for a large dump, and the file is larger
+  than
+  the requested length, so a dump must be checked against its requested size
+  before the
+  bytes are trusted.
+  Evidence: the expanded dump sizes.
+- The next step is to find the selector that the pixel pointer belongs to,
+  either by
+  reading the selector registers of the video path or by watching the pointer
+  with
+  `BPLM` at the linear form.
+  Evidence: the expanded dump.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data size is 208568 bytes.  The expanded member itself still
+  needs a
+  clean dump before the port can be checked against it.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
