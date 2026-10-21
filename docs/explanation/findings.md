@@ -2022,6 +2022,42 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The initial shift sweep
+
+- The sweep of the initial shift from zero to fifteen with the instruction
+  accurate
+  reader shows the shift eleven is the best: its head is
+  `03 03 03 00 00 03 00 00`, which matches three of the eight plaintext bytes,
+  while every other shift matches two or fewer.
+  Evidence: the initial shift sweep.
+- The shift eleven head shows the framing: the plaintext count of three wants
+  one
+  byte `0x03` and then three zero bytes, and the port emits `0x03` three times
+  instead.  The first byte is right and the pattern repeats, so the bit advance
+  after
+  the first literal is the remaining fault.
+  Evidence: the initial shift sweep and the block trace.
+- The reader, the mask table, the init, the literal branch, and the match path
+  are
+  read from the instructions, and the sweep covers the initial shift and the
+  literal
+  width, so the remaining question is the advance after a literal and the shift
+  growth.
+  The init sets the shift to nine and the threshold to `0x200` with the index
+  `0x102`, so no growth happens before the second block, and the plaintext wants
+  the
+  second byte at a different bit position.
+  Evidence: the disassembly of `0x4D360` and the sweeps.
+- The next step sweeps the advance after a literal, keeping the constant mask
+  `0x1FF`
+  and the literal width nine, because the port then matches the machine code in
+  every
+  read and the advance is the last unread detail.
+  Evidence: the sweeps.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
