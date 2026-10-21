@@ -2138,6 +2138,51 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The refill size
+
+- The refill reads a size, not one byte.  The instructions compute the read size
+  as `min(0x400 - the remaining, the length less the bytes read)` and pass it in
+  EBX with the count one, while the port read one byte per refill.  The port was
+  corrected.
+  Evidence: the disassembly of `0x4D8A9`.
+- The correction did not move the first divergence.  The expansion still ends
+  after
+  185 bytes and the first byte is still `0x0C` against the plaintext `0x03`,
+  which is
+  expected because the first refill only happens after the buffer drains and the
+  first
+  output bytes come from the initial read.
+  Evidence: the diff script.
+- The port now matches the machine code in the driver, the reader, the block
+  decoder,
+  the mask table, the init state, the literal branch, the match path, the table
+  update,
+  the shift growth, the output loop, and the refill.
+  Evidence: the disassembly chain.
+- The first literal reads `0x0C` where the plaintext holds `0x03`, and the shift
+  is
+  nine with the mask `0x1FF`, so the value is right for the position and the
+  position
+  is the question: the code read advances the position by the shift, nine, and
+  the
+  literal then reads at bit nine.  The plaintext value sits at bit eight, so the
+  advance after the first code is the remaining question, and the init sets the
+  bit
+  position to zero from `+0x4064`.
+  Evidence: the disassembly of `0x4D360` and the block trace.
+- The next step reads the code read's advance: the instruction adds the shift at
+  `+0x4068`, and the shift is nine, so the advance is nine, and the plaintext
+  wants
+  the literal one bit earlier.  Either the initial bit position is not zero or
+  the first
+  code is read with a different shift, and the two candidates are testable by
+  setting
+  the initial bit position to one.
+  Evidence: the disassembly and the block trace.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:

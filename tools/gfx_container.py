@@ -150,9 +150,15 @@ class _Lzss:
         if remaining < 5:
             for i in range(remaining):
                 self.buf[i] = self.buf[(self.bits >> 3) + i]
-            if self.read_pos < len(self.raw):
-                self.buf[remaining] = self.raw[self.read_pos]
-                self.read_pos += 1
+            # the instructions read min(0x400 - the remaining, the length less
+            # the bytes read) bytes, not one
+            room = len(self.raw) - self.read_pos
+            want = remaining
+            if want > room:
+                want = room
+            if want > 0:
+                self.buf[remaining:remaining + want] = self.raw[self.read_pos:self.read_pos + want]
+                self.read_pos += want
             self.bits &= 7
         # the instructions: load the 16 bit word, replace the low byte with the
         # byte at +2, then shift right once per bit offset while pulling a bit of
