@@ -1,0 +1,15 @@
+break
+exec BPPM 0150:118E1C
+clear
+exec RUN
+sleep 8
+break
+read CS EIP EAX EBX
+exec RUN
+sleep 4
+key \r
+sleep 6
+break
+read CS EIP EAX EBX
+exec BPDEL *
+exec RUN

@@ -1164,6 +1164,21 @@ audio tracks.  The game plays the tracks through the CD audio path.
   `DAT_00118E1C`, rather than relying on the key timing.
   Evidence: the two driven runs.
 - The sprite count, the dimensions, and the palette stay open.
+## The input flags confirm the key path
+
+- The protected-mode memory breakpoint `BPPM 0150:118E1C`, the input flags
+  `DAT_00118E1C`, fired twice in one run.  The first write came from
+  `CS=A5C EIP=32D` before the key, and the second from `CS=3DB8 EIP=5222`
+  after the Enter key, so the key reaches the game and writes the input flags.
+  Evidence: the input flag probe.
+- The input path therefore works.  The earlier failures are in the menu state
+  machine: the game reads the flags, and the demo does not leave for the menu on
+  the
+  key alone.  The next probe watches the menu state itself, the flags
+  `_DAT_00118E1C` and `DAT_0011D274` and the state `DAT_0011FAC4`, together with
+  the key, and reports which flag changes.
+  Evidence: the input flag probe and the driven runs.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
