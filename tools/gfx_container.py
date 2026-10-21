@@ -114,6 +114,7 @@ def member_bytes(container: Container, member: Member) -> bytes:
 
 
 MASK = 0x1FF
+LITERAL_BITS = 9
 
 
 class _Lzss:
@@ -171,7 +172,10 @@ class _Lzss:
                 self.shift = 9
                 self.threshold = 0x200
                 self.index = 0x102
+                saved = self.shift
+                self.shift = LITERAL_BITS
                 value = self._read_bits()
+                self.shift = saved
                 self.code = value
                 self.value = value
                 self.cur2 = value & 0xFF

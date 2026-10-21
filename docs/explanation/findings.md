@@ -1535,6 +1535,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The literal width sweep
+
+- The literal width is not the branch.  The sweep of the widths 2 to 9 shows
+  that no
+  width produces the expected head `03 00 00 00 B8 2E 03 00`, and the width 8
+  terminates the expansion after 44 bytes, so the width 8 is refuted and the
+  others
+  diverge at the first pixel.
+  Evidence: the literal width sweep.
+- The first byte of the expansion is `3F` at every width, so the first byte does
+  not
+  come from the literal branch at all.  The first code reads as `0x100`, the
+  literal, so
+  the byte must come from a step before the literal or from the initial state of
+  the
+  driver.
+  Evidence: the literal width sweep.
+- The tool now carries the literal width as a parameter, `LITERAL_BITS` in
+  `tools/gfx_container.py`, so a sweep is one command.
+  Evidence: the port change.
+- The next step examines the driver start: the driver reads one byte into the
+  bit buffer
+  before the first block, and the port seeds the buffer with the member bytes
+  instead.
+  The driver byte and the first literal may both reach the output, which would
+  explain
+  the leading `3F`.
+  Evidence: the decompiled `FUN_0004d3fc` and the sweep.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
