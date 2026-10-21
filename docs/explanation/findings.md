@@ -2250,6 +2250,43 @@ audio tracks.  The game plays the tracks through the CD audio path.
   pixel
   read goes elsewhere or the record fields are not what the port assumes.
   Evidence: the loader and the raw record.
+## The loader instructions
+
+- The loader is now read instruction by instruction, `0x257B0` to `0x258B4`, and
+  it
+  matches the port.  It opens the file with the mode at `0x100EB4`, reads four
+  bytes
+  into `DAT_00025CD4`, reads four bytes into `DAT_00025CDC`, takes the first
+  `SPRITES` resource of `count1 * 0x14` bytes at `0x100EB7`, reads it, takes the
+  second `SPRITES` resource of `count2` bytes at `0x100EBF`, reads it, and
+  closes.
+  Evidence: the disassembly of `0x257B0`.
+- The two reads are four bytes each and the two resources are `count1 * 0x14`
+  and
+  `count2` bytes, so the loader reads the count, the size, the records, and the
+  pixels, exactly as the port assumes.
+  Evidence: the disassembly of `0x257B0`.
+- The driver limit contradicts the loader.  The loader reads `count2` bytes,
+  208568 for
+  `GAMEL.SPR`, while the driver limit is the record `+0x18` plus one, 24484, so
+  the
+  driver cannot supply the pixels from the member expansion under the limit as
+  read.
+  Evidence: the disassembly of `0x257B0` and `0x4C32D`.
+- The record field at `+0x18` is therefore not the output size, and the port
+  reads it
+  as the end of the member.  The next step compares the field with the runtime:
+  the
+  driver limit is the record `+0x70` plus one, which is `+0x18` plus one, so the
+  field
+  must be something the driver can use as a limit while the member expands to
+  208636
+  bytes.
+  Evidence: the raw record and the two disassemblies.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, which matches the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
