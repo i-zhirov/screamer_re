@@ -1857,6 +1857,57 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The mask table is in the instructions
+
+- The mask table is read from the context init `0x4D360`, which the decoder
+  calls
+  after it allocates the context: `+0x8074` holds `0x1FF`, `+0x8078` holds
+  `0x3FF`,
+  `+0x807C` holds `0x7FF`, and `+0x8080` holds `0xFFF`.  The reader indexes the
+  table at `+0x8050` with the shift, so the shift nine reads `+0x8074`, the
+  shift ten
+  reads `+0x8078`, and so on.
+  Evidence: the disassembly of `0x4D360`.
+- The table is therefore the values `(1 << shift) - 1` for the shifts nine to
+  twelve, so
+  the mask assumption in the port was right, and the earlier note that called it
+  wrong is
+  corrected.
+  Evidence: the disassembly of `0x4D360`.
+- The init also sets the initial state: the shift at `+0x4068` to nine, the
+  threshold at
+  `+0x4060` to `0x200`, the index at `+0x405C` to `0x102`, the state at
+  `+0x404C`
+  to zero, and the bit position at `+0x406C` from `+0x4064`, which is zero. 
+  That is the
+  state the port already uses.
+  Evidence: the disassembly of `0x4D360`.
+- The context is a heap block of `0x8490` bytes, allocated by the decoder with
+  `malloc` at `0x30050` and stored in the stream field at `+0xB0`.  The mask
+  table lies
+  inside that block, so the earlier search for a static table was aimed at the
+  wrong place.
+  Evidence: the disassembly of `0x4C128` and `0x4D360`.
+- The decoder also sets the stream fields from the record: the record field at
+  `+0x74` bit
+  zero goes to the stream `+0x14` and bit one goes to the stream `+0x10`, and
+  the read
+  wrapper tests the stream `+0x10` to choose the compressed path.  That confirms
+  the
+  directory record flag at `+0x1C` with the record at `+0x58` and the name at
+  `+0x58`.
+  Evidence: the disassembly of `0x4C128`.
+- The port therefore matches the machine code in the reader, the masks, the
+  initial state,
+  and the literal branch, so the divergence lies outside the decoder: in the
+  input bytes the
+  port feeds it, or in a detail of the block loop that the port still
+  simplifies.
+  Evidence: the disassembly chain and the diff script.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
