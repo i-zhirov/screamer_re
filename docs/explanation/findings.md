@@ -1682,6 +1682,42 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The driver and literal instructions
+
+- The driver reads a full buffer at the start.  The instruction is a call to
+  `0xc607b` with the size in EBX, the value `[+0x4044]` capped at `0x400`, and
+  the
+  count 1, so the initial read is `min(stream length, 0x400)` bytes.  The
+  decompiled C
+  argument order misled the earlier reading, which took it for a one byte read.
+  Evidence: the disassembly of `0x4D3FC`.
+- The driver sets the state fields and loops on the block decoder until it
+  returns
+  zero, then returns the output count at `+0x4070`.
+  Evidence: the disassembly of `0x4D3FC`.
+- The literal branch matches the port.  It reads the code, treats `0x101` as the
+  end and
+  `0x100` as the literal, sets the shift to 9, the threshold to `0x200`, and the
+  index
+  to `0x102`, reads the value, takes its low byte into `+0x8085` and `+0x8084`,
+  increments the output count at `+0x4070`, and stores the byte at the output
+  buffer
+  `+0x8488`.
+  Evidence: the disassembly of `0x4D4C4`.
+- The port is therefore instruction accurate for the driver, the reader, and the
+  literal
+  branch.  The single remaining assumption is the mask table at `+0x8050`, whose
+  values
+  are not the values `(1 << n) - 1`.
+  Evidence: the disassembly of `0x4D3FC`, `0x4D4C4`, and `0x4D844`.
+- The next step reads the mask table: find the context pointer, which the stream
+  structure holds at `+0xB0`, and dump twelve 32 bit entries at the context plus
+  `0x8050`.
+  Evidence: the read wrapper and the disassembly.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
