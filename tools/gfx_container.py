@@ -196,13 +196,13 @@ class _Lzss:
             self.code2 = code
             if self.index <= code:
                 self.code = self.value
-                entry = (self.code >> 8) | self.cur
+                entry = (self.code & ~0xFF) | self.cur
                 self.ring[self.ring_index] = entry
                 self.ring_index += 1
             while 0xFF < self.code:
                 if self.ring_index >= len(self.ring) or self.code >= len(self.table_byte):
                     raise ValueError("the ring or table index runs past its bound")
-                entry = (self.code >> 8) | self.table_byte[self.code]
+                entry = (self.code & ~0xFF) | self.table_byte[self.code]
                 self.ring[self.ring_index] = entry
                 self.ring_index += 1
                 self.code = self.table_ushort[self.code]

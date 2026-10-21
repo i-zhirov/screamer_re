@@ -1908,6 +1908,47 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The match path and the shift sweep
+
+- The match path is read from the instructions `0x4D5E6` to `0x4D6D3`.  It
+  stores
+  the code in `+0x4050` and `+0x4058`, tests the code against the index at
+  `+0x405C`, replaces the code with the value at `+0x4054` when the code reaches
+  the
+  index, and then walks a chain.  The chain reads the byte at the context plus
+  the
+  code times four plus two and keeps the code high bits in place with
+  `(code & ~0xFF) | byte`, and it reads the next code as the 16 bit word at the
+  context plus the code times four.  It ends with the byte `code & 0xFF` in
+  `+0x8084`
+  and `+0x8085` and the code itself in the ring.
+  Evidence: the disassembly of `0x4D4C4`.
+- The high bits stay in place.  The port shifted them down with `code >> 8` and
+  the
+  instructions keep them with `code & ~0xFF`, so the port was corrected.  The
+  first
+  pixel did not change, so that was not the only fault.
+  Evidence: the disassembly and the diff script.
+- The initial shift sweep.  The port was run with each initial shift from zero
+  to
+  twelve, and the shift eleven gives the first byte `0x03`, the plaintext value,
+  while
+  every other shift gives another value.  The head at the shift eleven is
+  `03 03 03 00 00 03 00 00` against the plaintext `03 00 00 00 B8 2E 03 00`, so
+  the
+  first byte matches and the second does not.
+  Evidence: the shift sweep.
+- The init sets the shift to nine, so the first code read uses nine bits and the
+  mask `0x1FF`, and the first code reads `0x100`, the literal.  The sweep shows
+  that
+  the first byte needs eleven bits, so the literal read offset and the shift
+  advance
+  are the remaining question, not the mask table.
+  Evidence: the disassembly of `0x4D360` and the shift sweep.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
