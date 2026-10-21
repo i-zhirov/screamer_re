@@ -2483,6 +2483,50 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, matching the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## The loader runs in the demo
+
+- The loader runs during the demo, not only on the two menu paths.  A probe that
+  waits
+  twenty seconds and then breaks lands inside the loader at `EIP=1E7CB0`, which
+  is module
+  `0x25CB0`, inside the loader at `0x257B0`.  The demo therefore loads the
+  sprite
+  member, and every earlier probe that waited less than that saw the fill
+  pattern.
+  Evidence: the race probe.
+- The loader statics hold the runtime values at `0150:1E7CD4` and `0150:1E7CCC`:
+  the count is 3, the size is 208568, the record pointer is `0x0008D800`, and
+  the pixel
+  pointer is `0x002CAB14`.  The size matches the pixel byte count exactly, so
+  the LZSS
+  output count is 208568.
+  Evidence: the two dumps.
+- The port output count is 185 for `GAMEL.SPR` and 2 for `GAMEH.SPR`, so the
+  port and
+  the runtime differ by a factor near 1127 and the port is broken.  The runtime
+  count is
+  the reconciliation target: 208568.
+  Evidence: the port test and the statics.
+- The driver length is the record `+0x6C`, which is 10010 for `GAMEL.SPR` and
+  28736 for
+  `GAMEH.SPR`, and the driver limit is the record `+0x70` plus one, which is
+  24484 and
+  93676.  The runtime output count is 208568 for a member, so the limit is not
+  the output
+  bound for either member and the driver must run more than once or the field
+  bounds
+  something else.
+  Evidence: the records and the statics.
+- The member read did not appear in the break window, because the game issues
+  many small
+  reads and the breaks landed between them.  A probe that filters on the read
+  count 28736 or
+  10010 catches the member read and its record pointer.
+  Evidence: the member probe.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the runtime size.
+  Evidence: the record decode and the statics.
 ## Method
 
 The investigation uses these steps:
