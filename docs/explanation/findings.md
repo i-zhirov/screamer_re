@@ -2287,6 +2287,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, which matches the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## What the record field limits
+
+- The record field at `+0x18` is read in the decoder at `0x4C347`, where the
+  instructions take the record field at the stream `+0x70`, which is the record
+  `+0x18` because the record sits at the stream `+0x58`, and add one to it.  The
+  value then goes to the driver as the fourth argument at `0x4C360`.
+  Evidence: the disassembly of `0x4C128`.
+- The driver stores that argument at `+0x4048`, and the block decoder uses it as
+  the
+  output loop bound: the output loop compares the output count at `+0x4070` with
+  it and
+  loops while the two differ, so the field limits the output byte count of the
+  expansion.
+  Evidence: the disassembly of `0x4D3FC` and `0x4D4C4`.
+- The field is 24483 for `GAMEL.SPR`, so the limit is 24484, while the loader
+  reads
+  208568 pixel bytes from the stream and the port expands the member to 208636
+  bytes.
+  The field therefore cannot bound the expansion that the loader reads, and the
+  two
+  numbers disagree by a factor of eight and a half.
+  Evidence: the raw record, the loader, and the driver.
+- The next step compares the file the loader opens with the member the port
+  decodes.
+  The loader takes the file name from its own argument, and the port decodes
+  `GAMEL.SPR` from `GAME.DAT`, so a different file would explain the
+  disagreement.
+  Evidence: the loader argument and the member list.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, which matches the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
