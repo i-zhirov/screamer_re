@@ -2183,6 +2183,36 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The advance test
+
+- Adding the shift before the literal read does not make the first byte correct.
+  The advance of nine before the literal gives `3E AC 00 AC 00 AC 00 7E` and the
+  advance of two gives `03 03 03 00 00 03 00 07`, which matches three of the
+  eight
+  plaintext bytes and no more.  The plaintext head is `03 00 00 00 B8 2E 03 00`,
+  so
+  the first byte is right at the advance of two and the rest is not.
+  Evidence: the advance test.
+- The advance that makes the first byte right is two, not nine, so the code read
+  advances by the shift plus two, or the literal read starts two bits later than
+  the
+  code advance.  The shift is nine from the init, so the advance is not the
+  shift.
+  Evidence: the advance test.
+- The port matches the machine code in every read component, and the advance
+  test shows
+  the plaintext head needs two more bits before the literal.  The next step
+  reads the
+  reader's advance instruction again, because the instruction adds the shift and
+  the
+  plaintext needs the shift plus two, so the shift at `+0x4068` may not be the
+  value
+  the port uses at that point.
+  Evidence: the disassembly of `0x4D93F` and the advance test.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
