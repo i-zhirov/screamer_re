@@ -115,6 +115,7 @@ def member_bytes(container: Container, member: Member) -> bytes:
 
 MASK = 0x1FF
 LITERAL_BITS = 9
+LITERAL_ADVANCE = 9
 
 
 class _Lzss:
@@ -179,7 +180,7 @@ class _Lzss:
                 self.threshold = 0x200
                 self.index = 0x102
                 saved = self.shift
-                self.shift = LITERAL_BITS
+                self.shift = LITERAL_ADVANCE
                 value = self._read_bits() & ((1 << LITERAL_BITS) - 1)
                 self.shift = saved
                 self.code = value

@@ -2058,6 +2058,47 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The advance sweep
+
+- The sweep over the initial shift from eight to thirteen and the literal
+  advance
+  from two to sixteen, with the instruction accurate reader, the constant mask
+  `0x1FF`, and the literal width nine, finds no combination that produces the
+  plaintext head.  The best is four of eight bytes, and that best is all zeros,
+  so it
+  is not a partial match of the plaintext.
+  Evidence: the advance sweep.
+- The free parameters are therefore exhausted: the initial shift, the literal
+  width, the
+  literal advance, and the mask are swept, and the reader, the init, the literal
+  branch, and the match path are read from the instructions.  The plaintext head
+  does
+  not appear under any of them.
+  Evidence: the four sweeps.
+- The remaining explanation is outside the parameters: either the file layer
+  feeds the
+  decoder a different byte range than the member bytes the port uses, or the
+  driver and
+  block loop interaction holds a detail the port still simplifies.  The port
+  reads the
+  member at the directory offset and size, and the decoder seeks there, so the
+  first
+  candidate is the input range.
+  Evidence: the disassembly chain and the sweeps.
+- The next step compares the input range: dump the buffer the decoder fills at
+  the
+  driver, which the driver reads at `+0x8086` for `min(stream length, 0x400)`
+  bytes,
+  and compare it with the member bytes the port feeds.  The driver's initial
+  read is the
+  first `0x400` bytes of the member, so the two must be equal, and a difference
+  names
+  the fault.
+  Evidence: the disassembly of `0x4D3FC`.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
