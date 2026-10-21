@@ -1633,6 +1633,55 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The decoder disassembly
+
+- The reader is read from the instructions, not from the decompiled C, and the
+  port
+  matches it.  The reader takes the bit position at `+0x406C`, the byte index as
+  the
+  position shifted right three, and the bit offset as the position masked with
+  seven.  It
+  loads the 16 bit word at the byte index, then replaces the low byte with the
+  byte at the
+  byte index plus two, shifts the value right once per bit offset while pulling
+  a bit of that
+  third byte into bit 15, advances the bit position by the shift at `+0x4068`,
+  and masks
+  the value with the entry of the table at `+0x8050` for the shift.
+  Evidence: the disassembly of `0x4D844`.
+- The port is equivalent for the mask `0x1FF`.  The port reads three bytes and
+  shifts,
+  while the code reads a word and pulls the third byte in at bit 15, and the two
+  agree for
+  every shift up to twelve because the pulled bits land above bit 15 and the
+  mask discards
+  them.
+  Evidence: the disassembly of `0x4D844` and the port.
+- The mask table at `+0x8050` is the remaining unknown and it is not the values
+  `(1 << n) - 1` as assumed, because the first literal then reads `0x3F` while
+  the
+  plaintext holds `0x03`.  The table holds the mask for each shift, and its
+  values must be
+  read rather than assumed.
+  Evidence: the disassembly of `0x4D844` and the plaintext.
+- The reader also tracks the stream length: it compares the field at `+0x4044`
+  less the field
+  at `+0x4040` with `0x400` less the byte index and stops at the stream end, and
+  the
+  driver adds the bytes read to `+0x4040`.  The port seeds the buffer instead,
+  which is
+  equivalent only when the stream is at least `0x400` bytes.
+  Evidence: the disassembly of `0x4D844` and the decompiled `FUN_0004d3fc`.
+- The next step is to read the mask table: twelve 32 bit entries at the context
+  plus
+  `0x8050`.  The context is the stream structure, and the table values settle
+  the literal
+  width.
+  Evidence: the disassembly of `0x4D844`.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
