@@ -1138,6 +1138,32 @@ audio tracks.  The game plays the tracks through the CD audio path.
   fixed points.
   Evidence: the two driven runs.
 - The sprite count, the dimensions, and the palette stay open.
+## The two-minute key probe
+
+- The race did not start.  The game wrote no choice file and no replay, and the
+  run-time address stayed at `0150:1E1C40`, the demo motion routine, through 24
+  Enter
+  presses spaced five seconds apart.
+- The sprite loader statics changed.  The dumps hold `81 81 19 10 08 04 03 03`
+  at
+  `0150:25CD4`, `03 03 03 03 03 03 03 03` at `0150:25CDC`, and
+  `88 88 88 1A` at `0150:25CCC`, not the fill patterns of the earlier runs, so
+  something wrote those statics during the run.
+- The values do not match the sprite structure: the first dword would be
+  0x10198181, which is not a plausible sprite count, and the second is not a
+  plausible pixel size.  The loader did not run for a race, and the demo may
+  have
+  written the statics for its own graphics.
+  Evidence: the dumps and the missing state files.
+- The Enter key does not leave the demo in this configuration, while one earlier
+  run
+  did leave it, so the effect is not reproducible from the key alone.  The next
+  probe
+  should watch the demo state itself, for example with `BPPM` on the input flags
+  at
+  `DAT_00118E1C`, rather than relying on the key timing.
+  Evidence: the two driven runs.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
