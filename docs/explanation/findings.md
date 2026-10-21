@@ -1440,6 +1440,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The byte for byte check
+
+- The plaintext is built.  The two pixel dumps stitched at the correct split,
+  the
+  first from `0x6BD00` to `0x7FD2C` and the second from `0x7FD2C`, give exactly
+  208568 bytes, the size the loader read.
+  Evidence: the stitched plaintext.
+- The port does not complete.  The expansion stops with the clear message "the
+  ring or
+  table index runs past its bound", so the match decoding diverges and no byte
+  for byte
+  comparison is possible yet.
+  Evidence: the port run.
+- The harness is in place.  The port takes the compressed member and the
+  plaintext is
+  the ground truth, with the pixel part at the offset 68 of the expansion, after
+  the
+  count of 8 bytes and the three records of 60 bytes.  The moment the match
+  decoding is
+  right, the comparison reports it.
+  Evidence: the port and the plaintext.
+- The port now raises a clear error instead of crashing, so the next iteration
+  can debug
+  the match decoding against the plaintext rather than guess.
+  Evidence: the port run.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
