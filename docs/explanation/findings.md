@@ -2451,6 +2451,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, matching the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## The instrumented file reads
+
+- The instrumented read probe catches three events.  The first is the read call
+  itself at
+  `CS=824 EIP=17A5` with `ECX=1C`, which is a 28 byte read through the real mode
+  path.  The second and third are the return and the idle: the third sits at
+  `CS=150 EIP=1E1C40`, the demo motion routine inside `0x21BA0`, the same idle
+  address every probe has reached.
+  Evidence: the instrumented read probe.
+- No read carries a count of 10010 or 28736, the two sprite member sizes, so the
+  container member is never read and the loader never runs.  The LZSS call
+  therefore
+  cannot be instrumented in the demo idle, and the runtime values of the record
+  pointer,
+  the length, and the output count cannot be read there either.
+  Evidence: the instrumented read probe and the member list.
+- The port values stand as the only measured set: the driver length 10010 for
+  the low
+  member, the driver limit 24484, and the output count 185.  The runtime values
+  need a
+  probe that reaches a race or the network menu.
+  Evidence: the driver and the port.
+- The next step drives the game into a race with the key sequence and then dumps
+  the
+  driver fields at `+0x4048` and `+0x4044`, which the decoder sets from the
+  record
+  `+0x70` plus one and `+0x6C`.
+  Evidence: the call sites and the driver.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
