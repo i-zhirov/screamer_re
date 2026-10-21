@@ -1,0 +1,11 @@
+break
+exec BPINT 21 "3F"
+clear
+exec RUN
+sleep 12
+break
+read CS EIP EBX ECX EDX
+exec MEMDUMPBIN 0150:25A800 4096 MASK_A.BIN
+exec MEMDUMPBIN 0150:2A800 4096 MASK_B.BIN
+exec BPDEL *
+exec RUN

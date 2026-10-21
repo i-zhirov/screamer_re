@@ -1797,6 +1797,36 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The mask table constraint
+
+- The mask table has two constraints from the known bytes.  The first code reads
+  `0x100`, so the entry for the initial shift keeps bit eight and clears every
+  bit
+  above it.  The first literal reads `0x03` from the value `0x3F`, so the entry
+  for
+  the shift nine keeps bits zero and one and clears bits two to five.  The two
+  entries
+  are therefore different, so the initial shift is not nine and the code and the
+  literal
+  use different entries.
+  Evidence: the compressed head, the plaintext, and the disassembly.
+- A guessed dump of two regions at `0150:25A800` and `0150:2A800` returns data
+  but not the mask table, because the stream structure address is not known and
+  the
+  dump addresses were guesses.  The dump files are also larger than the
+  requested
+  length, the same size quirk as before.
+  Evidence: the mask table probe.
+- The next step is a memory search.  The stream structure holds the file name at
+  `+0x24`, so a search for the name finds the stream, and the table lies at the
+  found address plus `0x80DC`.  The debugger offers `MEMFIND` to start a search
+  and
+  `MEMS` to search a value within it.
+  Evidence: the stream layout and the debugger help.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
