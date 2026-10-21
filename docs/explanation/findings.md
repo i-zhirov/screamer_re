@@ -1988,6 +1988,40 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The block trace
+
+- The block trace at the initial shift nine: the first block reads the code
+  `0x00C` and emits `0x0C`, the second reads `0x03E` and emits `0x3E`, so the
+  code is the literal and the value passes through the reader.  The first byte
+  is
+  `0x0C` against the plaintext `0x03`.
+  Evidence: the block trace.
+- The block trace at the initial shift eleven: the first block emits `0x03`, the
+  plaintext value, then `03 03`, then `00 00 03`, then zeros.  The head is
+  `03 03 03 00 00 03 00 00` against the plaintext `03 00 00 00 B8 2E 03 00`, so
+  the
+  first byte is right and the rest is not.
+  Evidence: the block trace.
+- The two traces together show the framing: at the shift nine the first block is
+  one
+  byte and the byte is wrong, and at the shift eleven the first byte is right. 
+  The
+  plaintext count of three wants one byte `0x03` and then three zero bytes, so
+  the
+  second block must emit three zeros, and the trace at the shift eleven emits
+  two
+  bytes instead.
+  Evidence: the block trace.
+- The reader, the mask table, the init, the literal branch, and the match path
+  are all
+  read from the instructions, so the remaining question is the block framing:
+  how many
+  bytes a block emits and which code reaches the literal path.
+  Evidence: the disassembly chain.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
