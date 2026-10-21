@@ -1208,6 +1208,37 @@ audio tracks.  The game plays the tracks through the CD audio path.
   selector and offset through `IV` and `EV`.
   Evidence: the dump comparison.
 - The sprite count, the dimensions, and the palette stay open.
+## The watch and dump addressing
+
+- The `IV` and `EV` cross-check works.  The debugger creates a variable for a
+  selector and offset, `IV 0150:118E1C INFLAG`, and `EV` reads it, so a probe
+  can
+  name the state and read it back.
+  Evidence: the cross-check probe.
+- The mismatch is resolved.  The dumps before the run are zero at all three
+  addresses and the dumps after the first hit hold the fill pattern `55 55 55
+  55` at all
+  three, so the memory did change and the value at the watch is the fill pattern
+  of the
+  image load, not the game state.
+  Evidence: the before and after dumps.
+- The cause is the watch syntax.  `BPPM [selector]:[offset]` matches the offset
+  in any
+  selector, so it fires for the DOS/4GW image loader at `CS=A5C` and `CS=18` and
+  for
+  the keyboard handler at `CS=3DB8` alike, while `MEMDUMPBIN 0150:118E1C` reads
+  the
+  linear address `0x1C2000 + 0x118E1C`, which is the game data object only.
+  Evidence: the watch hits and the dump values.
+- The correct watch for the game state is the linear form, `BPLM 0x2DAE1C`,
+  which the
+  earlier probe already showed fires on a write.  A probe that uses `BPLM` with
+  the
+  linear address and dumps through a debug variable created with `IV` reads the
+  same
+  memory in both steps.
+  Evidence: the linear watch probe and the cross-check probe.
+- The sprite count, the dimensions, and the palette stay open.
 ## Method
 
 The investigation uses these steps:
