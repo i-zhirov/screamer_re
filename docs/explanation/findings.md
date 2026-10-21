@@ -2394,6 +2394,38 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, matching the plaintext length exactly.
   Evidence: the record decode and the plaintext.
+## Decoding the high member
+
+- The port decodes `GAMEH.SPR` and it still fails: the expansion is two bytes in
+  three blocks against the plaintext of 208568 pixel bytes, and `GAMEL.SPR`
+  expands
+  to 185 bytes in 99 blocks.  The member choice is therefore one fault and the
+  decoder holds another, because neither member expands.
+  Evidence: the member test.
+- The two members share their first four bytes, `00 7F 00 18`, so the decoder
+  reads
+  the same first block for both and diverges at the same point.  The shared head
+  is a
+  header, as the earlier note said, and the divergence is inside the block
+  framing.
+  Evidence: the two member heads.
+- The driver limit stands against both members: 24484 for `GAMEL.SPR` and 93676
+  for
+  `GAMEH.SPR`, while the plaintext holds 208568 pixel bytes, which is the high
+  member expansion.  The limit is therefore not the output size for either
+  member.
+  Evidence: the records and the plaintext.
+- The next step compares the driver limit with the expansion for the high
+  member: the
+  driver stops the output when the count reaches the limit, and the plaintext
+  needs
+  208636 bytes, so either the driver is called more than once or the field means
+  something else.
+  Evidence: the driver and the loader.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568, matching the plaintext length exactly.
+  Evidence: the record decode and the plaintext.
 ## Method
 
 The investigation uses these steps:
