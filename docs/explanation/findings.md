@@ -1949,6 +1949,45 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel data is 208568 bytes at one byte per pixel.
   Evidence: the record decode.
+## The bit bookkeeping
+
+- The literal width sweep with the corrected reader.  The width two gives
+  `00 03 03 03 00 00 03 00` against the plaintext `03 00 00 00 B8 2E 03 00`, so
+  the port emits a leading zero and then the value three three times.  Every
+  other
+  width gives another head.
+  Evidence: the literal width sweep.
+- The first code reads `0x100`, the literal, with the shift nine and the mask
+  `0x1FF`, and the literal read at the width two takes the bits nine and ten,
+  which
+  are `1 1` and the plaintext value `0x03`.  The reader then lands two bits
+  high,
+  because the value at the bit position nine is `0x0C` and the mask `0x03`
+  clears
+  it to zero.
+  Evidence: the bit analysis and the sweep.
+- The remaining question is the bit position bookkeeping: the code read advances
+  the
+  position by the shift, which is nine, and the plaintext wants the literal at
+  the
+  bits nine and ten, which the port reads as `0x0C`.  The advance for the code
+  and
+  the offset for the literal are therefore the last open detail, and the shift
+  sweep
+  shows that the first byte alone is right at the shift eleven.
+  Evidence: the sweeps.
+- The decoder is otherwise read from the instructions: the mask table is the
+  values
+  `(1 << shift) - 1` for the shifts nine to twelve, the init sets the shift
+  nine, the
+  threshold `0x200`, the index `0x102`, the state zero, and the bit position
+  zero,
+  and the match path keeps the code high bits in place.
+  Evidence: the disassembly of `0x4D360`, `0x4D4C4`, and `0x4D844`.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel data is 208568 bytes at one byte per pixel.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
