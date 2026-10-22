@@ -210,19 +210,20 @@ Evidence: the exclusive-OR decode of both directories.
 
 ### The member data compression
 
-The member data is LZSS-compressed.  The read path is:
+The member data is LZW-compressed.  The read path is:
 
 | Module address | Name | Evidence |
 | --- | --- | --- |
 | `0x4c4e5` | `stream_read` | tests the stream flag at `+0x10`; a clear flag reads raw and a set flag calls the expander |
-| `0x4d3fc` | `lzss_expand` | reads one header byte and loops on the block decoder until it returns 0 |
-| `0x4d4c4` | `lzss_block` | the LZSS block decoder |
-| `0x4d844` | `lzss_bit_read` | returns `0x100` for a literal and `0x101` for the end |
+| `0x4d3fc` | `lzw_expand` | loops on the block decoder until it returns 0 |
+| `0x4d4c4` | `lzw_block` | the LZW block decoder; the codes 0x100 clear and 0x101 end the stream |
+| `0x4d844` | `lzw_bit_read` | returns the code at the bit position, masked to the code width |
 
-The block decoder holds a ring buffer at `+0x4074` with a window of 0x200 bytes,
-a shift count at `+0x4068` that starts at 9 and grows to 12, and the output
-count
-at `+0x4070`.  The shift count range 9 to 12 is the classic LZSS length coding.
+The block decoder holds the dictionary at `+0x4074` with four byte entries and
+the index at `+0x4064`, a code width at `+0x4068` that starts at 9 and grows to
+12, and the output count at `+0x4070`.  The codes `0x100` and `0x101` clear the
+dictionary and end the stream, and the first free entry is `0x102`, which is the
+classic LZW coding.
 Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d3fc`.
 
 The bit reader `0x4d844` holds a bit buffer of 0x400 bytes at `+0x8086`, the bit
@@ -233,26 +234,21 @@ low 3 bits of the position and masked with the mask of the shift count.  The
 mask
 table holds the values `(1 << n) - 1` for the shift counts 9 to 12, so the
 reader
-returns 9 to 12 bits at a time.  The literal code `0x100` and the end code
-`0x101`
-mark a literal byte and the end of the stream.
-Evidence: the decompiled `FUN_0004d844`.
+returns 9 to 12 bits at a time.  The reader keeps the full 16 bit word and
+uses the byte at `+2` only for the bits that the bit offset pulls in at bit 15.
+Evidence: the disassembly of `0x4d916`.
 
-The confirmation of the sprite count at `+0x00` and the pixel data size at
-`+0x04`
-needs the expanded member bytes.  A run-time probe of the sprite loader at the
-run-time address `0150:31AA1` did not reach the loader within the probe window,
-so
-the confirmation stays open.
-Evidence: the probe session `work/probe2.dbg`.
+The expansion is confirmed: `LOGOH.SPR` of `GFX/GRAF.DAT` expands to 208636
+bytes, the sprite count at `+0x00` is 3, the pixel data size at `+0x04` is 208568,
+and the records are 0, 0, 200, 240, 0, then 1, 1, 466, 188, 48000, then 0, 0,
+640, 114, 135608, which matches the run-time records at `0150:8D800` exactly.
+Evidence: the expansion test and the record dump.
 
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and
 the names resolve.  The member data does not match the plain sprite structure,
-because it is LZSS-compressed; the expansion runs when the member is read, not
-when
-the directory is read.  The re-verification of the sprite layout therefore needs
-the expanded member bytes.  Evidence: the decompiled `FUN_0004c4e5`,
-`FUN_0004d3fc`, and `FUN_0004d4c4`.
+because it is LZW-compressed; the expansion runs when the member is read, not when
+the directory is read.  The expansion is now confirmed, so the re-verification of
+the sprite layout holds.  Evidence: the expansion test and the record dump.
 
 ### The resolution modes
 

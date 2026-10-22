@@ -37,14 +37,14 @@ def main() -> int:
     plain = plaintext()
     container = gfx_container.parse(GAME / "GFX/GAME.DAT")
     raw = gfx_container.member_bytes(container, container.member("GAMEL.SPR"))
-    decoder = gfx_container._Lzss(raw, 1 << 20)
+    decoder = gfx_container._Lzw(raw, 1 << 20)
     print(f"plaintext {len(plain)} bytes, compressed {len(raw)} bytes")
     for block in range(5000):
         before, code, shift, bitpos, ring = (
             len(decoder.out), decoder.code, decoder.shift, decoder.bits, decoder.ring_index,
         )
         try:
-            more = decoder.block()
+            more = decoder.step()
         except ValueError as error:
             print(f"block {block}: stopped at output {len(decoder.out)}: {error}")
             return 1

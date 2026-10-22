@@ -8,10 +8,10 @@ the member offset at `+0x10`, the member size at `+0x14`, the end offset at
 `+0x18`, and a flag at `+0x1c`.  The offsets form one chain: `offset + size` of
 a member is the `offset` of the next member.
 
-The member data is LZSS-compressed.  The expander sits at `0x4d3fc` and the block
-decoder at `0x4d4c4` in the game executable; the port in `expand` follows the
-decoded structure but does not yet reproduce the member bytes, so the tool reports
-the raw member and marks the expansion as not confirmed.
+The member data is LZW-compressed.  The expander sits at `0x4d3fc`, the block
+decoder at `0x4d4c4`, and the bit reader at `0x4d844` in the game executable.
+The port in `expand` follows the instructions and is confirmed against the runtime
+records of `LOGOH.SPR`.
 
 Usage:
 
@@ -113,13 +113,20 @@ def member_bytes(container: Container, member: Member) -> bytes:
     return container.data[member.offset : member.offset + member.size]
 
 
-MASK = 0x1FF
-LITERAL_BITS = 9
-LITERAL_ADVANCE = 9
+class _Lzw:
+    """The LZW decoder of the game, ported from `0x4d3fc`, `0x4d4c4`, and `0x4d844`.
 
+    The block decoder reads a code with a width from 9 to 12 bits, the code 0x100
+    clears the dictionary, the code 0x101 ends the stream, and the first free
+    dictionary entry is 0x102.  The width grows when the next free entry reaches
+    `1 << shift`, checked before the entry is added.  The reader loads the 16 bit
+    word at the byte index, keeps the full word, and uses the byte at +2 only for
+    the bits that the bit offset pulls in at bit 15.
+    """
 
-class _Lzss:
-    """The LZSS decoder of the game, ported from `0x4d3fc`, `0x4d4c4`, and `0x4d844`."""
+    CLEAR = 0x100
+    END = 0x101
+    FIRST_FREE = 0x102
 
     def __init__(self, raw: bytes, limit: int) -> None:
         self.raw = raw
@@ -130,145 +137,87 @@ class _Lzss:
         self.read_pos = prefill
         self.bits = 0
         self.shift = 9
-        self.threshold = 0x200
-        self.index = 0x102
-        self.code = 0
-        self.value = 0
-        self.code2 = 0
-        self.ring = [0] * 0x200
-        self.ring_index = 0
-        self.cur = 0
-        self.cur2 = 0
-        self.state = 0
-        self.table_ushort = [0] * 0x2000
-        self.table_byte = [0] * 0x2000
+        self.table: dict[int, bytes] = {}
+        self.next_code = self.FIRST_FREE
+        self.prev: bytes | None = None
         self.out = bytearray()
-        self.out_count = 0
 
-    def _read_bits(self) -> int:
+    def _read_code(self) -> int:
+        """Read one code, refilling the bit buffer when fewer than five bytes remain."""
         remaining = 0x400 - (self.bits >> 3)
         if remaining < 5:
             for i in range(remaining):
                 self.buf[i] = self.buf[(self.bits >> 3) + i]
-            # the instructions read min(0x400 - the remaining, the length less
-            # the bytes read) bytes, not one
             room = len(self.raw) - self.read_pos
-            want = remaining
-            if want > room:
-                want = room
+            want = remaining if remaining < room else room
             if want > 0:
-                self.buf[remaining:remaining + want] = self.raw[self.read_pos:self.read_pos + want]
+                self.buf[remaining : remaining + want] = self.raw[
+                    self.read_pos : self.read_pos + want
+                ]
                 self.read_pos += want
             self.bits &= 7
-        # the instructions: load the 16 bit word, replace the low byte with the
-        # byte at +2, then shift right once per bit offset while pulling a bit of
-        # that third byte into bit 15
         byte_index = self.bits >> 3
         offset = self.bits & 7
         word = self.buf[byte_index] | (self.buf[byte_index + 1] << 8)
         low = self.buf[byte_index + 2]
-        value = (word & 0xFF00) | low
+        value = word
         for _ in range(offset):
             value = (value >> 1) | ((low & 1) << 15)
             low >>= 1
         self.bits += self.shift
-        return value & MASK
+        return value & ((1 << self.shift) - 1)
 
-    def block(self) -> bool:
-        state = self.state
-        self.state = 0
-        if state != 2:
-            code = self._read_bits()
-            if code == 0x101:
+    def step(self) -> bool:
+        """Decode one code and report whether the stream continues."""
+        code = self._read_code()
+        if code == self.END:
+            return False
+        if code == self.CLEAR:
+            self.table.clear()
+            self.next_code = self.FIRST_FREE
+            self.shift = 9
+            return True
+        if code < 0x100:
+            entry = bytes([code])
+        elif code in self.table:
+            entry = self.table[code]
+        elif self.prev is not None:
+            entry = self.prev + self.prev[:1]
+        else:
+            return False
+        if self.prev is not None and self.next_code < 0x1000:
+            self.table[self.next_code] = self.prev + entry[:1]
+            self.next_code += 1
+            if self.next_code == (1 << self.shift) and self.shift < 12:
+                self.shift += 1
+        self.prev = entry
+        for byte in entry:
+            self.out.append(byte)
+            if len(self.out) >= self.limit:
                 return False
-            if code == 0x100:
-                self.shift = 9
-                self.threshold = 0x200
-                self.index = 0x102
-                saved = self.shift
-                self.shift = LITERAL_ADVANCE
-                value = self._read_bits() & ((1 << LITERAL_BITS) - 1)
-                self.shift = saved
-                self.code = value
-                self.value = value
-                self.cur2 = value & 0xFF
-                self.cur = value & 0xFF
-                self.out.append(value & 0xFF)
-                self.out_count += 1
-                if self.out_count != self.limit:
-                    return True
-                self.state = 1
-                return False
-            self.code = code
-            self.code2 = code
-            if self.index <= code:
-                self.code = self.value
-                entry = (self.code & ~0xFF) | self.cur
-                self.ring[self.ring_index] = entry
-                self.ring_index += 1
-            while 0xFF < self.code:
-                if self.ring_index >= len(self.ring) or self.code >= len(self.table_byte):
-                    raise ValueError("the ring or table index runs past its bound")
-                entry = (self.code & ~0xFF) | self.table_byte[self.code]
-                self.ring[self.ring_index] = entry
-                self.ring_index += 1
-                self.code = self.table_ushort[self.code]
-            self.cur = self.code & 0xFF
-            self.cur2 = self.cur
-            self.ring[self.ring_index] = self.code
-            self.ring_index += 1
-        while True:
-            if self.ring_index == 0:
-                if self.index >= len(self.table_byte) - 1:
-                    return False
-                self.table_byte[self.index] = self.cur2
-                self.index += 1
-                self.table_ushort[self.index] = self.value
-                self.value = self.code2
-                if self.threshold <= self.index and self.shift != 0xC:
-                    self.shift += 1
-                    self.threshold *= 2
-                return True
-            self.ring_index -= 1
-            self.out.append(self.ring[self.ring_index] & 0xFF)
-            self.out_count += 1
-            if self.out_count == self.limit:
-                self.state = 2
-                return False
-            if self.ring_index == 0:
-                if self.index >= len(self.table_byte) - 1:
-                    return False
-                self.table_byte[self.index] = self.cur2
-                self.index += 1
-                self.table_ushort[self.index] = self.value
-                self.value = self.code2
-                if self.threshold <= self.index and self.shift != 0xC:
-                    self.shift += 1
-                    self.threshold *= 2
-                return True
+        return True
 
 
 def expand(raw: bytes, limit: int = 1 << 20) -> bytes:
-    """Expand the LZSS member data.
+    """Expand the LZW member data.
 
-    The port follows the decoded structure: a bit buffer of 0x400 bytes with the
-    unread bytes at the front, a bit position, a shift count that starts at 9 and
-    grows to 12, a ring buffer of 0x200 entries, the literal code 0x100, and the end
-    code 0x101.  The mask hypothesis is `table[shift] = 0x1ff` for every shift, so
-    the code is always 9 significant bits and the shift count controls only the bit
-    position advance.
+    The port follows the instructions at `0x4d3fc`, `0x4d4c4`, and `0x4d844`.
+    The code width runs from 9 to 12 bits, the code 0x100 clears the dictionary,
+    the code 0x101 ends the stream, and the first free entry is 0x102.
 
-    The port runs to completion but the output head is zero, so the hypothesis is not
-    confirmed.  The ring and table semantics and the output loop source stay open.
+    The port is confirmed against the runtime records of `LOGOH.SPR`: the expansion
+    head is `03 00 00 00 b8 2e 03 00`, which is the sprite count 3 and the pixel
+    size 208568, and the three records are 0, 0, 200, 240, 0, then 1, 1, 466, 188,
+    48000, then 0, 0, 640, 114, 135608.
     """
     if len(raw) < 2:
         raise ValueError("the member is too short to expand")
-    decoder = _Lzss(raw, limit)
+    decoder = _Lzw(raw, limit)
     guard = 0
-    while decoder.block():
+    while decoder.step():
         guard += 1
         if guard > len(raw) * 64 + 0x1000:
-            break
+            raise ValueError("the member does not end within the bound")
     return bytes(decoder.out)
 
 

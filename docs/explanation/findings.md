@@ -2615,6 +2615,46 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568.
   Evidence: the records.
+## The LZW decoder is confirmed
+
+- The member expansion is confirmed against the run-time records.  `LOGOH.SPR`
+  of
+  `GFX/GRAF.DAT` expands to 208636 bytes, the sprite count at `+0x00` is 3, the
+  pixel size at `+0x04` is 208568, and the three records are 0, 0, 200, 240, 0,
+  then
+  1, 1, 466, 188, 48000, then 0, 0, 640, 114, 135608.  Those are exactly the
+  records the run-time holds at `0150:8D800`, so the decoder is solved.
+  Evidence: the expansion test and the record dump.
+- The decoder is LZW with the codes 0x100 clear and 0x101 end, the first free
+  entry 0x102, and the code width from 9 to 12 bits.  The width grows when the
+  next
+  free entry reaches `1 << shift`, checked before the entry is added.  The
+  reader
+  keeps the full 16 bit word and uses the byte at `+2` only for the bits that
+  the bit
+  offset pulls in at bit 15.
+  Evidence: the disassembly of `0x4d4c4`, `0x4d844`, and `0x4d916`.
+- The port is correct on `LOGOH.SPR` and the earlier mismatch had two causes:
+  the
+  member was wrong, because the demo loads `logoH.spr` from `gfx\graf.dat` and
+  not
+  `gameH.spr` from `gfx\game.dat`, and the algorithm was wrong, because the port
+  implemented LZSS and the game uses LZW.  The record `end` field equals the
+  expanded size, which is `8 + count * 0x14 + size`, and it is 208636 for
+  `LOGOH.SPR`.
+  Evidence: the member list, the call sites, and the expansion test.
+- The pixel bytes are the 208568 bytes after the 68 byte head, which is the
+  count,
+  the size, and the three records.
+  Evidence: the expansion.
+- The next step reads the pixel bytes of the expansion and confirms the sprite
+  images
+  against the screen.
+  Evidence: the expansion.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel bytes sum to 208568, which is the pixel size at `+0x04`.
+  Evidence: the expansion and the record dump.
 ## Method
 
 The investigation uses these steps:

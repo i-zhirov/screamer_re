@@ -99,10 +99,9 @@ python3 tools/gfx_container.py head GFX/GAME.DAT GAMEL.SPR
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether
 `8 + count * 0x14 + size` equals the member size.  The member data is
-LZSS-compressed, so the raw member does not match the plain structure.  The
-expansion follows the decoded LZSS structure but does not yet reproduce the
-member
-bytes, so the tool reports the raw member.
+LZW-compressed, so the raw member does not match the plain structure.  The
+expansion follows the instructions and is confirmed against the runtime records of
+`LOGOH.SPR`.
 
 ## Debugger limits and the alternatives
 
