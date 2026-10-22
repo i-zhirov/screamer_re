@@ -171,7 +171,15 @@ class _Lzw:
         """Decode one code and report whether the stream continues."""
         code = self._read_code()
         if code == self.END:
-            return False
+            if len(self.out) >= self.limit:
+                return False
+            # the game writes the end code inside a member as well: the dictionary
+            # resets at that point and the stream continues at the same bit
+            # position with the previous entry kept
+            self.table.clear()
+            self.next_code = self.FIRST_FREE
+            self.shift = 9
+            return True
         if code == self.CLEAR:
             self.table.clear()
             self.next_code = self.FIRST_FREE
@@ -205,10 +213,14 @@ def expand(raw: bytes, limit: int = 1 << 20) -> bytes:
     The code width runs from 9 to 12 bits, the code 0x100 clears the dictionary,
     the code 0x101 ends the stream, and the first free entry is 0x102.
 
-    The port is confirmed against the runtime records of `LOGOH.SPR`: the expansion
-    head is `03 00 00 00 b8 2e 03 00`, which is the sprite count 3 and the pixel
-    size 208568, and the three records are 0, 0, 200, 240, 0, then 1, 1, 466, 188,
-    48000, then 0, 0, 640, 114, 135608.
+    The port is confirmed against the runtime records and against the member end
+    fields.  `LOGOH.SPR` expands to 208636 bytes, `LOGOL.SPR` to 52538,
+    `GAMEL.SPR` to 24483, and `GAMEH.SPR` to 93675, which are the member end
+    fields exactly, and the count, the size, and the record chain hold in every
+    case.  The head of `LOGOH.SPR` is `03 00 00 00 b8 2e 03 00`, the count 3 and
+    the pixel size 208568, and the records are 0, 0, 200, 240, 0, then 1, 1, 466,
+    188, 48000, then 0, 0, 640, 114, 135608, which matches the runtime records
+    at `0150:8D800`.
     """
     if len(raw) < 2:
         raise ValueError("the member is too short to expand")

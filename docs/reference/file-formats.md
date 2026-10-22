@@ -238,10 +238,15 @@ returns 9 to 12 bits at a time.  The reader keeps the full 16 bit word and
 uses the byte at `+2` only for the bits that the bit offset pulls in at bit 15.
 Evidence: the disassembly of `0x4d916`.
 
-The expansion is confirmed: `LOGOH.SPR` of `GFX/GRAF.DAT` expands to 208636
-bytes, the sprite count at `+0x00` is 3, the pixel data size at `+0x04` is 208568,
-and the records are 0, 0, 200, 240, 0, then 1, 1, 466, 188, 48000, then 0, 0,
-640, 114, 135608, which matches the run-time records at `0150:8D800` exactly.
+The expansion is confirmed: every sprite member of `GFX/GRAF.DAT` and
+`GFX/GAME.DAT` expands to its member end field exactly, which is
+`8 + count * 0x14 + size`.  `LOGOH.SPR` expands to 208636 bytes, the sprite
+count at `+0x00` is 3, the pixel data size at `+0x04` is 208568, and the records
+are 0, 0, 200, 240, 0, then 1, 1, 466, 188, 48000, then 0, 0, 640, 114, 135608,
+which matches the run-time records at `0150:8D800` exactly.  `LOGOL.SPR` expands
+to 52538, `MENUL.SPR` to 75344, `MENUH.SPR` to 294846, `GAMEL.SPR` to 24483,
+and `GAMEH.SPR` to 93675.  The stream writes the end code inside a member as
+well, and the dictionary resets at that point while the stream continues.
 Evidence: the expansion test and the record dump.
 
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and

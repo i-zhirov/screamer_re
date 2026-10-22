@@ -2684,6 +2684,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel bytes sum to 208568.
   Evidence: the expansion and the record dump.
+## The member end fields are confirmed
+
+- The LZW decoder expands every sprite member of `GFX/GRAF.DAT` and
+  `GFX/GAME.DAT` to its member end field exactly: `LOGOL.SPR` to 52538,
+  `LOGOH.SPR` to 208636, `MENUL.SPR` to 75344, `MENUH.SPR` to 294846,
+  `GAMEL.SPR` to 24483, and `GAMEH.SPR` to 93675.  The count, the size, and
+  the record chain hold in every case, so the member end field is the expanded
+  size and the decoder is confirmed on six members.
+  Evidence: the expansion test.
+- The stream writes the end code inside a member as well.  The first end code of
+  `GAMEL.SPR` arrives at 5825 expanded bytes with 1611 codes read, and the
+  stream continues after it: the dictionary resets at that point and the stream
+  continues at the same bit position with the previous entry kept.  `GAMEH.SPR`
+  writes 59 such end codes.
+  Evidence: the code trace and the expansion test.
+- The clear code keeps the previous entry.  The variant that clears it fails
+  `GAMEL.SPR` at 5825 bytes, so the game keeps the previous entry across a
+  clear.
+  Evidence: the variant test.
+- The font members and the `PKC` members hold their own structures and are not
+  sprite members, so the structure test applies to the sprite members only.
+  Evidence: the member list.
+- The next step reads the pixel bytes of the expansion and confirms the sprite
+  images against the screen.
+  Evidence: the expansion test.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel bytes sum to 208568.
+  Evidence: the expansion and the record dump.
 ## Method
 
 The investigation uses these steps:
