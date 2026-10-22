@@ -3055,6 +3055,44 @@ audio tracks.  The game plays the tracks through the CD audio path.
   descriptor
   height and checks the shape, which names the letter glyphs.
   Evidence: the font page.
+## The descriptor second field is the row stride in bytes
+
+- The user review of the font page: the only somewhat readable image is the
+  `ATTRH.FNT` glyph at four bits and 64 pixels per row, which shows some
+  symbols,
+  and the one byte reading at 32 pixels per row shows the same fragment. 
+  Everything
+  else is garbage.
+  Evidence: the user review.
+- The two readable readings share the same row stride.  Four bits at 64 pixels
+  per row
+  is 32 bytes per row, and one byte at 32 pixels per row is also 32 bytes per
+  row, so
+  the two readings agree on the stride and differ on the pixel format.  The
+  descriptor
+  second field is therefore the row stride in bytes and not the width in pixels.
+  Evidence: the two readings and the descriptor.
+- The `ATTRH.FNT` descriptor is `(38, 32, 76)`: the height is 38 rows, the
+  stride
+  is 32 bytes, and the glyph holds 1216 bytes, which is `38 * 32`, and the third
+  field 76 is 1216 divided by 16, so the third field is the glyph size in 16
+  byte
+  units.
+  Evidence: the descriptor and the render.
+- The font page now draws every descriptor at its own stride in four bits at
+  twice the
+  stride in pixels and in one byte at the stride in pixels, with the height of
+  the
+  descriptor, and the `ATTRH` glyph at four bits and 64 pixels per row is the
+  reading
+  that shows symbols.
+  Evidence: the font page.
+- The next step draws the `ATTRH` font glyphs at the stride of the descriptor
+  and
+  reads the letters, and checks the third field against the glyph size on the
+  other
+  fonts.
+  Evidence: the font page.
 ## Method
 
 The investigation uses these steps:

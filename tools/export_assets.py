@@ -312,16 +312,37 @@ def build_font_page(game: Path, out_dir: Path, scale: int, cap: int) -> Path:
                 path = out_dir / f"{member.name.replace('.', '_')}_{mode}_{cell_w}.png"
                 write_png(path, w, h, rgb)
                 files.append((label, path))
-            # the descriptor width reading: the second field is the glyph width
+            # the descriptor reading: the second field is the row stride in BYTES.
+            # the draw routine reads four bits per pixel, so the width in pixels is
+            # the stride times two; the glyph holds the height rows of that stride.
             width_files = []
-            for index, (height, gw, extra) in enumerate(descriptors[:cap]):
+            for index, (height, stride, extra) in enumerate(descriptors[:cap]):
                 block = blocks[index] if index < len(blocks) else None
                 if block is None:
                     continue
-                w, h, rgb = font_sheet([block], "nibble", gw, height, per_row=1, scale=scale)
-                path = out_dir / f"{member.name.replace('.', '_')}_w{gw}_g{index}.png"
+                # four bits, the width in pixels is the stride times two
+                w, h, rgb = font_sheet([block], "nibble", stride * 2, height, per_row=1, scale=scale)
+                path = out_dir / f"{member.name.replace('.', '_')}_g{index}_nibble_{stride * 2}px.png"
                 write_png(path, w, h, rgb)
-                width_files.append((f"the glyph {index}: the height {height}, the width {gw}", path))
+                width_files.append(
+                    (
+                        f"the glyph {index}: four bits, the stride {stride} bytes, "
+                        f"{stride * 2} px per row, the height {height}",
+                        path,
+                    )
+                )
+                # one byte, the width in pixels is the stride
+                if stride * height <= len(block):
+                    w, h, rgb = font_sheet([block], "byte", stride, height, per_row=1, scale=scale)
+                    path = out_dir / f"{member.name.replace('.', '_')}_g{index}_byte_{stride}px.png"
+                    write_png(path, w, h, rgb)
+                    width_files.append(
+                        (
+                            f"the glyph {index}: one byte, the stride {stride} bytes, "
+                            f"{stride} px per row, the height {height}",
+                            path,
+                        )
+                    )
             files += width_files
             sections.append(
                 (
