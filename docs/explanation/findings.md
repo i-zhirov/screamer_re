@@ -3026,6 +3026,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   writes with the
   font bitmap, which names the letter glyphs and the mapping.
   Evidence: the draw routine.
+## The font descriptors vary per font
+
+- The font descriptors are not constants.  `GAMEL.FNT` holds the descriptors
+  `(30, 32, 76)`, `(27, 48, 11)`, `(10, 48, 10)`, and `(6, 48, 11)`, and
+  `GAMEH.FNT` holds `(60, 32, 76)`, `(54, 48, 11)`, `(18, 48, 10)`, and
+  `(12, 48, 11)`.  The menu and attribute fonts hold `(11, 32, 76)`, `(9, 32,
+  76)`,
+  `(19, 32, 76)`, and `(30, 32, 76)`, and `(19, 32, 76)` and `(38, 32, 76)`.
+  Evidence: the font page snapshot.
+- The second field is the glyph width.  It is 32 for the menu and the attribute
+  fonts and 48 for the game fonts, so the render of the game fonts with a width
+  of 32
+  is wrong and the glyphs look like noise.
+  Evidence: the font page snapshot.
+- The high fonts double the first field of the low fonts: 30 to 60, 27 to 54, 10
+  to 18,
+  6 to 12, 11 to 22, 9 to 18, 19 to 38, and 30 to 60, which confirms the
+  resolution pair.
+  Evidence: the font page snapshot.
+- The font page draws every block in four readings at a scale of eight and adds
+  one
+  image per descriptor with the width and the height of that descriptor, so the
+  glyphs
+  render at their own size.
+  Evidence: the font page.
+- The next step reads the glyph of one font at the descriptor width and the
+  descriptor
+  height and checks the shape, which names the letter glyphs.
+  Evidence: the font page.
 ## Method
 
 The investigation uses these steps:

@@ -237,8 +237,106 @@ def export_pcx(container, out_dir: Path, notes: list[str]) -> list[tuple[str, Pa
     return files
 
 
+def font_sheet(blocks, mode: str, cell_w: int, cell_h: int, per_row: int = 4,
+               scale: int = 8) -> tuple[int, int, bytes]:
+    """Render the blocks in one of the readings and return a grey sheet."""
+    rows = (len(blocks) + per_row - 1) // per_row
+    sheet_w, sheet_h = per_row * cell_w, rows * cell_h
+    canvas = bytearray(sheet_w * sheet_h)
+    for index, block in enumerate(blocks):
+        gx, gy = (index % per_row) * cell_w, (index // per_row) * cell_h
+        if cell_w * cell_h > len(block) * (2 if mode == "nibble" else (8 if mode == "bit" else 1)):
+            continue
+        for row in range(cell_h):
+            for x in range(cell_w):
+                if mode == "nibble":
+                    byte = block[(row * cell_w + x) >> 1]
+                    value = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
+                    value *= 17
+                elif mode == "byte":
+                    value = block[row * cell_w + x]
+                else:
+                    byte = block[(row * cell_w + x) >> 3]
+                    value = 255 if (byte >> (7 - (x & 7))) & 1 else 0
+                canvas[(gy + row) * sheet_w + gx + x] = value
+    sheet_w = sheet_w * scale
+    sheet_h = sheet_h * scale
+    big = bytearray()
+    for y in range(sheet_h // scale):
+        row = canvas[y * (sheet_w // scale) : (y + 1) * (sheet_w // scale)]
+        wide = bytearray()
+        for value in row:
+            wide += bytes((value,)) * scale
+        for _ in range(scale):
+            big += wide
+    rgb = bytearray()
+    for value in big:
+        rgb += bytes((value, value, value))
+    return sheet_w, sheet_h, bytes(rgb)
+
+
+def build_font_page(game: Path, out_dir: Path, scale: int, cap: int) -> Path:
+    """Write a fonts-only whiteboard with several readings of every block."""
+    readings = [
+        ("nibble", 32, 40, "four bits, 32 px per row (the draw routine)"),
+        ("byte", 32, 40, "one byte, 32 px per row"),
+        ("bit", 32, 40, "one bit, 32 px per row"),
+        ("nibble", 64, 40, "four bits, 64 px per row"),
+    ]
+    sections = []
+    for name in ("GFX/GAME.DAT", "GFX/GRAF.DAT"):
+        container = gfx_container.parse(game / name)
+        for member in container.members:
+            if not member.name.endswith(".FNT"):
+                continue
+            out = gfx_container.expand(
+                gfx_container.member_bytes(container, member), member.end
+            )
+            count = out[0]
+            total = count + 1
+            descriptors = [
+                struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)
+            ]
+            base = 1 + total * 12
+            blocks = [out[base + i * 0x500 : base + (i + 1) * 0x500] for i in range(total)]
+            tail = out[base + total * 0x500 :]
+            blocks += [
+                tail[i * 0x500 : (i + 1) * 0x500] for i in range(len(tail) // 0x500)
+            ]
+            blocks = blocks[:cap]
+            files = []
+            for mode, cell_w, cell_h, label in readings:
+                if mode == "byte":
+                    mode = "byte"
+                w, h, rgb = font_sheet(blocks, mode, cell_w, cell_h, scale=scale)
+                path = out_dir / f"{member.name.replace('.', '_')}_{mode}_{cell_w}.png"
+                write_png(path, w, h, rgb)
+                files.append((label, path))
+            # the descriptor width reading: the second field is the glyph width
+            width_files = []
+            for index, (height, gw, extra) in enumerate(descriptors[:cap]):
+                block = blocks[index] if index < len(blocks) else None
+                if block is None:
+                    continue
+                w, h, rgb = font_sheet([block], "nibble", gw, height, per_row=1, scale=scale)
+                path = out_dir / f"{member.name.replace('.', '_')}_w{gw}_g{index}.png"
+                write_png(path, w, h, rgb)
+                width_files.append((f"the glyph {index}: the height {height}, the width {gw}", path))
+            files += width_files
+            sections.append(
+                (
+                    f"{member.name} - the count {count}, {total} header glyphs, "
+                    f"{len(blocks)} blocks shown, the descriptors "
+                    f"{descriptors[:4]}",
+                    files,
+                )
+            )
+    return build_page(out_dir / "fonts.html", "Screamer fonts - scaled readings", sections, [])
+
+
 def build_page(
-    out_dir: Path,
+    page: Path,
+    title: str,
     sections: list[tuple[str, list[tuple[str, Path]]]],
     notes: list[str],
     embed: bool = False,
@@ -247,7 +345,7 @@ def build_page(
     parts = [
         "<!doctype html>",
         "<html lang=\"en\"><head><meta charset=\"utf-8\">",
-        "<title>Screamer assets</title>",
+        f"<title>{html.escape(title)}</title>",
         "<style>",
         "body{font-family:ui-monospace,monospace;background:#14161a;color:#e6e6e6;margin:2rem}",
         "h1{font-size:1.3rem}h2{font-size:1.05rem;margin-top:2rem;color:#9fd0ff}",
@@ -258,7 +356,7 @@ def build_page(
         ".size{font-size:.72rem;color:#8b93a1}",
         "ul{font-size:.8rem;color:#b8c0cc;line-height:1.6}",
         "</style></head><body>",
-        "<h1>Screamer (1995) - extracted assets</h1>",
+        f"<h1>{html.escape(title)}</h1>",
         "<p>Every image is decoded from the shipped containers with the confirmed formats: "
         "the LZW member decoder, the sprite pixel format of one byte per pixel, the font "
         "pixel format of four bits per pixel, and the PCX palette at the end of the file.</p>",
@@ -284,7 +382,6 @@ def build_page(
     for note in notes:
         parts.append(f"<li>{html.escape(note)}</li>")
     parts.append("</ul></body></html>")
-    page = out_dir / "index.html"
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text("\n".join(parts))
     return page
@@ -294,6 +391,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--game-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("work/assets"))
+    parser.add_argument("--font-scale", type=int, default=8)
+    parser.add_argument("--font-cap", type=int, default=16)
     parser.add_argument(
         "--scale",
         type=int,
@@ -325,7 +424,8 @@ def main() -> int:
         pcx_files += export_pcx(container, args.out, notes)
 
     page = build_page(
-        args.out,
+        args.out / "index.html",
+        "Screamer (1995) - extracted assets",
         [
             ("Sprite members", sprite_files),
             ("Font members", font_files),
@@ -334,10 +434,12 @@ def main() -> int:
         notes,
         embed=args.embed,
     )
+    font_page = build_font_page(game, args.out, args.font_scale, args.font_cap)
     print(f"the sprites: {len(sprite_files)}")
     print(f"the fonts:   {len(font_files)}")
     print(f"the PCX:     {len(pcx_files)}")
     print(f"the page:    {page}")
+    print(f"the fonts:   {font_page}")
     return 0
 
 

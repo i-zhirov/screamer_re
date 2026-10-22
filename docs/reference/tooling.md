@@ -120,7 +120,10 @@ sprites of a member one under the other and use the `MENU.COL` palette.  The fon
 sheets draw the four bit glyphs at 32 by 40 pixels per cell in grey.  The PCX files
 use the palette at the end of the file.  The page links the images by default and
 embeds them with `--embed`, which makes the page self contained and much larger.
-The tool uses the standard library only.
+`--scale` scales the sprite and font images by whole numbers and the default is
+four.  `--font-scale` and `--font-cap` set the separate font page, which draws every
+font block in four readings and adds one image per descriptor at the width and the
+height of that descriptor.  The tool uses the standard library only.
 
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether
