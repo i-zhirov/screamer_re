@@ -2808,6 +2808,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
 - The render command now prints a glyph bitmap, so the check repeats with one
   command.
   Evidence: the render command.
+## The font draw routine
+
+- The draw routine sits at `0x25000` to `0x25500`.  It reads the count at
+  `0x15440` at `0x25079` and `0x254c2`, the descriptor table pointer at
+  `0x15438` at `0x250a2`, the `FONTS` buffer at `0x1543c` at `0x25269`, and the
+  bitmap table pointer `0x19898` at `0x2562b` and `0x25720`.
+  Evidence: the reference search and the disassembly.
+- The routine computes the bitmap size as `0xa0 * 8`, which is `0x500`, the
+  confirmed bitmap size, and the screen stride as `0x280`, which is 640, the
+  screen
+  width.  It reads the descriptor height at `+0` and the fields `+4` and `+8`,
+  and
+  it computes the glyph step with `imul` on the count.
+  Evidence: the disassembly of `0x25089` and `0x2528b`.
+- The render at 8 by 8 and at 8 wide by the descriptor height shows no glyph, so
+  the pixel format and the row order stay open.  The routine holds the next
+  place
+  to read: the block after `0x25300`, which fetches the pixel bits from the
+  bitmap
+  and writes them to the screen.
+  Evidence: the render command and the disassembly.
+- The next step reads the block after `0x25300` and follows the pixel fetch and
+  the
+  screen write, which names the pixel format and the row order.
+  Evidence: the draw routine.
+- The draw routine reads the font tables at `0x1ca98` and `0x19898`, which
+  confirms
+  that the two tables are the descriptors and the bitmaps.
+  Evidence: the reference search.
 ## Method
 
 The investigation uses these steps:
