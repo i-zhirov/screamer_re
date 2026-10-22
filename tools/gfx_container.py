@@ -241,7 +241,9 @@ def print_font(container: Container, name: str) -> int:
     `count + 1` bitmaps of `0x500` bytes each into the table at `0x119898`.
     The descriptor holds three 32 bit fields: the glyph height, then the two
     font wide constants 32 and 76.  The height doubles between the low and the
-    high fonts.
+    high fonts.  After the first `count + 1` bitmaps the loader reads a 4 byte
+    size at `+0x1cb10` and reads that many bytes as the `FONTS` resource,
+    which holds the remaining glyph bitmaps of 0x500 bytes each.
     """
     member = container.member(name)
     expanded = expand(member_bytes(container, member), member.end)
@@ -263,6 +265,16 @@ def print_font(container: Container, name: str) -> int:
     print(f"bitmaps: {total} x 0x500 = {bitmaps} bytes to +0x{offset + bitmaps:X}")
     tail = len(expanded) - offset - bitmaps
     print(f"the tail after the bitmaps: {tail} bytes")
+    full = tail // 0x500
+    rem = tail % 0x500
+    print(
+        f"the tail holds the remaining glyph bitmaps of 0x500 bytes: "
+        f"{full} full and a {rem} byte remainder"
+    )
+    print(
+        "the loader reads the tail as the FONTS resource: the size at "
+        "+0x1cb10, then resource_get(engine, 'FONTS', size) at 0x2eed0"
+    )
     return 0
 
 

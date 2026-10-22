@@ -2746,6 +2746,33 @@ audio tracks.  The game plays the tracks through the CD audio path.
   sprite
   count, the size, and the record chain do not apply to them.
   Evidence: the member list.
+## The font tail is the FONTS resource
+
+- The loader reads the tail as a resource of its own.  After the first
+  `count + 1` bitmaps it reads a 4 byte size at `+0x1cb10`, then calls
+  `resource_get(engine, "FONTS", size)` at `0x25755` and reads the tail into
+  the resource buffer at `0x1543c`.  The string `FONTS` sits at `0x100ead`.
+  Evidence: the disassembly of `0x25733` and the string dump.
+- The tail holds the remaining glyph bitmaps of `0x500` bytes each.
+  `MENUL.FNT` holds 23 full bitmaps and a 111 byte remainder, `ATTRL.FNT`
+  6 full and 563, `ATTRH.FNT` 24 full and 1102, and `MENUH.FNT` 94 full and
+  904.
+  Evidence: the font command output.
+- The tail blocks hold pixel data: the first block of `MENUL.FNT` holds 201
+  distinct values with 8, 0, and 210 dominant, and the first block of
+  `ATTRH.FNT` holds 29 distinct values with 0 and 255 dominant, which is a
+  glyph mask.
+  Evidence: the font command output.
+- The sprite loader uses the same resource call with the string `SPRITES` at
+  `0x100eb7`, so the two loaders share the resource layer and the `FONTS` and
+  `SPRITES` names.
+  Evidence: the disassembly of `0x257b0` and the string dump.
+- The next step reads the glyph rows to draw the glyphs and finds the meaning of
+  the tail remainder.
+  Evidence: the font command.
+- The font members are not sprite members and hold their own structure, so the
+  sprite count, the size, and the record chain do not apply to them.
+  Evidence: the member list.
 ## Method
 
 The investigation uses these steps:

@@ -223,8 +223,15 @@ wide constants 32 and 76.  The heights confirm the two resolutions: `MENUL.FNT`
 holds 11, 9, 19, and 30 and `MENUH.FNT` holds 22, 18, 38, and 60, exactly
 double, and `ATTRL.FNT` holds 19 against `ATTRH.FNT` with 38.  The bitmap
 region holds pixel data with the values 0 and 255 dominant, which is a font mask.
-The member holds more data after the first `count + 1` bitmaps.
-Evidence: the disassembly of `0x25658` and the expansion test.
+After the first `count + 1` bitmaps the loader reads a 4 byte size at
+`+0x1cb10` and then reads that many bytes as the `FONTS` resource: the call is
+`resource_get(engine, "FONTS", size)` at `0x25755` with the string `FONTS` at
+`0x100ead`, and the tail is read into the resource buffer at `0x1543c`.  The tail
+holds the remaining glyph bitmaps of `0x500` bytes each: `MENUL.FNT` holds 23 full
+bitmaps and a 111 byte remainder, `ATTRL.FNT` 6 full and 563, `ATTRH.FNT` 24 full
+and 1102, and `MENUH.FNT` 94 full and 904.  The tail blocks hold pixel data with
+0 and 255 dominant, which is a glyph mask.
+Evidence: the disassembly of `0x25658` and the font command.
 
 ### The member data compression
 
