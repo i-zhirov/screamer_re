@@ -2569,6 +2569,52 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and the
   offsets chain exactly to 208568.
   Evidence: the record decode.
+## The decoder is LZW, not LZSS
+
+- The match path of the block decoder walks a dictionary chain.  The code 0x101
+  ends
+  the stream, the code 0x100 clears it, and the first free entry is 0x102, which
+  are the
+  classic LZW markers.  The table at `+0x4074` holds four byte entries with the
+  index at
+  `+0x4064`, and the shift table at `+0x8050` grows the code width from nine to
+  twelve
+  bits with the masks 0x1FF, 0x3FF, 0x7FF, and 0xFFF.  The decoder is therefore
+  LZW,
+  and the port implements LZSS, which is a different algorithm.
+  Evidence: the disassembly of `0x4D4C4` and `0x4D844`.
+- The correct LZW structure reproduces the shape of the runtime output.  The
+  runtime
+  records begin `03 00 00 00 B8 2E 03 00`, which is the count 3 and the size
+  208568, and
+  the LZW decoder emits `3F 00 00 00 F7 68 01 00`, the same shape with the
+  values
+  differing.  The shape agreement shows the structure, and the value difference
+  remains in the
+  bit reading.
+  Evidence: the LZW test and the records.
+- The reader replaces the low byte of the 16 bit word.  The port does this, and
+  the
+  instructions do not: they keep the full word and use the third byte only for
+  the bits that
+  the shift pulls in.  This is one port fault, found by comparing the
+  instructions with the
+  code.
+  Evidence: the disassembly of `0x4D916`.
+- The records are confirmed with 32 bit fields: sprite 0 is 0, 0, 200, 240, 0,
+  sprite 1 is
+  1, 1, 466, 188, 48000, and sprite 2 is 0, 0, 640, 114, 135608.  The offsets
+  chain
+  exactly to 208568, which is the pixel count and the runtime size.
+  Evidence: the record dump.
+- The next step rewrites the port as LZW with the reader from the instructions
+  and tests
+  the first eight output bytes against the runtime record head.
+  Evidence: the port and the records.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and
+  the pixel bytes sum to 208568.
+  Evidence: the records.
 ## Method
 
 The investigation uses these steps:
