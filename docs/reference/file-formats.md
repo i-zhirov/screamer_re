@@ -233,6 +233,37 @@ and 1102, and `MENUH.FNT` 94 full and 904.  The tail blocks hold pixel data with
 0 and 255 dominant, which is a glyph mask.
 Evidence: the disassembly of `0x25658` and the font command.
 
+### The font pixel format and row order
+
+The draw routine at `0x25000` to `0x25500` reads the glyph bitmaps and writes
+them to the screen, and its instructions fix the pixel format and the row order:
+
+| Instruction | Meaning |
+| --- | --- |
+| `0x25316` `al = byte [esi]` | the bitmap byte holds two pixels |
+| `0x25322` `and al, 0xf0` | the high nibble is the first pixel |
+| `0x25326` `shr al, 4` | the high nibble moves to the low half |
+| `0x2532f` `[edi] = al` | the first screen pixel is written |
+| `0x2533f` `and bl, 0xf` | the low nibble is the second pixel |
+| `0x2534a` `[edi+1] = bl` | the second screen pixel is written |
+| `0x2534d` `add edi, 2` | the screen advances two pixels per byte |
+| `0x2537a` `add edi, 0x280` | the next row is 640 bytes away |
+| `0x25329` `or eax, [0x15460]` | the colour base is added to the pixel |
+| `0x25324` `je 0x25331` | the zero nibble is skipped |
+
+The pixel format is therefore four bits per pixel, two pixels per byte, with the
+high nibble first, the zero nibble transparent, and the colour base at `0x15460`
+added to the value.  The row order is top to bottom with a stride of `0x280`, which
+is 640, the screen width.  The glyph width is the descriptor field 32 and the glyph
+height is the descriptor height, and the cell holds 2560 pixels, which is 1280 bytes.
+The draw routine also confirms the bitmap size as `0xa0 * 8`, which is `0x500`.
+Evidence: the disassembly of `0x25300` to `0x25500`.
+
+The render of the first glyphs shows a regular hatch pattern, so the first glyphs
+of the font are a dither or shading texture and not a letter shape.  The render does
+not change the pixel format, which the instructions fix.
+Evidence: the render command.
+
 ### The member data compression
 
 The member data is LZW-compressed.  The read path is:

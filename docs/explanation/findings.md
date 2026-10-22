@@ -2837,6 +2837,33 @@ audio tracks.  The game plays the tracks through the CD audio path.
   confirms
   that the two tables are the descriptors and the bitmaps.
   Evidence: the reference search.
+## The font pixel format and row order are confirmed
+
+- The pixel format is four bits per pixel, two pixels per byte, with the high
+  nibble first, the zero nibble transparent, and the colour base at `0x15460`
+  added to the value.  The draw routine reads one byte at `0x25316`, takes the
+  high nibble with `and al, 0xf0` and `shr al, 4`, writes it at `0x2532f`, takes
+  the low nibble with `and bl, 0xf`, writes it at `0x2534a`, and skips the zero
+  nibble with `je` at `0x25324`.
+  Evidence: the disassembly of `0x25300` to `0x25500`.
+- The row order is top to bottom with a stride of `0x280`, which is 640, the
+  screen width: `add edi, 0x280` at `0x2537a`, and the column loop compares
+  the column with the width from the descriptor at `0x25300`.
+  Evidence: the disassembly of `0x25300` to `0x25500`.
+- The draw routine also confirms the bitmap size as `0xa0 * 8`, which is
+  `0x500`,
+  from the draw side as well as the load side.
+  Evidence: the disassembly of `0x25089`.
+- The first glyphs of the font render as a regular hatch pattern with a period
+  of
+  seven pixels, so the first glyphs are a dither or shading texture and not a
+  letter shape.  That is a property of the data and not of the pixel format.
+  Evidence: the render command in the nibble mode.
+- The next step finds the glyphs that draw a letter, or reads the draw caller to
+  find which characters the font serves.
+  Evidence: the render command.
+- The render command now takes the nibble mode for four bit pixels.
+  Evidence: the render command.
 ## Method
 
 The investigation uses these steps:

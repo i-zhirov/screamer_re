@@ -101,7 +101,9 @@ python3 tools/gfx_container.py render GFX/GRAF.DAT MENUL.FNT 0 --width 32 --mode
 
 `font` prints the font layout of a member: the count, the descriptors, the
 bitmap region, and the tail decomposition.  `render` prints one glyph bitmap as
-characters, either one bit per pixel (`bit`) or one byte per pixel (`byte`).
+characters: one bit per pixel (`bit`), four bits per pixel with the high nibble
+first (`nibble`), or one byte per pixel (`byte`).  The font members use the
+`nibble` mode.
 
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether
