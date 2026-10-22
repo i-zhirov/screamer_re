@@ -233,6 +233,39 @@ def expand(raw: bytes, limit: int = 1 << 20) -> bytes:
     return bytes(decoder.out)
 
 
+def print_font(container: Container, name: str) -> int:
+    """Print the font layout of a member.
+
+    The font loader at `0x25658` reads the count (one byte) at `+0x00`, then
+    `count + 1` descriptors of 12 bytes each into the table at `0x1ca98`, then
+    `count + 1` bitmaps of `0x500` bytes each into the table at `0x119898`.
+    The descriptor holds three 32 bit fields: the glyph height, then the two
+    font wide constants 32 and 76.  The height doubles between the low and the
+    high fonts.
+    """
+    member = container.member(name)
+    expanded = expand(member_bytes(container, member), member.end)
+    count = expanded[0]
+    total = count + 1
+    print(f"member:  {member.name}")
+    print(f"bytes:   {len(expanded)}")
+    print(f"count at +0x00: {count} -> {total} descriptors and bitmaps")
+    offset = 1
+    for index in range(total):
+        height, field2, field3 = struct.unpack_from("<III", expanded, offset)
+        print(
+            f"  descriptor {index}: height {height} field2 {field2} "
+            f"field3 {field3}"
+        )
+        offset += 12
+    bitmaps = total * 0x500
+    print(f"descriptors end at +0x{offset:X}")
+    print(f"bitmaps: {total} x 0x500 = {bitmaps} bytes to +0x{offset + bitmaps:X}")
+    tail = len(expanded) - offset - bitmaps
+    print(f"the tail after the bitmaps: {tail} bytes")
+    return 0
+
+
 def print_info(container: Container) -> int:
     """Print the members of a container."""
     print(f"file:    {container.path}")
@@ -305,6 +338,10 @@ def main() -> int:
     head_parser.add_argument("file", type=Path)
     head_parser.add_argument("name")
 
+    font_parser = subparsers.add_parser("font", help="print a font layout")
+    font_parser.add_argument("file", type=Path)
+    font_parser.add_argument("name")
+
     args = parser.parse_args()
     try:
         container = parse(args.file)
@@ -313,6 +350,12 @@ def main() -> int:
         return 1
     if args.command == "info":
         return print_info(container)
+    if args.command == "font":
+        try:
+            return print_font(container, args.name)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
     if args.command == "member":
         if args.out is None:
             print("error: member needs --out", file=sys.stderr)

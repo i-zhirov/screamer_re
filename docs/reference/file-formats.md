@@ -208,6 +208,24 @@ that `sprite_load` and `font_load` read.  `GFX/MENU.DAT` holds the palette
 `AMAP6.3DX`, `AAUTO00.3DX` to `AAUTO06.3DX`, and `ASHADOW.3DX`.
 Evidence: the exclusive-OR decode of both directories.
 
+### The font member layout
+
+The font loader at `0x25658` reads the font members of `GFX/GRAF.DAT`:
+
+| Offset | Content |
+| --- | --- |
+| `+0x00` | the count, one byte |
+| `+0x01` | `count + 1` descriptors of 12 bytes each |
+| then | `count + 1` bitmaps of `0x500` bytes each |
+
+The descriptor holds three 32 bit fields: the glyph height, then the two font
+wide constants 32 and 76.  The heights confirm the two resolutions: `MENUL.FNT`
+holds 11, 9, 19, and 30 and `MENUH.FNT` holds 22, 18, 38, and 60, exactly
+double, and `ATTRL.FNT` holds 19 against `ATTRH.FNT` with 38.  The bitmap
+region holds pixel data with the values 0 and 255 dominant, which is a font mask.
+The member holds more data after the first `count + 1` bitmaps.
+Evidence: the disassembly of `0x25658` and the expansion test.
+
 ### The member data compression
 
 The member data is LZW-compressed.  The read path is:

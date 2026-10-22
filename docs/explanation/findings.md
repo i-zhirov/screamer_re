@@ -2713,6 +2713,39 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel bytes sum to 208568.
   Evidence: the expansion and the record dump.
+## The font member layout
+
+- The font loader at `0x25658` reads the count (one byte) at `+0x00`, then
+  `count + 1` descriptors of 12 bytes each into the table at `0x1ca98`, then
+  `count + 1` bitmaps of `0x500` bytes each into the table at `0x119898`.  The
+  descriptor holds three 32 bit fields: the glyph height, then the two font wide
+  constants 32 and 76.
+  Evidence: the disassembly of `0x25658`.
+- The descriptor layout is confirmed against the expanded bytes.  `MENUL.FNT`
+  holds
+  the heights 11, 9, 19, and 30 and `MENUH.FNT` holds 22, 18, 38, and 60,
+  exactly
+  double, and `ATTRL.FNT` holds 19 against `ATTRH.FNT` with 38.  The second and
+  third fields are 32 and 76 in all four fonts.
+  Evidence: the font command output.
+- The bitmap region holds pixel data: the first 1,280 byte bitmap of `ATTRL.FNT`
+  holds 120 distinct values with the values 0 and 255 dominant, which is a glyph
+  mask.
+  Evidence: the font command output.
+- The member holds more data after the first `count + 1` bitmaps: the tail is
+  8,243
+  bytes in `ATTRL.FNT`, 29,551 in `MENUL.FNT`, 31,822 in `ATTRH.FNT`, and
+  121,224 in `MENUH.FNT`.  The tail is the next open question of the font
+  layout.
+  Evidence: the font command output.
+- The next step reads the font tail and finds its structure, and reads the
+  bitmap
+  rows to draw the glyphs.
+  Evidence: the font command.
+- The font members are not sprite members and hold their own structure, so the
+  sprite
+  count, the size, and the record chain do not apply to them.
+  Evidence: the member list.
 ## Method
 
 The investigation uses these steps:
