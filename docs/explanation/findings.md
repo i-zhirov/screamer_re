@@ -2864,6 +2864,37 @@ audio tracks.  The game plays the tracks through the CD audio path.
   Evidence: the render command.
 - The render command now takes the nibble mode for four bit pixels.
   Evidence: the render command.
+## The hatch pattern is not the member or the offset
+
+- The member is not wrong.  The render uses the four members the loader loads,
+  `MENUL.FNT`, `MENUH.FNT`, `ATTRL.FNT`, and `ATTRH.FNT`, and the loader call
+  sites load `attr%c.fnt` and `game%c.fnt` in the race and `menu%c.fnt` in the
+  menu, so the members match.
+  Evidence: the loader call sites and the render command.
+- The offset is not wrong either.  The render covers the first `count + 1`
+  bitmaps,
+  the tail blocks, and the glyph 65, which is the letter A, and every one is
+  noise
+  or a hatch.  `MENUH.FNT` holds 98 glyphs, which is a full ASCII set, and its
+  glyph 65 is not a letter.
+  Evidence: the render command in the nibble mode.
+- The pixel format is confirmed from the draw routine, so the data is read as
+  the
+  game reads it, and the hatch is the content of the data.
+  Evidence: the disassembly of `0x25300` to `0x25500`.
+- The draw routine sits in the function `0x24da5` to `0x25622`, which also holds
+  a
+  record search on 28 byte records and the tables `0x197d8`, `0x19880`, and
+  `0x192a4`, so the function serves more than the font.
+  Evidence: the function list and the disassembly of `0x24da5`.
+- The most likely explanation is that the first bitmaps are a dither or shading
+  texture and the game does not draw the letters from them, or the game maps the
+  characters to other glyphs than the plain order.
+  Evidence: the render command.
+- The next step finds the caller of the draw routine, which is the text routine,
+  and
+  follows the character code to the glyph index, which names the mapping.
+  Evidence: the draw routine.
 ## Method
 
 The investigation uses these steps:
