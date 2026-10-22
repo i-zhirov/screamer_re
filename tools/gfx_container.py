@@ -284,9 +284,17 @@ def print_render(
     """Render one glyph bitmap as characters.
 
     The mode `bit` reads one bit per pixel, most significant first; the mode
-    `byte` reads one byte per pixel and marks a value of 128 or more with `#`
-    and a value between 1 and 127 with `+`.
+    `nibble` reads four bits per pixel, two pixels per byte with the high
+    nibble first, and marks the zero nibble with `.`; the mode `byte` reads one
+    byte per pixel and marks a value of 128 or more with `#` and a value
+    between 1 and 127 with `+`.
+
+    The draw routine at `0x25316` reads one byte, takes the high nibble with
+    `and al, 0xf0` and `shr al, 4`, writes it, takes the low nibble with
+    `and bl, 0xf`, writes it at `+1`, and skips the zero nibble, so the format
+    is four bits per pixel with two pixels per byte and the high nibble first.
     """
+
     member = container.member(name)
     expanded = expand(member_bytes(container, member), member.end)
     count = expanded[0]
@@ -303,7 +311,11 @@ def print_render(
     for row in range(min(rows, 40)):
         line = ""
         for column in range(width):
-            if mode == "byte":
+            if mode == "nibble":
+                byte = bitmap[(row * width + column) >> 1]
+                nibble = (byte >> 4) if (column & 1) == 0 else (byte & 0xF)
+                line += "." if nibble == 0 else "#"
+            elif mode == "byte":
                 value = bitmap[row * width + column]
                 line += "#" if value >= 128 else ("+" if value > 0 else ".")
             else:
@@ -396,7 +408,9 @@ def main() -> int:
     render_parser.add_argument("name")
     render_parser.add_argument("glyph", type=int)
     render_parser.add_argument("--width", type=int, default=32)
-    render_parser.add_argument("--mode", choices=("bit", "byte"), default="bit")
+    render_parser.add_argument(
+        "--mode", choices=("bit", "nibble", "byte"), default="bit"
+    )
 
     args = parser.parse_args()
     try:
