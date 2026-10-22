@@ -278,6 +278,43 @@ def print_font(container: Container, name: str) -> int:
     return 0
 
 
+def print_render(
+    container: Container, name: str, glyph: int, width: int, mode: str
+) -> int:
+    """Render one glyph bitmap as characters.
+
+    The mode `bit` reads one bit per pixel, most significant first; the mode
+    `byte` reads one byte per pixel and marks a value of 128 or more with `#`
+    and a value between 1 and 127 with `+`.
+    """
+    member = container.member(name)
+    expanded = expand(member_bytes(container, member), member.end)
+    count = expanded[0]
+    total = count + 1
+    if not 0 <= glyph < total:
+        raise ValueError(f"the glyph {glyph} is outside 0 to {total - 1}")
+    height = struct.unpack_from("<I", expanded, 1 + glyph * 12)[0]
+    base = 1 + total * 12 + glyph * 0x500
+    bitmap = expanded[base : base + 0x500]
+    rows = len(bitmap) * 8 // width
+    print(f"member: {member.name}")
+    print(f"glyph:  {glyph} of {total - 1}, height {height}")
+    print(f"mode:   {mode}, width {width}")
+    for row in range(min(rows, 40)):
+        line = ""
+        for column in range(width):
+            if mode == "byte":
+                value = bitmap[row * width + column]
+                line += "#" if value >= 128 else ("+" if value > 0 else ".")
+            else:
+                index = row * width + column
+                byte = bitmap[index >> 3]
+                bit = (byte >> (7 - (index & 7))) & 1
+                line += "#" if bit else "."
+        print(f"  {line}")
+    return 0
+
+
 def print_info(container: Container) -> int:
     """Print the members of a container."""
     print(f"file:    {container.path}")
@@ -354,6 +391,13 @@ def main() -> int:
     font_parser.add_argument("file", type=Path)
     font_parser.add_argument("name")
 
+    render_parser = subparsers.add_parser("render", help="render a glyph bitmap")
+    render_parser.add_argument("file", type=Path)
+    render_parser.add_argument("name")
+    render_parser.add_argument("glyph", type=int)
+    render_parser.add_argument("--width", type=int, default=32)
+    render_parser.add_argument("--mode", choices=("bit", "byte"), default="bit")
+
     args = parser.parse_args()
     try:
         container = parse(args.file)
@@ -365,6 +409,14 @@ def main() -> int:
     if args.command == "font":
         try:
             return print_font(container, args.name)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+    if args.command == "render":
+        try:
+            return print_render(
+                container, args.name, args.glyph, args.width, args.mode
+            )
         except ValueError as error:
             print(f"error: {error}", file=sys.stderr)
             return 1

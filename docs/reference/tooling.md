@@ -94,7 +94,14 @@ names, offsets, sizes, end offsets, and flags.
 python3 tools/gfx_container.py info GFX/GAME.DAT
 python3 tools/gfx_container.py member GFX/GAME.DAT GAMEL.SPR --out work/gamel.spr
 python3 tools/gfx_container.py head GFX/GAME.DAT GAMEL.SPR
+python3 tools/gfx_container.py font GFX/GRAF.DAT MENUL.FNT
+python3 tools/gfx_container.py render GFX/GRAF.DAT MENUL.FNT 0 --width 32 --mode bit
+python3 tools/gfx_container.py render GFX/GRAF.DAT MENUL.FNT 0 --width 32 --mode byte
 ```
+
+`font` prints the font layout of a member: the count, the descriptors, the
+bitmap region, and the tail decomposition.  `render` prints one glyph bitmap as
+characters, either one bit per pixel (`bit`) or one byte per pixel (`byte`).
 
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether

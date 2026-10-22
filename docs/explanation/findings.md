@@ -2773,6 +2773,41 @@ audio tracks.  The game plays the tracks through the CD audio path.
 - The font members are not sprite members and hold their own structure, so the
   sprite count, the size, and the record chain do not apply to them.
   Evidence: the member list.
+## The glyph render does not confirm the bitmap layout
+
+- The glyph rows are read at every plausible layout and none renders a glyph. 
+  The
+  bit packed reads at 32 and 64 bits per row with the most significant and the
+  least significant bit first, and the byte reads at 8, 16, 32, and 64 pixels
+  per
+  row all fail to show a letter or a digit.
+  Evidence: the render command.
+- The first bitmap of `MENUL.FNT` renders as a regular dither pattern in the
+  byte
+  read: the values are small, 1 to 9, with 0 dominant in 817 of the 1280 bytes,
+  and
+  the pattern marches on a diagonal grid.  A glyph mask would hold a letter
+  shape.
+  Evidence: the render command.
+- The dense glyphs of heights 19 and 30 and the tail blocks render as noise in
+  every
+  layout, so the pixel format or the row geometry is still wrong, or the data is
+  not
+  a glyph mask at all.
+  Evidence: the render command.
+- The layout that the loader reads is confirmed and the pixel interpretation is
+  not.
+  The descriptor is three 32 bit fields, the height, then 32 and 76, and the
+  bitmaps are 0x500 bytes each, but the rows do not draw a glyph.
+  Evidence: the loader and the render command.
+- The next step finds the draw routine that reads the bitmap and copies the
+  shape
+  from the loader tables at `0x1ca98` and `0x119898` to the screen, which names
+  the pixel format and the row order.
+  Evidence: the loader.
+- The render command now prints a glyph bitmap, so the check repeats with one
+  command.
+  Evidence: the render command.
 ## Method
 
 The investigation uses these steps:
