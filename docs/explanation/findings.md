@@ -2655,6 +2655,35 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114,
   and the pixel bytes sum to 208568, which is the pixel size at `+0x04`.
   Evidence: the expansion and the record dump.
+## The member structure table
+
+- The expansion confirms the sprite structure on both logo members:
+  `LOGOL.SPR` expands to 52538 bytes, the count is 3, the size is 52470, and
+  `8 + 3 * 0x14 + 52470` equals 52538, and `LOGOH.SPR` expands to 208636
+  bytes, the count is 3, the size is 208568, and `8 + 3 * 0x14 + 208568` equals
+  208636.  Both match the member end field.
+  Evidence: the expansion test.
+- The game sprite member `GAMEL.SPR` holds the right header, the count 63 and
+  the
+  size 23215, so `8 + 63 * 0x14 + 23215` equals 24483, which is the member end
+  field, and the expansion stops at 5825 bytes before the end.  The decoder
+  needs a
+  fix for that stream, and the same holds for `MENUL.SPR`, whose header count 29
+  and size 74756 give 75344 against the end field 20892.
+  Evidence: the expansion test.
+- The font members and the `PKC` members hold different structures, and the
+  `3DX`
+  members, the palette `MENU.COL`, and `MENU.MLB` are uncompressed with the flag
+  clear.
+  Evidence: the member list.
+- The next step fixes the remaining streams and reads the pixel bytes of the
+  logo
+  expansion to confirm the sprite images against the screen.
+  Evidence: the expansion test.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114,
+  and the pixel bytes sum to 208568.
+  Evidence: the expansion and the record dump.
 ## Method
 
 The investigation uses these steps:
