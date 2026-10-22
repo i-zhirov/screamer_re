@@ -171,38 +171,12 @@ def export_sprites(
     return files
 
 
-def parse_font(out: bytes) -> tuple[list[tuple[int, int, int]], list[list[tuple[int, int]]], bytes]:
-    """Parse a font member into the descriptors, the glyph tables, and the tail.
-
-    The layout is the one the loader at `0x25658` reads: a count byte, then
-    `count + 1` descriptors of `(height, first char, character count)`, then one
-    table of `(width, offset)` per descriptor, then a four byte tail size, then
-    the tail with the packed four bit glyphs.
-    """
-    count = out[0]
-    total = count + 1
-    descriptors = [struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)]
-    position = 1 + total * 12
-    tables = []
-    for _height, _first, number in descriptors:
-        tables.append(
-            [struct.unpack_from("<II", out, position + i * 8) for i in range(number)]
-        )
-        position += number * 8
-    size = struct.unpack_from("<I", out, position)[0]
-    return descriptors, tables, out[position + 4 : position + 4 + size]
-
-
 def glyph_image(tail: bytes, offset: int, width: int, height: int) -> bytes:
     """Return one glyph as grey pixels in the confirmed four bit format."""
-    bytes_per_row = (width + 1) // 2
-    pixels = bytearray(width * height)
-    for row in range(height):
-        for x in range(width):
-            byte = tail[offset + row * bytes_per_row + (x >> 1)]
-            nibble = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
-            pixels[row * width + x] = nibble * 17
-    return bytes(pixels)
+    return bytes(
+        value * 17
+        for value in gfx_container.glyph_pixels(tail, offset, width, height)
+    )
 
 
 def compose_glyphs(
@@ -237,7 +211,7 @@ def export_fonts(
         if not member.name.endswith(".FNT"):
             continue
         out = gfx_container.expand(gfx_container.member_bytes(container, member), member.end)
-        descriptors, tables, tail = parse_font(out)
+        descriptors, tables, tail = gfx_container.parse_font(out)
         for index, (height, first, number) in enumerate(descriptors):
             glyphs = [
                 (width, height, glyph_image(tail, offset, width, height))
@@ -285,7 +259,7 @@ def build_font_page(game: Path, out_dir: Path, scale: int, cap: int) -> Path:
             out = gfx_container.expand(
                 gfx_container.member_bytes(container, member), member.end
             )
-            descriptors, tables, tail = parse_font(out)
+            descriptors, tables, tail = gfx_container.parse_font(out)
             files = []
             for index, (height, first, number) in enumerate(descriptors[:cap]):
                 glyphs = [

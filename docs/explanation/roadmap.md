@@ -36,9 +36,11 @@ current host.
 
 ### M2: Format decoders
 
-- Decode the graphics format (`GFX/GRAF.DAT`, `GFX/MENU.DAT`, `GFX/GAME.DAT`).
+- Decode the graphics format (`GFX/GRAF.DAT`, `GFX/MENU.DAT`, `GFX/GAME.DAT`)
+  (done: the container, the LZW members, the sprites, the fonts, and the PCX
+  images have decoders, and the review confirms the exported assets).
 - Decode the map and index formats (`DATA/MAP*`, `DATA/GEN.DAT`,
-  `DATA/LOCAL.DAT`, `TABS/*`).
+  `DATA/LOCAL.DAT`, `TABS/*`) (next).
 - Decode the HMI `ADLIB-` music bank.
 - Decode the sample bank (`DATA/SOUND.DAT`).
 - Verify each decoder against the original data.
@@ -64,10 +66,14 @@ current host.
 
 1. Follow the calls from `main` into the game subsystems (done for the first
    level: `engine_init`, `race_loop`, and `frame_update` carry names).
-2. Decode the compression of `GAME.DAT` and `MENU.DAT`.  The record layouts
-   are known; the file bytes stay open.
+2. Decode the compression of `GAME.DAT` and `MENU.DAT` (done: the container
+   and the LZW members have decoders).
 3. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and
-   the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`.
-4. Start the graphics decoder with `GFX/MENU.DAT`, which is the smallest
-   graphics file.
-5. Set up the OpenWatcom V2 build harness under `work/`.
+   the chunk names are `3D_HEADER`, `3D_BLKOBJ`, `GOBJ_LIST`, and `OBJ_LIST`
+   (in progress: the chunk layout is decoded).
+4. Decode the graphics format (done: `GFX/MENU.DAT`, `GFX/GRAF.DAT`, and
+   `GFX/GAME.DAT`).
+5. Decode the map and index formats: `DATA/MAP*.DAT`, `DATA/MAP*I.DAT`,
+   `DATA/GEN.DAT`, `DATA/LOCAL.DAT`, and `TABS/*.TAB`.
+6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank.
+7. Set up the OpenWatcom V2 build harness under `work/`.

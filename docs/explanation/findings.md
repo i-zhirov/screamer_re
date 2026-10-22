@@ -30,10 +30,10 @@ The page separates observations from open questions.
   member of `GFX/GRAF.DAT` and `GFX/GAME.DAT` expands to its member end field
   exactly.
   Evidence: the expansion test.
-- The next step re-exports the assets and reviews the character sheets of the
-  six
-  fonts and the six sprite members.
-  Evidence: the export command.
+- The review of the re-exported assets confirms them: the sprite sheets hold the
+  logos and the cars, the character sheets hold the complete character sets, and
+  the PCX images render correctly.
+  Evidence: the user review.
 
 ## The font member layout is confirmed
 
@@ -785,8 +785,14 @@ Authority.
   `GAMEL.SPR` holds 10010 bytes, which fits the resolution difference.
   Evidence: the member list of `GFX/GAME.DAT`.
 
-## The LZSS port bug
+## The LZSS port bug (superseded)
 
+- This section is superseded.  The port defect below is real, and the conclusion
+  that the remaining gap is the match decoding is wrong.  The last defect was the
+  emulated `0x400` byte buffer of the reader at `0x4d844`, and the plain bit
+  stream reader fixes it.  See The LZW reader was the last defect in the asset
+  decode.
+  Evidence: that section.
 - The output loop of the block decoder is decoded: the driver `0x4d3fc` reads
   one
   byte into the bit buffer, then loops on the block decoder `0x4d4c4`.  The
@@ -834,8 +840,12 @@ Authority.
   `GAMEH.SPR`
   therefore stay unreported.  Evidence: the port result.
 
-## The low and high sprite members
+## The low and high sprite members (superseded)
 
+- This section is superseded.  The `head` output below comes from the broken
+  expansion.  The parser reports the count, the dimensions, and the palette of every
+  member now.  See The LZW reader was the last defect in the asset decode.
+  Evidence: that section.
 - The SPR parser cannot report the sprite count, the dimensions, or the palette
   for
   either member yet, because the LZSS expansion is not confirmed.  `head` on
@@ -953,11 +963,12 @@ The project has no decoder for these formats:
 - the HMI `ADLIB-` music bank (`DATA/MUSIC.DAT`, `CONFIG/SETUP.DAT`),
 - the map data (`DATA/MAP*.DAT`, `DATA/GEN.DAT`, `DATA/LOCAL.DAT`),
 - the map index data (`DATA/MAP*I.DAT`),
-- the graphics data (`GFX/*.DAT`),
 - the tables (`TABS/VIS.TAB`, `TABS/PERSP01.TAB`),
 - the raw sample data (`DATA/SOUND.DAT`),
-- the HMI `.386` drivers,
-- the replay format.
+- the HMI `.386` drivers.
+
+The graphics data (`GFX/*.DAT`) and the replay format have decoders.  See the
+graphics decoder section and the fifth level section.
 
 ### Duplicate data
 
@@ -3060,8 +3071,13 @@ audio tracks.  The game plays the tracks through the CD audio path.
   Evidence: the export.
 - The tool writes only under the output directory and uses the standard library.
   Evidence: the tool.
-## The asset review and the scale option
+## The asset review and the scale option (superseded)
 
+- This section is superseded.  The sprite and font readings below come from the
+  broken LZW expansion.  The PCX review and the `--scale` option stay valid.  See
+  The LZW reader was the last defect in the asset decode and The font member
+  layout is confirmed.
+  Evidence: the two sections.
 - The user review of the whiteboard: the PCX images render correctly, the sprite
   sheets render the first rows correctly and then show garbage, and the font
   sheets
@@ -3094,8 +3110,12 @@ audio tracks.  The game plays the tracks through the CD audio path.
   writes with the
   font bitmap, which names the letter glyphs and the mapping.
   Evidence: the draw routine.
-## The font descriptors vary per font
+## The font descriptors vary per font (superseded)
 
+- This section is superseded.  The descriptor numbers below are correct, and the
+  interpretation of the second field as the glyph width is wrong.  See The font
+  member layout is confirmed.
+  Evidence: that section.
 - The font descriptors are not constants.  `GAMEL.FNT` holds the descriptors
   `(30, 32, 76)`, `(27, 48, 11)`, `(10, 48, 10)`, and `(6, 48, 11)`, and
   `GAMEH.FNT` holds `(60, 32, 76)`, `(54, 48, 11)`, `(18, 48, 10)`, and
@@ -3123,8 +3143,12 @@ audio tracks.  The game plays the tracks through the CD audio path.
   descriptor
   height and checks the shape, which names the letter glyphs.
   Evidence: the font page.
-## The descriptor second field is the row stride in bytes
+## The descriptor second field is the row stride in bytes (superseded)
 
+- This section is superseded.  The readings below come from the broken LZW
+  expansion.  The second field is the first character code and the third field is
+  the character count.  See The font member layout is confirmed.
+  Evidence: that section.
 - The user review of the font page: the only somewhat readable image is the
   `ATTRH.FNT` glyph at four bits and 64 pixels per row, which shows some
   symbols,

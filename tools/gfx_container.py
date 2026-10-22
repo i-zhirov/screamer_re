@@ -237,6 +237,21 @@ def parse_font(out: bytes) -> tuple[list[tuple[int, int, int]], list[list[tuple[
     return descriptors, tables, out[position + 4 : position + 4 + size]
 
 
+def glyph_pixels(tail: bytes, offset: int, width: int, height: int) -> bytes:
+    """Return one glyph as one byte per pixel with the four bit values.
+
+    The glyph holds `height` rows of `width` pixels, two pixels per byte with the
+    high nibble first.  The value 0 is a transparent pixel.
+    """
+    bytes_per_row = (width + 1) // 2
+    pixels = bytearray(width * height)
+    for row in range(height):
+        for column in range(width):
+            byte = tail[offset + row * bytes_per_row + (column >> 1)]
+            pixels[row * width + column] = (byte >> 4) if (column & 1) == 0 else (byte & 0xF)
+    return bytes(pixels)
+
+
 def print_font(container: Container, name: str) -> int:
     """Print the font layout of a member.
 
@@ -288,16 +303,15 @@ def print_render(container: Container, name: str, glyph: int) -> int:
     if not 0 <= glyph < number:
         raise ValueError(f"the glyph {glyph} is outside 0 to {number - 1}")
     width, offset = tables[0][glyph]
-    bytes_per_row = (width + 1) // 2
     print(f"member: {member.name}")
     print(f"font 0: height {height}, the characters {first}..{first + number - 1}")
     print(f"glyph:  {glyph} -> the character {first + glyph}, width {width} px")
+    pixels = glyph_pixels(tail, offset, width, height)
     for row in range(height):
-        line = ""
-        for column in range(width):
-            byte = tail[offset + row * bytes_per_row + (column >> 1)]
-            nibble = (byte >> 4) if (column & 1) == 0 else (byte & 0xF)
-            line += "." if nibble == 0 else "#"
+        line = "".join(
+            "." if pixels[row * width + column] == 0 else "#"
+            for column in range(width)
+        )
         print(f"  {line}")
     return 0
 
