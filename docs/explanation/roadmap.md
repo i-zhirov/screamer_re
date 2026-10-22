@@ -40,7 +40,8 @@ current host.
   (done: the container, the LZW members, the sprites, the fonts, and the PCX
   images have decoders, and the review confirms the exported assets).
 - Decode the map and index formats (`DATA/MAP*`, `DATA/GEN.DAT`,
-  `DATA/LOCAL.DAT`, `TABS/*`) (next).
+  `DATA/LOCAL.DAT`, `TABS/*`) (in progress: the `DATA` files are LZW text with
+  the track and the car lists, and the loaders are known).
 - Decode the HMI `ADLIB-` music bank.
 - Decode the sample bank (`DATA/SOUND.DAT`).
 - Verify each decoder against the original data.
@@ -74,6 +75,7 @@ current host.
 4. Decode the graphics format (done: `GFX/MENU.DAT`, `GFX/GRAF.DAT`, and
    `GFX/GAME.DAT`).
 5. Decode the map and index formats: `DATA/MAP*.DAT`, `DATA/MAP*I.DAT`,
-   `DATA/GEN.DAT`, `DATA/LOCAL.DAT`, and `TABS/*.TAB`.
+   `DATA/GEN.DAT`, `DATA/LOCAL.DAT`, and `TABS/*.TAB` (in progress: the
+   `DATA` files expand to text lists, and the loaders are known).
 6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank.
 7. Set up the OpenWatcom V2 build harness under `work/`.

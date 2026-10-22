@@ -362,6 +362,27 @@ def print_head(container: Container, name: str) -> int:
     return 0
 
 
+def print_lzw(path: Path, limit: int = 1 << 20) -> int:
+    """Expand a plain LZW file and print the text.
+
+    The `DATA` files (`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream
+    with no container around it.  The reader is the same one the graphics members
+    use.  The expanded bytes are text: the `MAP*.DAT` files hold the `TRACK_DATA`
+    and the `OPPONENTS` lists, `GEN.DAT` holds the `CARS_DATA` list, and
+    `LOCAL.DAT` holds the credits text.
+    """
+    raw = path.read_bytes()
+    out = expand(raw, limit)
+    print(f"file:     {path}")
+    print(f"raw:      {len(raw)} bytes")
+    print(f"expanded: {len(out)} bytes")
+    text = out.decode("ascii", "replace")
+    sys.stdout.write(text)
+    if not text.endswith("\n"):
+        sys.stdout.write("\n")
+    return 0
+
+
 def write_member(container: Container, name: str, out: Path) -> int:
     """Write the raw bytes of a member to a file."""
     member = container.member(name)
@@ -397,7 +418,16 @@ def main() -> int:
     render_parser.add_argument("name")
     render_parser.add_argument("glyph", type=int)
 
+    lzw_parser = subparsers.add_parser("lzw", help="expand a plain LZW data file")
+    lzw_parser.add_argument("file", type=Path)
+
     args = parser.parse_args()
+    if args.command == "lzw":
+        try:
+            return print_lzw(args.file)
+        except (OSError, ValueError) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
     try:
         container = parse(args.file)
     except (OSError, ValueError) as error:

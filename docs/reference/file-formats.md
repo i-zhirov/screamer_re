@@ -80,15 +80,38 @@ strings.  The exact sample rate and the split into samples are not known.
 
 ## Map data
 
-| File | Content |
-| --- | --- |
-| `DATA/MAP1.DAT` to `DATA/MAP6.DAT` | compressed map data, high entropy |
-| `DATA/MAP1I.DAT` to `DATA/MAP6I.DAT` | 32-bit little-endian fields |
-| `DATA/GEN.DAT` | compressed data, high entropy |
-| `DATA/LOCAL.DAT` | compressed data, high entropy |
+The map data files are LZW streams with no container.  The reader is the one
+the graphics members use.  The expanded bytes are text.
 
-The `*I.DAT` files hold small 32-bit little-endian values at the start.
-The values look like offsets or counts.  The format is not decoded yet.
+| File | Raw | Expanded | Content |
+| --- | --- | --- | --- |
+| `DATA/MAP1.DAT`, `MAP2.DAT`, `MAP4.DAT`, `MAP6.DAT` | about 17 to 26 KB | 459 bytes | the `TRACK_DATA` list and the `OPPONENTS` list |
+| `DATA/MAP3.DAT` | 21640 bytes | 179 bytes | the same two lists with one opponent |
+| `DATA/GEN.DAT` | 4101 bytes | 6169 bytes | the `CARS_DATA` list and 15 more lists |
+| `DATA/LOCAL.DAT` | 2490 bytes | 969 bytes | the credits text, `#` is the separator |
+
+The lists hold one record per line.  The first byte of a field selects the type:
+`d` is a 32-bit integer, `f` is a 32-bit float, and the other bytes are
+separators.  A line that starts with `*` is a comment.  The parser reads until
+the `END_LIST` line.
+
+The `TRACK_DATA` record holds the fields `color`, `camera_hi`, `bonus_time`, and
+`carnage`, all of the type `d`.  The record size is 0x10 and the record limit is
+0x10.  The `MAP1.DAT` record is `d24 d300 d35 d10`.
+
+The `OPPONENTS` record holds the fields `max_spd`, `accel`, `brakes`, `skill`,
+and `sband`, all of the type `f`.  The record size is 0x14 and the record limit
+is 0x590.  The `MAP1.DAT` list holds nine records.
+
+The `MAP*I.DAT` files are not LZW.  `MAP1I.DAT` starts with the 16-bit values
+2, 0, 0, 0, 1, 0, 0x2455, -1, 0x1422, -1, and 0x08fc, so the file holds
+signed 16-bit values.  `MAP5.DAT` starts with the count 0x17 and the size 0x10cc,
+and `8 + 23 * 1792` is 41224, the file size.  The exact record layout of the
+`MAP*I.DAT` files is not decoded yet.
+
+The loaders are `FUN_00015460` (the named list parser), `FUN_000131a8` (the race
+data load), `FUN_00027770` (the level start), and `FUN_00029d08` (the menu data
+load).  See the findings page.
 
 ## Graphics data
 
@@ -392,6 +415,11 @@ so the installed single-player start is the high-resolution one.
 The values in `VIS.TAB` fall in small steps.  The values in
 `PERSP01.TAB` repeat `0xffffff81` (signed -127) in the first rows.  The
 meaning of both tables is not known yet.
+
+The loaders are known.  `FUN_0004d030` reads `TABS/VIS.TAB` into the buffer
+`PTR_DAT_0008c1c4`.  `FUN_0004cf94` reads `TABS/PERSP01.TAB` into the
+`PERSPTAB` resource and then points the resource pointer 0x40000 bytes past the
+start, so the resource holds two tables of 0x40000 bytes each.
 
 ## 3D object files
 

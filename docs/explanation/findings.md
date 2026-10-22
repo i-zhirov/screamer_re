@@ -3,6 +3,80 @@
 This page records the investigation log.  Each finding carries its evidence.
 The page separates observations from open questions.
 
+## The track data files are LZW text
+
+- The `DATA` files (`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream
+  with no container around it.  The reader at `0x4d844` that the graphics members
+  use expands them too.
+  Evidence: `python3 tools/gfx_container.py lzw DATA/MAP1.DAT`.
+- `DATA/MAP1.DAT` expands from 17292 bytes to 459 bytes of text with the
+  `TRACK_DATA` list and the `OPPONENTS` list.  `MAP2.DAT`, `MAP4.DAT`, and
+  `MAP6.DAT` expand to the same size and shape, and `MAP3.DAT` expands to 179
+  bytes.
+  Evidence: the `lzw` command on each file.
+- `DATA/GEN.DAT` expands from 4101 bytes to 6169 bytes of text with the
+  `CARS_DATA` list and 15 more lists.
+  Evidence: the `lzw` command on `DATA/GEN.DAT`.
+- `DATA/LOCAL.DAT` expands from 2490 bytes to 969 bytes of the credits text
+  with `#` as the separator.
+  Evidence: the `lzw` command on `DATA/LOCAL.DAT`.
+- The `TRACK_DATA` record is `color`, `camera_hi`, `bonus_time`, and `carnage`,
+  all of the type `d`, so the record holds four 32-bit integers and the size is
+  0x10.  `MAP1.DAT` holds `d24 d300 d35 d10`.
+  Evidence: the `MAP1.DAT` text and the 0x10 record size at `0x132b1`.
+- The `OPPONENTS` record is `max_spd`, `accel`, `brakes`, `skill`, and `sband`,
+  all of the type `f`, so the record holds five 32-bit floats and the size is
+  0x14.  `MAP1.DAT` holds nine records, `f16800` down to `f16000`.
+  Evidence: the `MAP1.DAT` text and the 0x14 record size at `0x132cd`.
+- The `MAP*.DAT` record sizes match the loader arrays: the loader at `0x131a8`
+  reads `TRACK_DATA` into an array of 0x10 records of 0x10 bytes and `OPPONENTS`
+  into an array of 0x590 records of 0x14 bytes.
+  Evidence: the disassembly of `0x132b1` and `0x132cd`.
+- The `MAP*I.DAT` files are not LZW.  `MAP1I.DAT` starts with the 16-bit values
+  2, 0, 0, 0, 1, 0, 0x2455, -1, 0x1422, -1, and 0x08fc, so the file holds
+  signed 16-bit values.
+  Evidence: the head of `DATA/MAP1I.DAT`.
+- `MAP5.DAT` and `MAP5I.DAT` are not LZW either.  `MAP5.DAT` starts with the
+  count 0x17 and the size 0x10cc, and `8 + 23 * 1792` is 41224, the file size.
+  Evidence: the head of `DATA/MAP5.DAT`.
+
+## The named list parser and the race loaders
+
+- `FUN_00015460` reads one named list from one data file.  The arguments are
+  the file name, the directory, the list name, the destination array, the record
+  limit, and the record size.  It opens `dir\data\file.dat`, reads the lines until
+  the list name, parses `count` records of `size` bytes until `END_LIST`, and
+  returns the record count.
+  Evidence: the disassembly of `0x15460` and the `MENU\data\GEN.dat` call at
+  `0x29e92`.
+- The field type comes from the first byte of the field: `d` is `atoi` and stores
+  four bytes, `f` is `atof` and stores a four byte float, and the other bytes
+  are separators.
+  Evidence: the disassembly of `0x15570`.
+- `FUN_000131a8` is the race data load.  It reads the five lists `OSTACLES`
+  (0x24 records of 0x24 bytes), `TRACK_DATA` (0x10 of 0x10), `OPPONENTS`
+  (0x590 of 0x14), `ANIMATIONS` (0xbc of 0x18), and `CARS_DATA` (0x40 of 0x40)
+  into `DAT_0010f000`, `DAT_0010cf44`, `DAT_00110d9c`, `DAT_0010f180`, and
+  `DAT_0010d25c`.
+  Evidence: the disassembly of `0x132b1`, `0x132cd`, `0x132d2`, `0x132f1`, and
+  `0x13318`.
+- The earlier names of the two large arrays are wrong: `DAT_00110d9c` holds the
+  opponents (0x590 records of 0x14 bytes) and `DAT_0010f180` holds the animations
+  (0xbc records of 0x18 bytes).
+  Evidence: the list names in the same call sites.
+- `FUN_00027770` starts one level.  It builds the name `MAP%d` from the level
+  number into `DAT_0011d294`, sets the level `DAT_0011d2b4` to 1, and calls
+  `race_session_start` at `0x128e0` with the level.
+  Evidence: the disassembly of `0x2780f` to `0x2784e`.
+- `FUN_00029d08` loads the menu data.  It reads `MENU\data\GEN.dat` into 0x24
+  records of 0x24 bytes, builds the text lists `menu`, `cardat`, `trackdat`, and
+  `champ` through `FUN_0001b394`, and calls the race init.
+  Evidence: the disassembly of `0x29e7b` and the decompiled `FUN_00029d08`.
+- `FUN_0004cf94` loads `TABS\persp01.tab` into the `PERSPTAB` resource and
+  then points `DAT_001214ec` 0x40000 bytes past the start, so the table holds two
+  halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
+  Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
+
 ## The LZW reader was the last defect in the asset decode
 
 - The member expansion produced the correct length for every member, but the
@@ -961,14 +1035,14 @@ file offset `0x3a8f8`.  See the Entry point section above.
 The project has no decoder for these formats:
 
 - the HMI `ADLIB-` music bank (`DATA/MUSIC.DAT`, `CONFIG/SETUP.DAT`),
-- the map data (`DATA/MAP*.DAT`, `DATA/GEN.DAT`, `DATA/LOCAL.DAT`),
 - the map index data (`DATA/MAP*I.DAT`),
 - the tables (`TABS/VIS.TAB`, `TABS/PERSP01.TAB`),
 - the raw sample data (`DATA/SOUND.DAT`),
 - the HMI `.386` drivers.
 
-The graphics data (`GFX/*.DAT`) and the replay format have decoders.  See the
-graphics decoder section and the fifth level section.
+The graphics data (`GFX/*.DAT`), the map data (`DATA/MAP*.DAT`,
+`DATA/GEN.DAT`, `DATA/LOCAL.DAT`), and the replay format have decoders.  See
+the graphics decoder section, the track data section, and the fifth level section.
 
 ### Duplicate data
 

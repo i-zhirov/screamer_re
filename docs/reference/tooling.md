@@ -96,12 +96,17 @@ python3 tools/gfx_container.py member GFX/GAME.DAT GAMEL.SPR --out work/gamel.sp
 python3 tools/gfx_container.py head GFX/GAME.DAT GAMEL.SPR
 python3 tools/gfx_container.py font GFX/GRAF.DAT MENUL.FNT
 python3 tools/gfx_container.py render GFX/GRAF.DAT MENUH.FNT 33
+python3 tools/gfx_container.py lzw DATA/MAP1.DAT
 ```
 
 `font` prints the font layout of a member: the count, the descriptors, the glyph
 tables, and the tail.  `render` prints one glyph as characters in the confirmed
 four bit format, with two pixels per byte and the high nibble first, so a zero
 nibble is a transparent pixel.
+
+`lzw` expands a plain LZW file and prints the text.  The `DATA` files
+(`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream with no container
+around it, and the reader is the one the graphics members use.
 
 `export_assets.py` writes the graphics assets as PNG files and builds a
 whiteboard
