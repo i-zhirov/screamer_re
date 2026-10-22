@@ -2527,6 +2527,48 @@ audio tracks.  The game plays the tracks through the CD audio path.
   114, and
   the pixel bytes sum to 208568, matching the runtime size.
   Evidence: the record decode and the statics.
+## The buffer hunt
+
+- The statics at `0150:1E7CCC` after thirty seconds hold the loader results: the
+  record
+  pointer `0x0008D800`, the second pointer `0x002CAB14`, the count 3, the flag
+  1, the size
+  208568, the third pointer `0x006BD000`, and the screen 640 by 400.  The loader
+  therefore
+  completed.
+  Evidence: the watch probe.
+- The buffer at `0x006BD000` holds `FF` fill at thirty seconds and at thirty
+  eight seconds,
+  so the loader did not write it in this run, and the region at `0x002CAB14`
+  plus `0x4044` is
+  all zero, so it is not the driver context.  Neither candidate holds the
+  expansion output.
+  Evidence: the context probe.
+- The file reads show two families: the C runtime reads at `EIP=5FD6` with
+  counts 4, 6, 28,
+  176, and 16, and the extender reads at `EIP=26D9` with counts of 8192 bytes
+  into the low
+  buffer `0x2380`, plus decreasing tails 7916, 7852, 7804, and 7740.  The read
+  with the count
+  208568 never appeared, so the pixel read goes through the buffered path.
+  Evidence: the read loop probe.
+- The requested byte for byte comparison is therefore not complete: the
+  expansion output buffer has
+  not been captured.  The port values stand against the runtime statics, and the
+  runtime output
+  count is 208568 while the port gives 185 for the low member and 2 for the high
+  member.
+  Evidence: the statics and the port.
+- The next step breaks on the read with the count 208568 and reads `EDX`, the
+  destination
+  buffer, at that moment.  The read is buffered through the extender, so the
+  probe must also dump
+  the low buffer `0x2380` at the read return.
+  Evidence: the read loop probe.
+- The sprite count is 3, the dimensions are 200 by 240, 466 by 188, and 640 by
+  114, and the
+  offsets chain exactly to 208568.
+  Evidence: the record decode.
 ## Method
 
 The investigation uses these steps:
