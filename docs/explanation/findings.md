@@ -2959,6 +2959,39 @@ audio tracks.  The game plays the tracks through the CD audio path.
   and
   the character from the caller, and reads the letter shape.
   Evidence: the callers.
+## The asset export and the whiteboard
+
+- `tools/export_assets.py` writes the assets as PNG files and a whiteboard page.
+   It
+  exports six sprite members, six font members, and 38 PCX members, and the page
+  shows them with their names and their sizes.
+  Evidence: the export run.
+- The export confirms the formats end to end.  The PCX files decode with their
+  own
+  palette: `LOAD1L.PCX` holds 245 distinct colours at 320 by 200 and
+  `LOAD1H.PCX`
+  the same at 640 by 400, and the menu screens hold 24 to 53 colours.  The
+  sprite
+  sheets hold 71 to 207 colours, and the font sheets hold 16 grey levels, which
+  is
+  the four bit nibble scaled by 17.
+  Evidence: the export verification.
+- The low and the high images share their dominant colour, for example
+  `LOAD1L.PCX`
+  and `LOAD1H.PCX` both hold `3c 6f 9b`, which confirms that the pairs are the
+  resolution variants of one image.
+  Evidence: the export verification.
+- The sprite sheets stack the sprites one under the other because the record x
+  and y
+  fields are not screen positions, and the sheet size is the sum of the sprite
+  heights.
+  Evidence: the export notes.
+- The next step draws the sprites at their record x and y and finds the
+  composition of
+  the screens, and reads the font sheets for the letter shapes.
+  Evidence: the export.
+- The tool writes only under the output directory and uses the standard library.
+  Evidence: the tool.
 ## Method
 
 The investigation uses these steps:

@@ -105,6 +105,23 @@ characters: one bit per pixel (`bit`), four bits per pixel with the high nibble
 first (`nibble`), or one byte per pixel (`byte`).  The font members use the
 `nibble` mode.
 
+`export_assets.py` writes the graphics assets as PNG files and builds a whiteboard
+page that shows every asset with its name and its size:
+
+```sh
+python3 tools/export_assets.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+python3 tools/export_assets.py --game-dir GAME --out work/assets
+python3 tools/export_assets.py --game-dir GAME --embed
+```
+
+The tool writes one PNG per sprite member, one glyph sheet per font member, and one
+PNG per PCX member, and then writes `index.html`.  The sprite sheets stack the
+sprites of a member one under the other and use the `MENU.COL` palette.  The font
+sheets draw the four bit glyphs at 32 by 40 pixels per cell in grey.  The PCX files
+use the palette at the end of the file.  The page links the images by default and
+embeds them with `--embed`, which makes the page self contained and much larger.
+The tool uses the standard library only.
+
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether
 `8 + count * 0x14 + size` equals the member size.  The member data is

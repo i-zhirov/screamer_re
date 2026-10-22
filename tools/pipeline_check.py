@@ -43,6 +43,7 @@ TOOLS = (
     "dosboxx_control.py",
     "entry_probe.py",
     "gfx_container.py",
+    "export_assets.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
