@@ -2992,6 +2992,40 @@ audio tracks.  The game plays the tracks through the CD audio path.
   Evidence: the export.
 - The tool writes only under the output directory and uses the standard library.
   Evidence: the tool.
+## The asset review and the scale option
+
+- The user review of the whiteboard: the PCX images render correctly, the sprite
+  sheets render the first rows correctly and then show garbage, and the font
+  sheets
+  show only noise.
+  Evidence: the user review.
+- The sprite row stride is correct.  The record offsets chain exactly at one
+  byte per
+  pixel: `200 * 240` is 48000, which is the offset of the second sprite, `466 *
+  188`
+  is 87608, and `48000 + 87608` is 135608, the offset of the third sprite.  A
+  smoothness sweep over the full height also names the width as the smoothest
+  stride.
+  The garbage is therefore the content, which is a dither shading, and not a
+  stride
+  fault.
+  Evidence: the record chain and the smoothness sweep.
+- The font bitmaps are dither textures.  The first bitmap of `MENUL.FNT` holds
+  141
+  distinct values with 0 dominant in 817 of the 1280 bytes, and the four bit
+  reading
+  holds all 16 values, so the data is a dither and not a letter shape.  The
+  regular
+  grid period scales with the render width, which marks a texture.
+  Evidence: the font command.
+- The export takes a `--scale` option that scales the sprite and font images by
+  whole
+  numbers, so the dither detail is visible.  The default is four.
+  Evidence: the export run.
+- The next step finds the draw of one character and compares the pixels it
+  writes with the
+  font bitmap, which names the letter glyphs and the mapping.
+  Evidence: the draw routine.
 ## Method
 
 The investigation uses these steps:

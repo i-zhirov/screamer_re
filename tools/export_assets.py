@@ -84,6 +84,21 @@ def scale_palette(palette: bytes, six_bit: bool = True) -> list[tuple[int, int, 
     return out
 
 
+def scale_pixels(pixels: bytes, width: int, height: int, scale: int) -> tuple[int, int, bytes]:
+    """Nearest neighbour scale of an index buffer."""
+    if scale <= 1:
+        return width, height, pixels
+    out = bytearray()
+    for y in range(height):
+        row = pixels[y * width : (y + 1) * width]
+        big = bytearray()
+        for value in row:
+            big += bytes((value,)) * scale
+        for _ in range(scale):
+            out += big
+    return width * scale, height * scale, bytes(out)
+
+
 def indexed_to_rgb(pixels: bytes, palette: list[tuple[int, int, int]]) -> bytes:
     """Map the index bytes to the rgb triples."""
     out = bytearray()
@@ -121,7 +136,9 @@ def decode_pcx(raw: bytes) -> tuple[int, int, bytes, bytes]:
     return width, height, bytes(pixels[: bpl * height]), palette
 
 
-def export_sprites(container, palette, out_dir: Path, notes: list[str]) -> list[tuple[str, Path]]:
+def export_sprites(
+    container, palette, out_dir: Path, notes: list[str], scale: int = 1
+) -> list[tuple[str, Path]]:
     """Export the sprite members and return the file list."""
     files = []
     for member in container.members:
@@ -142,7 +159,8 @@ def export_sprites(container, palette, out_dir: Path, notes: list[str]) -> list[
                 dst = (y + row) * sheet_w
                 canvas[dst : dst + w] = pixels[src : src + w]
             y += h
-        rgb = indexed_to_rgb(bytes(canvas), palette)
+        sheet_w, sheet_h, canvas = scale_pixels(bytes(canvas), sheet_w, sheet_h, scale)
+        rgb = indexed_to_rgb(canvas, palette)
         path = out_dir / f"{member.name.replace('.', '_')}.png"
         write_png(path, sheet_w, sheet_h, rgb)
         notes.append(
@@ -153,7 +171,9 @@ def export_sprites(container, palette, out_dir: Path, notes: list[str]) -> list[
     return files
 
 
-def export_fonts(container, out_dir: Path, notes: list[str]) -> list[tuple[str, Path]]:
+def export_fonts(
+    container, out_dir: Path, notes: list[str], scale: int = 1
+) -> list[tuple[str, Path]]:
     """Export the font members as glyph sheets in the confirmed 4 bit format."""
     files = []
     for member in container.members:
@@ -183,6 +203,7 @@ def export_fonts(container, out_dir: Path, notes: list[str]) -> list[tuple[str, 
                     byte = block[(row * cell_w + x) >> 1]
                     nibble = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
                     canvas[(gy + row) * sheet_w + gx + x] = nibble * 17
+        sheet_w, sheet_h, canvas = scale_pixels(bytes(canvas), sheet_w, sheet_h, scale)
         rgb = bytes()
         for value in canvas:
             rgb += bytes((value, value, value))
@@ -274,6 +295,12 @@ def main() -> int:
     parser.add_argument("--game-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("work/assets"))
     parser.add_argument(
+        "--scale",
+        type=int,
+        default=4,
+        help="scale the sprite and font images by whole numbers",
+    )
+    parser.add_argument(
         "--embed",
         action="store_true",
         help="embed the images in the page instead of linking them",
@@ -293,8 +320,8 @@ def main() -> int:
 
     for name in ("GFX/GAME.DAT", "GFX/GRAF.DAT"):
         container = gfx_container.parse(game / name)
-        sprite_files += export_sprites(container, scaled, args.out, notes)
-        font_files += export_fonts(container, args.out, notes)
+        sprite_files += export_sprites(container, scaled, args.out, notes, args.scale)
+        font_files += export_fonts(container, args.out, notes, args.scale)
         pcx_files += export_pcx(container, args.out, notes)
 
     page = build_page(
