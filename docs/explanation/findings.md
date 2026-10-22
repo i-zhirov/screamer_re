@@ -2895,6 +2895,45 @@ audio tracks.  The game plays the tracks through the CD audio path.
   and
   follows the character code to the glyph index, which names the mapping.
   Evidence: the draw routine.
+## The draw signature and the mapping
+
+- The draw entry is `0x25020`, and the signature is `draw(x, y, string, font,
+  color)`.  The routine stores `eax` at `0x15450` and checks it against 640, so
+  `eax` is the screen x; it stores `edx` at `0x15454` and checks it against the
+  screen height, so `edx` is the screen y; it stores `ebx` at `0x15458`, which
+  holds the string; it stores `ecx` at `0x1545c` and checks it against the
+  count,
+  so `ecx` is the font index; and it takes the stack word, shifts it left by
+  four,
+  and stores it at `0x15460`, so the word is the color and the base is the color
+  times sixteen.
+  Evidence: the disassembly of `0x25020`.
+- The glyph index is the character code.  The descriptor address is the font
+  index
+  times twelve from the table at `0x1ca98`, and the bitmap address is the font
+  index times `0x500` from the table at `0x19898`.
+  Evidence: the disassembly of `0x25089` to `0x250a8`.
+- The callers pass constant font indices.  The caller at `0x234bb` draws with
+  the
+  font 0 and the color 6, and the caller at `0x21788` draws with the font 5 and
+  the color 9, and the callers at `0x23562` and `0x23650` draw with the fonts 1,
+  3, and 4, all with sprintf built strings.
+  Evidence: the disassembly of the callers.
+- The fonts of a member are the count plus one.  `MENUL.FNT` holds the fonts 0
+  to
+  3, which matches the count 3, and the first glyph of each font is a dither or
+  shading pattern, so the first glyph is not a letter and the letters follow it
+  in
+  the font.
+  Evidence: the loader and the render command.
+- The next step follows one string from the sprintf call to the draw and reads
+  the
+  font that the game uses for a menu label, which confirms the character order.
+  Evidence: the callers.
+- The mapping is therefore settled: the font index is the argument, the string
+  holds
+  the characters, and the character code is the glyph index.
+  Evidence: the draw routine and the callers.
 ## Method
 
 The investigation uses these steps:
