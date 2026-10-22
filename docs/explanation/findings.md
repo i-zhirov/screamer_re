@@ -2934,6 +2934,31 @@ audio tracks.  The game plays the tracks through the CD audio path.
   holds
   the characters, and the character code is the glyph index.
   Evidence: the draw routine and the callers.
+## The character order is the ASCII order
+
+- The caller at `0x234fa` builds the string `"%d%c"` at `0xde4` with the
+  character `':'`, which is `0x3a`, and draws it with the font 1 and the color
+  5.
+  The format `"%d%c"` is at `0x100de4` and the character `0x3a` is the colon.
+  Evidence: the disassembly of `0x234fa` and the format string.
+- The caller at `0x234bb` draws with the font 0 and the color 6, and its string
+  comes from `sprintf` with the format `"%d"`, which is a number, and the caller
+  at `0x21788` draws with the font 5 and the color 9.  The fonts 0 and 1 hold
+  the
+  digits and the fonts 2 and 3 hold the letters, so the character code is the
+  glyph index.
+  Evidence: the disassembly of the callers and the format strings.
+- The mapping is therefore settled: the character order inside the font is the
+  ASCII
+  order, the font index selects the font, and the string holds the characters.
+  The first glyph of a font is a dither or shading pattern, and the letters
+  start
+  after it.
+  Evidence: the callers, the format strings, and the render command.
+- The next step renders the glyph that a menu label uses, with the font index
+  and
+  the character from the caller, and reads the letter shape.
+  Evidence: the callers.
 ## Method
 
 The investigation uses these steps:
