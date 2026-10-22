@@ -171,49 +171,86 @@ def export_sprites(
     return files
 
 
+def parse_font(out: bytes) -> tuple[list[tuple[int, int, int]], list[list[tuple[int, int]]], bytes]:
+    """Parse a font member into the descriptors, the glyph tables, and the tail.
+
+    The layout is the one the loader at `0x25658` reads: a count byte, then
+    `count + 1` descriptors of `(height, first char, character count)`, then one
+    table of `(width, offset)` per descriptor, then a four byte tail size, then
+    the tail with the packed four bit glyphs.
+    """
+    count = out[0]
+    total = count + 1
+    descriptors = [struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)]
+    position = 1 + total * 12
+    tables = []
+    for _height, _first, number in descriptors:
+        tables.append(
+            [struct.unpack_from("<II", out, position + i * 8) for i in range(number)]
+        )
+        position += number * 8
+    size = struct.unpack_from("<I", out, position)[0]
+    return descriptors, tables, out[position + 4 : position + 4 + size]
+
+
+def glyph_image(tail: bytes, offset: int, width: int, height: int) -> bytes:
+    """Return one glyph as grey pixels in the confirmed four bit format."""
+    bytes_per_row = (width + 1) // 2
+    pixels = bytearray(width * height)
+    for row in range(height):
+        for x in range(width):
+            byte = tail[offset + row * bytes_per_row + (x >> 1)]
+            nibble = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
+            pixels[row * width + x] = nibble * 17
+    return bytes(pixels)
+
+
+def compose_glyphs(
+    glyphs: list[tuple[int, int, bytes]], scale: int, columns: int = 16
+) -> tuple[int, int, bytes]:
+    """Lay the glyphs out in a grid with a two pixel gap and return grey pixels."""
+    gap = 2
+    cell_w = max(width for width, _height, _pixels in glyphs) + gap
+    cell_h = max(height for _width, height, _pixels in glyphs) + gap
+    rows = (len(glyphs) + columns - 1) // columns
+    sheet_w, sheet_h = columns * cell_w, rows * cell_h
+    canvas = bytearray(sheet_w * sheet_h)
+    for index, (width, height, pixels) in enumerate(glyphs):
+        gx = (index % columns) * cell_w
+        gy = (index // columns) * cell_h
+        for row in range(height):
+            for x in range(width):
+                canvas[(gy + row) * sheet_w + gx + x] = pixels[row * width + x]
+    sheet_w, sheet_h, canvas = scale_pixels(bytes(canvas), sheet_w, sheet_h, scale)
+    rgb = bytearray()
+    for value in canvas:
+        rgb += bytes((value, value, value))
+    return sheet_w, sheet_h, bytes(rgb)
+
+
 def export_fonts(
     container, out_dir: Path, notes: list[str], scale: int = 1
 ) -> list[tuple[str, Path]]:
-    """Export the font members as glyph sheets in the confirmed 4 bit format."""
+    """Export every font of every font member as a character sheet."""
     files = []
     for member in container.members:
         if not member.name.endswith(".FNT"):
             continue
         out = gfx_container.expand(gfx_container.member_bytes(container, member), member.end)
-        count = out[0]
-        total = count + 1
-        descriptors = [struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)]
-        base = 1 + total * 12
-        blocks = [out[base + i * 0x500 : base + (i + 1) * 0x500] for i in range(total)]
-        tail = out[base + total * 0x500 :]
-        blocks += [
-            tail[i * 0x500 : (i + 1) * 0x500]
-            for i in range(len(tail) // 0x500)
-        ]
-        # a sheet of glyph cells of 32 by 40 pixels, eight cells per row
-        per_row = 8
-        rows = (len(blocks) + per_row - 1) // per_row
-        cell_w, cell_h = 32, 40
-        sheet_w, sheet_h = per_row * cell_w, rows * cell_h
-        canvas = bytearray(sheet_w * sheet_h)
-        for index, block in enumerate(blocks):
-            gx, gy = (index % per_row) * cell_w, (index // per_row) * cell_h
-            for row in range(cell_h):
-                for x in range(cell_w):
-                    byte = block[(row * cell_w + x) >> 1]
-                    nibble = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
-                    canvas[(gy + row) * sheet_w + gx + x] = nibble * 17
-        sheet_w, sheet_h, canvas = scale_pixels(bytes(canvas), sheet_w, sheet_h, scale)
-        rgb = bytes()
-        for value in canvas:
-            rgb += bytes((value, value, value))
-        path = out_dir / f"{member.name.replace('.', '_')}_sheet.png"
-        write_png(path, sheet_w, sheet_h, rgb)
-        notes.append(
-            f"{member.name}: {len(out)} expanded bytes, the count {count}, "
-            f"{total} header glyphs and {len(blocks) - total} tail glyphs"
-        )
-        files.append((member.name, path))
+        descriptors, tables, tail = parse_font(out)
+        for index, (height, first, number) in enumerate(descriptors):
+            glyphs = [
+                (width, height, glyph_image(tail, offset, width, height))
+                for width, offset in tables[index]
+            ]
+            sheet_w, sheet_h, rgb = compose_glyphs(glyphs, scale)
+            path = out_dir / f"{member.name.replace('.', '_')}_f{index}.png"
+            write_png(path, sheet_w, sheet_h, rgb)
+            notes.append(
+                f"{member.name} font {index}: the height {height}, the characters "
+                f"{first}..{first + number - 1}, {number} glyphs, the tail {len(tail)} bytes"
+            )
+            files.append((f"{member.name} font {index}", path))
     return files
 
 
@@ -237,52 +274,8 @@ def export_pcx(container, out_dir: Path, notes: list[str]) -> list[tuple[str, Pa
     return files
 
 
-def font_sheet(blocks, mode: str, cell_w: int, cell_h: int, per_row: int = 4,
-               scale: int = 8) -> tuple[int, int, bytes]:
-    """Render the blocks in one of the readings and return a grey sheet."""
-    rows = (len(blocks) + per_row - 1) // per_row
-    sheet_w, sheet_h = per_row * cell_w, rows * cell_h
-    canvas = bytearray(sheet_w * sheet_h)
-    for index, block in enumerate(blocks):
-        gx, gy = (index % per_row) * cell_w, (index // per_row) * cell_h
-        if cell_w * cell_h > len(block) * (2 if mode == "nibble" else (8 if mode == "bit" else 1)):
-            continue
-        for row in range(cell_h):
-            for x in range(cell_w):
-                if mode == "nibble":
-                    byte = block[(row * cell_w + x) >> 1]
-                    value = (byte >> 4) if (x & 1) == 0 else (byte & 0xF)
-                    value *= 17
-                elif mode == "byte":
-                    value = block[row * cell_w + x]
-                else:
-                    byte = block[(row * cell_w + x) >> 3]
-                    value = 255 if (byte >> (7 - (x & 7))) & 1 else 0
-                canvas[(gy + row) * sheet_w + gx + x] = value
-    sheet_w = sheet_w * scale
-    sheet_h = sheet_h * scale
-    big = bytearray()
-    for y in range(sheet_h // scale):
-        row = canvas[y * (sheet_w // scale) : (y + 1) * (sheet_w // scale)]
-        wide = bytearray()
-        for value in row:
-            wide += bytes((value,)) * scale
-        for _ in range(scale):
-            big += wide
-    rgb = bytearray()
-    for value in big:
-        rgb += bytes((value, value, value))
-    return sheet_w, sheet_h, bytes(rgb)
-
-
 def build_font_page(game: Path, out_dir: Path, scale: int, cap: int) -> Path:
-    """Write a fonts-only whiteboard with several readings of every block."""
-    readings = [
-        ("nibble", 32, 40, "four bits, 32 px per row (the draw routine)"),
-        ("byte", 32, 40, "one byte, 32 px per row"),
-        ("bit", 32, 40, "one bit, 32 px per row"),
-        ("nibble", 64, 40, "four bits, 64 px per row"),
-    ]
+    """Write a fonts-only whiteboard with the character sheet of every font."""
     sections = []
     for name in ("GFX/GAME.DAT", "GFX/GRAF.DAT"):
         container = gfx_container.parse(game / name)
@@ -292,67 +285,31 @@ def build_font_page(game: Path, out_dir: Path, scale: int, cap: int) -> Path:
             out = gfx_container.expand(
                 gfx_container.member_bytes(container, member), member.end
             )
-            count = out[0]
-            total = count + 1
-            descriptors = [
-                struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)
-            ]
-            base = 1 + total * 12
-            blocks = [out[base + i * 0x500 : base + (i + 1) * 0x500] for i in range(total)]
-            tail = out[base + total * 0x500 :]
-            blocks += [
-                tail[i * 0x500 : (i + 1) * 0x500] for i in range(len(tail) // 0x500)
-            ]
-            blocks = blocks[:cap]
+            descriptors, tables, tail = parse_font(out)
             files = []
-            for mode, cell_w, cell_h, label in readings:
-                if mode == "byte":
-                    mode = "byte"
-                w, h, rgb = font_sheet(blocks, mode, cell_w, cell_h, scale=scale)
-                path = out_dir / f"{member.name.replace('.', '_')}_{mode}_{cell_w}.png"
-                write_png(path, w, h, rgb)
-                files.append((label, path))
-            # the descriptor reading: the second field is the row stride in BYTES.
-            # the draw routine reads four bits per pixel, so the width in pixels is
-            # the stride times two; the glyph holds the height rows of that stride.
-            width_files = []
-            for index, (height, stride, extra) in enumerate(descriptors[:cap]):
-                block = blocks[index] if index < len(blocks) else None
-                if block is None:
-                    continue
-                # four bits, the width in pixels is the stride times two
-                w, h, rgb = font_sheet([block], "nibble", stride * 2, height, per_row=1, scale=scale)
-                path = out_dir / f"{member.name.replace('.', '_')}_g{index}_nibble_{stride * 2}px.png"
-                write_png(path, w, h, rgb)
-                width_files.append(
+            for index, (height, first, number) in enumerate(descriptors[:cap]):
+                glyphs = [
+                    (width, height, glyph_image(tail, offset, width, height))
+                    for width, offset in tables[index]
+                ]
+                sheet_w, sheet_h, rgb = compose_glyphs(glyphs, scale)
+                path = out_dir / f"{member.name.replace('.', '_')}_f{index}.png"
+                write_png(path, sheet_w, sheet_h, rgb)
+                files.append(
                     (
-                        f"the glyph {index}: four bits, the stride {stride} bytes, "
-                        f"{stride * 2} px per row, the height {height}",
+                        f"font {index}: the height {height}, the characters "
+                        f"{first}..{first + number - 1}, {number} glyphs",
                         path,
                     )
                 )
-                # one byte, the width in pixels is the stride
-                if stride * height <= len(block):
-                    w, h, rgb = font_sheet([block], "byte", stride, height, per_row=1, scale=scale)
-                    path = out_dir / f"{member.name.replace('.', '_')}_g{index}_byte_{stride}px.png"
-                    write_png(path, w, h, rgb)
-                    width_files.append(
-                        (
-                            f"the glyph {index}: one byte, the stride {stride} bytes, "
-                            f"{stride} px per row, the height {height}",
-                            path,
-                        )
-                    )
-            files += width_files
             sections.append(
                 (
-                    f"{member.name} - the count {count}, {total} header glyphs, "
-                    f"{len(blocks)} blocks shown, the descriptors "
-                    f"{descriptors[:4]}",
+                    f"{member.name} - the count {out[0]}, {len(descriptors)} fonts, "
+                    f"the tail {len(tail)} bytes",
                     files,
                 )
             )
-    return build_page(out_dir / "fonts.html", "Screamer fonts - scaled readings", sections, [])
+    return build_page(out_dir / "fonts.html", "Screamer fonts - character sheets", sections, [])
 
 
 def build_page(

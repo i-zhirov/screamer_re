@@ -3,6 +3,74 @@
 This page records the investigation log.  Each finding carries its evidence.
 The page separates observations from open questions.
 
+## The LZW reader was the last defect in the asset decode
+
+- The member expansion produced the correct length for every member, but the
+  `LOGOH.SPR` sprite rendered the first rows and noise after them, and every
+  font
+  glyph rendered as noise.
+  Evidence: the render of `LOGOH.SPR` and of the font members.
+- The first port emulated the 0x400 byte buffer of the game reader at `0x4d844`,
+  which refills the buffer when fewer than five bytes remain.  The port diverged
+  at
+  the first refill, and the divergence is the point where the sprite render
+  changes
+  from the logo to noise.
+  Evidence: the render and the reader code.
+- The plain LSB-first bit stream, read one code at a time with the width from 9
+  to 12
+  bits, the clear code 0x100, the end code 0x101, and the first free entry
+  0x102,
+  renders `LOGOH.SPR` sprite 0 as the Virgin Interactive Entertainment logo, the
+  Graffiti logo, and the SCREAMER logo, and it renders every font as a readable
+  character set.
+  Evidence: the render of `LOGOH.SPR` and of the fonts.
+- The `tools/gfx_container.py` reader is now the plain one.  Every sprite and
+  font
+  member of `GFX/GRAF.DAT` and `GFX/GAME.DAT` expands to its member end field
+  exactly.
+  Evidence: the expansion test.
+- The next step re-exports the assets and reviews the character sheets of the
+  six
+  fonts and the six sprite members.
+  Evidence: the export command.
+
+## The font member layout is confirmed
+
+- The font loader at `0x25658` reads the count byte, `count + 1` descriptors of
+  12
+  bytes, one glyph table per descriptor of `num_chars` entries of 8 bytes, the
+  tail
+  size of 4 bytes, and the tail.
+  Evidence: the disassembly of `0x25658`.
+- The descriptor is the glyph height, the first character code, and the
+  character
+  count.  `MENUH.FNT` holds `(22, 32, 76)`, `(18, 32, 76)`, `(38, 32, 76)`, and
+  `(60, 32, 76)`.
+  Evidence: the font command.
+- The glyph table entry is the glyph width in pixels and the offset of the glyph
+  in
+  the tail, and the glyph holds `height` rows of `width` pixels packed four bits
+  per
+  pixel, so the size is `ceil(width / 2) * height`.  For `ATTRH.FNT` the first
+  entries are `(19, 0)`, `(13, 380)`, `(13, 646)`, and `(27, 912)`, and 380 is
+  19
+  divided by 2 rounded up times 38.
+  Evidence: the font command.
+- The character sheets render the complete ASCII set from the space to `z` with
+  the
+  accented characters `É`, `Ñ`, `¿`, `¡`, `À`, `Â`, `È`, `Ê`, `Ë`, `Î`, `Ï`,
+  `Ô`,
+  `Õ`, `Ù`, `Û`, and `Ü`.  The game fonts with the first code 48 and the count
+  10 or
+  11 hold the digits and the colon.
+  Evidence: the character sheets of `MENUH.FNT` and `GAMEH.FNT`.
+- The descriptor third field 76 is the character count and not a glyph size, and
+  the
+  second field 32 is the first character code and not a stride.  The earlier
+  stride and glyph size readings were wrong because the LZW expansion was wrong.
+  Evidence: the character sheets and the font command.
+
 ## Identity
 
 | Fact | Value | Evidence |

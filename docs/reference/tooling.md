@@ -95,17 +95,16 @@ python3 tools/gfx_container.py info GFX/GAME.DAT
 python3 tools/gfx_container.py member GFX/GAME.DAT GAMEL.SPR --out work/gamel.spr
 python3 tools/gfx_container.py head GFX/GAME.DAT GAMEL.SPR
 python3 tools/gfx_container.py font GFX/GRAF.DAT MENUL.FNT
-python3 tools/gfx_container.py render GFX/GRAF.DAT MENUL.FNT 0 --width 32 --mode bit
-python3 tools/gfx_container.py render GFX/GRAF.DAT MENUL.FNT 0 --width 32 --mode byte
+python3 tools/gfx_container.py render GFX/GRAF.DAT MENUH.FNT 33
 ```
 
-`font` prints the font layout of a member: the count, the descriptors, the
-bitmap region, and the tail decomposition.  `render` prints one glyph bitmap as
-characters: one bit per pixel (`bit`), four bits per pixel with the high nibble
-first (`nibble`), or one byte per pixel (`byte`).  The font members use the
-`nibble` mode.
+`font` prints the font layout of a member: the count, the descriptors, the glyph
+tables, and the tail.  `render` prints one glyph as characters in the confirmed
+four bit format, with two pixels per byte and the high nibble first, so a zero
+nibble is a transparent pixel.
 
-`export_assets.py` writes the graphics assets as PNG files and builds a whiteboard
+`export_assets.py` writes the graphics assets as PNG files and builds a
+whiteboard
 page that shows every asset with its name and its size:
 
 ```sh
@@ -114,22 +113,29 @@ python3 tools/export_assets.py --game-dir GAME --out work/assets
 python3 tools/export_assets.py --game-dir GAME --embed
 ```
 
-The tool writes one PNG per sprite member, one glyph sheet per font member, and one
+The tool writes one PNG per sprite member, one glyph sheet per font member, and
+one
 PNG per PCX member, and then writes `index.html`.  The sprite sheets stack the
-sprites of a member one under the other and use the `MENU.COL` palette.  The font
-sheets draw the four bit glyphs at 32 by 40 pixels per cell in grey.  The PCX files
-use the palette at the end of the file.  The page links the images by default and
+sprites of a member one under the other and use the `MENU.COL` palette.  The
+font
+sheets draw the four bit glyphs at 32 by 40 pixels per cell in grey.  The PCX
+files
+use the palette at the end of the file.  The page links the images by default
+and
 embeds them with `--embed`, which makes the page self contained and much larger.
 `--scale` scales the sprite and font images by whole numbers and the default is
-four.  `--font-scale` and `--font-cap` set the separate font page, which draws every
-font block in four readings and adds one image per descriptor at the width and the
+four.  `--font-scale` and `--font-cap` set the separate font page, which draws
+every
+font block in four readings and adds one image per descriptor at the width and
+the
 height of that descriptor.  The tool uses the standard library only.
 
 `head` prints the first 16 bytes of a member and tests the sprite structure: the
 count at `+0x00`, the pixel data size at `+0x04`, and whether
 `8 + count * 0x14 + size` equals the member size.  The member data is
 LZW-compressed, so the raw member does not match the plain structure.  The
-expansion follows the instructions and is confirmed against the runtime records of
+expansion follows the instructions and is confirmed against the runtime records
+of
 `LOGOH.SPR`.
 
 ## Debugger limits and the alternatives

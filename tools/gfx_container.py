@@ -114,14 +114,18 @@ def member_bytes(container: Container, member: Member) -> bytes:
 
 
 class _Lzw:
-    """The LZW decoder of the game, ported from `0x4d3fc`, `0x4d4c4`, and `0x4d844`.
+    """The LZW decoder of the member data.
 
-    The block decoder reads a code with a width from 9 to 12 bits, the code 0x100
+    The stream is a plain LSB-first code stream: each code starts at the next bit,
+    the low bit first, and the width runs from 9 to 12 bits.  The code 0x100
     clears the dictionary, the code 0x101 ends the stream, and the first free
     dictionary entry is 0x102.  The width grows when the next free entry reaches
-    `1 << shift`, checked before the entry is added.  The reader loads the 16 bit
-    word at the byte index, keeps the full word, and uses the byte at +2 only for
-    the bits that the bit offset pulls in at bit 15.
+    `1 << shift`, checked after the entry is added.
+
+    The first port emulated the 0x400 byte buffer of the game reader at `0x4d844`
+    and diverged at the first buffer refill, which made the logo sprites show the
+    first rows and noise after them.  The plain bit stream is confirmed: the
+    `LOGOH.SPR` sprite 0 renders the Virgin Interactive Entertainment logo.
     """
 
     CLEAR = 0x100
@@ -131,59 +135,36 @@ class _Lzw:
     def __init__(self, raw: bytes, limit: int) -> None:
         self.raw = raw
         self.limit = limit
-        self.buf = bytearray(0x400)
-        prefill = min(len(raw), 0x400)
-        self.buf[:prefill] = raw[:prefill]
-        self.read_pos = prefill
-        self.bits = 0
+        self.bitpos = 0
         self.shift = 9
         self.table: dict[int, bytes] = {}
         self.next_code = self.FIRST_FREE
         self.prev: bytes | None = None
         self.out = bytearray()
 
-    def _read_code(self) -> int:
-        """Read one code, refilling the bit buffer when fewer than five bytes remain."""
-        remaining = 0x400 - (self.bits >> 3)
-        if remaining < 5:
-            for i in range(remaining):
-                self.buf[i] = self.buf[(self.bits >> 3) + i]
-            room = len(self.raw) - self.read_pos
-            want = remaining if remaining < room else room
-            if want > 0:
-                self.buf[remaining : remaining + want] = self.raw[
-                    self.read_pos : self.read_pos + want
-                ]
-                self.read_pos += want
-            self.bits &= 7
-        byte_index = self.bits >> 3
-        offset = self.bits & 7
-        word = self.buf[byte_index] | (self.buf[byte_index + 1] << 8)
-        low = self.buf[byte_index + 2]
-        value = word
-        for _ in range(offset):
-            value = (value >> 1) | ((low & 1) << 15)
-            low >>= 1
-        self.bits += self.shift
-        return value & ((1 << self.shift) - 1)
+    def _read_code(self) -> int | None:
+        """Read one code from the bit stream, or None at the end of the stream."""
+        shift = self.shift
+        if self.bitpos + shift > len(self.raw) * 8:
+            return None
+        value = 0
+        for i in range(shift):
+            position = self.bitpos + i
+            bit = (self.raw[position >> 3] >> (position & 7)) & 1
+            value |= bit << i
+        self.bitpos += shift
+        return value
 
     def step(self) -> bool:
         """Decode one code and report whether the stream continues."""
         code = self._read_code()
-        if code == self.END:
-            if len(self.out) >= self.limit:
-                return False
-            # the game writes the end code inside a member as well: the dictionary
-            # resets at that point and the stream continues at the same bit
-            # position with the previous entry kept
-            self.table.clear()
-            self.next_code = self.FIRST_FREE
-            self.shift = 9
-            return True
+        if code is None or code == self.END:
+            return False
         if code == self.CLEAR:
             self.table.clear()
             self.next_code = self.FIRST_FREE
             self.shift = 9
+            self.prev = None
             return True
         if code < 0x100:
             entry = bytes([code])
@@ -233,96 +214,90 @@ def expand(raw: bytes, limit: int = 1 << 20) -> bytes:
     return bytes(decoder.out)
 
 
+def parse_font(out: bytes) -> tuple[list[tuple[int, int, int]], list[list[tuple[int, int]]], bytes]:
+    """Parse a font member into the descriptors, the glyph tables, and the tail.
+
+    The font loader at `0x25658` reads the count (one byte) at `+0x00`, then
+    `count + 1` descriptors of 12 bytes each: the glyph height, the first
+    character code, and the character count.  Then it reads one table per
+    descriptor of `(width, offset)` pairs, a four byte tail size, and the tail
+    with the packed four bit glyphs at those offsets.
+    """
+    count = out[0]
+    total = count + 1
+    descriptors = [struct.unpack_from("<III", out, 1 + i * 12) for i in range(total)]
+    position = 1 + total * 12
+    tables = []
+    for _height, _first, number in descriptors:
+        tables.append(
+            [struct.unpack_from("<II", out, position + i * 8) for i in range(number)]
+        )
+        position += number * 8
+    size = struct.unpack_from("<I", out, position)[0]
+    return descriptors, tables, out[position + 4 : position + 4 + size]
+
+
 def print_font(container: Container, name: str) -> int:
     """Print the font layout of a member.
 
-    The font loader at `0x25658` reads the count (one byte) at `+0x00`, then
-    `count + 1` descriptors of 12 bytes each into the table at `0x1ca98`, then
-    `count + 1` bitmaps of `0x500` bytes each into the table at `0x119898`.
-    The descriptor holds three 32 bit fields: the glyph height, then the two
-    font wide constants 32 and 76.  The height doubles between the low and the
-    high fonts.  After the first `count + 1` bitmaps the loader reads a 4 byte
-    size at `+0x1cb10` and reads that many bytes as the `FONTS` resource,
-    which holds the remaining glyph bitmaps of 0x500 bytes each.
+    The loader at `0x25658` reads the count byte, the descriptors, the glyph
+    tables, the tail size, and the tail.  Each descriptor is the glyph height,
+    the first character code, and the character count.  Each table entry is the
+    glyph width in pixels and the offset of the glyph in the tail.  The glyph
+    holds the height rows of the width packed four bits per pixel.
     """
     member = container.member(name)
     expanded = expand(member_bytes(container, member), member.end)
-    count = expanded[0]
-    total = count + 1
+    descriptors, tables, tail = parse_font(expanded)
     print(f"member:  {member.name}")
     print(f"bytes:   {len(expanded)}")
-    print(f"count at +0x00: {count} -> {total} descriptors and bitmaps")
-    offset = 1
-    for index in range(total):
-        height, field2, field3 = struct.unpack_from("<III", expanded, offset)
+    print(f"count at +0x00: {expanded[0]} -> {len(descriptors)} fonts")
+    position = 1 + len(descriptors) * 12
+    for index, (height, first, number) in enumerate(descriptors):
+        widths = [width for width, _offset in tables[index]]
         print(
-            f"  descriptor {index}: height {height} field2 {field2} "
-            f"field3 {field3}"
+            f"  font {index}: height {height}, the characters {first}..{first + number - 1}, "
+            f"{number} glyphs, the widths {min(widths)}..{max(widths)} px"
         )
-        offset += 12
-    bitmaps = total * 0x500
-    print(f"descriptors end at +0x{offset:X}")
-    print(f"bitmaps: {total} x 0x500 = {bitmaps} bytes to +0x{offset + bitmaps:X}")
-    tail = len(expanded) - offset - bitmaps
-    print(f"the tail after the bitmaps: {tail} bytes")
-    full = tail // 0x500
-    rem = tail % 0x500
-    print(
-        f"the tail holds the remaining glyph bitmaps of 0x500 bytes: "
-        f"{full} full and a {rem} byte remainder"
-    )
-    print(
-        "the loader reads the tail as the FONTS resource: the size at "
-        "+0x1cb10, then resource_get(engine, 'FONTS', size) at 0x2eed0"
-    )
+        position += number * 8
+    print(f"the tables end at +0x{position:X}")
+    print(f"the tail: {len(tail)} bytes at +0x{position + 4:X}")
     return 0
 
 
-def print_render(
-    container: Container, name: str, glyph: int, width: int, mode: str
-) -> int:
-    """Render one glyph bitmap as characters.
+def print_render(container: Container, name: str, glyph: int) -> int:
+    """Render one glyph of a font member as characters.
 
-    The mode `bit` reads one bit per pixel, most significant first; the mode
-    `nibble` reads four bits per pixel, two pixels per byte with the high
-    nibble first, and marks the zero nibble with `.`; the mode `byte` reads one
-    byte per pixel and marks a value of 128 or more with `#` and a value
-    between 1 and 127 with `+`.
+    The glyph index selects the entry of the first font table.  The entry is the
+    glyph width and the offset of the glyph in the tail, and the descriptor
+    gives the glyph height.  The glyph holds the height rows of the width packed
+    four bits per pixel with the high nibble first, so a zero nibble is a
+    transparent pixel.
 
     The draw routine at `0x25316` reads one byte, takes the high nibble with
     `and al, 0xf0` and `shr al, 4`, writes it, takes the low nibble with
     `and bl, 0xf`, writes it at `+1`, and skips the zero nibble, so the format
     is four bits per pixel with two pixels per byte and the high nibble first.
     """
-
     member = container.member(name)
     expanded = expand(member_bytes(container, member), member.end)
-    count = expanded[0]
-    total = count + 1
-    if not 0 <= glyph < total:
-        raise ValueError(f"the glyph {glyph} is outside 0 to {total - 1}")
-    height = struct.unpack_from("<I", expanded, 1 + glyph * 12)[0]
-    base = 1 + total * 12 + glyph * 0x500
-    bitmap = expanded[base : base + 0x500]
-    rows = len(bitmap) * 8 // width
+    descriptors, tables, tail = parse_font(expanded)
+    if not tables:
+        raise ValueError(f"{member.name} holds no font")
+    height, first, number = descriptors[0]
+    if not 0 <= glyph < number:
+        raise ValueError(f"the glyph {glyph} is outside 0 to {number - 1}")
+    width, offset = tables[0][glyph]
+    bytes_per_row = (width + 1) // 2
     print(f"member: {member.name}")
-    print(f"glyph:  {glyph} of {total - 1}, height {height}")
-    print(f"mode:   {mode}, width {width}")
-    for row in range(min(rows, 40)):
+    print(f"font 0: height {height}, the characters {first}..{first + number - 1}")
+    print(f"glyph:  {glyph} -> the character {first + glyph}, width {width} px")
+    for row in range(height):
         line = ""
         for column in range(width):
-            if mode == "nibble":
-                byte = bitmap[(row * width + column) >> 1]
-                nibble = (byte >> 4) if (column & 1) == 0 else (byte & 0xF)
-                line += "." if nibble == 0 else "#"
-            elif mode == "byte":
-                value = bitmap[row * width + column]
-                line += "#" if value >= 128 else ("+" if value > 0 else ".")
-            else:
-                index = row * width + column
-                byte = bitmap[index >> 3]
-                bit = (byte >> (7 - (index & 7))) & 1
-                line += "#" if bit else "."
+            byte = tail[offset + row * bytes_per_row + (column >> 1)]
+            nibble = (byte >> 4) if (column & 1) == 0 else (byte & 0xF)
+            line += "." if nibble == 0 else "#"
         print(f"  {line}")
     return 0
 
@@ -403,14 +378,10 @@ def main() -> int:
     font_parser.add_argument("file", type=Path)
     font_parser.add_argument("name")
 
-    render_parser = subparsers.add_parser("render", help="render a glyph bitmap")
+    render_parser = subparsers.add_parser("render", help="render a glyph as characters")
     render_parser.add_argument("file", type=Path)
     render_parser.add_argument("name")
     render_parser.add_argument("glyph", type=int)
-    render_parser.add_argument("--width", type=int, default=32)
-    render_parser.add_argument(
-        "--mode", choices=("bit", "nibble", "byte"), default="bit"
-    )
 
     args = parser.parse_args()
     try:
@@ -428,9 +399,7 @@ def main() -> int:
             return 1
     if args.command == "render":
         try:
-            return print_render(
-                container, args.name, args.glyph, args.width, args.mode
-            )
+            return print_render(container, args.name, args.glyph)
         except ValueError as error:
             print(f"error: {error}", file=sys.stderr)
             return 1

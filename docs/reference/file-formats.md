@@ -141,9 +141,10 @@ Evidence: the disassembly of `0x257b0` at `0x257cd` to `0x258b4`.
 
 **The font structure.**  The font loader at `0x25658` reads a count into
 `DAT_00025440`, then per font a 12-byte descriptor at `DAT_0011ca98`, then per
-font a 0x500-byte bitmap at `DAT_00119898`, and finally the `FONTS` resource.
-The loader increments the font count `DAT_00025440`.
-Evidence: the decompiled `FUN_00025658`.
+font a glyph table at `DAT_00119898` in a 0x500-byte slot, and finally the
+`FONTS` resource with the packed glyphs.  The loader increments the font count
+`DAT_00025440`.
+Evidence: the disassembly of `0x25658`.
 
 **Verification.**  `GFX/GAME.DAT` does not match the plain sprite structure at
 its head.  The first dword is `0xfbf05b00`, which is not a plausible sprite
@@ -216,22 +217,51 @@ The font loader at `0x25658` reads the font members of `GFX/GRAF.DAT`:
 | --- | --- |
 | `+0x00` | the count, one byte |
 | `+0x01` | `count + 1` descriptors of 12 bytes each |
-| then | `count + 1` bitmaps of `0x500` bytes each |
+| then | one glyph table per descriptor of `num_chars` entries of 8 bytes |
+| then | the tail size, four bytes |
+| then | the tail with the packed glyphs |
 
-The descriptor holds three 32 bit fields: the glyph height, then the two font
-wide constants 32 and 76.  The heights confirm the two resolutions: `MENUL.FNT`
-holds 11, 9, 19, and 30 and `MENUH.FNT` holds 22, 18, 38, and 60, exactly
-double, and `ATTRL.FNT` holds 19 against `ATTRH.FNT` with 38.  The bitmap
-region holds pixel data with the values 0 and 255 dominant, which is a font mask.
-After the first `count + 1` bitmaps the loader reads a 4 byte size at
-`+0x1cb10` and then reads that many bytes as the `FONTS` resource: the call is
-`resource_get(engine, "FONTS", size)` at `0x25755` with the string `FONTS` at
-`0x100ead`, and the tail is read into the resource buffer at `0x1543c`.  The tail
-holds the remaining glyph bitmaps of `0x500` bytes each: `MENUL.FNT` holds 23 full
-bitmaps and a 111 byte remainder, `ATTRL.FNT` 6 full and 563, `ATTRH.FNT` 24 full
-and 1102, and `MENUH.FNT` 94 full and 904.  The tail blocks hold pixel data with
-0 and 255 dominant, which is a glyph mask.
-Evidence: the disassembly of `0x25658` and the font command.
+The descriptor holds the glyph height, the first character code, and the
+character count.  `MENUH.FNT` holds `(22, 32, 76)`, `(18, 32, 76)`,
+`(38, 32, 76)`, and `(60, 32, 76)`, and the high fonts are exactly double the
+low
+fonts.  The heights confirm the two resolutions: `MENUL.FNT` holds 11, 9, 19,
+and
+30, `MENUH.FNT` holds 22, 18, 38, and 60, and `ATTRL.FNT` holds 19 against
+`ATTRH.FNT` with 38.
+
+The glyph table entry holds the glyph width in pixels and the offset of the
+glyph
+in the tail.  The glyph holds `height` rows of `width` pixels packed four bits
+per
+pixel, so the glyph size is `ceil(width / 2) * height`, and the next offset
+follows
+exactly.  For `ATTRH.FNT` the first entries are `(19, 0)`, `(13, 380)`, `(13,
+646)`,
+`(27, 912)`, and `(31, 1444)`: the first glyph is the space of 19 by 38 pixels,
+which is 380 bytes, and the second glyph starts at 380.
+
+The tail is the `FONTS` resource: `resource_get(engine, "FONTS", size)` at
+`0x25755`
+with the string `FONTS` at `0x100ead`, read into the buffer at `0x1543c`.  The
+tail
+size follows the last table and the member ends with the tail.  The sizes
+confirm the
+layout: `GAMEH.FNT` ends its tables at `+0x65d` with the tail size 93246 and
+`ATTRH.FNT` ends them at `+0x26d` with the tail size 32490, and in both cases
+the
+tail size plus the table end plus four equals the member size exactly.
+
+The character sheets confirm the layout: every font renders the ASCII set from
+the
+space to `z` with the accented characters `É`, `Ñ`, `¿`, `¡`, `À`, `Â`, `È`,
+`Ê`,
+`Ë`, `Î`, `Ï`, `Ô`, `Õ`, `Ù`, `Û`, and `Ü`.  The first character code 32 and the
+count 76 cover the codes 32 to 107, and the game fonts with the first code 48
+and
+the count 10 or 11 cover the digits and the colon.
+Evidence: the disassembly of `0x25658` and the font, render, and export
+commands.
 
 ### The font pixel format and row order
 
@@ -253,16 +283,22 @@ them to the screen, and its instructions fix the pixel format and the row order:
 
 The pixel format is therefore four bits per pixel, two pixels per byte, with the
 high nibble first, the zero nibble transparent, and the colour base at `0x15460`
-added to the value.  The row order is top to bottom with a stride of `0x280`, which
-is 640, the screen width.  The glyph width is the descriptor field 32 and the glyph
-height is the descriptor height, and the cell holds 2560 pixels, which is 1280 bytes.
-The draw routine also confirms the bitmap size as `0xa0 * 8`, which is `0x500`.
+added to the value.  The row order is top to bottom with a stride of `0x280`,
+which
+is 640, the screen width.  The glyph width is the descriptor field 32 and the
+glyph
+height is the descriptor height, and the cell holds 2560 pixels, which is 1280
+bytes.
+The draw routine also fixes the per-font table slot as `0xa0 * 8`, which is
+`0x500`, and the glyph width and height come from the table entry and the
+descriptor.
 Evidence: the disassembly of `0x25300` to `0x25500`.
 
-The render of the first glyphs shows a regular hatch pattern, so the first glyphs
-of the font are a dither or shading texture and not a letter shape.  The render does
-not change the pixel format, which the instructions fix.
-Evidence: the render command.
+The character sheets render every glyph as a letter: `MENUH.FNT` shows the
+complete
+ASCII set and `GAMEH.FNT` shows the italic game font with the accented
+characters.
+Evidence: the render command and the character sheets.
 
 ### The member data compression
 
@@ -284,31 +320,46 @@ Evidence: the decompiled `FUN_0004d4c4` and `FUN_0004d3fc`.
 
 The bit reader `0x4d844` holds a bit buffer of 0x400 bytes at `+0x8086`, the bit
 position at `+0x406c`, the shift count at `+0x4068`, and a mask table at
-`+0x8050`.  It returns the 16-bit value at the bit position, shifted right by
+`+0x8050`.
+It returns the 16-bit value at the bit position, shifted right by the low 3 bits
+of
+the position and masked with the mask of the shift count.  The mask table holds
 the
-low 3 bits of the position and masked with the mask of the shift count.  The
-mask
-table holds the values `(1 << n) - 1` for the shift counts 9 to 12, so the
-reader
-returns 9 to 12 bits at a time.  The reader keeps the full 16 bit word and
-uses the byte at `+2` only for the bits that the bit offset pulls in at bit 15.
-Evidence: the disassembly of `0x4d916`.
+values `(1 << n) - 1` for the shift counts 9 to 12, so the reader returns 9 to
+12
+bits at a time.
 
-The expansion is confirmed: every sprite member of `GFX/GRAF.DAT` and
-`GFX/GAME.DAT` expands to its member end field exactly, which is
+The tool reads the plain bit stream instead of emulating the 0x400 byte buffer:
+the
+code starts at the next bit, the low bit first, and the width runs from 9 to 12
+bits.
+The plain reader is the correct one.  The first port emulated the game buffer
+and
+diverged at the first refill, so the logo sprites showed the first rows and
+noise
+after them and every font glyph was noise.  The plain reader renders `LOGOH.SPR`
+sprite 0 as the Virgin Interactive Entertainment logo, the Graffiti logo, and
+the
+SCREAMER logo, and it renders every font as a readable character set.
+Evidence: the expansion test and the render of the sprites and the fonts.
+
+The expansion is confirmed: every sprite and font member of `GFX/GRAF.DAT` and
+`GFX/GAME.DAT` expands to its member end field exactly, which for a sprite is
 `8 + count * 0x14 + size`.  `LOGOH.SPR` expands to 208636 bytes, the sprite
 count at `+0x00` is 3, the pixel data size at `+0x04` is 208568, and the records
 are 0, 0, 200, 240, 0, then 1, 1, 466, 188, 48000, then 0, 0, 640, 114, 135608,
 which matches the run-time records at `0150:8D800` exactly.  `LOGOL.SPR` expands
 to 52538, `MENUL.SPR` to 75344, `MENUH.SPR` to 294846, `GAMEL.SPR` to 24483,
-and `GAMEH.SPR` to 93675.  The stream writes the end code inside a member as
-well, and the dictionary resets at that point while the stream continues.
+and `GAMEH.SPR` to 93675.  The stream ends with the end code, and the plain
+reader stops there.
 Evidence: the expansion test and the record dump.
 
 **Re-verification of the sprite layout.**  The member offsets, the sizes, and
 the names resolve.  The member data does not match the plain sprite structure,
-because it is LZW-compressed; the expansion runs when the member is read, not when
-the directory is read.  The expansion is now confirmed, so the re-verification of
+because it is LZW-compressed; the expansion runs when the member is read, not
+when
+the directory is read.  The expansion is now confirmed, so the re-verification
+of
 the sprite layout holds.  Evidence: the expansion test and the record dump.
 
 ### The resolution modes
