@@ -1,12 +1,15 @@
-# Watch the keyboard path and name the handler.
+# Catch the BIOS keyboard read and read the scancode in AL.
 break
 clear
-exec CALLBACKS
 exec BPINT 16 0
 exec BPINT 16 1
 exec RUN
 sleep 30
 break
-read EIP AX BX CX DX
+read EIP AX
+exec INTT
+sleep 2
+break
+read EIP AX
 exec BPDEL *
 exec RUN

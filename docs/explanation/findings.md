@@ -77,6 +77,23 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The read breakpoint is armed and the trace needs the read
+
+- The scancode probe runs 14 steps with 0 failures: both keyboard breakpoints
+  are accepted, the 30-second wait runs, and the registers read `EIP=0xda84`
+  `AX=0x100`.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- `INTT` traces `INT 00`, not `INT 16`, and the registers after the trace read
+  `EIP=0xca60` `AX=0x100`, so the trace caught another interrupt and not the
+  keyboard read.
+  Evidence: the trace output.
+- The `AH=01` check is therefore observed and the `AH=00` read is armed, and the
+  scancode read needs a break that lands on the read itself.
+  Evidence: the two runs.
+- The next step waits for the `AH=00` breakpoint instead of stopping on a timer,
+  so the `AL` at that stop is the scancode the game took.
+  Evidence: the probe result.
+
 ## The game polls the BIOS keyboard at the break
 
 - `CALLBACKS` lists the interrupt callbacks and the list ends with the BIOS
