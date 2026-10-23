@@ -77,6 +77,25 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The menu read returns the value 0x2f
+
+- The armed-after-demo probe runs 15 steps with 0 failures: the demo runs 60
+  seconds, the `BPINT 16 0` read breakpoint is armed after it, the Enter is sent,
+  and the break follows.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- The read breakpoint fires at the menu: the EIP is `0x1e7337`, the module
+  `0x25337`, which is inside the game code, and the registers read `AX=0x2f`.
+  Evidence: the register read.
+- `AX` is `0x2f`, so `AL` is `0x2f`, which is the value the game takes from
+  the BIOS read.  The value `0x2f` is the character `/` in the BIOS convention.
+  Evidence: the register read.
+- The read therefore runs in the menu and not in the demo, which matches the
+  earlier poll result, and the menu takes the key the read returns.
+  Evidence: the two probes.
+- The value `0x2f` is the read result and not the key that was sent, so the game
+  maps the BIOS result to its own action and the mapping table stays open.
+  Evidence: the sent key and the read value.
+
 ## The read breakpoint does not fire in the demo
 
 - The read probe runs 11 steps with 0 failures: the `BPINT 16 0` read breakpoint

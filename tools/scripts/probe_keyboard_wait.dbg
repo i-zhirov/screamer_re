@@ -1,9 +1,13 @@
-# Catch the BIOS keyboard read and read the scancode in AL.
+# Arm the keyboard read only after the demo, then read the scancode in AL.
 break
 clear
+exec RUN
+sleep 60
+break
+read EIP AX
 exec BPINT 16 0
 exec RUN
-sleep 30
+sleep 5
 key \r
 sleep 5
 break
