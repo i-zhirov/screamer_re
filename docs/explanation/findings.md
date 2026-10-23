@@ -77,6 +77,46 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The car record and its consumer
+
+- The `CARS_DATA` list names every field in its header line: `filename` (the
+  type `s`), `animation` (the type `x`), `maxspd`, `maxrpm`, `grip`, and
+  `accel` (the type `f`), `shiftmode` and `n_shifts` (the type `d`), and
+  `sh_rap0` to `sh_rap5` (the type `f`).
+  Evidence: the `CARS_DATA` header of `DATA/GEN.DAT`.
+- The first record is the Lamborghini: `sAUTO00`, `x0`, `f21000`, `f9000`,
+  `f1.05`, `f1000`, `d1`, `d6`, then `f270`, `f190`, `f130`, `f85`, `f55`,
+  `f40`.
+  Evidence: the first record of `DATA/GEN.DAT`.
+- The record is 0x40 bytes: the filename holds eight bytes at `+0x04`, the
+  animation holds four bytes at `+0x0c`, and the twelve numeric fields hold
+  four bytes each from `+0x10` to `+0x3f`.
+  Evidence: the 0x40 record size at `0x13318` and the field order.
+- `FUN_000136cc` is the car record consumer.  It copies the whole 0x40 byte
+  record to the car object at `+0x470`.
+  Evidence: the disassembly of `0x136e6` to `0x13710`.
+- The consumer reads the record fields at fixed offsets: `+0x474` is the filename
+  (the record `+0x04`), `+0x47c` is the animation (the record `+0x0c`), and
+  `+0x468` is the animation name (the record `+0x00`).
+  Evidence: the disassembly of `0x13713` to `0x1379a`.
+- The animation field is a flag: zero selects the letter `A` and a non-zero value
+  selects the letter `B`, so the two liveries share one car.
+  Evidence: the disassembly of `0x13716` to `0x13728`.
+- The consumer builds the cockpit name `COCK%s%c` from the filename and the
+  letter, and again with the letter `H`, so the members are `COCK00AL`,
+  `COCK00AH`, `COCK00BL`, and `COCK00BH`, which are the shipped members of
+  `GFX/GAME.DAT`.
+  Evidence: the disassembly of `0x13729` to `0x13764` and the member list.
+- The consumer reads the animation name with `FUN_00011060` against the list at
+  `0x106530`, which is the `ALETTER` list, and then reads the list `COCK%s%c`
+  through `FUN_00015460("GEN", "CARS", ...)` with 0x74 records of 0x74 bytes.
+  Evidence: the disassembly of `0x13787` to `0x13782`.
+- The `FUN_00015460` file arguments are the directory and the file name, so the
+  path is `dir\data\file.dat`.  The calls pass the directory `CARS` or `MENU` and
+  the file `GEN`, so the shipped `DATA/GEN.DAT` holds the lists `CARS_DATA` and
+  the 15 more, and the member argument selects the list.
+  Evidence: the disassembly of `0x13778` and the `GEN.DAT` list names.
+
 ## The track index and the level 5 record
 
 - The `MAP*I.DAT` files hold 16-bit signed values.  The first dword is a
