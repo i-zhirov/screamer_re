@@ -77,6 +77,22 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The table probe runs and fires on the pointer cell
+
+- The `BPLM` probe runs against the game: the launch is `dosbox-x -nogui
+  -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf`, the
+  breakpoint at `0x24E1C4` fires, and the dump files are written.
+  Evidence: `tools/scripts/probe_table_watch.dbg` and the run output.
+- The linear address of the `VIS.TAB` pointer cell is `0x24E1C4`, which is the
+  module address `0x8C1C4` plus `0x1C2000`, and the dump reads the same address.
+  Evidence: the probe and the dumps.
+- The pointer cell holds 0 before and after the fire, so the break lands on an
+  early access and not on the loader write, and the read order stays open.
+  Evidence: `VIS_PTR_BEFORE.BIN` and `VIS_PTR_AFTER.BIN`.
+- The next step runs the probe past the level load and watches the pointer value
+  that the loader stores.
+  Evidence: the probe result.
+
 ## The table consumers are not visible in the code
 
 - The `PERSPTAB` resource pointer is read by `FUN_0008bc7c`, which stores it in
