@@ -1,14 +1,16 @@
-# Catch the INT 16h AH=01 poll and read its answer in AL.
+# Inject the key while stopped at the poll, then run on and read AL.
 break
 clear
 exec BPINT 16 1
 exec BPLIST
 exec RUN
 sleep 40
+break
 read EIP AX
-exec BPLIST
 key \r
-sleep 10
+exec BPLIST
+exec RUN
+sleep 3
 read EIP AX
 exec BPLIST
 exec BPDEL *
