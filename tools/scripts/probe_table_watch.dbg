@@ -1,12 +1,38 @@
+# Watch the table pointer cells past the level load.
+#
+# The game runs a demo first, so the script lets it run, presses Enter to leave
+# the demo, and walks the menu with further Enter presses to start a race.  Then it
+# sets the linear watch on the two pointer cells and dumps them before and after.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/probe_table_watch.dbg \
+#     --port 9876 --cwd work/entry/run --timeout 500 \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+
 break
+clear
+exec RUN
+sleep 20
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
+break
+read EIP
 exec MEMDUMPBIN 0150:8C1C4 4 VIS_PTR_BEFORE.BIN
 exec MEMDUMPBIN 0150:1214EC 4 PERSP_PTR_BEFORE.BIN
 exec BPLM 0x24E1C4
-clear
+exec BPLM 0x2E34EC
 exec RUN
-sleep 10
+sleep 20
 break
 read EIP
 exec MEMDUMPBIN 0150:8C1C4 4 VIS_PTR_AFTER.BIN
+exec MEMDUMPBIN 0150:1214EC 4 PERSP_PTR_AFTER.BIN
 exec BPDEL *
 exec RUN

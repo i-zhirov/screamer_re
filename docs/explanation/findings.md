@@ -89,8 +89,14 @@ The page separates observations from open questions.
 - The pointer cell holds 0 before and after the fire, so the break lands on an
   early access and not on the loader write, and the read order stays open.
   Evidence: `VIS_PTR_BEFORE.BIN` and `VIS_PTR_AFTER.BIN`.
-- The next step runs the probe past the level load and watches the pointer value
-  that the loader stores.
+- The extended probe runs 26 steps with 0 failures: the demo runs, four Enter
+  presses walk the menu, and the two watches are set before the last run.
+  Evidence: the probe run.
+- The pointer cells hold 0 before and after the extended run, and the EIP is
+  `0x1e1c40` at both dumps, so the walk did not reach the race start.
+  Evidence: `VIS_PTR_AFTER.BIN` and `PERSP_PTR_AFTER.BIN`.
+- The next step checks the menu key sequence or watches the loader function
+  directly.
   Evidence: the probe result.
 
 ## The table consumers are not visible in the code
