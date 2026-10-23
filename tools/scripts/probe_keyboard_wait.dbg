@@ -1,16 +1,17 @@
-# Inject the key while stopped at the poll, then run on and read AL.
+# Arm both keyboard breakpoints, inject at the poll stop, and read the read return.
 break
 clear
 exec BPINT 16 1
+exec BPINT 16 0
 exec BPLIST
 exec RUN
 sleep 40
 break
 read EIP AX
 key \r
-exec BPLIST
 exec RUN
 sleep 3
+break
 read EIP AX
 exec BPLIST
 exec BPDEL *
