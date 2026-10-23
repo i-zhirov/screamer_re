@@ -1,0 +1,23 @@
+# Watch the two table loader entries with BPPM.
+break
+clear
+exec RUN
+sleep 20
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
+break
+read EIP
+exec BPPM 0150:4D030
+exec BPPM 0150:4CF94
+exec RUN
+sleep 20
+break
+read EIP
+exec BPDEL *
+exec RUN

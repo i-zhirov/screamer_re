@@ -95,9 +95,14 @@ The page separates observations from open questions.
 - The pointer cells hold 0 before and after the extended run, and the EIP is
   `0x1e1c40` at both dumps, so the walk did not reach the race start.
   Evidence: `VIS_PTR_AFTER.BIN` and `PERSP_PTR_AFTER.BIN`.
-- The next step checks the menu key sequence or watches the loader function
-  directly.
-  Evidence: the probe result.
+- The loader-entry probe sets both breakpoints: `BPPM 0150:4D030` and
+  `BPPM 0150:4CF94` report "Set prot-mode memory breakpoint", and the run
+  finishes with 22 steps and 0 failures.
+  Evidence: `tools/scripts/probe_table_loaders.dbg` and the run output.
+- Neither loader fires and the EIP is `0x1e1c40` again, so the game never
+  reaches the race start and the key sequence is the open question, not the
+  breakpoint mechanism.
+  Evidence: the probe run.
 
 ## The table consumers are not visible in the code
 
