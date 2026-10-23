@@ -77,6 +77,25 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The BPLIST check proves the read breakpoint never fires
+
+- The probe now reads `BPLIST` at every stop, which names the breakpoints that
+  are still armed.  A stop from the `break` command leaves the list unchanged; a
+  stop from a breakpoint removes or reports it.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg`.
+- The re-run reads `EIP=0x245d90` `AX=0x8b8b` at 60 seconds and
+  `EIP=0x1e1c40` `AX=2` after the Enter, and the breakpoint list reads
+  `00. BPINT 16 AH=00` at every stop.
+  Evidence: the run output.
+- So the `INT 16h` `AH=00` read breakpoint does not fire in the demo or after
+  one Enter, and the stops are the `break` command and not the watch.  The menu
+  read value stays unread, and the values `0x8b8b` and `2` are game data and not
+  scancodes.
+  Evidence: the breakpoint list at every stop.
+- The keyboard path is therefore the `AH=01` poll only, which the earlier probe
+  observed, and the `AH=00` read runs at a state the probes have not reached.
+  Evidence: the poll probe and the read probe.
+
 ## Correction: the value 0x2f was a glyph and not a scancode
 
 - This section is corrected.  The second run of the same probe reads

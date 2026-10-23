@@ -1,16 +1,15 @@
-# Arm the keyboard read only after the demo, then read the scancode in AL.
+# Arm the read breakpoint, run the demo, and let the stop happen on its own.
 break
 clear
+exec BPINT 16 0
+exec BPLIST
 exec RUN
 sleep 60
-break
 read EIP AX
-exec BPINT 16 0
-exec RUN
-sleep 5
+exec BPLIST
 key \r
-sleep 5
-break
+sleep 10
 read EIP AX
+exec BPLIST
 exec BPDEL *
 exec RUN
