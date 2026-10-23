@@ -77,6 +77,21 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The index reader and the member name
+
+- `FUN_00015460` builds the path `dir\data\file.dat` from a runtime directory
+  global and the first argument, and builds the member name `arg2.dtr`.
+  Evidence: the disassembly of `0x1547a` to `0x154ba`.
+- The first call in `FUN_000131a8` passes the index name `MAP1i` as the file and
+  `MAP1dat` as the member base, and the array `OSTACLES` (0x24 records of 0x24
+  bytes) as the destination, so the index reader is the obstacle reader and the
+  index holds the track obstacles.
+  Evidence: the disassembly of `0x1329e` to `0x132aa`.
+- The list reader builds the file `dir\data\file.dat` with the directory global
+  and the file argument, so the index is `MENU\data\MAP1i.dat`, the shipped
+  `DATA/MAP1I.DAT`.
+  Evidence: the disassembly of `0x1547a` to `0x15491`.
+
 ## The car record and its consumer
 
 - The `CARS_DATA` list names every field in its header line: `filename` (the
