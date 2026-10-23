@@ -77,6 +77,23 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The table consumers are not visible in the code
+
+- The `PERSPTAB` resource pointer is read by `FUN_0008bc7c`, which stores it in
+  the globals `0x83664` and `0x8abd3` and calls `GlobalDescriptorTableRegister`,
+  so the function sets up a descriptor and not the table read.
+  Evidence: the decompiled `FUN_0008bc7c`.
+- The two globals are written by `FUN_0008bc7c` and read by no analyzed
+  function, and the `VIS.TAB` buffer at `0x8c1c4` is read only by the loader
+  `FUN_0004d030`, so neither table has a visible reader.
+  Evidence: the reference lists of `0x83664`, `0x8abd3`, and `0x8c1c4`.
+- The meaning of `TABS/VIS.TAB` and `TABS/PERSP01.TAB` therefore stays open:
+  the loaders are known and the read order is not.
+  Evidence: the two reference lists.
+- The next step is a run-time watch on the two buffers with `BPLM` at the linear
+  addresses, which gives the read order that the static code hides.
+  Evidence: the protected-mode breakpoint method.
+
 ## The difficulty ladder holds in every level
 
 - The `OPPONENTS` ladder holds in all six levels: the `A` variant starts at
