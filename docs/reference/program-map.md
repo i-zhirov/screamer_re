@@ -315,6 +315,23 @@ Evidence: the strings at `0x100f4d`, `0x100f5d`, `0x100f68`, `0x100f73`,
 `0x100fd5`, `0x101014`, `0x1011a2`, `0x1011bc`, and the decompiled
 `FUN_0001b5a4`, `FUN_00029d08`, and `FUN_0002a364`.
 
+### The TABS table loaders
+
+`engine_init` calls `FUN_0004c810` at `0x1287a`, and that caller loads the two
+TABS tables.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x4c810` | `tabs_load` | calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e` | derived |
+| `0x4cf94` | `persptab_load` | opens `TABS\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000` | derived |
+| `0x4d030` | `vis_tab_load` | opens `TABS\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell | derived |
+
+The call order is `persptab_load` first and `vis_tab_load` second, so the
+`PERSPTAB` table reads first at the call level.  The run-time read order is not
+observed yet.
+Evidence: the call site scan and `python3 tools/le.py disasm STARTH.EXE 0x4c810`,
+`0x4cf94`, `0x4d030`, and `0x127a0`.
+
 ## Fifth level: the vehicle states, the timing filter, and the runtime
 
 ### The vehicle state chain

@@ -1,0 +1,12 @@
+# Confirm the BPPM fire through the emulator output and name the writer.
+break
+clear
+exec BPPM 0150:4CF94
+exec RUN
+sleep 25
+break
+exec BPLIST
+read CS EIP
+show
+exec BPDEL *
+exec RUN

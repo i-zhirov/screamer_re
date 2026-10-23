@@ -1,0 +1,108 @@
+# Read the first file reads after the game starts and name the TABS loads.
+# The loader read count is 0x40740, so a stop with ECX=0x40740 names a TABS read.
+break
+clear
+exec BPINT 21 "3F"
+exec BPLIST
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec BPDEL *
+exec RUN

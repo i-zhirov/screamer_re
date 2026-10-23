@@ -168,6 +168,19 @@ and
 `LOG`, `LOGS`, `LOGL`, and `HEAVYLOG` for CPU logs.  The next probe should use
 `BPLM` and `MEMDUMPBIN` rather than `BP` and the text `MEMDUMP`.
 
+A memory watch reports a byte change in the emulator output:
+
+```text
+DEBUG: Memory breakpoint (Prot): <selector>:<offset> - <old> -> <new>
+```
+
+The `(%02X)` field in `BPLIST` is the new byte at the watched address.  A `show`
+step prints the captured emulator output, so the fires of the window appear in
+order.  The dump offset is the linear address, and the length is a hexadecimal
+number.  The file offset of an object page maps to the linear address with the
+offset plus `0x1B7800`.
+Evidence: the watch-fire probe and the dump-base probe under `tools/scripts/`.
+
 The alternatives, if DOSBox-X still falls short:
 
 | Emulator | Debugger | Runs DOS/4GW | macOS arm64 | Cost |
@@ -232,6 +245,7 @@ is absent.  The script holds one command per line:
 | `expect <text>` | fail when the last response lacks the text |
 | `note <text>` | print a note |
 | `read <register> ...` | read registers |
+| `show` | print the captured emulator output |
 | `sleep <seconds>` | wait |
 | `stop` | end the script |
 | `wait <marker> [timeout]` | wait for a marker in the emulator output |

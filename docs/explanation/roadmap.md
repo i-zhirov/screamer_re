@@ -76,6 +76,8 @@ current host.
    `GFX/GAME.DAT`).
 5. Decode the map and index formats: `DATA/MAP*.DAT`, `DATA/MAP*I.DAT`,
    `DATA/GEN.DAT`, `DATA/LOCAL.DAT`, and `TABS/*.TAB` (in progress: the
-   `DATA` files expand to text lists, and the loaders are known).
+   `DATA` files expand to text lists, the loaders are known, and the two `TABS`
+   loaders carry a caller chain from `engine_init`; the run-time read order of the
+   two tables stays open).
 6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank.
 7. Set up the OpenWatcom V2 build harness under `work/`.

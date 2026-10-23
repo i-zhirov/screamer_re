@@ -30,6 +30,7 @@ Session script commands, one per line:
     expect <text>                  fail when the last response lacks the text
     note <text>                    print a note
     read <register> ...            read registers through the debugger EV command
+    show                          print the captured emulator output
     sleep <seconds>                wait
     stop                          end the script
     wait <marker> [timeout]        wait for a marker in the emulator output
@@ -299,6 +300,15 @@ class ScriptRunner:
             self._fail(step, f"expected {len(names)} values, got {len(values)}")
             return False
         print("read " + " ".join(f"{name}={value}" for name, value in zip(names, values)))
+        return True
+
+    def _step_show(self, step: ScriptStep) -> bool:
+        if self.child is None:
+            self._fail(step, "show needs --launch")
+            return False
+        print("--- emulator output ---")
+        print(self.child.text())
+        print("--- end ---")
         return True
 
     def _step_sleep(self, step: ScriptStep) -> bool:

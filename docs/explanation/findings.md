@@ -3808,3 +3808,76 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   armed for the state that starts a level.
   Evidence: the two runs.
 
+## The TABS loaders belong to the engine start
+
+- The byte scan over `obj.1` finds two call sites to the two TABS loaders.  The
+  site `0x4c839` targets `0x4cf94`, the `PERSPTAB` loader.  The site `0x4c83e`
+  targets `0x4d030`, the `VIS.TAB` loader.  Both sites sit inside
+  `FUN_0004c810`, so the caller loads the `PERSPTAB` table first and the
+  `VIS.TAB` table second.
+  Evidence: the call site scan and
+  `python3 tools/le.py disasm STARTH.EXE 0x4c810`.
+- `FUN_0004c810` is called from `engine_init` at `0x1287a`.  The caller passes
+  the game memory block in EAX and the value `0x280` in ECX.  The two tables load
+  at the engine start and not at the race start.
+  Evidence: the caller scan and
+  `python3 tools/le.py disasm STARTH.EXE 0x127a0`.
+- The earlier reading that `FUN_000131a8`, the race data load, calls the two TABS
+  loaders is corrected.  `FUN_000131a8` calls the sprite loader at `0x13426` and
+  `0x134b6`.  The two TABS loaders have one caller, `FUN_0004c810`, which
+  reaches them through `engine_init`.
+  Evidence: the call site scan of `0x4cf94` and `0x4d030` and the disassembly of
+  `0x131a8`.
+- Both loaders open the file with the mode `rb`.  Both read
+  `fread(buffer, 1, 0x40740, stream)`.  The `PERSPTAB` loader stores the
+  returned pointer at the `PERSPTAB` cell.  It then advances the cell by `0x40000`,
+  so the table holds two halves.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cf94` and `0x4d030`.
+- The `VIS.TAB` cell holds the pointer `0x0007C1C8` in the file.  The cell sits
+  at `obj.1 + 0x7c1c4`, which is the file offset `0x969c4`.  The pointer target
+  is zero in the file, so the game fills the buffer at run time.
+  Evidence: the file bytes at `0x969c4` and the module mapping.
+
+## The dump base and the memory watch
+
+- The dump offset is the linear address.  The dump length is a hexadecimal
+  number.  `MEMDUMPBIN 0150:1F20F8 10` reads
+  `EB 76 57 41 54 43 4F 4D 20 43 2F 43 2B 2B 33 32`, which is the entry jump
+  `EB 76 57 41` and the banner `TCOM C/C++32`.  `MEMDUMPBIN 0150:2AF736 20`
+  reads `TABS\persp01.tab\0PERSPTAB\0rb\0TAB`.
+  Evidence: `tools/scripts/probe_dump_base.dbg` and the dump files.
+- The earlier reading that the dump adds the selector base `0x1C2000` is not
+  supported by these dumps.  The entry dump passes the offset `0x1F20F8` and reads
+  the entry, so the offset is the linear address.
+  Evidence: the dump comparison.
+- The file offset to the linear address is the offset plus `0x1B7800` for the
+  object pages.  The entry file offset `0x3A8F8` reads at the linear `0x1F20F8`.
+  The name file offset `0xF7F36` reads at the linear `0x2AF736`.
+  Evidence: the two dumps.
+- The memory watch reports a byte change in the emulator output as
+  `DEBUG: Memory breakpoint (Prot): <sel>:<off> - <old> -> <new>`.  The `BPLIST`
+  `(%02X)` field is the new byte at the watched address.
+  Evidence: `tools/scripts/probe_watch_fire.dbg` and the emulator output.
+- The watch on the module address `0150:4CF94` that the earlier probes used does
+  not observe the loader code page.  The loader page at the linear `0x20EF94` holds
+  the fill `55 55 55 55` at 4 seconds.  The same page holds zero at 12 seconds.
+  It holds the loader bytes `53 51 52 55` at 24 seconds and at 44 seconds.  The
+  loader page therefore enters memory between 12 and 24 seconds, while the watch
+  address `0x4CF94` is a different page.
+  Evidence: `tools/scripts/probe_loader_page.dbg` and the four dumps.
+- The watch on the module address `0150:4CF94` fires with `00 -> 55`.  The dumps
+  at `0150:4CF94`, `0150:20EF94`, and `0150:21EF94` read the fill `55` at the
+  end of that six-second run.  The fire is therefore a page fill and not a loader
+  write.
+  Evidence: `tools/scripts/probe_loader_bytes.dbg` and the three dumps.
+- The read breakpoint at the engine start reads 28, 28, 6, 176 times seven, 28, 4,
+  16, 7852, 8192, 8192, and 28 bytes on the handle 5.  That sequence is the
+  config and the menu sequence.  No stop carries the loader count `0x40740`, so the
+  two TABS reads are not observed in that window.
+  Evidence: `tools/scripts/probe_first_reads.dbg` and the run output.
+- The two resource-cell watches do not confirm the read order yet.  The watch on
+  `0150:24E1C4` fires `00 -> 55` five times in a 45-second window, and the
+  dumps read the fill `55` at the end.  The watches on `0150:2CF4EC` and
+  `0150:2E34EC` do not fire.  The run-time address of the `PERSPTAB` cell
+  therefore stays open.
+  Evidence: `tools/scripts/probe_pointer_order.dbg` and the cell dumps.

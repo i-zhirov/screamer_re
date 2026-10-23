@@ -1,0 +1,27 @@
+# Watch the two TABS pointer cells and read the fire order.
+#
+# The PERSPTAB resource cell is the module 0x1214EC and the VIS.TAB cell is the
+# module 0x8C1C4.  The module plus 0x1C2000 is the run-time address for the
+# code pages and the earlier evidence for the resource cell.  The memory watch
+# reports a byte change, so both cells are watched at all four bytes.  The emulator
+# output lists the fires in order and the address names the table.
+break
+clear
+exec BPPM 0150:2E34EC
+exec BPPM 0150:2E34ED
+exec BPPM 0150:2E34EE
+exec BPPM 0150:2E34EF
+exec BPPM 0150:24E1C4
+exec BPPM 0150:24E1C5
+exec BPPM 0150:24E1C6
+exec BPPM 0150:24E1C7
+exec BPLIST
+exec RUN
+sleep 45
+break
+exec BPLIST
+exec MEMDUMPBIN 0150:2E34EC 10 CELL_A.BIN
+exec MEMDUMPBIN 0150:24E1C4 10 CELL_B.BIN
+show
+exec BPDEL *
+exec RUN

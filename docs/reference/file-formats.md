@@ -6,19 +6,30 @@ Every claim below comes from file bytes and from `file` output.
 ### The TABS table loaders
 
 - `FUN_0004cf94` loads `TABS\persp01.tab` into the `PERSPTAB` resource and
-  stores the pointer at `DAT_001214ec` (module `0x1214EC`, linear `0x2E34EC`).
-  The loader holds 43 instructions, at `obj.1 + 0x3cf94`, page 60 (file page
-  61), file offset `0x57794`.
+  stores the pointer at `DAT_001214ec` (module `0x1214EC`).  The loader holds 43
+  instructions, at `obj.1 + 0x3cf94`, page 60 (file page 61), file offset
+  `0x57794`.
 - `FUN_0004d030` loads `TABS\VIS.TAB` into the buffer `PTR_DAT_0008c1c4`
   (module `0x8C1C4`, linear `0x24E1C4`).  The loader holds 31 instructions, at
   `obj.1 + 0x3d030`, page 61 (file page 62), file offset `0x57830`.
 - The two loaders sit in adjacent pages of `obj.1`, and the `PERSPTAB` loader
   comes first in the image.
-- The read order is not observed at run time: the demo reaches neither loader,
-  and the race-start walk leaves both watches armed with the `PERSPTAB` loader
-  byte changed from `00` to `55`, so the page is touched by a write and the
-  loader does not execute in that window.
-  Evidence: `tools/scripts/probe_race_start.dbg` and the full breakpoint list.
+- Both loaders open the file with the mode `rb` and read
+  `fread(buffer, 1, 0x40740, stream)`.  The `PERSPTAB` loader then advances the
+  resource pointer by `0x40000`, so the table holds two halves.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cf94` and `0x4d030`.
+- One caller, `FUN_0004c810`, calls the two loaders in the order `PERSPTAB`
+  then `VIS.TAB`, and `engine_init` calls that caller at the engine start.  The
+  two tables therefore load at the engine start and not at the race start.
+  Evidence: the call site scan and the disassembly of `0x4c810` and `0x127a0`.
+- The `VIS.TAB` cell holds the pointer `0x0007C1C8` in the file at
+  `obj.1 + 0x7c1c4`, and the pointer target is zero in the file, so the game
+  fills the buffer at run time.
+  Evidence: the file bytes at `0x969c4`.
+- The run-time read order of the two files is not observed yet.  The memory watch
+  on the `VIS.TAB` cell reads the fill `55`, and the watches on the `PERSPTAB`
+  cell do not fire, so the cell addresses are not settled.
+  Evidence: `tools/scripts/probe_pointer_order.dbg` and the cell dumps.
 - `PERSP01.TAB` holds 262656 bytes of 32-bit values and `VIS.TAB` holds 161024
   bytes of 16-bit values, so the `PERSPTAB` table holds 65664 values and the
   `VIS` table holds 80512 values.

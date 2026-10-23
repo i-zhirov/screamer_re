@@ -1,0 +1,22 @@
+# Settle the BPPM marker and the loader byte addresses.
+#
+# The watch is armed before the game starts.  The dumps read the watched
+# address, the linear address module + 0x1C2000, and the linear address
+# module + 0x1D2000.  A comparison with the file bytes names the correct
+# linear address.
+break
+clear
+exec BPPM 0150:4CF94
+exec BPLIST
+exec MEMDUMPBIN 0150:4CF94 8 LB_A1.BIN
+exec MEMDUMPBIN 0150:20EF94 8 LB_B1.BIN
+exec MEMDUMPBIN 0150:21EF94 8 LB_C1.BIN
+exec RUN
+sleep 6
+break
+exec BPLIST
+exec MEMDUMPBIN 0150:4CF94 8 LB_A2.BIN
+exec MEMDUMPBIN 0150:20EF94 8 LB_B2.BIN
+exec MEMDUMPBIN 0150:21EF94 8 LB_C2.BIN
+exec BPDEL *
+exec RUN

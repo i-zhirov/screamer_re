@@ -1,0 +1,17 @@
+# Settle the dump address base with known bytes.
+#
+# The entry at the module 0x300F8 is the byte sequence EB 76 57 41.  The TABS name
+# strings sit at the file offset 0xF7F36.  The loader code at the module 0x4CF94 is
+# 53 51 52 55.  The dumps read the run-time address when the base is zero.
+break
+clear
+exec RUN
+sleep 20
+break
+read CS EIP
+exec MEMDUMPBIN 0150:1F20F8 10 ENTRY_T.BIN
+exec MEMDUMPBIN 0150:20EF94 10 LOADER_T.BIN
+exec MEMDUMPBIN 0150:2AF736 20 NAME_T.BIN
+exec MEMDUMPBIN 0150:0F7F36 20 NAME_OFF.BIN
+exec BPDEL *
+exec RUN

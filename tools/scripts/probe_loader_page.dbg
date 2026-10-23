@@ -1,0 +1,32 @@
+# Follow the loader page and the game address over a long window.
+#
+# The watch is armed before the game starts.  At every stop the probe reads
+# the game address and the loader page bytes, so the stop that loads the page
+# names the moment the loader runs.
+break
+clear
+exec BPPM 0150:4CF94
+exec RUN
+sleep 4
+break
+read CS EIP
+exec MEMDUMPBIN 0150:20EF94 4 LB_T1.BIN
+exec RUN
+sleep 8
+break
+read CS EIP
+exec MEMDUMPBIN 0150:20EF94 4 LB_T2.BIN
+exec RUN
+sleep 12
+break
+read CS EIP
+exec MEMDUMPBIN 0150:20EF94 4 LB_T3.BIN
+exec BPLIST
+exec RUN
+sleep 20
+break
+read CS EIP
+exec MEMDUMPBIN 0150:20EF94 4 LB_T4.BIN
+exec BPLIST
+exec BPDEL *
+exec RUN
