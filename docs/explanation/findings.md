@@ -77,6 +77,26 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The game polls the BIOS keyboard at the break
+
+- `CALLBACKS` lists the interrupt callbacks and the list ends with the BIOS
+  handlers: `BIOS 1Bh stock CTRL+BREAK handler`, `irq 14 ide`, `irq 15 ide`,
+  `irq 6 floppy`, `int 18`, `BIOS POST`, `BIOS Scan Video BIOS`, `BIOS Adapter
+  ROM scan`, `BIOS Startup screen`, `BIOS BOOT`, `IBM ROM BASIC entry`, and the
+  APM entries.  No game handler appears in the list.
+  Evidence: `exec CALLBACKS` through the control socket.
+- Both keyboard breakpoints are accepted: `BPINT 16 0` sets the read with `AH=00`
+  and `BPINT 16 1` sets the check with `AH=01`.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- At the 30-second break the registers are `EIP=0xda84`, `AX=0x100`, `BX=0`,
+  `CX=0x607`, and `DX=0xf02`.  `AX` is `0x100`, so `AH=01` and `AL=00`, which
+  is the BIOS check for a key, and the EIP is below the code object, in the BIOS.
+  Evidence: the run output.
+- So the game polls the BIOS keyboard with the `INT 16h` check, and the game does
+  not hook the interrupt itself.  The read that follows carries the scancode in
+  `AL`, so the `AH=00` breakpoint names the key the game takes.
+  Evidence: the register read and the `CALLBACKS` list.
+
 ## The keyboard watch is armed and the advanced commands are listed
 
 - The debugger help gives the command set: `BPINT [intNr] [ah] [al]` sets an

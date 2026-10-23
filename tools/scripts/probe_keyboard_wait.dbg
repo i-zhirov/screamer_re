@@ -1,13 +1,12 @@
-# Watch the keyboard path: the hardware interrupt 9 and the BIOS read 16.
+# Watch the keyboard path and name the handler.
 break
 clear
-exec BPINT 9
+exec CALLBACKS
 exec BPINT 16 0
-exec BPLIST
+exec BPINT 16 1
 exec RUN
-sleep 40
+sleep 30
 break
-read EIP
-exec SD
+read EIP AX BX CX DX
 exec BPDEL *
 exec RUN
