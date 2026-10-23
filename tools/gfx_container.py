@@ -31,6 +31,7 @@ RECORD_SIZE = 32
 NAME_SIZE = 16
 XOR_KEY = 0x3A
 TRAILER_SIZE = 4
+COMPRESSED_BIT = 0x2
 
 
 class Member:
@@ -111,6 +112,43 @@ def parse(path: Path) -> Container:
 def member_bytes(container: Container, member: Member) -> bytes:
     """Return the raw member bytes."""
     return container.data[member.offset : member.offset + member.size]
+
+
+def member_read(container: Container, member: Member) -> bytes:
+    """Read one member: expand it when the flag bit 1 is set, else return raw.
+
+    The open at `0x4c128` sets the flag at `file + 0x10` from bit 1 of the member
+    flags, and the read at `0x4c4e5` runs the LZW expander at `0x4d3fc` when that
+    flag is non-zero and the raw read at `0xc607b` when it is zero.  The `end` field
+    of the member is the expanded size.
+    """
+    raw = member_bytes(container, member)
+    if member.flag & COMPRESSED_BIT:
+        return expand(raw, member.end)
+    return raw
+
+
+def dump_members(container: Container, out_dir: Path) -> int:
+    """Write every member and check the expanded size against the end field."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"file:    {container.path}")
+    print(f"members: {len(container.members)}")
+    failures = 0
+    for member in container.members:
+        data = member_read(container, member)
+        path = out_dir / member.name
+        path.write_bytes(data)
+        if not member.flag & COMPRESSED_BIT:
+            state = "raw"
+        elif len(data) == member.end:
+            state = "expanded, the end field matches"
+        else:
+            state = f"FAIL, the end field is {member.end}"
+            failures += 1
+        print(f"{member.name:<16} flag {member.flag} {len(data):>8} bytes  {state}")
+    if failures:
+        raise ValueError(f"{failures} members do not reach the end field")
+    return 0
 
 
 class _Lzw:
@@ -445,6 +483,10 @@ def main() -> int:
     lzw_parser = subparsers.add_parser("lzw", help="expand a plain LZW data file")
     lzw_parser.add_argument("file", type=Path)
 
+    dump_parser = subparsers.add_parser("dump", help="write every member and check the end size")
+    dump_parser.add_argument("file", type=Path)
+    dump_parser.add_argument("--out", type=Path, required=True)
+
     args = parser.parse_args()
     if args.command == "lzw":
         try:
@@ -457,6 +499,12 @@ def main() -> int:
     except (OSError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
+    if args.command == "dump":
+        try:
+            return dump_members(container, args.out)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
     if args.command == "info":
         return print_info(container)
     if args.command == "font":

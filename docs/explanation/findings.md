@@ -77,6 +77,25 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The index lists are decoded
+
+- The container read path is confirmed by the dump: every compressed member
+  reaches its recorded end field, so the reader is `member_read` in
+  `tools/gfx_container.py`, which expands a member only when the flag bit 1 is set.
+  Evidence: `python3 tools/gfx_container.py dump DATA/MAP1I.DAT --out work/map1i`.
+- The level index holds the lists `OSTACLES` (`3dx_name`), `ANIMATIONS`
+  (`name`, `speed`, `spln`, `sound_fx`), and `SOUND_FX` (`name`, `volume`,
+  `loop`, `loop_start`, `loop_leng`, `pitch`, `pan`) in the member `MAP1DAT.DTR`.
+  Evidence: the text of `work/map1i/MAP1DAT.DTR`.
+- The track variants hold the lists `TRACK_DATA` (`color`, `camera_hi`,
+  `bonus_time`, `carnage`) and `OPPONENTS` (`max_spd`, `accel`, `brakes`,
+  `skill`, `sband`) in the members `MAP1A.DTR` to `MAP1E.DTR`, so the level has
+  five track variants.
+  Evidence: the text of `work/map1i/MAP1A.DTR` to `MAP1E.DTR`.
+- The `GEN.DAT` members are `CARS.DTR` (the `CARS_DATA` list), `MENU.DTR` (the
+  credits), and the sound bank members, and every one reaches its end field.
+  Evidence: `python3 tools/gfx_container.py dump DATA/GEN.DAT --out work/gen`.
+
 ## The index file is a container, and the game decompresses it
 
 - The data files are the same container format as the graphics files, with the
