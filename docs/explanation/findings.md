@@ -77,6 +77,26 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## Correction: the value 0x2f was a glyph and not a scancode
+
+- This section is corrected.  The second run of the same probe reads
+  `EIP=0x1e1c40` `AX=0`, so the read breakpoint does not fire a second time
+  and the game sits in the demo camera.
+  Evidence: the second run output.
+- The address `0x1e7337`, which the first run reported, is inside the font glyph
+  draw routine: the disassembly shows the inner loop `and al, 0xf0`, `shr al, 4`,
+  `or eax, [0x15460]`, and `mov [edi], al`, which is the pixel loop
+  `0x25316` to `0x2534a`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x252f0`.
+- So `AX=0x2f` was a glyph pixel value and not a keyboard scancode, and the
+  first run stopped at the glyph loop rather than at the read breakpoint.  The
+  read breakpoint has not been observed to fire, and the menu read value stays
+  unread.
+  Evidence: the two runs and the disassembly.
+- The next step distinguishes a breakpoint stop from a plain break by reading the
+  breakpoint list at the stop, which names the breakpoint that fired.
+  Evidence: the two runs.
+
 ## The menu read returns the value 0x2f
 
 - The armed-after-demo probe runs 15 steps with 0 failures: the demo runs 60
