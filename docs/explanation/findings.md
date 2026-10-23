@@ -77,6 +77,24 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The index file stops at an invalid code
+
+- The LZW reader records the stop reason: `end-code` for the code `0x101`,
+  `invalid-code` for a code that is not in the table with no previous entry, and
+  `out-of-bits` for the end of the bit stream.
+  Evidence: the `_Lzw.stop_reason` field and the `lzw` command output.
+- The six index files stop at an `invalid-code` from every start offset of 0, 4, 8,
+  and 12, with two exceptions: `MAP2I.DAT` and `MAP5I.DAT` from offset 4 stop at
+  an `end-code` after 37 and 23 codes.
+  Evidence: the stop reason test on the six files.
+- A valid LZW stream ends at the end code, so the index files are not plain LZW
+  streams.  The two short end codes are accidents of the bit pattern: 50 and 29
+  bytes from files of 19347 and 40632 bytes.
+  Evidence: the stop reasons against the file sizes.
+- The `DATA/MAP1.DAT` track file stops at an `end-code` after 234 codes and 459
+  bytes, which confirms the reader and the reason field.
+  Evidence: `python3 tools/gfx_container.py lzw DATA/MAP1.DAT`.
+
 ## The index file is not a plain LZW stream
 
 - The plain LZW reader consumes the whole `MAP1I.DAT` and stops at the end of the

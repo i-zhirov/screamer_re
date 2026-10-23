@@ -141,6 +141,8 @@ class _Lzw:
         self.next_code = self.FIRST_FREE
         self.prev: bytes | None = None
         self.out = bytearray()
+        self.codes = 0
+        self.stop_reason = "running"
 
     def _read_code(self) -> int | None:
         """Read one code from the bit stream, or None at the end of the stream."""
@@ -156,9 +158,20 @@ class _Lzw:
         return value
 
     def step(self) -> bool:
-        """Decode one code and report whether the stream continues."""
+        """Decode one code and report whether the stream continues.
+
+        The reason for the stop is recorded in `stop_reason`: `end-code` for the
+        code `0x101`, `invalid-code` for a code that is not in the table with no
+        previous entry, `out-of-bits` for the end of the bit stream, and `limit`
+        for the output limit.
+        """
         code = self._read_code()
-        if code is None or code == self.END:
+        if code is None:
+            self.stop_reason = "out-of-bits"
+            return False
+        self.codes += 1
+        if code == self.END:
+            self.stop_reason = "end-code"
             return False
         if code == self.CLEAR:
             self.table.clear()
@@ -173,6 +186,7 @@ class _Lzw:
         elif self.prev is not None:
             entry = self.prev + self.prev[:1]
         else:
+            self.stop_reason = "invalid-code"
             return False
         if self.prev is not None and self.next_code < 0x1000:
             self.table[self.next_code] = self.prev + entry[:1]
@@ -183,6 +197,7 @@ class _Lzw:
         for byte in entry:
             self.out.append(byte)
             if len(self.out) >= self.limit:
+                self.stop_reason = "limit"
                 return False
         return True
 
@@ -372,10 +387,19 @@ def print_lzw(path: Path, limit: int = 1 << 20) -> int:
     `LOCAL.DAT` holds the credits text.
     """
     raw = path.read_bytes()
-    out = expand(raw, limit)
+    decoder = _Lzw(raw, limit)
+    guard = 0
+    while decoder.step():
+        guard += 1
+        if guard > len(raw) * 64 + 0x1000:
+            decoder.stop_reason = "guard"
+            break
+    out = bytes(decoder.out)
     print(f"file:     {path}")
     print(f"raw:      {len(raw)} bytes")
     print(f"expanded: {len(out)} bytes")
+    print(f"codes:    {decoder.codes}")
+    print(f"stop:     {decoder.stop_reason}")
     text = out.decode("ascii", "replace")
     sys.stdout.write(text)
     if not text.endswith("\n"):
