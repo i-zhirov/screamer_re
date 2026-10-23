@@ -1,7 +1,8 @@
 # File formats
 
-This page records the observed formats.  The formats are not decoded yet.
-Every claim below comes from file bytes and from `file` output.
+This page records the observed formats.  Every claim below comes from file
+bytes and from `file` output.  The page records the decoded part and the open
+part of every format.
 
 ### The TABS table loaders
 
@@ -102,18 +103,45 @@ decoded yet.
 ## Music banks
 
 `DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` carry the ASCII signature
-`ADLIB-`.  Both files hold instrument names, for example `<Blank`,
-`$clap`, `$scratch`, `$rimshot`, `=woodblok`, `glock`, `Kick2`, `#Kick`,
-`$RimShot`, `<Snare`, and `;Clap`.
+`ADLIB-` at `+0x02`.  The `file` command names the format "AdLib
+instrument data".  The header is 0x1E bytes:
 
-The signature and the instrument names point to the HMI Sound Operating
-System music format.  The format is not decoded yet.
+| Offset | Field |
+| --- | --- |
+| `+0x00` | the version, `0x0000` |
+| `+0x02` | the signature `ADLIB-` |
+| `+0x08` | the value `0x007F` |
+| `+0x0A` | the value `0x007F` |
+| `+0x0C` | the instrument count, 28 |
+| `+0x10` | the instrument data offset, `0x61C` |
+
+The instrument table follows at `+0x1E`.  A record holds the instrument
+name in 10 bytes and the instrument index in a 2-byte field.  The table holds
+28 records, and the last index is 28.  The instrument names are `<Blank`,
+`$clap`, `$scratch`, `$rimshot`, `=woodblok`, and `glock`.  The instrument
+data follows at `+0x61C` and holds the OPL register values, for example
+`0F 00 00 00 3F 00 00 01`.
+
+`MUSIC.DAT` holds 199545 bytes and `SETUP.DAT` holds 276632 bytes.  Both
+files hold the same 28 instruments and the same table, so `SETUP.DAT` is the
+setup copy of the bank.
+Evidence: the file bytes, the `file` output, and
+`python3 tools/le.py disasm STARTH.EXE 0x2f9e0`.
 
 ## Sound data
 
-`DATA/SOUND.DAT` holds 8-bit unsigned samples.  The first bytes are
-`0x80`, which is silence in unsigned 8-bit PCM.  The file holds no ASCII
-strings.  The exact sample rate and the split into samples are not known.
+`DATA/SOUND.DAT` holds 1912400 bytes.  The file is a member container of
+the same shape as the graphics containers: the last 4 bytes hold the directory
+size `2976`, and the directory holds 92 records of 32 bytes.  The members are
+named `<name>.RAW`, for example `CRY.RAW` 8127, `HELI.RAW` 19521, and
+`AIRPLANE.RAW` 30014.  A member holds 8-bit unsigned samples, and the first
+bytes are `0x80`, which is silence in unsigned 8-bit PCM.
+
+The sample loader `FUN_0001f2e0` builds the path `%s\data\sound.dat` and
+opens every member through the member open `FUN_0004c08d` with the name
+`%s.RAW`.  A missing member is a fatal error.
+Evidence: the file bytes, `python3 tools/gfx_container.py info DATA/SOUND.DAT`,
+and `python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
 
 ## Map data
 

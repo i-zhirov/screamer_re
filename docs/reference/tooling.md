@@ -88,10 +88,13 @@ python3 tools/inventory.py <directory> [--title TITLE]
 `tools/gfx_container.py` lists and extracts the members of a Screamer graphics
 container.  It parses the directory at the end of the file and reports the
 member
-names, offsets, sizes, end offsets, and flags.
+names, offsets, sizes, end offsets, and flags.  The same container shape serves
+the sound bank `DATA/SOUND.DAT`, whose 92 members are named `<name>.RAW`.
 
 ```sh
 python3 tools/gfx_container.py info GFX/GAME.DAT
+python3 tools/gfx_container.py info DATA/SOUND.DAT
+python3 tools/gfx_container.py member DATA/SOUND.DAT CRY.RAW --out work/cry.raw
 python3 tools/gfx_container.py member GFX/GAME.DAT GAMEL.SPR --out work/gamel.spr
 python3 tools/gfx_container.py head GFX/GAME.DAT GAMEL.SPR
 python3 tools/gfx_container.py font GFX/GRAF.DAT MENUL.FNT

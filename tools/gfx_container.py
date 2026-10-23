@@ -1,6 +1,7 @@
 """List and extract the members of a Screamer graphics container.
 
-The graphics files (`GFX/GAME.DAT`, `GFX/MENU.DAT`, and the map files) hold a
+The graphics files (`GFX/GAME.DAT`, `GFX/MENU.DAT`, and the map files) and the
+sound bank (`DATA/SOUND.DAT`) hold a
 directory at the end of the file.  The last 4 bytes hold the size of the
 directory.  The directory holds `size / 32` records of 32 bytes.  A record holds
 the member name at `+0x00` (16 bytes, exclusive-ORed with `0x3a`, NUL-terminated),

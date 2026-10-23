@@ -3909,3 +3909,48 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the read window and the loader disassembly.
 - All the reads are on the handle 5, so the game reads one file at a time.
   Evidence: the read window.
+
+## The sound bank and the music bank
+
+- `DATA/SOUND.DAT` is a member container of the same shape as the graphics
+  containers.  The last 4 bytes hold the directory size 2976, and the directory
+  holds 92 records of 32 bytes.  The members are named `<name>.RAW`, for example
+  `CRY.RAW` 8127, `HELI.RAW` 19521, and `AIRPLANE.RAW` 30014.
+  Evidence: `python3 tools/gfx_container.py info DATA/SOUND.DAT` and the file tail.
+- The sample loader `FUN_0001f2e0` builds the path `%s\data\sound.dat`, walks
+  the sample table at `DAT_0015224` with the stride 36, builds the member name
+  `%s.RAW` for every record, and opens the member through the member open
+  `FUN_0004c08d`.  A missing member calls the exit.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
+- The sample loader is called from the config load at `0x15a64` and from the menu
+  space init at `0x29f07`, so the sample bank loads when the menu space starts.
+  Evidence: the caller scan of `0x1f2e0`.
+- The sample record is 36 bytes.  The loader reads the fields at `+0x0f`, `+0x10`,
+  `+0x18`, `+0x1f`, and `+0x23` into the flags, and it writes the loaded
+  sample pointer into the array at `0x16044`.  The loop bound is the count at
+  `DAT_0018d84`.
+  Evidence: the loader disassembly.
+- `DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` are the `ADLIB-` instrument bank.
+  The header is `0x1e` bytes: the version 0.0 at `+0x00`, the signature at
+  `+0x02`, the values `0x007f` at `+0x08` and `+0x0a`, the instrument count 28
+  at `+0x0c`, and the instrument data offset `0x61c` at `+0x10`.
+  Evidence: the file bytes and the `file` output.
+- The instrument table starts at `+0x1e`.  A record holds the name in 10 bytes and
+  the index in a 2-byte field, and the table holds 28 records.  The names are
+  `<Blank`, `$clap`, `$scratch`, `$rimshot`, `=woodblok`, and `glock`.
+  Evidence: the file bytes.
+- The instrument data starts at `+0x61c` and holds the OPL register values, for
+  example `0f 00 00 00 3f 00 00 01`.  `SETUP.DAT` holds the same 28
+  instruments as `MUSIC.DAT`, so it is the setup copy of the bank.
+  Evidence: the file bytes.
+- The music bank load `FUN_0002f9e0` copies the bank name, opens the file
+  through the member open `FUN_0004c08d`, reads the size, and allocates the bank.
+  `engine_init` calls it at `0x1283f` and then starts the music at `0x1284d`.
+  `FUN_0002f9b0`, called from the Watcom startup at `0x10013`, clears the
+  music bank struct.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f9e0` and `0x127a0`.
+- The engine strings name the HMI files and resources: `melodic.bnk`, `drum.bnk`,
+  `MELODIC_BANK`, `DRUM_BANK`, `%s.Hbnk`, `%s.HMP`, `MIDI_MUSIC`,
+  `SPFXBASE.GEN`, `SPFXFULL.GEN`, and `HMI*.386 File Open Failure`.
+  Evidence: the string dump of `STARTH.EXE` at the object 3 offsets `0x14e0` to
+  `0x1590`.

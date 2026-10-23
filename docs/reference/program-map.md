@@ -332,6 +332,25 @@ The call order is `persptab_load` first and `vis_tab_load` second, so the
 Evidence: the call site scan, `python3 tools/le.py disasm STARTH.EXE 0x4c810`,
 `0x4cf94`, `0x4d030`, and `0x127a0`, and `tools/scripts/probe_open_window.dbg`.
 
+### The sound loaders
+
+`engine_init` loads the music bank and starts the music, and the menu space init
+loads the sample bank.
+
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x1f2e0` | `sound_bank_load` | builds `%s\data\sound.dat`, walks the 36-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a missing member calls the exit | derived |
+| `0x2f9b0` | `music_bank_reset` | clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct | derived |
+| `0x2f9e0` | `music_bank_load` | copies the bank name, opens the file through the member open `0x4c08d`, reads the size, and allocates the bank | derived |
+| `0x2ffc4` | `music_start` | starts the music from the bank | derived |
+
+The callers: the Watcom startup calls `music_bank_reset` at `0x10013`, so the
+music bank struct starts empty.  `engine_init` calls `music_bank_load` at `0x1283f`
+and `music_start` at `0x1284d`.  `sound_bank_load` is called from the config
+load at `0x15a64` and from the menu space init at `0x29f07`.
+Evidence: the caller scan of `0x1f2e0`, `0x2f9b0`, `0x2f9e0`, and `0x2ffc4`
+and `python3 tools/le.py disasm STARTH.EXE 0x127a0` and `0x1f2e0`.
+
 ## Fifth level: the vehicle states, the timing filter, and the runtime
 
 ### The vehicle state chain

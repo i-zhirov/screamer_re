@@ -79,5 +79,8 @@ current host.
    `DATA` files expand to text lists, the loaders are known, and the two `TABS`
    loaders carry a caller chain from `engine_init` with the run-time order
    `PERSPTAB` then `VIS.TAB`).
-6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank.
+6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank
+   (in progress: `SOUND.DAT` is a member container of 92 `<name>.RAW` samples
+   with a loader, and the `ADLIB-` bank has a mapped header, instrument table,
+   and instrument data).
 7. Set up the OpenWatcom V2 build harness under `work/`.
