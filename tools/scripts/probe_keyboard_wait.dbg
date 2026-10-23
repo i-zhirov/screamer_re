@@ -1,11 +1,11 @@
-# Dump the stack at the poll stop and read the caller return address.
+# Break at the BIOS keyboard handler and read the registers.
 break
 clear
-exec BPINT 16 1
+exec BP F000:DA62
 exec RUN
-sleep 40
+sleep 45
 break
-read EIP AX ESP
-exec MEMDUMPBIN 0:7ff0 24 STACK.BIN
+read EIP AX BX CX DX
+exec BPLIST
 exec BPDEL *
 exec RUN
