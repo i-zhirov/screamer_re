@@ -1,21 +1,11 @@
-# Inject the key at the poll stop and search for the scancode and the ASCII.
+# Dump the stack at the poll stop and read the caller return address.
 break
 clear
 exec BPINT 16 1
 exec RUN
 sleep 40
 break
-read EIP AX
-key a
-exec RUN
-sleep 3
-break
-read EIP AX
-exec MEMFIND 0150:0 1E
-exec MEMS = 1E
-exec MEMFIND 0150:0 61
-exec MEMS = 61
-exec MEMFIND 0812:0 1E
-exec MEMS = 1E
+read EIP AX ESP
+exec MEMDUMPBIN 0:7ff0 24 STACK.BIN
 exec BPDEL *
 exec RUN
