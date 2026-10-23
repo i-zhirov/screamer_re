@@ -1,19 +1,16 @@
-# Wait out the demo camera fly-by, then press Enter and watch the loaders.
-#
-# The demo is a camera path routine at 0x21BA0 that returns when its path ends,
-# so the script lets it run out before the first key press.
+# Arm both table loader watches before the run, then walk the demo and the menu.
 break
 clear
-exec RUN
-sleep 45
-key \r
-sleep 15
-break
-read EIP
 exec BPPM 0150:4D030
 exec BPPM 0150:4CF94
 exec RUN
-sleep 30
+sleep 45
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
 break
 read EIP
 exec BPDEL *

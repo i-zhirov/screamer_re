@@ -77,6 +77,27 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The armed walk does not reach a race start
+
+- The armed walk runs 16 steps with 0 failures: both `BPPM` watches are set
+  before `RUN`, the 45-second wait runs, and the three Enter presses land.
+  Evidence: `tools/scripts/probe_table_loaders.dbg` and the run output.
+- Neither loader fires and the EIP at the break is `0x32d`, which is below the
+  code object, so the game is in the extender or a real-mode wait at that moment.
+  Evidence: the run output.
+- The walk facts together: 20 seconds and four Enters stay at the menu code
+  `0x1e1c40`, 45 seconds and one Enter reach the renderer `0xd4f20`, 45 and 60
+  seconds with no key reach `0xd7a4c` and `0x32d`, and 90 seconds ends the
+  process.
+  Evidence: the five probe runs.
+- The single Enter press that moved the game reached the module `0xd8b85`, so the
+  demo state advances on the key, and the two table loaders are not called by the
+  demo or by the three Enter presses.
+  Evidence: the single press result and the armed walk.
+- The two table loaders serve the race data, so the remaining step is the menu
+  selection that starts a race.
+  Evidence: the loader calls in `FUN_000131a8`.
+
 ## The Enter lands and the game reaches the renderer
 
 - The 45-second wait plus one Enter runs 16 steps with 0 failures: the key is
