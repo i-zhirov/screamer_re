@@ -77,6 +77,30 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The keyboard watch is armed and the advanced commands are listed
+
+- The debugger help gives the command set: `BPINT [intNr] [ah] [al]` sets an
+  interrupt breakpoint with the AH and the AL values, `CALLBACKS` shows the
+  interrupt callbacks, `INTHAND` sets the code view to an interrupt handler,
+  `INT` and `INTT` execute and trace into an interrupt, `LOG`, `LOGS`, `LOGL`, and
+  `LOGC` write CPU log files, `HEAVYLOG` logs on exit, `SELINFO` shows a
+  selector, `DV` and `DP` set the data view to a linear or physical address,
+  `DOS MCBS` shows the memory control block chain, and `SMV` sets memory at a
+  linear address.
+  Evidence: `exec ?` through the control socket.
+- The keyboard watch is accepted and listed: `BPINT 9` sets the hardware keyboard
+  interrupt and `BPINT 16 0` sets the BIOS read with AH=0, and `BPLIST` reports
+  both, numbers 00 and 01.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- The EIP at the 40-second break is `0x42ed`, below the code object, which is
+  consistent with a BIOS or extender handler, so the next step reads the breakpoint
+  number at the stop to name which one fired.
+  Evidence: the run output.
+- `SMV [addr] [val]` writes memory at a linear address and `BPLM` watches one,
+  so the menu state can be driven and watched without the keys once its address is
+  known.
+  Evidence: the help output.
+
 ## The one-Enter stop lands below the code object
 
 - The one-Enter stop runs 12 steps with 0 failures: both watches are armed,

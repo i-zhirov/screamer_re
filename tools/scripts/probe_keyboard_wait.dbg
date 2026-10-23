@@ -1,0 +1,13 @@
+# Watch the keyboard path: the hardware interrupt 9 and the BIOS read 16.
+break
+clear
+exec BPINT 9
+exec BPINT 16 0
+exec BPLIST
+exec RUN
+sleep 40
+break
+read EIP
+exec SD
+exec BPDEL *
+exec RUN
