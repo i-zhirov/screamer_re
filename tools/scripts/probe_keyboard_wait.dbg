@@ -1,4 +1,4 @@
-# Watch the BIOS keyboard buffer at the poll stop and after the injection.
+# Log the CPU after the poll stop and the injection to catch the INT 16 return.
 break
 clear
 exec BPINT 16 1
@@ -6,13 +6,12 @@ exec RUN
 sleep 40
 break
 read EIP AX
-exec MEMDUMPBIN 0:400 20 BUF_BEFORE.BIN
+exec LOGL 300000
 key \r
-exec MEMDUMPBIN 0:400 20 BUF_AFTER.BIN
 exec RUN
-sleep 3
+sleep 5
 break
 read EIP AX
-exec MEMDUMPBIN 0:400 20 BUF_CONSUMED.BIN
+exec LOGL
 exec BPDEL *
 exec RUN
