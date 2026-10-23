@@ -1,9 +1,19 @@
+# Wait out the demo camera fly-by, then press Enter and watch the loaders.
+#
+# The demo is a camera path routine at 0x21BA0 that returns when its path ends,
+# so the script lets it run out before the first key press.
 break
 clear
+exec RUN
+sleep 90
+key \r
+sleep 15
+break
+read EIP
 exec BPPM 0150:4D030
 exec BPPM 0150:4CF94
 exec RUN
-sleep 60
+sleep 30
 break
 read EIP
 exec BPDEL *
