@@ -1,0 +1,10 @@
+break
+clear
+exec RUN
+sleep 45
+break
+read EIP
+exec MEMDUMPBIN B8000 4000 SCREEN.BIN
+exec MEMDUMPBIN 0150:121528 20000 FRAME.BIN
+exec BPDEL *
+exec RUN
