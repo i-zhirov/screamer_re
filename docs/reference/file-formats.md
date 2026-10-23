@@ -103,11 +103,22 @@ The `OPPONENTS` record holds the fields `max_spd`, `accel`, `brakes`, `skill`,
 and `sband`, all of the type `f`.  The record size is 0x14 and the record limit
 is 0x590.  The `MAP1.DAT` list holds nine records.
 
-The `MAP*I.DAT` files are not LZW.  `MAP1I.DAT` starts with the 16-bit values
-2, 0, 0, 0, 1, 0, 0x2455, -1, 0x1422, -1, and 0x08fc, so the file holds
-signed 16-bit values.  `MAP5.DAT` starts with the count 0x17 and the size 0x10cc,
-and `8 + 23 * 1792` is 41224, the file size.  The exact record layout of the
-`MAP*I.DAT` files is not decoded yet.
+The `MAP*I.DAT` files are not LZW.  They hold signed 16-bit values.  The first
+dword is a count: 2 for `MAP1I.DAT` and `MAP2I.DAT`, 17 for `MAP3I.DAT`, 18
+for `MAP4I.DAT`, 20 for `MAP6I.DAT`, and 27 for `MAP5I.DAT`.
+
+The file holds records of the shape `1, 0, X, f1, Y, f2, Z, 0`, where the flags
+`f1` and `f2` are `-1` or `-2` and the third flag is `0`.  `MAP1I.DAT` starts
+`1, 0, 9301, -1, 5154, -1, 2300, 0`.  The file ends with one 32-bit value:
+512 in `MAP1I.DAT` and 544 in `MAP5I.DAT`.  `MAP5I.DAT` holds 2 header words
+and 2902 records of 7 words.  The values look like coordinates and the flags look
+like a mode, so the field meanings stay open.
+
+`MAP5.DAT` is not LZW.  It holds 41224 bytes: the count 23 and the size `0x10cc`
+in the header, and then 23 records of `0x700` bytes, because `23 * 0x700 + 8` is
+41224, the file size.  The record holds a mix of 32-bit floats and 32-bit
+integers: the first record starts `0.0, 1.0, 0.0, 2, -44376, 0.0, 104296, 4300,
+0.0, 0.9, 0.94, 0.0, 67985, 0.0`.  The exact record layout stays open.
 
 The loaders are `FUN_00015460` (the named list parser), `FUN_000131a8` (the race
 data load), `FUN_00027770` (the level start), and `FUN_00029d08` (the menu data

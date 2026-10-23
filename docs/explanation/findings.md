@@ -77,6 +77,38 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The track index and the level 5 record
+
+- The `MAP*I.DAT` files hold 16-bit signed values.  The first dword is a
+  count: 2 for `MAP1I.DAT` and `MAP2I.DAT`, 17 for `MAP3I.DAT`, 18 for
+  `MAP4I.DAT`, 20 for `MAP6I.DAT`, and 27 for `MAP5I.DAT`.
+  Evidence: the first words of each file.
+- The file holds records of the shape `1, 0, X, f1, Y, f2, Z, 0`, where the
+  flags `f1` and `f2` are `-1` or `-2`, and the third flag is `0`.  `MAP1I.DAT`
+  starts `1, 0, 9301, -1, 5154, -1, 2300, 0`, then `1, 0, 7373, -1, 3174, -1,
+  0, 0`, then `1, 0, 11241, -1, 7147, -1, 0, 0`.
+  Evidence: the first 40 words of `MAP1I.DAT`.
+- The file ends with one 32-bit value: 512 in `MAP1I.DAT` and 544 in
+  `MAP5I.DAT`.
+  Evidence: the last 16 words of each file.
+- `MAP5I.DAT` holds 20316 words: 2 header words and 2902 records of 7 words.
+  Evidence: the size and the record shape.
+- The values look like coordinates and the flags look like a mode, so the exact
+  field meanings stay open.
+  Evidence: the value range and the flag pattern.
+
+- `MAP5.DAT` is not LZW.  It holds 41224 bytes: the count 23 and the size
+  `0x10cc` in the header, and then 23 records of `0x700` bytes, because
+  `23 * 0x700 + 8` is 41224, the file size.
+  Evidence: the header and the file size.
+- The `MAP5.DAT` record holds a mix of 32-bit floats and 32-bit integers.  The
+  first record starts `0.0, 1.0, 0.0, 2, -44376, 0.0, 104296, 4300, 0.0, 0.9,
+  0.94, 0.0, 67985, 0.0`.
+  Evidence: the first record of `MAP5.DAT` as 32-bit values.
+- The `MAP5.DAT` and `MAP5I.DAT` pair is the level 5 pair, and level 5 is the
+  largest track.  The exact record layout of both stays open.
+  Evidence: the file sizes against the other levels.
+
 ## The LZW reader was the last defect in the asset decode
 
 - The member expansion produced the correct length for every member, but the
