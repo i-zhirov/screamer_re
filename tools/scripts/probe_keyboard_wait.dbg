@@ -1,9 +1,14 @@
-# Break at the BIOS keyboard handler and read the registers.
+# The game reads the keyboard with the extended INT 16h AH=11 call.
 break
 clear
-exec BP F000:DA62
+exec BPINT 16 11
 exec RUN
-sleep 45
+sleep 40
+break
+read EIP AX
+key \r
+exec RUN
+sleep 3
 break
 read EIP AX BX CX DX
 exec BPLIST
