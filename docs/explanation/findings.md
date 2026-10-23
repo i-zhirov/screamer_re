@@ -77,6 +77,32 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The index file is a container, and the game decompresses it
+
+- The data files are the same container format as the graphics files, with the
+  directory at the end: the open reads the last four bytes as the directory size,
+  seeks back by the size, and reads the 0x20 byte records until a name matches.
+  Evidence: the decompiled `FUN_0004c128` and `FUN_0004c08d`.
+- `DATA/MAP1I.DAT` holds 15 members: the `MAP1A` to `MAP1D` `.DTR` members
+  with the flag 3, and the `MAP1ANM`, `MAP1CAM`, `MAP1OPP`, `MAP1OST`, `MAP1CNG`,
+  `MAP1RPL`, and `MAP1SLA` `.SPL` members and the `.MRK` members with the flag 0.
+  Evidence: `python3 tools/gfx_container.py info DATA/MAP1I.DAT`.
+- The flag at `file + 0x10` is bit 1 of the record flags: the open sets
+  `param_1[4] = flags & 2` for the compression and `param_1[5] = flags & 1` for the
+  line mode.
+  Evidence: the decompiled `FUN_0004c128`.
+- The decompressing read at `FUN_0004c4e5` tests `param_1[4]`: zero runs the raw
+  read at `0xc607b` and a non-zero value runs the LZW expander at `0x4d3fc`.
+  Evidence: the decompiled `FUN_0004c4e5`.
+- The `MAP1DAT.DTR` member holds the flag 3, so the compression bit is set and
+  the game decompresses it with the LZW expander, and the `.SPL` and `.MRK`
+  members hold the flag 0 and the game reads them raw.
+  Evidence: the member list and the decompiled `FUN_0004c4e5`.
+- The five calls read the same member `MAP1dat` of the container `MAP1i` with the
+  list names `OSTACLES`, `TRACK_DATA`, `OPPONENTS`, and `ANIMATIONS`, so the
+  container holds the lists of the level.
+  Evidence: the disassembly of `0x1329e` to `0x1330c`.
+
 ## The index file stops at an invalid code
 
 - The LZW reader records the stop reason: `end-code` for the code `0x101`,
