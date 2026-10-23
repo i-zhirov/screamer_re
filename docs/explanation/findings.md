@@ -77,6 +77,36 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The five track variants differ in the opponents and the track data
+
+- The `OSTACLES` list is shared: it holds the nine 3DX names `azcono`,
+  `azbunny`, `azbirill`, `azstac`, `azlil`, `aztnt`, `az1porta`, `azgirl`, and
+  `azpagli`, and it sits in the shared `MAP1DAT.DTR`, so the five variants place
+  the same obstacles.
+  Evidence: the `OSTACLES` list of `MAP1DAT.DTR`.
+- The `ANIMATIONS` list is shared too: the five records are `awtruck` 16000 0 0,
+  `awbus` 15000 1 0, `awtruck` 10000 2 0, `awbus` 18000 3 0, and `ajet` 7000 4
+  1, so four animations serve the five variants.
+  Evidence: the `ANIMATIONS` list of `MAP1DAT.DTR`.
+- The `OPPONENTS` list is the per-variant difference.  `MAP1A` holds a nine
+  record ladder from `14000, 1100, 2000, 3500, 0.0003`, `MAP1B` from
+  `15000, 1500, 2000, 2600, 0.0003`, `MAP1C` from `16800, 2600, 2000, 2800,
+  0.0003`, and `MAP1E` from `20000, 6800, 2000/1500, 2000, 0.0`, so the field
+  rises from A to E.  `MAP1D` holds one record `16000, 3000, 2000, 3800,
+  0.0002`.
+  Evidence: the `OPPONENTS` lists of the five members.
+- `MAP1E` is the hardest variant: the `max_spd` runs to 20000, the `accel` to
+  6800, the `brakes` alternate 2000 and 1500, and the `sband` is 0.0, so the
+  opponents hold the line.
+  Evidence: the `MAP1E.DTR` opponents.
+- The `TRACK_DATA` field `bonus_time` and `carnage` fall from A to C: 50 and 20
+  in `MAP1A`, 40 and 15 in `MAP1B`, and 35 and 10 in `MAP1C`, `MAP1D`, and
+  `MAP1E`, and the `color` 24 and the `camera_hi` 300 hold in all five.
+  Evidence: the `TRACK_DATA` records of the five members.
+- The standalone `DATA/MAP1.DAT` is exactly the `MAP1C.DTR` variant: the expanded
+  text is identical, so the loose file is one variant of the container.
+  Evidence: the text compare of `DATA/MAP1.DAT` and `MAP1C.DTR`.
+
 ## The list fields are parsed and the record sizes agree
 
 - The field type comes from the first byte of the field: `s` is a string of the
