@@ -77,6 +77,21 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The demo is a camera fly-by and the menu follows it
+
+- The disassembly resolves the run-time address: `0x1E1C40` is the module
+  `0x21BA0`, a camera path routine.  It reads the reference points `0x13CCC`
+  and `0x13CD0`, calls the helpers `0x1F718`, `0x1F880`, and `0x4D9F4`, and
+  stores the result in the object fields `+0x38` and `+0x3C`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21ba0`.
+- The routine returns at `0x21DA0` when the object field `+0x38` is `-1`, so the
+  demo is a camera fly-by with a fixed path and the menu follows the demo.
+  Evidence: the disassembly of `0x21c6e` to `0x21c72`.
+- The four Enter presses therefore landed inside the demo and the single Enter
+  press that moved the game landed after it.  The key sequence is one Enter press
+  after the demo ends, which is the sequence the manual playthrough used.
+  Evidence: the disassembly and the single press probe.
+
 ## The table probe runs and fires on the pointer cell
 
 - The `BPLM` probe runs against the game: the launch is `dosbox-x -nogui
