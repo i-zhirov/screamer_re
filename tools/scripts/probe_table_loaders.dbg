@@ -1,4 +1,4 @@
-# Arm both table loader watches before the run, then walk the demo and the menu.
+# Arm both table loader watches, wait out the demo, then one Enter and stop.
 break
 clear
 exec BPPM 0150:4D030
@@ -6,11 +6,7 @@ exec BPPM 0150:4CF94
 exec RUN
 sleep 45
 key \r
-sleep 10
-key \r
-sleep 10
-key \r
-sleep 15
+sleep 5
 break
 read EIP
 exec BPDEL *

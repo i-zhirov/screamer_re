@@ -77,6 +77,23 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The one-Enter stop lands below the code object
+
+- The one-Enter stop runs 12 steps with 0 failures: both watches are armed,
+  the 45-second wait runs, the Enter lands, and the break follows after five
+  seconds.  The EIP is `0x32d`, below the code object.
+  Evidence: `tools/scripts/probe_table_loaders.dbg` and the run output.
+- `0x32d` is below `0x10000`, the start of the code object, so the game is in
+  the extender, a BIOS wait, or DOS at that moment, and not in its own code.
+  Evidence: the EIP and the object table.
+- The earlier single Enter press that reached the module `0xd8b85` therefore
+  depended on the demo phase: the same key reaches different states at different
+  times.
+  Evidence: the two probe runs.
+- The demo is long and the key advances its state, and the two table loaders stay
+  un-fired in every window so far.
+  Evidence: the six probe runs.
+
 ## The armed walk does not reach a race start
 
 - The armed walk runs 16 steps with 0 failures: both `BPPM` watches are set
