@@ -3768,6 +3768,27 @@ REA covers the package identity and the Mach-O targets.  REA does not
 open the DOS LE executables, so the project carries its own LE parser.
 The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
+## The PERSPTAB loader byte changes and the loader does not run
+
+- The race-start probe runs 20 steps with 0 failures.  All four watches are
+  armed and read `(00)`, and after the 60-second wait and three Enter presses the
+  registers read `EIP=0x32d`, below the code object.
+  Evidence: `tools/scripts/probe_race_start.dbg` and the full run output.
+- The full breakpoint list after the walk reads `00. BPPM 0150:0004CF94 (55)` and
+  `01. BPPM 0150:0004D030 (00)`, `02. BPPM 0150:000128E0 (00)`, and
+  `03. BPPM 0150:00027770 (00)`, so only the `PERSPTAB` loader marker changes,
+  from `00` to `55`, and the other three stay armed and unchanged.
+  Evidence: the breakpoint list at the stop.
+- The `BPPM` list marker is the byte at the watched address, so the byte at
+  `0150:0004CF94` changed from `00` to `55` and the game wrote to the loader
+  address.  The EIP at the stop is not that address, so the loader did not
+  execute in this window.
+  Evidence: the breakpoint list and the EIP.
+- So the `PERSPTAB` loader address is touched by a write and not by a call, and
+  the two table read orders stay unrecorded.  The next step reads the code at the
+  loader address and the stack at the write, which names the writer.
+  Evidence: the breakpoint list at the stop.
+
 ## The decoded key advances the check and the loaders stay armed
 
 - The injection probe runs 18 steps with 0 failures: `BPINT 16 11` and both

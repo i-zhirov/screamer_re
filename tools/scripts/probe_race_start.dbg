@@ -1,0 +1,21 @@
+# Watch the race start and the two table loaders through a long walk.
+break
+clear
+exec BPPM 0150:27770
+exec BPPM 0150:128E0
+exec BPPM 0150:4D030
+exec BPPM 0150:4CF94
+exec BPLIST
+exec RUN
+sleep 60
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
+break
+read EIP
+exec BPLIST
+exec BPDEL *
+exec RUN
