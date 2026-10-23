@@ -3767,3 +3767,23 @@ The investigation uses these steps:
 REA covers the package identity and the Mach-O targets.  REA does not
 open the DOS LE executables, so the project carries its own LE parser.
 The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
+
+## The decoded key advances the check and the loaders stay armed
+
+- The injection probe runs 18 steps with 0 failures: `BPINT 16 11` and both
+  `BPPM` loader watches are armed, the 40-second wait stops at `EIP=0xda84`
+  `AX=0x1103`, the `Ó` key is sent while stopped, and the run resumes.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- The registers after the resume read `EIP=0xda84` `AX=0x1100`, so the game moved
+  from the extended check `AL=0x03` to the extended read `AL=0x00` and it took the
+  injected key.
+  Evidence: the two register reads.
+- The breakpoint list reads `00. BPPM 0150:0004CF94`, `01. BPPM 0150:0004D030`,
+  and `02. BPINT 16 AH=11` at the stop, so neither `TABS` loader fires and the
+  game does not reach a level load on this key.
+  Evidence: the breakpoint list at the stop.
+- So the injected key is seen by the game at the extended check and the game then
+  takes the extended read, and the key does not start a race.  The two loaders stay
+  armed for the state that starts a level.
+  Evidence: the two runs.
+
