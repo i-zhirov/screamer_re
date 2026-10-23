@@ -77,6 +77,21 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The index file is not a plain LZW stream
+
+- The plain LZW reader consumes the whole `MAP1I.DAT` and stops at the end of the
+  bits, not at an end code: 75 codes and 115 bytes from the start, 57 codes and
+  97 bytes from offset 4, 217 codes and 381 bytes from offset 8, and 25 codes and
+  53 bytes from offset 12.  Every reading is short and holds binary values.
+  Evidence: the forced-past test on `DATA/MAP1I.DAT`.
+- A plain LZW stream of 18940 bytes cannot hold 115 bytes of output, so the file
+  is not a plain LZW stream and the obstacle reading stays open.
+  Evidence: the expansion ratios.
+- The loader opens the file in text mode and reads lines with `*` comments and
+  `END_LIST` terminators, and the file holds 2 to 27 records of the 0x24 byte
+  size, so the file is text under some compression that is not the member LZW.
+  Evidence: the disassembly of `0x1547a` to `0x154ba` and the first dwords.
+
 ## The index reader and the member name
 
 - `FUN_00015460` builds the path `dir\data\file.dat` from a runtime directory
