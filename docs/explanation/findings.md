@@ -77,6 +77,29 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The list fields are parsed and the record sizes agree
+
+- The field type comes from the first byte of the field: `s` is a string of the
+  size 12 in the record, and `d`, `f`, and `x` hold four bytes.  The record size
+  from the parse matches the loader size for every known list: `OSTACLES` 0x24,
+  `ANIMATIONS` 0x18, `OPPONENTS` 0x14, `TRACK_DATA` 0x10, and `CARS_DATA`
+  0x40.
+  Evidence: `python3 tools/gfx_container.py list DATA/MAP1I.DAT MAP1A.DTR OPPONENTS`.
+- The `OSTACLES` record holds three string slots and the `3dx_name` header names
+  the slot, so the record is `3 * 12` and the field name repeats.
+  Evidence: the `OSTACLES` records of `MAP1DAT.DTR`.
+- The `ANIMATIONS` record is a 12 byte name, a float speed, and the integers
+  `spln` and `sound_fx`, and the `MAP1DAT.DTR` records are `awtruck` 16000, 0, 0
+  and `awbus` 15000, 1, 0.
+  Evidence: the `ANIMATIONS` records of `MAP1DAT.DTR`.
+- The `OPPONENTS` record is the five floats `max_spd`, `accel`, `brakes`, `skill`,
+  and `sband`, and the `MAP1A.DTR` records run `14000, 1100, 2000, 3500, 0.0003`
+  down to `13200, 300, 2000, 3500, 0.0004`.
+  Evidence: the `OPPONENTS` records of `MAP1A.DTR`.
+- The `dump` command parses every known list of a text member, so the field values
+  are readable from one command.
+  Evidence: `python3 tools/gfx_container.py dump DATA/MAP1I.DAT --out work/map1i`.
+
 ## The index lists are decoded
 
 - The container read path is confirmed by the dump: every compressed member

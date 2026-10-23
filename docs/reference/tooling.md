@@ -98,6 +98,7 @@ python3 tools/gfx_container.py font GFX/GRAF.DAT MENUL.FNT
 python3 tools/gfx_container.py render GFX/GRAF.DAT MENUH.FNT 33
 python3 tools/gfx_container.py lzw DATA/MAP1.DAT
 python3 tools/gfx_container.py dump DATA/MAP1I.DAT --out work/map1i
+python3 tools/gfx_container.py list DATA/MAP1I.DAT MAP1A.DTR OPPONENTS
 ```
 
 `font` prints the font layout of a member: the count, the descriptors, the glyph
@@ -107,7 +108,11 @@ nibble is a transparent pixel.
 
 `dump` writes every member under the output directory, expands the members
 with the flag bit 1 set, and checks each expanded size against the recorded end
-field.
+field.  It also parses the known lists of a text member into structured
+records.
+
+`list` parses one named list of a member and prints its field names, the record
+size against the loader size, and every record.
 
 `lzw` expands a plain LZW file and prints the text.  The `DATA` files
 (`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream with no container

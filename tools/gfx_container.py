@@ -128,8 +128,105 @@ def member_read(container: Container, member: Member) -> bytes:
     return raw
 
 
-def dump_members(container: Container, out_dir: Path) -> int:
-    """Write every member and check the expanded size against the end field."""
+LIST_NAMES = (
+    "OSTACLES",
+    "ANIMATIONS",
+    "OPPONENTS",
+    "TRACK_DATA",
+    "CARS_DATA",
+    "SOUND_FX",
+)
+LIST_SIZES = {
+    "OSTACLES": 0x24,
+    "ANIMATIONS": 0x18,
+    "OPPONENTS": 0x14,
+    "TRACK_DATA": 0x10,
+    "CARS_DATA": 0x40,
+}
+FIELD_SIZES = {"s": 12, "d": 4, "f": 4, "x": 4}
+
+
+def parse_field(field: str) -> tuple[str, object]:
+    """Parse one field by its first byte: `d` int, `f` float, `x` hex, `s` string."""
+    kind = field[0]
+    value = field[1:]
+    if kind == "d":
+        return kind, int(value)
+    if kind == "f":
+        return kind, float(value)
+    if kind == "x":
+        return kind, int(value, 16)
+    return kind, value
+
+
+def parse_list(text: str, name: str) -> tuple[list[str], list[list[tuple[str, object]]]]:
+    """Parse one named list from the text.
+
+    The parser at `0x15460` reads the lines until the list name, takes the `*`
+    lines as the field names, and reads the records until `END_LIST`.  The first
+    byte of a field selects the type: `d` an integer, `f` a float, `x` a hex
+    integer, and `s` a string of the size 12 in the record.
+    """
+    lines = text.splitlines()
+    position = None
+    for index, line in enumerate(lines):
+        if line.strip() == name:
+            position = index + 1
+            break
+    if position is None:
+        raise ValueError(f"the list {name!r} is not in the member")
+    fields: list[str] = []
+    while position < len(lines) and lines[position].lstrip().startswith("*"):
+        fields.extend(lines[position].lstrip("*").split())
+        position += 1
+    if not fields:
+        raise ValueError(f"the list {name!r} holds no field names")
+    records: list[list[tuple[str, object]]] = []
+    while position < len(lines):
+        line = lines[position].strip()
+        position += 1
+        if line == "END_LIST":
+            break
+        if not line:
+            continue
+        records.append([parse_field(field) for field in line.split()])
+    return fields, records
+
+
+def print_list(text: str, name: str) -> int:
+    """Print one named list as structured records."""
+    fields, records = parse_list(text, name)
+    print(f"  {name}: {len(records)} records, the fields {', '.join(fields)}")
+    if records:
+        sizes = {sum(FIELD_SIZES.get(kind, 4) for kind, _ in record) for record in records}
+        if len(sizes) == 1:
+            size = sizes.pop()
+            if name in LIST_SIZES:
+                state = "matches" if size == LIST_SIZES[name] else "does NOT match"
+                print(
+                    f"    the record size {size:#x} {state} the loader size "
+                    f"{LIST_SIZES[name]:#x}"
+                )
+        else:
+            print(f"    FAIL, the record sizes differ: {sorted(sizes)}")
+    for index, record in enumerate(records):
+        if fields and len(record) % len(fields) == 0:
+            names = fields * (len(record) // len(fields))
+            values = "  ".join(
+                f"{field_name}={value}"
+                for field_name, (_, value) in zip(names, record)
+            )
+        else:
+            values = "  ".join(f"{kind}{value}" for kind, value in record)
+        print(f"    {index:3d}  {values}")
+    return 0
+
+
+def dump_members(container: Container, out_dir: Path, lists: bool = True) -> int:
+    """Write every member and check the expanded size against the end field.
+
+    A text member that holds a known list is also parsed into structured records.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"file:    {container.path}")
     print(f"members: {len(container.members)}")
@@ -146,6 +243,11 @@ def dump_members(container: Container, out_dir: Path) -> int:
             state = f"FAIL, the end field is {member.end}"
             failures += 1
         print(f"{member.name:<16} flag {member.flag} {len(data):>8} bytes  {state}")
+        if lists and member.flag & COMPRESSED_BIT:
+            text = data.decode("ascii", "replace")
+            for name in LIST_NAMES:
+                if any(line.strip() == name for line in text.splitlines()):
+                    print_list(text, name)
     if failures:
         raise ValueError(f"{failures} members do not reach the end field")
     return 0
@@ -486,6 +588,12 @@ def main() -> int:
     dump_parser = subparsers.add_parser("dump", help="write every member and check the end size")
     dump_parser.add_argument("file", type=Path)
     dump_parser.add_argument("--out", type=Path, required=True)
+    dump_parser.add_argument("--no-lists", action="store_true", help="skip the list parse")
+
+    list_parser = subparsers.add_parser("list", help="parse one named list of a member")
+    list_parser.add_argument("file", type=Path)
+    list_parser.add_argument("member")
+    list_parser.add_argument("list")
 
     args = parser.parse_args()
     if args.command == "lzw":
@@ -501,8 +609,16 @@ def main() -> int:
         return 1
     if args.command == "dump":
         try:
-            return dump_members(container, args.out)
+            return dump_members(container, args.out, not args.no_lists)
         except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+    if args.command == "list":
+        try:
+            member = container.member(args.member)
+            data = member_read(container, member)
+            return print_list(data.decode("ascii"), args.list)
+        except (UnicodeDecodeError, ValueError) as error:
             print(f"error: {error}", file=sys.stderr)
             return 1
     if args.command == "info":
