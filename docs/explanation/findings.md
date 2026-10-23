@@ -77,6 +77,29 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The difficulty ladder holds in every level
+
+- The `OPPONENTS` ladder holds in all six levels: the `A` variant starts at
+  `max_spd` 14000 and `accel` 1100, `B` at 15000 and 1500, `C` at 16700 to
+  16900 and 2600, and `E` at 19000 to 20000 and 6800, so the order A < B < C < E
+  holds, and `skill` falls from 3500 to 2600 to about 2700 to about 1800.
+  Evidence: the `OPPONENTS` lists of the six containers.
+- Every level holds one single record `D` variant with a hard opponent, from
+  `max_spd` 15300 to 16200 and `accel` 3000.
+  Evidence: the `D` variants of the six levels.
+- The `E` variant holds no sway in every level: the `sband` is 0.0, and the
+  `brakes` alternate 2000 and 1500.
+  Evidence: the `E` variants of the six levels.
+- The `TRACK_DATA` `bonus_time` and `carnage` fall from `A` to `C` and hold in
+  `C`, `D`, and `E` in every level, and the `color` and the `camera_hi` hold
+  inside one level.  The `color` differs per level: 24 in `MAP1`, 20 in `MAP2`, 24
+  in `MAP3`, 0 in `MAP4`, 104 in `MAP5`, and 13 in `MAP6`.
+  Evidence: the `TRACK_DATA` records of the six levels.
+- The `OSTACLES` and the `ANIMATIONS` lists differ per level and not per
+  variant: the obstacle count is 9, 6, 12, 9, 6, and 9, and the animation count
+  is 5, 2, 3, 5, 3, and 1 for the six levels.
+  Evidence: the shared members of the six containers.
+
 ## The five track variants differ in the opponents and the track data
 
 - The `OSTACLES` list is shared: it holds the nine 3DX names `azcono`,
