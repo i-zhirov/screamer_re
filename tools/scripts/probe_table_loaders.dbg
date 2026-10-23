@@ -5,7 +5,7 @@
 break
 clear
 exec RUN
-sleep 90
+sleep 45
 key \r
 sleep 15
 break

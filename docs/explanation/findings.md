@@ -77,6 +77,23 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The Enter lands and the game reaches the renderer
+
+- The 45-second wait plus one Enter runs 16 steps with 0 failures: the key is
+  sent, both `BPPM` breakpoints are set, and neither loader fires.
+  Evidence: `tools/scripts/probe_table_loaders.dbg` and the run output.
+- The EIP after the Enter is `0x296f20`, the module `0xd4f20`, which is a fixed
+  point interpolation loop: it multiplies and divides 16.16 values and stores them
+  to `[edi]` while `esi` advances by eight.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd4f20`.
+- So the Enter lands and the game draws, and the two table loaders have not run
+  at that point.  The breakpoints were armed after the wait, so a load during the
+  wait would be missed.
+  Evidence: the run output and the disassembly.
+- The two table loaders serve the race data, so the remaining step is the menu
+  selection that starts a race.
+  Evidence: the loader calls in `FUN_000131a8`.
+
 ## The demo is a camera fly-by and the menu follows it
 
 - The disassembly resolves the run-time address: `0x1E1C40` is the module
