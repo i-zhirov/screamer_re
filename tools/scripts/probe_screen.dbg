@@ -1,10 +1,18 @@
 break
 clear
 exec RUN
-sleep 45
+sleep 20
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 10
+key \r
+sleep 15
 break
 read EIP
-exec MEMDUMPBIN B8000 4000 SCREEN.BIN
-exec MEMDUMPBIN 0150:121528 20000 FRAME.BIN
+exec MEMDUMPBIN B8000 4000 /tmp/SCREEN.BIN
+exec MEMDUMPBIN 0150:121528 20000 /tmp/FRAME.BIN
 exec BPDEL *
 exec RUN
