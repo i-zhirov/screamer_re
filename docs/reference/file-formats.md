@@ -22,14 +22,19 @@ Every claim below comes from file bytes and from `file` output.
   then `VIS.TAB`, and `engine_init` calls that caller at the engine start.  The
   two tables therefore load at the engine start and not at the race start.
   Evidence: the call site scan and the disassembly of `0x4c810` and `0x127a0`.
+- The run-time order confirms the call order.  The open breakpoint reads the name
+  pointer `0x2AF736`, the `PERSPTAB` name, at the stop 18, and the pointer
+  `0x2AF753`, the `VIS.TAB` name, at the stop 20, so the game opens
+  `TABS\persp01.tab` first and `TABS\VIS.TAB` second.
+  Evidence: `tools/scripts/probe_open_window.dbg` and the name dump.
 - The `VIS.TAB` cell holds the pointer `0x0007C1C8` in the file at
   `obj.1 + 0x7c1c4`, and the pointer target is zero in the file, so the game
   fills the buffer at run time.
   Evidence: the file bytes at `0x969c4`.
-- The run-time read order of the two files is not observed yet.  The memory watch
-  on the `VIS.TAB` cell reads the fill `55`, and the watches on the `PERSPTAB`
-  cell do not fire, so the cell addresses are not settled.
-  Evidence: `tools/scripts/probe_pointer_order.dbg` and the cell dumps.
+- The read breakpoint shows the loader read is split into `0x1000` chunks, and no
+  stop carries the count `0x40740`.  All the reads are on the handle 5, so the game
+  reads one file at a time.
+  Evidence: `tools/scripts/probe_read_window.dbg` and the run output.
 - `PERSP01.TAB` holds 262656 bytes of 32-bit values and `VIS.TAB` holds 161024
   bytes of 16-bit values, so the `PERSPTAB` table holds 65664 values and the
   `VIS` table holds 80512 values.

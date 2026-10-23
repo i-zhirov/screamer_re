@@ -1,0 +1,796 @@
+# Watch the file reads over a long window and find the loader count.
+#
+# The two TABS loaders read fread(buffer, 1, 0x40740, stream).  The read
+# breakpoint AH=3F reports the handle in EBX and the count in ECX at each stop.
+# The TABS file sizes are 262656 and 161024 bytes, so the read runs and the
+# remainders 512 and 1280 name the two files and their order.
+break
+clear
+exec BPINT 21 "3F"
+exec BPLIST
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 0.3
+break
+read EAX EBX ECX EDX
+exec BPDEL *
+exec RUN

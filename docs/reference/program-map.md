@@ -327,10 +327,10 @@ TABS tables.
 | `0x4d030` | `vis_tab_load` | opens `TABS\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell | derived |
 
 The call order is `persptab_load` first and `vis_tab_load` second, so the
-`PERSPTAB` table reads first at the call level.  The run-time read order is not
-observed yet.
-Evidence: the call site scan and `python3 tools/le.py disasm STARTH.EXE 0x4c810`,
-`0x4cf94`, `0x4d030`, and `0x127a0`.
+`PERSPTAB` table reads first.  The run-time open order confirms it: the game opens
+`TABS\persp01.tab` before `TABS\VIS.TAB`.
+Evidence: the call site scan, `python3 tools/le.py disasm STARTH.EXE 0x4c810`,
+`0x4cf94`, `0x4d030`, and `0x127a0`, and `tools/scripts/probe_open_window.dbg`.
 
 ## Fifth level: the vehicle states, the timing filter, and the runtime
 

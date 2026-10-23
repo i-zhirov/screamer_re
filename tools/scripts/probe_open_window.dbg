@@ -1,0 +1,295 @@
+# Watch the file opens over a long window and name the TABS opens.
+#
+# The TABS loader opens TABS\persp01.tab and TABS\VIS.TAB.  The open
+# breakpoint AH=3D reports the name pointer in EDX at each stop, so the two
+# stops with the loader name pointers give the read order.
+break
+clear
+exec BPINT 21 "3D"
+exec BPLIST
+exec RUN
+sleep 3
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec RUN
+sleep 1
+break
+read EAX EBX ECX EDX
+exec BPDEL *
+exec RUN

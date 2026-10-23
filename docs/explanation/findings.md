@@ -3881,3 +3881,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `0150:2E34EC` do not fire.  The run-time address of the `PERSPTAB` cell
   therefore stays open.
   Evidence: `tools/scripts/probe_pointer_order.dbg` and the cell dumps.
+
+## The run-time read order is PERSPTAB then VIS.TAB
+
+- The open breakpoint over a 70-second window reads the name pointer in EDX at
+  every stop.  The stop 18 reads `EDX=0x2AF736` and the stop 20 reads
+  `EDX=0x2AF753`.
+  Evidence: `tools/scripts/probe_open_window.dbg` and the run output.
+- The dump-base probe reads `TABS\persp01.tab\0PERSPTAB\0rb\0TAB` at the linear
+  `0x2AF736`, so the stop 18 is the `PERSPTAB` open.  The name
+  `TABS\VIS.TAB` starts `0x1D` bytes after `0x2AF736`, at the linear `0x2AF753`,
+  so the stop 20 is the `VIS.TAB` open.
+  Evidence: `tools/scripts/probe_dump_base.dbg` and the name dump.
+- The run-time order is therefore `PERSPTAB` first and `VIS.TAB` second, which
+  matches the static call order at `0x4c839` and `0x4c83e`.  The run-time read
+  order of the two tables is now recorded.
+  Evidence: the open order and the call site scan.
+- The read breakpoint over a 90-second window shows the read sequence in order: the
+  config reads 28, 28, 6, the menu idle reads 176 times seven, the graphics loads
+  28, 4, 16, about 7800, and 8192 times N five times, the menu idle 176 times
+  four, the 64-byte reads eight times, the small reads 196, 9, 1, 249, 72, 908, and
+  912, and then a 4096-byte read run of 116 chunks with one 1157-byte read.
+  Evidence: `tools/scripts/probe_read_window.dbg` and the run output.
+- No stop carries the loader count `0x40740`, so the loader `fread(buffer, 1,
+  0x40740, stream)` is split by the C library stream buffer.  The DOS read count
+  is the stream refill, and the loader read is not a single `0x40740` read.
+  Evidence: the read window and the loader disassembly.
+- All the reads are on the handle 5, so the game reads one file at a time.
+  Evidence: the read window.
