@@ -77,6 +77,23 @@ The page separates observations from open questions.
   halves.  `FUN_0004d030` loads `TABS\VIS.TAB` into `PTR_DAT_0008c1c4`.
   Evidence: the decompiled `FUN_0004cf94` and `FUN_0004d030`.
 
+## The read breakpoint does not fire in the demo
+
+- The read probe runs 11 steps with 0 failures: the `BPINT 16 0` read breakpoint
+  is accepted, the 30-second wait runs, the Enter is sent, and the break follows.
+  Evidence: `tools/scripts/probe_keyboard_wait.dbg` and the run output.
+- The registers at the break read `EIP=0x1e1c40` `AX=0`: the game is back in
+  the demo camera routine at the module `0x21ba0` and the read breakpoint did not
+  fire, so the game did not take a key with `INT 16h` `AH=00` in that window.
+  Evidence: the register read.
+- The game therefore polls the keyboard with the `AH=01` check and continues the
+  demo, and the demo does not take the key.  The scancode in `AL` stays unread
+  because the read never happens in the demo.
+  Evidence: the two register reads at 30 seconds.
+- The next step is the menu state and not the demo, because the read path runs
+  there.
+  Evidence: the read probe and the poll probe.
+
 ## The read breakpoint is armed and the trace needs the read
 
 - The scancode probe runs 14 steps with 0 failures: both keyboard breakpoints

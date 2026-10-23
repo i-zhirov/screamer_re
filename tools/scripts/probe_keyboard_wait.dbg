@@ -2,13 +2,10 @@
 break
 clear
 exec BPINT 16 0
-exec BPINT 16 1
 exec RUN
 sleep 30
-break
-read EIP AX
-exec INTT
-sleep 2
+key \r
+sleep 5
 break
 read EIP AX
 exec BPDEL *
