@@ -1,18 +1,18 @@
-# Arm both keyboard breakpoints, inject at the poll stop, and read the read return.
+# Watch the BIOS keyboard buffer at the poll stop and after the injection.
 break
 clear
 exec BPINT 16 1
-exec BPINT 16 0
-exec BPLIST
 exec RUN
 sleep 40
 break
 read EIP AX
+exec MEMDUMPBIN 0:400 20 BUF_BEFORE.BIN
 key \r
+exec MEMDUMPBIN 0:400 20 BUF_AFTER.BIN
 exec RUN
 sleep 3
 break
 read EIP AX
-exec BPLIST
+exec MEMDUMPBIN 0:400 20 BUF_CONSUMED.BIN
 exec BPDEL *
 exec RUN
