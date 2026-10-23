@@ -1,10 +1,10 @@
-# Arm the read breakpoint, run the demo, and let the stop happen on its own.
+# Catch the INT 16h AH=01 poll and read its answer in AL.
 break
 clear
-exec BPINT 16 0
+exec BPINT 16 1
 exec BPLIST
 exec RUN
-sleep 60
+sleep 40
 read EIP AX
 exec BPLIST
 key \r
