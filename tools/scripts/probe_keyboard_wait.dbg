@@ -1,4 +1,4 @@
-# Log the callback for a key with a known scancode.
+# Inject the key at the poll stop and search for the scancode and the ASCII.
 break
 clear
 exec BPINT 16 1
@@ -6,11 +6,16 @@ exec RUN
 sleep 40
 break
 read EIP AX
-exec LOGL 80000
 key a
 exec RUN
-sleep 4
+sleep 3
 break
 read EIP AX
+exec MEMFIND 0150:0 1E
+exec MEMS = 1E
+exec MEMFIND 0150:0 61
+exec MEMS = 61
+exec MEMFIND 0812:0 1E
+exec MEMS = 1E
 exec BPDEL *
 exec RUN
