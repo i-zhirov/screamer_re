@@ -3,6 +3,27 @@
 This page records the observed formats.  The formats are not decoded yet.
 Every claim below comes from file bytes and from `file` output.
 
+### The TABS table loaders
+
+- `FUN_0004cf94` loads `TABS\persp01.tab` into the `PERSPTAB` resource and
+  stores the pointer at `DAT_001214ec` (module `0x1214EC`, linear `0x2E34EC`).
+  The loader holds 43 instructions, at `obj.1 + 0x3cf94`, page 60 (file page
+  61), file offset `0x57794`.
+- `FUN_0004d030` loads `TABS\VIS.TAB` into the buffer `PTR_DAT_0008c1c4`
+  (module `0x8C1C4`, linear `0x24E1C4`).  The loader holds 31 instructions, at
+  `obj.1 + 0x3d030`, page 61 (file page 62), file offset `0x57830`.
+- The two loaders sit in adjacent pages of `obj.1`, and the `PERSPTAB` loader
+  comes first in the image.
+- The read order is not observed at run time: the demo reaches neither loader,
+  and the race-start walk leaves both watches armed with the `PERSPTAB` loader
+  byte changed from `00` to `55`, so the page is touched by a write and the
+  loader does not execute in that window.
+  Evidence: `tools/scripts/probe_race_start.dbg` and the full breakpoint list.
+- `PERSP01.TAB` holds 262656 bytes of 32-bit values and `VIS.TAB` holds 161024
+  bytes of 16-bit values, so the `PERSPTAB` table holds 65664 values and the
+  `VIS` table holds 80512 values.
+  Evidence: the file sizes.
+
 ## CD image pair
 
 | File | Format |
