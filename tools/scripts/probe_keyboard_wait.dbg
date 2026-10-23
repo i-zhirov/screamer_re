@@ -1,4 +1,4 @@
-# Log the CPU after the poll stop and the injection to catch the INT 16 return.
+# Log the callback for a key with a known scancode.
 break
 clear
 exec BPINT 16 1
@@ -6,12 +6,11 @@ exec RUN
 sleep 40
 break
 read EIP AX
-exec LOGL 300000
-key \r
+exec LOGL 80000
+key a
 exec RUN
-sleep 5
+sleep 4
 break
 read EIP AX
-exec LOGL
 exec BPDEL *
 exec RUN
