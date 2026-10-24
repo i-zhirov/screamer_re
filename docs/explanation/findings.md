@@ -4019,3 +4019,28 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The next step is the embedded `fmmidi.com` program in `HMIMDRV.386` at the
   offset `0x2c`, which holds the register writes.
   Evidence: the driver banner scan.
+
+## The OPL register write sequence in the HMI driver
+
+- The driver code in `HMIMDRV.386` holds the OPL register write sequence.  The
+  sequence sits at `0x14157`: the bytes `8b 15 ef 00 00 00 ec` are
+  `mov edx, [0xEF]; in al, dx`, the status read; the bytes
+  `66 ba 20 00 b0 20 ee` are `mov dx, 0x20; mov al, 0x20; out dx, al`, the
+  register write; and the bytes `66 a1 f1 00 00 00 66 ba 21 00 ee` are
+  `mov eax, [0xF1]; mov dx, 0x21; out dx, al`, the data write.
+  Evidence: the driver byte dump at `0x14150`.
+- The driver writes the register pair in the order register then data, which is
+  the OPL register protocol.  The register number is `0x20`, the first OPL
+  register, and the value comes from the driver state.
+  Evidence: the same dump.
+- The driver repeats the sequence at `0x1420c` and `0x14230` for the other
+  registers.
+  Evidence: the driver byte dump at `0x14200`.
+- The instrument record's non-zero values line up with the OPL registers: the
+  value `0F` at `+0x06` is the register `0x20` value, and the values `3F`,
+  `01`, and `3E` at `+0x0A`, `+0x0D`, and `+0x11` are the register `0x40`,
+  `0x60`, and `0x80` values.
+  Evidence: the first `DRUM.BNK` record and the driver dump.
+- The record therefore holds the operator registers in the write order, and the
+  remaining fields follow the same shape.
+  Evidence: the two byte dumps.
