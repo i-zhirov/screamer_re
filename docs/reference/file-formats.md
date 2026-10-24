@@ -138,17 +138,27 @@ The instrument table starts at `+0x1E`.  A record holds the instrument name in
 10 bytes and the instrument index in a 2-byte field.  The table holds 28 records,
 and the indices run from 1 to 28.  The `MELODIC.BNK` names are `PIANO1`,
 `PIANO2`, and `CLEANGT`; the `DRUM.BNK` names are `$clap`, `$scratch`,
-`$rimshot`, `=woodblok`, and `glock`.  The instrument data starts at `+0x61C`
-and holds the OPL register values.
+`$rimshot`, `=woodblok`, and `glock`.
+
+### The instrument data
+
+The instrument data starts at `+0x61C` and holds 3840 bytes.  The data is 128
+records of 30 bytes, and the record period is confirmed in both banks.  A record
+holds the OPL register values, for example `0F`, `3F`, `01`, and `3E`.  The
+`DRUM.BNK` records repeat the default voice, and the `MELODIC.BNK` records
+hold the different voices.
+Evidence: the record period check over the data area and the file bytes.
 
 ### The songs
 
-`MUSIC1.HMP` to `MUSIC7.HMP` are the songs.  A song starts with the
-signature `HMIMIDIP` and the version text `013195`, and the song data follows.
+`MUSIC1.HMP` to `MUSIC7.HMP` are the songs.  A song holds a 16-byte header
+and the song data.  The header holds the signature `HMIMIDIP` in 8 bytes, the
+version text `013195` in 6 bytes, and two zero bytes.  The song data follows at
+`+0x10` and holds the track table and the events.  The event bytes use the high
+values `0x80` to `0x8F` and `0x90` to `0x9F`, which are the note off and the
+note on, and the values `0xD0` and `0x40`, which are the channel events.
 `MIDITEST.HMP` is the same format.
-
-Evidence: the file bytes and `python3 tools/gfx_container.py info DATA/MUSIC.DAT`
-and `CONFIG/SETUP.DAT`.
+Evidence: the `MUSIC1.HMP` head and the byte counts.
 
 ## Sound data
 

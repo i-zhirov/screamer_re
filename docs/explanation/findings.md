@@ -3969,3 +3969,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `HMI*.386 File Open Failure`.
   Evidence: the string dump of `STARTH.EXE` at the object 3 offsets `0x14e0` to
   `0x1590`.
+
+## The instrument data and the songs
+
+- The instrument data at `+0x61C` holds 3840 bytes.  The data is 128 records
+  of 30 bytes, because the period 30 holds in the `DRUM.BNK` data area over
+  the first 600 bytes.
+  Evidence: the record period check over the two bank data areas.
+- The records hold the OPL register values, for example `0F`, `3F`, `01`, and
+  `3E`.  The `DRUM.BNK` records repeat the default voice, and the
+  `MELODIC.BNK` records hold the different voices.
+  Evidence: the two data areas.
+- A song holds a 16-byte header and the song data.  The header holds the
+  signature `HMIMIDIP` in 8 bytes, the version text `013195` in 6 bytes, and
+  two zero bytes.  The song data follows at `+0x10`.
+  Evidence: the `MUSIC1.HMP` head.
+- The song data holds the values 13, 384, 120, 93, and 9 at `+0x30`, and the
+  events follow.  The event bytes hold the high values `0x80` to `0x83` and
+  `0xD0` to `0xD9`, which are the note and the channel events, and the
+  values `0x01`, `0x02`, and `0x40`.
+  Evidence: the `MUSIC1.HMP` byte counts.
+- The songs are `MUSIC1.HMP` to `MUSIC7.HMP` (74004 to 10386 bytes) and the
+  setup song `MIDITEST.HMP`.
+  Evidence: the member lists.
