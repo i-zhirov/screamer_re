@@ -4224,3 +4224,28 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The container path therefore stays open, and the next step is the OpenWatcom
   source build in the container or a fix for the installer copy fault.
   Evidence: the two results.
+
+## A ready-made OpenWatcom container
+
+- Ready-made OpenWatcom V2 images exist on Docker Hub.  The maintained one is
+  `arlaneenalra/watcom-docker`, whose tags track the OpenWatcom releases
+  (`latest`, `Current-build`, `Last-CI-build`, and the dated builds).  The
+  `Current-build` tag is 243 MB and was updated on 2026-10-24.
+  Evidence: the Docker Hub search and the tag list.
+- The image holds the extracted toolchain, so no installer run is needed.
+  `WATCOM=/opt/watcom`, the PATH starts with `/opt/watcom/binl64`, and
+  `wcc386`, `wlink`, `wlib`, and `wasm` sit in `binl64`.
+  Evidence: the container environment check.
+- The container build captures the wlink output in stdout.  The compile is clean, and
+  `system dos` reports the two 32-bit object warnings while `system dos4g` removes
+  them.  The remaining fault is `_cstart_` undefined plus the missing stack
+  segment and the start address.
+  Evidence: the two container builds.
+- The symbol names are read from the objects.  `driver.obj` holds `main_`,
+  `show_pair_`, `_line`, `_hex`, `_offsets`, `_record`, `_registers`, and the
+  `_cstart_` reference; `chk.obj` holds `__CHK` alone.
+  Evidence: the `strings` runs over the two objects.
+- The stub therefore has the right `__CHK` name, and the missing part is the
+  `_cstart_` definition.  The assembler does not emit the `_cstart_` and `main_`
+  labels from `chk.asm`, so the stub needs the C form or an assembler option.
+  Evidence: the `chk.obj` symbol list.
