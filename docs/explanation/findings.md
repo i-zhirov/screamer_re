@@ -4072,3 +4072,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   The remaining record bytes are the padding and the fields the driver sets to
   zero for the default voice.
   Evidence: the record and the driver dumps.
+
+## The OpenWatcom V2 build harness
+
+- The OpenWatcom V2 DOS toolchain is installed under `work/watcom/WATCOM`.  The
+  release asset `open-watcom-2_0-c-dos.exe` (127899553 bytes) is a DOS `SETUP.EXE`
+  installer.  The silent run `ow-dos.exe -s` extracts 49 MB, and the 32-bit DOS
+  tools are `WCC386.EXE`, `WPP386.EXE`, `WLINK.EXE`, `WLIB.EXE`, and
+  `WMAKE.EXE` in `BINW`.  The tools are DOS LE executables.
+  Evidence: the installer run and the file list.
+- The harness under `work/rebuild` holds `driver.c`, the makefile, `build.conf`,
+  and `build.sh`.  The driver reproduces the driver register write sequence: it
+  holds the first `DRUM.BNK` record and writes the eight register/value pairs in
+  the driver order, register then data.
+  Evidence: the harness files.
+- The build succeeds.  `wcc386 -bt=dos driver.c` reports "48 lines, included 948,
+  0 warnings, 0 errors" and writes `DRIVER.OBJ` (779 bytes).  The link
+  `wlink system dos option quiet library clib3r,pc9833r,emu387 name driver.exe
+  file driver.obj` writes `DRIVER.EXE` (13884 bytes), a DOS executable.
+  Evidence: `work/rebuild/build.txt` and the file list.
+- The run does not report yet.  The driver writes no output to the redirected
+  file, so the port write or the runtime waits in the DOSBox-X session.
+  Evidence: `work/rebuild/run.txt` is empty.
+- The next step runs the driver with the DOSBox-X debugger and reads the port
+  writes at `0x388` and `0x389`, which verifies the rebuilt sequence against
+  the original driver.
+  Evidence: the decode in the driver section.
