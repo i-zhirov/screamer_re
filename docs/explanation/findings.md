@@ -4249,3 +4249,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `_cstart_` definition.  The assembler does not emit the `_cstart_` and `main_`
   labels from `chk.asm`, so the stub needs the C form or an assembler option.
   Evidence: the `chk.obj` symbol list.
+
+## The driver links without the C run-time
+
+- The ready-made container builds the driver.  `arlaneenalra/watcom-docker:Current-build`
+  holds the extracted toolchain at `/opt/watcom`, so no installer run is needed.
+  Evidence: the container environment check.
+- The assembler and the compiler write no object to the mount without `-fo=`.
+  `wasm -bt=dos -zq -zcm=watcom -fo=/w/chk.obj chk.asm` and
+  `wcc386 -bt=dos -s -zq -fo=/w/cstart.obj cstart.c` write `chk.obj` (182 bytes)
+  and `cstart.obj` (222 bytes); the same commands without `-fo=` report the exit
+  code 0 and write no file.
+  Evidence: the two container runs.
+- The stub holds both symbols.  `chk.asm` defines `__CHK` (the stack check helper,
+  a single `ret`) and `_cstart_` (the start symbol, a `jmp main_`), and `chk.obj`
+  holds the symbols `main_`, `__CHK`, and `_cstart_`.
+  Evidence: the `strings` run over `chk.obj`.
+- The link succeeds without the C run-time:
+  `wlink system dos4g option quiet option nodefaultlibs name driver.exe file
+  driver.obj,chk.obj,cstart.obj` exits 0 and writes `driver.exe` (5146 bytes).
+  The two warnings stay: `W1014` stack segment not found and `W1023` no starting
+  address found, so the linker uses the address 0001:00000000.
+  Evidence: the container link run.
+- The next step runs `driver.exe` in DOSBox-X with the CPU log and reads the
+  `out dx,al` lines at the ports `0x388` and `0x389`, then compares the eight
+  pairs with the original driver sequence.
+  Evidence: the driver decode.
