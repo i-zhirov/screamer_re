@@ -4291,3 +4291,23 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The eight pairs therefore stay unverified.  The next step fixes the link start and the
   stack segment, so the entry lands on `_cstart_` and the driver reaches `main`.
   Evidence: the LE header and the log.
+
+## The start option fixes the entry and the run stays short
+
+- The link with `option start=_cstart_` moves the LE entry from object 1 offset 0 to
+  object 1 offset `0xd5`, the stub `_cstart_` code, and the link exits 0 with
+  `driver.exe` at 5146 bytes.
+  Evidence: `python3 tools/le.py info work/rebuild/driver.exe`.
+- The `option stack=0x1000` does not remove the `W1014 stack segment not found`
+  warning, and the LE header holds no stack line.  The DOS/4GW extender provides the
+  stack at run time, so the warning may be harmless for this target.
+  Evidence: the link output and the LE header.
+- The 4000000-instruction log (1760460 bytes) still holds no `out dx,al`, no
+  register `DX` of `0x388` or `0x389`, and no `int 21` line.  The only `out`
+  lines are the BIOS `out 20,al`, 148 of them, and the log tail is the BIOS keyboard
+  wait.  The driver therefore does not reach its own code, and the print through the
+  DOS call does not appear.
+  Evidence: `work/rebuild/LOGCPU.TXT`.
+- The next step reads the log head to find the last DOS or extender line before the
+  wait, which names the point where the driver stops.
+  Evidence: the log.
