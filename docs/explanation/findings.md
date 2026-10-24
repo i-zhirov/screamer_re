@@ -4161,3 +4161,51 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The next step reads the symbol names in the two objects with the librarian
   symbol list, then aligns the stub name with the `__CHK` reference.
   Evidence: the two objects.
+
+## The DOS screen capture and the link errors
+
+- `tools/dosboxx_control.py` now holds the `screen` step.  The step dumps the
+  text screen with `MEMDUMPBIN B800:0 FA0 DOSSCR.BIN` and prints the 25 rows,
+  so the DOS console text is readable without a window.
+  Evidence: `tools/scripts` and the screen output.
+- The wlink error is captured.  The link with `system dos` reports
+  `Warning! W1080: file driver.obj is a 32-bit object file` for both objects.
+  The link with `system dos4g` drops that warning and reports
+  `Error! E2028: m is an undefined reference`,
+  `Error! E2028: _cstart_ is an undefined reference`, and
+  `Warning! W1014: stack segment not found`.
+  Evidence: the two screen captures.
+- The `__CHK` reference is resolved.  The link with `option nodefaultlibs` and
+  the `chk.obj` stub reports no `__CHK` error, so the stub name matches the
+  reference.  The remaining errors are the entry symbol and the stack segment.
+  Evidence: the screen capture.
+- The entry symbol is `main_` in the OpenWatcom 32-bit C.  The link with
+  `option start=main_` reports the reference `m`, so the start option reads the
+  name in a shortened form, and the link with `option start=_main` reports `_ma`.
+  Evidence: the two screen captures.
+- The next step sets the entry symbol and the stack segment, then links
+  `DRIVER.EXE` without the C run-time.
+  Evidence: the link errors.
+
+## The Linux container cross-compile path
+
+- The OpenWatcom V2 release has no macOS asset.  The Linux asset
+  `open-watcom-2_0-c-linux-x64` is a 129121153-byte statically linked ELF, and
+  the SHA-256 is
+  `74cee369f527889144fe840f8fff3df78ed541b907f624334c12248e1435b8b3`.
+  Evidence: the download and `shasum -a 256`.
+- The Docker daemon runs through Colima with an `x86_64` Linux VM, so the
+  `linux/amd64` container runs natively.
+  Evidence: `colima status` and `docker info`.
+- The Linux installer runs in a `debian:bookworm-slim` container only when a
+  terminal is allocated.  Without a tty it dies with a floating point exception,
+  and with `-t` it draws the installer screen and extracts the files.
+  Evidence: the two container runs.
+- Two faults stay open.  The installer writes the tree to `/usr/bin/watcom` inside
+  the container, which is not the mounted `work/` directory, and the run then dies
+  with a segmentation fault at the "Copying Files" step (exit 139).
+  Evidence: the container run output.
+- The next step passes the extraction path to the installer and repeats the run, then
+  builds the driver with `wcc386 -bt=dos` and `wlink` from the container, where the
+  error and the symbol list land in stdout.
+  Evidence: the installer usage line and the two faults.
