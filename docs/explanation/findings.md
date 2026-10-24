@@ -4275,3 +4275,19 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `out dx,al` lines at the ports `0x388` and `0x389`, then compares the eight
   pairs with the original driver sequence.
   Evidence: the driver decode.
+
+## The rebuilt driver run
+
+- The rebuilt `driver.exe` is an LE image: the entry is object 1 offset 0 (module
+  linear 0x10000), the stack is object 0 with esp 0, and the file holds 2 pages.
+  The entry matches the link warning `W1023 no starting address found`, so the entry
+  lands at the image head and not on `_cstart_`.
+  Evidence: `python3 tools/le.py info work/rebuild/driver.exe`.
+- The CPU log over 200000 instructions holds no `out dx,al` and no register `DX` of
+  `0x388` or `0x389`.  The log tail is the BIOS keyboard wait `F000:D184 sti` and
+  `F000:D185 hlt` with `EAX=0x1100`, the `INT 16h AH=11` check, so the run stops
+  before the driver port writes.
+  Evidence: `work/rebuild/LOGCPU.TXT`.
+- The eight pairs therefore stay unverified.  The next step fixes the link start and the
+  stack segment, so the entry lands on `_cstart_` and the driver reaches `main`.
+  Evidence: the LE header and the log.
