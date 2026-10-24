@@ -4044,3 +4044,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The record therefore holds the operator registers in the write order, and the
   remaining fields follow the same shape.
   Evidence: the two byte dumps.
+
+## The driver register functions and the record fields
+
+- The driver code before `0x14157` is the detect routine.  It stores the port
+  base from the argument at `[0xEF]`, probes the port `0x21`, writes the timer
+  values `0xFD`, `0xFF`, and `0x3F`, and then writes the register `0x20` with
+  the value from the state `[0xF1]`.
+  Evidence: the driver byte dump at `0x140e0`.
+- The function at `0x14157` writes the register `0x20` and then the data:
+  `66 ba 20 00 b0 20 ee` is `mov dx, 0x20; mov al, 0x20; out dx, al`, and
+  `66 a1 f1 00 00 00 66 ba 21 00 ee` is `mov eax, [0xF1]; mov dx, 0x21;
+  out dx, al`.
+  Evidence: the driver byte dump at `0x14157`.
+- The block write routine at `0x141ef` takes the count in `[ebp+0x14]` and writes
+  the byte block from `es:[bx]` to the data port `[0xEF]+1`, with the status
+  delay loops on the port `[0xEF]`.  The driver therefore uses the port pair
+  `0x20` and `0x21` as the register and the data ports.
+  Evidence: the driver byte dump at `0x141ef`.
+- The record fields line up with the operator registers in the write order.  The
+  values `0F`, `3F`, `01`, and `3E` at `+0x06`, `+0x0A`, `+0x0D`, and
+  `+0x11` are the operator 1 registers `0x20`, `0x40`, `0x60`, and `0x80`; the
+  values `0F`, `3F`, `01`, and `01` at `+0x13`, `+0x17`, `+0x1A`, and `+0x1B`
+  are the operator 2 registers `0x23`, `0x43`, `0x63`, and the channel `0xC0`.
+  Evidence: the first `DRUM.BNK` record and the driver dump.
+- The record therefore holds the OPL register values in the driver write order.
+  The remaining record bytes are the padding and the fields the driver sets to
+  zero for the default voice.
+  Evidence: the record and the driver dumps.
