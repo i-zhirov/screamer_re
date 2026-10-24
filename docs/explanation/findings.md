@@ -4138,3 +4138,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   error with the debugger `show` step, which needs the emulator to stay in the
   debugger, and then removes the `__CHK` reference from the object.
   Evidence: the build outputs.
+
+## The wlink error capture and the __CHK stub
+
+- The wlink error does not land in a redirected file.  The run
+  `wlink ... > link.txt 2>&1` writes only the `dir` output, so the
+  OpenWatcom wlink writes the error to the console screen directly.  The
+  debugger `show` step prints the emulator output, which holds the DOSBox-X
+  log lines and not the DOS screen, so `show` does not capture the error
+  either.
+  Evidence: `work/rebuild/link.txt` and the two runs.
+- The captured error text stands from the first no-runtime link: the undefined
+  symbols are `__CHK`, `outp_`, and `printf_`.  The driver source now uses
+  the inline `out dx, al` instructions and the DOS `INT 21h` calls, so the only
+  remaining reference is `__CHK`, the stack check helper.
+  Evidence: the first link output and the driver source.
+- The stack check helper stub is written.  `work/rebuild/chk.asm` holds the
+  public symbol `__CHK` with the single `ret`, and `wasm -bt=dos -zcm=watcom`
+  writes `chk.obj` (146 bytes).  The link with `file driver.obj,chk.obj` still
+  writes no `DRIVER.EXE`, so the symbol name or the link line still differs.
+  Evidence: the stub source, the assembler output, and the link.
+- The next step reads the symbol names in the two objects with the librarian
+  symbol list, then aligns the stub name with the `__CHK` reference.
+  Evidence: the two objects.
