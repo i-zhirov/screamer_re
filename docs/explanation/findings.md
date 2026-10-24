@@ -4311,3 +4311,22 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The next step reads the log head to find the last DOS or extender line before the
   wait, which names the point where the driver stops.
   Evidence: the log.
+
+## The driver run does not start
+
+- The link fixes the entry: `option start=_cstart_` moves the LE entry to object 1
+  offset `0xd5`, and `driver.exe` builds at 5146 bytes.  The `option stack=0x1000`
+  has no effect, and the `dos4g` extender provides the stack at run time.
+  Evidence: `python3 tools/le.py info work/rebuild/driver.exe`.
+- The DOS4GW extender is copied beside the driver, and the run still shows the
+  DOSBox-X welcome screen, so the autoexec lines do not run or do not show.
+  Evidence: the screen capture.
+- The `BPINT 21 "4B"` exec break does not fire, and the log holds only the BIOS
+  addresses.  The log head is `F000:FEA5 sti` and `F000:FEA6 callback 0008`, no
+  `0x100xx` code address and no `int 21` line appear, and no `out dx,al` line
+  appears.  The driver code therefore does not run in the log window.
+  Evidence: `work/rebuild/LOGCPU.TXT`.
+- The eight pairs stay unverified.  The next step reads the DOS screen right after the
+  `driver.exe` line with the `screen` command and no `clear`, which shows the DOS
+  error text for the driver start.
+  Evidence: the screen capture.
