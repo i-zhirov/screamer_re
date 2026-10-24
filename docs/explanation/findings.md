@@ -4121,3 +4121,20 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   runs the driver with the CPU log to read the `out dx, al` lines at the ports
   `0x388` and `0x389`.
   Evidence: the two runs.
+
+## The headless run and the driver link
+
+- A direct `dosbox-x` run opens a window.  The graphics format probes were
+  headless because `tools/dosboxx_control.py` sets `SDL_VIDEODRIVER=dummy` and
+  `SDL_AUDIODRIVER=dummy` for the child.  Rule: every run sets both variables,
+  and `work/rebuild/build.sh` now does the same.
+  Evidence: the tool launch and the two run kinds.
+- The driver link fails and the error goes to the console, so the redirected
+  build file does not hold it.  The link with the run-time libraries wrote
+  `DRIVER.EXE` (13884 bytes) in one run, and the link with `option
+  nodefaultlibs` and the `-s` object names the undefined symbol `__CHK`.
+  Evidence: the two build outputs.
+- The no-runtime link therefore stays open.  The next step captures the link
+  error with the debugger `show` step, which needs the emulator to stay in the
+  debugger, and then removes the `__CHK` reference from the object.
+  Evidence: the build outputs.
