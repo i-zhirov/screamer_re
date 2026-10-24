@@ -102,31 +102,53 @@ decoded yet.
 
 ## Music banks
 
-`DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` carry the ASCII signature
-`ADLIB-` at `+0x02`.  The `file` command names the format "AdLib
-instrument data".  The header is 0x1E bytes:
+`DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` are member containers of the same
+shape as the graphics containers: the last 4 bytes hold the directory size, and
+the directory holds 32-byte records with the member name exclusive-ORed with
+`0x3a`.  `tools/gfx_container.py info` lists the members.
 
-| Offset | Field |
-| --- | --- |
-| `+0x00` | the version, `0x0000` |
-| `+0x02` | the signature `ADLIB-` |
-| `+0x08` | the value `0x007F` |
-| `+0x0A` | the value `0x007F` |
-| `+0x0C` | the instrument count, 28 |
-| `+0x10` | the instrument data offset, `0x61C` |
+`MUSIC.DAT` (199545 bytes) holds 9 members:
 
-The instrument table follows at `+0x1E`.  A record holds the instrument
-name in 10 bytes and the instrument index in a 2-byte field.  The table holds
-28 records, and the last index is 28.  The instrument names are `<Blank`,
-`$clap`, `$scratch`, `$rimshot`, `=woodblok`, and `glock`.  The instrument
-data follows at `+0x61C` and holds the OPL register values, for example
-`0F 00 00 00 3F 00 00 01`.
+| Member | Offset | Size |
+| --- | ---: | ---: |
+| `DRUM.BNK` | 0 | 5404 |
+| `MELODIC.BNK` | 5404 | 5404 |
+| `MUSIC1.HMP` | 10808 | 74004 |
+| `MUSIC2.HMP` | 84812 | 34180 |
+| `MUSIC3.HMP` | 118992 | 17602 |
+| `MUSIC4.HMP` | 136594 | 19231 |
+| `MUSIC5.HMP` | 155825 | 12357 |
+| `MUSIC6.HMP` | 168182 | 10386 |
+| `MUSIC7.HMP` | 178568 | 20653 |
 
-`MUSIC.DAT` holds 199545 bytes and `SETUP.DAT` holds 276632 bytes.  Both
-files hold the same 28 instruments and the same table, so `SETUP.DAT` is the
-setup copy of the bank.
-Evidence: the file bytes, the `file` output, and
-`python3 tools/le.py disasm STARTH.EXE 0x2f9e0`.
+`SETUP.DAT` (276632 bytes) holds 14 members: the same two banks, the setup
+screen `SETUP.FNT`, `SETUP.SPR`, `SETUP.TXT`, `MIDITEST.HMP`, the six PCX
+images `CTRL`, `INFO`, `LINK`, `MAIN`, `MODEM`, `NET`, `SOUND`, and
+`FX_TEST.RAW`.
+
+### The `ADLIB-` instrument bank
+
+`DRUM.BNK` and `MELODIC.BNK` are 5404-byte `ADLIB-` banks.  The `file`
+command names the format "AdLib instrument data".  The header is `0x1E` bytes:
+the version 0.0 at `+0x00`, the signature at `+0x02`, the values `0x007F` at
+`+0x08` and `+0x0A`, the instrument count 28 at `+0x0C`, and the instrument
+data offset `0x61C` at `+0x10`.
+
+The instrument table starts at `+0x1E`.  A record holds the instrument name in
+10 bytes and the instrument index in a 2-byte field.  The table holds 28 records,
+and the indices run from 1 to 28.  The `MELODIC.BNK` names are `PIANO1`,
+`PIANO2`, and `CLEANGT`; the `DRUM.BNK` names are `$clap`, `$scratch`,
+`$rimshot`, `=woodblok`, and `glock`.  The instrument data starts at `+0x61C`
+and holds the OPL register values.
+
+### The songs
+
+`MUSIC1.HMP` to `MUSIC7.HMP` are the songs.  A song starts with the
+signature `HMIMIDIP` and the version text `013195`, and the song data follows.
+`MIDITEST.HMP` is the same format.
+
+Evidence: the file bytes and `python3 tools/gfx_container.py info DATA/MUSIC.DAT`
+and `CONFIG/SETUP.DAT`.
 
 ## Sound data
 

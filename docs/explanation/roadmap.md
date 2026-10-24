@@ -81,6 +81,7 @@ current host.
    `PERSPTAB` then `VIS.TAB`).
 6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank
    (in progress: `SOUND.DAT` is a member container of 92 `<name>.RAW` samples
-   with a loader, and the `ADLIB-` bank has a mapped header, instrument table,
-   and instrument data).
+   with a loader; `MUSIC.DAT` is an archive of the two `ADLIB-` banks and the
+   seven `MUSICn.HMP` songs, and the bank header, the instrument table, and the
+   instrument data are mapped).
 7. Set up the OpenWatcom V2 build harness under `work/`.

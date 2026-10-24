@@ -3930,27 +3930,42 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   sample pointer into the array at `0x16044`.  The loop bound is the count at
   `DAT_0018d84`.
   Evidence: the loader disassembly.
-- `DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` are the `ADLIB-` instrument bank.
-  The header is `0x1e` bytes: the version 0.0 at `+0x00`, the signature at
-  `+0x02`, the values `0x007f` at `+0x08` and `+0x0a`, the instrument count 28
-  at `+0x0c`, and the instrument data offset `0x61c` at `+0x10`.
-  Evidence: the file bytes and the `file` output.
-- The instrument table starts at `+0x1e`.  A record holds the name in 10 bytes and
-  the index in a 2-byte field, and the table holds 28 records.  The names are
-  `<Blank`, `$clap`, `$scratch`, `$rimshot`, `=woodblok`, and `glock`.
+
+## The music archive and the songs
+
+- `DATA/MUSIC.DAT` and `CONFIG/SETUP.DAT` are member containers of the same
+  shape as the graphics containers.  `MUSIC.DAT` holds 9 members and `SETUP.DAT`
+  holds 14 members.
+  Evidence: `python3 tools/gfx_container.py info DATA/MUSIC.DAT` and
+  `CONFIG/SETUP.DAT`.
+- `MUSIC.DAT` holds the two `ADLIB-` banks `DRUM.BNK` (5404 bytes) and
+  `MELODIC.BNK` (5404 bytes) and the seven songs `MUSIC1.HMP` to `MUSIC7.HMP`
+  (74004 to 10386 bytes).  `SETUP.DAT` holds the same two banks, the setup
+  screen members, the six PCX images, and the sample `FX_TEST.RAW`.
+  Evidence: the two member lists.
+- The `ADLIB-` bank is 5404 bytes: the header `0x1e` bytes, the instrument
+  table at `+0x1e`, and the instrument data at `+0x61c`.  The header holds the
+  version 0.0, the signature at `+0x02`, the values `0x007f` at `+0x08` and
+  `+0x0a`, the instrument count 28 at `+0x0c`, and the data offset at `+0x10`.
   Evidence: the file bytes.
-- The instrument data starts at `+0x61c` and holds the OPL register values, for
-  example `0f 00 00 00 3f 00 00 01`.  `SETUP.DAT` holds the same 28
-  instruments as `MUSIC.DAT`, so it is the setup copy of the bank.
+- The instrument table holds 28 records of the 10-byte name and the 2-byte index.
+  The `MELODIC.BNK` names are `PIANO1`, `PIANO2`, and `CLEANGT`; the
+  `DRUM.BNK` names are `$clap`, `$scratch`, `$rimshot`, `=woodblok`, and
+  `glock`.  The instrument data holds the OPL register values.
   Evidence: the file bytes.
-- The music bank load `FUN_0002f9e0` copies the bank name, opens the file
-  through the member open `FUN_0004c08d`, reads the size, and allocates the bank.
-  `engine_init` calls it at `0x1283f` and then starts the music at `0x1284d`.
-  `FUN_0002f9b0`, called from the Watcom startup at `0x10013`, clears the
-  music bank struct.
+- The song format starts with the signature `HMIMIDIP` and the version text
+  `013195`, and the song data follows.  The songs are the HMI Music Production
+  files.
+  Evidence: the `MUSIC1.HMP` head.
+- The music bank load `FUN_0002f9e0` builds the path `%s\DATA\MUSIC.DAT`,
+  copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through
+  the member open `FUN_0004c08d`.  `engine_init` calls it at `0x1283f` and then
+  starts the music at `0x1284d`.  `FUN_0002f9b0`, called from the Watcom
+  startup at `0x10013`, clears the music bank struct.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f9e0` and `0x127a0`.
-- The engine strings name the HMI files and resources: `melodic.bnk`, `drum.bnk`,
-  `MELODIC_BANK`, `DRUM_BANK`, `%s.Hbnk`, `%s.HMP`, `MIDI_MUSIC`,
-  `SPFXBASE.GEN`, `SPFXFULL.GEN`, and `HMI*.386 File Open Failure`.
+- The engine strings name the members and the resources: `melodic.bnk`,
+  `drum.bnk`, `MELODIC_BANK`, `DRUM_BANK`, `%s.Hbnk`, `%s.HMP`,
+  `MIDI_MUSIC`, `SPFXBASE.GEN`, `SPFXFULL.GEN`, and
+  `HMI*.386 File Open Failure`.
   Evidence: the string dump of `STARTH.EXE` at the object 3 offsets `0x14e0` to
   `0x1590`.

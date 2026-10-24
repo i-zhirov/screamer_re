@@ -341,7 +341,7 @@ loads the sample bank.
 | --- | --- | --- | --- |
 | `0x1f2e0` | `sound_bank_load` | builds `%s\data\sound.dat`, walks the 36-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a missing member calls the exit | derived |
 | `0x2f9b0` | `music_bank_reset` | clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct | derived |
-| `0x2f9e0` | `music_bank_load` | copies the bank name, opens the file through the member open `0x4c08d`, reads the size, and allocates the bank | derived |
+| `0x2f9e0` | `music_bank_load` | builds `%s\DATA\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d` | derived |
 | `0x2ffc4` | `music_start` | starts the music from the bank | derived |
 
 The callers: the Watcom startup calls `music_bank_reset` at `0x10013`, so the
