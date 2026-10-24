@@ -4098,3 +4098,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   writes at `0x388` and `0x389`, which verifies the rebuilt sequence against
   the original driver.
   Evidence: the decode in the driver section.
+
+## The rebuilt driver build and the run
+
+- The no-gui run of the C run-time driver hangs in the BIOS.  The CPU log over
+  400000 instructions holds no `out dx,al` to the ports `0x388` and `0x389`, and
+  the EIP at the stop is `CS=824 EIP=147`, the BIOS.  The DOSBox-X log names
+  `ERROR BIOS:INT15:Unknown call ax=BFDE`, so the OpenWatcom run-time hangs in
+  the BIOS `INT 15h` call before the program `main` runs.
+  Evidence: the run log and `work/rebuild/LOGCPU.TXT`.
+- The run-time free driver compiles.  `wcc386 -bt=dos -s driver.c` reports
+  "64 lines, included 49, 0 warnings, 0 errors" and writes `DRIVER.OBJ`
+  (886 bytes).  The driver holds the first `DRUM.BNK` record and writes the
+  eight register/value pairs with the inline `out dx, al` instructions, so it needs
+  no C run-time.
+  Evidence: `work/rebuild/build.txt` and the driver source.
+- The link does not finish yet.  The `wlink system dos option quiet option
+  nodefaultlibs ... option start=_main` run writes no `DRIVER.EXE`, and the
+  error goes to the screen rather than the redirected file.
+  Evidence: the build output.
+- The next step captures the link error with the debugger `show` step, and then
+  runs the driver with the CPU log to read the `out dx, al` lines at the ports
+  `0x388` and `0x389`.
+  Evidence: the two runs.
