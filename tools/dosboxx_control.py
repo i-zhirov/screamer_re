@@ -30,6 +30,7 @@ Session script commands, one per line:
     expect <text>                  fail when the last response lacks the text
     note <text>                    print a note
     read <register> ...            read registers through the debugger EV command
+    screen                         dump the DOS text screen at B800:0
     show                          print the captured emulator output
     sleep <seconds>                wait
     stop                          end the script
@@ -222,10 +223,12 @@ class ScriptRunner:
         session: ControlSession,
         child: PtyProcess | None = None,
         timeout: float = 60.0,
+        workdir: Path | None = None,
     ) -> None:
         self.session = session
         self.child = child
         self.timeout = timeout
+        self.workdir = workdir
         self.failures = 0
         self.last_response: Response | None = None
         self.stopped = False
@@ -300,6 +303,30 @@ class ScriptRunner:
             self._fail(step, f"expected {len(names)} values, got {len(values)}")
             return False
         print("read " + " ".join(f"{name}={value}" for name, value in zip(names, values)))
+        return True
+
+    def _step_screen(self, step: ScriptStep) -> bool:
+        if self.child is None or self.workdir is None:
+            self._fail(step, "screen needs --launch and --cwd")
+            return False
+        response = self.session.request(
+            "EXEC", "MEMDUMPBIN B800:0 FA0 DOSSCR.BIN", timeout=self.timeout
+        )
+        if not response.ok:
+            self._fail(step, "the screen dump failed")
+            return False
+        path = self.workdir / "DOSSCR.BIN"
+        if not path.exists():
+            self._fail(step, f"the screen dump is missing at {path}")
+            return False
+        data = path.read_bytes()
+        print("--- dos screen ---")
+        for row in range(25):
+            chars = data[row * 160:(row + 1) * 160:2]
+            text = "".join(chr(c) if 32 <= c < 127 else " " for c in chars).rstrip()
+            if text:
+                print(text)
+        print("--- end ---")
         return True
 
     def _step_show(self, step: ScriptStep) -> bool:
@@ -419,7 +446,7 @@ def run_script(args: argparse.Namespace) -> int:
         with ControlSession(args.port, timeout=args.timeout) as session:
             if child is not None:
                 time.sleep(2.0)
-            runner = ScriptRunner(session, child, args.timeout)
+            runner = ScriptRunner(session, child, args.timeout, args.cwd)
             failures = runner.run(steps)
             print(f"{len(steps)} steps, {failures} failures")
             return 1 if failures else 0
