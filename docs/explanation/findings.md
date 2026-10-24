@@ -4209,3 +4209,18 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   builds the driver with `wcc386 -bt=dos` and `wlink` from the container, where the
   error and the symbol list land in stdout.
   Evidence: the installer usage line and the two faults.
+
+## The container extraction result
+
+- The installer ignores `-dWATCOM=/w/ow`.  It writes the tree to `/usr/bin/watcom`
+  inside the container, and the tree holds `binl`, `binl64`, `binw`, `eddat`,
+  `lh`, `lib386`, `samples`, and `src`.
+  Evidence: the container run and the tree list.
+- The `binl64` directory is empty after the run, so the Linux-x64 toolchain
+  binaries do not land.  The installer dies with a segmentation fault at the
+  "Copying Files" step, and the copy of the tree into the mounted directory is
+  therefore truncated at the same step.
+  Evidence: the container run and the `binl64` list.
+- The container path therefore stays open, and the next step is the OpenWatcom
+  source build in the container or a fix for the installer copy fault.
+  Evidence: the two results.
