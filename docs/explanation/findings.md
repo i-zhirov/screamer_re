@@ -3992,3 +3992,30 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The songs are `MUSIC1.HMP` to `MUSIC7.HMP` (74004 to 10386 bytes) and the
   setup song `MIDITEST.HMP`.
   Evidence: the member lists.
+
+## The instrument field order needs the HMI driver
+
+- The game code object holds no OPL port write.  The scan finds no `mov edx,
+  0x388` or `mov edx, 0x389` in the code object.  The `out dx, al`
+  instructions in the sound library region write the VGA DAC ports `0x3C8` and
+  `0x3C9`, for example the bytes `66 ba c8 03 2a c0 ee` at `0x81a2b`.
+  Evidence: the port scan over the code object.
+- The three HMI drivers are `data` files.  They hold no MZ header and no OPL
+  port immediate.  `HMIMDRV.386` holds the embedded driver programs
+  `fmmidi.com` (the OPL2 driver) and `fmmidi3.com` (the OPL3 driver) at the
+  offsets `0x2c` and `0x31e8`, and the banners "HMI MIDI Driver For OPL2"
+  at `0x64` and "HMI MIDI Driver For OPL3" at `0x3220`.
+  Evidence: the `file` output and the driver banner scan.
+- The instrument record's non-zero values sit at `+0x06`, `+0x0A`, `+0x0D`,
+  `+0x11`, `+0x13`, `+0x17`, `+0x1A`, and `+0x1B` in the first
+  `DRUM.BNK` record, and the values are `0F`, `3F`, `01`, `3E`, `0F`, `3F`,
+  `01`, `01`.  The values `3F` and `3E` are plausible total levels, and
+  `0F` and `01` are plausible rate values.
+  Evidence: the first record bytes at `+0x61C`.
+- The field order therefore stays open.  The game code does not write the OPL
+  registers, so the comparison needs the driver's register write order, and the
+  driver code is not decoded.
+  Evidence: the two negative results.
+- The next step is the embedded `fmmidi.com` program in `HMIMDRV.386` at the
+  offset `0x2c`, which holds the register writes.
+  Evidence: the driver banner scan.
