@@ -144,10 +144,15 @@ and the indices run from 1 to 28.  The `MELODIC.BNK` names are `PIANO1`,
 
 The instrument data starts at `+0x61C` and holds 3840 bytes.  The data is 128
 records of 30 bytes, and the record period is confirmed in both banks.  A record
-holds the OPL register values, for example `0F`, `3F`, `01`, and `3E`.  The
-`DRUM.BNK` records repeat the default voice, and the `MELODIC.BNK` records
-hold the different voices.
-Evidence: the record period check over the data area and the file bytes.
+holds the OPL register values, and the record holds them in the driver write
+order.  The driver writes the register pair register then data, and the first
+write is the register `0x20`.  The record fields line up with the registers:
+`+0x06` holds the register `0x20` value, `+0x0A` the register `0x40` value,
+`+0x0D` the register `0x60` value, and `+0x11` the register `0x80` value.
+The `DRUM.BNK` records repeat the default voice, and the `MELODIC.BNK`
+records hold the different voices.
+Evidence: the record period check over the data area, the driver dump at
+`0x14157` in `HMIMDRV.386`, and the file bytes.
 
 ### The songs
 
