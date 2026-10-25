@@ -4399,3 +4399,24 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   (`0150:000100a9` or the module linear pair) and reads the registers at the stop,
   which confirms the eight pairs directly.
   Evidence: the object disassembly.
+
+## The driver output and the const data
+
+- The run `driver.exe > out.txt` captures the driver output in a file, so the print
+  path needs no screen capture.  The file holds the eight output lines, each with the
+  letter `W` and then NUL bytes in place of the two hex pairs, and the DOS prompt
+  returns after them.
+  Evidence: `work/rebuild/out.txt`.
+- The `W` is the string constant from the `print` call, so the code runs and the
+  loop runs eight times.  The hex pairs are read from the `hex` table, so the NUL
+  bytes name the `hex` table as zero at run time.
+  Evidence: the output file and the driver source.
+- The `hex` table is a `const` array in the `CONST` segment, and the `record`
+  array is a `const` array too, so the two read as zero while the code and the
+  string constants work.  The fault is therefore in the segment load for the `const`
+  data, not in the write form.
+  Evidence: the `wdis` section list and the output file.
+- The next step reads the `CONST` segment placement in the LE image with
+  `python3 tools/le.py info` and compares the object offsets, then sets the record
+  values from a non-const table or from the code immediates.
+  Evidence: the output file and the object sections.
