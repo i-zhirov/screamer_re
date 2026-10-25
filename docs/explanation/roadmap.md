@@ -88,4 +88,5 @@ current host.
    joins 87 members with the `SOUND_FX` lists and the loader flags, and the
    sample rate is 11025; the songs decode with the chunk table and the MIDI
    events, and the tool writes standard MIDI files).
-7. Set up the OpenWatcom V2 build harness under `work/`.
+7. Set up the OpenWatcom V2 build harness (done: the harness lives in
+   `tools/rebuild` and links the test driver without the C run-time).
