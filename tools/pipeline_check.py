@@ -45,6 +45,7 @@ TOOLS = (
     "gfx_container.py",
     "export_assets.py",
     "sound_bank.py",
+    "member_probe.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -180,6 +181,38 @@ def verify_reference_digests(checks: Checks, game_dir: Path) -> None:
         f"outside the reference: {', '.join(written[:3])}" if written else "none",
     )
 
+
+
+def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float) -> None:
+    """Hook the member open and check the first member name."""
+    from member_probe import run_probe
+
+    result = run(
+        [
+            sys.executable,
+            "tools/member_probe.py",
+            "--game-dir",
+            str(work_dir / "game"),
+            "--work-dir",
+            str(work_dir),
+            "--port",
+            str(port),
+            "--timeout",
+            str(timeout),
+        ],
+        timeout=timeout + 30,
+    )
+    checks.check("stage 10: the member probe runs", result.returncode == 0, result.stderr.strip())
+    checks.check(
+        "stage 10: the member probe observes the first member",
+        "name='MENU.dtr'" in result.stdout,
+        "MENU.dtr",
+    )
+    checks.check(
+        "stage 10: the member probe reports the limit",
+        "the game left the debugger after the member open" in result.stdout,
+        "one member open per run",
+    )
 
 
 def check_sound(checks: Checks, game_dir: Path, work_dir: Path) -> None:
@@ -498,6 +531,7 @@ def main() -> int:
         check_session_script(checks, work_root, args.port, args.timeout)
         check_cross(checks, parser_result, runtime, Path(runtime.get("log", "")))
         check_radare2(checks, game_dir, args.exe, args.timeout)
+        check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
 
     print()

@@ -13,6 +13,7 @@
 | `tools/gfx_container.py` | list and extract the members of a graphics container |
 | `tools/export_assets.py` | export the graphics assets as PNG files |
 | `tools/sound_bank.py` | decode the sound formats: the banks, the samples, and the songs |
+| `tools/member_probe.py` | hook the container member open and report the member names |
 | `tools/ghidra/install_loader.sh` | install the LX/LE loader into Ghidra |
 | `tools/ghidra/decompile.sh` | decompile functions by address with Ghidra |
 | `tools/ghidra/DecompileFunctions.java` | the Ghidra headless decompile script |
@@ -196,6 +197,31 @@ chunks.  Every chunk prints the chunk number, the track number, the size, the ev
 count, the tick count, and the event mix.  The `--out` option writes one standard
 MIDI file per chunk, and the delta converts from the LSB-first form of the game to
 the standard MSB-first form.
+
+### `tools/member_probe.py`
+
+The tool hooks the container member open at run time and reports the member names.
+The protected-mode and linear breakpoints watch a memory change and the `BP`
+breakpoint is a real-mode breakpoint, so none of them fire at the protected-mode
+member open.  The tool patches a copy of the game executable with the INT 3 opcode
+`0xCC` at the file offset of the member open `FUN_0004C08D` and of its call site
+in the sample loader, sets the `BPINT 3` breakpoint, runs the game, and reads the
+member name from the stack at every stop.
+
+```sh
+python3 tools/member_probe.py --limit 40
+```
+
+The first observed member open is `MENU.dtr`, so the menu space init loads the
+menu data first.  The module base varies between runs, so the hook uses the fixed
+file offset and not the module address.
+
+Limit: the debugger intercepts the INT 3 opcode before the guest exception handler
+runs, so the game leaves the debugger after the first member open while the
+breakpoint stays armed.  The game continues when the breakpoint is deleted before
+the continue, but then the later member opens are not observed.  The tool therefore
+observes one member open per run.  The tool restores the game copy at the end of
+every run.
 
 ## Debugger limits and the alternatives
 
@@ -381,7 +407,7 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 20 seconds and reports 36 checks, or 40 checks when radare2 is
+A run takes about 2 minutes and reports 39 checks, or 43 checks when radare2 is
 on PATH.  Use `--skip-runtime` to run the static stages only.
 
 The check runs in three places:

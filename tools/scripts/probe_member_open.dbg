@@ -1,0 +1,29 @@
+# Hook the member open with a software breakpoint.
+#
+# The member open FUN_0004C08D runs at the module 0x4C08D, so the run-time
+# address is the module base plus 0x4C08D.  The DOSBox-X debugger has no
+# protected-mode code breakpoint: BP is a real-mode breakpoint, and BPPM and
+# BPLM watch a memory change.  This probe therefore patches the game copy at
+# work/entry/run/game/STARTH.EXE with the INT 3 opcode 0xCC at the file offset
+# 0x5688D (the member open) and sets the BPINT 3 breakpoint.  The member name
+# sits in EBX at the stop.
+#
+# Run it with:
+#   python3 tools/dosboxx_control.py script \
+#     --file tools/scripts/probe_member_open.dbg \
+#     --port 9876 --cwd work/entry/run --timeout 120 \
+#     --launch "dosbox-x -nogui -break-start -conf ../probe.conf -conf game/dosboxScreamer_single.conf"
+break
+clear
+exec BPINT 3
+exec BPLIST
+exec RUN
+sleep 8
+break
+read EAX EBX EIP
+exec MEMDUMPBIN 0150:2F4000 2000 MEMBER.BIN
+exec BPLIST
+show
+screen
+exec BPDEL *
+exec RUN

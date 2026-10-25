@@ -100,7 +100,7 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 ## Checks
 
-The full check runs every stage and reports 36 checks.  A pre-push hook runs
+The full check runs every stage and reports 39 checks.  A pre-push hook runs
 the syntax gate and the full check before every push.  Enable the hook once per
 clone:
 
