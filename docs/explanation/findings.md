@@ -4537,3 +4537,50 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   reader parses all 69 files of the eight songs without a defect.
   Evidence: `python3 tools/sound_bank.py song work/MUSIC1.HMP --out work/midi`
   and the `file` output.
+
+## The five unlisted sample members stay unloaded
+
+- The `SOUND.DAT` directory holds 92 members, and the `SOUND_FX` lists name 87
+  of them.  Five members are in no list: `CRY.RAW` 8127, `TOUR0.RAW` 22557,
+  `TOUR1.RAW` 33281, `TOUR2.RAW` 82689, and `TRAIN.RAW` 23040.
+  Evidence: `python3 tools/sound_bank.py samples DATA/SOUND.DAT --lists
+  DATA/GEN.DAT DATA/MAP1I.DAT ... DATA/MAP6I.DAT`.
+- The only member-name builder in the game is the sample loader at `0x1f2e0`.  The
+  loader builds the member name `<name>.RAW` and opens the member through the member
+  open at `0x4c08d`.  The format string `%s.RAW` has one reference in the code,
+  at `0x1f445`, inside that loader.
+  Evidence: the relocation listing and
+  `python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
+- The sample loader walks the 36-byte-record table at the module `0x15224`.  The list
+  loader at `0x15460` fills the table.  The `SOUND_FX` loads are the only callers
+  that pass the table: the config load at `0x15a1b` loads `SFXSBASE` and the level
+  list, the loader helper at `0x24693` and `0x246ed` loads `SPFXBASE` and `SPFXFULL`,
+  and the menu space init at `0x29efd` loads `MENU`.  The level start calls the
+  config load through the race session start at `0x12996`.
+  Evidence: the call-site scan and the disassembly of `0x15460`, `0x15984`,
+  `0x245ff`, `0x29e80`, and `0x128e0`.
+- The names of the five members are in no shipped file.  A case-insensitive search
+  over the whole game directory finds `CRY`, `TOUR`, and `TRAIN` only in the
+  `SOUND.DAT` member data (coincidence) and in the `MELODIC.BNK` instrument
+  `CRYSTAL`.  The executables, the drivers, the data containers, the `TABS`, the CD
+  data track, and the manual hold no sample name.
+  Evidence: the case-insensitive search over the game directory.
+- The setup program loads one test sample, `FX_TEST.RAW` of `CONFIG\SETUP.DAT`, and
+  no other sample.
+  Evidence: `python3 tools/le.py disasm SETUP.EXE 0x14c25` and the setup strings.
+- The run-time table at the level start holds the 14 records of the config load: the
+  12 `SFXSBASE` records (`skidfx`, `crash`, `oppmotor`, `automoto`, `wallh1`,
+  `hit_0`, `click`, `autogall`, `dentone`, `door`, `taz3`, `taz4`) and the two
+  `MAP1` records (`truck`, `airplane`).  The five members are not in the table.
+  Evidence: the memory dump at the linear `0x2c3224` through the DOSBox-X debugger.
+- The game therefore does not load the five members through the sample loader, and no
+  other loader names them.  The five members stay shipped but unused.  The `MAP5`
+  list names `sea` and the `MAP6` list names `heli`, so the level ambient lists
+  hold the later sounds; `TRAIN` and the `CRY` and `TOUR` names look like cut
+  content.
+  Evidence: the list texts, the call-site scan, and the run-time table dump.
+- Limit: the protected-mode and the linear breakpoints slow the emulation enough
+  that the member open at `0x4c08d` does not fire in a 150-second window, so the
+  run-time open of the five members stays unobserved.  The static evidence above
+  does not depend on that observation.
+  Evidence: `tools/scripts/probe_sample_table.dbg` and the run output.

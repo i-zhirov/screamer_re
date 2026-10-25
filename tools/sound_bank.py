@@ -21,7 +21,9 @@ The tool decodes the three sound formats of the shipped artifacts:
   non-zero loop length, the flag `0x4000` from a non-zero loop, the flag `0x400`
   from the bit 4 of the pitch high byte, and the flag `0x200` from the bit 4 of
   the pan high byte.  A member holds 8-bit unsigned samples at the rate 11025,
-  which the HMI digital driver init at `0x1f1fb` passes.
+  which the HMI digital driver init at `0x1f1fb` passes.  The lists name 87 of the
+  92 members; the five members `CRY`, `TOUR0`, `TOUR1`, `TOUR2`, and `TRAIN`
+  are in no list, so the sample loader never opens them.
 
 - The songs `MUSIC1.HMP` to `MUSIC7.HMP` and `MIDITEST.HMP` hold a header and
   the chunks.  The header holds the signature `HMIMIDIP`, the version `013195`,
