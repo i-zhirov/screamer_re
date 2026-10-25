@@ -224,16 +224,40 @@ The files:
 | `cstart.c` | the C start stub |
 | `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
 | `run.sh` | the headless DOSBox-X run; it writes `work/rebuild/out.txt` |
+| `free.c` | the rebuilt `free` module, the smallest named module in the program map |
+| `free_main.c` | the `free` test harness: the `main` markers and the stand-in `nfree` |
+| `build_free.sh` | the container build; it writes `work/rebuild/free.exe` and `work/rebuild/free.map` |
+| `run_free.sh` | the headless DOSBox-X run; it writes `work/rebuild/free_out.txt` |
+| `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
 sh tools/rebuild/build.sh
 sh tools/rebuild/run.sh
+sh tools/rebuild/build_free.sh
+sh tools/rebuild/run_free.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
 `E0 0F`, `23 3F`, `43 01`, and `C0 01`, which match the original driver
 sequence at `0x14157`.
+
+The module rebuild:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300ec \
+    --rebuilt work/rebuild/free.exe \
+    --rebuilt-map work/rebuild/free.map \
+    --rebuilt-symbol free_
+```
+
+The diff reads the original address from the command line and the rebuilt address
+from the linker map.  It exits with code 0 when the instruction sequences match.
+The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
+`85 c0`, `0f 85 14 1f 0a 00`, and `c3`, so the instruction sequences match and
+the tail-jump displacement differs.
 
 ## Host tools
 

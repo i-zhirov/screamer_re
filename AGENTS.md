@@ -89,14 +89,21 @@ screamer_re/
 
 ## Build And Test Commands
 
-- **Build**: N/A.  The tools are plain Python scripts.  Install no build
-  step.
+- **Build**: N/A for the tools.  The tools are plain Python scripts.  The
+  module rebuild uses the OpenWatcom V2 container harness and needs Docker:
+
+```sh
+sh tools/rebuild/build_free.sh
+sh tools/rebuild/run_free.sh
+```
+
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 ```
 
 The full check runs every stage and needs DOSBox-X.  It takes about 15
@@ -129,13 +136,18 @@ open ~/Documents/Screamer.app
   Use the following commands:
     - `python3 -m py_compile tools/le.py tools/inventory.py
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
-      tools/gfx_container.py tools/pipeline_check.py` to check the syntax
+      tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py
+      tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
     - `python3 tools/inventory.py
       ~/Documents/Screamer.app/Contents/Resources/game` to check the inventory
       tool
+    - `python3 tools/rebuild/diff_module.py --original
+      ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+      --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+      work/rebuild/free.map --rebuilt-symbol free_` to check the module diff
     - `python3 tools/pipeline_check.py --game-dir
       ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
 

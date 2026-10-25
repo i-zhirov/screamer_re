@@ -112,11 +112,17 @@ original Watcom symbol names.
 | `0x30050` | `memory_alloc` | allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8` | derived |
 | `0x3009b` | `printf` | passes the argument list and the output table `DAT_00102fd2` to the run-time print engine | inferred |
 | `0x300be` | `exit` | calls the run-time pair `PTR_FUN_00102f84` and `PTR_FUN_00102f88`; `main` calls it with the error code | inferred |
-| `0x300ec` | `free` | walks the heap block list `DAT_001031d0` and releases the block | inferred |
+| `0x300ec` | `free` | forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions | observed |
 
 `main` calls the run-time helpers because the Watcom run-time is linked into the
 same object.  The four run-time helpers sit at the end of the object, after the
 program code.
+
+The smallest functions in the object are six empty stubs of 5 bytes at `0x23ed0`,
+`0x24068`, `0x24070`, `0x24078`, `0x24090`, and `0x24098`.  Each holds the four
+instructions `push ebp`, `mov ebp,esp`, `pop ebp`, and `ret`, and each carries
+one call site from a mode dispatch at `0x20eca` or `0x20f98` that switches on the
+mode value at `0x1d260`.  The stubs carry no name.
 
 ## Race loop and frame update
 

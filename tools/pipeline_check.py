@@ -10,6 +10,9 @@ Stages:
 5. entry probe: run the game in DOSBox-X and report the run-time entry.
 6. debugger session: run a session script that breaks in and reads CS:EIP.
 7. cross-check: compare the file view with the run-time view.
+8. radare2 cross-check: compare the parser with radare2 when it is on PATH.
+9. rebuild: rebuild the smallest named module and diff it against the
+   original.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -44,6 +47,7 @@ TOOLS = (
     "entry_probe.py",
     "gfx_container.py",
     "export_assets.py",
+    "rebuild/diff_module.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -54,6 +58,10 @@ ENTRY_MODULE_LINEAR = 0x300F8
 ENTRY_FILE_OFFSET = 0x3A8F8
 ISO_PVD_OFFSET = 0x8000
 ISO_VOLUME_ID_OFFSET = 0x8028
+
+# The smallest named module in the program map: `free` at linear 0x300ec.
+FREE_MODULE_LINEAR = 0x300EC
+REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
 
 
 class Checks:
@@ -375,6 +383,52 @@ def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float)
     )
 
 
+def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
+    """Rebuild the smallest named module and diff it against the original.
+
+    The module is `free` at linear 0x300ec in STARTH.EXE, the smallest named
+    function in the program map.  The stage needs Docker for the OpenWatcom V2
+    container, so it skips when Docker is missing.
+    """
+    if shutil.which("docker") is None:
+        print("docker is not on PATH; the module rebuild is skipped")
+        return
+    result = run(["sh", "tools/rebuild/build_free.sh"], timeout=timeout)
+    checks.check(
+        "stage 9: the module rebuild links",
+        result.returncode == 0 and "free.exe" in result.stdout,
+        result.stderr.strip()[-80:],
+    )
+    if result.returncode != 0:
+        return
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/diff_module.py",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+            "--original-address",
+            f"{FREE_MODULE_LINEAR:#x}",
+            "--rebuilt",
+            str(REBUILD_DIR / "free.exe"),
+            "--rebuilt-map",
+            str(REBUILD_DIR / "free.map"),
+            "--rebuilt-symbol",
+            "free_",
+        ],
+        timeout=timeout,
+    )
+    detail = ""
+    lines = result.stdout.strip().splitlines()
+    if lines:
+        detail = lines[-1]
+    checks.check(
+        "stage 9: the rebuilt module matches the original",
+        result.returncode == 0 and "instruction sequences match" in result.stdout,
+        detail or result.stderr.strip()[-80:],
+    )
+
+
 def check_session_script(checks: Checks, work_root: Path, port: int, timeout: float) -> None:
     script = Path("tools/scripts/example_session.dbg")
     launch = (
@@ -436,6 +490,7 @@ def main() -> int:
         check_session_script(checks, work_root, args.port, args.timeout)
         check_cross(checks, parser_result, runtime, Path(runtime.get("log", "")))
         check_radare2(checks, game_dir, args.exe, args.timeout)
+    check_rebuild(checks, game_dir, args.timeout)
 
     print()
     print(f"{len(checks.results)} checks, {len(checks.failures)} failures")

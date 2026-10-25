@@ -4446,3 +4446,93 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `0x43` value `0x01`, and the register `0xC0` value `0x01`, each register first
   and the data second.
   Evidence: the output and the original decode.
+
+## The smallest module to rebuild
+
+- The program map lists `main` and its 13 callees, and the smallest is
+  `free` at linear `0x300ec` with three instructions and 9 bytes.  The bytes are
+  `85 c0` (`test eax,eax`), `0f 85 14 1f 0a 00` (`jne 0xd2008`), and `c3`
+  (`ret`), so the module forwards a non-null pointer to the run-time `free` at
+  `0xd2008` and returns at once for a null pointer.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300ec --count 3`.
+- Six smaller functions sit in the object at `0x23ed0`, `0x24068`, `0x24070`,
+  `0x24078`, `0x24090`, and `0x24098`.  Each holds 5 bytes and the four
+  instructions `push ebp`, `mov ebp,esp`, `pop ebp`, and `ret`, and each carries
+  one call site from the mode dispatch at `0x20eca` or `0x20f98`.  The bodies are
+  empty, so the six stubs are the smallest functions, but they are not a module to
+  rebuild.
+  Evidence: the object scan and the disassembly.
+- An empty C function does not generate the five bytes.  `void f(void) {}` compiles
+  to `c3` (`ret`), and `-od` compiles it to a 23-byte frame with five register
+  saves, so the original compiler differs from OpenWatcom V2 for an empty function.
+  The six stubs stay open.
+  Evidence: the container compiles and `wdis`.
+- The module to rebuild is `free`: it is the smallest named module, the source is
+  clear, and OpenWatcom V2 reproduces its code.
+  Evidence: the size compare, the container build, and the module diff.
+
+## The rebuilt `free` module
+
+- The module source holds the function and no other code:
+  `void free(void *p) { if (p) nfree(p); }`.  The callee carries the name `nfree`,
+  because the module and the run-time function share the name `free`.
+  Evidence: `tools/rebuild/free.c`.
+- OpenWatcom V2 compiles the source to the original instruction sequence:
+  `85 c0` (`test eax,eax`), `0f 85 <rel32>` (`jne nfree_`), and `c3` (`ret`),
+  9 bytes.  The Watcom register calling convention passes the first argument in
+  `eax`, so the C form reproduces the original three instructions.
+  Evidence: `wdis work/rebuild/free.obj` and the original decode.
+- The container build links the module with the harness stubs (`chk.asm`,
+  `stack.asm`, `cstart.c`) and the stand-in `nfree` from `free_main.c`.  It writes
+  `work/rebuild/free.exe` (1082 bytes) and the linker map
+  `work/rebuild/free.map`.
+  Evidence: `sh tools/rebuild/build_free.sh` and the map file.
+
+## The module diff and the run
+
+- The diff reads the original `free` at linear `0x300ec` in `STARTH.EXE` and the
+  rebuilt `free` at linear `0x10000` in `free.exe`, and the rebuilt module lands
+  first in the code object.  The byte compare holds 6 of 9 equal bytes, and the
+  three different bytes are the `rel32` displacement of the tail jump.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+  work/rebuild/free.map --rebuilt-symbol free_`.
+- The instruction compare holds 3 of 3 equal instructions, no opcode
+  differences, and one operand difference: `jne 0xd2008` against `jne 0x10034`.
+  The operand is the link-time displacement of the tail jump, so the rebuilt module
+  holds the original instruction sequence.  The jump goes forward in both images.
+  Evidence: the diff output and the map file.
+- The rebuilt module behaves like the original.  The headless run writes the four
+  markers `NULL`, `DONE`, `FREE`, and `AFTR` on their own lines: the marker
+  `NULL` before the null call, the marker `DONE` after it, the marker `FREE` from
+  the stand-in `nfree`, and the marker `AFTR` after the non-null call.  The module
+  therefore does nothing for a null pointer and forwards a non-null pointer, the same
+  behavior as the original three instructions.
+  Evidence: `sh tools/rebuild/run_free.sh` and `work/rebuild/free_out.txt`.
+- The pipeline check holds the rebuild.  The check runs the build and the diff as
+  stage 9 and reports 17 checks and 0 failures with `--skip-runtime`.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --skip-runtime`.
+
+## The harness print helper and the string literal
+
+- The `print` helper of the harness writes a long block of code bytes for a string
+  literal.  The driver output holds 8267 code-like bytes before the `W` lines, and the
+  first driver print is the literal `REBUILT$` at `DGROUP` offset 0.  The rebuilt
+  module showed the same fault on its first run: the four literal prints wrote 33068
+  code-like bytes and no marker text.
+  Evidence: `work/rebuild/out.txt` and the first `free.exe` run.
+- The `print` helper writes a program-written buffer correctly.  The driver prints the
+  eight pairs through the `line` array, and the rebuilt module prints its markers
+  through the `text` array after the markers moved out of the literals.
+  Evidence: the two output files.
+- The pointer value is not the fault.  The driver literal print passes `9` for the
+  `DONE$` literal at `DGROUP` offset `9`, and the module literal prints pass `8`,
+  `0xf`, and `0x16` for the three markers at the same offsets, so each pointer holds
+  its literal.
+  Evidence: the `main` disassembly and the `DGROUP` dump.
+- The open question is the `CONST` content at run time.  The earlier finding that the
+  string constants work came from the `W` letter, and the `W` is `line[0]`, a byte the
+  program writes itself, so that finding covers the written bytes only.  The `hex` table
+  read as zero and the literals read as code-like bytes, so the loaded content of the
+  `CONST` segment is the suspect.
+  Evidence: the earlier section, the disassembly, and the output files.

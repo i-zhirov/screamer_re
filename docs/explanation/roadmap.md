@@ -48,9 +48,13 @@ current host.
 
 ### M3: Rebuild
 
-- Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2.
+- Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
+  progress: the smallest named module, `free` at `0x300ec`, is rebuilt with the
+  harness in `tools/rebuild`, and its code matches the original).
 - Rebuild the data pipeline that produces the shipped data files.
-- Compare the rebuild with the original: same files, same behavior.
+- Compare the rebuild with the original: same files, same behavior (in progress:
+  `tools/rebuild/diff_module.py` compares the rebuilt code with the original
+  code).
 
 ### M4: Modern platform
 
@@ -84,4 +88,7 @@ current host.
    with a loader; `MUSIC.DAT` is an archive of the two `ADLIB-` banks and the
    seven `MUSICn.HMP` songs, and the bank header, the instrument table, and the
    instrument data are mapped).
-7. Set up the OpenWatcom V2 build harness under `work/`.
+7. Set up the OpenWatcom V2 build harness under `work/` (done: the harness is
+   at `tools/rebuild`, and the first module rebuild and diff run).
+8. Rebuild the next modules from the program map in size order: `exit` at
+   `0x300be`, `printf` at `0x3009b`, and `engine_shutdown` at `0x128ac`.
