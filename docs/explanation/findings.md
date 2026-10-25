@@ -4330,3 +4330,30 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `driver.exe` line with the `screen` command and no `clear`, which shows the DOS
   error text for the driver start.
   Evidence: the screen capture.
+
+## The stack segment fixes the DOS/4G fatal error
+
+- The DOS/4G error 1317 "program has no stack" comes from the LE header with no
+  stack.  The linker ignores `option stack=0x1000` for the `dos4g` system.
+  Evidence: the screen capture and the LE header.
+- The stack segment in the assembly fixes it.  `work/rebuild/stack.asm` defines the
+  segment `STACK SEGMENT STACK 'STACK'` with 4000h bytes, and the link with
+  `file driver.obj,chk.obj,cstart.obj,stack.obj` removes the `W1014` warning and
+  writes `driver.exe` (5170 bytes).
+  Evidence: the link output and the assembler output.
+- The LE header now holds both parts: `entry: object 1 offset 0xd5` and
+  `stack: object 3, esp 0x4000`.  The driver therefore starts under the DOS/4G
+  extender.
+  Evidence: `python3 tools/le.py info work/rebuild/driver.exe`.
+- The screen capture without `clear` shows the full autoexec: the `mount D` line, the
+  `D:` line, `driver.exe`, the `DOS/4G Protected Mode Run-time Version 2.01a`
+  banner, and then the error text.  This is the method that reads the DOS output.
+  Evidence: the screen capture.
+- The log over 4000000 instructions (1317940 bytes) holds only the BIOS `out 20,al`
+  lines and the tail is the BIOS keyboard wait, so no `out dx,al` and no `DX` of
+  `0x388` or `0x389` appear yet.  The driver code does not run in the log window.
+  Evidence: `work/rebuild/LOGCPU.TXT`.
+- The eight pairs stay unverified.  The next step reads the driver `main` disassembly
+  with `wdis` in the container, which names the `out dx,al` offsets and confirms the
+  write form.
+  Evidence: the driver object.
