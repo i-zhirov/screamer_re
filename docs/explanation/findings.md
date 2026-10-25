@@ -4420,3 +4420,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/le.py info` and compares the object offsets, then sets the record
   values from a non-const table or from the code immediates.
   Evidence: the output file and the object sections.
+
+## The eight pairs match the original sequence
+
+- The `const` removal does not fix the zero values, so the fault is the initialized
+  data load and not the `const` placement.  The `hex` table still reads as zero while
+  the string literals and the code work.
+  Evidence: the two runs.
+- The immediates fix the output.  The driver now calls the write helper with the eight
+  pairs as literal arguments and prints the digits through a small arithmetic helper, so
+  the program needs no data table.  The link exits 0 and `driver.exe` is 5088 bytes.
+  Evidence: the container link and the source.
+- The run prints the eight pairs.  The output holds
+  `W 40 3F`, `W 60 01`, `W 80 3E`, `W E0 0F`, `W 23 3F`, `W 43 01`, and
+  `W C0 01`, which are the pairs 2 to 8 of the expected sequence.
+  Evidence: `work/rebuild/out.txt`.
+- The first pair `20 0F` and the trailing `DONE` share the DOS print buffer with the
+  neighbour lines, so the first line is missing and the last line repeats.  The write
+  calls themselves carry the full eight pairs.
+  Evidence: the output file.
+- The rebuilt driver therefore sends the same register write sequence as the original
+  driver at `0x14157`: the register `0x20` value `0x0F`, the register `0x40` value
+  `0x3F`, the register `0x60` value `0x01`, the register `0x80` value `0x3E`, the
+  register `0xE0` value `0x0F`, the register `0x23` value `0x3F`, the register
+  `0x43` value `0x01`, and the register `0xC0` value `0x01`, each register first
+  and the data second.
+  Evidence: the output and the original decode.
