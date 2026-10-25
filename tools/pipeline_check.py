@@ -84,6 +84,12 @@ REBUILT_MODULES = (
         "printf.map",
         ((0x3009B, "printf_", 0),),
     ),
+    (
+        "memcpy",
+        "memmod.exe",
+        "memcpy.map",
+        ((0x8C150, "memcpy_", 0),),
+    ),
 )
 REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
 

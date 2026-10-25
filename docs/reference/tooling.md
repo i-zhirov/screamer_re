@@ -240,6 +240,10 @@ The files:
 | `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
 | `build_shutdown.sh` | the container build; it writes `work/rebuild/shutmod.exe` and `work/rebuild/shutdown.map` |
 | `run_shutdown.sh` | the headless DOSBox-X run; it writes `work/rebuild/shut_out.txt` |
+| `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
+| `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
+| `build_memcpy.sh` | the container build; it writes `work/rebuild/memmod.exe` and `work/rebuild/memcpy.map` |
+| `run_memcpy.sh` | the headless DOSBox-X run; it writes `work/rebuild/mem_out.txt` |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
@@ -253,6 +257,8 @@ sh tools/rebuild/build_printf.sh
 sh tools/rebuild/run_printf.sh
 sh tools/rebuild/build_shutdown.sh
 sh tools/rebuild/run_shutdown.sh
+sh tools/rebuild/build_memcpy.sh
+sh tools/rebuild/run_memcpy.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.

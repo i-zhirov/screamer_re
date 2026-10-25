@@ -102,5 +102,5 @@ current host.
 10. Rebuild `engine_shutdown` at `0x128ac` with `-of+` (done: the frame and the
     eight calls match, and the rebuild holds one extra `mov esp,ebp` restore that no
     option removes, so the module stays open as a byte-level match).
-11. Rebuild the self-contained `memcpy` at `0x8c150`, which carries no link-time
-    address and can match byte for byte.
+11. Rebuild the self-contained `memcpy` at `0x8c150` (done: the module matches the
+    original byte for byte, the first exact match; the behavior run needs more work).

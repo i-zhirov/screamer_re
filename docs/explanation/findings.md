@@ -4733,3 +4733,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The diff tool now names the case.  When the instruction counts differ and one sequence holds the other plus one
   instruction, the tool reports the extra instruction instead of only the counts.
   Evidence: `tools/rebuild/diff_module.py` and the five module diffs.
+
+## The memcpy module matches byte for byte
+
+- `memcpy` at `0x8c150` holds 14 bytes and 8 instructions: `pushad`, the register moves, `shr ecx,2`,
+  `rep movsd`, `popad`, and `ret`.  The function carries no call and no data reference, so its code is
+  position-independent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8c150 --count 8`.
+- The module is assembly, because the original routine is assembly too.  The Watcom assembler takes the Intel names
+  `pushad` and `popad`: `pushal` and `popal` fail with `E032: Syntax error`.
+  Evidence: the two container compiles and `wdis work/rebuild/memcpy.obj`.
+- The rebuilt module matches the original byte for byte.  The diff reports 14 of 14 bytes equal, 0 different, 8 of 8
+  instructions equal, no opcode differences, and no operand differences, and the verdict is `the modules are
+  byte-identical`.  This is the first module with an exact match.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x8c150
+  --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_`.
+- The byte compare also settles the behavior: two identical instruction sequences carry the same behavior, so the module
+  needs no register-level argument beyond the code match.
+  Evidence: the byte-identical diff.
+- The behavior run prints `N`, and the copy does not arrive.  The rebuilt `main` fills the source buffer at the `DGROUP`
+  offset `0x10`, clears the target at `0x8`, calls the module with `eax=8`, `edx=0x10`, and `ebx=8`, and then compares
+  the two buffers byte by byte.  The disassembly of the rebuilt `main` shows the correct order and the correct addresses, so
+  the run result contradicts the code, and the harness needs more work.  The module stays verified by the byte compare.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/le.py disasm work/rebuild/memmod.exe 0x10029 --count 40`.

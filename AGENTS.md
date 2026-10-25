@@ -101,6 +101,8 @@ sh tools/rebuild/build_printf.sh
 sh tools/rebuild/run_printf.sh
 sh tools/rebuild/build_shutdown.sh
 sh tools/rebuild/run_shutdown.sh
+sh tools/rebuild/build_memcpy.sh
+sh tools/rebuild/run_memcpy.sh
 ```
 
 - **Test**: run the syntax gate and the tool checks:
@@ -113,10 +115,11 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x3009b --rebuilt work/rebuild/prtfmod.exe --rebuilt-map work/rebuild/printf.map --rebuilt-symbol printf_
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8c150 --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_
 ```
 
 The full check runs every stage and needs DOSBox-X.  It takes about 15
-seconds and reports 33 checks:
+seconds and reports 35 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
