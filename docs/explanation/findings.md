@@ -4615,3 +4615,22 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The linker map marks a symbol that only the module references with a trailing `+`, for example
   `0001:00000000+ exit_flush_`.  The diff tool accepts the mark.
   Evidence: `work/rebuild/exit.map` and the diff run.
+
+## The frame of the simple game functions
+
+- `engine_shutdown` at `0x128ac` is the next named module in the program map: 11 instructions
+  with an EBP frame, `push ebp`, `mov ebp,esp`, eight calls, `pop ebp`, and `ret`.  The frame
+  holds no local variable.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x128ac --count 11`.
+- OpenWatcom V2 does not generate the frame.  The same source with eight calls compiles to 47
+  bytes without a frame, and the last call becomes `jmp f8_`, because the function returns
+  nothing and the call is last.  The original holds `call 0x25f14`, `pop ebp`, and `ret`.
+  Evidence: the container compile and `wdis work/rebuild/probe/shutdown_probe.obj`.
+- The two differences repeat the earlier empty-stub result: the original compiler creates an EBP
+  frame for a function without a local variable, and OpenWatcom V2 does not.  The frame question
+  therefore covers every simple game function, not only the six stubs.
+  Evidence: the empty-stub section and the probe.
+- `engine_shutdown` stays open until the frame question is answered.  The next named module with a
+  register-save prologue and a local slot is `printf` at `0x3009b`: `push ebx`, `push edx`,
+  `sub esp,4`, the print-engine call at `0xd429f`, and the matching epilogue, with no EBP frame.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x3009b --count 13`.

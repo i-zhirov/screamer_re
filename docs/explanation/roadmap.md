@@ -93,5 +93,8 @@ current host.
    at `tools/rebuild`, and the first module rebuild and diff run).
 8. Rebuild the next modules from the program map in size order (done: `free` at
    `0x300ec` and `exit` at `0x300be` with its helper at `0x300d6`).
-9. Rebuild the next modules: `engine_shutdown` at `0x128ac` and `printf` at
-   `0x3009b`.
+9. Answer the frame question of the simple game functions: the original compiler
+   creates an EBP frame for a function without a local variable, and OpenWatcom V2 does
+   not.  `engine_shutdown` at `0x128ac` waits on the answer.
+10. Rebuild the next modules: `printf` at `0x3009b` and the self-contained `memcpy`
+    at `0x8c150`.
