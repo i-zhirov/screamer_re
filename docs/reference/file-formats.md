@@ -134,36 +134,45 @@ the version 0.0 at `+0x00`, the signature at `+0x02`, the values `0x007F` at
 `+0x08` and `+0x0A`, the instrument count 28 at `+0x0C`, and the instrument
 data offset `0x61C` at `+0x10`.
 
-The instrument table starts at `+0x1E`.  A record holds the instrument name in
-10 bytes and the instrument index in a 2-byte field.  The table holds 28 records,
-and the indices run from 1 to 28.  The `MELODIC.BNK` names are `PIANO1`,
-`PIANO2`, and `CLEANGT`; the `DRUM.BNK` names are `$clap`, `$scratch`,
-`$rimshot`, `=woodblok`, and `glock`.
+The instrument table starts at `+0x1E`.  A record holds the key in the first
+byte, the instrument name in the next 9 bytes, and the instrument index in the
+last 2 bytes.  The table holds 127 records and a 10-byte remainder to the data
+offset.  The drum records use the key as the MIDI note, for example 0x24 `$clap`,
+0x3C `<Blank`, and 0x30 `0scratch`.  The melodic records use the key 0x01, for
+example `PIANO1`, `HONKTONK`, and `CLEANGT`.
 
 ### The instrument data
 
 The instrument data starts at `+0x61C` and holds 3840 bytes.  The data is 128
-records of 30 bytes, and the record period is confirmed in both banks.  A record
-holds the OPL register values, and the record holds them in the driver write
-order.  The driver writes the register pair register then data, and the first
-write is the register `0x20`.  The record fields line up with the registers:
-`+0x06` holds the register `0x20` value, `+0x0A` the register `0x40` value,
-`+0x0D` the register `0x60` value, and `+0x11` the register `0x80` value.
-The `DRUM.BNK` records repeat the default voice, and the `MELODIC.BNK`
-records hold the different voices.
+records of 30 bytes that reach the file end.  A record holds the OPL register
+values, and the record holds them in the driver write order.  The driver writes
+the register pair register then data, and the first write is the register `0x20`.
+The record fields line up with the registers: `+0x06` holds the register `0x20`
+value, `+0x0A` the register `0x40` value, `+0x0D` the register `0x60` value,
+`+0x11` the register `0x80` value, `+0x13` the register `0xE0` value, `+0x17`
+the register `0x23` value, `+0x1A` the register `0x43` value, and `+0x1B` the
+register `0xC0` value.  The `DRUM.BNK` records repeat the default voice, and the
+`MELODIC.BNK` records hold the different voices.
 Evidence: the record period check over the data area, the driver dump at
 `0x14157` in `HMIMDRV.386`, and the file bytes.
 
 ### The songs
 
-`MUSIC1.HMP` to `MUSIC7.HMP` are the songs.  A song holds a 16-byte header
-and the song data.  The header holds the signature `HMIMIDIP` in 8 bytes, the
-version text `013195` in 6 bytes, and two zero bytes.  The song data follows at
-`+0x10` and holds the track table and the events.  The event bytes use the high
-values `0x80` to `0x8F` and `0x90` to `0x9F`, which are the note off and the
-note on, and the values `0xD0` and `0x40`, which are the channel events.
-`MIDITEST.HMP` is the same format.
-Evidence: the `MUSIC1.HMP` head and the byte counts.
+`MUSIC1.HMP` to `MUSIC7.HMP` and `MIDITEST.HMP` are the songs.  A song holds
+a header of `0x388` bytes and the chunks.  The header holds the signature
+`HMIMIDIP` in 8 bytes, the version text `013195` in 6 bytes, the length at
+`+0x20`, which is the file size minus the track count, the track count at `+0x30`,
+the value `0x180` at `+0x34`, the division `0x78` at `+0x38`, the duration in
+seconds at `+0x3C`, and the instrument table of 175 records at `+0x40`.
+
+The chunks start at `+0x388`.  A chunk holds the chunk number, the chunk length,
+and the track number in 12 bytes, and then the MIDI data.  The chunk lengths are
+contiguous from `+0x388` to the data end at `+0x20`, so the chunks cover the
+data exactly, and the chunk count is the track count.  The MIDI data is standard
+MIDI events with a running status, and every chunk ends with the meta event
+`FF 2F 00`.  The delta runs 7 bits per byte, the low bits first, and the byte
+with the bit 7 set ends the number.
+Evidence: `python3 tools/sound_bank.py song DATA/MUSIC1.HMP`.
 
 ## Sound data
 
@@ -171,14 +180,22 @@ Evidence: the `MUSIC1.HMP` head and the byte counts.
 the same shape as the graphics containers: the last 4 bytes hold the directory
 size `2976`, and the directory holds 92 records of 32 bytes.  The members are
 named `<name>.RAW`, for example `CRY.RAW` 8127, `HELI.RAW` 19521, and
-`AIRPLANE.RAW` 30014.  A member holds 8-bit unsigned samples, and the first
-bytes are `0x80`, which is silence in unsigned 8-bit PCM.
+`AIRPLANE.RAW` 30014.  A member holds 8-bit unsigned samples at 11025 Hz,
+and the first bytes are `0x80`, which is silence in unsigned 8-bit PCM.
 
 The sample loader `FUN_0001f2e0` builds the path `%s\data\sound.dat` and
 opens every member through the member open `FUN_0004c08d` with the name
-`%s.RAW`.  A missing member is a fatal error.
-Evidence: the file bytes, `python3 tools/gfx_container.py info DATA/SOUND.DAT`,
-and `python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
+`%s.RAW`.  A missing member is a fatal error.  The loader walks the table at
+`0x15224` with the stride 36.  The table is filled from the `SOUND_FX` lists of
+`DATA/GEN.DAT` and the `DATA/MAP*I.DAT` containers.  A record holds the name,
+the volume, the loop, the loop start, the loop length, the pitch, and the pan.
+The loader derives the runtime flags from the record: the flag `0x100` from the
+bit 4 of the volume high byte, the flag `0x40` from a non-zero loop length,
+the flag `0x4000` from a non-zero loop, the flag `0x400` from the bit 4 of the
+pitch high byte, and the flag `0x200` from the bit 4 of the pan high byte.
+Evidence: the file bytes, `python3 tools/sound_bank.py samples DATA/SOUND.DAT
+--lists DATA/GEN.DAT DATA/MAP*I.DAT`, and
+`python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
 
 ## Map data
 

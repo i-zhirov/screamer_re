@@ -13,6 +13,7 @@ Initial reconnaissance is complete.  The project has:
 - a parser and disassembler for the DOS/4GW linear executables (`tools/le.py`),
 - a CD image extractor (`tools/extract_cd_image.py`),
 - an inventory generator (`tools/inventory.py`),
+- decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
 No reconstructed source code exists yet.
@@ -99,7 +100,7 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 ## Checks
 
-The full check runs every stage and reports 28 checks.  A pre-push hook runs
+The full check runs every stage and reports 36 checks.  A pre-push hook runs
 the syntax gate and the full check before every push.  Enable the hook once per
 clone:
 

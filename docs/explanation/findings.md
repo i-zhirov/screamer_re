@@ -4446,3 +4446,94 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `0x43` value `0x01`, and the register `0xC0` value `0x01`, each register first
   and the data second.
   Evidence: the output and the original decode.
+
+## The bank header, the instrument table, and the instrument data
+
+- The `ADLIB-` bank header is `0x1E` bytes.  It holds the version 0.0 at `+0x00`,
+  the signature `ADLIB-` at `+0x02`, the values `0x007F` at `+0x08` and `+0x0A`,
+  the instrument count 28 at `+0x0C`, and the instrument data offset `0x61C` at
+  `+0x10`.  Both banks of `MUSIC.DAT` and both banks of `SETUP.DAT` hold this
+  header.
+  Evidence: `python3 tools/sound_bank.py bank work/DRUM.BNK` and the file bytes.
+- The instrument table holds 127 records of 12 bytes and a 10-byte remainder to
+  the data offset.  A record holds the key in the first byte, the name in the
+  next 9 bytes, and the index in the last 2 bytes.  The drum records use the key
+  as the MIDI note, for example 0x24 `$clap`, 0x3C `<Blank`, and 0x30
+  `0scratch`.  The melodic records use the key 0x01, for example `PIANO1`,
+  `HONKTONK`, and `CLEANGT`.
+  Evidence: the bank command output and the raw record bytes.
+- The instrument data holds 128 records of 30 bytes.  The data at `+0x61C` plus
+  `128 * 30` is 5404, the file size, so the data reaches the file end.  The
+  10-byte table remainder at `0x612` holds the name `GUNSHOT` or `<Blank` of the
+  next record, and its index field shares the first 2 bytes of the data.
+  Evidence: the header data offset, the file size, and the bank command output.
+- The first `DRUM.BNK` record holds the eight register pairs `20:0F`, `40:3F`,
+  `60:01`, `80:3E`, `E0:0F`, `23:3F`, `43:01`, and `C0:01`, so the tool
+  prints the same sequence that the rebuilt driver writes.
+  Evidence: `python3 tools/sound_bank.py bank work/DRUM.BNK`.
+
+## The sample records and the runtime flags
+
+- The `SOUND_FX` record size 0x24 matches the sample table stride 36 of the
+  loader at `0x1f2e0`, so the record fields line up with the loader fields.
+  Evidence: `python3 tools/gfx_container.py list DATA/GEN.DAT MENU.DTR SOUND_FX`
+  and the loader disassembly.
+- The `SOUND_FX` lists hold 90 records: 79 in `DATA/GEN.DAT` and 11 in the six
+  `DATA/MAP*I.DAT` containers.  The names of 87 records join a member of
+  `DATA/SOUND.DAT` after the `.RAW` suffix is added, so the loader loads 87 of
+  the 92 members.
+  Evidence: `python3 tools/sound_bank.py samples DATA/SOUND.DAT --lists
+  DATA/GEN.DAT DATA/MAP*I.DAT`.
+- Five members have no `SOUND_FX` record: `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`,
+  `TOUR2.RAW`, and `TRAIN.RAW`.  The sample loader walks the record table
+  only, so the game never loads those five members through that path.
+  Evidence: the samples command and the loader at `0x1f2e0`.
+- The sample flags match the loader: the flag `0x100` comes from the bit 4 of the
+  volume high byte, the flag `0x40` from a non-zero loop length, the flag
+  `0x4000` from a non-zero loop, the flag `0x400` from the bit 4 of the pitch
+  high byte, and the flag `0x200` from the bit 4 of the pan high byte.  For
+  example, `HELI.RAW` holds the volume `0x10007FFF`, the loop -1, and the pitch
+  `0x10010000`, so the flags are `0x4700`.
+  Evidence: the samples command and the loader disassembly.
+- The sample rate is 11025 Hz.  The sound init at `0x1f1fb` stores the value
+  `0x2B11` at `0x1E50` and passes it with the buffer `0x1E40` to the HMI
+  digital driver init at `0xC903A`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f1c0` and the sample WAV
+  files of the tool.
+- The 11 `MAP*I.DAT` records are the level ambient sounds.  For example,
+  `MAP1DAT.DTR` names the looped samples `truck` and `airplane`, and
+  `MAP4DAT.DTR` names `truck` again, so three records repeat a name of another
+  level.
+  Evidence: the samples command and the list text of `MAP1I.DAT` and `MAP4I.DAT`.
+
+## The song chunk table and the event stream
+
+- The song chunks start at `+0x388` and hold the chunk number, the chunk
+  length, and the track number in 12 bytes, and then the MIDI data.  The chunk
+  lengths are contiguous from `+0x388` to the data end, which is the value at
+  `+0x20`, so the chunks cover the data exactly.  The chunk count equals the
+  track count in every song.
+  Evidence: `python3 tools/sound_bank.py song work/MUSIC1.HMP` and the chunk
+  chain test.
+- The chunk numbers run from 0 to `track_count - 1`.  The track numbers differ
+  from the chunk order, so the file orders the tracks and the track number names
+  the MIDI track.  For example, `MUSIC1.HMP` holds 13 chunks and the track
+  numbers 0, 2, 3, 4, 7, 6, 9, 9, 0, 0, 0, 1, 5.
+  Evidence: the song command output.
+- The MIDI data is standard MIDI events with a running status, and every chunk
+  ends with the meta event `FF 2F 00`.  The delta runs 7 bits per byte, the low
+  bits first, and the byte with the bit 7 set ends the number.  For example, the
+  first event of the chunk 1 of `MUSIC1.HMP` is the delta `0` and the control
+  change `B2 20 00`, and the first event of the chunk 0 of `MUSIC2.HMP` is the
+  delta `14867` and the end of the track.
+  Evidence: the song command output and the event parse of the chunks.
+- The duration at `+0x3C` is the total tick count of a track divided by the
+  value 120 at `+0x38`.  For example, `MUSIC1.HMP` holds 11208 ticks in the
+  track 0 and the duration 93, and `MUSIC6.HMP` holds 5304 ticks and the
+  duration 44.
+  Evidence: the song command output and the header fields.
+- The tool writes the chunks as standard MIDI files.  The `file` command reads
+  them as "Standard MIDI data (format 0) using 1 track at 1/120", and a strict
+  reader parses all 69 files of the eight songs without a defect.
+  Evidence: `python3 tools/sound_bank.py song work/MUSIC1.HMP --out work/midi`
+  and the `file` output.

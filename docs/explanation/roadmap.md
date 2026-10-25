@@ -42,9 +42,12 @@ current host.
 - Decode the map and index formats (`DATA/MAP*`, `DATA/GEN.DAT`,
   `DATA/LOCAL.DAT`, `TABS/*`) (in progress: the `DATA` files are LZW text with
   the track and the car lists, and the loaders are known).
-- Decode the HMI `ADLIB-` music bank.
-- Decode the sample bank (`DATA/SOUND.DAT`).
-- Verify each decoder against the original data.
+- Decode the HMI `ADLIB-` music bank (done: the bank decoder reports the
+  header, the instrument table, and the instrument data).
+- Decode the sample bank (`DATA/SOUND.DAT`) (done: the sample decoder joins
+  the `SOUND_FX` records and exports WAV files).
+- Verify each decoder against the original data (done: the pipeline check holds
+  the bank header, the sample flags, and the song header).
 
 ### M3: Rebuild
 
@@ -80,8 +83,9 @@ current host.
    loaders carry a caller chain from `engine_init` with the run-time order
    `PERSPTAB` then `VIS.TAB`).
 6. Decode the sound formats: `DATA/SOUND.DAT` and the HMI `ADLIB-` music bank
-   (in progress: `SOUND.DAT` is a member container of 92 `<name>.RAW` samples
-   with a loader; `MUSIC.DAT` is an archive of the two `ADLIB-` banks and the
-   seven `MUSICn.HMP` songs, and the bank header, the instrument table, and the
-   instrument data are mapped).
+   (done: the bank header, the instrument table, and the instrument data carry a
+   decoder and the rebuilt driver confirms the register order; the sample bank
+   joins 87 members with the `SOUND_FX` lists and the loader flags, and the
+   sample rate is 11025; the songs decode with the chunk table and the MIDI
+   events, and the tool writes standard MIDI files).
 7. Set up the OpenWatcom V2 build harness under `work/`.

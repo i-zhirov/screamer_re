@@ -143,6 +143,7 @@ LIST_SIZES = {
     "OPPONENTS": 0x14,
     "TRACK_DATA": 0x10,
     "CARS_DATA": 0x40,
+    "SOUND_FX": 0x24,
 }
 FIELD_SIZES = {"s": 12, "d": 4, "f": 4, "x": 4}
 
