@@ -4377,3 +4377,25 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   screen right after the driver start with no `clear`, which shows the first output
   of the driver `main`, the `REBUILT` text.
   Evidence: the screen capture and the disassembly.
+
+## The driver runs and returns to the prompt
+
+- The screen capture with no `clear` after the driver start shows the driver output
+  and the DOS prompt `D:\>` at the end.  The output lines hold the letter `W`
+  eight times, which is the `show_pair` text of the eight writes, and the screen font
+  garbles the rest of each line.  The driver `main` therefore runs the whole loop and
+  returns to DOS.
+  Evidence: the screen capture.
+- The driver object holds the `out dx,al` writes at `_TEXT + 0x00a9` and
+  `+0x00b5`, and the entry `0xd5` is the stub `_cstart_`, so the object chain is
+  complete.
+  Evidence: `work/rebuild/wdis.txt`.
+- The CPU log stays short: 7124 lines, all BIOS `F000` addresses, and no
+  `out dx,al` and no `DX` of `0x388` or `0x389`.  The log therefore stops before
+  the driver window even when the run reaches the writes, so the log count and the
+  log start point are the last suspects.
+  Evidence: `work/rebuild/LOGCPU.TXT`.
+- The next step sets the log breakpoint at the driver write address with `BPPM`
+  (`0150:000100a9` or the module linear pair) and reads the registers at the stop,
+  which confirms the eight pairs directly.
+  Evidence: the object disassembly.
