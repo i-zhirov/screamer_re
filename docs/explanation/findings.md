@@ -4357,3 +4357,23 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   with `wdis` in the container, which names the `out dx,al` offsets and confirms the
   write form.
   Evidence: the driver object.
+
+## The driver object holds the port writes
+
+- `wdis driver.obj` in the container exits 0 and lists 98 lines.  The first
+  routine is 118 bytes at `_TEXT + 0x0000`, and it holds the two port writes
+  `00A9  EE  out dx,al` and `00B5  EE  out dx,al`.  The second routine is
+  91 bytes at `_TEXT + 0x0076`.
+  Evidence: `work/rebuild/wdis.txt`.
+- The two `out dx,al` instructions sit in the `main` loop, so the eight register
+  pairs pass the same two instructions.  The write form is therefore in the object,
+  and the compile is not the fault.
+  Evidence: the disassembly.
+- The LE entry `object 1 offset 0xd5` sits past both routines, at the stub
+  `_cstart_` code, which is the `jmp main_`.  So the object chain is complete:
+  the entry jumps to `main`, and `main` holds the writes.
+  Evidence: the LE header and the disassembly.
+- The run therefore stops between the entry and the writes.  The next step reads the
+  screen right after the driver start with no `clear`, which shows the first output
+  of the driver `main`, the `REBUILT` text.
+  Evidence: the screen capture and the disassembly.
