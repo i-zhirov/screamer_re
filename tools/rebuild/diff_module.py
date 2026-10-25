@@ -130,13 +130,20 @@ def main() -> int:
     if not original_body:
         print(f"error: no function body at {original_address:#x}", file=sys.stderr)
         return 1
-    count = arguments.count if arguments.count else len(original_body)
-    original_body = original_body[:count]
-    try:
-        rebuilt_body = le.decode(rebuilt, rebuilt_address, count)
-    except ValueError as error:
-        print(f"error: {error}", file=sys.stderr)
-        return 1
+    if arguments.count:
+        count = arguments.count
+        original_body = original_body[:count]
+        try:
+            rebuilt_body = le.decode(rebuilt, rebuilt_address, count)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+    else:
+        try:
+            rebuilt_body = le.function_body(rebuilt, rebuilt_address)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
 
     original_bytes = b"".join(insn.raw for insn in original_body)
     rebuilt_bytes = b"".join(insn.raw for insn in rebuilt_body)
@@ -172,7 +179,24 @@ def main() -> int:
     print_body("rebuilt", rebuilt_body)
     print()
 
+    original_shapes = [instruction_shape(insn) for insn in original_body]
+    rebuilt_shapes = [instruction_shape(insn) for insn in rebuilt_body]
     if len(original_body) != len(rebuilt_body):
+        for index, (a, b) in enumerate(zip(original_shapes, rebuilt_shapes)):
+            if a == b:
+                continue
+            tail = len(original_body) - index
+            if rebuilt_shapes[index + 1 : index + 1 + tail] == original_shapes[index:]:
+                extra = rebuilt_body[index]
+                print(f"verdict: the rebuilt module holds one instruction the "
+                      f"original does not: {extra.text}")
+                return 1
+            if original_shapes[index + 1 : index + 1 + tail] == rebuilt_shapes[index:]:
+                extra = original_body[index]
+                print(f"verdict: the original holds one instruction the rebuilt "
+                      f"module does not: {extra.text}")
+                return 1
+            break
         print(f"verdict: the instruction counts differ, "
               f"{len(original_body)} and {len(rebuilt_body)}")
         return 1
@@ -192,9 +216,7 @@ def main() -> int:
     if not opcode_differences and not operand_differences:
         print("verdict: the modules are byte-identical")
         return 0
-    original_shape = [instruction_shape(insn) for insn in original_body]
-    rebuilt_shape = [instruction_shape(insn) for insn in rebuilt_body]
-    if original_shape == rebuilt_shape:
+    if original_shapes == rebuilt_shapes:
         print("verdict: the instruction sequences match; the differing operands "
               "are the link-time addresses")
         return 0

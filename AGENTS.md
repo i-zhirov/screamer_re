@@ -99,6 +99,8 @@ sh tools/rebuild/build_exit.sh
 sh tools/rebuild/run_exit.sh
 sh tools/rebuild/build_printf.sh
 sh tools/rebuild/run_printf.sh
+sh tools/rebuild/build_shutdown.sh
+sh tools/rebuild/run_shutdown.sh
 ```
 
 - **Test**: run the syntax gate and the tool checks:

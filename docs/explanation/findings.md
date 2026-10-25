@@ -4705,3 +4705,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The test program carries the name `prtfmod.exe`, because DOS truncates an output file name over eight
   characters to its short form: `printf_out.txt` becomes `PRINTF_O.TXT`.
   Evidence: the two runs and the work directory listing.
+
+## The engine_shutdown rebuild and the restore instruction
+
+- The `engine_shutdown` module rebuilds with the stack-frame option `-of+` to 54 bytes and 15 instructions
+  against the original 52 bytes and 14 instructions.  The frame and the eight calls match, so the frame
+  answer holds for the game files.
+  Evidence: `sh tools/rebuild/build_shutdown.sh` and the diff.
+- The extra instruction is `mov esp,ebp`, the ESP restore of the epilogue.  The original holds `pop ebp`
+  and `ret` alone, so the original compiler dropped the restore because the frame holds no local variable
+  and nothing moved the stack pointer.
+  Evidence: the two decodes.
+- No compiler option suppresses the restore.  The full option list of the compiler itself holds `-of` for
+  `as needed`, `-of+` for `always`, `-ok` for the flow graph, and `-oc` for the call-to-jump form, and the
+  sweep of the 47 candidate options found no other frame control.  The `-of+ -ok` and `-of+ -oc` builds keep
+  the restore, the `-of+ -od` build replaces the prologue with the 5-register debug frame, and
+  `#pragma on (frame)` changes nothing.
+  Evidence: `strings /opt/watcom/binl64/wcc386` and the container compiles.
+- The rest of the module matches.  The diff holds 12 of 14 instructions equal and 8 operand differences,
+  which are the link-time addresses of the eight calls, and the run writes the markers `1` to `8` in order, so
+  the call chain matches the original.
+  Evidence: the diff output and `sh tools/rebuild/run_shutdown.sh`.
+- The module stays open as a byte-level match.  The rebuild holds the original code shape with one extra
+  restore instruction, and the difference is a code generator change between the original compiler and OpenWatcom
+  V2 that no source form can remove.
+  Evidence: the section above.
+- The diff tool now names the case.  When the instruction counts differ and one sequence holds the other plus one
+  instruction, the tool reports the extra instruction instead of only the counts.
+  Evidence: `tools/rebuild/diff_module.py` and the five module diffs.

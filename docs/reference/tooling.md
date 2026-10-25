@@ -236,6 +236,10 @@ The files:
 | `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
 | `build_printf.sh` | the container build; it writes `work/rebuild/prtfmod.exe` and `work/rebuild/printf.map` |
 | `run_printf.sh` | the headless DOSBox-X run; it writes `work/rebuild/prtf_out.txt` |
+| `shutdown.c` | the rebuilt `engine_shutdown` module, built with the stack-frame option `-of+` |
+| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
+| `build_shutdown.sh` | the container build; it writes `work/rebuild/shutmod.exe` and `work/rebuild/shutdown.map` |
+| `run_shutdown.sh` | the headless DOSBox-X run; it writes `work/rebuild/shut_out.txt` |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
@@ -247,6 +251,8 @@ sh tools/rebuild/build_exit.sh
 sh tools/rebuild/run_exit.sh
 sh tools/rebuild/build_printf.sh
 sh tools/rebuild/run_printf.sh
+sh tools/rebuild/build_shutdown.sh
+sh tools/rebuild/run_shutdown.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
@@ -314,9 +320,26 @@ wcc386 -bt=dos -s -zq -of+ -fo=/w/module.obj module.c
 ```
 
 The option reproduces the original `push ebp`, `mov ebp,esp` frame.  One difference
-stays: for a function that does not change ESP, OpenWatcom V2 adds `mov esp,ebp` to
-the epilogue, and the original compiler omits it.  A run-time or library file rebuild
+stays: for a function that does not change ESP, OpenWatcom V2 adds `mov esp,ebp` to the
+epilogue, and the original compiler omits it.  A run-time or library file rebuild
 takes the default, no frame, because those modules carry a register-save prologue.
+
+The `engine_shutdown` module is the first game file to test the option:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x128ac \
+    --rebuilt work/rebuild/shutmod.exe \
+    --rebuilt-map work/rebuild/shutdown.map \
+    --rebuilt-symbol engine_shutdown_
+```
+
+The rebuild holds 54 bytes and 15 instructions against the original 52 bytes and 14
+instructions, and the diff names the difference: `the rebuilt module holds one
+instruction the original does not: mov esp, ebp`.  The frame and the eight calls match,
+the run writes the markers `1` to `8` in order, and no compiler option removes the
+restore, so the module stays open as a byte-level match.
 
 ## Host tools
 

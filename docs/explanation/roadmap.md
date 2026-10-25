@@ -49,9 +49,11 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: the three smallest named modules, `free` at `0x300ec`, `exit` at
-  `0x300be` with its helper at `0x300d6`, and `printf` at `0x3009b`, are rebuilt
-  with the harness in `tools/rebuild`, and their code matches the original).
+  progress: the four smallest named modules, `free` at `0x300ec`, `exit` at
+  `0x300be` with its helper at `0x300d6`, `printf` at `0x3009b`, and
+  `engine_shutdown` at `0x128ac`, are rebuilt with the harness in
+  `tools/rebuild`; the first three match the original, and `engine_shutdown` holds
+  one extra `mov esp,ebp` restore).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -97,5 +99,8 @@ current host.
    game files passed the Watcom stack-frame option `-of+` and the run-time files
    did not, and OpenWatcom V2 adds `mov esp,ebp` to the epilogue of a function
    that does not change ESP).
-10. Rebuild `engine_shutdown` at `0x128ac` with `-of+`, and then the
-    self-contained `memcpy` at `0x8c150`.
+10. Rebuild `engine_shutdown` at `0x128ac` with `-of+` (done: the frame and the
+    eight calls match, and the rebuild holds one extra `mov esp,ebp` restore that no
+    option removes, so the module stays open as a byte-level match).
+11. Rebuild the self-contained `memcpy` at `0x8c150`, which carries no link-time
+    address and can match byte for byte.
