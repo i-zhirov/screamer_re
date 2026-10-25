@@ -59,8 +59,26 @@ ENTRY_FILE_OFFSET = 0x3A8F8
 ISO_PVD_OFFSET = 0x8000
 ISO_VOLUME_ID_OFFSET = 0x8028
 
-# The smallest named module in the program map: `free` at linear 0x300ec.
-FREE_MODULE_LINEAR = 0x300EC
+# The rebuilt modules: the name, the test program, the linker map, and the diffs.  A
+# diff holds the original linear address, the rebuilt symbol, and the instruction count
+# (0 takes the count from the original).
+REBUILT_MODULES = (
+    (
+        "free",
+        "free.exe",
+        "free.map",
+        ((0x300EC, "free_", 0),),
+    ),
+    (
+        "exit",
+        "exitmod.exe",
+        "exit.map",
+        (
+            (0x300BE, "exit_", 0),
+            (0x300D6, "exit_flush_", 6),
+        ),
+    ),
+)
 REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
 
 
@@ -384,49 +402,52 @@ def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float)
 
 
 def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
-    """Rebuild the smallest named module and diff it against the original.
+    """Rebuild the named modules and diff them against the original.
 
-    The module is `free` at linear 0x300ec in STARTH.EXE, the smallest named
-    function in the program map.  The stage needs Docker for the OpenWatcom V2
-    container, so it skips when Docker is missing.
+    The modules are `free` at linear 0x300ec, the smallest named function in the
+    program map, and `exit` at linear 0x300be with its helper at 0x300d6.  The stage
+    needs Docker for the OpenWatcom V2 container, so it skips when Docker is missing.
     """
     if shutil.which("docker") is None:
         print("docker is not on PATH; the module rebuild is skipped")
         return
-    result = run(["sh", "tools/rebuild/build_free.sh"], timeout=timeout)
-    checks.check(
-        "stage 9: the module rebuild links",
-        result.returncode == 0 and "free.exe" in result.stdout,
-        result.stderr.strip()[-80:],
-    )
-    if result.returncode != 0:
-        return
-    result = run(
-        [
-            sys.executable,
-            "tools/rebuild/diff_module.py",
-            "--original",
-            str(game_dir / "STARTH.EXE"),
-            "--original-address",
-            f"{FREE_MODULE_LINEAR:#x}",
-            "--rebuilt",
-            str(REBUILD_DIR / "free.exe"),
-            "--rebuilt-map",
-            str(REBUILD_DIR / "free.map"),
-            "--rebuilt-symbol",
-            "free_",
-        ],
-        timeout=timeout,
-    )
-    detail = ""
-    lines = result.stdout.strip().splitlines()
-    if lines:
-        detail = lines[-1]
-    checks.check(
-        "stage 9: the rebuilt module matches the original",
-        result.returncode == 0 and "instruction sequences match" in result.stdout,
-        detail or result.stderr.strip()[-80:],
-    )
+    for name, executable, map_name, diffs in REBUILT_MODULES:
+        result = run(["sh", f"tools/rebuild/build_{name}.sh"], timeout=timeout)
+        checks.check(
+            f"stage 9: the {name} module rebuild links",
+            result.returncode == 0 and executable in result.stdout,
+            result.stderr.strip()[-80:],
+        )
+        if result.returncode != 0:
+            continue
+        for original_address, symbol, count in diffs:
+            command = [
+                sys.executable,
+                "tools/rebuild/diff_module.py",
+                "--original",
+                str(game_dir / "STARTH.EXE"),
+                "--original-address",
+                f"{original_address:#x}",
+                "--rebuilt",
+                str(REBUILD_DIR / executable),
+                "--rebuilt-map",
+                str(REBUILD_DIR / map_name),
+                "--rebuilt-symbol",
+                symbol,
+            ]
+            if count:
+                command += ["--count", str(count)]
+            result = run(command, timeout=timeout)
+            detail = ""
+            lines = result.stdout.strip().splitlines()
+            if lines:
+                detail = lines[-1]
+            checks.check(
+                f"stage 9: the {name} module matches the original at "
+                f"{original_address:#x}",
+                result.returncode == 0 and "instruction sequences match" in result.stdout,
+                detail or result.stderr.strip()[-80:],
+            )
 
 
 def check_session_script(checks: Checks, work_root: Path, port: int, timeout: float) -> None:

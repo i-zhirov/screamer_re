@@ -228,6 +228,10 @@ The files:
 | `free_main.c` | the `free` test harness: the `main` markers and the stand-in `nfree` |
 | `build_free.sh` | the container build; it writes `work/rebuild/free.exe` and `work/rebuild/free.map` |
 | `run_free.sh` | the headless DOSBox-X run; it writes `work/rebuild/free_out.txt` |
+| `exit.c` | the rebuilt `exit` module and its helper |
+| `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
+| `build_exit.sh` | the container build; it writes `work/rebuild/exitmod.exe` and `work/rebuild/exit.map` |
+| `run_exit.sh` | the headless DOSBox-X run; it writes `work/rebuild/exit_out.txt` |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
@@ -235,6 +239,8 @@ sh tools/rebuild/build.sh
 sh tools/rebuild/run.sh
 sh tools/rebuild/build_free.sh
 sh tools/rebuild/run_free.sh
+sh tools/rebuild/build_exit.sh
+sh tools/rebuild/run_exit.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
@@ -251,13 +257,32 @@ python3 tools/rebuild/diff_module.py \
     --rebuilt work/rebuild/free.exe \
     --rebuilt-map work/rebuild/free.map \
     --rebuilt-symbol free_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300be \
+    --rebuilt work/rebuild/exitmod.exe \
+    --rebuilt-map work/rebuild/exit.map \
+    --rebuilt-symbol exit_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300d6 --count 6 \
+    --rebuilt work/rebuild/exitmod.exe \
+    --rebuilt-map work/rebuild/exit.map \
+    --rebuilt-symbol exit_flush_
 ```
 
 The diff reads the original address from the command line and the rebuilt address
 from the linker map.  It exits with code 0 when the instruction sequences match.
 The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
 `85 c0`, `0f 85 14 1f 0a 00`, and `c3`, so the instruction sequences match and
-the tail-jump displacement differs.
+the tail-jump address differs.  The `exit` function and its helper match in the same
+way: 8 of 8 instructions and 6 of 6 instructions, and the differing operands are the
+addresses of the three hook slots and of the two calls.
+
+The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
+`exit` as its own command and leaves the session.
 
 ## Host tools
 

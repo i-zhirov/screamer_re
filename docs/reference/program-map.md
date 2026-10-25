@@ -111,12 +111,14 @@ original Watcom symbol names.
 | `0x10978` | `error_report` | dispatches on the code through a jump table to one message stub per code | observed |
 | `0x30050` | `memory_alloc` | allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8` | derived |
 | `0x3009b` | `printf` | passes the argument list and the output table `DAT_00102fd2` to the run-time print engine | inferred |
-| `0x300be` | `exit` | calls the run-time pair `PTR_FUN_00102f84` and `PTR_FUN_00102f88`; `main` calls it with the error code | inferred |
+| `0x300be` | `exit` | calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code | observed |
 | `0x300ec` | `free` | forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions | observed |
 
 `main` calls the run-time helpers because the Watcom run-time is linked into the
 same object.  The four run-time helpers sit at the end of the object, after the
-program code.
+program code.  The rebuilt `exit` module at `tools/rebuild/exit.c` holds the same two
+functions; the OpenWatcom V2 run-time source `bld/clib/startup/c/exit.c` holds the
+same shape, with a shared handler slot and a terminator that never returns.
 
 The smallest functions in the object are six empty stubs of 5 bytes at `0x23ed0`,
 `0x24068`, `0x24070`, `0x24078`, `0x24090`, and `0x24098`.  Each holds the four

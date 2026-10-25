@@ -4536,3 +4536,82 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   read as zero and the literals read as code-like bytes, so the loaded content of the
   `CONST` segment is the suspect.
   Evidence: the earlier section, the disassembly, and the output files.
+
+## The next module: the run-time exit chain
+
+- The program map lists `exit` at linear `0x300be` with 8 instructions, the next smallest
+  named function after `free`.  The bytes are `52 89 c2` (`push edx`, `mov edx,eax`), two
+  `ff 15 <addr>` calls through the function-pointer slots `0x2f84` and `0x2f88`,
+  `89 d0` (`mov eax,edx`), `e8 02 00 00 00` (`call 0x300d6`), and `5a c3` (`pop edx`,
+  `ret`).
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300be --count 8`.
+- The helper at `0x300d6` holds 6 instructions and 22 bytes: `push edx`, `mov edx,eax`,
+  the calls through the slots `0x2f88` and `0x2f8c`, `mov eax,edx`, and
+  `e9 9b 02 00 00` (`jmp 0x30387`).  The helper calls the slot `0x2f88` again, so the
+  two functions share one handler slot.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300d6 --count 6`.
+- The terminator at `0x30387` jumps over a message writer to `0x303ac`, which calls
+  `0xd43bf` and then terminates the process with `mov ah,0x4c` and `int 0x21`.
+  Evidence: the disassembly.
+- The OpenWatcom V2 run-time source `bld/clib/startup/c/exit.c` holds the same shape for
+  the DOS build: `exit` calls `(*__int23_exit)()` and `__FiniRtns`, `_exit` calls
+  `(*__int23_exit)()` and `(*__FPE_handler_exit)()`, and both end in a call that never
+  returns.  The shared slot is therefore the interrupt handler slot.
+  Evidence: the source file in the OpenWatcom v2 repository.
+
+## The rebuilt `exit` module
+
+- The module source holds the two functions and three hook slots: `exit` calls the slots 1
+  and 2 and then `exit_flush`, and `exit_flush` calls the slots 2 and 3 and then
+  `exit_terminate`.  The terminator carries `__declspec(__aborts)`, the OpenWatcom V2
+  spelling of the run-time `_WCNORETURN` macro.
+  Evidence: `tools/rebuild/exit.c`.
+- The position of `__declspec(__aborts)` matters.  The suffix form
+  `void f(int) __declspec(__aborts);` fails with the error `E1026: Invalid declarator`
+  and mis-parses the declarations after it; the prefix form compiles.
+  Evidence: the two container compiles.
+- OpenWatcom V2 compiles the source to the original instruction sequences.  `exit` holds
+  8 instructions and 24 bytes, and `exit_flush` holds 6 instructions and 22 bytes, the same
+  as the original.  The terminator attribute drops the epilogue of `exit_flush` and turns its
+  last call into a jump, so the rebuild holds the original `jmp` form.
+  Evidence: `wdis work/rebuild/exit.obj`.
+- The build writes `work/rebuild/exitmod.exe` (1094 bytes) and the linker map
+  `work/rebuild/exit.map`.
+  Evidence: `sh tools/rebuild/build_exit.sh` and the map file.
+
+## The exit diff and the run
+
+- The diff of `exit` reports 8 of 8 instructions equal, no opcode differences, and three
+  operand differences: the slot addresses `0x2f84` and `0x2f88` and the helper call.  The
+  diff of the helper reports 6 of 6 instructions equal and three operand differences: the
+  slot addresses `0x2f88` and `0x2f8c` and the terminator jump.  Both verdicts are `the
+  instruction sequences match; the differing operands are the link-time addresses`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map
+  work/rebuild/exit.map --rebuilt-symbol exit_` and the same command for `0x300d6` with
+  `--count 6` and `--rebuilt-symbol exit_flush_`.
+- The rebuilt module keeps the shared slot: the original calls `0x2f88` from `exit` and from
+  the helper, and the rebuilt `exit` and `exit_flush` both read the slot `exit_hook_2`.
+  Evidence: the two diff outputs.
+- The headless run writes the markers `A`, `B`, `B`, `C`, and `T` on their own lines: the
+  first hook, the second hook from `exit`, the second hook again from the helper, the third
+  hook, and the terminator.  The repeated `B` shows the shared slot, so the module runs the
+  original chain.
+  Evidence: `sh tools/rebuild/run_exit.sh` and `work/rebuild/exit_out.txt`.
+- The test program carries the name `exitmod.exe`.  A program named `exit.exe` leaves the
+  DOSBox-X session before the debugger connects, because the DOS shell reads `exit` as its own
+  command, and a name over eight characters fails with `Bad command or filename`.
+  Evidence: the two failed runs.
+- The harness sets the three hook slots in `main`, because the initialized data of the rebuilt
+  image reads wrong at run time.  The assignments write the addresses of the three stub
+  functions, so the module calls the stubs.
+  Evidence: `tools/rebuild/exit_main.c` and the run output.
+
+## The pipeline check holds two modules
+
+- Stage 9 rebuilds and diffs both modules.  The check reports 20 checks and 0 failures with
+  `--skip-runtime`, which is three more checks than the `free` module alone.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --skip-runtime`.
+- The linker map marks a symbol that only the module references with a trailing `+`, for example
+  `0001:00000000+ exit_flush_`.  The diff tool accepts the mark.
+  Evidence: `work/rebuild/exit.map` and the diff run.

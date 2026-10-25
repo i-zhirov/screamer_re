@@ -2,9 +2,9 @@
 
 The tool reads the original module and the rebuilt module with tools/le.py,
 compares the machine code byte for byte, and compares the instruction
-sequences.  A relative branch to another function carries a link-time
-displacement, so the tool reports the differing operands separately from the
-differing opcodes.
+sequences.  A reference to another function or to a data slot carries a link-time
+address, so the tool reports the differing operands separately from the differing
+opcodes.
 
 Usage:
     python3 tools/rebuild/diff_module.py \
@@ -29,7 +29,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import le  # noqa: E402
 
-MAP_SYMBOL = re.compile(r"^([0-9a-f]{4}):([0-9a-f]{8})\s+(\S+)\s*$", re.IGNORECASE)
+MAP_SYMBOL = re.compile(
+    r"^([0-9a-f]{4}):([0-9a-f]{8})[+*]?\s+(\S+)\s*$", re.IGNORECASE
+)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -179,7 +181,7 @@ def main() -> int:
         return 1
     if operand_differences:
         print("verdict: the instruction sequences match; the differing operands "
-              "are the link-time displacements")
+              "are the link-time addresses")
         return 0
     print("verdict: the modules are byte-identical")
     return 0

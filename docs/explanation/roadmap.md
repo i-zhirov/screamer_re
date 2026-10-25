@@ -49,8 +49,9 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: the smallest named module, `free` at `0x300ec`, is rebuilt with the
-  harness in `tools/rebuild`, and its code matches the original).
+  progress: the two smallest named modules, `free` at `0x300ec` and `exit` at
+  `0x300be` with its helper at `0x300d6`, are rebuilt with the harness in
+  `tools/rebuild`, and their code matches the original).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -90,5 +91,7 @@ current host.
    instrument data are mapped).
 7. Set up the OpenWatcom V2 build harness under `work/` (done: the harness is
    at `tools/rebuild`, and the first module rebuild and diff run).
-8. Rebuild the next modules from the program map in size order: `exit` at
-   `0x300be`, `printf` at `0x3009b`, and `engine_shutdown` at `0x128ac`.
+8. Rebuild the next modules from the program map in size order (done: `free` at
+   `0x300ec` and `exit` at `0x300be` with its helper at `0x300d6`).
+9. Rebuild the next modules: `engine_shutdown` at `0x128ac` and `printf` at
+   `0x3009b`.

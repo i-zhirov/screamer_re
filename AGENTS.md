@@ -95,6 +95,8 @@ screamer_re/
 ```sh
 sh tools/rebuild/build_free.sh
 sh tools/rebuild/run_free.sh
+sh tools/rebuild/build_exit.sh
+sh tools/rebuild/run_exit.sh
 ```
 
 - **Test**: run the syntax gate and the tool checks:
@@ -104,10 +106,12 @@ python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py t
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
 ```
 
 The full check runs every stage and needs DOSBox-X.  It takes about 15
-seconds and reports 28 checks:
+seconds and reports 31 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -147,7 +151,8 @@ open ~/Documents/Screamer.app
     - `python3 tools/rebuild/diff_module.py --original
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
       --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
-      work/rebuild/free.map --rebuilt-symbol free_` to check the module diff
+      work/rebuild/free.map --rebuilt-symbol free_` to check the module diffs; the
+      Build And Test Commands section holds the exit module commands
     - `python3 tools/pipeline_check.py --game-dir
       ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
 
