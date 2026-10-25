@@ -199,6 +199,42 @@ work is already in place.  Bochs is the fallback with the best debugger for
 protected-mode DOS code, and QEMU with GDB is the fallback with the best
 scripting.
 
+## The rebuild harness
+
+`tools/rebuild/` holds the rebuilt driver and the build scripts.  The build runs in
+a container, because the OpenWatcom V2 release has no macOS asset.  The container
+holds the extracted toolchain, so no installer run is needed.
+
+| Item | Value |
+| --- | --- |
+| Container | `arlaneenalra/watcom-docker@sha256:16e4845ddd0df7bc877b45d103aacf66bc48aaab6d1c61d6bcaa9c1274f06a65` |
+| OpenWatcom | V2.0 beta, the build date Oct 24 2026 |
+| Container tools | `wcc386`, `wlink`, `wasm` in `/opt/watcom/binl64` |
+| DOS-hosted asset | `open-watcom-2_0-c-dos.exe`, 127899553 bytes |
+| Linux asset | `open-watcom-2_0-c-linux-x64`, 129121153 bytes, SHA-256 `74cee369f527889144fe840f8fff3df78ed541b907f624334c12248e1435b8b3` |
+| Release tag | `Current-build` |
+
+The files:
+
+| File | Role |
+| --- | --- |
+| `driver.c` | the rebuilt driver: the eight register pairs as immediates, register first and data second, with no C run-time |
+| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol |
+| `stack.asm` | the `STACK` segment that the DOS/4G extender needs (the error 1317) |
+| `cstart.c` | the C start stub |
+| `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
+| `run.sh` | the headless DOSBox-X run; it writes `work/rebuild/out.txt` |
+
+```sh
+sh tools/rebuild/build.sh
+sh tools/rebuild/run.sh
+```
+
+The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
+The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
+`E0 0F`, `23 3F`, `43 01`, and `C0 01`, which match the original driver
+sequence at `0x14157`.
+
 ## Host tools
 
 | Tool | Version | Use |

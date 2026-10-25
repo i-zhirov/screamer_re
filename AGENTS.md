@@ -82,6 +82,7 @@ screamer_re/
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
 │   ├── le.py                  # parse an LE image and disassemble x86 code
 │   ├── pipeline_check.py      # run the pipeline end to end
+│   ├── rebuild/               # the OpenWatcom V2 build harness
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
 ```
