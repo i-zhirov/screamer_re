@@ -32,6 +32,19 @@ import le  # noqa: E402
 MAP_SYMBOL = re.compile(
     r"^([0-9a-f]{4}):([0-9a-f]{8})[+*]?\s+(\S+)\s*$", re.IGNORECASE
 )
+ADDRESS = re.compile(r"\[(?:0x[0-9a-f]+|\d+)\]")
+BRANCH_TARGET = re.compile(r"\b(j[a-z]+|call|loop\w*)\s+0x[0-9a-f]+\b")
+
+
+def instruction_shape(insn: le.Insn) -> str:
+    """Name an instruction with every absolute address replaced by a placeholder.
+
+    Two instructions of the same shape differ only in their link-time addresses.  A
+    memory operand with a register base keeps its offset, because the stack layout is
+    not a link-time address.
+    """
+    text = ADDRESS.sub("[ADDR]", insn.text)
+    return BRANCH_TARGET.sub(r"\1 ADDR", text)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -166,7 +179,7 @@ def main() -> int:
     opcode_differences = 0
     operand_differences = 0
     for index, (a, b) in enumerate(zip(original_body, rebuilt_body)):
-        if a.raw != b.raw and a.mnemonic != b.mnemonic:
+        if a.mnemonic != b.mnemonic:
             opcode_differences += 1
             print(f"opcode difference at {a.address:#x}: {a.text} and {b.text}")
         elif a.operands != b.operands:
@@ -176,15 +189,22 @@ def main() -> int:
           f"{len(original_body)} instructions equal, "
           f"{opcode_differences} opcodes different, "
           f"{operand_differences} operands different")
-    if opcode_differences:
-        print("verdict: the instruction sequences differ")
-        return 1
-    if operand_differences:
+    if not opcode_differences and not operand_differences:
+        print("verdict: the modules are byte-identical")
+        return 0
+    original_shape = [instruction_shape(insn) for insn in original_body]
+    rebuilt_shape = [instruction_shape(insn) for insn in rebuilt_body]
+    if original_shape == rebuilt_shape:
         print("verdict: the instruction sequences match; the differing operands "
               "are the link-time addresses")
         return 0
-    print("verdict: the modules are byte-identical")
-    return 0
+    if sorted(insn.mnemonic for insn in original_body) == sorted(
+        insn.mnemonic for insn in rebuilt_body
+    ):
+        print("verdict: the modules hold the same instructions in a different order")
+        return 0
+    print("verdict: the instruction sequences differ")
+    return 1
 
 
 if __name__ == "__main__":

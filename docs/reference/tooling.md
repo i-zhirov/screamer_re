@@ -232,6 +232,10 @@ The files:
 | `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
 | `build_exit.sh` | the container build; it writes `work/rebuild/exitmod.exe` and `work/rebuild/exit.map` |
 | `run_exit.sh` | the headless DOSBox-X run; it writes `work/rebuild/exit_out.txt` |
+| `printf.c` | the rebuilt `printf` module, after the run-time file `bld/clib/streamio/c/printf.c` |
+| `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
+| `build_printf.sh` | the container build; it writes `work/rebuild/prtfmod.exe` and `work/rebuild/printf.map` |
+| `run_printf.sh` | the headless DOSBox-X run; it writes `work/rebuild/prtf_out.txt` |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
@@ -241,6 +245,8 @@ sh tools/rebuild/build_free.sh
 sh tools/rebuild/run_free.sh
 sh tools/rebuild/build_exit.sh
 sh tools/rebuild/run_exit.sh
+sh tools/rebuild/build_printf.sh
+sh tools/rebuild/run_printf.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
@@ -271,6 +277,13 @@ python3 tools/rebuild/diff_module.py \
     --rebuilt work/rebuild/exitmod.exe \
     --rebuilt-map work/rebuild/exit.map \
     --rebuilt-symbol exit_flush_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x3009b \
+    --rebuilt work/rebuild/prtfmod.exe \
+    --rebuilt-map work/rebuild/printf.map \
+    --rebuilt-symbol printf_
 ```
 
 The diff reads the original address from the command line and the rebuilt address
@@ -281,8 +294,29 @@ the tail-jump address differs.  The `exit` function and its helper match in the 
 way: 8 of 8 instructions and 6 of 6 instructions, and the differing operands are the
 addresses of the three hook slots and of the two calls.
 
+The rebuilt `printf` holds 34 bytes and 13 instructions, the same as the original, and
+no EBP frame.  Three instructions come in a different order, because the V2 register
+allocator spills the argument list before it loads the arguments, so the verdict is
+`the modules hold the same instructions in a different order`.
+
 The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
-`exit` as its own command and leaves the session.
+`exit` as its own command and leaves the session.  The `printf` test program carries
+the name `prtfmod.exe`, and its output file carries the name `prtf_out.txt`, because
+DOS keeps only the first eight characters of a file name.
+
+## The compiler options
+
+The original game files were built with the Watcom stack-frame option `-of+`, and the
+run-time library files were not.  A game file rebuild therefore adds `-of+`:
+
+```sh
+wcc386 -bt=dos -s -zq -of+ -fo=/w/module.obj module.c
+```
+
+The option reproduces the original `push ebp`, `mov ebp,esp` frame.  One difference
+stays: for a function that does not change ESP, OpenWatcom V2 adds `mov esp,ebp` to
+the epilogue, and the original compiler omits it.  A run-time or library file rebuild
+takes the default, no frame, because those modules carry a register-save prologue.
 
 ## Host tools
 

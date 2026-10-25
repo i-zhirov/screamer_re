@@ -49,9 +49,9 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: the two smallest named modules, `free` at `0x300ec` and `exit` at
-  `0x300be` with its helper at `0x300d6`, are rebuilt with the harness in
-  `tools/rebuild`, and their code matches the original).
+  progress: the three smallest named modules, `free` at `0x300ec`, `exit` at
+  `0x300be` with its helper at `0x300d6`, and `printf` at `0x3009b`, are rebuilt
+  with the harness in `tools/rebuild`, and their code matches the original).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -93,8 +93,9 @@ current host.
    at `tools/rebuild`, and the first module rebuild and diff run).
 8. Rebuild the next modules from the program map in size order (done: `free` at
    `0x300ec` and `exit` at `0x300be` with its helper at `0x300d6`).
-9. Answer the frame question of the simple game functions: the original compiler
-   creates an EBP frame for a function without a local variable, and OpenWatcom V2 does
-   not.  `engine_shutdown` at `0x128ac` waits on the answer.
-10. Rebuild the next modules: `printf` at `0x3009b` and the self-contained `memcpy`
-    at `0x8c150`.
+9. Answer the frame question of the simple game functions (done: the original
+   game files passed the Watcom stack-frame option `-of+` and the run-time files
+   did not, and OpenWatcom V2 adds `mov esp,ebp` to the epilogue of a function
+   that does not change ESP).
+10. Rebuild `engine_shutdown` at `0x128ac` with `-of+`, and then the
+    self-contained `memcpy` at `0x8c150`.

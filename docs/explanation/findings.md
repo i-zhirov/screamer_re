@@ -4634,3 +4634,74 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   register-save prologue and a local slot is `printf` at `0x3009b`: `push ebx`, `push edx`,
   `sub esp,4`, the print-engine call at `0xd429f`, and the matching epilogue, with no EBP frame.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x3009b --count 13`.
+
+## The frame answer: the stack-frame option
+
+- The Watcom C/C++ compiler option `-of+` generates a stack frame for every function, and the
+  OpenWatcom V2 default is `-of-`, no frame.  The option sweep over the 47 candidate options finds
+  `-of+` alone as the frame producer.
+  Evidence: the container sweep and `wdis work/rebuild/probe/shut_of.obj`.
+- The original game files were built with the frame option.  With `-of+`, the `engine_shutdown` source
+  holds the original frame `push ebp`, `mov ebp,esp` ... `pop ebp`, `ret`, and the last call stays a
+  plain `call`, which matches the original `call 0x25f14`.  The frame option therefore also answers the
+  tail-call half of the question.
+  Evidence: the container compile and the original decode.
+- The run-time wrappers carry no frame, so the game and the library differ.  `free`, `exit`, and
+  `printf` all hold a register-save prologue, and the library build of the Watcom run-time leaves the
+  frame out.  The frame rule is therefore per file, not per program.
+  Evidence: the `free`, `exit`, and `printf` decodes and the `-of+` sweep.
+- One difference stays.  With `-of+`, OpenWatcom V2 adds `mov esp,ebp` to the epilogue of a function
+  that does not change ESP: the `engine_shutdown` rebuild holds 54 bytes against the original 52, and the
+  empty stub holds `55 89 e5 89 ec 5d c3` against the original `55 89 e5 5d c3`.  The original
+  compiler omits the restore when nothing moved.
+  Evidence: the two container compiles.
+- The frame answer unblocks the game files.  A game file rebuild takes `-of+`, and a run-time or library
+  file rebuild takes the default.  The `printf` rebuild below is the first module to test the rule.
+  Evidence: the module results.
+
+## The rebuilt `printf` module
+
+- The module source follows the OpenWatcom V2 run-time file
+  `bld/clib/streamio/c/printf.c`: `va_start` over the format argument, the print-engine call with the
+  standard-output file, the format, and the argument list, and the return of the count.
+  Evidence: the source file in the OpenWatcom v2 repository.
+- The V2 header defines `stdout` as `((__w_FILE *)&__iob[1])` and `va_start` as the intrinsic
+  `__builtin_va_start`, so the compiler emits the address of the standard-output entry, which matches the
+  original `mov eax, 0x2fd2`.
+  Evidence: `/opt/watcom/h/stdio.h` and `/opt/watcom/h/stdarg.h`.
+- The V2 `va_list` is a plain pointer, so the source passes `&args` to keep the original form, which
+  passed the `va_list` by reference.  The `va_end` call is absent, because the original epilogue holds no
+  trace of it.
+  Evidence: `tools/rebuild/printf.c` and the two container compiles.
+- OpenWatcom V2 compiles the source to 34 bytes and 13 instructions, the same as the original, with the
+  register-save prologue `push ebx`, `push edx`, `sub esp,4` and no EBP frame.  The register-save
+  prologue therefore avoids the frame question, which is the answer the module was built to test.
+  Evidence: `wdis work/rebuild/printf.obj` and the diff.
+- Three instructions come in a different order.  The original computes the argument address into `ebx`,
+  loads the standard-output entry into `eax`, loads the format into `edx`, stores the argument list, and then
+  passes its address; the V2 build computes the argument address into `eax`, stores it, passes the address,
+  loads the format, and then loads the standard-output entry.  The instructions are the same and only the
+  register allocation and the spill position differ.
+  Evidence: the two decodes.
+- The build writes `work/rebuild/prtfmod.exe` (4987 bytes) and the linker map
+  `work/rebuild/printf.map`.
+  Evidence: `sh tools/rebuild/build_printf.sh` and the map file.
+
+## The printf diff and the run
+
+- The diff reports 13 of 13 instructions equal, no opcode differences, and 6 operand differences.  The
+  verdict is `the modules hold the same instructions in a different order`, which names the register
+  allocation difference and separates it from the link-time addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x3009b --rebuilt work/rebuild/prtfmod.exe --rebuilt-map
+  work/rebuild/printf.map --rebuilt-symbol printf_`.
+- The diff tool now names three verdicts: the link-time addresses, the same instructions in a different
+  order, and a real difference.  It replaces every absolute memory address and every branch target with a
+  placeholder for the shape compare, and a memory operand with a register base keeps its offset.
+  Evidence: `tools/rebuild/diff_module.py` and the four module diffs.
+- The headless run writes `P` and `4`: the module reaches the print-engine stub, and the count returns
+  through the module.
+  Evidence: `sh tools/rebuild/run_printf.sh` and `work/rebuild/prtf_out.txt`.
+- The test program carries the name `prtfmod.exe`, because DOS truncates an output file name over eight
+  characters to its short form: `printf_out.txt` becomes `PRINTF_O.TXT`.
+  Evidence: the two runs and the work directory listing.

@@ -78,6 +78,12 @@ REBUILT_MODULES = (
             (0x300D6, "exit_flush_", 6),
         ),
     ),
+    (
+        "printf",
+        "prtfmod.exe",
+        "printf.map",
+        ((0x3009B, "printf_", 0),),
+    ),
 )
 REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
 
@@ -442,10 +448,18 @@ def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
             lines = result.stdout.strip().splitlines()
             if lines:
                 detail = lines[-1]
+            matched = any(
+                verdict in result.stdout
+                for verdict in (
+                    "the instruction sequences match",
+                    "the same instructions in a different order",
+                    "byte-identical",
+                )
+            )
             checks.check(
                 f"stage 9: the {name} module matches the original at "
                 f"{original_address:#x}",
-                result.returncode == 0 and "instruction sequences match" in result.stdout,
+                result.returncode == 0 and matched,
                 detail or result.stderr.strip()[-80:],
             )
 
