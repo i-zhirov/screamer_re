@@ -209,9 +209,14 @@ def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float
         "MENU.dtr",
     )
     checks.check(
-        "stage 10: the member probe reports the limit",
-        "the game left the debugger after the member open" in result.stdout,
-        "one member open per run",
+        "stage 10: the member probe observes the sample loads",
+        "name='skidfx.RAW'" in result.stdout and "name='airplane.RAW'" in result.stdout,
+        "the SFXSBASE and MAP1 samples",
+    )
+    checks.check(
+        "stage 10: the member probe observes the unlisted members stay absent",
+        "name='cry.RAW'" not in result.stdout and "name='train.RAW'" not in result.stdout,
+        "the five unlisted members stay absent",
     )
 
 

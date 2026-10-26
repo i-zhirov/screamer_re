@@ -4585,7 +4585,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   does not depend on that observation.
   Evidence: `tools/scripts/probe_member_open.dbg` and the run output.
 
-## The member open hook observes MENU.dtr
+## The member open hook observes every member open
 
 - The `BP`, `BPPM`, and `BPLM` breakpoints of the DOSBox-X debugger do not
   fire at the member open.  `BP` is a real-mode breakpoint, and `BPPM` and
@@ -4597,24 +4597,38 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   member open `FUN_0004C08D`, the `BPINT 3` breakpoint fires, and the member
   name sits in `EBX` at the stop.
   Evidence: `python3 tools/member_probe.py` and the run output.
-- The first observed member open is `MENU.dtr`.  The `EBX` pointer is `0x2F5148`
-  and the name at that pointer is `MENU.dtr`, so the menu space init loads the
-  menu data first.
-  Evidence: the stack dump at the stop and the run output.
+- The debugger consumes the INT 3 opcode, so the guest resumes at the next byte and
+  the patched `push esi` is skipped.  The Watcom frame then restores the stack
+  pointer to a frame that is four bytes too high, and the return address comes from
+  the wrong stack slot.  The tool repairs the frame: it decrements the stack pointer
+  by four and writes the `ESI` value at the new top, which is exactly what the
+  skipped `push esi` does.  The member open then runs with a correct frame, and the
+  opcode stays in place, so the next member open fires the same breakpoint.
+  Evidence: the frame layout in the disassembly, the code overview at
+  `0150:0020E08D`, and the run output.
+- One run observes 55 member opens in the demo window, in this order: `MENU.dtr`,
+  `MAP1dat.dtr`, `MAP1B.dtr`, `CARS.dtr`, the level graphics `MAP1.BCK`,
+  `MAP1.MLB`, `MAP1.UNR`, `MAP1.MMP`, and `MAP1.smg`, the level data
+  `MAP1opp.spl`, `MAP1anm.spl`, `MAP1cam.spl`, `MAP1rpl.spl`, `MAP1OST.spl`, and
+  `MAP1.mrk`, the font `attrH.fnt`, the sprite `logoH.spr`, the text `game.txt`,
+  the objects `azstac.3DX`, `azcono.3DX`, `awtruck.3DX`, `awbus.3DX`,
+  `ajet.3DX`, `SHADOW.3DX`, and `AUTO00.3DX` to `AUTO04.3DX`, the text
+  `attr.txt`, the list `SFXSBASE.dtr`, the list `MAP1dat.dtr`, the samples
+  `skidfx.RAW` to `airplane.RAW`, the palette `MAP1.COL`, and the menu graphics
+  `menuH.spr`, `menuH.fnt`, `menu.BCK`, and `menu.MLB`.
+  Evidence: `python3 tools/member_probe.py --limit 200` and the run output.
+- The sample loads are the `SFXSBASE` records and the two `MAP1` records, 14 members
+  from `skidfx.RAW` to `airplane.RAW`.  The set matches the run-time table dump,
+  which holds the 12 `SFXSBASE` records and the two `MAP1` records.
+  Evidence: the member sequence and the table dump at the linear `0x2C3224`.
+- The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
+  `TRAIN.RAW` do not appear in the 55 opens.  The run-time trace therefore confirms
+  the static conclusion: the game does not load them.
+  Evidence: the member sequence and the sample list join.
 - The module base varies between runs: the entry dump reads `0x1F20F8` in one run
   and `0x1F00F8` in another, so the base is `0x1C2000` and `0x1C0000`.  The hook
-  therefore uses the fixed file offset and not the module address.
+  therefore recognizes the stop by the patched bytes and not by the module address.
   Evidence: the entry dumps and the debugger screen.
-- The game copy survives the first member open: the `push esi` at the patched byte
-  is skipped, but the Watcom frame restores the stack pointer at `mov esp, ebp`, so
-  the stack stays correct.
-  Evidence: the code overview at `0150:0020E08D` and the run output.
-- Limit: the debugger intercepts the INT 3 opcode before the guest exception
-  handler runs, so the game leaves the debugger after the first member open while the
-  breakpoint stays armed.  The game continues when the breakpoint is deleted before
-  the continue, but then the later member opens are not observed.  The hook
-  therefore observes one member open per run.
-  Evidence: `python3 tools/member_probe.py` and the run output.
-- The tool reports the member name, the pointer, and the limit.  It restores the
+- The tool reports the member name and the pointer at every stop.  It restores the
   game copy at the end of every run.
   Evidence: the run output and the file bytes after the run.

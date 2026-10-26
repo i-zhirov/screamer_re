@@ -212,15 +212,19 @@ member name from the stack at every stop.
 python3 tools/member_probe.py --limit 40
 ```
 
-The first observed member open is `MENU.dtr`, so the menu space init loads the
-menu data first.  The module base varies between runs, so the hook uses the fixed
-file offset and not the module address.
+The debugger consumes the INT 3 opcode, so the guest resumes at the next byte and
+the patched `push esi` is skipped.  The tool repairs the Watcom frame: it decrements
+the stack pointer by four and writes the `ESI` value at the new top, which is exactly
+what the skipped `push esi` does.  The member open then runs with a correct frame,
+and the opcode stays in place, so every member open fires the same breakpoint.
 
-Limit: the debugger intercepts the INT 3 opcode before the guest exception handler
-runs, so the game leaves the debugger after the first member open while the
-breakpoint stays armed.  The game continues when the breakpoint is deleted before
-the continue, but then the later member opens are not observed.  The tool therefore
-observes one member open per run.  The tool restores the game copy at the end of
+One run observes 55 member opens in the demo window.  The first is `MENU.dtr`, so the
+menu space init loads the menu data first.  The sample loads are the `SFXSBASE`
+records and the two `MAP1` records, 14 members from `skidfx.RAW` to `airplane.RAW`.
+The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
+`TRAIN.RAW` do not appear, so the run-time trace confirms the static conclusion.
+The module base varies between runs, so the hook recognizes the stop by the patched
+bytes and not by the module address.  The tool restores the game copy at the end of
 every run.
 
 ## Debugger limits and the alternatives
@@ -407,7 +411,7 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 2 minutes and reports 39 checks, or 43 checks when radare2 is
+A run takes about 5 minutes and reports 40 checks, or 44 checks when radare2 is
 on PATH.  Use `--skip-runtime` to run the static stages only.
 
 The check runs in three places:

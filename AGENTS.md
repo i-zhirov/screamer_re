@@ -103,8 +103,8 @@ python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-The full check runs every stage and needs DOSBox-X.  It takes about 2
-minutes and reports 39 checks:
+The full check runs every stage and needs DOSBox-X.  It takes about 5
+minutes and reports 40 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
