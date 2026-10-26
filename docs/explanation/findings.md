@@ -4819,3 +4819,28 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the run dump and the crash address `3:00000001`.
 - The module is not in the pipeline check stage 9, because the diff does not match yet.
   Evidence: `tools/pipeline_check.py`.
+
+## The error_report jump table at run time
+
+- The crash is the compiler's jump table, and the fault is now pinned.  The DOS/4G dump reports the fault at
+  `1A0:00000001`, and `EIP` is `1`, so the jump reached offset `1`.  The rebuilt `jmp` instruction holds the
+  displacement `0`, so the effective address is `CS:0 + eax*4` and not the table, and the entry read there is the
+  object-relative value `1`.  The table entries are also unrelocated, because the bytes at the table address are the
+  first case body and not addresses.
+  Evidence: `python3 tools/le.py disasm work/rebuild/errmod.exe 0x10050 --count 8` and the run dump.
+- The rebuilt image therefore does not relocate the jump table.  The table lands in the code object, and the loader
+  applies no fixup to its displacement or to its entries, while the data fixups work: the `exit` module reaches its
+  function-pointer slots and the `memcpy` module matches byte for byte.  The code-object fixups are the open question.
+  Evidence: the four module results.
+- The rebuild now builds the table at run time.  The handlers are real functions, so the compiler emits their addresses
+  as data that the loader relocates, the same way the `exit` module reaches its slots, and the module no longer holds a
+  compiler jump table.
+  Evidence: `tools/rebuild/error_report.c`.
+- The crash is gone.  The harness run prints the three `R` markers, one per code, and the `D` marker, and the program
+  exits cleanly.  The guard stays silent, so the segments agree.
+  Evidence: `sh tools/rebuild/run_error_report.sh` and `work/rebuild/err_out.txt`.
+- The code shape differs from the original.  The diff reports 4 of 16 instructions equal and the verdict
+  `the instruction sequences differ`, because the run-time table replaces the compiler table.  The module therefore trades
+  the byte-level match for a behavior run, and stays out of the pipeline check stage 9.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978 --count 16
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map --rebuilt-symbol error_report_`.
