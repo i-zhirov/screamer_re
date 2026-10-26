@@ -219,7 +219,7 @@ The files:
 | File | Role |
 | --- | --- |
 | `driver.c` | the rebuilt driver: the eight register pairs as immediates, register first and data second, with no C run-time |
-| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol |
+| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol, which sets `ES` to `DS` |
 | `stack.asm` | the `STACK` segment that the DOS/4G extender needs (the error 1317) |
 | `cstart.c` | the C start stub |
 | `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
@@ -346,6 +346,23 @@ instructions, and the diff names the difference: `the rebuilt module holds one
 instruction the original does not: mov esp, ebp`.  The frame and the eight calls match,
 the run writes the markers `1` to `8` in order, and no compiler option removes the
 restore, so the module stays open as a byte-level match.
+
+The `memcpy` module is the first exact match:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x8c150 \
+    --rebuilt work/rebuild/memmod.exe \
+    --rebuilt-map work/rebuild/memcpy.map \
+    --rebuilt-symbol memcpy_
+```
+
+The diff reports 14 of 14 bytes equal and the verdict `the modules are
+byte-identical`.  The module copies through `rep movsd`, which reads through `DS:ESI`
+and writes through `ES:EDI`, so the harness start code sets `ES` to `DS`; without that
+step the copy reads the source and writes to the wrong segment, and the target stays
+zero.  The run then prints the target bytes `A` to `H` and the flag `Y`.
 
 ## Host tools
 

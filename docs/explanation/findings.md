@@ -4756,3 +4756,19 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the two buffers byte by byte.  The disassembly of the rebuilt `main` shows the correct order and the correct addresses, so
   the run result contradicts the code, and the harness needs more work.  The module stays verified by the byte compare.
   Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/le.py disasm work/rebuild/memmod.exe 0x10029 --count 40`.
+
+## The memcpy harness and the ES segment
+
+- The harness fault is the `ES` segment register, not the module.  The diagnostic run prints the source bytes `A` to `H` and
+  the target bytes as eight non-printing characters, so the module reads the source correctly through `DS:ESI` and writes through
+  `ES:EDI` to the wrong segment.  The module itself is byte-identical to the original, so it cannot be at fault.
+  Evidence: the diagnostic run and the byte-identical diff.
+- The start stub of the harness never set `ES`.  `tools/rebuild/chk.asm` held `_cstart_` as `jmp main_` alone, so the
+  program ran with whatever `ES` the loader left, while the game start code sets `ES` to the data segment.
+  Evidence: `tools/rebuild/chk.asm`.
+- The fix is `push ds` and `pop es` in `_cstart_`.  The copy then lands, and the run prints the target bytes `A` to `H`
+  and the flag `Y`, so the harness passes.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `work/rebuild/mem_out.txt`.
+- The fix is safe for every module.  The shared stub carries the two extra bytes for the driver, `free`, `exit`, `printf`,
+  `engine_shutdown`, and `memcpy`, and the full check still reports 35 checks and 0 failures.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --port 9895`.

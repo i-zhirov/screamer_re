@@ -1,9 +1,14 @@
 /* The test harness for the rebuilt `memcpy` module.
  *
  * The harness fills a source buffer with the characters `A` to `H`, clears the target
- * buffer, calls the module, and prints `Y` when every byte arrived and `N` when one did not.
+ * buffer, calls the module, and prints the target bytes and the result flag `Y`.
  *
- * The buffers and the markers go through data, because the `print` helper of this harness
+ * The module copies through `rep movsd`, which reads through DS:ESI and writes through
+ * ES:EDI.  The harness start code `_cstart_` in tools/rebuild/chk.asm sets ES to DS, so
+ * the write reaches the target buffer.  Without that step the copy reads the source
+ * correctly and writes to the segment that ES still holds, and the target stays zero.
+ *
+ * The markers go through the data buffer `text`, because the `print` helper of this harness
  * writes garbage for a string literal (the same fault shows in the output of the driver at
  * work/rebuild/out.txt).
  */
@@ -53,6 +58,9 @@ int main(void)
         if (target[i] != source[i]) {
             same = 0;
         }
+    }
+    for (i = 0; i < 8; i++) {
+        put(target[i]);
     }
     put((char)(same ? 'Y' : 'N'));
     quit();
