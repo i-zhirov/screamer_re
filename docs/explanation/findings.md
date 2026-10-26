@@ -4893,3 +4893,37 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `sh tools/rebuild/run_bios_video.sh` and `work/rebuild/bv_out.txt`.
 - The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
+
+## The list_destroy module and the unoptimized build
+
+- `list_destroy` at `0x2ed77` is 25 instructions and 54 bytes: the five register saves `ebx`, `ecx`,
+  `esi`, `edi`, and `ebp`, the frame `mov ebp,esp` and `sub esp,0xc`, the two arguments stored at
+  `[ebp-8]` and `[ebp-4]`, the guard `cmp dword ptr [eax],0` with the short skip, the `free` call at
+  `0xd2008`, the return of the first argument through the temporary at `[ebp-0xc]`, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ed77 --count 25`.
+- The module is the first game file with an unoptimized shape.  The rebuild with the game-file option
+  `-of+` alone holds 13 instructions, because the compiler keeps the argument in a register, drops the
+  locals, and saves only `ecx`.  The rebuild with `-of+ -od` holds 26 instructions and 64 bytes against
+  the original 25 and 54, with 15 of 54 bytes equal, which is the closest game-file result so far.
+  Evidence: the container builds and the two diffs.
+- The `-of+ -od` rebuild matches the original in the frame, the locals, the argument stores, the guard,
+  the `free` call, and the return temporary.  Four differences stay: the prologue order, because the
+  original pushes the four registers and then `ebp` while the rebuild pushes `ebp` and the frame first; the
+  local offsets, because the four saves sit between the frame pointer and the locals in the rebuild; the
+  branch form, because the original uses one short `je` while the rebuild inverts the test and adds a long
+  `jmp`; and the epilogue, because the original restores `esp` from `ebp` and the rebuild uses
+  `lea esp,[ebp-0x10]`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2ed77
+  --rebuilt work/rebuild/ldmod.exe --rebuilt-map work/rebuild/list_destroy.map --rebuilt-symbol
+  list_destroy_`.
+- The four differences repeat the `bios_video` set, and the register-save count pins the compiler
+  version.  The original saves five registers including `ebp`; the V2 `-od` build saves six and the V2
+  `-od` build for this module saves four plus the frame, so the original Watcom 10.x build saves one
+  register fewer than the V2 build in the same mode.
+  Evidence: the four diffs.
+- The run passes.  The harness prints `F`, `R`, `Z`, and `N`: the guard frees the set pointer, the return
+  is the first argument, the pointer itself stays set, and the null pointer skips the free call.  The segment
+  guard stays silent.
+  Evidence: `sh tools/rebuild/run_list_destroy.sh` and `work/rebuild/ld_out.txt`.
+- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.
