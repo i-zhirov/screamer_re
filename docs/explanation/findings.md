@@ -4864,3 +4864,32 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
   not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 9.
   Evidence: the section above and the two diffs.
+
+## The bios_video module and its instruction diff
+
+- `bios_video` at `0x108e4` is the next named module, 22 instructions and 52 bytes.  It builds a
+  general register set at `[ebp-0x2c]` of 0x1c bytes and a segment register set at `[ebp-0x10]` of 0xc
+  bytes, sets the `ax` word from the mode argument, calls the fill helper at `0x4bf23`, and then calls the
+  interrupt helper at `0x4bf4b` with the number `0x10`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x108e4 --count 22`.
+- The two helpers are now known.  The fill helper at `0x4bf23` writes the live `es`, `cs`, `ss`, `ds`, `fs`,
+  and `gs` words into the first pointer, and the call helper at `0x4bf4b` passes its four arguments to the
+  DPMI entry at `0xd4410`.  The first pointer is therefore the 0xc-byte segment set and the second the
+  0x1c-byte general set.
+  Evidence: the two helper dumps.
+- The rebuild holds 20 instructions and 48 bytes against the original 22 and 52, with 6 of 48 bytes equal.  The
+  structure sizes match, because the rebuild subtracts 0x28 and the original 0x28 plus the 4-byte argument slot.
+  Four differences stay: the prologue order, because the original saves `ebx`, `ecx`, `edx`, and `ebp` before the
+  frame and the rebuild saves them after; the argument spill, because the original stores `eax` to `[ebp-4]` and
+  reloads it while the rebuild stores the `ax` word once; the epilogue, because the original restores `esp` from
+  `ebp` and the rebuild uses `lea esp,[ebp-0xc]`; and the argument order, because the original computes the first
+  pointer first and the rebuild last.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x108e4 --rebuilt
+  work/rebuild/bvmod.exe --rebuilt-map work/rebuild/bios_video.map --rebuilt-symbol bios_video_`.
+- The module rebuilds with the stack-frame option `-of+`, which gives the frame and the matching structure layout.
+  Evidence: `tools/rebuild/build_bios_video.sh`.
+- The run passes.  The harness prints the fill marker, the call marker, and the exit marker, and the segment guard
+  stays silent.
+  Evidence: `sh tools/rebuild/run_bios_video.sh` and `work/rebuild/bv_out.txt`.
+- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.
