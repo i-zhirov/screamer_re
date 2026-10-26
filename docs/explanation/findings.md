@@ -4772,3 +4772,21 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The fix is safe for every module.  The shared stub carries the two extra bytes for the driver, `free`, `exit`, `printf`,
   `engine_shutdown`, and `memcpy`, and the full check still reports 35 checks and 0 failures.
   Evidence: `python3 tools/pipeline_check.py --game-dir ... --port 9895`.
+
+## The segment guard in the start stub
+
+- The start stub now runs a guard before `main_`.  It saves the flags and the registers, sets `ES` to `DS`, writes
+  the pattern `A5A5A5A5` to a stack slot through `ES:EDI`, and reads the slot back through `DS:ESI` and through
+  `SS:ESP`.  A mismatch means the segments do not describe the same memory, so the harness spells `SEGFAIL` and exits
+  with the code 1.
+  Evidence: `tools/rebuild/chk.asm`.
+- The guard fires when the segments disagree.  A build with the `push ds` and `pop es` lines removed prints `SEGFAIL` on
+  the screen and leaves the module output empty, so the fault class can no longer reappear in silence.
+  Evidence: the deliberate broken build and `work/rebuild/mem_out.txt`.
+- The failure path uses the BIOS teletype, not the DOS print.  The DOS print reads the message through `DS:EDX`, so it
+  writes garbage when `DS` is the broken segment; the teletype prints one immediate character at a time and needs no segment
+  setup.  The guard spells `SEGFAIL` and then exits with the code 1.
+  Evidence: the two runs, one with the guard message and one without.
+- The guard is silent when the segments agree, and the module passes.  The run prints the target bytes `A` to `H` and the
+  flag `Y`, and the full check reports 35 checks and 0 failures.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/pipeline_check.py --game-dir ... --port 9896`.

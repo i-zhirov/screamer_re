@@ -219,7 +219,7 @@ The files:
 | File | Role |
 | --- | --- |
 | `driver.c` | the rebuilt driver: the eight register pairs as immediates, register first and data second, with no C run-time |
-| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol, which sets `ES` to `DS` |
+| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol, which runs the segment guard, sets `ES` to `DS`, and then starts `main_` |
 | `stack.asm` | the `STACK` segment that the DOS/4G extender needs (the error 1317) |
 | `cstart.c` | the C start stub |
 | `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
@@ -363,6 +363,12 @@ byte-identical`.  The module copies through `rep movsd`, which reads through `DS
 and writes through `ES:EDI`, so the harness start code sets `ES` to `DS`; without that
 step the copy reads the source and writes to the wrong segment, and the target stays
 zero.  The run then prints the target bytes `A` to `H` and the flag `Y`.
+
+The start stub also runs a segment guard before `main_`.  The guard writes a pattern to
+the stack through `ES:EDI` and reads it back through `DS:ESI` and through `SS:ESP`.  When a
+read differs, the segments do not describe the same memory, so the harness spells
+`SEGFAIL` on the screen through the BIOS teletype, which needs no segment setup, and exits
+with the code 1.  The guard is silent when the segments agree.
 
 ## Host tools
 
