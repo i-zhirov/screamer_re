@@ -244,6 +244,10 @@ The files:
 | `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
 | `build_memcpy.sh` | the container build; it writes `work/rebuild/memmod.exe` and `work/rebuild/memcpy.map` |
 | `run_memcpy.sh` | the headless DOSBox-X run; it writes `work/rebuild/mem_out.txt` |
+| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over 20 codes with a jump table |
+| `error_report_main.c` | the `error_report` test harness: the message table and the variadic printer stub |
+| `build_error_report.sh` | the container build; it writes `work/rebuild/errmod.exe` and `work/rebuild/error_report.map` |
+| `run_error_report.sh` | the headless DOSBox-X run; it writes `work/rebuild/err_out.txt` |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh

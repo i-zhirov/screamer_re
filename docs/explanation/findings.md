@@ -4790,3 +4790,32 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The guard is silent when the segments agree, and the module passes.  The run prints the target bytes `A` to `H` and the
   flag `Y`, and the full check reports 35 checks and 0 failures.
   Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/pipeline_check.py --game-dir ... --port 9896`.
+
+## The error_report module
+
+- `error_report` at `0x10978` is the first game module of the rebuild and the next one in size order.  It holds 16 dispatch
+  instructions and 21 message bodies: `push ebp`, `mov ebp,esp`, `sub esp,4`, the code argument stored at `[ebp-4]`, `inc eax`,
+  `cmp eax,0x17`, the default jump to `0x10b87`, and the jump through `cs:[eax*4 + 0x918]`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10978 --count 16`.
+- The jump table at the linear `0x10918` holds 23 object-relative entries, and the codes 20, 21, and 22 point at the default
+  body at `0x10b87`.  The bodies sit at `0x10996` to `0x10b86`, one per code, and each pushes message offsets and the
+  message-table base `0x2fd2`, calls the printer at `0x4bf64`, and returns.
+  Evidence: the table and body dumps.
+- The message offsets are `0x44`, `0x6f`, `0x74`, `0xa3`, `0xd1`, `0xff`, `0x116`, `0x141`, `0x16e`, `0x18b`, `0x1c0`,
+  `0x1f8`, `0x232`, `0x252`, `0x288`, `0x2a7`, `0x2d8`, `0x307`, `0x330`, `0x35a`, `0x369`, and `0x383`.  The codes 2, 3,
+  4, 5, 6, 8, 11, and the default push the format offset `0x7fe8` as well, so the printer is a printf-style call.
+  Evidence: the body dump.
+- The rebuild source holds the switch with the codes 0 to 19 and the default, and the printer declaration carries `__cdecl`, so the
+  compiler pushes the message table and the offsets instead of passing the first argument in a register.  The Watcom default calling
+  convention passes the first argument in `eax`, which does not match the original.
+  Evidence: `tools/rebuild/error_report.c` and `wdis work/rebuild/error_report.obj`.
+- The rebuild does not match byte for byte yet.  Three differences stay: the original spills the code argument to a local and keeps an EBP
+  frame, the rebuild keeps the argument in a register and saves `ecx` and `edx`; the rebuild shares the common case tails through jumps while
+  the original expands every body; and the rebuild compares against `0x13` while the original compares against `0x17`.
+  Evidence: the two disassemblies and the diff.
+- The harness run crashes at a null selector.  The guard passes, because the dump shows `DS` and `ES` equal at `0x200`, so the fault is
+  past the start stub.  The jump table is the suspect: its entries are absolute addresses that the loader must relocate, and the same
+  class of fault already hit the `ES` register.  The module stays open as a byte-level match.
+  Evidence: the run dump and the crash address `3:00000001`.
+- The module is not in the pipeline check stage 9, because the diff does not match yet.
+  Evidence: `tools/pipeline_check.py`.

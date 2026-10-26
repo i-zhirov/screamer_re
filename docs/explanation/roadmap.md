@@ -104,3 +104,6 @@ current host.
     option removes, so the module stays open as a byte-level match).
 11. Rebuild the self-contained `memcpy` at `0x8c150` (done: the module matches the
     original byte for byte, the first exact match; the behavior run needs more work).
+12. Rebuild the game modules in size order (in progress: `error_report` at `0x10978` is
+    decoded and rebuilt; its structure matches, and the frame, the shared case tails, the case
+    count, and the jump-table relocation stay open).
