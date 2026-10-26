@@ -4927,3 +4927,34 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `sh tools/rebuild/run_list_destroy.sh` and `work/rebuild/ld_out.txt`.
 - The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
+
+## The memory_available module and the recurring differences
+
+- `memory_available` at `0x2f8ca` holds 27 instructions and 58 bytes: the six register saves
+  `ebx`, `ecx`, `edx`, `esi`, `edi`, and `ebp`, the frame `mov ebp,esp` and `sub esp,0xc`, the
+  argument stored at `[ebp-4]`, the first call at `0x2f758` with its result moved to `edx`, the
+  second call at `0x2f82e` with the argument reloaded, the sum `add edx,eax`, the sum stored at
+  `[ebp-8]`, the return through the temporary at `[ebp-0xc]`, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f8ca --count 27`.
+- The rebuild with `-of+ -od` holds 27 instructions and 59 bytes against the original 27 and 58,
+  with 31 of 58 bytes equal.  This is the first game module whose instruction count matches, and
+  the byte count differs by one.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f8ca
+  --rebuilt work/rebuild/mamod.exe --rebuilt-map work/rebuild/memory_available.map
+  --rebuilt-symbol memory_available_`.
+- Three of the four `bios_video` differences recur.  The prologue order recurs, because the
+  original pushes the five registers and then `ebp` while the rebuild pushes `ebp` and the frame
+  first.  The local offsets recur, because the saves sit between the frame pointer and the locals.
+  The epilogue recurs, because the original restores `esp` from `ebp` and the rebuild uses
+  `lea esp,[ebp-0x14]`.  The branch form does not apply, because this module has no conditional.
+  Evidence: the two diffs.
+- The register-save count follows the registers the function uses.  `list_destroy` uses `edx` only for
+  the free call, and the original saves five registers; `memory_available` holds the first call result
+  in `edx` across the second call, and the original saves six.  The V2 `-od` build saves the same
+  six here, so the save set is not the difference for this module.
+  Evidence: the three module diffs.
+- The run passes.  The harness prints `F`, `S`, `T`, and `D`: the first probe runs once, the second
+  probe runs once, the total is the sum, and the program exits.  The segment guard stays silent.
+  Evidence: `sh tools/rebuild/run_memory_available.sh` and `work/rebuild/ma_out.txt`.
+- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.
