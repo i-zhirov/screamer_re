@@ -4844,3 +4844,23 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the byte-level match for a behavior run, and stays out of the pipeline check stage 9.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978 --count 16
   --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map --rebuilt-symbol error_report_`.
+
+## The jump table is absent from the object file
+
+- The table never reaches the code object.  The object dump lists two routines, 80 bytes at `_TEXT + 0` and 263 bytes at
+  `_TEXT + 0x50`, and the whole `_TEXT` holds 343 bytes.  The table of 23 entries alone needs 92 bytes, and the linked
+  `error_report_` holds 263 bytes against the original span of about 551 bytes, so the table is absent from the image and not
+  only from the link.
+  Evidence: `wdis work/rebuild/er.obj` and `work/rebuild/error_report.map`.
+- The compiler emits the jump against a symbol whose table it does not place in the code segment.  The object dump holds
+  `jmp dword ptr L$1[eax*4]` and no `L$1` definition, so the reference and the table part company at the compiler, before the
+  linker runs.
+  Evidence: the object dump.
+- The linker cannot be told to keep the table.  The `wlink` V2.0 beta holds `option eliminate` for dead-code elimination with
+  no disable form: `option noeliminate` fails with `E3033: directive error near 'noeliminate'`, and `eliminate=off`, `ELiminate=no`,
+  and `eliminate=false` fail the same way.
+  Evidence: the four container links.
+- The original build therefore used a compiler and a linker that place and keep the table.  The original Watcom C/C++ 10.x toolchain
+  did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
+  not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 9.
+  Evidence: the section above and the two diffs.
