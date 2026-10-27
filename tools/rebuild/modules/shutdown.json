@@ -1,0 +1,33 @@
+{
+  "exe": "shutmod.exe",
+  "map": "shutdown.map",
+  "name": "shutdown",
+  "run": {
+    "command": "shutmod.exe > shut_out.txt",
+    "expect": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "output": "shut_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "shutdown.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "shutdown_main.c"
+    }
+  ]
+}
