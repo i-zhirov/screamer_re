@@ -62,7 +62,7 @@ screamer_re/
 ├── .githooks/
 │   └── pre-push               # run the checks before every push
 ├── .github/workflows/
-│   └── pipeline.yml          # CI: the syntax gate and the full check
+│   └── pipeline.yml           # CI: the syntax gate and the full check
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
@@ -78,10 +78,14 @@ screamer_re/
 │   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket
 │   ├── ghidra/                # Ghidra loader install and decompile scripts
 │   ├── entry_probe.py         # find the program entry in a CPU log
+│   ├── export_assets.py       # export the graphics assets as PNG files
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
+│   ├── gfx_container.py       # list and extract the members of a graphics container
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
 │   ├── le.py                  # parse an LE image and disassemble x86 code
+│   ├── member_probe.py        # hook the container member open at run time
 │   ├── pipeline_check.py      # run the pipeline end to end
+│   ├── sound_bank.py          # decode the ADLIB- banks, the samples, and the songs
 │   ├── rebuild/               # the OpenWatcom V2 build harness
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -108,7 +112,7 @@ sh tools/rebuild/run_memcpy.sh
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/rebuild/diff_module.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -118,8 +122,8 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8c150 --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_
 ```
 
-The full check runs every stage and needs DOSBox-X.  It takes about 15
-seconds and reports 35 checks:
+The full check runs every stage and needs DOSBox-X.  It takes about 6
+minutes and reports 49 checks:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -148,7 +152,10 @@ open ~/Documents/Screamer.app
   Use the following commands:
     - `python3 -m py_compile tools/le.py tools/inventory.py
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
-      tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py
+    - `python3 -m py_compile tools/le.py tools/inventory.py
+      tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
+      tools/gfx_container.py tools/export_assets.py tools/sound_bank.py
+      tools/member_probe.py tools/rebuild/diff_module.py
       tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the

@@ -47,6 +47,8 @@ TOOLS = (
     "entry_probe.py",
     "gfx_container.py",
     "export_assets.py",
+    "sound_bank.py",
+    "member_probe.py",
     "rebuild/diff_module.py",
 )
 
@@ -217,6 +219,104 @@ def verify_reference_digests(checks: Checks, game_dir: Path) -> None:
         f"outside the reference: {', '.join(written[:3])}" if written else "none",
     )
 
+
+
+def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float) -> None:
+    """Hook the member open and check the first member name."""
+    from member_probe import run_probe
+
+    result = run(
+        [
+            sys.executable,
+            "tools/member_probe.py",
+            "--game-dir",
+            str(work_dir / "game"),
+            "--work-dir",
+            str(work_dir),
+            "--port",
+            str(port),
+            "--timeout",
+            str(timeout),
+        ],
+        timeout=timeout + 30,
+    )
+    checks.check("stage 9: the member probe runs", result.returncode == 0, result.stderr.strip())
+    checks.check(
+        "stage 9: the member probe observes the first member",
+        "name='MENU.dtr'" in result.stdout,
+        "MENU.dtr",
+    )
+    checks.check(
+        "stage 9: the member probe observes the sample loads",
+        "name='skidfx.RAW'" in result.stdout and "name='airplane.RAW'" in result.stdout,
+        "the SFXSBASE and MAP1 samples",
+    )
+    checks.check(
+        "stage 9: the member probe observes the unlisted members stay absent",
+        "name='cry.RAW'" not in result.stdout and "name='train.RAW'" not in result.stdout,
+        "the five unlisted members stay absent",
+    )
+
+
+def check_sound(checks: Checks, game_dir: Path, work_dir: Path) -> None:
+    """Decode the sound formats and check the reference values."""
+    # The bank tool needs a member, so extract the two banks first.
+    for name in ("DRUM.BNK", "MELODIC.BNK", "MUSIC1.HMP"):
+        run(
+            [sys.executable, "tools/gfx_container.py", "member", str(game_dir / "DATA/MUSIC.DAT"), name,
+             "--out", str(work_dir / name)]
+        )
+    drum = run([sys.executable, "tools/sound_bank.py", "bank", str(work_dir / "DRUM.BNK")])
+    checks.check("stage 10: the drum bank decodes", drum.returncode == 0, drum.stderr.strip())
+    checks.check(
+        "stage 10: the drum bank holds the reference header",
+        "signature:   ADLIB-" in drum.stdout
+        and "count:       28" in drum.stdout
+        and "data offset: 0x61c" in drum.stdout,
+        "ADLIB-, 28, 0x61c",
+    )
+    checks.check(
+        "stage 10: the first drum instrument holds the driver pairs",
+        "20:0F  40:3F  60:01  80:3E  E0:0F  23:3F  43:01  C0:01" in drum.stdout,
+        "the eight register pairs",
+    )
+    melodic = run([sys.executable, "tools/sound_bank.py", "bank", str(work_dir / "MELODIC.BNK")])
+    checks.check(
+        "stage 10: the melodic bank decodes",
+        melodic.returncode == 0 and "PIANO1" in melodic.stdout,
+        melodic.stderr.strip(),
+    )
+    lists = [
+        str(game_dir / "DATA/GEN.DAT"),
+        *[str(path) for path in sorted((game_dir / "DATA").glob("MAP*I.DAT"))],
+    ]
+    samples = run(
+        [sys.executable, "tools/sound_bank.py", "samples", str(game_dir / "DATA/SOUND.DAT"), "--lists", *lists]
+    )
+    checks.check("stage 10: the sample bank decodes", samples.returncode == 0, samples.stderr.strip())
+    checks.check(
+        "stage 10: the sample bank joins 87 members",
+        "members: 92" in samples.stdout and "joined:  87" in samples.stdout,
+        "92 members, 87 joined",
+    )
+    checks.check(
+        "stage 10: the sample flags match the loader",
+        "heli             8127    19521  268468223    -1      0      0  268500992  285212672 0x4700"
+        in samples.stdout,
+        "heli 0x4700",
+    )
+    song = run([sys.executable, "tools/sound_bank.py", "song", str(work_dir / "MUSIC1.HMP")])
+    checks.check("stage 10: the song decodes", song.returncode == 0, song.stderr.strip())
+    checks.check(
+        "stage 10: the song header matches the reference",
+        "tracks:      13" in song.stdout and "duration:    93 s" in song.stdout,
+        "13 tracks, 93 s",
+    )
+    checks.check(
+        "stage 10: the song chunks cover the data",
+        song.stdout.count("track") >= 13 and "0x12107" in song.stdout,
+        "13 chunks",
+    )
 
 
 def check_cd_image(checks: Checks, game_dir: Path, work_dir: Path) -> None:
@@ -426,7 +526,7 @@ def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
     for name, executable, map_name, diffs in REBUILT_MODULES:
         result = run(["sh", f"tools/rebuild/build_{name}.sh"], timeout=timeout)
         checks.check(
-            f"stage 9: the {name} module rebuild links",
+            f"stage 11: the {name} module rebuild links",
             result.returncode == 0 and executable in result.stdout,
             result.stderr.strip()[-80:],
         )
@@ -463,7 +563,7 @@ def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
                 )
             )
             checks.check(
-                f"stage 9: the {name} module matches the original at "
+                f"stage 11: the {name} module matches the original at "
                 f"{original_address:#x}",
                 result.returncode == 0 and matched,
                 detail or result.stderr.strip()[-80:],
@@ -531,6 +631,8 @@ def main() -> int:
         check_session_script(checks, work_root, args.port, args.timeout)
         check_cross(checks, parser_result, runtime, Path(runtime.get("log", "")))
         check_radare2(checks, game_dir, args.exe, args.timeout)
+        check_member_probe(checks, work_root / "run", args.port, args.timeout)
+    check_sound(checks, game_dir, work_root)
     check_rebuild(checks, game_dir, args.timeout)
 
     print()

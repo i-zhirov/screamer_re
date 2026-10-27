@@ -10,6 +10,10 @@
 | `tools/dosboxx_control.py` | drive the DOSBox-X debugger over its control socket |
 | `tools/entry_probe.py` | find the program entry in a DOSBox-X instruction log |
 | `tools/pipeline_check.py` | run the pipeline end to end and check the stages agree |
+| `tools/gfx_container.py` | list and extract the members of a graphics container |
+| `tools/export_assets.py` | export the graphics assets as PNG files |
+| `tools/sound_bank.py` | decode the sound formats: the banks, the samples, and the songs |
+| `tools/member_probe.py` | hook the container member open and report the member names |
 | `tools/ghidra/install_loader.sh` | install the LX/LE loader into Ghidra |
 | `tools/ghidra/decompile.sh` | decompile functions by address with Ghidra |
 | `tools/ghidra/DecompileFunctions.java` | the Ghidra headless decompile script |
@@ -155,6 +159,73 @@ LZW-compressed, so the raw member does not match the plain structure.  The
 expansion follows the instructions and is confirmed against the runtime records
 of
 `LOGOH.SPR`.
+
+### `tools/sound_bank.py`
+
+The tool decodes the three sound formats.  It uses the container and the list
+parse of `tools/gfx_container.py`, so the two tools agree on the container shape
+and the `SOUND_FX` list shape.
+
+```sh
+GAME=~/Documents/Screamer.app/Contents/Resources/game
+python3 tools/gfx_container.py member "$GAME/DATA/MUSIC.DAT" DRUM.BNK --out work/DRUM.BNK
+python3 tools/sound_bank.py bank work/DRUM.BNK
+python3 tools/sound_bank.py samples "$GAME/DATA/SOUND.DAT" \
+  --lists "$GAME/DATA/GEN.DAT" "$GAME/DATA/MAP1I.DAT" "$GAME/DATA/MAP2I.DAT" \
+  "$GAME/DATA/MAP3I.DAT" "$GAME/DATA/MAP4I.DAT" "$GAME/DATA/MAP5I.DAT" "$GAME/DATA/MAP6I.DAT"
+python3 tools/sound_bank.py samples "$GAME/DATA/SOUND.DAT" \
+  --lists "$GAME/DATA/GEN.DAT" "$GAME/DATA/MAP1I.DAT" --out work/samples
+python3 tools/gfx_container.py member "$GAME/DATA/MUSIC.DAT" MUSIC1.HMP --out work/MUSIC1.HMP
+python3 tools/sound_bank.py song work/MUSIC1.HMP
+python3 tools/sound_bank.py song work/MUSIC1.HMP --out work/midi
+```
+
+`bank` parses an `ADLIB-` instrument bank.  It reports the header, the
+instrument table, and the instrument records.  Every record prints the eight OPL
+register and value pairs in the driver write order: the register `0x20` at `+0x06`,
+`0x40` at `+0x0A`, `0x60` at `+0x0D`, `0x80` at `+0x11`, `0xE0` at `+0x13`,
+`0x23` at `+0x17`, `0x43` at `+0x1A`, and `0xC0` at `+0x1B`.
+
+`samples` parses `DATA/SOUND.DAT` and the `SOUND_FX` lists of the list
+containers.  It joins the list names with the members, prints the sample records,
+and derives the runtime flags of the loader at `0x1f2e0`.  The `--out` option
+writes one WAV file per sample.  The samples are 8-bit unsigned mono, and the
+default rate is 11025, which the HMI digital driver init at `0x1f1fb` passes.
+
+`song` parses an HMP song.  It reports the header, the instrument table, and the
+chunks.  Every chunk prints the chunk number, the track number, the size, the event
+count, the tick count, and the event mix.  The `--out` option writes one standard
+MIDI file per chunk, and the delta converts from the LSB-first form of the game to
+the standard MSB-first form.
+
+### `tools/member_probe.py`
+
+The tool hooks the container member open at run time and reports the member names.
+The protected-mode and linear breakpoints watch a memory change and the `BP`
+breakpoint is a real-mode breakpoint, so none of them fire at the protected-mode
+member open.  The tool patches a copy of the game executable with the INT 3 opcode
+`0xCC` at the file offset of the member open `FUN_0004C08D` and of its call site
+in the sample loader, sets the `BPINT 3` breakpoint, runs the game, and reads the
+member name from the stack at every stop.
+
+```sh
+python3 tools/member_probe.py --limit 40
+```
+
+The debugger consumes the INT 3 opcode, so the guest resumes at the next byte and
+the patched `push esi` is skipped.  The tool repairs the Watcom frame: it decrements
+the stack pointer by four and writes the `ESI` value at the new top, which is exactly
+what the skipped `push esi` does.  The member open then runs with a correct frame,
+and the opcode stays in place, so every member open fires the same breakpoint.
+
+One run observes 55 member opens in the demo window.  The first is `MENU.dtr`, so the
+menu space init loads the menu data first.  The sample loads are the `SFXSBASE`
+records and the two `MAP1` records, 14 members from `skidfx.RAW` to `airplane.RAW`.
+The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
+`TRAIN.RAW` do not appear, so the run-time trace confirms the static conclusion.
+The module base varies between runs, so the hook recognizes the stop by the patched
+bytes and not by the module address.  The tool restores the game copy at the end of
+every run.
 
 ## Debugger limits and the alternatives
 
@@ -470,17 +541,19 @@ to `LOGCPU.TXT` in the DOSBox-X working directory.
 The tool runs every stage of the pipeline and checks that the stages agree: the
 syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
 debugger session script, the cross-checks between the file view and the run-time
-view, and the radare2 cross-check.  The check pins the reference values from the
+view, the radare2 cross-check, the container member probe, the sound bank decode,
+and the OpenWatcom module rebuild.  The check pins the reference values from the
 reference pages.  The tool exits with code 0 when every check passes.  The
-radare2 stage is skipped when `r2` is not on PATH.
+radare2 stage is skipped when `r2` is not on PATH, and the module rebuild stage
+is skipped when Docker is missing.
 
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 20 seconds and reports 28 checks.  Use `--skip-runtime` to run
-the static stages only.
+A run takes about 6 minutes and reports 49 checks, or 53 checks when radare2 is
+on PATH.  Use `--skip-runtime` to run the static stages only.
 
 The check runs in three places:
 
