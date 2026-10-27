@@ -4968,6 +4968,33 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
 
+## The frame_step module and the call order
+
+- `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
+  `mov ebp,esp`, the call to `default_data_copy` at `0x10193`, the call to `joystick_update` at
+  `0x24da0`, the call to `frame_timer` at `0x1fc38`, and the epilogue `pop ebp` and `ret`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2aa84 --count 7`.
+- The three calls run in this order: the default data copy, the joystick update, and the frame timer.
+  The hand-written row named the callees in address order (`0x10193`, `0x1fc38`, `0x24da0`), so the
+  row now names the call order and the rebuild run confirms it.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_step` and
+  `work/rebuild/fs_out.txt`.
+- The rebuild with `-of+` holds 8 instructions and 22 bytes against the original 7 and 20: the frame,
+  the three calls, the epilogue, and one `mov esp,ebp`.  The `-of` build holds 11 instructions, so
+  the `as needed` form is not the answer here.
+  Evidence: `python3 tools/rebuild/harness.py build --module frame_step` and the two diffs.
+- The diff holds 5 of 7 instructions equal and the verdict `the rebuilt module holds one instruction
+  the original does not: mov esp, ebp`.  The difference is the same code-generator change as
+  `engine_shutdown`, because `frame_step` changes no ESP.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa84
+  --rebuilt work/rebuild/fsmod.exe --rebuilt-map work/rebuild/frame_step.map --rebuilt-symbol
+  frame_step_`.
+- The run passes.  The harness prints `D`, `J`, `F`, and `T`: the copy runs, the joystick update
+  runs, the frame timer runs, and the program exits.  The segment guard stays silent.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_step` and `work/rebuild/fs_out.txt`.
+- The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2aa84`.
+
 ## The rebuild framework
 
 - The rebuild framework holds one record per function and one record per build
@@ -5020,9 +5047,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   /nonexistent/STARTH.EXE`.
 - The status page renders the store.
   Evidence: `python3 tools/rebuild/view.py html`.
-- The pipeline check reports 42 checks and 0 failures and takes about 2 minutes
+- The pipeline check reports 43 checks and 0 failures and takes about 2 minutes
   40 seconds.  Inside the Nix dev shell the radare2 stage adds four checks, so
-  the run reports 46 checks.  With `--skip-runtime` it reports 31 checks and
+  the run reports 47 checks.  With `--skip-runtime` it reports 32 checks and
   takes about 14 seconds.  The earlier sections in this file record the check
   count at the time they were written, not the current count.
   Evidence: `python3 tools/pipeline_check.py --game-dir

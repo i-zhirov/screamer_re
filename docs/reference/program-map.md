@@ -166,7 +166,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x29d08` | `menu_space_init` | loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music | observed |
 | `0x29f80` | `menu_frame` | loads `gfx\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits | observed |
 | `0x2a1b0` | `race_cleanup` | tears the race down and releases the `OPT_PCX` resource | observed |
-| `0x2aa84` | `frame_step` | calls `default_data_copy`, `frame_timer`, and `joystick_update` | derived |
+| `0x2aa84` | `frame_step` | calls `default_data_copy`, `joystick_update`, and `frame_timer` | derived |
 | `0x2ff14` | `music_play` | processes a music request record and sets a state from 0 to 6 | derived |
 | `0x8c160` | `memset` | fills `count >> 2` dwords with one value | observed |
 <!-- end generated: frame_update callees -->

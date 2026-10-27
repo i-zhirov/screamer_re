@@ -472,9 +472,9 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 2 minutes 40 seconds and reports 42 checks.  Inside the Nix dev
-shell the radare2 stage adds four checks, so the run reports 46 checks.  Use
-`--skip-runtime` to skip the run-time stages: it reports 31 checks and takes
+A run takes about 2 minutes 40 seconds and reports 43 checks.  Inside the Nix dev
+shell the radare2 stage adds four checks, so the run reports 47 checks.  Use
+`--skip-runtime` to skip the run-time stages: it reports 32 checks and takes
 about 14 seconds.
 
 The check runs in three places:
