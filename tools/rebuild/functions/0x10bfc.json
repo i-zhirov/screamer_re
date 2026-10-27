@@ -1,0 +1,17 @@
+{
+  "address": "0x10bfc",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records"
+    }
+  ],
+  "name": "object_load",
+  "notes": [],
+  "role": "reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records",
+  "section": "Resource loader",
+  "size": 3,
+  "status": "named"
+}

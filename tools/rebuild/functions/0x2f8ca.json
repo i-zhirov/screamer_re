@@ -1,0 +1,47 @@
+{
+  "address": "0x2f8ca",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`"
+    }
+  ],
+  "module": "memory_available",
+  "name": "memory_available",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 58,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
+    "date": "2026-10-27",
+    "source_digest": "sha256:d5e72b9ada92ef440218f04138abfa8eec1d358b5c973a4e08f8e9015efb2e21",
+    "tool": "run.py"
+  },
+  "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
+  "section": "Program functions",
+  "size": 5,
+  "status": "rebuilt",
+  "symbol": "memory_available_"
+}

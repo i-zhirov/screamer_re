@@ -772,7 +772,7 @@ Authority.
   loop (`motion_update`, `default_data_copy`, `joystick_update`) until the
   session state `DAT_0011ce44` reaches 4, and ends with `race_end` at `0x279a4`.
   Evidence: the decompiled `FUN_00027700`.
-- `frame_update` clears the screen, runs `net_space_init` and `menu_frame`, then
+- `frame_update` clears the screen, runs `menu_space_init` and `menu_frame`, then
   loops on `frame_step` until the frame flag `DAT_0011d234` is set, and ends
   with
   `race_frame` and `race_cleanup`.
@@ -5049,6 +5049,15 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
   not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 11.
   Evidence: the section above and the two diffs.
+- The compiler-table rebuild crashes again.  The V2 compiler does not place the jump table in the code object, so the
+  rebuilt `jmp` reads the entry at `CS:0` and reaches offset `1`, and the run prints the DOS/4G general-protection dump
+  at `1A0:00000001` with none of the `R` and `D` markers.  The earlier "crash is gone" claim and the
+  "run-time table stays as the working form" claim are superseded.
+  Evidence: `python3 tools/rebuild/harness.py run --module error_report` and
+  `python3 tools/le.py disasm work/rebuild/errmod.exe 0x10050 --count 8`.
+- The store records the behavior crash.  The `run.py run --module error_report` command exits 1 with
+  `error: the output lacks 'R'`, and the `0x10978` record holds `behavior: fail`.
+  Evidence: `python3 tools/rebuild/run.py run --module error_report` and the run log under `work/rebuild/logs/`.
 
 ## The bios_video module and its instruction diff
 
@@ -5143,3 +5152,109 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `sh tools/rebuild/run_memory_available.sh` and `work/rebuild/ma_out.txt`.
 - The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
+
+## The frame_step module and the call order
+
+- `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
+  `mov ebp,esp`, the call to `default_data_copy` at `0x10193`, the call to `joystick_update` at
+  `0x24da0`, the call to `frame_timer` at `0x1fc38`, and the epilogue `pop ebp` and `ret`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2aa84 --count 7`.
+- The three calls run in this order: the default data copy, the joystick update, and the frame timer.
+  The hand-written row named the callees in address order (`0x10193`, `0x1fc38`, `0x24da0`), so the
+  row now names the call order and the rebuild run confirms it.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_step` and
+  `work/rebuild/fs_out.txt`.
+- The rebuild with `-of+` holds 8 instructions and 22 bytes against the original 7 and 20: the frame,
+  the three calls, the epilogue, and one `mov esp,ebp`.  The `-of` build holds 11 instructions, so
+  the `as needed` form is not the answer here.
+  Evidence: `python3 tools/rebuild/harness.py build --module frame_step` and the two diffs.
+- The diff holds 5 of 7 instructions equal and the verdict `the rebuilt module holds one instruction
+  the original does not: mov esp, ebp`.  The difference is the same code-generator change as
+  `engine_shutdown`, because `frame_step` changes no ESP.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa84
+  --rebuilt work/rebuild/fsmod.exe --rebuilt-map work/rebuild/frame_step.map --rebuilt-symbol
+  frame_step_`.
+- The run passes.  The harness prints `D`, `J`, `F`, and `T`: the copy runs, the joystick update
+  runs, the frame timer runs, and the program exits.  The segment guard stays silent.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_step` and `work/rebuild/fs_out.txt`.
+- The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2aa84`.
+
+## The rebuild framework
+
+- The rebuild framework holds one record per function and one record per build
+  unit.  `store.py` is the record store and the validation, `harness.py` is the
+  pinned container and DOSBox-X harness, `run.py` is the runner, `view.py`
+  renders the self-contained status page, and `docs.py` renders the
+  `program-map.md` tables.  The function records live at
+  `tools/rebuild/functions/0x<address>.json`, the ten module recipes at
+  `tools/rebuild/modules/*.json`, and the record contracts at
+  `tools/rebuild/contracts/*.schema.json`.
+  Evidence: `tools/rebuild/store.py`, `harness.py`, `run.py`, `view.py`, and
+  `docs.py`.
+- The seed added 644 records and lost none: 643 records in its first run and one
+  more, the exit helper at `0x300d6`, in a correction run.
+  Evidence: `python3 tools/rebuild/store.py seed`.
+- The store holds 757 function records and 10 module records, and
+  `store.py check` reports `767 records, 0 violations`.
+  Evidence: `python3 tools/rebuild/store.py check`.
+- The import of the hand-written program map reproduces the tables: the render
+  writes them between 21 marker pairs, and `docs.py check` reports no drift.
+  The import ran once with the one-time importer; the migration is complete and
+  the tool is removed.
+  Evidence: `python3 tools/rebuild/docs.py render` and
+  `python3 tools/rebuild/docs.py check`.
+- The framework replaces the twenty shell scripts and the module registry: the
+  ten module recipes and `harness.py` build and run each module, and the store
+  is the only registry.  The twenty shell scripts are removed.
+  Evidence: `tools/rebuild/modules/` and `python3 tools/rebuild/harness.py
+  build --module free`.
+- The generated tables differ from the hand-written ones in four ways: the 21
+  marker pairs; the rows of every function table reordered to address ascending;
+  11 duplicate rows removed from a later table when an earlier table names the
+  same address; and 3 rows corrected from the disassembly of `0x29d08` and
+  `0x4c810`: the name and the evidence cell of `0x29d08` become
+  `menu_space_init`, the evidence cell of `0x28ba4` follows the new name, and
+  the name of `0x4c810` becomes `stream_layer_init`.
+  Evidence: the render diff and
+  `python3 tools/le.py disasm STARTH.EXE 0x29d08`.
+- The runner builds and runs the declared checks through the harness, and the
+  store records the result of each one.
+  Evidence: `python3 tools/rebuild/harness.py build --module free` and
+  `python3 tools/rebuild/run.py run --all --no-write`.
+- The runner writes no result when a declared check is a skip, so a stored result
+  never holds a `skip` verdict.  A missing original image gives a clear error and
+  exit 2.  The DOSBox-X conf quotes the mount path, so a checkout path with a
+  space still mounts.
+  Evidence: `python3 -m unittest discover -s tools/rebuild/tests`,
+  `python3 tools/rebuild/run.py run --function 0x300ec --skip-runtime`, and
+  `python3 tools/rebuild/run.py run --function 0x300ec --no-write --original
+  /nonexistent/STARTH.EXE`.
+- The status page renders the store.
+  Evidence: `python3 tools/rebuild/view.py html`.
+- The pipeline check reports 57 checks and 0 failures and takes about 8 minutes
+  40 seconds.  Inside the Nix dev shell the radare2 stage adds four checks, so
+  the run reports 61 checks.  With `--skip-runtime` it reports 42 checks and
+  takes about 16 seconds.  The earlier sections in this file record the check
+  count at the time they were written, not the current count.
+  Evidence: `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game`.
+
+## The status page in the hooks and CI
+
+- The pre-commit hook regenerates `work/rebuild/status.html`, so the local page
+  is current at every commit.  The page is generated output and stays out of git.
+  Evidence: `.githooks/pre-commit` and `python3 tools/rebuild/view.py html`.
+- The CI `status` job regenerates the page on every push and pull request and
+  publishes it as the `rebuild-status` artifact.  The job needs the standard
+  library only, because the page reads the committed store.
+  Evidence: `.github/workflows/pipeline.yml` and the `rebuild-status` artifact.
+- The hook skips with a clear line when the view tool or `python3` is missing,
+  and it fails the commit when the page cannot render.
+  Evidence: `sh .githooks/pre-commit`.
+- The pre-push hook is gone.  It ran the full check in the Nix dev shell before
+  every push, and the SSH connection to the remote idled for the whole run, so
+  the remote closed it and the push failed.  The syntax gate, the unit suite, and
+  the full check run in CI instead, and the pre-commit hook still regenerates the
+  status page.
+  Evidence: the failed pushes and `.github/workflows/pipeline.yml`.

@@ -1,0 +1,30 @@
+{
+  "exe": "mamod.exe",
+  "map": "memory_available.map",
+  "name": "memory_available",
+  "run": {
+    "command": "mamod.exe > ma_out.txt",
+    "expect": [
+      "F",
+      "S",
+      "T",
+      "D"
+    ],
+    "output": "ma_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_available.c",
+      "flags": [
+        "-of+",
+        "-od"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_available_main.c"
+    }
+  ]
+}

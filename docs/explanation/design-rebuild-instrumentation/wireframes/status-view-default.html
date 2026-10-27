@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Status view — default state</title>
+  <!-- Design asset for docs/explanation/design-rebuild-instrumentation.md.
+       Self-contained: no server, no external reference. -->
+  <style>
+    /* Theme variables copied from the Whiteboard frame template. */
+    :root {
+      color-scheme: light;
+      --page-bg: linear-gradient(160deg, #eef0ff 0%, #f7f6ff 42%, #eaf7ff 100%);
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f2ff;
+      --border: #e2e3f6;
+      --border-strong: #cbcef0;
+      --text-primary: #1b1b2f;
+      --text-secondary: #666680;
+      --text-tertiary: #9a9ab4;
+      --accent: #5b5bd6;
+      --accent-soft: #ededff;
+      --success: #16a34a;
+      --warning: #d97706;
+      --error: #dc2626;
+      --selected-bg: #f0f0ff;
+      --selected-border: #5b5bd6;
+      --shadow-card: 0 1px 2px rgba(27, 27, 47, 0.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --page-bg: linear-gradient(160deg, #101226 0%, #171936 45%, #0f1c2e 100%);
+        --bg-surface: #1e1f38;
+        --bg-elevated: #2a2b4a;
+        --border: #353760;
+        --border-strong: #454780;
+        --text-primary: #f1f1fb;
+        --text-secondary: #a5a5c6;
+        --text-tertiary: #71729a;
+        --accent: #8b8bfa;
+        --accent-soft: rgba(139, 139, 250, 0.16);
+        --success: #4ade80;
+        --warning: #fbbf24;
+        --error: #f87171;
+        --selected-bg: rgba(139, 139, 250, 0.14);
+        --selected-border: #8b8bfa;
+        --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--page-bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    h2 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0.5rem; }
+    h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 90ch; }
+    .section { margin-bottom: 2rem; }
+    .label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .option {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      box-shadow: var(--shadow-card);
+    }
+    .option .letter {
+      background: var(--bg-elevated);
+      color: var(--accent);
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .option .content { flex: 1; }
+    .option .content h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .option .content p { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
+
+    .wireframe {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-card);
+    }
+    .wireframe-header {
+      background: var(--bg-elevated);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .wireframe-body { padding: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<h2>Status view — default state</h2>
+<p class="subtitle">The approved layout D: section board on the left, inline detail pane on the right. Sample data from the store. Screen size: desktop.</p>
+
+<div class="options">
+
+  <div class="option">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Section board and inline detail pane</h3>
+      <p class="subtitle">Filters and the progress bar on top. Sections collapse. Chips are functions, colored by status. The selected record stays open on the right.</p>
+
+      <div class="wireframe" style="font-size:11px;line-height:1.5;">
+        <div class="wireframe-header" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <span><b>Screamer rebuild</b> · 155 functions</span>
+          <span style="color:var(--text-secondary);">last run 2026-10-26 14:02 · <span style="color:var(--warning);">9 stale</span></span>
+        </div>
+        <div class="wireframe-body" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span style="border:1px solid var(--border-strong);border-radius:4px;padding:2px 8px;">status: all ▾</span>
+            <span style="border:1px solid var(--border-strong);border-radius:4px;padding:2px 8px;">module: all ▾</span>
+            <span style="border:1px solid var(--border-strong);border-radius:4px;padding:2px 8px;color:var(--text-tertiary);">search…</span>
+            <span style="border:1px solid var(--warning);color:var(--warning);border-radius:4px;padding:2px 8px;">stale only</span>
+            <span style="flex:1"></span>
+            <span style="border:1px solid var(--accent);border-radius:4px;padding:2px 8px;color:var(--accent);">board</span>
+            <span style="border:1px solid var(--border-strong);border-radius:4px;padding:2px 8px;color:var(--text-secondary);">table</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="width:100%;height:6px;background:var(--bg-elevated);border-radius:3px;overflow:hidden;">
+              <span style="display:block;width:3%;height:100%;background:var(--success);"></span>
+            </span>
+            <span style="color:var(--text-secondary);white-space:nowrap;">4 verified · 2 matching · 1 rebuilt · 133 named · 16 unknown</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+
+            <div style="flex:2.1;display:flex;flex-direction:column;gap:6px;">
+              <div style="border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);padding:8px;">
+                <div style="display:flex;justify-content:space-between;color:var(--text-secondary);">
+                  <span>▾ Race loop and frame update · 18 functions</span>
+                  <span>2 verified · 1 rebuilt</span>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;">
+                  <span style="border:1px solid var(--accent);background:var(--selected-bg);border-radius:10px;padding:1px 8px;">0x300ec free ✓</span>
+                  <span style="border:1px solid var(--success);color:var(--success);border-radius:10px;padding:1px 8px;">0x300d6 exit_flush ✓</span>
+                  <span style="border:1px solid var(--error);color:var(--error);border-radius:10px;padding:1px 8px;">0x10978 error_report</span>
+                  <span style="border:1px solid var(--warning);color:var(--warning);border-radius:10px;padding:1px 8px;">0x2ed77 list_destroy ⚠</span>
+                  <span style="border:1px solid var(--border-strong);color:var(--text-tertiary);border-radius:10px;padding:1px 8px;">0x15570 (unnamed)</span>
+                  <span style="border:1px solid var(--border-strong);color:var(--text-tertiary);border-radius:10px;padding:1px 8px;">0x2f8ca memory_available</span>
+                  <span style="border:1px solid var(--border-strong);color:var(--text-tertiary);border-radius:10px;padding:1px 8px;">+ 12 unnamed</span>
+                </div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);padding:8px;">
+                <div style="display:flex;justify-content:space-between;color:var(--text-secondary);">
+                  <span>▸ Program functions · 121 functions</span>
+                  <span>2 verified · 5 rebuilt</span>
+                </div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);padding:8px;">
+                <div style="display:flex;justify-content:space-between;color:var(--text-secondary);">
+                  <span>▸ Unmapped · 16 functions</span>
+                  <span>0 verified</span>
+                </div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);padding:8px;">
+                <div style="display:flex;justify-content:space-between;color:var(--text-secondary);">
+                  <span>▸ Modules · 1 module</span>
+                  <span>1 verified</span>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;">
+                  <span style="border:1px solid var(--success);color:var(--success);border-radius:10px;padding:1px 8px;">driver ✓</span>
+                </div>
+              </div>
+              <div style="color:var(--text-tertiary);padding-left:4px;">legend: ✓ verified or matching · ⚠ stale · red = rebuilt with a difference · grey = unknown</div>
+            </div>
+
+            <div style="flex:1;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);padding:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <span style="font-size:13px;font-weight:600;">free</span>
+                <span style="color:var(--text-tertiary);">×</span>
+              </div>
+              <div style="font-family:monospace;color:var(--text-secondary);">0x300ec · Race loop and frame update</div>
+              <div style="margin-top:5px;">release a heap block</div>
+              <div style="margin-top:5px;">
+                <span style="border:1px solid var(--success);color:var(--success);border-radius:10px;padding:1px 8px;">verified</span>
+                <span style="color:var(--text-secondary);"> module free</span>
+              </div>
+              <div style="margin-top:6px;">instructions 3/3 (100%) · bytes 6/9 (67%)</div>
+              <div style="color:var(--text-secondary);">checks build, identity · run 2026-10-24</div>
+              <div style="margin-top:6px;">evidence (2)<br>
+                <span style="font-family:monospace;color:var(--text-secondary);">python3 tools/le.py disasm … 0x300ec</span><br>
+                <span style="color:var(--text-secondary);">finding: The rebuilt free module</span>
+              </div>
+              <div style="margin-top:6px;">notes (1)<br>
+                <span style="color:var(--text-secondary);">the tail jump displacement is a link-time value</span>
+              </div>
+              <div style="margin-top:6px;color:var(--accent);">→ tools/rebuild/free.c &nbsp; → findings.md</div>
+              <div style="margin-top:6px;color:var(--text-tertiary);">test this record: run.py run --name free</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section">
+  <div class="label">what came from where</div>
+  <ul>
+    <li>From layout C: sections collapse, every function is a chip, the status is the chip color, and each section shows its own counters.</li>
+    <li>From layout A: the filter row, the progress bar, and the detail pane. The pane is inline, not a drawer, so a person reads the board and the notes together.</li>
+    <li>Added in layout D: a board and table switch. The board finds a group. The table compares percentages over 155 rows. Both read the same selection and the same filters.</li>
+  </ul>
+</div>
+
+</body>
+</html>

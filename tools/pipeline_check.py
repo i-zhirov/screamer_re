@@ -11,8 +11,12 @@ Stages:
 6. debugger session: run a session script that breaks in and reads CS:EIP.
 7. cross-check: compare the file view with the run-time view.
 8. radare2 cross-check: compare the parser with radare2 when it is on PATH.
-9. rebuild: rebuild the smallest named module and diff it against the
-   original.
+9. member probe: hook the container member open at run time.
+10. sound bank: decode the ADLIB- banks, the samples, and the songs.
+11. check_run: run every recorded check and compare the printed verdict
+    with the recorded result.
+12. check_store: prove the store, the seed, the generated tables, and the
+    status page.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -28,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -50,6 +55,11 @@ TOOLS = (
     "sound_bank.py",
     "member_probe.py",
     "rebuild/diff_module.py",
+    "rebuild/store.py",
+    "rebuild/harness.py",
+    "rebuild/run.py",
+    "rebuild/view.py",
+    "rebuild/docs.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -61,39 +71,12 @@ ENTRY_FILE_OFFSET = 0x3A8F8
 ISO_PVD_OFFSET = 0x8000
 ISO_VOLUME_ID_OFFSET = 0x8028
 
-# The rebuilt modules: the name, the test program, the linker map, and the diffs.  A
-# diff holds the original linear address, the rebuilt symbol, and the instruction count
-# (0 takes the count from the original).
-REBUILT_MODULES = (
-    (
-        "free",
-        "free.exe",
-        "free.map",
-        ((0x300EC, "free_", 0),),
-    ),
-    (
-        "exit",
-        "exitmod.exe",
-        "exit.map",
-        (
-            (0x300BE, "exit_", 0),
-            (0x300D6, "exit_flush_", 6),
-        ),
-    ),
-    (
-        "printf",
-        "prtfmod.exe",
-        "printf.map",
-        ((0x3009B, "printf_", 0),),
-    ),
-    (
-        "memcpy",
-        "memmod.exe",
-        "memcpy.map",
-        ((0x8C150, "memcpy_", 0),),
-    ),
-)
-REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
+# The progress line of the runner: `[<i>/<n>] <label>: <verdict> (<detail>)`.
+PROGRESS_LINE = re.compile(r"^\[(\d+)/(\d+)\] (.+?): (PASS|FAIL|SKIP) \((.*)\)$")
+# The detail of a record with no recorded result.
+NO_RESULT_DETAIL = "no recorded result"
+# The detail the runner writes for a skipped behavior check.
+RUNTIME_DETAIL = "the runtime is skipped"
 
 
 class Checks:
@@ -104,6 +87,10 @@ class Checks:
         self.results.append((name, bool(ok), detail))
         print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f"  ({detail})" if detail else ""))
         return bool(ok)
+
+    def skip(self, name: str, detail: str = "") -> None:
+        """Print a check the run cannot compare, outside the check count."""
+        print(f"[SKIP] {name}" + (f"  ({detail})" if detail else ""))
 
     @property
     def failures(self) -> list[str]:
@@ -120,6 +107,12 @@ def sha256(path: Path) -> str:
 
 def run(command: list[str], timeout: float = 300.0) -> subprocess.CompletedProcess:
     return subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+
+
+def last_line(text: str) -> str:
+    """The last non-empty line of a tool output."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    return lines[-1] if lines else ""
 
 
 def check_syntax(checks: Checks) -> None:
@@ -513,61 +506,177 @@ def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float)
     )
 
 
-def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
-    """Rebuild the named modules and diff them against the original.
+def recorded_records() -> dict[str, dict]:
+    """The store records by the key of their progress line.
 
-    The modules are `free` at linear 0x300ec, the smallest named function in the
-    program map, and `exit` at linear 0x300be with its helper at 0x300d6.  The stage
-    needs Docker for the OpenWatcom V2 container, so it skips when Docker is missing.
+    A function record takes its address and a module row takes its name, so the
+    store list holds one key per record of the run.
+    """
+    result = run([sys.executable, "tools/rebuild/store.py", "list", "--json"])
+    if result.returncode != 0:
+        raise ValueError(f"the store list failed: {last_line(result.stderr)}")
+    records = {}
+    for record in json.loads(result.stdout):
+        if "address" in record:
+            records[record["address"]] = record
+        else:
+            records[record["name"]] = record
+    return records
+
+
+def record_of(records: dict[str, dict], label: str) -> dict | None:
+    """The record of a progress label, or None when the store lacks it.
+
+    A function label starts with the address, and a module label is the name.
+    """
+    record = records.get(label)
+    if record is not None:
+        return record
+    token = label.split(" ", 1)[0]
+    if token.startswith("0x"):
+        return records.get(token)
+    return None
+
+
+def progress_lines(text: str) -> list[tuple[str, str, str]]:
+    """The label, the verdict, and the detail of every progress line."""
+    entries = []
+    for line in text.splitlines():
+        match = PROGRESS_LINE.match(line.strip())
+        if match:
+            entries.append((match.group(3), match.group(4), match.group(5)))
+    return entries
+
+
+def expected_result(record: dict, skip_runtime: bool) -> tuple[str, str | None]:
+    """The verdict and the expected detail of a record.
+
+    The runner prints `FAIL` when a check failed, `SKIP` when a check was
+    skipped, and `PASS` otherwise.  Under `--skip-runtime` the runner skips a
+    declared behavior check with the detail `the runtime is skipped`.
+    """
+    result = record.get("result") or {}
+    verdicts = {
+        name: check.get("verdict")
+        for name, check in result.get("checks", {}).items()
+    }
+    detail = None
+    if skip_runtime and "behavior" in record.get("checks", []):
+        verdicts["behavior"] = "skip"
+        detail = RUNTIME_DETAIL
+    if "fail" in verdicts.values():
+        return "FAIL", detail
+    if "skip" in verdicts.values():
+        return "SKIP", detail
+    return "PASS", detail
+
+
+def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
+    """Run every recorded check and compare the verdicts with the store.
+
+    The runner builds and runs the modules of the records that declare checks, so
+    the stage needs Docker and DOSBox-X.  The stage compares the printed verdict
+    of every record with the recorded result, so a known difference passes and a
+    change or an unexpected skip fails.  A record the store holds no result for is
+    skipped, because the run holds nothing to compare it with.
     """
     if shutil.which("docker") is None:
-        print("docker is not on PATH; the module rebuild is skipped")
+        print("docker is not on PATH; the record run is skipped")
         return
-    for name, executable, map_name, diffs in REBUILT_MODULES:
-        result = run(["sh", f"tools/rebuild/build_{name}.sh"], timeout=timeout)
+    command = [
+        sys.executable,
+        "tools/rebuild/run.py",
+        "run",
+        "--all",
+        "--no-write",
+        "--original",
+        str(game_dir / "STARTH.EXE"),
+    ]
+    if skip_runtime:
+        command.append("--skip-runtime")
+    result = run(command)
+    records = recorded_records()
+    entries = progress_lines(result.stdout)
+    if not entries:
         checks.check(
-            f"stage 11: the {name} module rebuild links",
-            result.returncode == 0 and executable in result.stdout,
-            result.stderr.strip()[-80:],
+            "stage 11: the run prints a progress line",
+            False,
+            last_line(result.stderr),
         )
-        if result.returncode != 0:
+        return
+    compared = 0
+    for label, verdict, detail in entries:
+        record = record_of(records, label)
+        if record is None:
+            checks.check(f"stage 11: {label}", False, "no record in the store")
             continue
-        for original_address, symbol, count in diffs:
-            command = [
-                sys.executable,
-                "tools/rebuild/diff_module.py",
-                "--original",
-                str(game_dir / "STARTH.EXE"),
-                "--original-address",
-                f"{original_address:#x}",
-                "--rebuilt",
-                str(REBUILD_DIR / executable),
-                "--rebuilt-map",
-                str(REBUILD_DIR / map_name),
-                "--rebuilt-symbol",
-                symbol,
-            ]
-            if count:
-                command += ["--count", str(count)]
-            result = run(command, timeout=timeout)
-            detail = ""
-            lines = result.stdout.strip().splitlines()
-            if lines:
-                detail = lines[-1]
-            matched = any(
-                verdict in result.stdout
-                for verdict in (
-                    "the instruction sequences match",
-                    "the same instructions in a different order",
-                    "byte-identical",
-                )
-            )
-            checks.check(
-                f"stage 11: the {name} module matches the original at "
-                f"{original_address:#x}",
-                result.returncode == 0 and matched,
-                detail or result.stderr.strip()[-80:],
-            )
+        if not record.get("result"):
+            checks.skip(f"stage 11: {label}", NO_RESULT_DETAIL)
+            continue
+        expected, expected_detail = expected_result(record, skip_runtime)
+        ok = verdict == expected and (
+            expected_detail is None or detail == expected_detail
+        )
+        detail_text = f"{verdict} ({detail})"
+        if not ok:
+            detail_text += f", the recorded result is {expected}"
+        checks.check(f"stage 11: {label}", ok, detail_text)
+        compared += 1
+    with_result = sum(1 for record in records.values() if record.get("result"))
+    checks.check(
+        "stage 11: the run compares every record with a recorded result",
+        compared == with_result,
+        f"{compared} of {with_result}",
+    )
+
+
+def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
+    """Prove the store, the seed, the generated tables, and the page.
+
+    The store is the only module registry, so the stage runs the store check,
+    the seed check, and the drift check, and it renders the status page.
+    """
+    result = run([sys.executable, "tools/rebuild/store.py", "check"])
+    checks.check(
+        "stage 12: the store holds no violation",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/store.py",
+            "seed",
+            "--check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
+    checks.check(
+        "stage 12: the seed finds no difference",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run([sys.executable, "tools/rebuild/docs.py", "check"])
+    checks.check(
+        "stage 12: the program-map tables hold no drift",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    page = work_dir / "status.html"
+    result = run(
+        [sys.executable, "tools/rebuild/view.py", "html", "--out", str(page)]
+    )
+    checks.check(
+        "stage 12: the status page renders",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    checks.check(
+        "stage 12: the status page exists",
+        page.is_file(),
+        str(page),
+    )
 
 
 def check_session_script(checks: Checks, work_root: Path, port: int, timeout: float) -> None:
@@ -633,7 +742,8 @@ def main() -> int:
         check_radare2(checks, game_dir, args.exe, args.timeout)
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
-    check_rebuild(checks, game_dir, args.timeout)
+    check_run(checks, game_dir, args.skip_runtime)
+    check_store(checks, game_dir, work_root)
 
     print()
     print(f"{len(checks.results)} checks, {len(checks.failures)} failures")

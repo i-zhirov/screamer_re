@@ -1,0 +1,18 @@
+{
+  "address": "0x2ffc4",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "starts the music from the bank"
+    }
+  ],
+  "name": "music_start",
+  "notes": [],
+  "object_offset": "0x1ffc4",
+  "role": "starts the music from the bank",
+  "section": "The sound loaders",
+  "size": 308,
+  "status": "named"
+}

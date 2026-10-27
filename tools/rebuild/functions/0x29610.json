@@ -1,0 +1,17 @@
+{
+  "address": "0x29610",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap"
+    }
+  ],
+  "name": "race_heading_update",
+  "notes": [],
+  "role": "angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap",
+  "section": "race_frame callees",
+  "size": 5,
+  "status": "named"
+}

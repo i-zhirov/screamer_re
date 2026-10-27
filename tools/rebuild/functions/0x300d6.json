@@ -1,0 +1,14 @@
+{
+  "address": "0x300d6",
+  "checks": [
+    "identity"
+  ],
+  "count": 6,
+  "evidence": [],
+  "module": "exit",
+  "notes": [],
+  "object_offset": "0x200d6",
+  "size": 22,
+  "status": "unknown",
+  "symbol": "exit_flush_"
+}

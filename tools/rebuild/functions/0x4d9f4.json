@@ -1,0 +1,17 @@
+{
+  "address": "0x4d9f4",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "a Watcom floating-point helper, called with no arguments between float operations"
+    }
+  ],
+  "name": "fp_helper",
+  "notes": [],
+  "role": "a Watcom floating-point helper, called with no arguments between float operations",
+  "section": "motion_update callees",
+  "size": 70,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x1ccd8",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418`"
+    }
+  ],
+  "name": "object_state_save",
+  "notes": [],
+  "role": "saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418`",
+  "section": "object_transform callees",
+  "size": 1,
+  "status": "named"
+}

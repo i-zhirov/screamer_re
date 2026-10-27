@@ -1,0 +1,17 @@
+{
+  "address": "0x1c84c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position"
+    }
+  ],
+  "name": "object_car_link",
+  "notes": [],
+  "role": "indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position",
+  "section": "object_update_all callees",
+  "size": 2,
+  "status": "named"
+}

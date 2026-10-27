@@ -1,0 +1,17 @@
+{
+  "address": "0x1df34",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`"
+    }
+  ],
+  "name": "object_slide_step",
+  "notes": [],
+  "role": "computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`",
+  "section": "object_physics callees",
+  "size": 1,
+  "status": "named"
+}

@@ -272,9 +272,10 @@ scripting.
 
 ## The rebuild harness
 
-`tools/rebuild/` holds the rebuilt driver and the build scripts.  The build runs in
-a container, because the OpenWatcom V2 release has no macOS asset.  The container
-holds the extracted toolchain, so no installer run is needed.
+`tools/rebuild/` holds the rebuild framework, the module records, and the
+rebuilt modules.  The build runs in a container, because the OpenWatcom V2
+release has no macOS asset.  The container holds the extracted toolchain, so
+no installer run is needed.
 
 | Item | Value |
 | --- | --- |
@@ -293,47 +294,39 @@ The files:
 | `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol, which runs the segment guard, sets `ES` to `DS`, and then starts `main_` |
 | `stack.asm` | the `STACK` segment that the DOS/4G extender needs (the error 1317) |
 | `cstart.c` | the C start stub |
-| `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
-| `run.sh` | the headless DOSBox-X run; it writes `work/rebuild/out.txt` |
 | `free.c` | the rebuilt `free` module, the smallest named module in the program map |
 | `free_main.c` | the `free` test harness: the `main` markers and the stand-in `nfree` |
-| `build_free.sh` | the container build; it writes `work/rebuild/free.exe` and `work/rebuild/free.map` |
-| `run_free.sh` | the headless DOSBox-X run; it writes `work/rebuild/free_out.txt` |
 | `exit.c` | the rebuilt `exit` module and its helper |
 | `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
-| `build_exit.sh` | the container build; it writes `work/rebuild/exitmod.exe` and `work/rebuild/exit.map` |
-| `run_exit.sh` | the headless DOSBox-X run; it writes `work/rebuild/exit_out.txt` |
 | `printf.c` | the rebuilt `printf` module, after the run-time file `bld/clib/streamio/c/printf.c` |
 | `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
-| `build_printf.sh` | the container build; it writes `work/rebuild/prtfmod.exe` and `work/rebuild/printf.map` |
-| `run_printf.sh` | the headless DOSBox-X run; it writes `work/rebuild/prtf_out.txt` |
 | `shutdown.c` | the rebuilt `engine_shutdown` module, built with the stack-frame option `-of+` |
 | `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
-| `build_shutdown.sh` | the container build; it writes `work/rebuild/shutmod.exe` and `work/rebuild/shutdown.map` |
-| `run_shutdown.sh` | the headless DOSBox-X run; it writes `work/rebuild/shut_out.txt` |
 | `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
 | `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
-| `build_memcpy.sh` | the container build; it writes `work/rebuild/memmod.exe` and `work/rebuild/memcpy.map` |
-| `run_memcpy.sh` | the headless DOSBox-X run; it writes `work/rebuild/mem_out.txt` |
-| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over 20 codes with a jump table |
+| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over 20 codes with a compiler jump table that the link does not relocate |
 | `error_report_main.c` | the `error_report` test harness: the message table and the variadic printer stub |
-| `build_error_report.sh` | the container build; it writes `work/rebuild/errmod.exe` and `work/rebuild/error_report.map` |
-| `run_error_report.sh` | the headless DOSBox-X run; it writes `work/rebuild/err_out.txt` |
+| `bios_video.c` | the rebuilt `bios_video` module: the register sets and the interrupt 10h call |
+| `bios_video_main.c` | the `bios_video` test harness: the fill and call markers |
+| `list_destroy.c` | the rebuilt `list_destroy` module: the guard, the `free` call, and the return |
+| `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
+| `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
+| `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
+| `modules/*.json` | the ten module records: the sources, the compiler, the link, and the run expectations |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
+| `harness.py` | the pinned container build and the DOSBox-X run of one module |
+| `run.py` | select the records, run the declared checks, print the progress, and write the results |
+| `view.py` | render the self-contained status page of the store |
+| `docs.py` | render the `program-map.md` tables and check the drift |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
-sh tools/rebuild/build.sh
-sh tools/rebuild/run.sh
-sh tools/rebuild/build_free.sh
-sh tools/rebuild/run_free.sh
-sh tools/rebuild/build_exit.sh
-sh tools/rebuild/run_exit.sh
-sh tools/rebuild/build_printf.sh
-sh tools/rebuild/run_printf.sh
-sh tools/rebuild/build_shutdown.sh
-sh tools/rebuild/run_shutdown.sh
-sh tools/rebuild/build_memcpy.sh
-sh tools/rebuild/run_memcpy.sh
+python3 tools/rebuild/harness.py build --module free
+python3 tools/rebuild/harness.py run --module free
+python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/store.py check
+python3 tools/rebuild/docs.py render
+python3 tools/rebuild/view.py html
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
@@ -542,26 +535,28 @@ The tool runs every stage of the pipeline and checks that the stages agree: the
 syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
 debugger session script, the cross-checks between the file view and the run-time
 view, the radare2 cross-check, the container member probe, the sound bank decode,
-and the OpenWatcom module rebuild.  The check pins the reference values from the
-reference pages.  The tool exits with code 0 when every check passes.  The
-radare2 stage is skipped when `r2` is not on PATH, and the module rebuild stage
-is skipped when Docker is missing.
+the record run, and the store check.  The check pins the reference values from
+the reference pages.  The tool exits with code 0 when every check passes.  The
+radare2 stage is skipped when `r2` is not on PATH, and the record run is skipped
+when Docker is missing.
 
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 6 minutes and reports 49 checks, or 53 checks when radare2 is
-on PATH.  Use `--skip-runtime` to run the static stages only.
+A run takes about 8 minutes and reports 57 checks.  Inside the Nix dev
+shell the radare2 stage adds four checks, so the run reports 61 checks.  Use
+`--skip-runtime` to skip the run-time stages: it reports 42 checks and takes
+about 16 seconds.
 
 The check runs in three places:
 
-- the `.githooks/pre-push` hook runs the syntax gate and the full check before
-  every push.  Enable it once per clone with
-  `git config core.hooksPath .githooks`.  Set `SCREAMER_GAME_DIR` to use another
-  game directory,
-- GitHub Actions runs the syntax gate on every push and pull request,
+- the `.githooks/pre-commit` hook regenerates `work/rebuild/status.html` before
+  every commit, and the CI `status` job regenerates the page and publishes it as
+  the `rebuild-status` artifact,
+- GitHub Actions runs the syntax gate and the unit suite on every push and pull
+  request,
 - GitHub Actions runs the full check on a self-hosted runner that holds the
   game and DOSBox-X.  Register the runner with the labels `macOS` and
   `screamer-artifacts`, and set the repository variable `SCREAMER_SELF_HOSTED`

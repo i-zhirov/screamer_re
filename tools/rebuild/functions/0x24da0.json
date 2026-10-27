@@ -1,0 +1,17 @@
+{
+  "address": "0x24da0",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "walks the 28-byte control records at `DAT_001197d8` with floating-point scaling"
+    }
+  ],
+  "name": "joystick_update",
+  "notes": [],
+  "role": "walks the 28-byte control records at `DAT_001197d8` with floating-point scaling",
+  "section": "race_loop callees",
+  "size": 5,
+  "status": "named"
+}

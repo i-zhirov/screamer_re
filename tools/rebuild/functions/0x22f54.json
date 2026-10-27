@@ -1,0 +1,17 @@
+{
+  "address": "0x22f54",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "writes the 20-byte record and advances the index with a wrap"
+    }
+  ],
+  "name": "replay_write",
+  "notes": [],
+  "role": "writes the 20-byte record and advances the index with a wrap",
+  "section": "The replay records",
+  "size": 4,
+  "status": "named"
+}

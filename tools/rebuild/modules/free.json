@@ -1,0 +1,26 @@
+{
+  "exe": "free.exe",
+  "map": "free.map",
+  "name": "free",
+  "run": {
+    "command": "free.exe > free_out.txt",
+    "expect": [
+      "NULL",
+      "DONE",
+      "FREE",
+      "AFTR"
+    ],
+    "output": "free_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "free.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "free_main.c"
+    }
+  ]
+}

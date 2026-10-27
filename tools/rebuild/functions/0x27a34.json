@@ -1,0 +1,18 @@
+{
+  "address": "0x27a34",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "gated on the session state `DAT_0011ce44`"
+    }
+  ],
+  "name": "hud_update",
+  "notes": [],
+  "object_offset": "0x17a34",
+  "role": "gated on the session state `DAT_0011ce44`",
+  "section": "object_update_all callees",
+  "size": 45,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x2ecf8",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block"
+    }
+  ],
+  "name": "list_create",
+  "notes": [],
+  "role": "allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block",
+  "section": "Program functions",
+  "size": 4,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x4c08d",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "opens the path through the run-time file layer and fills the stream record; returns `-1` on failure"
+    }
+  ],
+  "name": "fopen",
+  "notes": [],
+  "role": "opens the path through the run-time file layer and fills the stream record; returns `-1` on failure",
+  "section": "Resource loader",
+  "size": 2,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x8ac78",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "sets the position vector at `+0x3c`, `+0x40`, and `+0x44` and clears the velocity at `+0x6c`, `+0x70`, and `+0x74`"
+    }
+  ],
+  "name": "camera_update",
+  "notes": [],
+  "role": "sets the position vector at `+0x3c`, `+0x40`, and `+0x44` and clears the velocity at `+0x6c`, `+0x70`, and `+0x74`",
+  "section": "race_frame callees",
+  "size": 4468,
+  "status": "named"
+}

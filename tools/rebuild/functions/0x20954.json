@@ -1,0 +1,17 @@
+{
+  "address": "0x20954",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180`"
+    }
+  ],
+  "name": "opponent_update",
+  "notes": [],
+  "role": "walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180`",
+  "section": "object_update_all callees",
+  "size": 2,
+  "status": "named"
+}

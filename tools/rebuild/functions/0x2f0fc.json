@@ -1,0 +1,17 @@
+{
+  "address": "0x2f0fc",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address"
+    }
+  ],
+  "name": "dos_memory_alloc",
+  "notes": [],
+  "role": "calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address",
+  "section": "The resource layer",
+  "size": 3,
+  "status": "named"
+}

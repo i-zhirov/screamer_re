@@ -1,0 +1,17 @@
+{
+  "address": "0x2eed0",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "looks a resource up by name in the engine resource list and loads it from its file when missing"
+    }
+  ],
+  "name": "resource_get",
+  "notes": [],
+  "role": "looks a resource up by name in the engine resource list and loads it from its file when missing",
+  "section": "Resource loader",
+  "size": 3,
+  "status": "named"
+}

@@ -1,0 +1,27 @@
+{
+  "exe": "exitmod.exe",
+  "map": "exit.map",
+  "name": "exit",
+  "run": {
+    "command": "exitmod.exe > exit_out.txt",
+    "expect": [
+      "A",
+      "B",
+      "B",
+      "C",
+      "T"
+    ],
+    "output": "exit_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "exit.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "exit_main.c"
+    }
+  ]
+}

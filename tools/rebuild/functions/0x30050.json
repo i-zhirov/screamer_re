@@ -1,0 +1,17 @@
+{
+  "address": "0x30050",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`"
+    }
+  ],
+  "name": "memory_alloc",
+  "notes": [],
+  "role": "allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`",
+  "section": "Program functions",
+  "size": 75,
+  "status": "named"
+}

@@ -1,0 +1,49 @@
+{
+  "address": "0x10978",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "count": 16,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "dispatches on the code through a jump table to one message stub per code"
+    }
+  ],
+  "module": "error_report",
+  "name": "error_report",
+  "notes": [],
+  "object_offset": "0x978",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "error: the output lacks 'D'",
+        "verdict": "fail"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 47,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10978",
+    "date": "2026-10-27",
+    "source_digest": "sha256:2c0c4ec2df8a438358b4cea7b47cde8599a9551404784bfcbb35ae5da82a291c",
+    "tool": "run.py"
+  },
+  "role": "dispatches on the code through a jump table to one message stub per code",
+  "section": "Program functions",
+  "size": 558,
+  "status": "rebuilt",
+  "symbol": "error_report_"
+}

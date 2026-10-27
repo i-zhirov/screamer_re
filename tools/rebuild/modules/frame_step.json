@@ -1,0 +1,29 @@
+{
+  "exe": "fsmod.exe",
+  "map": "frame_step.map",
+  "name": "frame_step",
+  "run": {
+    "command": "fsmod.exe > fs_out.txt",
+    "expect": [
+      "D",
+      "J",
+      "F",
+      "T"
+    ],
+    "output": "fs_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "frame_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "frame_step_main.c"
+    }
+  ]
+}

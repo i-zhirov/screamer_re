@@ -1,0 +1,17 @@
+{
+  "address": "0x27ec8",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "called after every draw step"
+    }
+  ],
+  "name": "video_present",
+  "notes": [],
+  "role": "called after every draw step",
+  "section": "motion_update callees",
+  "size": 2,
+  "status": "named"
+}

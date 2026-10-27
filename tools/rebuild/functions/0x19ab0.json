@@ -1,0 +1,18 @@
+{
+  "address": "0x19ab0",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "runs five steps on the player structure `DAT_00110a20`"
+    }
+  ],
+  "name": "player_update",
+  "notes": [],
+  "object_offset": "0x9ab0",
+  "role": "runs five steps on the player structure `DAT_00110a20`",
+  "section": "object_update_all callees",
+  "size": 61,
+  "status": "named"
+}

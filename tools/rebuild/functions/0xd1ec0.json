@@ -1,0 +1,17 @@
+{
+  "address": "0xd1ec0",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "replicates the byte through the dword and calls `0xe0860`"
+    }
+  ],
+  "name": "memset",
+  "notes": [],
+  "role": "replicates the byte through the dword and calls `0xe0860`",
+  "section": "The runtime memory manager",
+  "size": 101,
+  "status": "named"
+}

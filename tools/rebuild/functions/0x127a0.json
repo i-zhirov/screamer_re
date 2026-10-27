@@ -1,0 +1,17 @@
+{
+  "address": "0x127a0",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls 17 setup functions, loads `MENU` from `%s\\DATA\\MUSIC.DAT`, and reads the video mode"
+    }
+  ],
+  "name": "engine_init",
+  "notes": [],
+  "role": "calls 17 setup functions, loads `MENU` from `%s\\DATA\\MUSIC.DAT`, and reads the video mode",
+  "section": "Program functions",
+  "size": 4,
+  "status": "named"
+}

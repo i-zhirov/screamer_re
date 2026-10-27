@@ -1,0 +1,17 @@
+{
+  "address": "0x1e00c",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec`"
+    }
+  ],
+  "name": "object_collision",
+  "notes": [],
+  "role": "calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec`",
+  "section": "object_physics callees",
+  "size": 5,
+  "status": "named"
+}

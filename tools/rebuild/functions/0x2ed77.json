@@ -1,0 +1,47 @@
+{
+  "address": "0x2ed77",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "releases the block when the pointer is set; counterpart of `list_create`"
+    }
+  ],
+  "module": "list_destroy",
+  "name": "list_destroy",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 54,
+        "detail": "the instruction counts differ, 25 and 26",
+        "instructions_equal": 17,
+        "instructions_total": 25,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2ed77",
+    "date": "2026-10-27",
+    "source_digest": "sha256:1965e1bbfbddc85bc15f105987dfbda1eccb5424a77c48aa97fb56f0c430b223",
+    "tool": "run.py"
+  },
+  "role": "releases the block when the pointer is set; counterpart of `list_create`",
+  "section": "Program functions",
+  "size": 4,
+  "status": "rebuilt",
+  "symbol": "list_destroy_"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x25db0",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls the DOS/4GW real-mode interrupt dispatcher with `0x1500`"
+    }
+  ],
+  "name": "dpmi_real_int",
+  "notes": [],
+  "role": "calls the DOS/4GW real-mode interrupt dispatcher with `0x1500`",
+  "section": "Subsystem initialisation",
+  "size": 1272,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x279a4",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "tears the race down through 13 calls"
+    }
+  ],
+  "name": "race_end",
+  "notes": [],
+  "role": "tears the race down through 13 calls",
+  "section": "race_loop callees",
+  "size": 2,
+  "status": "named"
+}

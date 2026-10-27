@@ -1,0 +1,17 @@
+{
+  "address": "0xd1f25",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0`"
+    }
+  ],
+  "name": "malloc",
+  "notes": [],
+  "role": "rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0`",
+  "section": "The runtime memory manager",
+  "size": 227,
+  "status": "named"
+}

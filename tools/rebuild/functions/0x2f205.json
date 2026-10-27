@@ -1,0 +1,17 @@
+{
+  "address": "0x2f205",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls INT 31h AX=0x0502 with the address in EBX:ECX"
+    }
+  ],
+  "name": "memory_free",
+  "notes": [],
+  "role": "calls INT 31h AX=0x0502 with the address in EBX:ECX",
+  "section": "The resource layer",
+  "size": 4,
+  "status": "named"
+}

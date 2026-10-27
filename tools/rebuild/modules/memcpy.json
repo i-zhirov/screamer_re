@@ -1,0 +1,31 @@
+{
+  "exe": "memmod.exe",
+  "map": "memcpy.map",
+  "name": "memcpy",
+  "run": {
+    "command": "memmod.exe > mem_out.txt",
+    "expect": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "Y"
+    ],
+    "output": "mem_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "memcpy.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memcpy_main.c"
+    }
+  ]
+}

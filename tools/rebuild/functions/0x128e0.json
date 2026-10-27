@@ -1,0 +1,17 @@
+{
+  "address": "0x128e0",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540`"
+    }
+  ],
+  "name": "race_session_start",
+  "notes": [],
+  "role": "sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540`",
+  "section": "The timing and filter layer",
+  "size": 5,
+  "status": "named"
+}

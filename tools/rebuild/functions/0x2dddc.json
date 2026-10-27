@@ -1,0 +1,17 @@
+{
+  "address": "0x2dddc",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it"
+    }
+  ],
+  "name": "net_player_add",
+  "notes": [],
+  "role": "takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it",
+  "section": "overlay_dispatch callees",
+  "size": 5,
+  "status": "named"
+}

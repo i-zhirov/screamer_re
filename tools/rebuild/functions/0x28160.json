@@ -1,0 +1,17 @@
+{
+  "address": "0x28160",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads the option flags in `DAT_000f0002` and calls the overlay for the set flag"
+    }
+  ],
+  "name": "overlay_dispatch",
+  "notes": [],
+  "role": "reads the option flags in `DAT_000f0002` and calls the overlay for the set flag",
+  "section": "race_frame callees",
+  "size": 5,
+  "status": "named"
+}

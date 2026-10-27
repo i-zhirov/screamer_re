@@ -1,0 +1,18 @@
+{
+  "address": "0x1c760",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads the input bits `DAT_00118e1c` and the state at `+0x2f8`"
+    }
+  ],
+  "name": "object_player_input",
+  "notes": [],
+  "object_offset": "0xc760",
+  "role": "reads the input bits `DAT_00118e1c` and the state at `+0x2f8`",
+  "section": "object_update_all callees",
+  "size": 60,
+  "status": "named"
+}

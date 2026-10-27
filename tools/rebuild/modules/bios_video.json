@@ -1,0 +1,28 @@
+{
+  "exe": "bvmod.exe",
+  "map": "bios_video.map",
+  "name": "bios_video",
+  "run": {
+    "command": "bvmod.exe > bv_out.txt",
+    "expect": [
+      "F",
+      "C",
+      "D"
+    ],
+    "output": "bv_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "bios_video.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "bios_video_main.c"
+    }
+  ]
+}

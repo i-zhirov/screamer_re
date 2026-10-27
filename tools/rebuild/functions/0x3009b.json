@@ -1,0 +1,47 @@
+{
+  "address": "0x3009b",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions"
+    }
+  ],
+  "module": "printf",
+  "name": "printf",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 20,
+        "bytes_total": 34,
+        "detail": "the modules hold the same instructions in a different order",
+        "instructions_equal": 13,
+        "instructions_total": 13,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x3009b",
+    "date": "2026-10-27",
+    "source_digest": "sha256:57c3fabaf075a7ce5bbbad81b461cc36c4cec7cef8bb76ad18be324949be63b9",
+    "tool": "run.py"
+  },
+  "role": "holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions",
+  "section": "Program functions",
+  "size": 35,
+  "status": "verified",
+  "symbol": "printf_"
+}

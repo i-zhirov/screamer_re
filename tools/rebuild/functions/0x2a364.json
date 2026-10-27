@@ -1,0 +1,17 @@
+{
+  "address": "0x2a364",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\\graf.dat`"
+    }
+  ],
+  "name": "loading_screen",
+  "notes": [],
+  "role": "clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\\graf.dat`",
+  "section": "The graphics decoders",
+  "size": 3,
+  "status": "named"
+}

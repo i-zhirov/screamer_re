@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rebuild module record",
+  "description": "One record per build unit, for example modules/free.json. The shared harness sources (chk.asm, stack.asm, cstart.c) are constants of harness.py, not fields of this record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "exe", "sources"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Equals the file name."
+    },
+    "exe": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The linked executable under work/rebuild/."
+    },
+    "map": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The linker map under work/rebuild/. Absent for the driver, which links without a map."
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "run": { "$ref": "#/$defs/run" },
+    "status": {
+      "enum": ["unknown", "not_a_function", "named", "rebuilt", "matching", "verified"],
+      "description": "Set for a module that holds no function record, for example the driver."
+    },
+    "checks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["build", "identity", "behavior"] }
+    },
+    "result": {
+      "$ref": "record.schema.json#/$defs/result",
+      "description": "The last run of the module checks. The same shape as the result of a function record."
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "compiler"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A file under tools/rebuild/."
+        },
+        "compiler": { "enum": ["wcc386", "wasm"] },
+        "flags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The flags of this file, for example -of+."
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "output", "expect"],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The command line inside DOSBox-X."
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The captured output file under work/rebuild/."
+        },
+        "expect": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Every line must appear in the output."
+        },
+        "timeout": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

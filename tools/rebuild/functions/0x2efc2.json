@@ -1,0 +1,17 @@
+{
+  "address": "0x2efc2",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads the current record and caches it through `0x2f062`"
+    }
+  ],
+  "name": "resource_read",
+  "notes": [],
+  "role": "reads the current record and caches it through `0x2f062`",
+  "section": "The resource layer",
+  "size": 3,
+  "status": "named"
+}

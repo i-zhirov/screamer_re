@@ -1,0 +1,17 @@
+{
+  "address": "0xd4324",
+  "checks": [],
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "loads `argc` and `argv`, calls `main`"
+    }
+  ],
+  "name": "main invoker",
+  "notes": [],
+  "object_offset": "0xc4324",
+  "role": "loads `argc` and `argv`, calls `main`",
+  "section": "Startup path",
+  "size": 1,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x29564",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "switches on `DAT_0011fac4`; case 1 advances `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_001203b8`"
+    }
+  ],
+  "name": "race_state_update",
+  "notes": [],
+  "role": "switches on `DAT_0011fac4`; case 1 advances `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_001203b8`",
+  "section": "race_frame callees",
+  "size": 1,
+  "status": "named"
+}

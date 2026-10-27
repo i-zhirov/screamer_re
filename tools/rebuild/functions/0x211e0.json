@@ -1,0 +1,17 @@
+{
+  "address": "0x211e0",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads the control bits `DAT_00118e1c` and dispatches the game action"
+    }
+  ],
+  "name": "input_map",
+  "notes": [],
+  "role": "reads the control bits `DAT_00118e1c` and dispatches the game action",
+  "section": "race_loop callees",
+  "size": 4,
+  "status": "named"
+}

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Update the rebuild status page before every commit.
+#
+# Enable the hooks once per clone:
+#     git config core.hooksPath .githooks
+#
+# The page is generated output under work/ and stays out of git.  The hook keeps
+# the local page current, so a person reads the state of the store at the commit.
+# The CI `status` job regenerates the page and publishes it as an artifact.
+
+set -e
+
+VIEW="tools/rebuild/view.py"
+
+if [ ! -f "$VIEW" ]; then
+    echo "pre-commit: status page skipped: no $VIEW"
+    exit 0
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "pre-commit: status page skipped: python3 is not on PATH"
+    exit 0
+fi
+
+echo "pre-commit: update the status page"
+python3 "$VIEW" html

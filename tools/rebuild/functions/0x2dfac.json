@@ -1,0 +1,18 @@
+{
+  "address": "0x2dfac",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "sets a panel position and the visible flag, then calls `0x25af0`"
+    }
+  ],
+  "name": "panel_show",
+  "notes": [],
+  "object_offset": "0x1dfac",
+  "role": "sets a panel position and the visible flag, then calls `0x25af0`",
+  "section": "race_frame callees",
+  "size": 75,
+  "status": "named"
+}

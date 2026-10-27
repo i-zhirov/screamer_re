@@ -1,0 +1,17 @@
+{
+  "address": "0x4bf23",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS"
+    }
+  ],
+  "name": "dpmi_fill_regs",
+  "notes": [],
+  "role": "fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS",
+  "section": "The resource layer",
+  "size": 40,
+  "status": "named"
+}

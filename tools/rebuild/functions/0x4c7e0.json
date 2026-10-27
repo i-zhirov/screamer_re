@@ -1,0 +1,17 @@
+{
+  "address": "0x4c7e0",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "returns the word at `stream + 0x70`"
+    }
+  ],
+  "name": "stream_status",
+  "notes": [],
+  "role": "returns the word at `stream + 0x70`",
+  "section": "Resource loader",
+  "size": 5,
+  "status": "named"
+}

@@ -1,0 +1,24 @@
+{
+  "exe": "prtfmod.exe",
+  "map": "printf.map",
+  "name": "printf",
+  "run": {
+    "command": "prtfmod.exe > prtf_out.txt",
+    "expect": [
+      "P",
+      "4"
+    ],
+    "output": "prtf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "printf.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "printf_main.c"
+    }
+  ]
+}

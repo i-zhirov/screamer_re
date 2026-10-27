@@ -181,6 +181,20 @@ def main() -> int:
 
     original_shapes = [instruction_shape(insn) for insn in original_body]
     rebuilt_shapes = [instruction_shape(insn) for insn in rebuilt_body]
+    common = min(len(original_body), len(rebuilt_body))
+    opcode_differences = 0
+    operand_differences = 0
+    for index, (a, b) in enumerate(zip(original_body, rebuilt_body)):
+        if a.mnemonic != b.mnemonic:
+            opcode_differences += 1
+            print(f"opcode difference at {a.address:#x}: {a.text} and {b.text}")
+        elif a.operands != b.operands:
+            operand_differences += 1
+            print(f"operand difference at {a.address:#x}: {a.text} and {b.text}")
+    print(f"instruction compare: {common - opcode_differences} of "
+          f"{common} instructions equal, "
+          f"{opcode_differences} opcodes different, "
+          f"{operand_differences} operands different")
     if len(original_body) != len(rebuilt_body):
         for index, (a, b) in enumerate(zip(original_shapes, rebuilt_shapes)):
             if a == b:
@@ -200,19 +214,6 @@ def main() -> int:
         print(f"verdict: the instruction counts differ, "
               f"{len(original_body)} and {len(rebuilt_body)}")
         return 1
-    opcode_differences = 0
-    operand_differences = 0
-    for index, (a, b) in enumerate(zip(original_body, rebuilt_body)):
-        if a.mnemonic != b.mnemonic:
-            opcode_differences += 1
-            print(f"opcode difference at {a.address:#x}: {a.text} and {b.text}")
-        elif a.operands != b.operands:
-            operand_differences += 1
-            print(f"operand difference at {a.address:#x}: {a.text} and {b.text}")
-    print(f"instruction compare: {len(original_body) - opcode_differences} of "
-          f"{len(original_body)} instructions equal, "
-          f"{opcode_differences} opcodes different, "
-          f"{operand_differences} operands different")
     if not opcode_differences and not operand_differences:
         print("verdict: the modules are byte-identical")
         return 0

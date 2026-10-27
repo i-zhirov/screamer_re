@@ -1,0 +1,17 @@
+{
+  "address": "0x2e0b4",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the overlay for the race state 0"
+    }
+  ],
+  "name": "race_panel_0",
+  "notes": [],
+  "role": "the overlay for the race state 0",
+  "section": "race_frame callees",
+  "size": 3,
+  "status": "named"
+}

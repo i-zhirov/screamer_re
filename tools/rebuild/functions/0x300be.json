@@ -1,0 +1,47 @@
+{
+  "address": "0x300be",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code"
+    }
+  ],
+  "module": "exit",
+  "name": "exit",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 24,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 8,
+        "instructions_total": 8,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x300be",
+    "date": "2026-10-27",
+    "source_digest": "sha256:2f3da4b333f8665ba1630be7eeff8e23357275e9ebcc1c0f70f07c2e13713d3c",
+    "tool": "run.py"
+  },
+  "role": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code",
+  "section": "Program functions",
+  "size": 46,
+  "status": "verified",
+  "symbol": "exit_"
+}

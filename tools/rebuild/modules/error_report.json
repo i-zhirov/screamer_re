@@ -1,0 +1,26 @@
+{
+  "exe": "errmod.exe",
+  "map": "error_report.map",
+  "name": "error_report",
+  "run": {
+    "command": "errmod.exe > err_out.txt",
+    "expect": [
+      "R",
+      "R",
+      "R",
+      "D"
+    ],
+    "output": "err_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "error_report.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "error_report_main.c"
+    }
+  ]
+}

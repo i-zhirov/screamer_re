@@ -1,0 +1,30 @@
+{
+  "exe": "ldmod.exe",
+  "map": "list_destroy.map",
+  "name": "list_destroy",
+  "run": {
+    "command": "ldmod.exe > ld_out.txt",
+    "expect": [
+      "F",
+      "R",
+      "Z",
+      "N"
+    ],
+    "output": "ld_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "list_destroy.c",
+      "flags": [
+        "-of+",
+        "-od"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "list_destroy_main.c"
+    }
+  ]
+}

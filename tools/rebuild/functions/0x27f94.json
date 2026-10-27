@@ -1,0 +1,17 @@
+{
+  "address": "0x27f94",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input"
+    }
+  ],
+  "name": "frame_update",
+  "notes": [],
+  "role": "clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input",
+  "section": "Program functions",
+  "size": 4,
+  "status": "named"
+}
