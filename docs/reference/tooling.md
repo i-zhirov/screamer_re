@@ -552,14 +552,11 @@ about 16 seconds.
 
 The check runs in three places:
 
-- the `.githooks/pre-push` hook runs the syntax gate and the full check before
-  every push.  Enable the hooks once per clone with
-  `git config core.hooksPath .githooks`.  Set `SCREAMER_GAME_DIR` to use another
-  game directory,
 - the `.githooks/pre-commit` hook regenerates `work/rebuild/status.html` before
   every commit, and the CI `status` job regenerates the page and publishes it as
   the `rebuild-status` artifact,
-- GitHub Actions runs the syntax gate on every push and pull request,
+- GitHub Actions runs the syntax gate and the unit suite on every push and pull
+  request,
 - GitHub Actions runs the full check on a self-hosted runner that holds the
   game and DOSBox-X.  Register the runner with the labels `macOS` and
   `screamer-artifacts`, and set the repository variable `SCREAMER_SELF_HOSTED`

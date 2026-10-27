@@ -108,16 +108,16 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 The full check runs every stage and reports 57 checks.  Inside the Nix dev
 shell the radare2 stage adds four checks, so the run reports 61 checks.  With
-`--skip-runtime` it reports 42 checks.  A pre-push hook runs
-the syntax gate and the full check before every push.  Enable the hook once per
-clone:
+`--skip-runtime` it reports 42 checks.  CI runs the syntax gate and the unit
+suite on every push and pull request, and the full check on a self-hosted runner.
+The pre-commit hook regenerates the status page; enable the hooks once per clone:
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-The hook reports a skip and passes when the game directory or DOSBox-X is
-missing.  Set `SCREAMER_GAME_DIR` to use another game directory.
+The full check needs the game directory and DOSBox-X.  Set `SCREAMER_GAME_DIR` to
+use another game directory.
 
 GitHub Actions runs the syntax gate on every push and pull request.  The full
 check runs on a self-hosted runner that holds the game and DOSBox-X.  Register

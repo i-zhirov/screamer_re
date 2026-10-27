@@ -5252,3 +5252,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The hook skips with a clear line when the view tool or `python3` is missing,
   and it fails the commit when the page cannot render.
   Evidence: `sh .githooks/pre-commit`.
+- The pre-push hook is gone.  It ran the full check in the Nix dev shell before
+  every push, and the SSH connection to the remote idled for the whole run, so
+  the remote closed it and the push failed.  The syntax gate, the unit suite, and
+  the full check run in CI instead, and the pre-commit hook still regenerates the
+  status page.
+  Evidence: the failed pushes and `.github/workflows/pipeline.yml`.

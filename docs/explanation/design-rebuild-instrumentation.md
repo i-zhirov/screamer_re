@@ -227,7 +227,7 @@ A person recovers the name and the role of a candidate.
   every heavy operation is an external Docker build or a DOSBox-X session.
 - **Trade-offs**: Typed records, so a bad status cannot compile, and
   `cargo test` as a built-in runner. In return: a second toolchain in
-  `flake.nix`, CI, and the pre-push hook, a `target/` tree to keep out of
+  `flake.nix` and CI, a `target/` tree to keep out of
   git, `serde` and `serde_json` as new dependencies against the
   one-dependency rule, a second language in the Code Guidelines, and a text
   protocol that breaks the Rust side on a wording change in Python. The

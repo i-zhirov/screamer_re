@@ -61,8 +61,7 @@ screamer_re/
 ├── README.md                  # landing page: status, layout, quick start
 ├── task.md                    # the original task definition
 ├── .githooks/
-│   ├── pre-commit             # update the status page before every commit
-│   └── pre-push               # run the checks before every push
+│   └── pre-commit             # update the status page before every commit
 ├── .github/workflows/
 │   └── pipeline.yml           # CI: the syntax gate, the status page, and the full check
 ├── docs/
@@ -182,11 +181,10 @@ open ~/Documents/Screamer.app
 
 - You MUST run the changed tool against the shipped artifacts and
   confirm the output.
-- You MUST enable the repository hooks in a new clone with
-  `git config core.hooksPath .githooks`.  The pre-commit hook regenerates
-  `work/rebuild/status.html`, and the pre-push hook runs the syntax gate and
-  the full check before every push.  The pre-push hook reports a skip when the
-  game directory or DOSBox-X is missing.
+- You MUST enable the pre-commit hook in a new clone with
+  `git config core.hooksPath .githooks`.  The hook regenerates
+  `work/rebuild/status.html` before every commit.  The syntax gate, the unit
+  suite, and the full check run in CI.
 - You MUST record a new finding with its evidence in
   `docs/explanation/findings.md`.
 - You MUST update the affected pages under `docs/` when a change affects
