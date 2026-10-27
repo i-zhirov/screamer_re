@@ -536,7 +536,7 @@ section names, so a reader sees the same page with generated tables.
 | --- | --- | --- |
 | Should the run cache a build per source digest? | The user | Accepted deferral. Add the cache when a full run takes too long. |
 | Should the run go in parallel? | The user | Accepted deferral. Add it when the module count grows. |
-| Should the page be published as an artifact? | The user | Accepted deferral. The page is self-contained, so the step is small. |
+| Should the page be published as an artifact? | The user | Resolved. The CI `status` job regenerates the page and publishes it as the `rebuild-status` artifact, and the pre-commit hook regenerates the local page. |
 | Should the framework track data objects too? | The user | Accepted deferral. The program map holds code first. |
 
 ## Success Criteria

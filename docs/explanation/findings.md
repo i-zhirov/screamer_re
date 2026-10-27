@@ -5054,3 +5054,16 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   count at the time they were written, not the current count.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
+
+## The status page in the hooks and CI
+
+- The pre-commit hook regenerates `work/rebuild/status.html`, so the local page
+  is current at every commit.  The page is generated output and stays out of git.
+  Evidence: `.githooks/pre-commit` and `python3 tools/rebuild/view.py html`.
+- The CI `status` job regenerates the page on every push and pull request and
+  publishes it as the `rebuild-status` artifact.  The job needs the standard
+  library only, because the page reads the committed store.
+  Evidence: `.github/workflows/pipeline.yml` and the `rebuild-status` artifact.
+- The hook skips with a clear line when the view tool or `python3` is missing,
+  and it fails the commit when the page cannot render.
+  Evidence: `sh .githooks/pre-commit`.

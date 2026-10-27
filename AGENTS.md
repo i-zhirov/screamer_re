@@ -61,9 +61,10 @@ screamer_re/
 ├── README.md                  # landing page: status, layout, quick start
 ├── task.md                    # the original task definition
 ├── .githooks/
+│   ├── pre-commit             # update the status page before every commit
 │   └── pre-push               # run the checks before every push
 ├── .github/workflows/
-│   └── pipeline.yml          # CI: the syntax gate and the full check
+│   └── pipeline.yml          # CI: the syntax gate, the status page, and the full check
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
@@ -176,10 +177,11 @@ open ~/Documents/Screamer.app
 
 - You MUST run the changed tool against the shipped artifacts and
   confirm the output.
-- You MUST enable the pre-push hook in a new clone with
-  `git config core.hooksPath .githooks`.  The hook runs the syntax gate and
-  the full check before every push.  It reports a skip when the game
-  directory or DOSBox-X is missing.
+- You MUST enable the repository hooks in a new clone with
+  `git config core.hooksPath .githooks`.  The pre-commit hook regenerates
+  `work/rebuild/status.html`, and the pre-push hook runs the syntax gate and
+  the full check before every push.  The pre-push hook reports a skip when the
+  game directory or DOSBox-X is missing.
 - You MUST record a new finding with its evidence in
   `docs/explanation/findings.md`.
 - You MUST update the affected pages under `docs/` when a change affects
@@ -268,6 +270,9 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
+- The pre-commit hook regenerates `work/rebuild/status.html`, and the CI
+  `status` job regenerates the page and publishes it as an artifact.  The page
+  is generated output, so it stays out of git.
 - Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
