@@ -10,6 +10,9 @@ Stages:
 5. entry probe: run the game in DOSBox-X and report the run-time entry.
 6. debugger session: run a session script that breaks in and reads CS:EIP.
 7. cross-check: compare the file view with the run-time view.
+8. radare2 cross-check: compare the parser with radare2 when it is on PATH.
+9. rebuild: rebuild the smallest named module and diff it against the
+   original.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -46,6 +49,7 @@ TOOLS = (
     "export_assets.py",
     "sound_bank.py",
     "member_probe.py",
+    "rebuild/diff_module.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -56,6 +60,40 @@ ENTRY_MODULE_LINEAR = 0x300F8
 ENTRY_FILE_OFFSET = 0x3A8F8
 ISO_PVD_OFFSET = 0x8000
 ISO_VOLUME_ID_OFFSET = 0x8028
+
+# The rebuilt modules: the name, the test program, the linker map, and the diffs.  A
+# diff holds the original linear address, the rebuilt symbol, and the instruction count
+# (0 takes the count from the original).
+REBUILT_MODULES = (
+    (
+        "free",
+        "free.exe",
+        "free.map",
+        ((0x300EC, "free_", 0),),
+    ),
+    (
+        "exit",
+        "exitmod.exe",
+        "exit.map",
+        (
+            (0x300BE, "exit_", 0),
+            (0x300D6, "exit_flush_", 6),
+        ),
+    ),
+    (
+        "printf",
+        "prtfmod.exe",
+        "printf.map",
+        ((0x3009B, "printf_", 0),),
+    ),
+    (
+        "memcpy",
+        "memmod.exe",
+        "memcpy.map",
+        ((0x8C150, "memcpy_", 0),),
+    ),
+)
+REBUILD_DIR = Path(__file__).parent.parent / "work/rebuild"
 
 
 class Checks:
@@ -202,19 +240,19 @@ def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float
         ],
         timeout=timeout + 30,
     )
-    checks.check("stage 10: the member probe runs", result.returncode == 0, result.stderr.strip())
+    checks.check("stage 9: the member probe runs", result.returncode == 0, result.stderr.strip())
     checks.check(
-        "stage 10: the member probe observes the first member",
+        "stage 9: the member probe observes the first member",
         "name='MENU.dtr'" in result.stdout,
         "MENU.dtr",
     )
     checks.check(
-        "stage 10: the member probe observes the sample loads",
+        "stage 9: the member probe observes the sample loads",
         "name='skidfx.RAW'" in result.stdout and "name='airplane.RAW'" in result.stdout,
         "the SFXSBASE and MAP1 samples",
     )
     checks.check(
-        "stage 10: the member probe observes the unlisted members stay absent",
+        "stage 9: the member probe observes the unlisted members stay absent",
         "name='cry.RAW'" not in result.stdout and "name='train.RAW'" not in result.stdout,
         "the five unlisted members stay absent",
     )
@@ -229,22 +267,22 @@ def check_sound(checks: Checks, game_dir: Path, work_dir: Path) -> None:
              "--out", str(work_dir / name)]
         )
     drum = run([sys.executable, "tools/sound_bank.py", "bank", str(work_dir / "DRUM.BNK")])
-    checks.check("stage 9: the drum bank decodes", drum.returncode == 0, drum.stderr.strip())
+    checks.check("stage 10: the drum bank decodes", drum.returncode == 0, drum.stderr.strip())
     checks.check(
-        "stage 9: the drum bank holds the reference header",
+        "stage 10: the drum bank holds the reference header",
         "signature:   ADLIB-" in drum.stdout
         and "count:       28" in drum.stdout
         and "data offset: 0x61c" in drum.stdout,
         "ADLIB-, 28, 0x61c",
     )
     checks.check(
-        "stage 9: the first drum instrument holds the driver pairs",
+        "stage 10: the first drum instrument holds the driver pairs",
         "20:0F  40:3F  60:01  80:3E  E0:0F  23:3F  43:01  C0:01" in drum.stdout,
         "the eight register pairs",
     )
     melodic = run([sys.executable, "tools/sound_bank.py", "bank", str(work_dir / "MELODIC.BNK")])
     checks.check(
-        "stage 9: the melodic bank decodes",
+        "stage 10: the melodic bank decodes",
         melodic.returncode == 0 and "PIANO1" in melodic.stdout,
         melodic.stderr.strip(),
     )
@@ -255,27 +293,27 @@ def check_sound(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     samples = run(
         [sys.executable, "tools/sound_bank.py", "samples", str(game_dir / "DATA/SOUND.DAT"), "--lists", *lists]
     )
-    checks.check("stage 9: the sample bank decodes", samples.returncode == 0, samples.stderr.strip())
+    checks.check("stage 10: the sample bank decodes", samples.returncode == 0, samples.stderr.strip())
     checks.check(
-        "stage 9: the sample bank joins 87 members",
+        "stage 10: the sample bank joins 87 members",
         "members: 92" in samples.stdout and "joined:  87" in samples.stdout,
         "92 members, 87 joined",
     )
     checks.check(
-        "stage 9: the sample flags match the loader",
+        "stage 10: the sample flags match the loader",
         "heli             8127    19521  268468223    -1      0      0  268500992  285212672 0x4700"
         in samples.stdout,
         "heli 0x4700",
     )
     song = run([sys.executable, "tools/sound_bank.py", "song", str(work_dir / "MUSIC1.HMP")])
-    checks.check("stage 9: the song decodes", song.returncode == 0, song.stderr.strip())
+    checks.check("stage 10: the song decodes", song.returncode == 0, song.stderr.strip())
     checks.check(
-        "stage 9: the song header matches the reference",
+        "stage 10: the song header matches the reference",
         "tracks:      13" in song.stdout and "duration:    93 s" in song.stdout,
         "13 tracks, 93 s",
     )
     checks.check(
-        "stage 9: the song chunks cover the data",
+        "stage 10: the song chunks cover the data",
         song.stdout.count("track") >= 13 and "0x12107" in song.stdout,
         "13 chunks",
     )
@@ -475,6 +513,63 @@ def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float)
     )
 
 
+def check_rebuild(checks: Checks, game_dir: Path, timeout: float) -> None:
+    """Rebuild the named modules and diff them against the original.
+
+    The modules are `free` at linear 0x300ec, the smallest named function in the
+    program map, and `exit` at linear 0x300be with its helper at 0x300d6.  The stage
+    needs Docker for the OpenWatcom V2 container, so it skips when Docker is missing.
+    """
+    if shutil.which("docker") is None:
+        print("docker is not on PATH; the module rebuild is skipped")
+        return
+    for name, executable, map_name, diffs in REBUILT_MODULES:
+        result = run(["sh", f"tools/rebuild/build_{name}.sh"], timeout=timeout)
+        checks.check(
+            f"stage 11: the {name} module rebuild links",
+            result.returncode == 0 and executable in result.stdout,
+            result.stderr.strip()[-80:],
+        )
+        if result.returncode != 0:
+            continue
+        for original_address, symbol, count in diffs:
+            command = [
+                sys.executable,
+                "tools/rebuild/diff_module.py",
+                "--original",
+                str(game_dir / "STARTH.EXE"),
+                "--original-address",
+                f"{original_address:#x}",
+                "--rebuilt",
+                str(REBUILD_DIR / executable),
+                "--rebuilt-map",
+                str(REBUILD_DIR / map_name),
+                "--rebuilt-symbol",
+                symbol,
+            ]
+            if count:
+                command += ["--count", str(count)]
+            result = run(command, timeout=timeout)
+            detail = ""
+            lines = result.stdout.strip().splitlines()
+            if lines:
+                detail = lines[-1]
+            matched = any(
+                verdict in result.stdout
+                for verdict in (
+                    "the instruction sequences match",
+                    "the same instructions in a different order",
+                    "byte-identical",
+                )
+            )
+            checks.check(
+                f"stage 11: the {name} module matches the original at "
+                f"{original_address:#x}",
+                result.returncode == 0 and matched,
+                detail or result.stderr.strip()[-80:],
+            )
+
+
 def check_session_script(checks: Checks, work_root: Path, port: int, timeout: float) -> None:
     script = Path("tools/scripts/example_session.dbg")
     launch = (
@@ -538,6 +633,7 @@ def main() -> int:
         check_radare2(checks, game_dir, args.exe, args.timeout)
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
+    check_rebuild(checks, game_dir, args.timeout)
 
     print()
     print(f"{len(checks.results)} checks, {len(checks.failures)} failures")

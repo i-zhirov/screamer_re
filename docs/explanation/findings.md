@@ -4632,3 +4632,514 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The tool reports the member name and the pointer at every stop.  It restores the
   game copy at the end of every run.
   Evidence: the run output and the file bytes after the run.
+## The smallest module to rebuild
+
+- The program map lists `main` and its 13 callees, and the smallest is
+  `free` at linear `0x300ec` with three instructions and 9 bytes.  The bytes are
+  `85 c0` (`test eax,eax`), `0f 85 14 1f 0a 00` (`jne 0xd2008`), and `c3`
+  (`ret`), so the module forwards a non-null pointer to the run-time `free` at
+  `0xd2008` and returns at once for a null pointer.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300ec --count 3`.
+- Six smaller functions sit in the object at `0x23ed0`, `0x24068`, `0x24070`,
+  `0x24078`, `0x24090`, and `0x24098`.  Each holds 5 bytes and the four
+  instructions `push ebp`, `mov ebp,esp`, `pop ebp`, and `ret`, and each carries
+  one call site from the mode dispatch at `0x20eca` or `0x20f98`.  The bodies are
+  empty, so the six stubs are the smallest functions, but they are not a module to
+  rebuild.
+  Evidence: the object scan and the disassembly.
+- An empty C function does not generate the five bytes.  `void f(void) {}` compiles
+  to `c3` (`ret`), and `-od` compiles it to a 23-byte frame with five register
+  saves, so the original compiler differs from OpenWatcom V2 for an empty function.
+  The six stubs stay open.
+  Evidence: the container compiles and `wdis`.
+- The module to rebuild is `free`: it is the smallest named module, the source is
+  clear, and OpenWatcom V2 reproduces its code.
+  Evidence: the size compare, the container build, and the module diff.
+
+## The rebuilt `free` module
+
+- The module source holds the function and no other code:
+  `void free(void *p) { if (p) nfree(p); }`.  The callee carries the name `nfree`,
+  because the module and the run-time function share the name `free`.
+  Evidence: `tools/rebuild/free.c`.
+- OpenWatcom V2 compiles the source to the original instruction sequence:
+  `85 c0` (`test eax,eax`), `0f 85 <rel32>` (`jne nfree_`), and `c3` (`ret`),
+  9 bytes.  The Watcom register calling convention passes the first argument in
+  `eax`, so the C form reproduces the original three instructions.
+  Evidence: `wdis work/rebuild/free.obj` and the original decode.
+- The container build links the module with the harness stubs (`chk.asm`,
+  `stack.asm`, `cstart.c`) and the stand-in `nfree` from `free_main.c`.  It writes
+  `work/rebuild/free.exe` (1082 bytes) and the linker map
+  `work/rebuild/free.map`.
+  Evidence: `sh tools/rebuild/build_free.sh` and the map file.
+
+## The module diff and the run
+
+- The diff reads the original `free` at linear `0x300ec` in `STARTH.EXE` and the
+  rebuilt `free` at linear `0x10000` in `free.exe`, and the rebuilt module lands
+  first in the code object.  The byte compare holds 6 of 9 equal bytes, and the
+  three different bytes are the `rel32` displacement of the tail jump.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+  work/rebuild/free.map --rebuilt-symbol free_`.
+- The instruction compare holds 3 of 3 equal instructions, no opcode
+  differences, and one operand difference: `jne 0xd2008` against `jne 0x10034`.
+  The operand is the link-time displacement of the tail jump, so the rebuilt module
+  holds the original instruction sequence.  The jump goes forward in both images.
+  Evidence: the diff output and the map file.
+- The rebuilt module behaves like the original.  The headless run writes the four
+  markers `NULL`, `DONE`, `FREE`, and `AFTR` on their own lines: the marker
+  `NULL` before the null call, the marker `DONE` after it, the marker `FREE` from
+  the stand-in `nfree`, and the marker `AFTR` after the non-null call.  The module
+  therefore does nothing for a null pointer and forwards a non-null pointer, the same
+  behavior as the original three instructions.
+  Evidence: `sh tools/rebuild/run_free.sh` and `work/rebuild/free_out.txt`.
+- The pipeline check holds the rebuild.  The check runs the build and the diff as
+  stage 11 and reports 34 checks and 0 failures with `--skip-runtime`.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --skip-runtime`.
+
+## The harness print helper and the string literal
+
+- The `print` helper of the harness writes a long block of code bytes for a string
+  literal.  The driver output holds 8267 code-like bytes before the `W` lines, and the
+  first driver print is the literal `REBUILT$` at `DGROUP` offset 0.  The rebuilt
+  module showed the same fault on its first run: the four literal prints wrote 33068
+  code-like bytes and no marker text.
+  Evidence: `work/rebuild/out.txt` and the first `free.exe` run.
+- The `print` helper writes a program-written buffer correctly.  The driver prints the
+  eight pairs through the `line` array, and the rebuilt module prints its markers
+  through the `text` array after the markers moved out of the literals.
+  Evidence: the two output files.
+- The pointer value is not the fault.  The driver literal print passes `9` for the
+  `DONE$` literal at `DGROUP` offset `9`, and the module literal prints pass `8`,
+  `0xf`, and `0x16` for the three markers at the same offsets, so each pointer holds
+  its literal.
+  Evidence: the `main` disassembly and the `DGROUP` dump.
+- The open question is the `CONST` content at run time.  The earlier finding that the
+  string constants work came from the `W` letter, and the `W` is `line[0]`, a byte the
+  program writes itself, so that finding covers the written bytes only.  The `hex` table
+  read as zero and the literals read as code-like bytes, so the loaded content of the
+  `CONST` segment is the suspect.
+  Evidence: the earlier section, the disassembly, and the output files.
+
+## The next module: the run-time exit chain
+
+- The program map lists `exit` at linear `0x300be` with 8 instructions, the next smallest
+  named function after `free`.  The bytes are `52 89 c2` (`push edx`, `mov edx,eax`), two
+  `ff 15 <addr>` calls through the function-pointer slots `0x2f84` and `0x2f88`,
+  `89 d0` (`mov eax,edx`), `e8 02 00 00 00` (`call 0x300d6`), and `5a c3` (`pop edx`,
+  `ret`).
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300be --count 8`.
+- The helper at `0x300d6` holds 6 instructions and 22 bytes: `push edx`, `mov edx,eax`,
+  the calls through the slots `0x2f88` and `0x2f8c`, `mov eax,edx`, and
+  `e9 9b 02 00 00` (`jmp 0x30387`).  The helper calls the slot `0x2f88` again, so the
+  two functions share one handler slot.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x300d6 --count 6`.
+- The terminator at `0x30387` jumps over a message writer to `0x303ac`, which calls
+  `0xd43bf` and then terminates the process with `mov ah,0x4c` and `int 0x21`.
+  Evidence: the disassembly.
+- The OpenWatcom V2 run-time source `bld/clib/startup/c/exit.c` holds the same shape for
+  the DOS build: `exit` calls `(*__int23_exit)()` and `__FiniRtns`, `_exit` calls
+  `(*__int23_exit)()` and `(*__FPE_handler_exit)()`, and both end in a call that never
+  returns.  The shared slot is therefore the interrupt handler slot.
+  Evidence: the source file in the OpenWatcom v2 repository.
+
+## The rebuilt `exit` module
+
+- The module source holds the two functions and three hook slots: `exit` calls the slots 1
+  and 2 and then `exit_flush`, and `exit_flush` calls the slots 2 and 3 and then
+  `exit_terminate`.  The terminator carries `__declspec(__aborts)`, the OpenWatcom V2
+  spelling of the run-time `_WCNORETURN` macro.
+  Evidence: `tools/rebuild/exit.c`.
+- The position of `__declspec(__aborts)` matters.  The suffix form
+  `void f(int) __declspec(__aborts);` fails with the error `E1026: Invalid declarator`
+  and mis-parses the declarations after it; the prefix form compiles.
+  Evidence: the two container compiles.
+- OpenWatcom V2 compiles the source to the original instruction sequences.  `exit` holds
+  8 instructions and 24 bytes, and `exit_flush` holds 6 instructions and 22 bytes, the same
+  as the original.  The terminator attribute drops the epilogue of `exit_flush` and turns its
+  last call into a jump, so the rebuild holds the original `jmp` form.
+  Evidence: `wdis work/rebuild/exit.obj`.
+- The build writes `work/rebuild/exitmod.exe` (1094 bytes) and the linker map
+  `work/rebuild/exit.map`.
+  Evidence: `sh tools/rebuild/build_exit.sh` and the map file.
+
+## The exit diff and the run
+
+- The diff of `exit` reports 8 of 8 instructions equal, no opcode differences, and three
+  operand differences: the slot addresses `0x2f84` and `0x2f88` and the helper call.  The
+  diff of the helper reports 6 of 6 instructions equal and three operand differences: the
+  slot addresses `0x2f88` and `0x2f8c` and the terminator jump.  Both verdicts are `the
+  instruction sequences match; the differing operands are the link-time addresses`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map
+  work/rebuild/exit.map --rebuilt-symbol exit_` and the same command for `0x300d6` with
+  `--count 6` and `--rebuilt-symbol exit_flush_`.
+- The rebuilt module keeps the shared slot: the original calls `0x2f88` from `exit` and from
+  the helper, and the rebuilt `exit` and `exit_flush` both read the slot `exit_hook_2`.
+  Evidence: the two diff outputs.
+- The headless run writes the markers `A`, `B`, `B`, `C`, and `T` on their own lines: the
+  first hook, the second hook from `exit`, the second hook again from the helper, the third
+  hook, and the terminator.  The repeated `B` shows the shared slot, so the module runs the
+  original chain.
+  Evidence: `sh tools/rebuild/run_exit.sh` and `work/rebuild/exit_out.txt`.
+- The test program carries the name `exitmod.exe`.  A program named `exit.exe` leaves the
+  DOSBox-X session before the debugger connects, because the DOS shell reads `exit` as its own
+  command, and a name over eight characters fails with `Bad command or filename`.
+  Evidence: the two failed runs.
+- The harness sets the three hook slots in `main`, because the initialized data of the rebuilt
+  image reads wrong at run time.  The assignments write the addresses of the three stub
+  functions, so the module calls the stubs.
+  Evidence: `tools/rebuild/exit_main.c` and the run output.
+
+## The pipeline check holds two modules
+
+- Stage 9 rebuilds and diffs both modules.  The check reports 20 checks and 0 failures with
+  `--skip-runtime`, which is three more checks than the `free` module alone.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --skip-runtime`.
+- The linker map marks a symbol that only the module references with a trailing `+`, for example
+  `0001:00000000+ exit_flush_`.  The diff tool accepts the mark.
+  Evidence: `work/rebuild/exit.map` and the diff run.
+
+## The frame of the simple game functions
+
+- `engine_shutdown` at `0x128ac` is the next named module in the program map: 11 instructions
+  with an EBP frame, `push ebp`, `mov ebp,esp`, eight calls, `pop ebp`, and `ret`.  The frame
+  holds no local variable.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x128ac --count 11`.
+- OpenWatcom V2 does not generate the frame.  The same source with eight calls compiles to 47
+  bytes without a frame, and the last call becomes `jmp f8_`, because the function returns
+  nothing and the call is last.  The original holds `call 0x25f14`, `pop ebp`, and `ret`.
+  Evidence: the container compile and `wdis work/rebuild/probe/shutdown_probe.obj`.
+- The two differences repeat the earlier empty-stub result: the original compiler creates an EBP
+  frame for a function without a local variable, and OpenWatcom V2 does not.  The frame question
+  therefore covers every simple game function, not only the six stubs.
+  Evidence: the empty-stub section and the probe.
+- `engine_shutdown` stays open until the frame question is answered.  The next named module with a
+  register-save prologue and a local slot is `printf` at `0x3009b`: `push ebx`, `push edx`,
+  `sub esp,4`, the print-engine call at `0xd429f`, and the matching epilogue, with no EBP frame.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x3009b --count 13`.
+
+## The frame answer: the stack-frame option
+
+- The Watcom C/C++ compiler option `-of+` generates a stack frame for every function, and the
+  OpenWatcom V2 default is `-of-`, no frame.  The option sweep over the 47 candidate options finds
+  `-of+` alone as the frame producer.
+  Evidence: the container sweep and `wdis work/rebuild/probe/shut_of.obj`.
+- The original game files were built with the frame option.  With `-of+`, the `engine_shutdown` source
+  holds the original frame `push ebp`, `mov ebp,esp` ... `pop ebp`, `ret`, and the last call stays a
+  plain `call`, which matches the original `call 0x25f14`.  The frame option therefore also answers the
+  tail-call half of the question.
+  Evidence: the container compile and the original decode.
+- The run-time wrappers carry no frame, so the game and the library differ.  `free`, `exit`, and
+  `printf` all hold a register-save prologue, and the library build of the Watcom run-time leaves the
+  frame out.  The frame rule is therefore per file, not per program.
+  Evidence: the `free`, `exit`, and `printf` decodes and the `-of+` sweep.
+- One difference stays.  With `-of+`, OpenWatcom V2 adds `mov esp,ebp` to the epilogue of a function
+  that does not change ESP: the `engine_shutdown` rebuild holds 54 bytes against the original 52, and the
+  empty stub holds `55 89 e5 89 ec 5d c3` against the original `55 89 e5 5d c3`.  The original
+  compiler omits the restore when nothing moved.
+  Evidence: the two container compiles.
+- The frame answer unblocks the game files.  A game file rebuild takes `-of+`, and a run-time or library
+  file rebuild takes the default.  The `printf` rebuild below is the first module to test the rule.
+  Evidence: the module results.
+
+## The rebuilt `printf` module
+
+- The module source follows the OpenWatcom V2 run-time file
+  `bld/clib/streamio/c/printf.c`: `va_start` over the format argument, the print-engine call with the
+  standard-output file, the format, and the argument list, and the return of the count.
+  Evidence: the source file in the OpenWatcom v2 repository.
+- The V2 header defines `stdout` as `((__w_FILE *)&__iob[1])` and `va_start` as the intrinsic
+  `__builtin_va_start`, so the compiler emits the address of the standard-output entry, which matches the
+  original `mov eax, 0x2fd2`.
+  Evidence: `/opt/watcom/h/stdio.h` and `/opt/watcom/h/stdarg.h`.
+- The V2 `va_list` is a plain pointer, so the source passes `&args` to keep the original form, which
+  passed the `va_list` by reference.  The `va_end` call is absent, because the original epilogue holds no
+  trace of it.
+  Evidence: `tools/rebuild/printf.c` and the two container compiles.
+- OpenWatcom V2 compiles the source to 34 bytes and 13 instructions, the same as the original, with the
+  register-save prologue `push ebx`, `push edx`, `sub esp,4` and no EBP frame.  The register-save
+  prologue therefore avoids the frame question, which is the answer the module was built to test.
+  Evidence: `wdis work/rebuild/printf.obj` and the diff.
+- Three instructions come in a different order.  The original computes the argument address into `ebx`,
+  loads the standard-output entry into `eax`, loads the format into `edx`, stores the argument list, and then
+  passes its address; the V2 build computes the argument address into `eax`, stores it, passes the address,
+  loads the format, and then loads the standard-output entry.  The instructions are the same and only the
+  register allocation and the spill position differ.
+  Evidence: the two decodes.
+- The build writes `work/rebuild/prtfmod.exe` (4987 bytes) and the linker map
+  `work/rebuild/printf.map`.
+  Evidence: `sh tools/rebuild/build_printf.sh` and the map file.
+
+## The printf diff and the run
+
+- The diff reports 13 of 13 instructions equal, no opcode differences, and 6 operand differences.  The
+  verdict is `the modules hold the same instructions in a different order`, which names the register
+  allocation difference and separates it from the link-time addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x3009b --rebuilt work/rebuild/prtfmod.exe --rebuilt-map
+  work/rebuild/printf.map --rebuilt-symbol printf_`.
+- The diff tool now names three verdicts: the link-time addresses, the same instructions in a different
+  order, and a real difference.  It replaces every absolute memory address and every branch target with a
+  placeholder for the shape compare, and a memory operand with a register base keeps its offset.
+  Evidence: `tools/rebuild/diff_module.py` and the four module diffs.
+- The headless run writes `P` and `4`: the module reaches the print-engine stub, and the count returns
+  through the module.
+  Evidence: `sh tools/rebuild/run_printf.sh` and `work/rebuild/prtf_out.txt`.
+- The test program carries the name `prtfmod.exe`, because DOS truncates an output file name over eight
+  characters to its short form: `printf_out.txt` becomes `PRINTF_O.TXT`.
+  Evidence: the two runs and the work directory listing.
+
+## The engine_shutdown rebuild and the restore instruction
+
+- The `engine_shutdown` module rebuilds with the stack-frame option `-of+` to 54 bytes and 15 instructions
+  against the original 52 bytes and 14 instructions.  The frame and the eight calls match, so the frame
+  answer holds for the game files.
+  Evidence: `sh tools/rebuild/build_shutdown.sh` and the diff.
+- The extra instruction is `mov esp,ebp`, the ESP restore of the epilogue.  The original holds `pop ebp`
+  and `ret` alone, so the original compiler dropped the restore because the frame holds no local variable
+  and nothing moved the stack pointer.
+  Evidence: the two decodes.
+- No compiler option suppresses the restore.  The full option list of the compiler itself holds `-of` for
+  `as needed`, `-of+` for `always`, `-ok` for the flow graph, and `-oc` for the call-to-jump form, and the
+  sweep of the 47 candidate options found no other frame control.  The `-of+ -ok` and `-of+ -oc` builds keep
+  the restore, the `-of+ -od` build replaces the prologue with the 5-register debug frame, and
+  `#pragma on (frame)` changes nothing.
+  Evidence: `strings /opt/watcom/binl64/wcc386` and the container compiles.
+- The rest of the module matches.  The diff holds 12 of 14 instructions equal and 8 operand differences,
+  which are the link-time addresses of the eight calls, and the run writes the markers `1` to `8` in order, so
+  the call chain matches the original.
+  Evidence: the diff output and `sh tools/rebuild/run_shutdown.sh`.
+- The module stays open as a byte-level match.  The rebuild holds the original code shape with one extra
+  restore instruction, and the difference is a code generator change between the original compiler and OpenWatcom
+  V2 that no source form can remove.
+  Evidence: the section above.
+- The diff tool now names the case.  When the instruction counts differ and one sequence holds the other plus one
+  instruction, the tool reports the extra instruction instead of only the counts.
+  Evidence: `tools/rebuild/diff_module.py` and the five module diffs.
+
+## The memcpy module matches byte for byte
+
+- `memcpy` at `0x8c150` holds 14 bytes and 8 instructions: `pushad`, the register moves, `shr ecx,2`,
+  `rep movsd`, `popad`, and `ret`.  The function carries no call and no data reference, so its code is
+  position-independent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8c150 --count 8`.
+- The module is assembly, because the original routine is assembly too.  The Watcom assembler takes the Intel names
+  `pushad` and `popad`: `pushal` and `popal` fail with `E032: Syntax error`.
+  Evidence: the two container compiles and `wdis work/rebuild/memcpy.obj`.
+- The rebuilt module matches the original byte for byte.  The diff reports 14 of 14 bytes equal, 0 different, 8 of 8
+  instructions equal, no opcode differences, and no operand differences, and the verdict is `the modules are
+  byte-identical`.  This is the first module with an exact match.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x8c150
+  --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_`.
+- The byte compare also settles the behavior: two identical instruction sequences carry the same behavior, so the module
+  needs no register-level argument beyond the code match.
+  Evidence: the byte-identical diff.
+- The behavior run prints `N`, and the copy does not arrive.  The rebuilt `main` fills the source buffer at the `DGROUP`
+  offset `0x10`, clears the target at `0x8`, calls the module with `eax=8`, `edx=0x10`, and `ebx=8`, and then compares
+  the two buffers byte by byte.  The disassembly of the rebuilt `main` shows the correct order and the correct addresses, so
+  the run result contradicts the code, and the harness needs more work.  The module stays verified by the byte compare.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/le.py disasm work/rebuild/memmod.exe 0x10029 --count 40`.
+
+## The memcpy harness and the ES segment
+
+- The harness fault is the `ES` segment register, not the module.  The diagnostic run prints the source bytes `A` to `H` and
+  the target bytes as eight non-printing characters, so the module reads the source correctly through `DS:ESI` and writes through
+  `ES:EDI` to the wrong segment.  The module itself is byte-identical to the original, so it cannot be at fault.
+  Evidence: the diagnostic run and the byte-identical diff.
+- The start stub of the harness never set `ES`.  `tools/rebuild/chk.asm` held `_cstart_` as `jmp main_` alone, so the
+  program ran with whatever `ES` the loader left, while the game start code sets `ES` to the data segment.
+  Evidence: `tools/rebuild/chk.asm`.
+- The fix is `push ds` and `pop es` in `_cstart_`.  The copy then lands, and the run prints the target bytes `A` to `H`
+  and the flag `Y`, so the harness passes.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `work/rebuild/mem_out.txt`.
+- The fix is safe for every module.  The shared stub carries the two extra bytes for the driver, `free`, `exit`, `printf`,
+  `engine_shutdown`, and `memcpy`, and the full check still reports 35 checks and 0 failures.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ... --port 9895`.
+
+## The segment guard in the start stub
+
+- The start stub now runs a guard before `main_`.  It saves the flags and the registers, sets `ES` to `DS`, writes
+  the pattern `A5A5A5A5` to a stack slot through `ES:EDI`, and reads the slot back through `DS:ESI` and through
+  `SS:ESP`.  A mismatch means the segments do not describe the same memory, so the harness spells `SEGFAIL` and exits
+  with the code 1.
+  Evidence: `tools/rebuild/chk.asm`.
+- The guard fires when the segments disagree.  A build with the `push ds` and `pop es` lines removed prints `SEGFAIL` on
+  the screen and leaves the module output empty, so the fault class can no longer reappear in silence.
+  Evidence: the deliberate broken build and `work/rebuild/mem_out.txt`.
+- The failure path uses the BIOS teletype, not the DOS print.  The DOS print reads the message through `DS:EDX`, so it
+  writes garbage when `DS` is the broken segment; the teletype prints one immediate character at a time and needs no segment
+  setup.  The guard spells `SEGFAIL` and then exits with the code 1.
+  Evidence: the two runs, one with the guard message and one without.
+- The guard is silent when the segments agree, and the module passes.  The run prints the target bytes `A` to `H` and the
+  flag `Y`, and the full check reports 35 checks and 0 failures.
+  Evidence: `sh tools/rebuild/run_memcpy.sh` and `python3 tools/pipeline_check.py --game-dir ... --port 9896`.
+
+## The error_report module
+
+- `error_report` at `0x10978` is the first game module of the rebuild and the next one in size order.  It holds 16 dispatch
+  instructions and 21 message bodies: `push ebp`, `mov ebp,esp`, `sub esp,4`, the code argument stored at `[ebp-4]`, `inc eax`,
+  `cmp eax,0x17`, the default jump to `0x10b87`, and the jump through `cs:[eax*4 + 0x918]`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10978 --count 16`.
+- The jump table at the linear `0x10918` holds 23 object-relative entries, and the codes 20, 21, and 22 point at the default
+  body at `0x10b87`.  The bodies sit at `0x10996` to `0x10b86`, one per code, and each pushes message offsets and the
+  message-table base `0x2fd2`, calls the printer at `0x4bf64`, and returns.
+  Evidence: the table and body dumps.
+- The message offsets are `0x44`, `0x6f`, `0x74`, `0xa3`, `0xd1`, `0xff`, `0x116`, `0x141`, `0x16e`, `0x18b`, `0x1c0`,
+  `0x1f8`, `0x232`, `0x252`, `0x288`, `0x2a7`, `0x2d8`, `0x307`, `0x330`, `0x35a`, `0x369`, and `0x383`.  The codes 2, 3,
+  4, 5, 6, 8, 11, and the default push the format offset `0x7fe8` as well, so the printer is a printf-style call.
+  Evidence: the body dump.
+- The rebuild source holds the switch with the codes 0 to 19 and the default, and the printer declaration carries `__cdecl`, so the
+  compiler pushes the message table and the offsets instead of passing the first argument in a register.  The Watcom default calling
+  convention passes the first argument in `eax`, which does not match the original.
+  Evidence: `tools/rebuild/error_report.c` and `wdis work/rebuild/error_report.obj`.
+- The rebuild does not match byte for byte yet.  Three differences stay: the original spills the code argument to a local and keeps an EBP
+  frame, the rebuild keeps the argument in a register and saves `ecx` and `edx`; the rebuild shares the common case tails through jumps while
+  the original expands every body; and the rebuild compares against `0x13` while the original compares against `0x17`.
+  Evidence: the two disassemblies and the diff.
+- The harness run crashes at a null selector.  The guard passes, because the dump shows `DS` and `ES` equal at `0x200`, so the fault is
+  past the start stub.  The jump table is the suspect: its entries are absolute addresses that the loader must relocate, and the same
+  class of fault already hit the `ES` register.  The module stays open as a byte-level match.
+  Evidence: the run dump and the crash address `3:00000001`.
+- The module is not in the pipeline check stage 11, because the diff does not match yet.
+  Evidence: `tools/pipeline_check.py`.
+
+## The error_report jump table at run time
+
+- The crash is the compiler's jump table, and the fault is now pinned.  The DOS/4G dump reports the fault at
+  `1A0:00000001`, and `EIP` is `1`, so the jump reached offset `1`.  The rebuilt `jmp` instruction holds the
+  displacement `0`, so the effective address is `CS:0 + eax*4` and not the table, and the entry read there is the
+  object-relative value `1`.  The table entries are also unrelocated, because the bytes at the table address are the
+  first case body and not addresses.
+  Evidence: `python3 tools/le.py disasm work/rebuild/errmod.exe 0x10050 --count 8` and the run dump.
+- The rebuilt image therefore does not relocate the jump table.  The table lands in the code object, and the loader
+  applies no fixup to its displacement or to its entries, while the data fixups work: the `exit` module reaches its
+  function-pointer slots and the `memcpy` module matches byte for byte.  The code-object fixups are the open question.
+  Evidence: the four module results.
+- The rebuild now builds the table at run time.  The handlers are real functions, so the compiler emits their addresses
+  as data that the loader relocates, the same way the `exit` module reaches its slots, and the module no longer holds a
+  compiler jump table.
+  Evidence: `tools/rebuild/error_report.c`.
+- The crash is gone.  The harness run prints the three `R` markers, one per code, and the `D` marker, and the program
+  exits cleanly.  The guard stays silent, so the segments agree.
+  Evidence: `sh tools/rebuild/run_error_report.sh` and `work/rebuild/err_out.txt`.
+- The code shape differs from the original.  The diff reports 4 of 16 instructions equal and the verdict
+  `the instruction sequences differ`, because the run-time table replaces the compiler table.  The module therefore trades
+  the byte-level match for a behavior run, and stays out of the pipeline check stage 11.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978 --count 16
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map --rebuilt-symbol error_report_`.
+
+## The jump table is absent from the object file
+
+- The table never reaches the code object.  The object dump lists two routines, 80 bytes at `_TEXT + 0` and 263 bytes at
+  `_TEXT + 0x50`, and the whole `_TEXT` holds 343 bytes.  The table of 23 entries alone needs 92 bytes, and the linked
+  `error_report_` holds 263 bytes against the original span of about 551 bytes, so the table is absent from the image and not
+  only from the link.
+  Evidence: `wdis work/rebuild/er.obj` and `work/rebuild/error_report.map`.
+- The compiler emits the jump against a symbol whose table it does not place in the code segment.  The object dump holds
+  `jmp dword ptr L$1[eax*4]` and no `L$1` definition, so the reference and the table part company at the compiler, before the
+  linker runs.
+  Evidence: the object dump.
+- The linker cannot be told to keep the table.  The `wlink` V2.0 beta holds `option eliminate` for dead-code elimination with
+  no disable form: `option noeliminate` fails with `E3033: directive error near 'noeliminate'`, and `eliminate=off`, `ELiminate=no`,
+  and `eliminate=false` fail the same way.
+  Evidence: the four container links.
+- The original build therefore used a compiler and a linker that place and keep the table.  The original Watcom C/C++ 10.x toolchain
+  did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
+  not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 11.
+  Evidence: the section above and the two diffs.
+
+## The bios_video module and its instruction diff
+
+- `bios_video` at `0x108e4` is the next named module, 22 instructions and 52 bytes.  It builds a
+  general register set at `[ebp-0x2c]` of 0x1c bytes and a segment register set at `[ebp-0x10]` of 0xc
+  bytes, sets the `ax` word from the mode argument, calls the fill helper at `0x4bf23`, and then calls the
+  interrupt helper at `0x4bf4b` with the number `0x10`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x108e4 --count 22`.
+- The two helpers are now known.  The fill helper at `0x4bf23` writes the live `es`, `cs`, `ss`, `ds`, `fs`,
+  and `gs` words into the first pointer, and the call helper at `0x4bf4b` passes its four arguments to the
+  DPMI entry at `0xd4410`.  The first pointer is therefore the 0xc-byte segment set and the second the
+  0x1c-byte general set.
+  Evidence: the two helper dumps.
+- The rebuild holds 20 instructions and 48 bytes against the original 22 and 52, with 6 of 48 bytes equal.  The
+  structure sizes match, because the rebuild subtracts 0x28 and the original 0x28 plus the 4-byte argument slot.
+  Four differences stay: the prologue order, because the original saves `ebx`, `ecx`, `edx`, and `ebp` before the
+  frame and the rebuild saves them after; the argument spill, because the original stores `eax` to `[ebp-4]` and
+  reloads it while the rebuild stores the `ax` word once; the epilogue, because the original restores `esp` from
+  `ebp` and the rebuild uses `lea esp,[ebp-0xc]`; and the argument order, because the original computes the first
+  pointer first and the rebuild last.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x108e4 --rebuilt
+  work/rebuild/bvmod.exe --rebuilt-map work/rebuild/bios_video.map --rebuilt-symbol bios_video_`.
+- The module rebuilds with the stack-frame option `-of+`, which gives the frame and the matching structure layout.
+  Evidence: `tools/rebuild/build_bios_video.sh`.
+- The run passes.  The harness prints the fill marker, the call marker, and the exit marker, and the segment guard
+  stays silent.
+  Evidence: `sh tools/rebuild/run_bios_video.sh` and `work/rebuild/bv_out.txt`.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.
+
+## The list_destroy module and the unoptimized build
+
+- `list_destroy` at `0x2ed77` is 25 instructions and 54 bytes: the five register saves `ebx`, `ecx`,
+  `esi`, `edi`, and `ebp`, the frame `mov ebp,esp` and `sub esp,0xc`, the two arguments stored at
+  `[ebp-8]` and `[ebp-4]`, the guard `cmp dword ptr [eax],0` with the short skip, the `free` call at
+  `0xd2008`, the return of the first argument through the temporary at `[ebp-0xc]`, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ed77 --count 25`.
+- The module is the first game file with an unoptimized shape.  The rebuild with the game-file option
+  `-of+` alone holds 13 instructions, because the compiler keeps the argument in a register, drops the
+  locals, and saves only `ecx`.  The rebuild with `-of+ -od` holds 26 instructions and 64 bytes against
+  the original 25 and 54, with 15 of 54 bytes equal, which is the closest game-file result so far.
+  Evidence: the container builds and the two diffs.
+- The `-of+ -od` rebuild matches the original in the frame, the locals, the argument stores, the guard,
+  the `free` call, and the return temporary.  Four differences stay: the prologue order, because the
+  original pushes the four registers and then `ebp` while the rebuild pushes `ebp` and the frame first; the
+  local offsets, because the four saves sit between the frame pointer and the locals in the rebuild; the
+  branch form, because the original uses one short `je` while the rebuild inverts the test and adds a long
+  `jmp`; and the epilogue, because the original restores `esp` from `ebp` and the rebuild uses
+  `lea esp,[ebp-0x10]`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2ed77
+  --rebuilt work/rebuild/ldmod.exe --rebuilt-map work/rebuild/list_destroy.map --rebuilt-symbol
+  list_destroy_`.
+- The four differences repeat the `bios_video` set, and the register-save count pins the compiler
+  version.  The original saves five registers including `ebp`; the V2 `-od` build saves six and the V2
+  `-od` build for this module saves four plus the frame, so the original Watcom 10.x build saves one
+  register fewer than the V2 build in the same mode.
+  Evidence: the four diffs.
+- The run passes.  The harness prints `F`, `R`, `Z`, and `N`: the guard frees the set pointer, the return
+  is the first argument, the pointer itself stays set, and the null pointer skips the free call.  The segment
+  guard stays silent.
+  Evidence: `sh tools/rebuild/run_list_destroy.sh` and `work/rebuild/ld_out.txt`.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.
+
+## The memory_available module and the recurring differences
+
+- `memory_available` at `0x2f8ca` holds 27 instructions and 58 bytes: the six register saves
+  `ebx`, `ecx`, `edx`, `esi`, `edi`, and `ebp`, the frame `mov ebp,esp` and `sub esp,0xc`, the
+  argument stored at `[ebp-4]`, the first call at `0x2f758` with its result moved to `edx`, the
+  second call at `0x2f82e` with the argument reloaded, the sum `add edx,eax`, the sum stored at
+  `[ebp-8]`, the return through the temporary at `[ebp-0xc]`, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f8ca --count 27`.
+- The rebuild with `-of+ -od` holds 27 instructions and 59 bytes against the original 27 and 58,
+  with 31 of 58 bytes equal.  This is the first game module whose instruction count matches, and
+  the byte count differs by one.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f8ca
+  --rebuilt work/rebuild/mamod.exe --rebuilt-map work/rebuild/memory_available.map
+  --rebuilt-symbol memory_available_`.
+- Three of the four `bios_video` differences recur.  The prologue order recurs, because the
+  original pushes the five registers and then `ebp` while the rebuild pushes `ebp` and the frame
+  first.  The local offsets recur, because the saves sit between the frame pointer and the locals.
+  The epilogue recurs, because the original restores `esp` from `ebp` and the rebuild uses
+  `lea esp,[ebp-0x14]`.  The branch form does not apply, because this module has no conditional.
+  Evidence: the two diffs.
+- The register-save count follows the registers the function uses.  `list_destroy` uses `edx` only for
+  the free call, and the original saves five registers; `memory_available` holds the first call result
+  in `edx` across the second call, and the original saves six.  The V2 `-od` build saves the same
+  six here, so the save set is not the difference for this module.
+  Evidence: the three module diffs.
+- The run passes.  The harness prints `F`, `S`, `T`, and `D`: the first probe runs once, the second
+  probe runs once, the total is the sum, and the program exits.  The segment guard stays silent.
+  Evidence: `sh tools/rebuild/run_memory_available.sh` and `work/rebuild/ma_out.txt`.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
+  Evidence: `tools/pipeline_check.py`.

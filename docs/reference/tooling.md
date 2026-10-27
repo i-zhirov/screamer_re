@@ -290,21 +290,160 @@ The files:
 | File | Role |
 | --- | --- |
 | `driver.c` | the rebuilt driver: the eight register pairs as immediates, register first and data second, with no C run-time |
-| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol |
+| `chk.asm` | the `__CHK` stack check helper and the `_cstart_` start symbol, which runs the segment guard, sets `ES` to `DS`, and then starts `main_` |
 | `stack.asm` | the `STACK` segment that the DOS/4G extender needs (the error 1317) |
 | `cstart.c` | the C start stub |
 | `build.sh` | the container build; it writes `work/rebuild/driver.exe` |
 | `run.sh` | the headless DOSBox-X run; it writes `work/rebuild/out.txt` |
+| `free.c` | the rebuilt `free` module, the smallest named module in the program map |
+| `free_main.c` | the `free` test harness: the `main` markers and the stand-in `nfree` |
+| `build_free.sh` | the container build; it writes `work/rebuild/free.exe` and `work/rebuild/free.map` |
+| `run_free.sh` | the headless DOSBox-X run; it writes `work/rebuild/free_out.txt` |
+| `exit.c` | the rebuilt `exit` module and its helper |
+| `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
+| `build_exit.sh` | the container build; it writes `work/rebuild/exitmod.exe` and `work/rebuild/exit.map` |
+| `run_exit.sh` | the headless DOSBox-X run; it writes `work/rebuild/exit_out.txt` |
+| `printf.c` | the rebuilt `printf` module, after the run-time file `bld/clib/streamio/c/printf.c` |
+| `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
+| `build_printf.sh` | the container build; it writes `work/rebuild/prtfmod.exe` and `work/rebuild/printf.map` |
+| `run_printf.sh` | the headless DOSBox-X run; it writes `work/rebuild/prtf_out.txt` |
+| `shutdown.c` | the rebuilt `engine_shutdown` module, built with the stack-frame option `-of+` |
+| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
+| `build_shutdown.sh` | the container build; it writes `work/rebuild/shutmod.exe` and `work/rebuild/shutdown.map` |
+| `run_shutdown.sh` | the headless DOSBox-X run; it writes `work/rebuild/shut_out.txt` |
+| `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
+| `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
+| `build_memcpy.sh` | the container build; it writes `work/rebuild/memmod.exe` and `work/rebuild/memcpy.map` |
+| `run_memcpy.sh` | the headless DOSBox-X run; it writes `work/rebuild/mem_out.txt` |
+| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over 20 codes with a jump table |
+| `error_report_main.c` | the `error_report` test harness: the message table and the variadic printer stub |
+| `build_error_report.sh` | the container build; it writes `work/rebuild/errmod.exe` and `work/rebuild/error_report.map` |
+| `run_error_report.sh` | the headless DOSBox-X run; it writes `work/rebuild/err_out.txt` |
+| `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
 sh tools/rebuild/build.sh
 sh tools/rebuild/run.sh
+sh tools/rebuild/build_free.sh
+sh tools/rebuild/run_free.sh
+sh tools/rebuild/build_exit.sh
+sh tools/rebuild/run_exit.sh
+sh tools/rebuild/build_printf.sh
+sh tools/rebuild/run_printf.sh
+sh tools/rebuild/build_shutdown.sh
+sh tools/rebuild/run_shutdown.sh
+sh tools/rebuild/build_memcpy.sh
+sh tools/rebuild/run_memcpy.sh
 ```
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
 `E0 0F`, `23 3F`, `43 01`, and `C0 01`, which match the original driver
 sequence at `0x14157`.
+
+The module rebuild:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300ec \
+    --rebuilt work/rebuild/free.exe \
+    --rebuilt-map work/rebuild/free.map \
+    --rebuilt-symbol free_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300be \
+    --rebuilt work/rebuild/exitmod.exe \
+    --rebuilt-map work/rebuild/exit.map \
+    --rebuilt-symbol exit_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x300d6 --count 6 \
+    --rebuilt work/rebuild/exitmod.exe \
+    --rebuilt-map work/rebuild/exit.map \
+    --rebuilt-symbol exit_flush_
+
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x3009b \
+    --rebuilt work/rebuild/prtfmod.exe \
+    --rebuilt-map work/rebuild/printf.map \
+    --rebuilt-symbol printf_
+```
+
+The diff reads the original address from the command line and the rebuilt address
+from the linker map.  It exits with code 0 when the instruction sequences match.
+The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
+`85 c0`, `0f 85 14 1f 0a 00`, and `c3`, so the instruction sequences match and
+the tail-jump address differs.  The `exit` function and its helper match in the same
+way: 8 of 8 instructions and 6 of 6 instructions, and the differing operands are the
+addresses of the three hook slots and of the two calls.
+
+The rebuilt `printf` holds 34 bytes and 13 instructions, the same as the original, and
+no EBP frame.  Three instructions come in a different order, because the V2 register
+allocator spills the argument list before it loads the arguments, so the verdict is
+`the modules hold the same instructions in a different order`.
+
+The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
+`exit` as its own command and leaves the session.  The `printf` test program carries
+the name `prtfmod.exe`, and its output file carries the name `prtf_out.txt`, because
+DOS keeps only the first eight characters of a file name.
+
+## The compiler options
+
+The original game files were built with the Watcom stack-frame option `-of+`, and the
+run-time library files were not.  A game file rebuild therefore adds `-of+`:
+
+```sh
+wcc386 -bt=dos -s -zq -of+ -fo=/w/module.obj module.c
+```
+
+The option reproduces the original `push ebp`, `mov ebp,esp` frame.  One difference
+stays: for a function that does not change ESP, OpenWatcom V2 adds `mov esp,ebp` to the
+epilogue, and the original compiler omits it.  A run-time or library file rebuild
+takes the default, no frame, because those modules carry a register-save prologue.
+
+The `engine_shutdown` module is the first game file to test the option:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x128ac \
+    --rebuilt work/rebuild/shutmod.exe \
+    --rebuilt-map work/rebuild/shutdown.map \
+    --rebuilt-symbol engine_shutdown_
+```
+
+The rebuild holds 54 bytes and 15 instructions against the original 52 bytes and 14
+instructions, and the diff names the difference: `the rebuilt module holds one
+instruction the original does not: mov esp, ebp`.  The frame and the eight calls match,
+the run writes the markers `1` to `8` in order, and no compiler option removes the
+restore, so the module stays open as a byte-level match.
+
+The `memcpy` module is the first exact match:
+
+```sh
+python3 tools/rebuild/diff_module.py \
+    --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+    --original-address 0x8c150 \
+    --rebuilt work/rebuild/memmod.exe \
+    --rebuilt-map work/rebuild/memcpy.map \
+    --rebuilt-symbol memcpy_
+```
+
+The diff reports 14 of 14 bytes equal and the verdict `the modules are
+byte-identical`.  The module copies through `rep movsd`, which reads through `DS:ESI`
+and writes through `ES:EDI`, so the harness start code sets `ES` to `DS`; without that
+step the copy reads the source and writes to the wrong segment, and the target stays
+zero.  The run then prints the target bytes `A` to `H` and the flag `Y`.
+
+The start stub also runs a segment guard before `main_`.  The guard writes a pattern to
+the stack through `ES:EDI` and reads it back through `DS:ESI` and through `SS:ESP`.  When a
+read differs, the segments do not describe the same memory, so the harness spells
+`SEGFAIL` on the screen through the BIOS teletype, which needs no segment setup, and exits
+with the code 1.  The guard is silent when the segments agree.
 
 ## Host tools
 
@@ -402,16 +541,18 @@ to `LOGCPU.TXT` in the DOSBox-X working directory.
 The tool runs every stage of the pipeline and checks that the stages agree: the
 syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
 debugger session script, the cross-checks between the file view and the run-time
-view, and the radare2 cross-check.  The check pins the reference values from the
+view, the radare2 cross-check, the container member probe, the sound bank decode,
+and the OpenWatcom module rebuild.  The check pins the reference values from the
 reference pages.  The tool exits with code 0 when every check passes.  The
-radare2 stage is skipped when `r2` is not on PATH.
+radare2 stage is skipped when `r2` is not on PATH, and the module rebuild stage
+is skipped when Docker is missing.
 
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 5 minutes and reports 40 checks, or 44 checks when radare2 is
+A run takes about 6 minutes and reports 49 checks, or 53 checks when radare2 is
 on PATH.  Use `--skip-runtime` to run the static stages only.
 
 The check runs in three places:

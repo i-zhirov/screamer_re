@@ -51,9 +51,16 @@ current host.
 
 ### M3: Rebuild
 
-- Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2.
+- Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
+  progress: the four smallest named modules, `free` at `0x300ec`, `exit` at
+  `0x300be` with its helper at `0x300d6`, `printf` at `0x3009b`, and
+  `engine_shutdown` at `0x128ac`, are rebuilt with the harness in
+  `tools/rebuild`; the first three match the original, and `engine_shutdown` holds
+  one extra `mov esp,ebp` restore).
 - Rebuild the data pipeline that produces the shipped data files.
-- Compare the rebuild with the original: same files, same behavior.
+- Compare the rebuild with the original: same files, same behavior (in progress:
+  `tools/rebuild/diff_module.py` compares the rebuilt code with the original
+  code).
 
 ### M4: Modern platform
 
@@ -87,6 +94,21 @@ current host.
    decoder and the rebuilt driver confirms the register order; the sample bank
    joins 87 members with the `SOUND_FX` lists and the loader flags, and the
    sample rate is 11025; the songs decode with the chunk table and the MIDI
-   events, and the tool writes standard MIDI files).
-7. Set up the OpenWatcom V2 build harness (done: the harness lives in
-   `tools/rebuild` and links the test driver without the C run-time).
+   events, and the tool writes standard MIDI files; the five unlisted members
+   stay unloaded).
+7. Set up the OpenWatcom V2 build harness under `work/` (done: the harness is
+   at `tools/rebuild`, and the first module rebuild and diff run).
+8. Rebuild the next modules from the program map in size order (done: `free` at
+   `0x300ec` and `exit` at `0x300be` with its helper at `0x300d6`).
+9. Answer the frame question of the simple game functions (done: the original
+   game files passed the Watcom stack-frame option `-of+` and the run-time files
+   did not, and OpenWatcom V2 adds `mov esp,ebp` to the epilogue of a function
+   that does not change ESP).
+10. Rebuild `engine_shutdown` at `0x128ac` with `-of+` (done: the frame and the
+    eight calls match, and the rebuild holds one extra `mov esp,ebp` restore that no
+    option removes, so the module stays open as a byte-level match).
+11. Rebuild the self-contained `memcpy` at `0x8c150` (done: the module matches the
+    original byte for byte, the first exact match; the behavior run needs more work).
+12. Rebuild the game modules in size order (in progress: `error_report` at `0x10978` is
+    decoded and rebuilt; its structure matches, and the frame, the shared case tails, the case
+    count, and the jump-table relocation stay open).
