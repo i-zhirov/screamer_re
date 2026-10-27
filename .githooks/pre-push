@@ -21,7 +21,15 @@ python3 -m py_compile \
     tools/entry_probe.py \
     tools/gfx_container.py tools/export_assets.py \
     tools/rebuild/diff_module.py \
+    tools/rebuild/store.py \
+    tools/rebuild/harness.py \
+    tools/rebuild/run.py \
+    tools/rebuild/view.py \
+    tools/rebuild/docs.py \
     tools/pipeline_check.py
+
+echo "pre-push: unit suite"
+python3 -m unittest discover -s tools/rebuild/tests
 
 if [ ! -d "$GAME_DIR" ]; then
     echo "pre-push: full check skipped: no game directory at $GAME_DIR"

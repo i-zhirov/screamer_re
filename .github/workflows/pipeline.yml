@@ -23,7 +23,14 @@ jobs:
             tools/entry_probe.py \
             tools/gfx_container.py tools/export_assets.py \
             tools/rebuild/diff_module.py \
+            tools/rebuild/store.py \
+            tools/rebuild/harness.py \
+            tools/rebuild/run.py \
+            tools/rebuild/view.py \
+            tools/rebuild/docs.py \
             tools/pipeline_check.py
+      - name: run the unit suite
+        run: python3 -m unittest discover -s tools/rebuild/tests
 
   pipeline:
     name: full pipeline
