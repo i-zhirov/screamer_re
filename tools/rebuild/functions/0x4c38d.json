@@ -1,0 +1,17 @@
+{
+  "address": "0x4c38d",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "frees the buffers and closes the handle; the counterpart of `fopen`"
+    }
+  ],
+  "name": "stream_close",
+  "notes": [],
+  "role": "frees the buffers and closes the handle; the counterpart of `fopen`",
+  "section": "Resource loader",
+  "size": 5,
+  "status": "named"
+}

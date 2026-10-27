@@ -1,0 +1,17 @@
+{
+  "address": "0x1b304",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads three 28-byte records from a `cfg` file"
+    }
+  ],
+  "name": "controls_load",
+  "notes": [],
+  "role": "reads three 28-byte records from a `cfg` file",
+  "section": "Subsystem initialisation",
+  "size": 3,
+  "status": "named"
+}

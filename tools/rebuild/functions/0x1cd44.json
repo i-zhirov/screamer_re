@@ -1,0 +1,17 @@
+{
+  "address": "0x1cd44",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "writes the world position at `+0x498`, `+0x49c`, and `+0x4a0` and the float fields at `+0x4a4` to `+0x4ac` from the position and the velocity"
+    }
+  ],
+  "name": "object_transform",
+  "notes": [],
+  "role": "writes the world position at `+0x498`, `+0x49c`, and `+0x4a0` and the float fields at `+0x4a4` to `+0x4ac` from the position and the velocity",
+  "section": "object_update_all callees",
+  "size": 1,
+  "status": "named"
+}

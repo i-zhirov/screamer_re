@@ -1,0 +1,17 @@
+{
+  "address": "0xd429f",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0`"
+    }
+  ],
+  "name": "dpmi_issue_int",
+  "notes": [],
+  "role": "clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0`",
+  "section": "The runtime memory manager",
+  "size": 133,
+  "status": "named"
+}

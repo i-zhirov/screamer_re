@@ -1,0 +1,17 @@
+{
+  "address": "0x22df8",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400`"
+    }
+  ],
+  "name": "timing_update",
+  "notes": [],
+  "role": "reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400`",
+  "section": "The timing and filter layer",
+  "size": 1,
+  "status": "named"
+}

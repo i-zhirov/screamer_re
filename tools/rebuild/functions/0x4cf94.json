@@ -1,0 +1,17 @@
+{
+  "address": "0x4cf94",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "opens `TABS\\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000`"
+    }
+  ],
+  "name": "persptab_load",
+  "notes": [],
+  "role": "opens `TABS\\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000`",
+  "section": "The TABS table loaders",
+  "size": 3,
+  "status": "named"
+}

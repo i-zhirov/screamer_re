@@ -1,0 +1,17 @@
+{
+  "address": "0x289bc",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4"
+    }
+  ],
+  "name": "overlay_queue_update",
+  "notes": [],
+  "role": "walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4",
+  "section": "overlay_dispatch callees",
+  "size": 4,
+  "status": "named"
+}

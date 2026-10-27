@@ -1,0 +1,17 @@
+{
+  "address": "0x2f904",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages"
+    }
+  ],
+  "name": "pool_init",
+  "notes": [],
+  "role": "queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages",
+  "section": "The resource layer",
+  "size": 5,
+  "status": "named"
+}

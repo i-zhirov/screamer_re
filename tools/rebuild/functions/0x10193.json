@@ -1,0 +1,17 @@
+{
+  "address": "0x10193",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2"
+    }
+  ],
+  "name": "default_data_copy",
+  "notes": [],
+  "role": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2",
+  "section": "race_loop callees",
+  "size": 1484,
+  "status": "named"
+}

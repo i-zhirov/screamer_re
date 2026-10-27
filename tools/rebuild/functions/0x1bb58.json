@@ -1,0 +1,17 @@
+{
+  "address": "0x1bb58",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure"
+    }
+  ],
+  "name": "setup_load",
+  "notes": [],
+  "role": "reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure",
+  "section": "Subsystem initialisation",
+  "size": 3,
+  "status": "named"
+}

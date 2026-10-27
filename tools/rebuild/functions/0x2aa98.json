@@ -1,0 +1,17 @@
+{
+  "address": "0x2aa98",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "fills 480 by 400"
+    }
+  ],
+  "name": "video_fill",
+  "notes": [],
+  "role": "fills 480 by 400",
+  "section": "race_loop callees",
+  "size": 2,
+  "status": "named"
+}

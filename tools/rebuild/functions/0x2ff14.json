@@ -1,0 +1,17 @@
+{
+  "address": "0x2ff14",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "processes a music request record and sets a state from 0 to 6"
+    }
+  ],
+  "name": "music_play",
+  "notes": [],
+  "role": "processes a music request record and sets a state from 0 to 6",
+  "section": "frame_update callees",
+  "size": 2,
+  "status": "named"
+}

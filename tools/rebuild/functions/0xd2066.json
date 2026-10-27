@@ -1,0 +1,17 @@
+{
+  "address": "0xd2066",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "copies the dwords and then the bytes"
+    }
+  ],
+  "name": "memmove",
+  "notes": [],
+  "role": "copies the dwords and then the bytes",
+  "section": "The runtime memory manager",
+  "size": 43,
+  "status": "named"
+}

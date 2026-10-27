@@ -1,0 +1,17 @@
+{
+  "address": "0x29f80",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "loads `gfx\\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits"
+    }
+  ],
+  "name": "menu_frame",
+  "notes": [],
+  "role": "loads `gfx\\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits",
+  "section": "frame_update callees",
+  "size": 5,
+  "status": "named"
+}

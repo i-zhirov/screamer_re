@@ -1,0 +1,17 @@
+{
+  "address": "0x205c4",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "float computation through `0x11c00` and `0x2218c`"
+    }
+  ],
+  "name": "ai_update",
+  "notes": [],
+  "role": "float computation through `0x11c00` and `0x2218c`",
+  "section": "object_update_all callees",
+  "size": 2,
+  "status": "named"
+}

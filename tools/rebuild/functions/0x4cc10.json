@@ -1,0 +1,17 @@
+{
+  "address": "0x4cc10",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "bounds the file index, initializes the object record, and copies the chunk table from the file record"
+    }
+  ],
+  "name": "object_init_from_file",
+  "notes": [],
+  "role": "bounds the file index, initializes the object record, and copies the chunk table from the file record",
+  "section": "Resource loader",
+  "size": 2,
+  "status": "named"
+}

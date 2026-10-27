@@ -1,0 +1,18 @@
+{
+  "address": "0x1f94c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8`"
+    }
+  ],
+  "name": "view_move",
+  "notes": [],
+  "object_offset": "0xf94c",
+  "role": "calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8`",
+  "section": "motion_update callees",
+  "size": 71,
+  "status": "named"
+}

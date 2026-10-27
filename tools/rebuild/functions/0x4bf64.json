@@ -1,0 +1,17 @@
+{
+  "address": "0x4bf64",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "wraps `0xd429f` with the real-mode buffer and the protected-mode buffer"
+    }
+  ],
+  "name": "dpmi_real_copy",
+  "notes": [],
+  "role": "wraps `0xd429f` with the real-mode buffer and the protected-mode buffer",
+  "section": "The runtime memory manager",
+  "size": 41,
+  "status": "named"
+}

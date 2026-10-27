@@ -1,0 +1,17 @@
+{
+  "address": "0x1d30c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254`"
+    }
+  ],
+  "name": "object_revolution_step",
+  "notes": [],
+  "role": "accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254`",
+  "section": "The vehicle state chain",
+  "size": 5,
+  "status": "named"
+}

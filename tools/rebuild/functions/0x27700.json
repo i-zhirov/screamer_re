@@ -1,0 +1,17 @@
+{
+  "address": "0x27700",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4"
+    }
+  ],
+  "name": "race_loop",
+  "notes": [],
+  "role": "starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4",
+  "section": "Program functions",
+  "size": 2,
+  "status": "named"
+}

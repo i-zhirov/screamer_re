@@ -1,0 +1,17 @@
+{
+  "address": "0x26448",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "counts to 8 and reads the mouse and keyboard state; the shared input poll"
+    }
+  ],
+  "name": "input_poll",
+  "notes": [],
+  "role": "counts to 8 and reads the mouse and keyboard state; the shared input poll",
+  "section": "race_loop callees",
+  "size": 4792,
+  "status": "named"
+}

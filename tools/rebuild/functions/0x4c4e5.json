@@ -1,0 +1,17 @@
+{
+  "address": "0x4c4e5",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "buffered read; advances the position and clamps it to the stream size"
+    }
+  ],
+  "name": "stream_read",
+  "notes": [],
+  "role": "buffered read; advances the position and clamps it to the stream size",
+  "section": "Resource loader",
+  "size": 3,
+  "status": "named"
+}

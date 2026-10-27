@@ -1,0 +1,17 @@
+{
+  "address": "0x262a8",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "fills an HMI request block and calls the sound driver"
+    }
+  ],
+  "name": "sound_driver_set",
+  "notes": [],
+  "role": "fills an HMI request block and calls the sound driver",
+  "section": "Subsystem initialisation",
+  "size": 416,
+  "status": "named"
+}

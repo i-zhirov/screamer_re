@@ -1,0 +1,17 @@
+{
+  "address": "0x4d32c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "formats into a buffer through the run-time `vsprintf` and writes the terminator"
+    }
+  ],
+  "name": "sprintf",
+  "notes": [],
+  "role": "formats into a buffer through the run-time `vsprintf` and writes the terminator",
+  "section": "Resource loader",
+  "size": 53,
+  "status": "named"
+}

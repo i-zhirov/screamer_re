@@ -1,0 +1,17 @@
+{
+  "address": "0x15460",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "builds a file name, opens it, and parses records until `END_LIST`"
+    }
+  ],
+  "name": "list_file_load",
+  "notes": [],
+  "role": "builds a file name, opens it, and parses records until `END_LIST`",
+  "section": "Subsystem initialisation",
+  "size": 2,
+  "status": "named"
+}

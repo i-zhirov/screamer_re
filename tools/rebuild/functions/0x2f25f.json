@@ -1,0 +1,17 @@
+{
+  "address": "0x2f25f",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066`"
+    }
+  ],
+  "name": "resource_find",
+  "notes": [],
+  "role": "walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066`",
+  "section": "The resource layer",
+  "size": 4,
+  "status": "named"
+}

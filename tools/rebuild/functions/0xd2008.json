@@ -1,0 +1,17 @@
+{
+  "address": "0xd2008",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "walks the free list and keeps the largest free block in `DAT_001031d8`"
+    }
+  ],
+  "name": "free",
+  "notes": [],
+  "role": "walks the free list and keeps the largest free block in `DAT_001031d8`",
+  "section": "The runtime memory manager",
+  "size": 94,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x14e20",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "hooks interrupt 9 and drives the keyboard LEDs"
+    }
+  ],
+  "name": "keyboard_hook",
+  "notes": [],
+  "role": "hooks interrupt 9 and drives the keyboard LEDs",
+  "section": "Subsystem initialisation",
+  "size": 5,
+  "status": "named"
+}

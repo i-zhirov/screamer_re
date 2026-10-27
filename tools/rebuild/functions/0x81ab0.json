@@ -1,0 +1,17 @@
+{
+  "address": "0x81ab0",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "a sound library update in the `0x8xxxx` region"
+    }
+  ],
+  "name": "sound_effects_update",
+  "notes": [],
+  "role": "a sound library update in the `0x8xxxx` region",
+  "section": "object_update_all callees",
+  "size": 37320,
+  "status": "named"
+}

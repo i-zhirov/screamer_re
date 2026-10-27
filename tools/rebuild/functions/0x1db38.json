@@ -1,0 +1,18 @@
+{
+  "address": "0x1db38",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`"
+    }
+  ],
+  "name": "object_gear_state",
+  "notes": [],
+  "object_offset": "0xdb38",
+  "role": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`",
+  "section": "object_physics callees",
+  "size": 97,
+  "status": "named"
+}

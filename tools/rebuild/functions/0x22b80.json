@@ -1,0 +1,17 @@
+{
+  "address": "0x22b80",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08`"
+    }
+  ],
+  "name": "filter_update",
+  "notes": [],
+  "role": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08`",
+  "section": "object_gear_step and object_slide_step callees",
+  "size": 1,
+  "status": "named"
+}

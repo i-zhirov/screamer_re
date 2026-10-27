@@ -1,0 +1,17 @@
+{
+  "address": "0x4bf4b",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls the interrupt through `0xd4410` and returns the value from EBX"
+    }
+  ],
+  "name": "dpmi_call",
+  "notes": [],
+  "role": "calls the interrupt through `0xd4410` and returns the value from EBX",
+  "section": "The resource layer",
+  "size": 25,
+  "status": "named"
+}

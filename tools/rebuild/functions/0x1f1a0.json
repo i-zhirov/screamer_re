@@ -1,0 +1,17 @@
+{
+  "address": "0x1f1a0",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls interrupt 33h and delays"
+    }
+  ],
+  "name": "mouse_init",
+  "notes": [],
+  "role": "calls interrupt 33h and delays",
+  "section": "Subsystem initialisation",
+  "size": 3,
+  "status": "named"
+}

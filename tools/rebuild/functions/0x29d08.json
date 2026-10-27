@@ -1,0 +1,17 @@
+{
+  "address": "0x29d08",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music"
+    }
+  ],
+  "name": "menu_space_init",
+  "notes": [],
+  "role": "loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music",
+  "section": "frame_update callees",
+  "size": 4,
+  "status": "named"
+}

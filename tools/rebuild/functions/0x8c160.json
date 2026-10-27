@@ -1,0 +1,17 @@
+{
+  "address": "0x8c160",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "fills `count >> 2` dwords with one value"
+    }
+  ],
+  "name": "memset",
+  "notes": [],
+  "role": "fills `count >> 2` dwords with one value",
+  "section": "frame_update callees",
+  "size": 220998,
+  "status": "named"
+}

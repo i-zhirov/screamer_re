@@ -1,0 +1,17 @@
+{
+  "address": "0x1f718",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058`"
+    }
+  ],
+  "name": "table_lookup",
+  "notes": [],
+  "role": "calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058`",
+  "section": "overlay_dispatch callees",
+  "size": 3,
+  "status": "named"
+}

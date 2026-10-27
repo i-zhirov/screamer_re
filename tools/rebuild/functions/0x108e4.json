@@ -1,0 +1,47 @@
+{
+  "address": "0x108e4",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "builds a record with the argument and calls interrupt 10h through the run-time"
+    }
+  ],
+  "module": "bios_video",
+  "name": "bios_video",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 48,
+        "detail": "the instruction counts differ, 22 and 20",
+        "instructions_equal": 10,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x108e4",
+    "date": "2026-10-27",
+    "source_digest": "sha256:e9bcde36812390ab95202efab32668589ba08804f961934df2510e4383fdc37c",
+    "tool": "run.py"
+  },
+  "role": "builds a record with the argument and calls interrupt 10h through the run-time",
+  "section": "Program functions",
+  "size": 3,
+  "status": "rebuilt",
+  "symbol": "bios_video_"
+}

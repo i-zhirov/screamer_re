@@ -1,0 +1,17 @@
+{
+  "address": "0x21e6c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "scales the object position with the time base, calls `FUN_0001f94c`, and advances the time base with a wrap at 1.0"
+    }
+  ],
+  "name": "motion_update",
+  "notes": [],
+  "role": "scales the object position with the time base, calls `FUN_0001f94c`, and advances the time base with a wrap at 1.0",
+  "section": "race_loop callees",
+  "size": 2,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x10ba4",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "loads a graphics file by name"
+    }
+  ],
+  "name": "graphics_load",
+  "notes": [],
+  "role": "loads a graphics file by name",
+  "section": "The graphics decoders",
+  "size": 2,
+  "status": "named"
+}

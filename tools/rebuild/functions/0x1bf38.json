@@ -1,0 +1,17 @@
+{
+  "address": "0x1bf38",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "reads `screamer.cfg` and sets a flag from a character"
+    }
+  ],
+  "name": "config_load",
+  "notes": [],
+  "role": "reads `screamer.cfg` and sets a flag from a character",
+  "section": "Subsystem initialisation",
+  "size": 1,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x2a1b0",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "tears the race down and releases the `OPT_PCX` resource"
+    }
+  ],
+  "name": "race_cleanup",
+  "notes": [],
+  "role": "tears the race down and releases the `OPT_PCX` resource",
+  "section": "frame_update callees",
+  "size": 1,
+  "status": "named"
+}

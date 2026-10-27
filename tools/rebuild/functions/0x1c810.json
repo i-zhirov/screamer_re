@@ -1,0 +1,18 @@
+{
+  "address": "0x1c810",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "runs the physics and collision steps, gated on the state at `+0x414`"
+    }
+  ],
+  "name": "object_physics",
+  "notes": [],
+  "object_offset": "0xc810",
+  "role": "runs the physics and collision steps, gated on the state at `+0x414`",
+  "section": "object_update_all callees",
+  "size": 62,
+  "status": "named"
+}

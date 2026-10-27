@@ -1,0 +1,47 @@
+{
+  "address": "0x300ec",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions"
+    }
+  ],
+  "module": "free",
+  "name": "free",
+  "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 9,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 3,
+        "instructions_total": 3,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+    "date": "2026-10-27",
+    "source_digest": "sha256:23c621a4c467e30ea06fd288200b3483a8a5ae99fb80a7517a34f13e48514fcc",
+    "tool": "run.py"
+  },
+  "role": "forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions",
+  "section": "Program functions",
+  "size": 12,
+  "status": "verified",
+  "symbol": "free_"
+}

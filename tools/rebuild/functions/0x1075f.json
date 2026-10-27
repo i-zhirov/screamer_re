@@ -1,0 +1,17 @@
+{
+  "address": "0x1075f",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "byte-swaps and swaps dwords between the buffer and the region 0x9f dwords ahead, 80 by 400 dwords; gated on the flag 0x10"
+    }
+  ],
+  "name": "video_block_swap_a",
+  "notes": [],
+  "role": "byte-swaps and swaps dwords between the buffer and the region 0x9f dwords ahead, 80 by 400 dwords; gated on the flag 0x10",
+  "section": "race_frame callees",
+  "size": 66,
+  "status": "named"
+}

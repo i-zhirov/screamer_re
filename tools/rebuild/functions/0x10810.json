@@ -1,0 +1,18 @@
+{
+  "address": "0x10810",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "allocates the engine object and creates its list"
+    }
+  ],
+  "name": "engine_interface_init",
+  "notes": [],
+  "object_offset": "0x810",
+  "role": "allocates the engine object and creates its list",
+  "section": "Subsystem initialisation",
+  "size": 185,
+  "status": "named"
+}

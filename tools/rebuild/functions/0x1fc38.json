@@ -1,0 +1,17 @@
+{
+  "address": "0x1fc38",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02"
+    }
+  ],
+  "name": "frame_timer",
+  "notes": [],
+  "role": "waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02",
+  "section": "race_loop callees",
+  "size": 2,
+  "status": "named"
+}

@@ -1,0 +1,17 @@
+{
+  "address": "0x15720",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "fills a 50-entry table with floating-point ramp values"
+    }
+  ],
+  "name": "palette_build",
+  "notes": [],
+  "role": "fills a 50-entry table with floating-point ramp values",
+  "section": "Subsystem initialisation",
+  "size": 3,
+  "status": "named"
+}

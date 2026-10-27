@@ -1,0 +1,17 @@
+{
+  "address": "0x2807c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8`"
+    }
+  ],
+  "name": "race_frame",
+  "notes": [],
+  "role": "blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8`",
+  "section": "frame_update callees",
+  "size": 2,
+  "status": "named"
+}

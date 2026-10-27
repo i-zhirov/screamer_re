@@ -1,0 +1,17 @@
+{
+  "address": "0x30170",
+  "checks": [],
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "`sti`, stack setup, DOS version check"
+    }
+  ],
+  "name": "startup",
+  "notes": [],
+  "object_offset": "0x20170",
+  "role": "`sti`, stack setup, DOS version check",
+  "section": "Startup path",
+  "size": 114035,
+  "status": "named"
+}

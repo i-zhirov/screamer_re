@@ -1,0 +1,18 @@
+{
+  "address": "0x10020",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX"
+    }
+  ],
+  "name": "main",
+  "notes": [],
+  "object_offset": "0x20",
+  "role": "called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX",
+  "section": "Program functions",
+  "size": 2,
+  "status": "named"
+}

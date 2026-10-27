@@ -1,0 +1,17 @@
+{
+  "address": "0x4d030",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "opens `TABS\\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell"
+    }
+  ],
+  "name": "vis_tab_load",
+  "notes": [],
+  "role": "opens `TABS\\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell",
+  "section": "The TABS table loaders",
+  "size": 3,
+  "status": "named"
+}

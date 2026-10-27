@@ -1,0 +1,17 @@
+{
+  "address": "0x300f8",
+  "checks": [],
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "`jmp short +0x76` over the banner string"
+    }
+  ],
+  "name": "entry jump",
+  "notes": [],
+  "object_offset": "0x200f8",
+  "role": "`jmp short +0x76` over the banner string",
+  "section": "Startup path",
+  "size": 114155,
+  "status": "named"
+}

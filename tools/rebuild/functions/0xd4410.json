@@ -1,0 +1,17 @@
+{
+  "address": "0xd4410",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block"
+    }
+  ],
+  "name": "dpmi_int31_entry",
+  "notes": [],
+  "role": "saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block",
+  "section": "The runtime memory manager",
+  "size": 108,
+  "status": "named"
+}

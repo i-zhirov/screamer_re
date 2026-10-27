@@ -1,0 +1,17 @@
+{
+  "address": "0x8bdec",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call"
+    }
+  ],
+  "name": "vesa_set_mode",
+  "notes": [],
+  "role": "calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call",
+  "section": "Subsystem initialisation",
+  "size": 868,
+  "status": "named"
+}

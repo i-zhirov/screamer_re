@@ -1,0 +1,17 @@
+{
+  "address": "0x4c810",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e`"
+    }
+  ],
+  "name": "stream_layer_init",
+  "notes": [],
+  "role": "calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e`",
+  "section": "The TABS table loaders",
+  "size": 1,
+  "status": "named"
+}

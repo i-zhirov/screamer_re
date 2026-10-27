@@ -1,0 +1,18 @@
+{
+  "address": "0x1c79c",
+  "checks": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "runs the preparation steps, gated on the state at `+0x414`"
+    }
+  ],
+  "name": "object_prepare",
+  "notes": [],
+  "object_offset": "0xc79c",
+  "role": "runs the preparation steps, gated on the state at `+0x414`",
+  "section": "object_update_all callees",
+  "size": 52,
+  "status": "named"
+}

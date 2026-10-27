@@ -1,0 +1,17 @@
+{
+  "address": "0x81a70",
+  "checks": [],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "a sound library update with the driver block `DAT_00106350`"
+    }
+  ],
+  "name": "sound_update",
+  "notes": [],
+  "role": "a sound library update with the driver block `DAT_00106350`",
+  "section": "race_frame callees",
+  "size": 64,
+  "status": "named"
+}
