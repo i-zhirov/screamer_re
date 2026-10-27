@@ -64,7 +64,7 @@ screamer_re/
 │   ├── pre-commit             # update the status page before every commit
 │   └── pre-push               # run the checks before every push
 ├── .github/workflows/
-│   └── pipeline.yml          # CI: the syntax gate, the status page, and the full check
+│   └── pipeline.yml           # CI: the syntax gate, the status page, and the full check
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
@@ -80,10 +80,14 @@ screamer_re/
 │   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket
 │   ├── ghidra/                # Ghidra loader install and decompile scripts
 │   ├── entry_probe.py         # find the program entry in a CPU log
+│   ├── export_assets.py       # export the graphics assets as PNG files
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
+│   ├── gfx_container.py       # list and extract the members of a graphics container
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
 │   ├── le.py                  # parse an LE image and disassemble x86 code
+│   ├── member_probe.py        # hook the container member open at run time
 │   ├── pipeline_check.py      # run the pipeline end to end
+│   ├── sound_bank.py          # decode the ADLIB- banks, the samples, and the songs
 │   ├── rebuild/               # the rebuild framework and the OpenWatcom V2 harness
 │   │   ├── store.py           # the function and module record store
 │   │   ├── harness.py         # the pinned container and DOSBox-X harness
@@ -115,7 +119,7 @@ python3 tools/rebuild/view.py html
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -126,9 +130,9 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 ```
 
 The full check runs every stage and needs Docker and DOSBox-X.  It takes
-about 2 minutes 40 seconds and reports 43 checks.  Inside the Nix dev shell
-the radare2 stage adds four checks, so the run reports 47 checks.  With
-`--skip-runtime` it reports 32 checks and takes about 14 seconds:
+about 8 minutes and reports 57 checks.  Inside the Nix dev shell
+the radare2 stage adds four checks, so the run reports 61 checks.  With
+`--skip-runtime` it reports 42 checks and takes about 16 seconds:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -157,7 +161,8 @@ open ~/Documents/Screamer.app
   Use the following commands:
     - `python3 -m py_compile tools/le.py tools/inventory.py
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
-      tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py
+      tools/gfx_container.py tools/export_assets.py tools/sound_bank.py
+      tools/member_probe.py tools/rebuild/diff_module.py
       tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py
       tools/rebuild/view.py tools/rebuild/docs.py
       tools/pipeline_check.py` to check the syntax

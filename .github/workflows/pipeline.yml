@@ -21,8 +21,8 @@ jobs:
             tools/extract_cd_image.py \
             tools/dosboxx_control.py \
             tools/entry_probe.py \
-            tools/gfx_container.py tools/export_assets.py \
-            tools/rebuild/diff_module.py \
+            tools/gfx_container.py tools/export_assets.py tools/sound_bank.py \
+            tools/member_probe.py tools/rebuild/diff_module.py \
             tools/rebuild/store.py \
             tools/rebuild/harness.py \
             tools/rebuild/run.py \

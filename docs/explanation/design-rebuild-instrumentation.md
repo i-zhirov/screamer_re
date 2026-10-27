@@ -499,7 +499,7 @@ The migration runs in order, and every step keeps the checks green.
 2. Add `harness.py` and `run.py`. Port the ten modules to module
    records, and confirm that every diff verdict matches the recorded one.
 3. Add `view.py` and the unit tests.
-4. Rewire `pipeline_check.py` to the store. Stage 9 runs
+4. Rewire `pipeline_check.py` to the store. Stage 11 runs
    `run.py run --all --no-write`, compares the printed verdict of each
    record with the recorded result, and fails on a change and on an
    unexpected skip. Read the check count it prints.
@@ -526,7 +526,7 @@ section names, so a reader sees the same page with generated tables.
 | The store becomes the only record of an observation | A finding is lost | `findings.md` stays hand-written, and the record links to it. |
 | The check count drifts again | A reader distrusts the checks | One number in `README.md`, `AGENTS.md`, and `tooling.md`, printed by the pipeline check. |
 | A stale record reports green | A person rebuilds the wrong function | The source digest compare and the stale mark. |
-| Stage 9 accepts a known difference silently | A regression hides behind the five open modules | The stage compares each printed verdict with the recorded result, so a changed verdict fails. |
+| Stage 11 accepts a known difference silently | A regression hides behind the five open modules | The stage compares each printed verdict with the recorded result, so a changed verdict fails. |
 | A hand edit breaks a record | The store fails to load | `store.py check` in the pipeline check. |
 | The seed adds scan noise | The total misleads a reader | A false positive becomes a `not_a_function` record with a note, and it leaves the total. |
 

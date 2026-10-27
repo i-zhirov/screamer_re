@@ -594,8 +594,8 @@ produces.
           skipped` is the expected detail of a behavior-check record
         - `REBUILT_MODULES` and its comment go away, because the store is
           the only module registry
-        - the module docstring names `check_run` as stage 9, which replaces
-          `check_rebuild`, and `check_store` as the new stage 10
+        - the module docstring names `check_run` as stage 11, which replaces
+          `check_rebuild`, and `check_store` as the new stage 12
     - **Verify:** `python3 tools/pipeline_check.py --game-dir
       ~/Documents/Screamer.app/Contents/Resources/game`, then read the
       printed check count and the elapsed time

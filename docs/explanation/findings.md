@@ -4447,6 +4447,191 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   and the data second.
   Evidence: the output and the original decode.
 
+## The bank header, the instrument table, and the instrument data
+
+- The `ADLIB-` bank header is `0x1E` bytes.  It holds the version 0.0 at `+0x00`,
+  the signature `ADLIB-` at `+0x02`, the values `0x007F` at `+0x08` and `+0x0A`,
+  the instrument count 28 at `+0x0C`, and the instrument data offset `0x61C` at
+  `+0x10`.  Both banks of `MUSIC.DAT` and both banks of `SETUP.DAT` hold this
+  header.
+  Evidence: `python3 tools/sound_bank.py bank work/DRUM.BNK` and the file bytes.
+- The instrument table holds 127 records of 12 bytes and a 10-byte remainder to
+  the data offset.  A record holds the key in the first byte, the name in the
+  next 9 bytes, and the index in the last 2 bytes.  The drum records use the key
+  as the MIDI note, for example 0x24 `$clap`, 0x3C `<Blank`, and 0x30
+  `0scratch`.  The melodic records use the key 0x01, for example `PIANO1`,
+  `HONKTONK`, and `CLEANGT`.
+  Evidence: the bank command output and the raw record bytes.
+- The instrument data holds 128 records of 30 bytes.  The data at `+0x61C` plus
+  `128 * 30` is 5404, the file size, so the data reaches the file end.  The
+  10-byte table remainder at `0x612` holds the name `GUNSHOT` or `<Blank` of the
+  next record, and its index field shares the first 2 bytes of the data.
+  Evidence: the header data offset, the file size, and the bank command output.
+- The first `DRUM.BNK` record holds the eight register pairs `20:0F`, `40:3F`,
+  `60:01`, `80:3E`, `E0:0F`, `23:3F`, `43:01`, and `C0:01`, so the tool
+  prints the same sequence that the rebuilt driver writes.
+  Evidence: `python3 tools/sound_bank.py bank work/DRUM.BNK`.
+
+## The sample records and the runtime flags
+
+- The `SOUND_FX` record size 0x24 matches the sample table stride 36 of the
+  loader at `0x1f2e0`, so the record fields line up with the loader fields.
+  Evidence: `python3 tools/gfx_container.py list DATA/GEN.DAT MENU.DTR SOUND_FX`
+  and the loader disassembly.
+- The `SOUND_FX` lists hold 90 records: 79 in `DATA/GEN.DAT` and 11 in the six
+  `DATA/MAP*I.DAT` containers.  The names of 87 records join a member of
+  `DATA/SOUND.DAT` after the `.RAW` suffix is added, so the loader loads 87 of
+  the 92 members.
+  Evidence: `python3 tools/sound_bank.py samples DATA/SOUND.DAT --lists
+  DATA/GEN.DAT DATA/MAP*I.DAT`.
+- Five members have no `SOUND_FX` record: `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`,
+  `TOUR2.RAW`, and `TRAIN.RAW`.  The sample loader walks the record table
+  only, so the game never loads those five members through that path.
+  Evidence: the samples command and the loader at `0x1f2e0`.
+- The sample flags match the loader: the flag `0x100` comes from the bit 4 of the
+  volume high byte, the flag `0x40` from a non-zero loop length, the flag
+  `0x4000` from a non-zero loop, the flag `0x400` from the bit 4 of the pitch
+  high byte, and the flag `0x200` from the bit 4 of the pan high byte.  For
+  example, `HELI.RAW` holds the volume `0x10007FFF`, the loop -1, and the pitch
+  `0x10010000`, so the flags are `0x4700`.
+  Evidence: the samples command and the loader disassembly.
+- The sample rate is 11025 Hz.  The sound init at `0x1f1fb` stores the value
+  `0x2B11` at `0x1E50` and passes it with the buffer `0x1E40` to the HMI
+  digital driver init at `0xC903A`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f1c0` and the sample WAV
+  files of the tool.
+- The 11 `MAP*I.DAT` records are the level ambient sounds.  For example,
+  `MAP1DAT.DTR` names the looped samples `truck` and `airplane`, and
+  `MAP4DAT.DTR` names `truck` again, so three records repeat a name of another
+  level.
+  Evidence: the samples command and the list text of `MAP1I.DAT` and `MAP4I.DAT`.
+
+## The song chunk table and the event stream
+
+- The song chunks start at `+0x388` and hold the chunk number, the chunk
+  length, and the track number in 12 bytes, and then the MIDI data.  The chunk
+  lengths are contiguous from `+0x388` to the data end, which is the value at
+  `+0x20`, so the chunks cover the data exactly.  The chunk count equals the
+  track count in every song.
+  Evidence: `python3 tools/sound_bank.py song work/MUSIC1.HMP` and the chunk
+  chain test.
+- The chunk numbers run from 0 to `track_count - 1`.  The track numbers differ
+  from the chunk order, so the file orders the tracks and the track number names
+  the MIDI track.  For example, `MUSIC1.HMP` holds 13 chunks and the track
+  numbers 0, 2, 3, 4, 7, 6, 9, 9, 0, 0, 0, 1, 5.
+  Evidence: the song command output.
+- The MIDI data is standard MIDI events with a running status, and every chunk
+  ends with the meta event `FF 2F 00`.  The delta runs 7 bits per byte, the low
+  bits first, and the byte with the bit 7 set ends the number.  For example, the
+  first event of the chunk 1 of `MUSIC1.HMP` is the delta `0` and the control
+  change `B2 20 00`, and the first event of the chunk 0 of `MUSIC2.HMP` is the
+  delta `14867` and the end of the track.
+  Evidence: the song command output and the event parse of the chunks.
+- The duration at `+0x3C` is the total tick count of a track divided by the
+  value 120 at `+0x38`.  For example, `MUSIC1.HMP` holds 11208 ticks in the
+  track 0 and the duration 93, and `MUSIC6.HMP` holds 5304 ticks and the
+  duration 44.
+  Evidence: the song command output and the header fields.
+- The tool writes the chunks as standard MIDI files.  The `file` command reads
+  them as "Standard MIDI data (format 0) using 1 track at 1/120", and a strict
+  reader parses all 69 files of the eight songs without a defect.
+  Evidence: `python3 tools/sound_bank.py song work/MUSIC1.HMP --out work/midi`
+  and the `file` output.
+
+## The five unlisted sample members stay unloaded
+
+- The `SOUND.DAT` directory holds 92 members, and the `SOUND_FX` lists name 87
+  of them.  Five members are in no list: `CRY.RAW` 8127, `TOUR0.RAW` 22557,
+  `TOUR1.RAW` 33281, `TOUR2.RAW` 82689, and `TRAIN.RAW` 23040.
+  Evidence: `python3 tools/sound_bank.py samples DATA/SOUND.DAT --lists
+  DATA/GEN.DAT DATA/MAP1I.DAT ... DATA/MAP6I.DAT`.
+- The only member-name builder in the game is the sample loader at `0x1f2e0`.  The
+  loader builds the member name `<name>.RAW` and opens the member through the member
+  open at `0x4c08d`.  The format string `%s.RAW` has one reference in the code,
+  at `0x1f445`, inside that loader.
+  Evidence: the relocation listing and
+  `python3 tools/le.py disasm STARTH.EXE 0x1f2e0`.
+- The sample loader walks the 36-byte-record table at the module `0x15224`.  The list
+  loader at `0x15460` fills the table.  The `SOUND_FX` loads are the only callers
+  that pass the table: the config load at `0x15a1b` loads `SFXSBASE` and the level
+  list, the loader helper at `0x24693` and `0x246ed` loads `SPFXBASE` and `SPFXFULL`,
+  and the menu space init at `0x29efd` loads `MENU`.  The level start calls the
+  config load through the race session start at `0x12996`.
+  Evidence: the call-site scan and the disassembly of `0x15460`, `0x15984`,
+  `0x245ff`, `0x29e80`, and `0x128e0`.
+- The names of the five members are in no shipped file.  A case-insensitive search
+  over the whole game directory finds `CRY`, `TOUR`, and `TRAIN` only in the
+  `SOUND.DAT` member data (coincidence) and in the `MELODIC.BNK` instrument
+  `CRYSTAL`.  The executables, the drivers, the data containers, the `TABS`, the CD
+  data track, and the manual hold no sample name.
+  Evidence: the case-insensitive search over the game directory.
+- The setup program loads one test sample, `FX_TEST.RAW` of `CONFIG\SETUP.DAT`, and
+  no other sample.
+  Evidence: `python3 tools/le.py disasm SETUP.EXE 0x14c25` and the setup strings.
+- The run-time table at the level start holds the 14 records of the config load: the
+  12 `SFXSBASE` records (`skidfx`, `crash`, `oppmotor`, `automoto`, `wallh1`,
+  `hit_0`, `click`, `autogall`, `dentone`, `door`, `taz3`, `taz4`) and the two
+  `MAP1` records (`truck`, `airplane`).  The five members are not in the table.
+  Evidence: the memory dump at the linear `0x2c3224` through the DOSBox-X debugger.
+- The game therefore does not load the five members through the sample loader, and no
+  other loader names them.  The five members stay shipped but unused.  The `MAP5`
+  list names `sea` and the `MAP6` list names `heli`, so the level ambient lists
+  hold the later sounds; `TRAIN` and the `CRY` and `TOUR` names look like cut
+  content.
+  Evidence: the list texts, the call-site scan, and the run-time table dump.
+- Limit: the protected-mode and the linear breakpoints slow the emulation enough
+  that the member open at `0x4c08d` does not fire in a 150-second window, so the
+  run-time open of the five members stays unobserved.  The static evidence above
+  does not depend on that observation.
+  Evidence: `tools/scripts/probe_member_open.dbg` and the run output.
+
+## The member open hook observes every member open
+
+- The `BP`, `BPPM`, and `BPLM` breakpoints of the DOSBox-X debugger do not
+  fire at the member open.  `BP` is a real-mode breakpoint, and `BPPM` and
+  `BPLM` watch a memory change and not the code.  The debugger help confirms
+  the three types.
+  Evidence: the debugger help output and the probe runs.
+- The `SMV` and `BPINT 3` software breakpoint observes the member open.  The
+  game copy carries the INT 3 opcode `0xCC` at the file offset `0x5688D` of the
+  member open `FUN_0004C08D`, the `BPINT 3` breakpoint fires, and the member
+  name sits in `EBX` at the stop.
+  Evidence: `python3 tools/member_probe.py` and the run output.
+- The debugger consumes the INT 3 opcode, so the guest resumes at the next byte and
+  the patched `push esi` is skipped.  The Watcom frame then restores the stack
+  pointer to a frame that is four bytes too high, and the return address comes from
+  the wrong stack slot.  The tool repairs the frame: it decrements the stack pointer
+  by four and writes the `ESI` value at the new top, which is exactly what the
+  skipped `push esi` does.  The member open then runs with a correct frame, and the
+  opcode stays in place, so the next member open fires the same breakpoint.
+  Evidence: the frame layout in the disassembly, the code overview at
+  `0150:0020E08D`, and the run output.
+- One run observes 55 member opens in the demo window, in this order: `MENU.dtr`,
+  `MAP1dat.dtr`, `MAP1B.dtr`, `CARS.dtr`, the level graphics `MAP1.BCK`,
+  `MAP1.MLB`, `MAP1.UNR`, `MAP1.MMP`, and `MAP1.smg`, the level data
+  `MAP1opp.spl`, `MAP1anm.spl`, `MAP1cam.spl`, `MAP1rpl.spl`, `MAP1OST.spl`, and
+  `MAP1.mrk`, the font `attrH.fnt`, the sprite `logoH.spr`, the text `game.txt`,
+  the objects `azstac.3DX`, `azcono.3DX`, `awtruck.3DX`, `awbus.3DX`,
+  `ajet.3DX`, `SHADOW.3DX`, and `AUTO00.3DX` to `AUTO04.3DX`, the text
+  `attr.txt`, the list `SFXSBASE.dtr`, the list `MAP1dat.dtr`, the samples
+  `skidfx.RAW` to `airplane.RAW`, the palette `MAP1.COL`, and the menu graphics
+  `menuH.spr`, `menuH.fnt`, `menu.BCK`, and `menu.MLB`.
+  Evidence: `python3 tools/member_probe.py --limit 200` and the run output.
+- The sample loads are the `SFXSBASE` records and the two `MAP1` records, 14 members
+  from `skidfx.RAW` to `airplane.RAW`.  The set matches the run-time table dump,
+  which holds the 12 `SFXSBASE` records and the two `MAP1` records.
+  Evidence: the member sequence and the table dump at the linear `0x2C3224`.
+- The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
+  `TRAIN.RAW` do not appear in the 55 opens.  The run-time trace therefore confirms
+  the static conclusion: the game does not load them.
+  Evidence: the member sequence and the sample list join.
+- The module base varies between runs: the entry dump reads `0x1F20F8` in one run
+  and `0x1F00F8` in another, so the base is `0x1C2000` and `0x1C0000`.  The hook
+  therefore recognizes the stop by the patched bytes and not by the module address.
+  Evidence: the entry dumps and the debugger screen.
+- The tool reports the member name and the pointer at every stop.  It restores the
+  game copy at the end of every run.
+  Evidence: the run output and the file bytes after the run.
 ## The smallest module to rebuild
 
 - The program map lists `main` and its 13 callees, and the smallest is
@@ -4510,7 +4695,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   behavior as the original three instructions.
   Evidence: `sh tools/rebuild/run_free.sh` and `work/rebuild/free_out.txt`.
 - The pipeline check holds the rebuild.  The check runs the build and the diff as
-  stage 9 and reports 17 checks and 0 failures with `--skip-runtime`.
+  stage 11 and reports 34 checks and 0 failures with `--skip-runtime`.
   Evidence: `python3 tools/pipeline_check.py --game-dir ... --skip-runtime`.
 
 ## The harness print helper and the string literal
@@ -4817,7 +5002,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   past the start stub.  The jump table is the suspect: its entries are absolute addresses that the loader must relocate, and the same
   class of fault already hit the `ES` register.  The module stays open as a byte-level match.
   Evidence: the run dump and the crash address `3:00000001`.
-- The module is not in the pipeline check stage 9, because the diff does not match yet.
+- The module is not in the pipeline check stage 11, because the diff does not match yet.
   Evidence: `tools/pipeline_check.py`.
 
 ## The error_report jump table at run time
@@ -4841,7 +5026,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `sh tools/rebuild/run_error_report.sh` and `work/rebuild/err_out.txt`.
 - The code shape differs from the original.  The diff reports 4 of 16 instructions equal and the verdict
   `the instruction sequences differ`, because the run-time table replaces the compiler table.  The module therefore trades
-  the byte-level match for a behavior run, and stays out of the pipeline check stage 9.
+  the byte-level match for a behavior run, and stays out of the pipeline check stage 11.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978 --count 16
   --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map --rebuilt-symbol error_report_`.
 
@@ -4862,7 +5047,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the four container links.
 - The original build therefore used a compiler and a linker that place and keep the table.  The original Watcom C/C++ 10.x toolchain
   did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
-  not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 9.
+  not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 11.
   Evidence: the section above and the two diffs.
 - The compiler-table rebuild crashes again.  The V2 compiler does not place the jump table in the code object, so the
   rebuilt `jmp` reads the entry at `CS:0` and reaches offset `1`, and the run prints the DOS/4G general-protection dump
@@ -4900,7 +5085,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The run passes.  The harness prints the fill marker, the call marker, and the exit marker, and the segment guard
   stays silent.
   Evidence: `sh tools/rebuild/run_bios_video.sh` and `work/rebuild/bv_out.txt`.
-- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
 
 ## The list_destroy module and the unoptimized build
@@ -4934,7 +5119,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   is the first argument, the pointer itself stays set, and the null pointer skips the free call.  The segment
   guard stays silent.
   Evidence: `sh tools/rebuild/run_list_destroy.sh` and `work/rebuild/ld_out.txt`.
-- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
 
 ## The memory_available module and the recurring differences
@@ -4965,7 +5150,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The run passes.  The harness prints `F`, `S`, `T`, and `D`: the first probe runs once, the second
   probe runs once, the total is the sum, and the program exits.  The segment guard stays silent.
   Evidence: `sh tools/rebuild/run_memory_available.sh` and `work/rebuild/ma_out.txt`.
-- The module stays out of the pipeline check stage 9, because the diff does not match byte for byte.
+- The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
 
 ## The frame_step module and the call order
@@ -5047,10 +5232,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   /nonexistent/STARTH.EXE`.
 - The status page renders the store.
   Evidence: `python3 tools/rebuild/view.py html`.
-- The pipeline check reports 43 checks and 0 failures and takes about 2 minutes
+- The pipeline check reports 57 checks and 0 failures and takes about 8 minutes
   40 seconds.  Inside the Nix dev shell the radare2 stage adds four checks, so
-  the run reports 47 checks.  With `--skip-runtime` it reports 32 checks and
-  takes about 14 seconds.  The earlier sections in this file record the check
+  the run reports 61 checks.  With `--skip-runtime` it reports 42 checks and
+  takes about 16 seconds.  The earlier sections in this file record the check
   count at the time they were written, not the current count.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.

@@ -19,6 +19,7 @@ Initial reconnaissance is complete.  The project has:
   (`tools/rebuild/run.py`),
 - a self-contained status page of the store (`tools/rebuild/view.py`),
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
+- decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
 No reconstructed source code exists yet.
@@ -105,9 +106,9 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 ## Checks
 
-The full check runs every stage and reports 43 checks.  Inside the Nix dev
-shell the radare2 stage adds four checks, so the run reports 47 checks.  With
-`--skip-runtime` it reports 32 checks.  A pre-push hook runs
+The full check runs every stage and reports 57 checks.  Inside the Nix dev
+shell the radare2 stage adds four checks, so the run reports 61 checks.  With
+`--skip-runtime` it reports 42 checks.  A pre-push hook runs
 the syntax gate and the full check before every push.  Enable the hook once per
 clone:
 
