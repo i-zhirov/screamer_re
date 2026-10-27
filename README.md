@@ -13,6 +13,12 @@ Initial reconnaissance is complete.  The project has:
 - a parser and disassembler for the DOS/4GW linear executables (`tools/le.py`),
 - a CD image extractor (`tools/extract_cd_image.py`),
 - an inventory generator (`tools/inventory.py`),
+- a rebuild store with one record per function and its status
+  (`tools/rebuild/store.py`),
+- a check runner that builds and tests the declared checks
+  (`tools/rebuild/run.py`),
+- a self-contained status page of the store (`tools/rebuild/view.py`),
+- a generated program map with a drift check (`tools/rebuild/docs.py`),
 - an investigation log with evidence and open questions.
 
 No reconstructed source code exists yet.
@@ -72,8 +78,8 @@ python3 tools/inventory.py \
   ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-Run the full pipeline end to end.  The check needs DOSBox-X and takes about
-15 seconds:
+Run the full pipeline end to end.  The check needs Docker and DOSBox-X and
+takes about 2 minutes 40 seconds:
 
 ```sh
 python3 tools/pipeline_check.py \
@@ -99,7 +105,9 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 ## Checks
 
-The full check runs every stage and reports 28 checks.  A pre-push hook runs
+The full check runs every stage and reports 42 checks.  Inside the Nix dev
+shell the radare2 stage adds four checks, so the run reports 46 checks.  With
+`--skip-runtime` it reports 31 checks.  A pre-push hook runs
 the syntax gate and the full check before every push.  Enable the hook once per
 clone:
 

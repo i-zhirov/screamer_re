@@ -37,8 +37,9 @@ original DOS platform first and modern platforms later.
   shell with the `yetmorecode/ghidra-lx-loader` extension.
 - **Storage**: files on disk.  `work/` holds extracted artifacts and
   generated output.  The project uses no database.
-- **Testing**: no test framework.  Each tool is verified against the
-  shipped artifacts with the commands in Build And Test Commands.
+- **Testing**: the standard-library `unittest` suite covers the pure logic of
+  the rebuild framework.  Each tool is verified against the shipped artifacts
+  with the commands in Build And Test Commands.
 - **Target Platform**: the tools run on macOS 15.5 on arm64.  The game
   target is 32-bit DOS.
 - **Project Type**: CLI tools plus a documentation set.
@@ -82,7 +83,16 @@ screamer_re/
 │   ├── inventory.py           # build a file inventory with SHA-256 digests
 │   ├── le.py                  # parse an LE image and disassemble x86 code
 │   ├── pipeline_check.py      # run the pipeline end to end
-│   ├── rebuild/               # the OpenWatcom V2 build harness
+│   ├── rebuild/               # the rebuild framework and the OpenWatcom V2 harness
+│   │   ├── store.py           # the function and module record store
+│   │   ├── harness.py         # the pinned container and DOSBox-X harness
+│   │   ├── run.py             # run the declared checks and print progress
+│   │   ├── view.py            # render the self-contained status page
+│   │   ├── docs.py            # render the program-map tables
+│   │   ├── contracts/         # the JSON Schema contracts of the records
+│   │   ├── functions/         # one record per function, 0x<address>.json
+│   │   ├── modules/           # the ten module recipes
+│   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
 ```
@@ -93,22 +103,18 @@ screamer_re/
   module rebuild uses the OpenWatcom V2 container harness and needs Docker:
 
 ```sh
-sh tools/rebuild/build_free.sh
-sh tools/rebuild/run_free.sh
-sh tools/rebuild/build_exit.sh
-sh tools/rebuild/run_exit.sh
-sh tools/rebuild/build_printf.sh
-sh tools/rebuild/run_printf.sh
-sh tools/rebuild/build_shutdown.sh
-sh tools/rebuild/run_shutdown.sh
-sh tools/rebuild/build_memcpy.sh
-sh tools/rebuild/run_memcpy.sh
+python3 tools/rebuild/harness.py build --module free
+python3 tools/rebuild/harness.py run --module free
+python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/store.py check
+python3 tools/rebuild/docs.py render
+python3 tools/rebuild/view.py html
 ```
 
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -118,8 +124,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8c150 --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_
 ```
 
-The full check runs every stage and needs DOSBox-X.  It takes about 15
-seconds and reports 35 checks:
+The full check runs every stage and needs Docker and DOSBox-X.  It takes
+about 2 minutes 40 seconds and reports 42 checks.  Inside the Nix dev shell
+the radare2 stage adds four checks, so the run reports 46 checks.  With
+`--skip-runtime` it reports 31 checks and takes about 14 seconds:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -149,6 +157,8 @@ open ~/Documents/Screamer.app
     - `python3 -m py_compile tools/le.py tools/inventory.py
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
       tools/gfx_container.py tools/export_assets.py tools/rebuild/diff_module.py
+      tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py
+      tools/rebuild/view.py tools/rebuild/docs.py
       tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
@@ -224,12 +234,17 @@ Layers:
 | Layer | Responsibility | Example |
 | --- | --- | --- |
 | Tools | parse, extract, and report | `tools/le.py` |
+| Store | hold the identity, the status, and the evidence per function | `tools/rebuild/functions/` |
 | Documentation | record findings and reference facts | `docs/reference/` |
 | Work | hold extracted artifacts and generated output | `work/` |
 
 ```text
 shipped artifacts -> tools -> stdout / work/ -> docs/
 ```
+
+A function record lives at `tools/rebuild/functions/0x<address>.json`, and
+`store.py` is the only writer.  Every other tool reads and writes a record
+through the store.
 
 ### Code Quality
 
@@ -248,8 +263,12 @@ shipped artifacts -> tools -> stdout / work/ -> docs/
 
 ### Testing
 
-- The project holds no test framework.  Verify a tool by running it
-  against the shipped artifacts.
+- The rebuild framework uses the standard-library `unittest` suite under
+  `tools/rebuild/tests/`.  Run it with
+  `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
+  temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
+  directory.
+- Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
 - Compare a regenerated table with the table in
