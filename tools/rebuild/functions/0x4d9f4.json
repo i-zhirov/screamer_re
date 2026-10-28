@@ -1,17 +1,47 @@
 {
   "address": "0x4d9f4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "a Watcom floating-point helper, called with no arguments between float operations"
+      "text": "rounds the value on the FPU stack to an integer"
     }
   ],
+  "module": "fp_helper",
   "name": "fp_helper",
   "notes": [],
-  "role": "a Watcom floating-point helper, called with no arguments between float operations",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 29,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 12,
+        "instructions_total": 12,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d9f4",
+    "date": "2026-10-28",
+    "source_digest": "sha256:097980b2066dab4e4124de910505104a1e3895cca6d34b21a72f86580b8b90de",
+    "tool": "run.py"
+  },
+  "role": "rounds the value on the FPU stack to an integer",
   "section": "motion_update callees",
   "size": 70,
-  "status": "named"
+  "status": "verified",
+  "symbol": "fp_helper_"
 }

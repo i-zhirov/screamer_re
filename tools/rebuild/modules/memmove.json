@@ -1,0 +1,24 @@
+{
+  "exe": "mmmod.exe",
+  "map": "memmove.map",
+  "name": "memmove",
+  "run": {
+    "command": "mmmod.exe > mm_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "mm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "memmove.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memmove_main.c"
+    }
+  ]
+}

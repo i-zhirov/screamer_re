@@ -317,7 +317,15 @@ The files:
 | `video_fill.c` | the rebuilt `video_fill` module, the active C build with `-of+`: the size pair 480 and 400 and the video buffer pointer |
 | `video_fill.asm` | the alternative assembly build of `video_fill`, kept alongside for the later Watcom 10.x build; it matches the original with only the link-time addresses |
 | `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
-| `modules/*.json` | the eleven module records: the sources, the compiler, the link, and the run expectations |
+| `memset.asm` | the rebuilt `memset` module, byte-identical to the original: the dword filler |
+| `memset_main.c` | the `memset` test harness: the filled buffer check |
+| `dpmi_fill_regs.asm` | the rebuilt `dpmi_fill_regs` module, byte-identical: the six segment words |
+| `dpmi_fill_regs_main.c` | the `dpmi_fill_regs` test harness: the segment set check |
+| `memmove.asm` | the rebuilt `memmove` module, byte-identical: the dword and byte copy |
+| `memmove_main.c` | the `memmove` test harness: the copied buffer check |
+| `fp_helper.asm` | the rebuilt `fp_helper` module, byte-identical: the FPU rounding helper |
+| `fp_helper_main.c` | the `fp_helper` test harness: the run marker |
+| `modules/*.json` | the fifteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

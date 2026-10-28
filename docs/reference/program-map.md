@@ -168,7 +168,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x2a1b0` | `race_cleanup` | tears the race down and releases the `OPT_PCX` resource | observed |
 | `0x2aa84` | `frame_step` | calls `default_data_copy`, `joystick_update`, and `frame_timer` | derived |
 | `0x2ff14` | `music_play` | processes a music request record and sets a state from 0 to 6 | derived |
-| `0x8c160` | `memset` | fills `count >> 2` dwords with one value | observed |
+| `0x8c160` | `memset` | fills `count >> 2` dwords with the value byte replicated | observed |
 <!-- end generated: frame_update callees -->
 
 `frame_update` clears the screen with `memset(DAT_00121528, 0, 0x3e800)`.
@@ -208,7 +208,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | --- | --- | --- | --- |
 | `0x1f94c` | `view_move` | calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8` | derived |
 | `0x27ec8` | `video_present` | called after every draw step | inferred |
-| `0x4d9f4` | `fp_helper` | a Watcom floating-point helper, called with no arguments between float operations | observed |
+| `0x4d9f4` | `fp_helper` | rounds the value on the FPU stack to an integer | observed |
 <!-- end generated: motion_update callees -->
 
 ### race_frame callees
@@ -436,7 +436,7 @@ Evidence: the Ghidra references to `0x118e04`.
 | `0xd1ec0` | `memset` | replicates the byte through the dword and calls `0xe0860` | observed |
 | `0xd1f25` | `malloc` | rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0` | observed |
 | `0xd2008` | `free` | walks the free list and keeps the largest free block in `DAT_001031d8` | observed |
-| `0xd2066` | `memmove` | copies the dwords and then the bytes | observed |
+| `0xd2066` | `memmove` | copies `count` bytes from the source to the destination and returns the destination | observed |
 | `0xd429f` | `dpmi_issue_int` | clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0` | inferred |
 | `0xd4410` | `dpmi_int31_entry` | saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block | inferred |
 <!-- end generated: The runtime memory manager -->
@@ -484,7 +484,7 @@ services.
 | `0x2f25f` | `resource_find` | walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066` | derived |
 | `0x2f470` | `resource_free` | frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise | derived |
 | `0x2f904` | `pool_init` | queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages | inferred |
-| `0x4bf23` | `dpmi_fill_regs` | fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS | observed |
+| `0x4bf23` | `dpmi_fill_regs` | fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs | observed |
 | `0x4bf4b` | `dpmi_call` | calls the interrupt through `0xd4410` and returns the value from EBX | inferred |
 <!-- end generated: The resource layer -->
 

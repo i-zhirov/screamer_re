@@ -1,17 +1,47 @@
 {
   "address": "0xd2066",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "copies the dwords and then the bytes"
+      "text": "copies `count` bytes from the source to the destination and returns the destination"
     }
   ],
+  "module": "memmove",
   "name": "memmove",
   "notes": [],
-  "role": "copies the dwords and then the bytes",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 37,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 23,
+        "instructions_total": 23,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd2066",
+    "date": "2026-10-28",
+    "source_digest": "sha256:776faf10e22c2bd79ad8bb37b6abdff85e83f21b39fd3ac549facbbfdce3db42",
+    "tool": "run.py"
+  },
+  "role": "copies `count` bytes from the source to the destination and returns the destination",
   "section": "The runtime memory manager",
   "size": 43,
-  "status": "named"
+  "status": "verified",
+  "symbol": "memmove_"
 }

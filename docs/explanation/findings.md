@@ -5153,6 +5153,64 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The module stays out of the pipeline check stage 11, because the diff does not match byte for byte.
   Evidence: `tools/pipeline_check.py`.
 
+## The Phase A library modules match byte for byte
+
+- `memset` at `0x8c160` holds 12 instructions and 25 bytes: `pushad`, the register moves, the
+  value replication, `shr ecx,2`, `rep stosd`, `popad`, and `ret`.  The function carries no call
+  and no data reference.  The call sites load the destination into `eax`, the byte count into
+  `edx`, and the fill value into `ebx`, and the function fills `count >> 2` dwords with the value
+  byte replicated.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8c160 --count 12`.
+- The module is assembly, because the original routine is library assembly.  The rebuilt module
+  matches the original byte for byte: 25 of 25 bytes equal, 12 of 12 instructions equal, and the
+  verdict is `the modules are byte-identical`.  This is the third exact match.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x8c160
+  --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memset.map --rebuilt-symbol
+  memset_`.
+- The run passes.  The harness prints `V` and `D`: the first 16 bytes hold the repeated value and
+  the rest stays the pattern.
+  Evidence: `python3 tools/rebuild/harness.py run --module memset` and `work/rebuild/mem_out.txt`.
+- `dpmi_fill_regs` at `0x4bf23` holds 16 instructions and 40 bytes: the `edx` save, the pointer
+  moved to `edx`, the six segment reads `cs`, `ds`, `es`, `ss`, `fs`, and `gs`, the six word
+  stores, and the epilogue.  It fills the 12-byte real-mode segment set in the order `es`, `cs`,
+  `ss`, `ds`, `fs`, and `gs` at offsets 0, 2, 4, 6, 8, and 10.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4bf23 --count 16`.
+- The rebuilt module matches byte for byte: 40 of 40 bytes equal.  The byte directive
+  `db 89h, 0C2h` pins the `mov edx,eax` encoding, because the assembler emits the `8Bh` form of
+  the same instruction.
+  Evidence: `tools/rebuild/dpmi_fill_regs.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4bf23
+  --rebuilt work/rebuild/dprmod.exe --rebuilt-map work/rebuild/dpmi_fill_regs.map --rebuilt-symbol
+  dpmi_fill_regs_`.
+- `memmove` at `0xd2066` holds 23 instructions and 37 bytes: the saves of `ecx`, `esi`, `edi`, and
+  `es`, the destination in `edi`, the source in `esi`, the count in `ecx`, `es` set to `ds`, the
+  `repne movsd` of the whole dwords, the `repne movsb` of the remainder, the destination returned
+  in `eax`, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd2066 --count 23`.
+- The rebuilt module matches byte for byte: 37 of 37 bytes equal.  The five byte directives pin the
+  `89h` form of the register moves, and two byte directives pin the `0F2h` prefix of the string
+  moves, because the assembler rejects `repne` on a `movs` instruction and emits the `8Bh` form
+  of a register move.
+  Evidence: `tools/rebuild/memmove.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0xd2066
+  --rebuilt work/rebuild/mmmod.exe --rebuilt-map work/rebuild/memmove.map --rebuilt-symbol
+  memmove_`.
+- `fp_helper` at `0x4d9f4` holds 12 instructions and 29 bytes: the `eax` save, the control word
+  saved to the stack, the rounding control set to truncate, `frndint`, the control word restored,
+  and the stack adjusted.  The function is the Watcom floating-point helper that rounds the value
+  on the FPU stack to an integer.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d9f4 --count 12`.
+- The rebuilt module matches byte for byte: 29 of 29 bytes equal.  The harness prints `F` and `D`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4d9f4
+  --rebuilt work/rebuild/fphmod.exe --rebuilt-map work/rebuild/fp_helper.map --rebuilt-symbol
+  fp_helper_` and `python3 tools/rebuild/harness.py run --module fp_helper`.
+- The store records the result of all four modules: build pass, identity pass, behavior pass, and
+  the status `verified`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x8c160`,
+  `python3 tools/rebuild/run.py run --function 0x4bf23`,
+  `python3 tools/rebuild/run.py run --function 0xd2066`, and
+  `python3 tools/rebuild/run.py run --function 0x4d9f4`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
