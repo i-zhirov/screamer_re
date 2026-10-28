@@ -154,7 +154,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x27770` | `race_start` | sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)` | derived |
 | `0x2786c` | `object_update_all` | walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record | derived |
 | `0x279a4` | `race_end` | tears the race down through 13 calls | derived |
-| `0x2aa98` | `video_fill` | fills 480 by 400 | inferred |
+| `0x2aa98` | `video_fill` | calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer | derived |
 <!-- end generated: race_loop callees -->
 
 ### frame_update callees

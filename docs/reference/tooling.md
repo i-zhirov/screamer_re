@@ -312,7 +312,11 @@ The files:
 | `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
-| `modules/*.json` | the ten module records: the sources, the compiler, the link, and the run expectations |
+| `frame_step.c` | the rebuilt `frame_step` module: the three calls in call order |
+| `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
+| `video_fill.c` | the rebuilt `video_fill` module: the size pair 480 and 400 and the video buffer pointer |
+| `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
+| `modules/*.json` | the eleven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

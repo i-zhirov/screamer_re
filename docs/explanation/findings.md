@@ -5180,6 +5180,38 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2aa84`.
 
+## The video_fill module and the video buffer pointer
+
+- `video_fill` at `0x2aa98` holds 12 instructions and 30 bytes: the register saves `ebx` and `edx`,
+  the frame `push ebp` and `mov ebp,esp`, the size pair `edx=0x190` (400) and `eax=0x1e0` (480), the
+  buffer pointer loaded from `DAT_00121528` into `ebx`, the call to the video copy at `0x8beb8`, and
+  the epilogue `pop ebp`, `pop edx`, `pop ebx`, and `ret`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2aa98 --count 12`.
+- The pointer is the video buffer.  `video_buf_load` at `0x4c8f0` loads the `VIDEO_BUF` resource and
+  stores the pointer at `DAT_00121528`, and `frame_update` clears the buffer through the same pointer,
+  so `video_fill` passes the screen buffer to the copy.  The raw displacement in the instruction is
+  `0x21528`, which the loader relocates to the data object (base `0x100000`) at `0x121528`, the
+  address the program map names `DAT_00121528`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c8f0 --count 12` and the program map.
+- The callee at `0x8beb8` copies the buffer to the VGA display at `0xa0000` through the VBE bank
+  switch at `0x8c0fc`.  The size pair and the pointer are its only arguments, so the wrapper holds no
+  logic of its own.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8beb8 --count 40`.
+- The rebuild with `-of+` holds 13 instructions and 33 bytes against the original 12 and 30.  The
+  difference repeats the `bios_video` set: the prologue order, because the original saves `ebx` and
+  `edx` before the frame while the rebuild pushes the frame first; and the epilogue, because the
+  original restores the registers with `pop` and the rebuild uses `lea esp,[ebp-8]` before the pops.
+  The call order and the argument values are the same, so the module is a faithful rebuild.
+  Evidence: `python3 tools/rebuild/harness.py build --module video_fill` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa98
+  --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map --rebuilt-symbol
+  video_fill_`.
+- The run passes.  The harness prints `V` and `D`: the copy stub runs with 480, 400, and
+  `DAT_00121528`, and the program exits.  The segment guard stays silent.
+  Evidence: `python3 tools/rebuild/harness.py run --module video_fill` and `work/rebuild/vf_out.txt`.
+- The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2aa98`.
+
 ## The rebuild framework
 
 - The rebuild framework holds one record per function and one record per build

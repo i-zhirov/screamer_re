@@ -52,14 +52,14 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: ten named modules are rebuilt with the harness and the store in
+  progress: eleven named modules are rebuilt with the harness and the store in
   `tools/rebuild`: `free` at `0x300ec`, `exit` at `0x300be` with its helper at
   `0x300d6`, `printf` at `0x3009b`, `memcpy` at `0x8c150`, and
   `engine_shutdown` at `0x128ac`, `error_report` at `0x10978`, `bios_video` at
-  `0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`, and
-  `frame_step` at `0x2aa84`; the four run-time modules match the original, the
-  six game modules hold the recorded difference, and the driver module matches
-  by behavior).
+  `0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`,
+  `frame_step` at `0x2aa84`, and `video_fill` at `0x2aa98`; the four run-time
+  modules match the original, the seven game modules hold the recorded
+  difference, and the driver module matches by behavior).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -112,8 +112,9 @@ current host.
     option removes, so the module stays open as a byte-level match).
 11. Rebuild the self-contained `memcpy` at `0x8c150` (done: the module matches the
     original byte for byte, the first exact match; the behavior run needs more work).
-12. Rebuild the game modules in size order (in progress: the ten modules
-    under `tools/rebuild/modules` carry a recipe and a result, and `frame_step`
-    at `0x2aa84` is the latest: 7 instructions and 20 bytes, the call order
-    `default_data_copy`, `joystick_update`, `frame_timer`, and the same extra
-    `mov esp,ebp` restore as `engine_shutdown`).
+12. Rebuild the game modules in size order (in progress: the eleven modules
+    under `tools/rebuild/modules` carry a recipe and a result, and `video_fill`
+    at `0x2aa98` is the latest: 12 instructions and 30 bytes, the register
+    saves `ebx` and `edx`, the size pair 480 and 400, the video buffer pointer
+    from `DAT_00121528`, and one call to the video copy at `0x8beb8`; the
+    prologue order and the epilogue repeat the `bios_video` differences).
