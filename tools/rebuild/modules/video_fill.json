@@ -13,8 +13,11 @@
   },
   "sources": [
     {
-      "compiler": "wasm",
-      "file": "video_fill.asm"
+      "compiler": "wcc386",
+      "file": "video_fill.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",

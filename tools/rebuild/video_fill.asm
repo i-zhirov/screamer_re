@@ -1,4 +1,4 @@
-; The rebuilt `video_fill` module.
+; The alternative assembly build of the `video_fill` module.
 ;
 ; The original sits at linear 0x2aa98 in STARTH.EXE and holds 12 instructions and
 ; 30 bytes: the register saves `ebx` and `edx`, the frame `push ebp` and
@@ -10,13 +10,15 @@
 ; `DAT_00121528` holds the video buffer address: `video_buf_load` at `0x4c8f0`
 ; stores the loaded `VIDEO_BUF` resource pointer there.
 ;
-; The module is assembly, because the OpenWatcom V2 C compiler cannot reproduce
-; the original code shape.  The original compiler saves the registers before the
-; frame and omits the ESP restore when the frame holds no local variable, while
-; OpenWatcom V2 saves after the frame and always emits `lea esp,[ebp-8]` in the
-; epilogue.  The extra instruction breaks the instruction-sequence match, so the
-; C rebuild cannot pass the identity check; the assembly rebuild holds the
-; original shape and differs only in the two link-time addresses.
+; This file is the alternative build, not the active module source.  The C build
+; at `video_fill.c` is the active module; it holds the original shape with one
+; extra `lea esp,[ebp-8]`, because OpenWatcom V2 saves the registers after the
+; frame and always emits an ESP restore, while the original compiler saves them
+; before the frame and omits the restore.  This assembly build holds the
+; original shape exactly and passes the identity check, with only the two
+; link-time addresses differing.  A build with the original Watcom 10.x
+; compiler should reproduce the C code shape, and then the C build becomes the
+; exact match.
 .386
 .model flat
 public video_fill_

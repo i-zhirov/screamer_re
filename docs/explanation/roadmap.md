@@ -58,9 +58,10 @@ current host.
   `engine_shutdown` at `0x128ac`, `error_report` at `0x10978`, `bios_video` at
   `0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`,
   `frame_step` at `0x2aa84`, and `video_fill` at `0x2aa98`; the four run-time
-  modules match the original, `video_fill` matches with only the link-time
-  addresses, the six game modules hold the recorded difference, and the driver
-  module matches by behavior).
+  modules match the original, the seven game modules hold the recorded
+  difference, and the driver module matches by behavior; the `video_fill` module
+  holds an assembly alternative that matches exactly, for the later build with
+  the original Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -115,9 +116,10 @@ current host.
     original byte for byte, the first exact match; the behavior run needs more work).
 12. Rebuild the game modules in size order (in progress: the eleven modules
     under `tools/rebuild/modules` carry a recipe and a result, and `video_fill`
-    at `0x2aa98` is the latest and the first verified game module: 12
-    instructions and 30 bytes, the register saves `ebx` and `edx`, the size pair
-    480 and 400, the video buffer pointer from `DAT_00121528`, and one call to
-    the video copy at `0x8beb8`; the module is assembly, because OpenWatcom V2
-    cannot reproduce the original code shape in C, and it matches with only the
-    two link-time addresses).
+    at `0x2aa98` is the latest: 12 instructions and 30 bytes, the register
+    saves `ebx` and `edx`, the size pair 480 and 400, the video buffer pointer
+    from `DAT_00121528`, and one call to the video copy at `0x8beb8`; the C
+    module stays the active build and holds the recorded `-of+` difference, the
+    assembly alternative at `video_fill.asm` matches exactly, and the later
+    build with the original Watcom 10.x compiler should reproduce the C code
+    shape).

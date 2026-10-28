@@ -5213,9 +5213,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the restore.
   Evidence: the container compiles of `video_fill.c` with the eight option sets and the `wdis`
   dumps of the objects.
-- The module is assembly now, like `memcpy`.  The assembler output holds the original shape, and the
-  only differences are the two link-time address fields: the buffer pointer displacement and the call
-  displacement.  The diff reports 12 of 12 instructions equal, 0 opcode differences, 2 operand
+- The alternative assembly build at `tools/rebuild/video_fill.asm` holds the original shape exactly.
+  The only differences are the two link-time address fields: the buffer pointer displacement and the
+  call displacement.  The diff reports 12 of 12 instructions equal, 0 opcode differences, 2 operand
   differences, and 24 of 30 bytes equal, and the verdict is `the instruction sequences match; the
   differing operands are the link-time addresses`.  The byte directive `db 89h, 0E5h` pins the
   `mov ebp,esp` encoding, because the assembler emits the `8Bh` form of the same instruction.
@@ -5223,10 +5223,18 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa98
   --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map --rebuilt-symbol
   video_fill_`.
+- The C build stays the active module, and the assembly build stays alongside as the documented
+  alternative.  The project returns to the original Watcom 10.x compiler later; that compiler saves
+  the registers before the frame and omits the restore, so a Watcom 10.x build of the C source should
+  reproduce the original shape and make the C module the exact match.
+  Evidence: `tools/rebuild/video_fill.c`, `tools/rebuild/video_fill.asm`, and
+  `tools/rebuild/modules/video_fill.json`.
 - The run passes.  The harness prints `V` and `D`: the copy stub runs with 480, 400, and
   `DAT_00121528`, and the program exits.  The segment guard stays silent.
   Evidence: `python3 tools/rebuild/harness.py run --module video_fill` and `work/rebuild/vf_out.txt`.
-- The store records the result: build pass, identity pass, behavior pass, and the status `verified`.
+- The store records the result of the active C build: build pass, identity fail, behavior pass, and
+  the status `rebuilt`.  The assembly build records build pass, identity pass, behavior pass, and the
+  status `verified` when it replaces the C source in the module recipe.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2aa98`.
 
 ## The rebuild framework
