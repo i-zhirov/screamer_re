@@ -5,12 +5,12 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "dispatches on the status at `+0xc` and calls the DPMI helper `0x4bf64` for each case"
+      "text": "dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case"
     }
   ],
   "name": "stream_release",
   "notes": [],
-  "role": "dispatches on the status at `+0xc` and calls the DPMI helper `0x4bf64` for each case",
+  "role": "dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case",
   "section": "The resource layer",
   "size": 5,
   "status": "named"

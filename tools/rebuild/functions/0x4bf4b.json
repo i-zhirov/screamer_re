@@ -1,17 +1,47 @@
 {
   "address": "0x4bf4b",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls the interrupt through `0xd4410` and returns the value from EBX"
+      "text": "calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block"
     }
   ],
+  "module": "dpmi_call",
   "name": "dpmi_call",
   "notes": [],
-  "role": "calls the interrupt through `0xd4410` and returns the value from EBX",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 25,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 14,
+        "instructions_total": 14,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf4b",
+    "date": "2026-10-28",
+    "source_digest": "sha256:db6f512b0f9d42336f79fa0889e0e187f9725f0f142a3f64ca6140b043cf7aba",
+    "tool": "run.py"
+  },
+  "role": "calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block",
   "section": "The resource layer",
   "size": 25,
-  "status": "named"
+  "status": "verified",
+  "symbol": "dpmi_call_"
 }

@@ -5211,6 +5211,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/run.py run --function 0xd2066`, and
   `python3 tools/rebuild/run.py run --function 0x4d9f4`.
 
+## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules
+
+- `vesa_set_mode` at `0x8bdec` holds 51 instructions and 167 bytes: the mode argument stored at
+  `DAT_0007c17c`, the DOS block allocated through `dpmi_alloc_dos` at `0x8be93`, the real-mode
+  register set at `DAT_0007c190` for the VBE mode info call, the mode set through INT 10h, and
+  the memory model and the window bits stored from the info block.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8bdec --count 60`.
+- The module is assembly, because the original is library-style code: it holds `pushad`/`popad`,
+  the direct INT 31h and INT 10h calls, and no EBP frame.  The diff reports 8 of 8 compared
+  instructions equal and the verdict `the instruction sequences match; the differing operands are
+  the link-time addresses`; the diff compares the early-return path, because the diff tool stops
+  the body at the first terminator.
+  Evidence: `tools/rebuild/vesa_set_mode.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x8bdec
+  --rebuilt work/rebuild/vsmmod.exe --rebuilt-map work/rebuild/vesa_set_mode.map --rebuilt-symbol
+  vesa_set_mode_`.
+- The harness allocator stub returns the info block in `edi` through the small assembly source
+  `vesa_alloc.asm`, because the `#pragma aux` form of the compiler rejects a data symbol in its
+  instruction string.  The run passes: the mode argument reaches the data area and the real-mode
+  interrupt path runs under DOSBox-X.
+  Evidence: `python3 tools/rebuild/harness.py run --module vesa_set_mode` and
+  `work/rebuild/vsm_out.txt`.
+- `memset` at `0xd1ec0` is the run-time library version, 12 instructions and 24 bytes: the value
+  byte replicated over the dword, the count moved to `ecx`, and the call to the run-time core at
+  `0xe0860`.  The module is named `memset_runtime`, because the game-side `memset` module at
+  `tools/rebuild/memset.asm` already carries the name `memset`.  The rebuilt module matches with
+  22 of 24 bytes equal, and the only difference is the call displacement.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd1ec0 --count 12` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0xd1ec0
+  --rebuilt work/rebuild/msrtmod.exe --rebuilt-map work/rebuild/memset_runtime.map
+  --rebuilt-symbol memset_runtime_`.
+- `dpmi_call` at `0x4bf4b` holds 14 instructions and 25 bytes: the four arguments moved to the
+  register set of the DPMI INT 31h entry at `0xd4410`, and the result read from the result block.
+  The rebuilt module matches with 22 of 25 bytes equal, and the only difference is the call
+  displacement.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4bf4b --count 14` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4bf4b
+  --rebuilt work/rebuild/dpcmodex.exe --rebuilt-map work/rebuild/dpmi_call.map --rebuilt-symbol
+  dpmi_call_`.
+- The function at `0x4bf64` is `fprintf`, not `dpmi_real_copy`.  The shape matches `printf` at
+  `0x3009b`: the stack arguments, the `va_start` address, and the print-engine call at `0xd429f`.
+  The call sites are the message stubs of `error_report`, the `stream_release` cases, and the
+  stream functions, so the earlier name is a misnomer.  The store record and the program-map row
+  now name `fprintf`, and the `stream_release` role names `fprintf` instead of the DPMI helper.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4bf64 --count 13` and
+  `python3 tools/le.py disasm STARTH.EXE 0x3009b --count 13`.
+- The `fprintf` module is C, like the `printf` module.  The diff reports 13 of 13 instructions
+  equal and the verdict `the modules hold the same instructions in a different order`, because
+  the rebuild evaluates the argument loads in a different order than the original.
+  Evidence: `tools/rebuild/fprintf.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4bf64
+  --rebuilt work/rebuild/fprfmod.exe --rebuilt-map work/rebuild/fprintf.map --rebuilt-symbol
+  fprintf_`.
+- The store records the result of all four modules: build pass, identity pass, behavior pass, and
+  the status `verified`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x8bdec`,
+  `python3 tools/rebuild/run.py run --function 0xd1ec0`,
+  `python3 tools/rebuild/run.py run --function 0x4bf4b`, and
+  `python3 tools/rebuild/run.py run --function 0x4bf64`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

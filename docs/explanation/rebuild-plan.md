@@ -50,12 +50,12 @@ floating-point instructions.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x8bdec` | `vesa_set_mode` | 22 | 8 | 1 | 0 |
-| `0xd1ec0` | `memset` | 24 | 12 | 1 | 0 |
+| `0x8bdec` | `vesa_set_mode` (done) | 22 | 8 | 1 | 0 |
+| `0xd1ec0` | `memset` (done) | 24 | 12 | 1 | 0 |
 | `0x8c160` | `memset` (done) | 25 | 12 | 0 | 0 |
-| `0x4bf4b` | `dpmi_call` | 25 | 14 | 1 | 0 |
+| `0x4bf4b` | `dpmi_call` (done) | 25 | 14 | 1 | 0 |
 | `0x4d9f4` | `fp_helper` (done) | 29 | 12 | 0 | 4 |
-| `0x4bf64` | `dpmi_real_copy` | 33 | 13 | 1 | 0 |
+| `0x4bf64` | `fprintf` (done) | 33 | 13 | 1 | 0 |
 | `0x10193` | `default_data_copy` | 33 | 16 | 0 | 0 |
 | `0xd2066` | `memmove` (done) | 37 | 23 | 0 | 0 |
 | `0x27a34` | `hud_update` | 38 | 11 | 3 | 0 |
@@ -192,13 +192,15 @@ floating-point instructions.
 
 ## Position
 
-Fifteen modules carry a recipe and a result: `free` at `0x300ec`, `exit` at
+Nineteen modules carry a recipe and a result: `free` at `0x300ec`, `exit` at
 `0x300be` with its helper at `0x300d6`, `printf` at `0x3009b`, `memcpy` at
-`0x8c150`, `memset` at `0x8c160`, `memmove` at `0xd2066`, `fp_helper` at
-`0x4d9f4`, `dpmi_fill_regs` at `0x4bf23`, `engine_shutdown` at `0x128ac`,
-`error_report` at `0x10978`, `bios_video` at `0x108e4`, `list_destroy` at
-`0x2ed77`, `memory_available` at `0x2f8ca`, `frame_step` at `0x2aa84`, and
-`video_fill` at `0x2aa98`.  The next modules are the remaining Phase A
-functions in table order.  The four Phase A functions that are done:
-`memset` at `0x8c160`, `dpmi_fill_regs` at `0x4bf23`, `memmove` at
-`0xd2066`, and `fp_helper` at `0x4d9f4`.
+`0x8c150`, `memset` at `0x8c160`, `memset` at `0xd1ec0`, `memmove` at
+`0xd2066`, `fp_helper` at `0x4d9f4`, `dpmi_fill_regs` at `0x4bf23`, `dpmi_call`
+at `0x4bf4b`, `vesa_set_mode` at `0x8bdec`, `fprintf` at `0x4bf64`,
+`engine_shutdown` at `0x128ac`, `error_report` at `0x10978`, `bios_video` at
+`0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`,
+`frame_step` at `0x2aa84`, and `video_fill` at `0x2aa98`.  The next modules are
+the remaining Phase A functions in table order.  The eight Phase A functions
+that are done: `vesa_set_mode` at `0x8bdec`, `memset` at `0xd1ec0`, `memset`
+at `0x8c160`, `dpmi_call` at `0x4bf4b`, `fp_helper` at `0x4d9f4`, `fprintf` at
+`0x4bf64`, `memmove` at `0xd2066`, and `dpmi_fill_regs` at `0x4bf23`.

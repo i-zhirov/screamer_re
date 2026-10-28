@@ -325,7 +325,16 @@ The files:
 | `memmove_main.c` | the `memmove` test harness: the copied buffer check |
 | `fp_helper.asm` | the rebuilt `fp_helper` module, byte-identical: the FPU rounding helper |
 | `fp_helper_main.c` | the `fp_helper` test harness: the run marker |
-| `modules/*.json` | the fifteen module records: the sources, the compiler, the link, and the run expectations |
+| `vesa_set_mode.asm` | the rebuilt `vesa_set_mode` module: the VBE mode set through the real-mode interrupt path |
+| `vesa_set_mode_main.c` | the `vesa_set_mode` test harness: the data area and the run marker |
+| `vesa_alloc.asm` | the `vesa_set_mode` harness allocator stub: the info block in `edi` |
+| `memset_runtime.asm` | the rebuilt run-time `memset` module: the value replication and the core call |
+| `memset_runtime_main.c` | the `memset_runtime` test harness: the core stub and the buffer check |
+| `dpmi_call.asm` | the rebuilt `dpmi_call` module: the four arguments and the DPMI entry call |
+| `dpmi_call_main.c` | the `dpmi_call` test harness: the DPMI entry stub and the result check |
+| `fprintf.c` | the rebuilt `fprintf` module, after the run-time file `bld/clib/streamio/c/fprintf.c` |
+| `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
+| `modules/*.json` | the nineteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

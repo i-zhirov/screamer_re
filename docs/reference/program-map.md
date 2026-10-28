@@ -432,8 +432,7 @@ Evidence: the Ghidra references to `0x118e04`.
 <!-- begin generated: The runtime memory manager -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x4bf64` | `dpmi_real_copy` | wraps `0xd429f` with the real-mode buffer and the protected-mode buffer | inferred |
-| `0xd1ec0` | `memset` | replicates the byte through the dword and calls `0xe0860` | observed |
+| `0xd1ec0` | `memset` | replicates the value byte over the dword and calls the run-time core at `0xe0860` | observed |
 | `0xd1f25` | `malloc` | rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0` | observed |
 | `0xd2008` | `free` | walks the free list and keeps the largest free block in `DAT_001031d8` | observed |
 | `0xd2066` | `memmove` | copies `count` bytes from the source to the destination and returns the destination | observed |
@@ -476,7 +475,7 @@ services.
 <!-- begin generated: The resource layer -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls the DPMI helper `0x4bf64` for each case | inferred |
+| `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case | inferred |
 | `0x2efc2` | `resource_read` | reads the current record and caches it through `0x2f062` | inferred |
 | `0x2f0fc` | `dos_memory_alloc` | calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address | derived |
 | `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
@@ -485,7 +484,7 @@ services.
 | `0x2f470` | `resource_free` | frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise | derived |
 | `0x2f904` | `pool_init` | queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages | inferred |
 | `0x4bf23` | `dpmi_fill_regs` | fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs | observed |
-| `0x4bf4b` | `dpmi_call` | calls the interrupt through `0xd4410` and returns the value from EBX | inferred |
+| `0x4bf4b` | `dpmi_call` | calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block | inferred |
 <!-- end generated: The resource layer -->
 
 `list_create` allocates `count * 0x1c` bytes.  This confirms the 28-byte record
@@ -518,6 +517,7 @@ and `5` when the `3D_BLKOBJ` chunk is missing.
 | --- | --- | --- | --- |
 | `0x10bfc` | `object_load` | reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records | observed |
 | `0x2eed0` | `resource_get` | looks a resource up by name in the engine resource list and loads it from its file when missing | observed |
+| `0x4bf64` | `fprintf` | formats into a stream through the run-time `__fprtf` at `0xd429f` | observed |
 | `0x4c08d` | `fopen` | opens the path through the run-time file layer and fills the stream record; returns `-1` on failure | derived |
 | `0x4c38d` | `stream_close` | frees the buffers and closes the handle; the counterpart of `fopen` | derived |
 | `0x4c4e5` | `stream_read` | buffered read; advances the position and clamps it to the stream size | derived |
@@ -553,7 +553,7 @@ the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 | `0x25db0` | `dpmi_real_int` | calls the DOS/4GW real-mode interrupt dispatcher with `0x1500` | derived |
 | `0x262a8` | `sound_driver_set` | fills an HMI request block and calls the sound driver | inferred |
 | `0x4c8f0` | `video_buf_load` | loads the `VIDEO_BUF` resource | observed |
-| `0x8bdec` | `vesa_set_mode` | calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call | derived |
+| `0x8bdec` | `vesa_set_mode` | allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h | derived |
 <!-- end generated: Subsystem initialisation -->
 
 The init order is: the configuration, the list files, the setup, the controls,
