@@ -26,22 +26,22 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 6,
+        "bytes_equal": 24,
         "bytes_total": 30,
-        "detail": "the instruction counts differ, 12 and 13",
-        "instructions_equal": 8,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 12,
         "instructions_total": 12,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2aa98",
     "date": "2026-10-28",
-    "source_digest": "sha256:444fb46e375fb0c3bd779818c259bc354745971d28d96fea7a0e173c733a5f3b",
+    "source_digest": "sha256:fc4bb9aa881bae379286dd2d320e74d7721b984cdb5ca320f482de4de21c2840",
     "tool": "run.py"
   },
   "role": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer",
   "section": "race_loop callees",
   "size": 2,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "video_fill_"
 }

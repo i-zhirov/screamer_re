@@ -5197,19 +5197,36 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   switch at `0x8c0fc`.  The size pair and the pointer are its only arguments, so the wrapper holds no
   logic of its own.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8beb8 --count 40`.
-- The rebuild with `-of+` holds 13 instructions and 33 bytes against the original 12 and 30.  The
-  difference repeats the `bios_video` set: the prologue order, because the original saves `ebx` and
-  `edx` before the frame while the rebuild pushes the frame first; and the epilogue, because the
-  original restores the registers with `pop` and the rebuild uses `lea esp,[ebp-8]` before the pops.
-  The call order and the argument values are the same, so the module is a faithful rebuild.
-  Evidence: `python3 tools/rebuild/harness.py build --module video_fill` and
+- The C rebuild failed the identity check.  The original compiler saves the registers before the
+  frame and omits the ESP restore when the frame holds no local variable, while OpenWatcom V2 with
+  `-of+` saves the registers after the frame and always emits an ESP restore, so the rebuild held 13
+  instructions and 33 bytes against the original 12 and 30 with one extra `lea esp,[ebp-8]`.  The
+  extra instruction keeps the instruction multiset unequal, so the diff tool reports the counts
+  differ instead of the same instructions in a different order.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa98
+  --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map --rebuilt-symbol
+  video_fill_`.
+- The option sweep explains the C codegen.  `-of+ -od` gives the original's save-before-frame order
+  but saves the whole register set and adds a local slot, `-of` alone drops the frame, and
+  `-of+ -ot`, `-of+ -os`, and `-of+ -ox` change nothing against `-of+` alone.  The container holds
+  OpenWatcom V2 only, so no original Watcom 10.x compiler is available, and no C source form removes
+  the restore.
+  Evidence: the container compiles of `video_fill.c` with the eight option sets and the `wdis`
+  dumps of the objects.
+- The module is assembly now, like `memcpy`.  The assembler output holds the original shape, and the
+  only differences are the two link-time address fields: the buffer pointer displacement and the call
+  displacement.  The diff reports 12 of 12 instructions equal, 0 opcode differences, 2 operand
+  differences, and 24 of 30 bytes equal, and the verdict is `the instruction sequences match; the
+  differing operands are the link-time addresses`.  The byte directive `db 89h, 0E5h` pins the
+  `mov ebp,esp` encoding, because the assembler emits the `8Bh` form of the same instruction.
+  Evidence: `tools/rebuild/video_fill.asm` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa98
   --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map --rebuilt-symbol
   video_fill_`.
 - The run passes.  The harness prints `V` and `D`: the copy stub runs with 480, 400, and
   `DAT_00121528`, and the program exits.  The segment guard stays silent.
   Evidence: `python3 tools/rebuild/harness.py run --module video_fill` and `work/rebuild/vf_out.txt`.
-- The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
+- The store records the result: build pass, identity pass, behavior pass, and the status `verified`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2aa98`.
 
 ## The rebuild framework

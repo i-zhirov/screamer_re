@@ -314,7 +314,7 @@ The files:
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
 | `frame_step.c` | the rebuilt `frame_step` module: the three calls in call order |
 | `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
-| `video_fill.c` | the rebuilt `video_fill` module: the size pair 480 and 400 and the video buffer pointer |
+| `video_fill.asm` | the rebuilt `video_fill` module: the size pair 480 and 400 and the video buffer pointer; assembly, because OpenWatcom V2 cannot reproduce the original code shape in C |
 | `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
 | `modules/*.json` | the eleven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
