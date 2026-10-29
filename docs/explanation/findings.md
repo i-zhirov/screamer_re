@@ -5498,6 +5498,24 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module menu_enter` and
   `work/rebuild/mntr_out.txt`.
 
+## The player_update module
+
+- `player_update` at `0x19ab0` holds 14 instructions and 55 bytes: the frame, the five player
+  structure addresses, the five step calls at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and
+  `0x212d0`, and the epilogue.  The function runs the five steps on the player structure
+  `DAT_00110a20` in call order.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19ab0 --count 14`.
+- The rebuild with `-of+` holds 15 instructions and 57 bytes, with one extra `mov esp,ebp` in the
+  epilogue, the same code-generator difference as `frame_step` and `hud_update`.  The identity
+  check stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x19ab0
+  --rebuilt work/rebuild/pupmod.exe --rebuilt-map work/rebuild/player_update.map --rebuilt-symbol
+  player_update_`.
+- The run passes.  The harness prints `0` to `4` in order and `D`, so the five steps run in the
+  same order as the original.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_update` and
+  `work/rebuild/pup_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

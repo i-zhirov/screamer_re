@@ -188,7 +188,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 <!-- begin generated: object_update_all callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x19ab0` | `player_update` | runs five steps on the player structure `DAT_00110a20` | inferred |
+| `0x19ab0` | `player_update` | runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20` | inferred |
 | `0x1c760` | `object_player_input` | reads the input bits `DAT_00118e1c` and the state at `+0x2f8` | derived |
 | `0x1c79c` | `object_prepare` | runs the preparation steps, gated on the state at `+0x414` | derived |
 | `0x1c810` | `object_physics` | runs the physics and collision steps, gated on the state at `+0x414` | derived |

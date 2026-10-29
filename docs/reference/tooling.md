@@ -359,7 +359,9 @@ The files:
 | `video_buf_load_main.c` | the `video_buf_load` test harness: the lookup and release stubs |
 | `menu_enter.c` | the rebuilt `menu_enter` module: the saved value and the two state stores |
 | `menu_enter_main.c` | the `menu_enter` test harness: the state words and the frame stub |
-| `modules/*.json` | the thirty-one module records: the sources, the compiler, the link, and the run expectations |
+| `player_update.c` | the rebuilt `player_update` module: the five step calls in call order |
+| `player_update_main.c` | the `player_update` test harness: the five step stubs |
+| `modules/*.json` | the thirty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
