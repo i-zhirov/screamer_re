@@ -1,17 +1,47 @@
 {
   "address": "0x22b80",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08`"
+      "text": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08`"
     }
   ],
+  "module": "filter_update",
   "name": "filter_update",
   "notes": [],
-  "role": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 36,
+        "detail": "the instruction counts differ, 20 and 16",
+        "instructions_equal": 3,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22b80",
+    "date": "2026-10-29",
+    "source_digest": "sha256:36b6982b09438f825c80ca24c836cc3460f4182db52f92946d95e363119d6837",
+    "tool": "run.py"
+  },
+  "role": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08`",
   "section": "object_gear_step and object_slide_step callees",
   "size": 1,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "filter_update_"
 }

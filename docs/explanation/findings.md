@@ -5402,6 +5402,35 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/run.py run --function 0x4d32c`, and
   `python3 tools/rebuild/run.py run --function 0x1c79c`.
 
+## The filter_update module and the data pointer
+
+- `filter_update` at `0x22b80` holds 20 instructions and 49 bytes: the `edx` save, the frame, the
+  argument slot, the table pointer loaded from `DAT_0010cf08`, the index scaled by 4, the one-pole
+  filter arithmetic, and the `ret 8` epilogue.  The function applies
+  `*p = (*p - f) * table[i] + f`.  The first argument arrives in `eax`, and the float argument
+  makes the Watcom compiler pass the remaining arguments on the stack.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22b80 --count 20`.
+- The rebuild with `-of+` holds 16 instructions, because the V2 compiler keeps the pointer in a
+  register and drops the argument slot and its reloads.  The identity check stays open and the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x22b80
+  --rebuilt work/rebuild/fupmod.exe --rebuilt-map work/rebuild/filter_update.map --rebuilt-symbol
+  filter_update_`.
+- A global pointer initializer in a harness does not reach the real address in this minimal build.
+  The assignment `DAT_0010cf08 = table;` compiles to `mov dword ptr [0x1c], 4`, and the loader
+  patches the memory operand of the assignment but not the immediate value, so the module
+  dereferences the raw offset 4 and reads the wrong memory.  The harness therefore sets the
+  pointer to a stack-local array, whose address the compiler computes at run time and which
+  needs no relocation.
+  Evidence: `work/rebuild/fupmod.exe` and `tools/rebuild/filter_update_main.c`.
+- The run passes.  The harness prints `V` and `D`: the value holds
+  `(1.0 - 0.5) * 0.25 + 0.5`.
+  Evidence: `python3 tools/rebuild/harness.py run --module filter_update` and
+  `work/rebuild/fup_out.txt`.
+- The float code of the module needs the FPU stubs, and the stub source now also provides the
+  `_fltused_` marker that the linker needs.
+  Evidence: `tools/rebuild/fpu_stub.asm`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

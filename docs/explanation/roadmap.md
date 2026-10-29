@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: twenty-seven named modules are rebuilt with the harness and the
+  progress: twenty-eight named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, and the first four Phase B modules `music_bank_reset`
   at `0x2f9b0`, `object_gear_state` at `0x1db38`, `sprintf` at `0x4d32c`, and
@@ -118,6 +118,7 @@ The plan follows the size order, starting with the smallest functions.
     original byte for byte, the first exact match; the behavior run needs more work).
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
-    A functions are done, and the first four Phase B functions are done:
+    A functions are done, and the first five Phase B functions are done:
     `music_bank_reset` at `0x2f9b0`, `object_gear_state` at `0x1db38`,
-    `sprintf` at `0x4d32c`, and `object_prepare` at `0x1c79c`).
+    `sprintf` at `0x4d32c`, `object_prepare` at `0x1c79c`, and `filter_update`
+    at `0x22b80`).

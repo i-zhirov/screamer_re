@@ -451,7 +451,7 @@ services allocate the separate buffers for the real-mode drivers.
 <!-- begin generated: object_gear_step and object_slide_step callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x22b80` | `filter_update` | applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table `DAT_0010cf08` | derived |
+| `0x22b80` | `filter_update` | applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08` | derived |
 <!-- end generated: object_gear_step and object_slide_step callees -->
 
 `object_gear_step` holds the vehicle states 1 and 2 at `+0x2f8`.  State 2 sets

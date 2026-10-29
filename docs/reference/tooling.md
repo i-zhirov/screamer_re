@@ -351,7 +351,9 @@ The files:
 | `sprintf_main.c` | the `sprintf` test harness: the `__iob` table and the format engine stub |
 | `object_prepare.c` | the rebuilt `object_prepare` module: the three preparation calls |
 | `object_prepare_main.c` | the `object_prepare` test harness: the step stubs and the state gate |
-| `modules/*.json` | the twenty-seven module records: the sources, the compiler, the link, and the run expectations |
+| `filter_update.c` | the rebuilt `filter_update` module: the one-pole filter with the table pointer |
+| `filter_update_main.c` | the `filter_update` test harness: the stack-local filter table and the value check |
+| `modules/*.json` | the twenty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
