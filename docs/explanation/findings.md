@@ -5480,6 +5480,24 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module video_buf_load` and
   `work/rebuild/vbl_out.txt`.
 
+## The menu_enter module
+
+- `menu_enter` at `0x28b5c` holds 19 instructions and 54 bytes: the register saves, the frame,
+  the saved value of `DAT_0011fb58`, the two state stores, the menu frame call at `0x29f80`, the
+  restore, and the epilogue.  The function saves the value of `DAT_0011fb58`, sets `DAT_0011fb64`
+  to -1 and clears the fade `DAT_0011d224`, runs the menu frame, and restores the saved value.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x28b5c --count 19`.
+- The rebuild with `-of+` holds 15 instructions and 47 bytes, because the V2 compiler keeps the
+  saved value in a register and drops the argument slot and the register reloads.  The identity
+  check stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x28b5c
+  --rebuilt work/rebuild/mntrmod.exe --rebuilt-map work/rebuild/menu_enter.map --rebuilt-symbol
+  menu_enter_`.
+- The run passes.  The harness prints `0`, `1`, and `D`: the state words hold the reset values and
+  the frame stub ran once, and the saved value is restored.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_enter` and
+  `work/rebuild/mntr_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

@@ -357,7 +357,9 @@ The files:
 | `video_block_swap_b_main.c` | the `video_block_swap_b` test harness: the video buffer and the swap check |
 | `video_buf_load.c` | the rebuilt `video_buf_load` module: the `VIDEO_BUF` lookup and the two pointer stores |
 | `video_buf_load_main.c` | the `video_buf_load` test harness: the lookup and release stubs |
-| `modules/*.json` | the thirty module records: the sources, the compiler, the link, and the run expectations |
+| `menu_enter.c` | the rebuilt `menu_enter` module: the saved value and the two state stores |
+| `menu_enter_main.c` | the `menu_enter` test harness: the state words and the frame stub |
+| `modules/*.json` | the thirty-one module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

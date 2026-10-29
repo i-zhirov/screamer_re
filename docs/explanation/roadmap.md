@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: thirty named modules are rebuilt with the harness and the
+  progress: thirty-one named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, and the first four Phase B modules `music_bank_reset`
   at `0x2f9b0`, `object_gear_state` at `0x1db38`, `sprintf` at `0x4d32c`, and
@@ -121,5 +121,5 @@ The plan follows the size order, starting with the smallest functions.
     A functions are done, and the first five Phase B functions are done:
     `music_bank_reset` at `0x2f9b0`, `object_gear_state` at `0x1db38`,
     `sprintf` at `0x4d32c`, `object_prepare` at `0x1c79c`, `filter_update`
-    at `0x22b80`, `video_block_swap_b` at `0x107a1`, and `video_buf_load`
-    at `0x4c8f0`).
+    at `0x22b80`, `video_block_swap_b` at `0x107a1`, `video_buf_load` at
+    `0x4c8f0`, and `menu_enter` at `0x28b5c`).
