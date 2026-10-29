@@ -5457,6 +5457,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `verified`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x107a1`.
 
+## The video_buf_load module
+
+- `video_buf_load` at `0x4c8f0` holds 18 instructions and 53 bytes: the register saves, the frame,
+  the three arguments of the resource lookup, the call at `0x2eed0`, the two pointer stores, the
+  null guard, the release call at `0x2edad`, and the epilogue.  The function looks the `VIDEO_BUF`
+  resource up through `resource_get`, stores the returned pointer in `DAT_00021504` and
+  `DAT_00121528`, and releases the stream when the lookup fails.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c8f0 --count 18`.
+- The two lookup constants `0x16c4` and `0x4b500` are the resource key and the name table address
+  of the original image.  The rebuild passes the literals, so the argument loads hold the same
+  immediates as the original.  The rebuild holds 19 instructions and 56 bytes against 18 and 53,
+  and the difference is the recurring frame set: the prologue order and the `lea` epilogue against
+  the original `mov esp,ebp`.
+  Evidence: `tools/rebuild/video_buf_load.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4c8f0
+  --rebuilt work/rebuild/vblmod.exe --rebuilt-map work/rebuild/video_buf_load.map
+  --rebuilt-symbol video_buf_load_`.
+- The run passes.  The harness prints `0`, `1`, and `D`: with the non-null lookup result both
+  result pointers hold it and the release stub does not run, and with the null result the release
+  stub runs with the stream.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/harness.py run --module video_buf_load` and
+  `work/rebuild/vbl_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

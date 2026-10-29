@@ -73,7 +73,7 @@ floating-point instructions.
 | `0x1c79c` | `object_prepare` (done) | 49 | 16 | 3 | 0 |
 | `0x22b80` | `filter_update` (done) | 49 | 20 | 0 | 5 |
 | `0x107a1` | `video_block_swap_b` (done) | 52 | 18 | 0 | 0 |
-| `0x4c8f0` | `video_buf_load` | 53 | 18 | 2 | 0 |
+| `0x4c8f0` | `video_buf_load` (done) | 53 | 18 | 2 | 0 |
 | `0x28b5c` | `menu_enter` | 54 | 19 | 1 | 0 |
 | `0x19ab0` | `player_update` | 55 | 14 | 5 | 0 |
 | `0x27f44` | `race_timeout` | 56 | 16 | 1 | 0 |
