@@ -1,17 +1,42 @@
 {
   "address": "0xd4410",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block"
+      "text": "writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt"
     }
   ],
+  "module": "dpmi_int31_entry",
   "name": "dpmi_int31_entry",
   "notes": [],
-  "role": "saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block",
+  "result": {
+    "checks": {
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 56,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 28,
+        "instructions_total": 28,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd4410",
+    "date": "2026-10-29",
+    "source_digest": "sha256:c2edc390f20bf08a7f59f5dc6bdeb06ecda34dd1c151292344eb49bf3650db82",
+    "tool": "run.py"
+  },
+  "role": "writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt",
   "section": "The runtime memory manager",
   "size": 108,
-  "status": "named"
+  "status": "verified",
+  "symbol": "dpmi_int31_entry_"
 }

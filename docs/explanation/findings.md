@@ -5536,6 +5536,30 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_timeout` and
   `work/rebuild/rtof_out.txt`.
 
+## The dpmi_int31_entry module
+
+- `dpmi_int31_entry` at `0xd4410` holds 28 instructions and 56 bytes: the saves, the dispatcher
+  call at `0xd4448`, the register block writes, the flag write, the pops, the segment writes, and
+  the epilogue.  The dispatcher turns the interrupt number into the `int N; ret` stub address from
+  the table at `cs:0xc44ee`, loads the real-mode registers from the block, and runs the stub
+  through the real-mode interrupt path.  The module writes the returned registers, the flags, and
+  the segment values back into the block.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd4410 --count 28`.
+- The module is assembly, because the original is a run-time routine with the segment and flag
+  juggling.  The diff reports 28 of 28 instructions equal and the verdict `the instruction
+  sequences match; the differing operands are the link-time addresses`, so the identity check
+  passes and the store records `verified`.
+  Evidence: `tools/rebuild/dpmi_int31_entry.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0xd4410
+  --rebuilt work/rebuild/dpiexmod.exe --rebuilt-map work/rebuild/dpmi_int31_entry.map
+  --rebuilt-symbol dpmi_int31_entry_`.
+- The behavior run is not included for this module.  The original writes the interrupt results
+  through the real-mode segment path: it loads `ds` from the block and writes to the
+  segment-relative address.  The flat harness cannot provide that path, and the run faults before
+  the markers, so the module record declares the build and the identity checks only.
+  Evidence: `python3 tools/rebuild/harness.py run --module dpmi_int31_entry` and
+  `work/rebuild/dpiex_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

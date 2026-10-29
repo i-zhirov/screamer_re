@@ -363,7 +363,10 @@ The files:
 | `player_update_main.c` | the `player_update` test harness: the five step stubs |
 | `race_timeout.c` | the rebuilt `race_timeout` module: the frame delta and the timeout flag |
 | `race_timeout_main.c` | the `race_timeout` test harness: the frame delta stub and the state check |
-| `modules/*.json` | the thirty-three module records: the sources, the compiler, the link, and the run expectations |
+| `dpmi_int31_entry.asm` | the rebuilt `dpmi_int31_entry` module: the run-time DPMI INT 31h entry |
+| `dpmi_int31_stub.asm` | the `dpmi_int31_entry` harness dispatcher stub: the register return path |
+| `dpmi_int31_entry_main.c` | the `dpmi_int31_entry` test harness: the register blocks |
+| `modules/*.json` | the thirty-four module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

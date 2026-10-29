@@ -437,7 +437,7 @@ Evidence: the Ghidra references to `0x118e04`.
 | `0xd2008` | `free` | walks the free list and keeps the largest free block in `DAT_001031d8` | observed |
 | `0xd2066` | `memmove` | copies `count` bytes from the source to the destination and returns the destination | observed |
 | `0xd429f` | `dpmi_issue_int` | clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0` | inferred |
-| `0xd4410` | `dpmi_int31_entry` | saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block | inferred |
+| `0xd4410` | `dpmi_int31_entry` | writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt | inferred |
 <!-- end generated: The runtime memory manager -->
 
 `list_create` allocates the record array through `malloc`, so the engine lists
