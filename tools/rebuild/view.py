@@ -370,7 +370,9 @@ def _row_module(row: dict) -> str | None:
 
 
 def _is_stale(row: dict, digests: dict[str, str]) -> bool:
-    return store.is_stale(row, digests.get(_row_module(row)))
+    # The page marks a record whose module sources changed, because it must
+    # render without the game image.  The runner uses the full input fingerprint.
+    return store.source_is_stale(row, digests.get(_row_module(row)))
 
 
 def _sorted_records(records: list[dict]) -> list[dict]:

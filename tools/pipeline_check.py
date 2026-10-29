@@ -13,8 +13,9 @@ Stages:
 8. radare2 cross-check: compare the parser with radare2 when it is on PATH.
 9. member probe: hook the container member open at run time.
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
-11. check_run: run every recorded check and compare the printed verdict
-    with the recorded result.
+11. check_run: run every recorded check of the changed records, verify the
+    unchanged records against their stored fingerprint, and compare the
+    printed verdicts with the recorded results.
 12. check_store: prove the store, the seed, the generated tables, and the
     status page.
 
@@ -43,6 +44,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import le as le_module  # noqa: E402
 from entry_probe import run_probe  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).parent / "rebuild"))
+import store as store_module  # noqa: E402
 
 TOOLS = (
     "le.py",
@@ -77,6 +81,8 @@ PROGRESS_LINE = re.compile(r"^\[(\d+)/(\d+)\] (.+?): (PASS|FAIL|SKIP) \((.*)\)$"
 NO_RESULT_DETAIL = "no recorded result"
 # The detail the runner writes for a skipped behavior check.
 RUNTIME_DETAIL = "the runtime is skipped"
+# The detail the runner writes for a record whose inputs are unchanged.
+UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
 
 
 class Checks:
@@ -571,14 +577,40 @@ def expected_result(record: dict, skip_runtime: bool) -> tuple[str, str | None]:
     return "PASS", detail
 
 
+def unchanged_is_verified(record: dict, game_dir: Path) -> bool:
+    """Tell whether the recorded result of an unchanged record is trustworthy.
+
+    The runner reports `PASS` with the unchanged detail only when the fingerprint
+    of the recorded result equals the current input fingerprint.  The stage
+    recomputes the fingerprint itself, so a forged or a stale store record
+    fails even when the runner is skipped.
+    """
+    result = record.get("result") or {}
+    stored = result.get("fingerprint")
+    if not stored:
+        return False
+    module_name = record.get("module") or record.get("name")
+    try:
+        module = store_module.load_module(module_name)
+    except ValueError:
+        return False
+    current = store_module.compute_fingerprint(
+        record, module, original=game_dir / "STARTH.EXE"
+    )
+    return stored == current
+
+
 def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
     """Run every recorded check and compare the verdicts with the store.
 
     The runner builds and runs the modules of the records that declare checks, so
-    the stage needs Docker and DOSBox-X.  The stage compares the printed verdict
-    of every record with the recorded result, so a known difference passes and a
-    change or an unexpected skip fails.  A record the store holds no result for is
-    skipped, because the run holds nothing to compare it with.
+    the stage needs Docker and DOSBox-X.  With `--skip-unchanged` the runner
+    reports a record whose inputs are unchanged since the previous run without
+    running its checks, and the stage verifies the stored fingerprint of that
+    record itself.  The stage compares the printed verdict of every record that
+    ran with the recorded result, so a known difference passes and a change or an
+    unexpected skip fails.  A record the store holds no result for is skipped,
+    because the run holds nothing to compare it with.
     """
     if shutil.which("docker") is None:
         print("docker is not on PATH; the record run is skipped")
@@ -589,6 +621,7 @@ def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
         "run",
         "--all",
         "--no-write",
+        "--skip-unchanged",
         "--original",
         str(game_dir / "STARTH.EXE"),
     ]
@@ -612,6 +645,14 @@ def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
             continue
         if not record.get("result"):
             checks.skip(f"stage 11: {label}", NO_RESULT_DETAIL)
+            continue
+        if detail == UNCHANGED_DETAIL:
+            ok = verdict == "PASS" and unchanged_is_verified(record, game_dir)
+            detail_text = f"{verdict} ({detail})"
+            if not ok:
+                detail_text += ", the recorded fingerprint does not match the inputs"
+            checks.check(f"stage 11: {label}", ok, detail_text)
+            compared += 1
             continue
         expected, expected_detail = expected_result(record, skip_runtime)
         ok = verdict == expected and (

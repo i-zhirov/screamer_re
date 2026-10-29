@@ -313,9 +313,9 @@ The files:
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
 | `modules/*.json` | the ten module records: the sources, the compiler, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
-| `run.py` | select the records, run the declared checks, print the progress, and write the results |
+| `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |
 | `view.py` | render the self-contained status page of the store |
 | `docs.py` | render the `program-map.md` tables and check the drift |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
@@ -324,6 +324,7 @@ The files:
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
@@ -549,6 +550,14 @@ A run takes about 8 minutes and reports 57 checks.  Inside the Nix dev
 shell the radare2 stage adds four checks, so the run reports 61 checks.  Use
 `--skip-runtime` to skip the run-time stages: it reports 42 checks and takes
 about 16 seconds.
+
+The record run calls `run.py run --all --skip-unchanged`.  A record whose input
+fingerprint still matches the fingerprint of its recorded result runs no check
+and reports `PASS` with the detail `the inputs are unchanged since the previous
+run`; the stage recomputes the fingerprint and fails a record whose stored
+fingerprint does not match.  The first run after the framework change records
+the fingerprints, so it still runs every module once; the runs after that skip
+the unchanged modules and functions and take only the hashing time.
 
 The check runs in three places:
 
