@@ -5348,6 +5348,60 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
 
+## The first Phase B modules
+
+- `music_bank_reset` at `0x2f9b0` holds 14 instructions and 46 bytes: the frame, the argument
+  slot, the three field stores at `+0x04`, `+0x10`, and `+0x14`, and the epilogue.  The rebuild
+  with `-of+` holds 8 instructions, because the OpenWatcom V2 compiler keeps the argument in a
+  register and drops the argument slot and its reloads.  The identity check stays open and the
+  store records `rebuilt`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f9b0 --count 14` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f9b0
+  --rebuilt work/rebuild/mbrmod.exe --rebuilt-map work/rebuild/music_bank_reset.map
+  --rebuilt-symbol music_bank_reset_`.
+- `object_gear_state` at `0x1db38` holds 16 instructions and 47 bytes: the frame, the argument
+  slot, the gear state read from `+0x3f4`, the compare chain, and the three stores to `+0x4e8`.
+  The original uses a compare chain, so the rebuild uses an if-else chain.  The rebuild holds 20
+  instructions against 16, because the compiler saves `edx` and computes the field pointer once.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1db38 --count 16` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1db38
+  --rebuilt work/rebuild/ogsmod.exe --rebuilt-map work/rebuild/object_gear_state.map
+  --rebuilt-symbol object_gear_state_`.
+- `sprintf` at `0x4d32c` holds 18 instructions and 48 bytes: the register-save prologue, the
+  `va_start` address, the format and the buffer arguments from the stack, the fourth argument
+  `0x3d319`, the format-engine call at `0xd68c0`, and the terminator write.  The function holds no
+  EBP frame, so the rebuild uses the default compiler settings like the `printf` module.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d32c --count 18`.
+- The `sprintf` rebuild passes the identity check.  The diff reports 18 of 18 instructions equal
+  and 32 of 48 bytes equal, and the verdict is `the modules hold the same instructions in a
+  different order`, because the rebuild evaluates the argument loads in a different order.  The
+  fourth argument of the format engine is a pointer the run-time uses for the output; the raw
+  value `0x3d319` is a relocated placeholder, and the rebuild passes the address of the harness
+  `__iob` table.  The store records `verified`.
+  Evidence: `tools/rebuild/sprintf.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4d32c
+  --rebuilt work/rebuild/sprmod.exe --rebuilt-map work/rebuild/sprintf.map --rebuilt-symbol
+  sprintf_`.
+- `object_prepare` at `0x1c79c` holds 16 instructions and 49 bytes: the frame, the argument slot,
+  the three preparation calls at `0x1db94`, `0x1ce38`, and `0x1cbac`, the guard on the state at
+  `+0x414`, and the epilogue.  The rebuild holds 15 instructions against 16, and the identity
+  check stays open.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c79c --count 16` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1c79c
+  --rebuilt work/rebuild/oprmod.exe --rebuilt-map work/rebuild/object_prepare.map
+  --rebuilt-symbol object_prepare_`.
+- The `-of+ -od` builds of the three game modules are worse than the `-of+` builds.  The
+  OpenWatcom V2 `-od` mode saves the full register set and adds local slots, while the original
+  compiler's `-of+` style saves only `ebp` and the argument slot, so the `-od` builds hold 23, 38,
+  and 27 instructions against the originals 14, 16, and 16.
+  Evidence: the container compiles with the two option sets and the three diffs.
+- The run passes for all four modules.  The store records `rebuilt` for `music_bank_reset`,
+  `object_gear_state`, and `object_prepare`, and `verified` for `sprintf`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2f9b0`,
+  `python3 tools/rebuild/run.py run --function 0x1db38`,
+  `python3 tools/rebuild/run.py run --function 0x4d32c`, and
+  `python3 tools/rebuild/run.py run --function 0x1c79c`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

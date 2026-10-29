@@ -343,7 +343,15 @@ The files:
 | `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
 | `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
 | `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
-| `modules/*.json` | the twenty-three module records: the sources, the compiler, the link, and the run expectations |
+| `music_bank_reset.c` | the rebuilt `music_bank_reset` module: the three field stores of the music bank record |
+| `music_bank_reset_main.c` | the `music_bank_reset` test harness: the bank record check |
+| `object_gear_state.c` | the rebuilt `object_gear_state` module: the gear state mapping through an if-else chain |
+| `object_gear_state_main.c` | the `object_gear_state` test harness: the gear state and the field check |
+| `sprintf.c` | the rebuilt `sprintf` module, after the run-time file `bld/clib/streamio/c/sprintf.c` |
+| `sprintf_main.c` | the `sprintf` test harness: the `__iob` table and the format engine stub |
+| `object_prepare.c` | the rebuilt `object_prepare` module: the three preparation calls |
+| `object_prepare_main.c` | the `object_prepare` test harness: the step stubs and the state gate |
+| `modules/*.json` | the twenty-seven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

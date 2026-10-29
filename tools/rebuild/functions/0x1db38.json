@@ -1,6 +1,10 @@
 {
   "address": "0x1db38",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
@@ -8,11 +12,37 @@
       "text": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`"
     }
   ],
+  "module": "object_gear_state",
   "name": "object_gear_state",
   "notes": [],
   "object_offset": "0xdb38",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 47,
+        "detail": "the instruction counts differ, 16 and 20",
+        "instructions_equal": 6,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1db38",
+    "date": "2026-10-29",
+    "source_digest": "sha256:5a48cb0ff52d595b8ab3487bf50238eeb8ba398215e8480a0cd60bead99dd22c",
+    "tool": "run.py"
+  },
   "role": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`",
   "section": "object_physics callees",
   "size": 97,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_gear_state_"
 }

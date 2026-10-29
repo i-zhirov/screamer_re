@@ -1,6 +1,10 @@
 {
   "address": "0x2f9b0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
@@ -8,11 +12,37 @@
       "text": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct"
     }
   ],
+  "module": "music_bank_reset",
   "name": "music_bank_reset",
   "notes": [],
   "object_offset": "0x1f9b0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 28,
+        "detail": "the instruction counts differ, 14 and 8",
+        "instructions_equal": 5,
+        "instructions_total": 8,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f9b0",
+    "date": "2026-10-29",
+    "source_digest": "sha256:cc2274611e80da90dfe5677d69a63b7f008a628e0d21500e5e7eea06c4b60785",
+    "tool": "run.py"
+  },
   "role": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct",
   "section": "The sound loaders",
   "size": 50,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "music_bank_reset_"
 }

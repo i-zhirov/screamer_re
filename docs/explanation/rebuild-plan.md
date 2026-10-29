@@ -67,10 +67,10 @@ floating-point instructions.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x2f9b0` | `music_bank_reset` | 46 | 14 | 0 | 0 |
-| `0x1db38` | `object_gear_state` | 47 | 16 | 0 | 0 |
-| `0x4d32c` | `sprintf` | 48 | 18 | 1 | 0 |
-| `0x1c79c` | `object_prepare` | 49 | 16 | 3 | 0 |
+| `0x2f9b0` | `music_bank_reset` (done) | 46 | 14 | 0 | 0 |
+| `0x1db38` | `object_gear_state` (done) | 47 | 16 | 0 | 0 |
+| `0x4d32c` | `sprintf` (done) | 48 | 18 | 1 | 0 |
+| `0x1c79c` | `object_prepare` (done) | 49 | 16 | 3 | 0 |
 | `0x22b80` | `filter_update` | 49 | 20 | 0 | 5 |
 | `0x107a1` | `video_block_swap_b` | 52 | 18 | 0 | 0 |
 | `0x4c8f0` | `video_buf_load` | 53 | 18 | 2 | 0 |
@@ -192,11 +192,9 @@ floating-point instructions.
 
 ## Position
 
-Twenty-three modules carry a recipe and a result: the twelve Phase A modules
-and the eleven modules that follow them in the roadmap.  The next modules are
-the remaining Phase B functions in table order.  All twelve Phase A functions
-are done: `vesa_set_mode` at `0x8bdec`, `memset` at `0xd1ec0`, `memset` at
-`0x8c160`, `dpmi_call` at `0x4bf4b`, `fp_helper` at `0x4d9f4`, `fprintf` at
-`0x4bf64`, `default_data_copy` at `0x10193`, `memmove` at `0xd2066`,
-`hud_update` at `0x27a34`, `stream_status` at `0x4c7e0`, `race_state_update`
-at `0x29564`, and `dpmi_fill_regs` at `0x4bf23`.
+Twenty-seven modules carry a recipe and a result: the twelve Phase A modules,
+the eleven modules of the earlier batches, and the first four Phase B modules.
+The next modules are the remaining Phase B functions in table order.  The
+first four Phase B functions are done: `music_bank_reset` at `0x2f9b0`,
+`object_gear_state` at `0x1db38`, `sprintf` at `0x4d32c`, and `object_prepare`
+at `0x1c79c`.
