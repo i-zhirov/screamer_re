@@ -334,7 +334,16 @@ The files:
 | `dpmi_call_main.c` | the `dpmi_call` test harness: the DPMI entry stub and the result check |
 | `fprintf.c` | the rebuilt `fprintf` module, after the run-time file `bld/clib/streamio/c/fprintf.c` |
 | `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
-| `modules/*.json` | the nineteen module records: the sources, the compiler, the link, and the run expectations |
+| `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
+| `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
+| `hud_update.c` | the rebuilt `hud_update` module: the three overlay calls, gated on the session state |
+| `hud_update_main.c` | the `hud_update` test harness: the session state and the overlay stubs |
+| `stream_status.c` | the rebuilt `stream_status` module: the word at `stream + 0x70` |
+| `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
+| `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
+| `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
+| `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
+| `modules/*.json` | the twenty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
@@ -567,10 +576,19 @@ python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-A run takes about 8 minutes and reports 57 checks.  Inside the Nix dev
-shell the radare2 stage adds four checks, so the run reports 61 checks.  Use
-`--skip-runtime` to skip the run-time stages: it reports 42 checks and takes
-about 16 seconds.
+The record run of stage 11 builds and runs every module record, so it needs
+more time as the module count grows.  Use `--record-timeout` to raise the
+budget of that one subprocess; the default is 1200 seconds:
+
+```sh
+python3 tools/pipeline_check.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
+  --record-timeout 1800
+```
+
+A run takes about 15 minutes and reports one check per module record in stage
+11 plus the fixed stages.  Use `--skip-runtime` to skip the run-time stages:
+it takes about 16 seconds.
 
 The check runs in three places:
 

@@ -26,6 +26,7 @@ The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
     python3 tools/pipeline_check.py --game-dir DIR [--skip-runtime]
+    python3 tools/pipeline_check.py --game-dir DIR --record-timeout 1800
 """
 
 from __future__ import annotations
@@ -571,7 +572,9 @@ def expected_result(record: dict, skip_runtime: bool) -> tuple[str, str | None]:
     return "PASS", detail
 
 
-def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
+def check_run(
+    checks: Checks, game_dir: Path, skip_runtime: bool, record_timeout: float
+) -> None:
     """Run every recorded check and compare the verdicts with the store.
 
     The runner builds and runs the modules of the records that declare checks, so
@@ -594,7 +597,7 @@ def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
     ]
     if skip_runtime:
         command.append("--skip-runtime")
-    result = run(command)
+    result = run(command, timeout=record_timeout)
     records = recorded_records()
     entries = progress_lines(result.stdout)
     if not entries:
@@ -720,6 +723,12 @@ def main() -> int:
     parser.add_argument("--exe", default="STARTH.EXE")
     parser.add_argument("--port", type=int, default=9876)
     parser.add_argument("--timeout", type=float, default=300.0)
+    parser.add_argument(
+        "--record-timeout",
+        type=float,
+        default=1200.0,
+        help="the seconds the record run of stage 11 may take",
+    )
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
     parser.add_argument("--skip-runtime", action="store_true")
     args = parser.parse_args()
@@ -742,7 +751,7 @@ def main() -> int:
         check_radare2(checks, game_dir, args.exe, args.timeout)
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
-    check_run(checks, game_dir, args.skip_runtime)
+    check_run(checks, game_dir, args.skip_runtime, args.record_timeout)
     check_store(checks, game_dir, work_root)
 
     print()

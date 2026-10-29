@@ -52,19 +52,21 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: nineteen named modules are rebuilt with the harness and the store
-  in `tools/rebuild`: `free` at `0x300ec`, `exit` at `0x300be` with its helper
-  at `0x300d6`, `printf` at `0x3009b`, `memcpy` at `0x8c150`, `memset` at
-  `0x8c160`, `memset_runtime` at `0xd1ec0`, `memmove` at `0xd2066`,
+  progress: twenty-three named modules are rebuilt with the harness and the
+  store in `tools/rebuild`: `free` at `0x300ec`, `exit` at `0x300be` with its
+  helper at `0x300d6`, `printf` at `0x3009b`, `memcpy` at `0x8c150`, `memset`
+  at `0x8c160`, `memset_runtime` at `0xd1ec0`, `memmove` at `0xd2066`,
   `fp_helper` at `0x4d9f4`, `dpmi_fill_regs` at `0x4bf23`, `dpmi_call` at
   `0x4bf4b`, `vesa_set_mode` at `0x8bdec`, `fprintf` at `0x4bf64`,
-  `engine_shutdown` at `0x128ac`, `error_report` at `0x10978`, `bios_video` at
-  `0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`,
-  `frame_step` at `0x2aa84`, and `video_fill` at `0x2aa98`; the twelve modules
-  that match the original, the seven game modules hold the recorded difference,
-  and the driver module matches by behavior; the `video_fill` module holds an
-  assembly alternative that matches exactly, for the later build with the
-  original Watcom 10.x compiler).
+  `default_data_copy` at `0x10193`, `hud_update` at `0x27a34`, `stream_status`
+  at `0x4c7e0`, `race_state_update` at `0x29564`, `engine_shutdown` at
+  `0x128ac`, `error_report` at `0x10978`, `bios_video` at `0x108e4`,
+  `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`, `frame_step`
+  at `0x2aa84`, and `video_fill` at `0x2aa98`; the thirteen modules that match
+  the original, the ten game modules hold the recorded difference, and the
+  driver module matches by behavior; the `video_fill` module holds an assembly
+  alternative that matches exactly, for the later build with the original
+  Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -121,8 +123,7 @@ The plan follows the size order, starting with the smallest functions.
 11. Rebuild the self-contained `memcpy` at `0x8c150` (done: the module matches the
     original byte for byte, the first exact match; the behavior run needs more work).
 12. Rebuild the game modules in size order (in progress: the plan in
-    `rebuild-plan.md` orders the remaining functions by size; the first eight
-    Phase A functions are done: `memset` at `0x8c160`, `dpmi_fill_regs` at
-    `0x4bf23`, `memmove` at `0xd2066`, `fp_helper` at `0x4d9f4`, `vesa_set_mode`
-    at `0x8bdec`, `memset` at `0xd1ec0`, `dpmi_call` at `0x4bf4b`, and
-    `fprintf` at `0x4bf64`, which the store earlier named `dpmi_real_copy`).
+    `rebuild-plan.md` orders the remaining functions by size; the first twelve
+    Phase A functions are done, and `default_data_copy` at `0x10193`,
+    `hud_update` at `0x27a34`, `stream_status` at `0x4c7e0`, and
+    `race_state_update` at `0x29564` are the latest).

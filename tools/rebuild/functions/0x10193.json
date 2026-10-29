@@ -1,6 +1,10 @@
 {
   "address": "0x10193",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
@@ -8,10 +12,36 @@
       "text": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2"
     }
   ],
+  "module": "default_data_copy",
   "name": "default_data_copy",
   "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 30,
+        "bytes_total": 33,
+        "detail": "the modules hold the same instructions in a different order",
+        "instructions_equal": 16,
+        "instructions_total": 16,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10193",
+    "date": "2026-10-28",
+    "source_digest": "sha256:afb3f0f42e013785f36b33b8190b36b641a23cc2f0b3edf5ae24510d8398de56",
+    "tool": "run.py"
+  },
   "role": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2",
   "section": "race_loop callees",
   "size": 1484,
-  "status": "named"
+  "status": "verified",
+  "symbol": "default_data_copy_"
 }

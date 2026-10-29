@@ -5271,6 +5271,83 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/run.py run --function 0x4bf4b`, and
   `python3 tools/rebuild/run.py run --function 0x4bf64`.
 
+## The default_data_copy, hud_update, stream_status, and race_state_update modules
+
+- `default_data_copy` at `0x10193` holds 16 instructions and 33 bytes: the register saves, the
+  segment saves, the two block addresses, `cld`, the `rep movsd` of 32 dwords, and the epilogue.
+  It copies the default data block from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10193 --count 16`.
+- The module is assembly, because the original is library-style code: it holds `pushad`/`popad`,
+  the segment register saves, and the `rep movsd`, and no EBP frame.  The diff reports 30 of 33
+  bytes equal and the verdict `the modules hold the same instructions in a different order`, which
+  the store accepts; the two differing operands are the relocated block addresses.
+  Evidence: `tools/rebuild/default_data_copy.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10193
+  --rebuilt work/rebuild/ddcmod.exe --rebuilt-map work/rebuild/default_data_copy.map
+  --rebuilt-symbol default_data_copy_`.
+- The run passes: the target block holds the source pattern.  The store records the status
+  `verified`.
+  Evidence: `python3 tools/rebuild/harness.py run --module default_data_copy` and
+  `work/rebuild/ddc_out.txt`.
+- `hud_update` at `0x27a34` holds 11 instructions and 38 bytes: the frame, the two guards on the
+  session state `DAT_0011ce44`, and the three overlay calls.  The rebuild with `-of+` holds 12
+  instructions and 40 bytes, with one extra `mov esp,ebp` in the epilogue, the same code-generator
+  difference as `frame_step` and `engine_shutdown`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27a34 --count 11` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x27a34
+  --rebuilt work/rebuild/hudmod.exe --rebuilt-map work/rebuild/hud_update.map --rebuilt-symbol
+  hud_update_`.
+- The run passes.  The state 4 runs the first two overlays, the state 3 runs only the third, and
+  the harness prints `0`, `2`, and `D`.
+  Evidence: `python3 tools/rebuild/harness.py run --module hud_update` and
+  `work/rebuild/hud_out.txt`.
+- `stream_status` at `0x4c7e0` holds 21 instructions and 38 bytes: the six register saves, the
+  frame, the two local slots, the word read at `stream + 0x70`, and the epilogue.  The rebuild
+  with `-of+ -od` holds 21 instructions and 39 bytes, and the `bios_video` difference set recurs:
+  the prologue order, the local offsets, and the `lea` epilogue against the original `mov esp,ebp`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c7e0 --count 21` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4c7e0
+  --rebuilt work/rebuild/stsmod.exe --rebuilt-map work/rebuild/stream_status.map --rebuilt-symbol
+  stream_status_`.
+- `race_state_update` at `0x29564` holds 13 dispatch instructions plus the case bodies: the frame,
+  the state word read from `DAT_0011fac4`, the bound check against 8, and the compiler jump table
+  at `cs:[eax*4 + 0x19540]`.  The case bodies call the state step functions, and case 1 also
+  advances the frame timing value and copies the next state.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29564 --count 40`.
+- The C switch of the first rebuild emits a compiler jump table, and the jump table crashes the
+  harness run, the same fault as the first `error_report` rebuild.  The rebuild now uses an
+  if-else chain, which holds no jump table, and the run passes: the states 0, 2, and 7 run their
+  step, and the state 8 runs nothing.
+  Evidence: `tools/rebuild/race_state_update.c` and
+  `python3 tools/rebuild/harness.py run --module race_state_update`.
+- The float code of the module references the FPU run-time symbols `__8087` and
+  `__init_387_emulator`.  The compiler emits these names without the trailing underscore, so a C
+  stub cannot provide them; the stub source `fpu_stub.asm` stands in for the FPU control init and
+  the 387 emulator init.
+  Evidence: `tools/rebuild/fpu_stub.asm` and the link errors.
+- The identity check stays open for `hud_update`, `stream_status`, and `race_state_update`, so the
+  store records the status `rebuilt` for all three.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x27a34`,
+  `python3 tools/rebuild/run.py run --function 0x4c7e0`, and
+  `python3 tools/rebuild/run.py run --function 0x29564`.
+
+## The record-run budget of the pipeline
+
+- The record run of stage 11 builds and runs every module record through the
+  runner, so it needs more time as the module count grows.  The 300-second
+  default of the pipeline subprocess no longer fits the 24 records, and the
+  stage timed out.  `pipeline_check.py` now holds `--record-timeout` (default
+  1200 seconds) for the stage-11 subprocess.
+  Evidence: `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game --record-timeout 1800` and
+  `tools/pipeline_check.py`.
+- The full check reports 70 checks and 0 failures with the 24 module records,
+  and the check count grows with the module count.  The earlier sections in
+  this file record the check count at the time they were written, not the
+  current count.
+  Evidence: `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

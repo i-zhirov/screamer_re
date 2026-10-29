@@ -1,0 +1,28 @@
+{
+  "exe": "hudmod.exe",
+  "map": "hud_update.map",
+  "name": "hud_update",
+  "run": {
+    "command": "hudmod.exe > hud_out.txt",
+    "expect": [
+      "0",
+      "2",
+      "D"
+    ],
+    "output": "hud_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "hud_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "hud_update_main.c"
+    }
+  ]
+}
