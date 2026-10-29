@@ -5320,11 +5320,14 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the frame.  The initial 10.0 release (the "10.0 Limited Availability" build, dated March 1994)
   was tested and does not explain it: its compiler loads and builds modules, but its `-of+`
   epilogue adds `mov esp,ebp` exactly as the 10.0a build does, and its `-of+ -od` prologue saves
-  the registers after the frame exactly as the 10.0a build does.  The remaining candidates are the
-  10.5, 10.6, and 11.0 releases: the 10.5 and 11.0 run-time banners end in `1988-1995`, and the
-  10.6 release stays untested, so they are unlikely.  The 10.0a toolchain stays the closest
-  verified match.
-  Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, file
+  the registers after the frame exactly as the 10.0a build does.  The 10.6 release (dated
+  February 1996) was tested and does not explain it either: its `-of+` epilogue adds
+  `mov esp,ebp`, its `-of+ -od` prologue saves the registers after the frame, and its run-time
+  banner ends in `1988-1995`.  The only untested candidate is the 10.5 release, whose run-time
+  banner also ends in `1988-1995`.  The 10.0a toolchain stays the closest verified match.
+  Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, files
   `watcom-10.0-la/watcom10la.iso` (SHA-256
-  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`), the version banner
-  `WATCOM C32 Optimizing Compiler  Version 10.0 Limited Availability`, and the two object diffs.
+  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`) and
+  `watcom-10.6/WATCOM_C106.iso` (SHA-256
+  `18dd98ae9c8d883e2d680bf9e4eda1c4bf78376c5f05e071b55e57a6619aecf2`), the version banners,
+  and the object diffs.
