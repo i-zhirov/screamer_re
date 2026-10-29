@@ -5416,12 +5416,13 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x22b80
   --rebuilt work/rebuild/fupmod.exe --rebuilt-map work/rebuild/filter_update.map --rebuilt-symbol
   filter_update_`.
-- A global pointer initializer in a harness does not reach the real address in this minimal build.
-  The assignment `DAT_0010cf08 = table;` compiles to `mov dword ptr [0x1c], 4`, and the loader
-  patches the memory operand of the assignment but not the immediate value, so the module
-  dereferences the raw offset 4 and reads the wrong memory.  The harness therefore sets the
-  pointer to a stack-local array, whose address the compiler computes at run time and which
-  needs no relocation.
+- A global pointer initializer in a harness did not reach the real address in the first
+  `filter_update` build.  The assignment `DAT_0010cf08 = table;` compiled to
+  `mov dword ptr [0x1c], 4`, and the module dereferenced the raw offset.  The later
+  `video_block_swap_b` harness shows that a static buffer with a pointer assignment works, so the
+  fault was specific to the `filter_update` data layout: the linker placed a 4-byte gap before the
+  initialized static table.  The `filter_update` harness uses a stack-local table, whose address
+  the compiler computes at run time and which needs no relocation.
   Evidence: `work/rebuild/fupmod.exe` and `tools/rebuild/filter_update_main.c`.
 - The run passes.  The harness prints `V` and `D`: the value holds
   `(1.0 - 0.5) * 0.25 + 0.5`.
@@ -5430,6 +5431,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The float code of the module needs the FPU stubs, and the stub source now also provides the
   `_fltused_` marker that the linker needs.
   Evidence: `tools/rebuild/fpu_stub.asm`.
+
+## The video_block_swap_b module
+
+- `video_block_swap_b` at `0x107a1` holds 18 instructions and 52 bytes: `pushad`, the video buffer
+  pointer loaded from `DAT_00121528`, the far pointer at `0x3e580` bytes ahead, the two counters,
+  the dword swap loop, and the epilogue.  The module swaps 200 rows of 160 dwords between the
+  front of the video buffer and the region `0xf960` dwords ahead.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x107a1 --count 18`.
+- The module is assembly, because the original is library-style code: it holds `pushad`/`popad`
+  and no EBP frame.  The diff reports 49 of 52 bytes equal and the verdict `the instruction
+  sequences match; the differing operands are the link-time addresses`, and the only difference is
+  the buffer pointer displacement.
+  Evidence: `tools/rebuild/video_block_swap_b.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x107a1
+  --rebuilt work/rebuild/vbsbmod.exe --rebuilt-map work/rebuild/video_block_swap_b.map
+  --rebuilt-symbol video_block_swap_b_`.
+- The run passes.  The harness fills the buffer with the index value, and after the swap the first
+  row holds the far row values and the far row holds the first row values.  The harness prints `V`
+  and `D`.  The static buffer with the pointer assignment works here, which corrects the data
+  pointer finding of the `filter_update` section.
+  Evidence: `python3 tools/rebuild/harness.py run --module video_block_swap_b` and
+  `work/rebuild/vbsb_out.txt`.
+- The store records the result: build pass, identity pass, behavior pass, and the status
+  `verified`.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x107a1`.
 
 ## The frame_step module and the call order
 

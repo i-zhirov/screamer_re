@@ -219,7 +219,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x1075f` | `video_block_swap_a` | byte-swaps and swaps dwords between the buffer and the region 0x9f dwords ahead, 80 by 400 dwords; gated on the flag 0x10 | derived |
-| `0x107a1` | `video_block_swap_b` | byte-swaps and swaps dwords between the front and the region at 0xf960, 200 by 160 dwords; gated on the flag 0x20 | derived |
+| `0x107a1` | `video_block_swap_b` | swaps 200 rows of 160 dwords between the front of the video buffer and the region `0xf960` dwords ahead | derived |
 | `0x28160` | `overlay_dispatch` | reads the option flags in `DAT_000f0002` and calls the overlay for the set flag | derived |
 | `0x29564` | `race_state_update` | switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8` | derived |
 | `0x29610` | `race_heading_update` | angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap | inferred |

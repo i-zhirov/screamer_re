@@ -353,7 +353,9 @@ The files:
 | `object_prepare_main.c` | the `object_prepare` test harness: the step stubs and the state gate |
 | `filter_update.c` | the rebuilt `filter_update` module: the one-pole filter with the table pointer |
 | `filter_update_main.c` | the `filter_update` test harness: the stack-local filter table and the value check |
-| `modules/*.json` | the twenty-eight module records: the sources, the compiler, the link, and the run expectations |
+| `video_block_swap_b.asm` | the rebuilt `video_block_swap_b` module: the 200 by 160 dword swap |
+| `video_block_swap_b_main.c` | the `video_block_swap_b` test harness: the video buffer and the swap check |
+| `modules/*.json` | the twenty-nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
