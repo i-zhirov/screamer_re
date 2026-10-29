@@ -2,13 +2,16 @@
 
 The tool selects the function records and the module rows of the store, runs the
 declared checks of each one in address order, prints one progress line per record,
-and writes the result through `store.py`.  The full log of the run stays under
+and writes the result through `store.py`.  With `--skip-unchanged` a record whose
+input fingerprint still matches the fingerprint of its recorded result prints
+`PASS` and runs no check, so an unchanged module or function costs one hash and
+no build, no diff, and no DOSBox run.  The full log of the run stays under
 `work/rebuild/logs/`.
 
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --all) [--no-write] [--show]
-        [--skip-runtime] [--original PATH]
+        [--skip-runtime] [--skip-unchanged] [--original PATH]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -19,6 +22,7 @@ import argparse
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
 
@@ -73,7 +77,7 @@ def next_selection(records: list[dict], count: int) -> list[dict]:
 def select_records(
     records: list[dict],
     modules: dict[str, dict],
-    digests: dict[str, str],
+    stale_fn: Callable[[dict], bool] | None,
     function: int | None,
     name: str | None,
     module: str | None,
@@ -85,6 +89,8 @@ def select_records(
     """Return the selected function records and the selected module rows.
 
     A module row is a module record that holds no function record of the store.
+    The stale selector takes a predicate, because the input fingerprint of a
+    record needs its own record and its own module.
     """
     module_rows = [
         row
@@ -116,16 +122,12 @@ def select_records(
         ]
         rows = [row for row in module_rows if row.get("status") == status]
     elif stale:
-        functions = [
-            record
-            for record in records
-            if store.is_stale(record, digests.get(record.get("module")))
-        ]
-        rows = [
-            row
-            for row in module_rows
-            if store.is_stale(row, digests.get(row["name"]))
-        ]
+        if stale_fn is None:
+            functions = []
+            rows = []
+        else:
+            functions = [record for record in records if stale_fn(record)]
+            rows = [row for row in module_rows if stale_fn(row)]
     elif next_count is not None:
         functions = next_selection(records, next_count)
         rows = []
@@ -368,12 +370,15 @@ def _run_record(
     return checks, verdict, detail, verdict != "SKIP" and not skipped
 
 
-def _result(checks: dict[str, dict], module: dict, command: str) -> dict:
+def _result(
+    checks: dict[str, dict], module: dict, command: str, fingerprint: str
+) -> dict:
     return {
         "date": date.today().isoformat(),
         "command": command,
         "tool": "run.py",
         "source_digest": store.source_digest(module),
+        "fingerprint": fingerprint,
         "checks": checks,
     }
 
@@ -389,18 +394,22 @@ def _write_result(
     row: dict | None,
     checks: dict[str, dict],
     command: str,
+    original: Path,
 ) -> None:
+    target = record if record is not None else row
+    module_name = target.get("module") if record is not None else target["name"]
+    module = store.load_module(module_name)
+    fingerprint = store.compute_fingerprint(target, module, original=original)
     if record is not None:
-        module = store.load_module(record["module"])
         store.save_result(
             int(record["address"], 16),
-            _result(checks, module, command),
+            _result(checks, module, command, fingerprint),
             _next_status(record.get("checks", []), checks),
         )
         return
     store.save_module_result(
         row["name"],
-        _result(checks, store.load_module(row["name"]), command),
+        _result(checks, module, command, fingerprint),
         _next_status(row.get("checks", []), checks),
     )
 
@@ -422,19 +431,83 @@ def _write_log(lines: list[str]) -> Path:
     return path
 
 
+def _module_for(
+    record: dict | None, row: dict | None, modules: dict[str, dict]
+) -> dict | None:
+    """The module record of a function record or of a module row."""
+    target = record if record is not None else row
+    if target is None:
+        return None
+    name = target.get("module") if record is not None else target.get("name")
+    if name is None:
+        return None
+    return modules.get(name)
+
+
+def _current_fingerprint(
+    record: dict | None,
+    row: dict | None,
+    modules: dict[str, dict],
+    original: Path,
+) -> str | None:
+    """The fingerprint of one record, or None when its module is missing."""
+    module = _module_for(record, row, modules)
+    target = record if record is not None else row
+    if module is None or target is None:
+        return None
+    return store.compute_fingerprint(target, module, original=original)
+
+
+def _stored_fingerprint(record: dict | None, row: dict | None) -> str | None:
+    target = record if record is not None else row
+    if target is None:
+        return None
+    result = target.get("result")
+    if not result:
+        return None
+    return result.get("fingerprint")
+
+
+def _is_unchanged(
+    record: dict | None, row: dict | None, modules: dict[str, dict], original: Path
+) -> bool:
+    """Tell whether the recorded result matches the current inputs.
+
+    A record without a recorded result or without a stored fingerprint is
+    changed, because it must run at least once to record one.
+    """
+    stored = _stored_fingerprint(record, row)
+    if stored is None:
+        return False
+    fingerprint = _current_fingerprint(record, row, modules, original)
+    return fingerprint is not None and stored == fingerprint
+
+
 def command_run(arguments: argparse.Namespace) -> int:
     records = [
         store.load_record(address) for address in store.candidate_addresses()
     ]
     module_names = sorted(path.stem for path in store.MODULES_DIR.glob("*.json"))
     modules = {name: store.load_module(name) for name in module_names}
-    digests = {
-        name: store.source_digest(module) for name, module in modules.items()
-    }
+
+    def stale_fn(record: dict) -> bool:
+        if not record.get("result"):
+            return False
+        if "address" in record:
+            module = _module_for(record, None, modules)
+        else:
+            module = _module_for(None, record, modules)
+        if module is None:
+            return False
+        fingerprint = store.compute_fingerprint(
+            record, module, original=arguments.original
+        )
+        return store.is_stale(record, fingerprint)
+
     functions, rows = select_records(
         records,
         modules,
-        digests,
+        stale_fn,
         arguments.function,
         arguments.name,
         arguments.module,
@@ -455,6 +528,20 @@ def command_run(arguments: argparse.Namespace) -> int:
     verdicts: list[str] = []
     failed = False
     for index, (record, row) in enumerate(entries, 1):
+        if arguments.skip_unchanged and _is_unchanged(
+            record, row, modules, arguments.original
+        ):
+            verdicts.append("PASS")
+            line = progress_line(
+                index,
+                len(entries),
+                _label(record, row),
+                "PASS",
+                store.UNCHANGED_DETAIL,
+            )
+            print(line)
+            log_lines.append(line)
+            continue
         checks, verdict, detail, write = _run_record(
             record, row, modules, arguments, log_lines
         )
@@ -462,7 +549,9 @@ def command_run(arguments: argparse.Namespace) -> int:
         if verdict == "FAIL":
             failed = True
         if write and not arguments.no_write:
-            _write_result(record, row, checks, _command_text(record, row))
+            _write_result(
+                record, row, checks, _command_text(record, row), arguments.original
+            )
         line = progress_line(
             index, len(entries), _label(record, row), verdict, detail
         )
@@ -531,6 +620,12 @@ def parse_arguments() -> argparse.Namespace:
         "--skip-runtime",
         action="store_true",
         help="skip the behavior checks",
+    )
+    run_parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="report a record whose inputs are unchanged since the previous "
+        "run, and run no check for it",
     )
     run_parser.add_argument(
         "--original",

@@ -70,6 +70,7 @@ hand-entered percentage.
 | `command` | string | The exact command that ran. |
 | `tool` | string | The tool and its version. |
 | `source_digest` | string | `sha256:` over the sorted source files of the module. |
+| `fingerprint` | string | `sha256:` over every input of the declared checks: the module recipe, the module sources, the shared harness sources, the record fields, the participating tools, the original image, and the built artifacts. |
 | `checks` | object | One check result per declared check. |
 
 ### Check Result
@@ -108,7 +109,7 @@ and run recipe, so the framework replaces the twenty shell scripts.
 | `flags` | list[string] | The flags of this file, for example `-of+`. |
 
 The shared harness sources (`chk.asm`, `stack.asm`, `cstart.c`) are constants
-of `harness.py`, not fields of a module record.
+of `store.py`, not fields of a module record.
 
 ### Run Entry
 
@@ -231,7 +232,7 @@ The view derives both values. The store never holds them.
 | Instruction match | `instructions_equal / instructions_total`, as a percentage. |
 | Byte match | `bytes_equal / bytes_total`, as a percentage. |
 | Undefined | `—` when the record has no result or a zero total. |
-| Stale | True when the record has a result and `source_digest` differs from the digest of the current module sources. |
+| Stale | The status page marks a record stale when it has a result and `source_digest` differs from the digest of the current module sources. The runner skips a record only when its `fingerprint` still matches the current inputs. |
 | Stale sort order | Instruction match first, then byte match. |
 
 ## Seed Rules

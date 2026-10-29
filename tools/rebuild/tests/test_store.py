@@ -62,6 +62,7 @@ class StoreTestCase(unittest.TestCase):
             "command": "python3 tools/rebuild/run.py run --function 0x300ec",
             "tool": "run.py",
             "source_digest": "sha256:" + "0" * 64,
+            "fingerprint": "sha256:" + "0" * 64,
             "checks": {
                 name: {"verdict": verdict, "detail": detail}
                 for name, (verdict, detail) in checks.items()
@@ -110,6 +111,52 @@ class StoreTestCase(unittest.TestCase):
 
     def schema(self, name: str) -> dict:
         return json.loads((store.CONTRACTS_DIR / name).read_text())
+
+    def fingerprint_env(
+        self,
+    ) -> tuple[Path, Path, Path, Path, dict, dict]:
+        """A rebuild tree, a record, and a module for the fingerprint tests."""
+        rebuild = self.root / "rebuild"
+        work = self.root / "work"
+        tools = self.root / "tools"
+        original = self.root / "STARTH.EXE"
+        rebuild.mkdir(parents=True, exist_ok=True)
+        work.mkdir(parents=True, exist_ok=True)
+        (tools / "rebuild").mkdir(parents=True, exist_ok=True)
+        for name in ("chk.asm", "stack.asm", "cstart.c"):
+            (rebuild / name).write_bytes(f"shared {name}".encode())
+        (rebuild / "free.c").write_bytes(b"int free_(void *p) { return 0; }")
+        for name in store.TOOL_FILES:
+            (tools / name).write_bytes(f"tool {name}".encode())
+        (work / "free.exe").write_bytes(b"EXE")
+        (work / "free.map").write_bytes(b"MAP")
+        original.write_bytes(b"ORIGINAL")
+        module = {
+            "name": "free",
+            "exe": "free.exe",
+            "map": "free.map",
+            "sources": [{"file": "free.c", "compiler": "wcc386"}],
+        }
+        record = self.record(
+            name="free",
+            module="free",
+            symbol="free_",
+            count=3,
+            checks=["build", "identity"],
+        )
+        return rebuild, work, tools, original, record, module
+
+    def fingerprint_of(
+        self, rebuild: Path, work: Path, tools: Path, original: Path, record: dict, module: dict
+    ) -> str:
+        return store.compute_fingerprint(
+            record,
+            module,
+            rebuild_dir=rebuild,
+            work_dir=work,
+            tools_dir=tools,
+            original=original,
+        )
 
     def test_advance_status_build_passes(self) -> None:
         self.assertEqual(
@@ -168,10 +215,22 @@ class StoreTestCase(unittest.TestCase):
     def test_is_stale_no_result(self) -> None:
         self.assertFalse(store.is_stale(self.record(), "sha256:" + "0" * 64))
 
-    def test_is_stale_digest_change(self) -> None:
-        record = self.record(result={"source_digest": "sha256:" + "1" * 64})
+    def test_is_stale_fingerprint_change(self) -> None:
+        record = self.record(result={"fingerprint": "sha256:" + "1" * 64})
         self.assertFalse(store.is_stale(record, "sha256:" + "1" * 64))
         self.assertTrue(store.is_stale(record, "sha256:" + "2" * 64))
+
+    def test_is_stale_without_stored_fingerprint(self) -> None:
+        record = self.record(result={"source_digest": "sha256:" + "0" * 64})
+        self.assertTrue(store.is_stale(record, "sha256:" + "1" * 64))
+
+    def test_source_is_stale_no_result(self) -> None:
+        self.assertFalse(store.source_is_stale(self.record(), "sha256:" + "0" * 64))
+
+    def test_source_is_stale_digest_change(self) -> None:
+        record = self.record(result={"source_digest": "sha256:" + "1" * 64})
+        self.assertFalse(store.source_is_stale(record, "sha256:" + "1" * 64))
+        self.assertTrue(store.source_is_stale(record, "sha256:" + "2" * 64))
 
     def test_source_digest_changes_with_content(self) -> None:
         (self.root / "one.c").write_bytes(b"one")
@@ -193,6 +252,126 @@ class StoreTestCase(unittest.TestCase):
         pattern = re.compile(r"^sha256:[0-9a-f]{64}$")
         self.assertRegex(first, pattern)
         self.assertRegex(second, pattern)
+
+    def test_fingerprint_is_stable(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        self.assertEqual(
+            self.fingerprint_of(rebuild, work, tools, original, record, module),
+            self.fingerprint_of(rebuild, work, tools, original, record, module),
+        )
+        self.assertRegex(
+            self.fingerprint_of(rebuild, work, tools, original, record, module),
+            re.compile(r"^sha256:[0-9a-f]{64}$"),
+        )
+
+    def test_fingerprint_changes_with_source_content(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        (rebuild / "free.c").write_bytes(b"changed")
+        after = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_changes_with_shared_source(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        (rebuild / "chk.asm").write_bytes(b"changed")
+        after = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_changes_with_recipe(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        changed = {
+            **module,
+            "sources": [
+                {**module["sources"][0], "flags": ["-of+"]}
+            ],
+        }
+        after = self.fingerprint_of(rebuild, work, tools, original, record, changed)
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_changes_with_record_fields(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(
+            before,
+            self.fingerprint_of(
+                rebuild, work, tools, original, {**record, "symbol": "other_"}, module
+            ),
+        )
+        self.assertNotEqual(
+            before,
+            self.fingerprint_of(
+                rebuild, work, tools, original, {**record, "count": 4}, module
+            ),
+        )
+        self.assertNotEqual(
+            before,
+            self.fingerprint_of(
+                rebuild,
+                work,
+                tools,
+                original,
+                {**record, "checks": ["build"]},
+                module,
+            ),
+        )
+
+    def test_fingerprint_changes_with_tool_code(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        (tools / "rebuild/run.py").write_bytes(b"changed")
+        after = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_changes_with_original(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        original.write_bytes(b"changed")
+        after = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_changes_when_artifact_missing(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        (work / "free.exe").unlink()
+        after = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(before, after)
+        (work / "free.map").unlink()
+        again = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertNotEqual(after, again)
+
+    def test_fingerprint_ignores_status_and_result(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        annotated = {
+            **module,
+            "status": "verified",
+            "result": {"date": "2026-10-26", "checks": {}},
+        }
+        self.assertEqual(
+            before,
+            self.fingerprint_of(rebuild, work, tools, original, record, annotated),
+        )
+
+    def test_fingerprint_ignores_documentation_fields(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        documented = {
+            **record,
+            "name": "another name",
+            "role": "Release a block.",
+            "confidence": "inferred",
+            "section": "Program functions",
+            "evidence": [{"kind": "note", "text": "a note"}],
+            "notes": [{"date": "2026-10-26", "text": "a note"}],
+        }
+        self.assertEqual(
+            before,
+            self.fingerprint_of(
+                rebuild, work, tools, original, documented, module
+            ),
+        )
 
     def test_validate_record_address_mismatch(self) -> None:
         path = self.write_record(0x300EC, self.record(address="0x300f0"))

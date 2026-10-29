@@ -110,6 +110,7 @@ screamer_re/
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
@@ -282,6 +283,18 @@ through the store.
 - Compare a regenerated table with the table in
   `docs/reference/inventory.md` before a commit.
 - Confirm every documented command runs before a commit.
+- The verification run (`run.py run --all` and stage 11 of the pipeline) must
+  skip a record whose inputs are unchanged since the previous run.  The input
+  fingerprint of a record covers the module recipe, the module sources, the
+  shared harness sources (`chk.asm`, `stack.asm`, `cstart.c`), the record
+  fields that steer the checks, the participating tools (`run.py`,
+  `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original image, and
+  the built artifacts.  The fingerprint lives in the `result.fingerprint` of
+  the record, `store.compute_fingerprint` computes it, and `run.py
+  --skip-unchanged` uses it.  `pipeline_check.py` verifies the stored
+  fingerprint of an unchanged record itself.  A documentation-only change to a
+  record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`) must
+  not invalidate a result.
 
 ### Dependency Management
 
