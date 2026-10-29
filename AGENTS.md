@@ -35,6 +35,10 @@ original DOS platform first and modern platforms later.
   from Homebrew.  The static cross-check uses radare2 6.2.4 from the Nix
   dev shell.  The decompilation uses Ghidra 12.0.4 from the `ghidra` dev
   shell with the `yetmorecode/ghidra-lx-loader` extension.
+- **Toolchains**: the module rebuild uses the pinned OpenWatcom V2 container
+  harness.  The period Watcom C/C++ 10.0a toolchain (the original build
+  toolchain, abandonware) runs under DOSBox-X and stays alongside the V2
+  harness.  The two harnesses do not replace each other.
 - **Storage**: files on disk.  `work/` holds extracted artifacts and
   generated output.  The project uses no database.
 - **Testing**: the standard-library `unittest` suite covers the pure logic of
@@ -87,9 +91,11 @@ screamer_re/
 │   ├── member_probe.py        # hook the container member open at run time
 │   ├── pipeline_check.py      # run the pipeline end to end
 │   ├── sound_bank.py          # decode the ADLIB- banks, the samples, and the songs
-│   ├── rebuild/               # the rebuild framework and the OpenWatcom V2 harness
+│   ├── rebuild/               # the rebuild framework and the two toolchain harnesses
 │   │   ├── store.py           # the function and module record store
 │   │   ├── harness.py         # the pinned container and DOSBox-X harness
+│   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
+│   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
 │   │   ├── run.py             # run the declared checks and print progress
 │   │   ├── view.py            # render the self-contained status page
 │   │   ├── docs.py            # render the program-map tables
@@ -115,10 +121,18 @@ python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
 ```
 
+The period build uses the Watcom 10.0a toolchain under DOSBox-X (needs
+DOSBox-X, not Docker):
+
+```sh
+python3 tools/rebuild/watcom10_setup.py
+python3 tools/rebuild/harness_dos.py build --module free
+```
+
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -162,8 +176,9 @@ open ~/Documents/Screamer.app
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
       tools/gfx_container.py tools/export_assets.py tools/sound_bank.py
       tools/member_probe.py tools/rebuild/diff_module.py
-      tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/run.py
-      tools/rebuild/view.py tools/rebuild/docs.py
+      tools/rebuild/store.py tools/rebuild/harness.py
+      tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
+      tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
       tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
@@ -320,3 +335,6 @@ supply-chain, and maintenance costs.
   every claim.
 - Record a file format as unknown until a decoder confirms it.
 - Keep `work/` disposable.  Regenerate it from the shipped artifacts.
+- The period Watcom 10.0a toolchain stays alongside the pinned OpenWatcom V2
+  harness.  The two harnesses serve two goals: V2 runs the declared checks, and
+  10.0a targets the byte-for-byte match.  Do not replace one with the other.

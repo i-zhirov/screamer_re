@@ -5046,9 +5046,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   and `eliminate=false` fail the same way.
   Evidence: the four container links.
 - The original build therefore used a compiler and a linker that place and keep the table.  The original Watcom C/C++ 10.x toolchain
-  did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain, which the project does
-  not have.  The run-time table stays as the working form, and the module stays out of the pipeline check stage 11.
-  Evidence: the section above and the two diffs.
+  did so, and the V2 toolchain does not, so a byte-level match for this module needs the original toolchain.  The project now holds the
+  period Watcom 10.0a toolchain (see the last section), which emits the table reference and relocates it, and the rebuilt program runs.
+  The reconstructed source still differs from the original source, so the module stays out of the pipeline check stage 11.
+  Evidence: the section above, the two diffs, and the period toolchain section below.
 - The compiler-table rebuild crashes again.  The V2 compiler does not place the jump table in the code object, so the
   rebuilt `jmp` reads the entry at `CS:0` and reaches offset `1`, and the run prints the DOS/4G general-protection dump
   at `1A0:00000001` with none of the `R` and `D` markers.  The earlier "crash is gone" claim and the
@@ -5258,3 +5259,57 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the full check run in CI instead, and the pre-commit hook still regenerates the
   status page.
   Evidence: the failed pushes and `.github/workflows/pipeline.yml`.
+
+## The period Watcom 10.0a toolchain
+
+- The original build uses the Watcom C/C++ 10.0a toolchain.  The run-time banner of the game,
+  `WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1994.`,
+  is byte-identical to the string in the 10.0a `LIB386/DOS/CLIB3R.LIB`.  The 10.5 run-time banner
+  ends in `1988-1995`, so 10.5 is excluded; the initial 10.0 release stays unverified (see the open
+  question below).
+  Evidence: `grep -a 'WATCOM International Corp. 1988-1994' work/watcom10/WATCOM/LIB386/DOS/CLIB3R.LIB`
+  and the strings of `LIB386/DOS/CLIB3R.LIB` from the 10.5 image (Internet Archive item
+  `Watcom_C_10.5`, image `Watcom_C++_10.5.iso`, SHA-256
+  `e7d8275b71f05c782b69918365c770716bde8f56a08fcdc62fe23dc43d808b9b`).
+- The linked stub is the 10.0a stub.  The first 10832 bytes of `STARTH.EXE` are byte-identical to the
+  10.0a `WSTUB.EXE`, and the stub carries the marker `WATCOM patch level .a`, so the linker is the
+  10.0a linker.
+  Evidence: the byte compare of the two stubs and `strings work/watcom10/WATCOM/BINB/WSTUB.EXE`.
+- The period toolchain is now set up.  The tool `tools/rebuild/watcom10_setup.py` downloads the
+  Watcom C/C++ 10.0a CD-ROM image from the Internet Archive item `watcomcc10.0cd-rom`, verifies the
+  SHA-256 `f51ed9358e7eaf6a0d292268bbbc15832530489dd8239a98f6938c244f1736fc`, and extracts the
+  `WATCOM` tree to `work/watcom10/WATCOM`.  The DOS tools run under DOSBox-X, because they are DOS
+  programs.  The toolchain runs alongside the pinned OpenWatcom V2 container; it does not replace it.
+  Evidence: `python3 tools/rebuild/watcom10_setup.py` and the extracted tree.
+- The build harness `tools/rebuild/harness_dos.py` compiles and links one module with the period
+  toolchain.  The link uses the standard run-time library (the default libs), because that flow
+  produces a runnable DOS/4G executable; the module symbol comes from the linker map.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module free`.
+- The period `free` matches as the V2 build does: 3 of 3 instructions, and the only differing
+  operand is the link-time address of the tail jump.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x300ec
+  --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_`.
+- The period compiler places and relocates the jump table of `error_report`.  The rebuilt code holds
+  `jmp dword ptr cs:[eax*4+0x10]` (the same shape as the original `jmp dword ptr cs:[eax*4+0x918]`),
+  the linker relocates the table address, and the program prints all four markers.  The V2 build
+  emits the same reference without the table and crashes.  The diff still differs, because the
+  reconstructed source holds a switch of 0x13 cases while the original holds one of 0x17.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report`,
+  `python3 tools/rebuild/harness.py run --module error_report`, and the two diffs.
+- The period `-of+ -od` build of `list_destroy` is much closer than the V2 build: 33 of 54 bytes
+  equal (the V2 build: 15 of 54) and 22 of 25 instructions equal.  The register-save count now
+  matches the original: five registers including `ebp`.  Three differences stay: the prologue order,
+  the local offsets, and the epilogue (`lea esp,[ebp-0x10]` and the pop order against `mov esp,ebp`
+  and the original pop order).
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` and the diff.
+- The period `-of+` build of `frame_step` still holds the extra `mov esp,ebp`.  The 10.0a compiler
+  emits it exactly as the V2 compiler does, and the original omits it, so the 10.0a build is not
+  byte-perfect for this case either.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module frame_step` and the diff.
+- Open question: the `-of+` epilogue and the register-save order suggest the original build may use
+  the initial 10.0 release.  The "10.0 Limited Availability" image (dated March 1994) holds such a
+  compiler, but its `WCC386.EXE` does not load under DOSBox-X (the loader reports `Loader read
+  error`), so it stays unverified.  The 10.0a toolchain is the closest verified match.
+  Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, file
+  `watcom-10.0-la/watcom10la.iso` (SHA-256
+  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`) and the failed run.

@@ -25,6 +25,8 @@ jobs:
             tools/member_probe.py tools/rebuild/diff_module.py \
             tools/rebuild/store.py \
             tools/rebuild/harness.py \
+            tools/rebuild/harness_dos.py \
+            tools/rebuild/watcom10_setup.py \
             tools/rebuild/run.py \
             tools/rebuild/view.py \
             tools/rebuild/docs.py \
