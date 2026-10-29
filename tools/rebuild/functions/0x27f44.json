@@ -1,17 +1,47 @@
 {
   "address": "0x27f44",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "compares the frame counter with `FUN_0001fa04` and sets `DAT_00101e04` after 1000"
+      "text": "computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000"
     }
   ],
+  "module": "race_timeout",
   "name": "race_timeout",
   "notes": [],
-  "role": "compares the frame counter with `FUN_0001fa04` and sets `DAT_00101e04` after 1000",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 26,
+        "bytes_total": 56,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27f44",
+    "date": "2026-10-29",
+    "source_digest": "sha256:a588aec16637ace2f4ab771c63aff9c936d406a4c4dac0042e3bb4978a15efcd",
+    "tool": "run.py"
+  },
+  "role": "computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000",
   "section": "object_update_all callees",
   "size": 1,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_timeout_"
 }

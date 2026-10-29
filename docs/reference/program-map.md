@@ -197,7 +197,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | `0x205c4` | `ai_update` | float computation through `0x11c00` and `0x2218c` | inferred |
 | `0x20954` | `opponent_update` | walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180` | inferred |
 | `0x27a34` | `hud_update` | gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set | inferred |
-| `0x27f44` | `race_timeout` | compares the frame counter with `FUN_0001fa04` and sets `DAT_00101e04` after 1000 | derived |
+| `0x27f44` | `race_timeout` | computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000 | derived |
 | `0x81ab0` | `sound_effects_update` | a sound library update in the `0x8xxxx` region | inferred |
 <!-- end generated: object_update_all callees -->
 

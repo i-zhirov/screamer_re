@@ -5516,6 +5516,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module player_update` and
   `work/rebuild/pup_out.txt`.
 
+## The race_timeout module
+
+- `race_timeout` at `0x27f44` holds 16 instructions and 56 bytes: the `edx` save, the frame, the
+  two counter arguments, the frame delta call at `0x1fa04`, the mask, the compare against 1000,
+  the two state stores, and the epilogue.  The function computes the frame delta between
+  `DAT_000107fd` and `DAT_0011d228`, and when the low word of the delta is greater than 1000, it
+  resets the counter to `DAT_000107fd` and sets the timeout flag `DAT_00101e04`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27f44 --count 16`.
+- The rebuild with `-of+` holds 16 instructions and 58 bytes, so the instruction count matches,
+  but the instruction sequences differ: the prologue order recurs, and the V2 compiler stores the
+  timeout flag with an immediate while the original moves the value through `edx`.  The identity
+  check stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x27f44
+  --rebuilt work/rebuild/rtofmod.exe --rebuilt-map work/rebuild/race_timeout.map --rebuilt-symbol
+  race_timeout_`.
+- The run passes.  The harness prints `0`, `1`, and `D`: with the delta 1500 the counter resets
+  and the flag sets, and with the delta 500 both stay.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_timeout` and
+  `work/rebuild/rtof_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

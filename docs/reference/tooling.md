@@ -361,7 +361,9 @@ The files:
 | `menu_enter_main.c` | the `menu_enter` test harness: the state words and the frame stub |
 | `player_update.c` | the rebuilt `player_update` module: the five step calls in call order |
 | `player_update_main.c` | the `player_update` test harness: the five step stubs |
-| `modules/*.json` | the thirty-two module records: the sources, the compiler, the link, and the run expectations |
+| `race_timeout.c` | the rebuilt `race_timeout` module: the frame delta and the timeout flag |
+| `race_timeout_main.c` | the `race_timeout` test harness: the frame delta stub and the state check |
+| `modules/*.json` | the thirty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
