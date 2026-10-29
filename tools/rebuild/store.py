@@ -34,9 +34,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import le  # noqa: E402
 
-FUNCTIONS_DIR = Path(__file__).resolve().parent / "functions"
-MODULES_DIR = Path(__file__).resolve().parent / "modules"
-CONTRACTS_DIR = Path(__file__).resolve().parent / "contracts"
+REBUILD_DIR = Path(__file__).resolve().parent
+FUNCTIONS_DIR = REBUILD_DIR / "functions"
+MODULES_DIR = REBUILD_DIR / "modules"
+CONTRACTS_DIR = REBUILD_DIR / "contracts"
+REPOSITORY_ROOT = REBUILD_DIR.parent.parent
+WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
+TOOLS_DIR = REPOSITORY_ROOT / "tools"
+SHARED_SOURCES = ("chk.asm", "stack.asm", "cstart.c")
+TOOL_FILES = (
+    "rebuild/run.py",
+    "rebuild/harness.py",
+    "rebuild/diff_module.py",
+    "rebuild/store.py",
+    "le.py",
+)
+MISSING = b"<missing>"
+UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
 STATUS_LADDER = (
     "unknown",
     "not_a_function",
@@ -55,7 +69,6 @@ SEED_LIMIT = 10000
 DEFAULT_ORIGINAL = (
     Path.home() / "Documents/Screamer.app/Contents/Resources/game/STARTH.EXE"
 )
-REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
 LE_TOOL = Path(__file__).resolve().parent.parent / "le.py"
 FINDINGS_DOCUMENT = Path("docs/explanation/findings.md")
 ADDRESS_PATTERN = re.compile(r"^0x[0-9a-f]+$")
@@ -170,7 +183,25 @@ def supported_status(record: dict) -> str | None:
     return advance_status(record.get("checks", []), verdicts)
 
 
-def is_stale(record: dict, digest: str) -> bool:
+def is_stale(record: dict, fingerprint: str) -> bool:
+    """Tell whether the recorded result no longer matches the current inputs.
+
+    The fingerprint covers the full input set of the declared checks: the module
+    sources, the shared harness sources, the recipe fields, the record fields,
+    the participating tools, the original image, and the built artifacts.
+    """
+    result = record.get("result")
+    if not result:
+        return False
+    return result.get("fingerprint") != fingerprint
+
+
+def source_is_stale(record: dict, digest: str) -> bool:
+    """Tell whether the recorded result no longer matches the module sources.
+
+    The status page uses the module-source digest, because it needs no game
+    image and no built artifact.  The runner uses the full fingerprint instead.
+    """
     result = record.get("result")
     if not result:
         return False
@@ -178,13 +209,92 @@ def is_stale(record: dict, digest: str) -> bool:
 
 
 def source_digest(module: dict, root: Path | None = None) -> str:
-    base = Path(root) if root is not None else Path(__file__).resolve().parent
+    base = Path(root) if root is not None else REBUILD_DIR
     digest = hashlib.sha256()
     for source in sorted(module.get("sources", []), key=lambda entry: entry["file"]):
         name = source["file"]
         digest.update(name.encode("utf-8"))
         digest.update(b"\x00")
         digest.update((base / name).read_bytes())
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _file_bytes(path: Path) -> bytes:
+    """The file content, or a fixed marker for a missing file.
+
+    A missing original image or a missing built artifact is a changed input, so
+    the fingerprint of a record that once hashed the file differs and the record
+    is stale.  A missing tool or source file makes the marker part of the
+    fingerprint too, so the record is stale rather than an error.
+    """
+    try:
+        return path.read_bytes()
+    except OSError:
+        return MISSING
+
+
+def _record_fields(record: dict) -> bytes:
+    """The canonical bytes of the record fields that steer the declared checks."""
+    fields = {
+        key: record[key]
+        for key in ("address", "symbol", "count", "checks", "module")
+        if key in record
+    }
+    return json.dumps(fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _recipe_fields(module: dict) -> bytes:
+    """The canonical bytes of the module recipe, without the run outcome."""
+    recipe = {
+        key: value
+        for key, value in module.items()
+        if key not in ("status", "result")
+    }
+    return json.dumps(recipe, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def compute_fingerprint(
+    record: dict,
+    module: dict,
+    *,
+    rebuild_dir: Path | None = None,
+    work_dir: Path | None = None,
+    tools_dir: Path | None = None,
+    original: Path | None = None,
+) -> str:
+    """The SHA-256 over every input of the declared checks of one record.
+
+    The inputs are, in order: the module recipe fields, the module sources by
+    file name, the shared harness sources, the record fields that steer the
+    checks, the participating tool sources, the original image, and the built
+    artifacts.  Every file is hashed by content, and a missing file contributes
+    a fixed marker, so a deleted artifact or a moved game makes the record stale
+    instead of raising.
+    """
+    base = Path(rebuild_dir) if rebuild_dir is not None else REBUILD_DIR
+    work = Path(work_dir) if work_dir is not None else WORK_DIR
+    tools = Path(tools_dir) if tools_dir is not None else TOOLS_DIR
+    original_path = Path(original) if original is not None else DEFAULT_ORIGINAL
+    digest = hashlib.sha256()
+
+    def feed(label: str, data: bytes) -> None:
+        digest.update(label.encode("utf-8"))
+        digest.update(b"\x00")
+        digest.update(data)
+
+    feed("recipe", _recipe_fields(module))
+    for source in sorted(module.get("sources", []), key=lambda entry: entry["file"]):
+        name = source["file"]
+        feed(f"source:{name}", _file_bytes(base / name))
+    for name in SHARED_SOURCES:
+        feed(f"shared:{name}", _file_bytes(base / name))
+    feed("record", _record_fields(record))
+    for name in TOOL_FILES:
+        feed(f"tool:{name}", _file_bytes(tools / name))
+    feed("original", _file_bytes(original_path))
+    feed(f"exe:{module['exe']}", _file_bytes(work / module["exe"]))
+    if "map" in module:
+        feed(f"map:{module['map']}", _file_bytes(work / module["map"]))
     return f"sha256:{digest.hexdigest()}"
 
 

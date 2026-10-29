@@ -137,8 +137,11 @@ A person recovers the name and the role of a candidate.
   write the status that `advance_status` gives: a skip or a failed build keeps
   the previous status, and a failed identity gives `rebuilt`.
 - **FR-007**: `run.py --no-write` MUST leave the store unchanged.
-- **FR-008**: A record MUST count as stale when the source digest in its
-  last result differs from the digest of its current sources.
+- **FR-008**: The status page MUST mark a record stale when the source
+  digest in its last result differs from the digest of its current module
+  sources.  The runner MUST count a record as stale when the input fingerprint
+  in its last result differs from the fingerprint of the current inputs, and
+  `run.py --skip-unchanged` MUST run no check for an unchanged record.
 - **FR-009**: `view.py` MUST write one self-contained HTML page. The page
   MUST hold no external reference and MUST need no server.
 - **FR-010**: `docs.py render` MUST write the function tables of
@@ -154,9 +157,10 @@ A person recovers the name and the role of a candidate.
   validation, the seed diff, the selection, the progress line, the summary,
   and the table grouping.
 - **FR-015**: `pipeline_check.py` MUST use the store as the module
-  registry and MUST run `run.py run --all --no-write`. It MUST pass
-  `--skip-runtime` when it skips the run-time stages. It MUST compare the
-  printed verdict of each record with the recorded result, so a known
+  registry and MUST run `run.py run --all --no-write --skip-unchanged`. It MUST
+  pass `--skip-runtime` when it skips the run-time stages. It MUST compare the
+  printed verdict of each record that ran with the recorded result, and it MUST
+  verify the stored fingerprint of an unchanged record itself, so a known
   difference passes and a change fails. It MUST fail on an unexpected skip
   of a named record.
 - **FR-016**: A module record MUST hold its own status, checks, and result
@@ -354,7 +358,7 @@ flowchart LR
 - **Interface**:
   - `run.py run (--function ADDR | --name NAME | --module NAME |
     --status STATUS | --stale | --next N | --all) [--no-write] [--show]
-    [--skip-runtime]`
+    [--skip-runtime] [--skip-unchanged]`
   - The selection runs in address order. Without a selection flag the tool
     prints a clear error and exits 2.
   - `--next N` selects the N records of the smallest `size` among the
@@ -365,6 +369,10 @@ flowchart LR
     `driver`, and the progress line reads `[1/1] driver: PASS (behavior)`.
   - `--skip-runtime` skips the behavior checks, so a run needs Docker only.
     The pipeline check passes it when it skips the run-time stages.
+  - `--skip-unchanged` reports a record whose input fingerprint still matches
+    the fingerprint of its recorded result with `PASS` and runs no check for
+    it. A record without a recorded result or without a stored fingerprint
+    always runs. `--stale` selects the records whose fingerprint differs.
   - The identity check passes when `diff_module.py` exits 0 and the verdict
     line names one of the three matches. The check result holds the verdict
     line in `detail`.

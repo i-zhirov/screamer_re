@@ -11,6 +11,7 @@ import json
 import sys
 import tempfile
 import unittest
+from collections.abc import Callable
 from pathlib import Path
 from unittest import mock
 
@@ -29,14 +30,35 @@ class RunTestCase(unittest.TestCase):
         self.saved_functions = store.FUNCTIONS_DIR
         self.saved_modules = store.MODULES_DIR
         self.saved_log = run.LOG_DIR
+        self.saved_rebuild = store.REBUILD_DIR
+        self.saved_work = store.WORK_DIR
+        self.saved_tools = store.TOOLS_DIR
         store.FUNCTIONS_DIR = self.root / "functions"
         store.MODULES_DIR = self.root / "modules"
         run.LOG_DIR = self.root / "logs"
+        store.REBUILD_DIR = self.root / "rebuild"
+        store.WORK_DIR = self.root / "work"
+        store.TOOLS_DIR = self.root / "tools"
+        self.original = self.root / "STARTH.EXE"
+        self.original.write_bytes(b"ORIGINAL")
+        store.REBUILD_DIR.mkdir(parents=True, exist_ok=True)
+        store.WORK_DIR.mkdir(parents=True, exist_ok=True)
+        (store.TOOLS_DIR / "rebuild").mkdir(parents=True, exist_ok=True)
+        for name in ("chk.asm", "stack.asm", "cstart.c"):
+            (store.REBUILD_DIR / name).write_bytes(f"shared {name}".encode())
+        (store.REBUILD_DIR / "free.c").write_bytes(b"int free_(void *p) { return 0; }")
+        for name in store.TOOL_FILES:
+            (store.TOOLS_DIR / name).write_bytes(f"tool {name}".encode())
+        (store.WORK_DIR / "free.exe").write_bytes(b"EXE")
+        (store.WORK_DIR / "free.map").write_bytes(b"MAP")
 
     def tearDown(self) -> None:
         store.FUNCTIONS_DIR = self.saved_functions
         store.MODULES_DIR = self.saved_modules
         run.LOG_DIR = self.saved_log
+        store.REBUILD_DIR = self.saved_rebuild
+        store.WORK_DIR = self.saved_work
+        store.TOOLS_DIR = self.saved_tools
         self.temporary.cleanup()
 
     def write_record(self, address: int, record: dict) -> Path:
@@ -82,7 +104,7 @@ class RunTestCase(unittest.TestCase):
         self,
         records: list[dict],
         modules: dict[str, dict] | None = None,
-        digests: dict[str, str] | None = None,
+        stale_fn: Callable[[dict], bool] | None = None,
         **overrides: object,
     ) -> tuple[list[dict], list[dict]]:
         arguments: dict = {
@@ -95,7 +117,9 @@ class RunTestCase(unittest.TestCase):
             "all_records": False,
         }
         arguments.update(overrides)
-        return run.select_records(records, modules or {}, digests or {}, **arguments)
+        return run.select_records(
+            records, modules or {}, stale_fn, **arguments
+        )
 
     def test_progress_line_pass(self) -> None:
         self.assertEqual(
@@ -267,22 +291,22 @@ class RunTestCase(unittest.TestCase):
                 name="free",
                 status="named",
                 module="free",
-                result={"source_digest": "sha256:" + "1" * 64},
+                result={"fingerprint": "sha256:" + "1" * 64},
             ),
             self.record(
                 "0x300f0",
                 name="current",
                 status="rebuilt",
                 module="free",
-                result={"source_digest": stale},
+                result={"fingerprint": stale},
             ),
         ]
         modules = {"free": self.module()}
-        digests = {"free": stale}
-        selected, rows = self.select(records, modules, digests, status="named")
+        stale_fn = lambda record: store.is_stale(record, stale)
+        selected, rows = self.select(records, modules, stale_fn, status="named")
         self.assertEqual([record["address"] for record in selected], ["0x300ec"])
         self.assertEqual(rows, [])
-        selected, rows = self.select(records, modules, digests, stale=True)
+        selected, rows = self.select(records, modules, stale_fn, stale=True)
         self.assertEqual([record["address"] for record in selected], ["0x300ec"])
         self.assertEqual(rows, [])
 
@@ -368,6 +392,148 @@ class RunTestCase(unittest.TestCase):
                     code = run.main()
         self.assertEqual(code, 1)
         self.assertEqual(path.read_text(), before)
+
+    def test_skip_unchanged_skips_the_checks(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="verified",
+            module="free",
+            symbol="free_",
+            checks=["build", "identity", "behavior"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": store.source_digest(module),
+            "fingerprint": store.compute_fingerprint(
+                record, module, original=self.original
+            ),
+            "checks": {"build": {"verdict": "pass", "detail": "the module builds"}},
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_build", side_effect=AssertionError("must not build")
+        ):
+            with mock.patch.object(
+                run, "run_identity", side_effect=AssertionError("must not diff")
+            ):
+                with mock.patch.object(
+                    run, "run_behavior", side_effect=AssertionError("must not run")
+                ):
+                    with mock.patch.object(sys, "argv", arguments):
+                        with contextlib.redirect_stdout(output):
+                            code = run.main()
+        self.assertEqual(code, 0)
+        self.assertIn(
+            "PASS (the inputs are unchanged since the previous run)",
+            output.getvalue(),
+        )
+
+    def test_skip_unchanged_runs_a_changed_record(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="rebuilt",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": "sha256:" + "0" * 64,
+            "fingerprint": "sha256:" + "0" * 64,
+            "checks": {
+                "identity": {
+                    "verdict": "pass",
+                    "detail": "the modules are byte-identical",
+                }
+            },
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        passing = (
+            "pass",
+            {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "instructions_equal": 3,
+                "instructions_total": 3,
+                "bytes_equal": 6,
+                "bytes_total": 9,
+            },
+        )
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(run, "run_identity", return_value=passing):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        self.assertIn("PASS (instructions 3/3, bytes 6/9)", output.getvalue())
+
+    def test_skip_unchanged_runs_a_record_without_result(self) -> None:
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="named",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        self.write_record(196844, record)
+        self.write_module("free", self.module())
+        passing = (
+            "pass",
+            {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "instructions_equal": 3,
+                "instructions_total": 3,
+                "bytes_equal": 6,
+                "bytes_total": 9,
+            },
+        )
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(run, "run_identity", return_value=passing):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        self.assertIn("PASS (instructions 3/3, bytes 6/9)", output.getvalue())
 
     def test_missing_original_exits_2(self) -> None:
         record = self.record(

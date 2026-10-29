@@ -108,8 +108,11 @@ nix develop .#ghidra --command sh tools/ghidra/decompile.sh 0x10020 0x2ecf8
 
 The full check runs every stage and reports 57 checks.  Inside the Nix dev
 shell the radare2 stage adds four checks, so the run reports 61 checks.  With
-`--skip-runtime` it reports 42 checks.  CI runs the syntax gate and the unit
-suite on every push and pull request, and the full check on a self-hosted runner.
+`--skip-runtime` it reports 42 checks.  The record run skips a record whose
+input fingerprint still matches its recorded result, so after one full run the
+record run takes only the hashing time for the unchanged modules.  CI runs the
+syntax gate and the unit suite on every push and pull request, and the full
+check on a self-hosted runner.
 The pre-commit hook regenerates the status page; enable the hooks once per clone:
 
 ```sh

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Rebuild module record",
-  "description": "One record per build unit, for example modules/free.json. The shared harness sources (chk.asm, stack.asm, cstart.c) are constants of harness.py, not fields of this record.",
+  "description": "One record per build unit, for example modules/free.json. The shared harness sources (chk.asm, stack.asm, cstart.c) are constants of store.py, not fields of this record.",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "exe", "sources"],
