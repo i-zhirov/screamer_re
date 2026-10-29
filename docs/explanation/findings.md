@@ -3,33 +3,6 @@
 This page records the investigation log.  Each finding carries its evidence.
 The page separates observations from open questions.
 
-## The record run skips records with unchanged inputs
-
-- `run.py run --skip-unchanged` reports a record with `PASS` and the detail
-  `the inputs are unchanged since the previous run`, and runs no check for it,
-  when the fingerprint of the recorded result equals the current input
-  fingerprint.  The fingerprint covers the module recipe, the module sources,
-  the shared harness sources, the record fields, the participating tools, the
-  original image, and the built artifacts.  A record without a recorded result
-  or without a stored fingerprint always runs.
-  Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --no-write
-  --skip-unchanged --original
-  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
-- The first run after the framework change records the fingerprints and runs
-  every module once.  The runs after that skip the unchanged modules and
-  functions, so the record run takes only the hashing time for them.
-  Evidence: the same command on a record that holds a stored fingerprint
-  prints the unchanged detail and runs no build, no diff, and no DOSBox run.
-- `pipeline_check.py` passes `--skip-unchanged` to the record run and verifies
-  the stored fingerprint of an unchanged record itself, so a tampered or a
-  stale store record fails even when the runner skips it.
-  Evidence: `python3 tools/pipeline_check.py --game-dir
-  ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime`.
-- The status page keeps the module-source digest for its stale mark, because
-  it must render without the game image.  The runner uses the full input
-  fingerprint instead.
-  Evidence: `python3 tools/rebuild/view.py html` renders with no game directory.
-
 ## The track data files are LZW text
 
 - The `DATA` files (`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream
@@ -5333,10 +5306,25 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   emits it exactly as the V2 compiler does, and the original omits it, so the 10.0a build is not
   byte-perfect for this case either.
   Evidence: `python3 tools/rebuild/harness_dos.py build --module frame_step` and the diff.
+- The initial 10.0 compiler is verified and runs.  The earlier `Loader read error` was not a
+  property of the compiler: the WPACK unpack writes the output file progressively, and a harness
+  that stops DOSBox-X as soon as the file appears leaves a truncated image (65 KB to 81 KB of
+  517764 bytes), which the loader rejects.  When the unpack runs to completion, the full
+  `WCC386.EXE` loads and prints `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
+  Availability`.  The full toolchain builds and runs a module: the period `free` prints all four
+  markers and the diff holds 3 of 3 instructions.
+  Evidence: the unpack to completion, `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
+  Availability`, the `free` run, and the diff.
 - Open question: the `-of+` epilogue and the register-save order suggest the original build may use
-  the initial 10.0 release.  The "10.0 Limited Availability" image (dated March 1994) holds such a
-  compiler, but its `WCC386.EXE` does not load under DOSBox-X (the loader reports `Loader read
-  error`), so it stays unverified.  The 10.0a toolchain is the closest verified match.
+  a compiler whose code generator omits the redundant `mov esp,ebp` and saves the registers before
+  the frame.  The initial 10.0 release (the "10.0 Limited Availability" build, dated March 1994)
+  was tested and does not explain it: its compiler loads and builds modules, but its `-of+`
+  epilogue adds `mov esp,ebp` exactly as the 10.0a build does, and its `-of+ -od` prologue saves
+  the registers after the frame exactly as the 10.0a build does.  The remaining candidates are the
+  10.5, 10.6, and 11.0 releases: the 10.5 and 11.0 run-time banners end in `1988-1995`, and the
+  10.6 release stays untested, so they are unlikely.  The 10.0a toolchain stays the closest
+  verified match.
   Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, file
   `watcom-10.0-la/watcom10la.iso` (SHA-256
-  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`) and the failed run.
+  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`), the version banner
+  `WATCOM C32 Optimizing Compiler  Version 10.0 Limited Availability`, and the two object diffs.
