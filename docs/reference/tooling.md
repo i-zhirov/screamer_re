@@ -368,7 +368,9 @@ The files:
 | `dpmi_int31_entry_main.c` | the `dpmi_int31_entry` test harness: the register blocks |
 | `object_physics.c` | the rebuilt `object_physics` module: the gated and unconditional physics steps |
 | `object_physics_main.c` | the `object_physics` test harness: the four step stubs and the state gate |
-| `modules/*.json` | the thirty-five module records: the sources, the compiler, the link, and the run expectations |
+| `dpmi_real_int.asm` | the rebuilt `dpmi_real_int` module: the real-mode interrupt setup |
+| `dpmi_real_int_main.c` | the `dpmi_real_int` test harness: the state words and the error path stubs |
+| `modules/*.json` | the thirty-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

@@ -1,0 +1,24 @@
+{
+  "exe": "dprimod.exe",
+  "map": "dpmi_real_int.map",
+  "name": "dpmi_real_int",
+  "run": {
+    "command": "dprimod.exe > dpri_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "dpri_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "dpmi_real_int.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_real_int_main.c"
+    }
+  ]
+}

@@ -550,7 +550,7 @@ the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 | `0x1bb58` | `setup_load` | reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure | observed |
 | `0x1bf38` | `config_load` | reads `screamer.cfg` and sets a flag from a character | observed |
 | `0x1f1a0` | `mouse_init` | calls interrupt 33h and delays | observed |
-| `0x25db0` | `dpmi_real_int` | calls the DOS/4GW real-mode interrupt dispatcher with `0x1500` | derived |
+| `0x25db0` | `dpmi_real_int` | sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path | derived |
 | `0x262a8` | `sound_driver_set` | fills an HMI request block and calls the sound driver | inferred |
 | `0x4c8f0` | `video_buf_load` | loads the `VIDEO_BUF` resource through `resource_get`, stores the pointer in `DAT_00021504` and `DAT_00121528`, and releases the stream on failure | observed |
 | `0x8bdec` | `vesa_set_mode` | allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h | derived |

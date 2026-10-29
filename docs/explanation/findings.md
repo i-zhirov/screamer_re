@@ -5607,6 +5607,25 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_physics` and
   `work/rebuild/obph_out.txt`.
 
+## The dpmi_real_int module
+
+- `dpmi_real_int` at `0x25db0` holds 17 compared instructions and 58 bytes plus the real-mode
+  interrupt path: the state flags, the DOS multiplexer call INT 2Fh AX=1500h, the success return,
+  and the real-mode path through INT 31h with the register block at `DAT_001176c0`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25db0 --count 60`.
+- The module is assembly, because the original is library-style code: it holds `pushad`/`popad`,
+  the direct INT 2Fh and INT 31h calls, and no EBP frame.  The diff reports 17 of 17 compared
+  instructions equal and the verdict `the instruction sequences match; the differing operands are
+  the link-time addresses`, so the identity check passes and the store records `verified`.
+  Evidence: `tools/rebuild/dpmi_real_int.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x25db0
+  --rebuilt work/rebuild/dprimod.exe --rebuilt-map work/rebuild/dpmi_real_int.map
+  --rebuilt-symbol dpmi_real_int_`.
+- The run passes.  The harness prints `V` and `D`: the module runs and sets the state flag
+  `DAT_00116684`.  The error path stubs stand in for the report and the driver calls.
+  Evidence: `python3 tools/rebuild/harness.py run --module dpmi_real_int` and
+  `work/rebuild/dpri_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
