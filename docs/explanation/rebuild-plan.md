@@ -78,7 +78,7 @@ floating-point instructions.
 | `0x19ab0` | `player_update` (done) | 55 | 14 | 5 | 0 |
 | `0x27f44` | `race_timeout` (done) | 56 | 16 | 1 | 0 |
 | `0xd4410` | `dpmi_int31_entry` (done) | 56 | 28 | 1 | 0 |
-| `0x1c810` | `object_physics` | 57 | 18 | 4 | 0 |
+| `0x1c810` | `object_physics` (done) | 57 | 18 | 4 | 0 |
 | `0x25db0` | `dpmi_real_int` | 58 | 17 | 0 | 0 |
 | `0x1c760` | `object_player_input` | 58 | 18 | 3 | 0 |
 | `0x4c810` | `stream_layer_init` | 61 | 19 | 6 | 0 |

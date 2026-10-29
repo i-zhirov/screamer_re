@@ -5560,6 +5560,25 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module dpmi_int31_entry` and
   `work/rebuild/dpiex_out.txt`.
 
+## The object_physics module
+
+- `object_physics` at `0x1c810` holds 18 instructions and 57 bytes: the frame, the argument slot,
+  the guard on the state at `+0x414`, the two gated steps at `0x1df34` and `0x1db38`, the two
+  unconditional steps at `0x1d834` and `0x1e00c`, and the epilogue.  The function runs the
+  physics steps: when the state at `+0x414` is set, the slide step and the gear state run, and
+  then the gear step and the collision step run.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c810 --count 18`.
+- The rebuild with `-of+` holds 17 instructions and 47 bytes, because the V2 compiler keeps the
+  object pointer in a register and drops the argument slot and its reloads.  The identity check
+  stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1c810
+  --rebuilt work/rebuild/obphmod.exe --rebuilt-map work/rebuild/object_physics.map --rebuilt-symbol
+  object_physics_`.
+- The run passes.  The harness prints `0`, `1`, and `D`: with the state cleared only the gear step
+  and the collision step run, and with the state set all four steps run.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_physics` and
+  `work/rebuild/obph_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

@@ -366,7 +366,9 @@ The files:
 | `dpmi_int31_entry.asm` | the rebuilt `dpmi_int31_entry` module: the run-time DPMI INT 31h entry |
 | `dpmi_int31_stub.asm` | the `dpmi_int31_entry` harness dispatcher stub: the register return path |
 | `dpmi_int31_entry_main.c` | the `dpmi_int31_entry` test harness: the register blocks |
-| `modules/*.json` | the thirty-four module records: the sources, the compiler, the link, and the run expectations |
+| `object_physics.c` | the rebuilt `object_physics` module: the gated and unconditional physics steps |
+| `object_physics_main.c` | the `object_physics` test harness: the four step stubs and the state gate |
+| `modules/*.json` | the thirty-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
