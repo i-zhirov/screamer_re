@@ -5317,17 +5317,37 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Availability`, the `free` run, and the diff.
 - Open question: the `-of+` epilogue and the register-save order suggest the original build may use
   a compiler whose code generator omits the redundant `mov esp,ebp` and saves the registers before
-  the frame.  The initial 10.0 release (the "10.0 Limited Availability" build, dated March 1994)
-  was tested and does not explain it: its compiler loads and builds modules, but its `-of+`
-  epilogue adds `mov esp,ebp` exactly as the 10.0a build does, and its `-of+ -od` prologue saves
-  the registers after the frame exactly as the 10.0a build does.  The 10.6 release (dated
-  February 1996) was tested and does not explain it either: its `-of+` epilogue adds
-  `mov esp,ebp`, its `-of+ -od` prologue saves the registers after the frame, and its run-time
-  banner ends in `1988-1995`.  The only untested candidate is the 10.5 release, whose run-time
-  banner also ends in `1988-1995`.  The 10.0a toolchain stays the closest verified match.
+  the frame.  The shipped 10.0, 10.5, and 10.6 releases were tested and do not explain it.  The
+  initial 10.0 release (the "10.0 Limited Availability" build, March 1994) loads and builds
+  modules, but its `-of+` epilogue adds `mov esp,ebp` and its `-of+ -od` prologue saves the
+  registers after the frame, as the 10.0a build does.  The 10.5 release (July 1995) also adds
+  `mov esp,ebp` and saves the registers after the frame.  The archive copy of the 10.5 disc holds
+  a truncated `WCC386.EXE` (65536 bytes), so the test uses the complete `WPP386.EXE` ("WATCOM
+  C++32 Optimizing Compiler Version 10.5") in C mode.  The 10.6 release (February 1996) also adds
+  `mov esp,ebp` and saves the registers after the frame.  The run-time banners of the 10.5 and
+  10.6 releases end in `1988-1995`, so the game does not use them: the game's banner ends in
+  `1988-1994`.  The 10.0a toolchain stays the closest verified match.
   Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, files
   `watcom-10.0-la/watcom10la.iso` (SHA-256
-  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`) and
+  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`),
+  `watcom-10.5/Watcom_C++_10.5.iso` (SHA-256
+  `e7d8275b71f05c782b69918365c770716bde8f56a08fcdc62fe23dc43d808b9b`), and
   `watcom-10.6/WATCOM_C106.iso` (SHA-256
   `18dd98ae9c8d883e2d680bf9e4eda1c4bf78376c5f05e071b55e57a6619aecf2`), the version banners,
   and the object diffs.
+- Remaining candidates: no shipping release in the archive explains the epilogue.  The archive
+  holds 10.0 Limited Availability, 10.0a, 10.5, 10.6, 11.0, 11.0a, and 11.0b.  The 11.0
+  releases are from 1996 or later, and the 11.0b run-time banner ends in `1988-1995`.  The
+  remaining explanation is a private or patched build of 10.0/10.0a, or an unreleased
+  intermediate build between 10.0a (November 1994) and 10.5 (July 1995), whose backend omits the
+  redundant `mov esp,ebp` and saves the registers before the frame.
+- To verify a private or patched build, use the whole executable, not one function.  A private
+  build must still print the 10.0a run-time banner (`1988-1994`) and carry the `WSTUB.EXE` stub
+  (`patch level .a`), so the game itself confirms the link-time artifacts but not the compiler.
+  (1) Build many reconstructed modules with the measured compiler and diff each one against the
+  original.  If the only difference is the `-of+` epilogue and the prologue order, the difference
+  is a systematic backend change.  If the differences are scattered, the reconstruction is
+  incomplete.  (2) Count the `mov esp,ebp` epilogues in the game.  A compiler that omits the
+  instruction shows none; the 10.0a build shows one for each `-of+` function that changes `esp`.
+  (3) Accept the build only with the compiler binary.  A version string or a banner alone does
+  not prove the code generator.
