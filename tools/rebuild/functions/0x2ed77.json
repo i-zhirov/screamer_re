@@ -26,10 +26,10 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
+        "bytes_equal": 22,
         "bytes_total": 54,
         "detail": "the instruction counts differ, 25 and 26",
-        "instructions_equal": 17,
+        "instructions_equal": 19,
         "instructions_total": 25,
         "verdict": "fail"
       }

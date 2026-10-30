@@ -18,10 +18,6 @@
       "compiler": "wcc386",
       "file": "list_destroy.c",
       "flags": [
-        "-of+",
-        "-od"
-      ],
-      "period_flags": [
         "-od"
       ]
     },
