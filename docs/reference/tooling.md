@@ -431,7 +431,7 @@ The files:
 | `pool_init.c` | the rebuilt `pool_init` module: the DPMI 0x0500 query and the page conversions |
 | `pool_init_main.c` | the `pool_init` test harness: the pool record and the two DPMI stubs |
 | `modules/*.json` | the sixty-seven module records: the sources, the compiler, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |
 | `view.py` | render the self-contained status page of the store |
@@ -539,7 +539,10 @@ allocator spills the argument list before it loads the arguments, so the verdict
 The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
 `exit` as its own command and leaves the session.  The `printf` test program carries
 the name `prtfmod.exe`, and its output file carries the name `prtf_out.txt`, because
-DOS keeps only the first eight characters of a file name.
+DOS keeps only the first eight characters of a file name.  The store rejects a
+module whose `run.output` does not fit 8.3, and it rejects a `run.command` whose
+redirect target differs from the output.  The unit suite checks every shipped
+recipe.
 
 ## The compiler options
 

@@ -296,7 +296,9 @@ through the store.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
 - A harness output file name stays within the 8.3 limit (`name.ext`), because
-  DOS truncates a longer name and the run check misses the file.
+  DOS truncates a longer name and the run check misses the file.  The store's
+  module validation rejects a longer name and a redirect target that differs
+  from the output.
 - Compare a regenerated table with the table in
   `docs/reference/inventory.md` before a commit.
 - Confirm every documented command runs before a commit.

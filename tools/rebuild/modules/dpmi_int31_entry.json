@@ -3,12 +3,12 @@
   "map": "dpmi_int31_entry.map",
   "name": "dpmi_int31_entry",
   "run": {
-    "command": "dpiexmod.exe > dpiex_out.txt",
+    "command": "dpiexmod.exe > dpi_out.txt",
     "expect": [
       "V",
       "D"
     ],
-    "output": "dpiex_out.txt",
+    "output": "dpi_out.txt",
     "timeout": 180
   },
   "sources": [

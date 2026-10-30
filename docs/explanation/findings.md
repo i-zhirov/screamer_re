@@ -6408,3 +6408,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the run reported every marker missing while the file held all five.  The
   module now writes `fp_out.txt`.  Keep every harness output name within 8.3.
   Evidence: `ls work/rebuild/FPRTF_OU.TXT` and the first failed run.
+- The audit of every module recipe found one more long output name:
+  `dpiex_out.txt` for `dpmi_int31_entry`; it is now `dpi_out.txt` and the
+  behavior run finds both markers.  The store rejects a module whose
+  `run.output` is not an 8.3 name or whose `run.command` redirects to a
+  different name, and the unit suite checks every shipped recipe.
+  Evidence: `python3 tools/rebuild/store.py check`,
+  `python3 -m unittest discover -s tools/rebuild/tests`, and
+  `python3 tools/rebuild/harness.py run --module dpmi_int31_entry`.
