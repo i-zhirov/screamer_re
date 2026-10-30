@@ -5315,50 +5315,51 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   markers and the diff holds 3 of 3 instructions.
   Evidence: the unpack to completion, `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
   Availability`, the `free` run, and the diff.
-- The differences do not come from compiler options, calling conventions, or pragmas.  A sweep of
-  35 option combinations on the 10.0a compiler gave the same prologue (`push ebp; mov ebp,esp;
-  push <registers>; sub esp,N`) and the same epilogue (`mov esp,ebp; pop ebp; <registers>; ret`)
-  in every case.  The sweep covered the optimization sub-options (`-oa` to `-ox`), `-of+` with
-  `-od`, `-os`, `-ot+`, `-ol+`, the calling conventions (`-4r`, `-3r`), the target models (`-bw`,
-  `-bd`, `-bm`, `-br`, `-bq`, `-bc`), the Windows prologue (`-zW` and `-zW -bw`), and the code and
-  data options (`-zp8`, `-zp1`, `-zu`, `-zA`, `-zr`, `-zk0`, `-zk1`, `-zk2`, `-zi`, `-zc`, `-zg`,
-  `-e`, `-4`).  Five `#pragma aux` variants (custom `parm`, `value`, and `modify` lists on the
-  function and on the callees), `__cdecl` and `__stdcall` arguments, `#pragma pack(8)`,
-  `#pragma off (check_stack)`, and a prototype-less callee also kept the same prologue and
-  epilogue.  The per-module flags in `tools/rebuild/modules/` match the original: `printf` and
-  `free` have no `-of+` and no frame in the original, and `frame_step` and `list_destroy` have
-  `-of+` and a frame.
-  Evidence: the 10.0a `WCC386.EXE` builds of `frame_step.c` and `list_destroy.c` into
-  `work/opt/*.OBJ` and their disassembly.
-- The original code uses one frame layout throughout: the compiler saves the registers before the
-  frame and puts the locals directly below `ebp`.  The text holds 205 prologues of the form
+- The registers-before-frame prologue comes from the `-od` flag without `-of+`, not from a
+  different compiler.  A sweep of 35 option combinations on the 10.0a compiler, four calling
+  conventions, and five `#pragma aux` variants kept the frame-first prologue only because each
+  combination also passed `-of+`.  Plain `-od` gives the original prologue
+  `push ebx; push ecx; push esi; push edi; push ebp; mov ebp,esp; sub esp,0xc` and the original
+  epilogue `mov esp,ebp; pop ebp; pop edi; pop esi; pop ecx; pop ebx; ret`.  The module recipe
+  passes `-of+ -od`; the original used `-od` alone.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` with the recipe
+  flags changed to `-od` gives 25 of 25 instructions equal and 44 of 54 bytes equal (the recipe
+  with `-of+ -od` gives 22 of 25 and 33 of 54).  The only remaining difference is the local slot
+  order: the original stores `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and the temporary at
+  `[ebp-0xc]`, while the 10.0a build stores them at `[ebp-0xc]`, `[ebp-8]`, and `[ebp-4]`.
+  The original text uses this form widely: 205 prologues of the form
   `push ebx; push ecx; [push edx]; push esi; push edi; push ebp; mov ebp,esp` (for example at
-  0x11c00 and 0x1821c), and they store the register arguments at `[ebp-4]` and above.  The same
-  compiler emits `mov esp,ebp` only when the function needs the frame restored; 116 frame
-  functions without locals end in `pop ebp; ret` (for example `frame_step`).  No tested 10.x
-  compiler produces this layout: 10.0 Limited Availability, 10.0a, 10.5, 10.6, and 11.0b all save
-  the registers after the frame and emit `mov esp,ebp` even when the function has no locals.
+  0x11c00 and 0x1821c), and 116 frame functions without locals end in `pop ebp; ret`.
   Evidence: the byte census of `STARTH.EXE` object 1 and the disassembly at 0x11c00, 0x1821c,
   0x2aa84, and 0x2ed77.
-- Open question: the original frame layout (registers saved before the frame, smart epilogue)
-  matches no 10.x release, so the code generator is older than 10.0.  The pre-10.0 releases
-  (8.x and 9.x) stay unverified: the archive holds them only as packed WPK/REX files
-  (`watcom-9.5/discmaster/Sybase - Watcom C++ 9.5b.zip` holds `32/06/WCC386.DOS` as a packed
-  image) and the installer is interactive.  The 10.0a toolchain stays the closest verified match
-  for the link-time artifacts (run-time banner `1988-1994`, `WSTUB.EXE` patch level `.a`), but not
-  for the code.
-- Remaining candidates: a pre-10.0 compiler (8.x or 9.x) for the game code, linked with the 10.0a
-  run-time and stub.  This fits the mixed evidence: the banner and the stub are 10.0a, while the
-  frame layout is older.  A private or patched 10.0/10.0a build is unlikely, because it would have
-  to change the frame generator itself.
-- To verify a candidate build, use the frame layout as the first test and the whole executable as
-  the acceptance test.  (1) Build `list_destroy` and `frame_step` with the candidate compiler.
-  The original saves the registers before the frame, places the locals directly below `ebp`, and
-  omits `mov esp,ebp` when the function has no locals; a 10.x build saves the registers after the
-  frame and adds `mov esp,ebp`.  (2) Census the original text (object 1) for the two prologue
-  forms and the two epilogue forms; one build must produce the same mix.  (3) Build many modules
-  and diff each one against the original.  If the only difference is the frame layout, the
-  candidate is the code generator; if the differences are scattered, the reconstruction is
-  incomplete.  (4) Accept the build only with the compiler binary.  The run-time banner
-  (`1988-1994`) and the `WSTUB.EXE` stub (`patch level .a`) prove the link-time artifacts, not the
-  code generator.
+- The same `-od` prologue appears in every tested pre-10.0 and 10.x compiler, so the layout does
+  not separate the versions.  The 9.5 compiler (extracted non-interactively with
+  `Z:\AUTOTYPE.COM` and the installer `unpack` command; `WCC386.EXE` 627702 bytes, banner
+  `WATCOM C32 Optimizing Compiler  Version 9.5`), the 9.01d compiler (banner `WATCOM C 386
+  Optimizing Compiler  Version 9.01`), and the 8.5a compiler (banner `WATCOM C 386 Optimizing
+  Compiler  Version 8.5a`) all produce the registers-first prologue with `-od` and the frame-first
+  prologue with `-of+`.  The 8.5a `-od` build is frameless.
+  Evidence: the 9.5, 9.01d, and 8.5a builds of `list_destroy.c` and the version banners.
+- The `-of+` epilogue stays conservative in every tested compiler: 8.5a, 9.01d, 9.5, 10.0 Limited
+  Availability, 10.0a, 10.5, 10.6, and 11.0b all emit `mov esp,ebp; pop ebp; ret` for
+  `frame_step`.  The original emits `pop ebp; ret`.  The 9.5 `-of+` build goes further and adds
+  `lea esp,[ebp-0x14]` with five register pops.  So `frame_step` is not explained by the compiler
+  version, the flags, or the pragmas; a different optimization setting or a hand-written routine
+  remains the explanation.
+  Evidence: the 9.5, 9.01d, 8.5a, and 10.0a `-of+` builds of `frame_step.c`.
+- The shared module recipe cannot simply change to `-od`.  The period build improves to 25 of 25
+  instructions, but the V2 declared check drops from 22 of 25 to 19 of 25, because both harnesses
+  read the same recipe.  A per-harness flag set would be needed to use `-od` for the period build
+  and keep `-of+ -od` for the V2 check.
+  Evidence: `python3 tools/rebuild/run.py run --module list_destroy` with the recipe flags
+  changed to `-od` reports `FAIL (instructions 19/25, bytes 22/54)`.
+- To reproduce the original frame, use `-od` without `-of+` for the prologue and the
+  `list_destroy` epilogue: the registers-before-frame layout follows from the flag, not from the
+  version.  The open problem is the `frame_step` epilogue.  (1) Build `list_destroy` with `-od`
+  and diff it; the instructions must match 25 of 25, and the local slot order may stay the only
+  difference.  (2) For `frame_step`, the `-of+` epilogue is conservative in every tested compiler
+  (8.5a to 11.0b), so the original's `pop ebp; ret` needs a setting, a source form, or a
+  hand-written routine that is not yet found.  (3) Census the original text (object 1) for the
+  prologue and epilogue forms after every change; one build must produce the same mix.  (4) Accept
+  a compiler only with its binary.  The run-time banner (`1988-1994`) and the `WSTUB.EXE` stub
+  (`patch level .a`) prove the link-time artifacts, not the code generator.
