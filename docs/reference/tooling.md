@@ -426,7 +426,9 @@ The files:
 | `resource_free_main.c` | the `resource_free` test harness: the record table and the two free stubs |
 | `list_create.c` | the rebuilt `list_create` module: the allocation and the list stores |
 | `list_create_main.c` | the `list_create` test harness: the list record and the three stubs |
-| `modules/*.json` | the sixty-five module records: the sources, the compiler, the link, and the run expectations |
+| `pool_init.c` | the rebuilt `pool_init` module: the DPMI 0x0500 query and the page conversions |
+| `pool_init_main.c` | the `pool_init` test harness: the pool record and the two DPMI stubs |
+| `modules/*.json` | the sixty-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

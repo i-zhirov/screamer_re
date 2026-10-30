@@ -1,17 +1,48 @@
 {
   "address": "0x2f904",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages"
+      "text": "the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0"
     }
   ],
+  "module": "pool_init",
   "name": "pool_init",
   "notes": [],
-  "role": "queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 103,
+        "detail": "the instruction counts differ, 44 and 42",
+        "instructions_equal": 19,
+        "instructions_total": 42,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f904",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:79b83768fb74aa8475616a3498298f5e3b3a7d12f10dde5232380806a0a85c78",
+    "source_digest": "sha256:4b8e664b170495543fdc239f80b1406d8c8270b9b863b8e9f05b6d8534c02b1d",
+    "tool": "run.py"
+  },
+  "role": "queries the free memory through DPMI function 0x0500 and converts the page counts to bytes",
   "section": "The resource layer",
-  "size": 5,
-  "status": "named"
+  "size": 129,
+  "status": "rebuilt",
+  "symbol": "pool_init_"
 }

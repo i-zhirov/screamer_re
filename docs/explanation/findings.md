@@ -6139,6 +6139,33 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module list_create` and
   `work/rebuild/lcr_out.txt`.
 
+## The pool_init module
+
+- `pool_init` at `0x2f904` holds 44 instructions and 129 bytes: the six register saves, the frame,
+  the 0x30-byte local area, the DPMI function 0x0500 setup, the `dpmi_fill_regs` call at `0x4bf23`,
+  the `dpmi_call` call at `0x4bf4b`, the status test, the two page conversions, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f904 --count 44`.
+- The function sets `0x0500` at result word 0 and the result buffer `pool + 0x1c` at word 5.  A
+  non-zero status returns 1.  Otherwise the field at `+0x24` is multiplied by 4096, the field at
+  `+0x3c` is multiplied by 4096 when it is positive and set to 0 otherwise, and the function
+  returns 0.
+  Evidence: the stores at `0x2f915` and `0x2f922`, the status test at `0x2f940`, and the shifts at
+  `0x2f952` and `0x2f962`.
+- The harness stub writes the free-memory fields only when the status is 0.  A stub that writes the
+  fields on failure would overwrite the values the failure test wants to keep.
+  Evidence: `tools/rebuild/pool_init_main.c`.
+- The rebuild with `-of+` holds 42 instructions, because OpenWatcom V2 keeps the pool pointer in a
+  register and lays out the two shifts differently.  The identity check stays open and the store
+  records `rebuilt`.
+  Evidence: `tools/rebuild/pool_init.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f904
+  --rebuilt work/rebuild/pimod.exe --rebuilt-map work/rebuild/pool_init.map
+  --rebuilt-symbol pool_init_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, and `D`: the positive field converts
+  to bytes, the zero field stays 0, and the non-zero status returns 1 and leaves the fields.
+  Evidence: `python3 tools/rebuild/harness.py run --module pool_init` and
+  `work/rebuild/pi_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
