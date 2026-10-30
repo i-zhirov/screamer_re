@@ -29,7 +29,7 @@
       },
       "identity": {
         "bytes_equal": 25,
-        "bytes_total": 48,
+        "bytes_total": 51,
         "detail": "the modules hold the same instructions in a different order",
         "instructions_equal": 16,
         "instructions_total": 16,
@@ -38,7 +38,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
     "date": "2026-10-30",
-    "source_digest": "sha256:46bcd1e6cb4f328ca889b00d0c367737eae223f034cc69c88d81d00914c0ed73",
+    "source_digest": "sha256:ff990c492fca9b60bcc52b2a2ac5e76da9bd652586840528cd087320ad3f610c",
     "tool": "run.py"
   },
   "role": "dispatches on the code through a jump table to one message stub per code",

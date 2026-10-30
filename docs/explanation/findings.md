@@ -5458,3 +5458,37 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
   --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
   --rebuilt-symbol error_report_`.
+
+## The short push encoding and the format-string arguments
+
+- The original passes format-string addresses, not integer offsets.  The offsets `0x44`, `0x6f`,
+  `0x74`, `0xa3`, `0x369`, and `0x383` are data-segment addresses: `0x44` holds "Cannot free
+  memory of a duplicated object!", `0x6f` holds "OK.\n", `0x74` holds "Error while searching for
+  object file: %s.3dx\n", `0x369` holds "General failure: aborted.", and `0x383` holds
+  "Unknown error in engine interface <%s>.\n".  The printer at `0x4bf64` loads the first argument
+  into `eax` and the second into `edx` and calls `0xd429f`, which reads `[eax+0xc]` as a stream
+  status byte, so the call is a `fprintf`-style call with a stream and a format string.
+  Evidence: the object 3 data dump at the linear `0x100044`, the disassembly of `0x4bf64` and
+  `0xd429f`, and the pushed values.
+- The 10.0a compiler shortens an integer constant that fits in a signed byte to `push imm8`
+  (`6A ib`), and no flag disables it.  `-ot`, `-os`, `-or`, `-oa`, `-oc`, `-od`, `-d1`, and
+  `-d1+` all keep `6a 44`, and the 10.0 Limited Availability compiler does the same.
+  Evidence: `work/opt/TY.C` (eleven argument types and casts, all `6a 44`), `H1.C`, `H2.C`, and
+  `H3.C` (the optimization options), `F1.C` and `F2.C` (the debug options), and `G1.C` (the LA
+  build).
+- A relocatable operand restores the long encoding.  A string literal or a symbol address is
+  unknown at compile time, so the compiler emits `push imm32` (`68 id`) with a relocation even
+  when the value is small.  One test file holds `report(stream, "Cannot free memory ...")` as
+  `68 04 00 00 00` (the literal at offset 4), `report(stream, "OK.\n")` as `68 30 00 00 00`, and
+  `report(stream, 0x44)` as `6a 44`.
+  Evidence: `work/opt/SL.C` and `python3 tools/le.py disasm work/opt/SL.EXE 0x10030 --count 8`.
+- The module passes the game's format strings, so the period build emits the long encoding and
+  the diff holds 16 of 16 instructions with the same 52-byte length.  The byte compare rises from
+  29 of 49 to 44 of 52.  The eight differing bytes are the link-time addresses: the jump-table
+  address, the format-string address, the stream address, the printer address, and the `ja`
+  target.  The harness keeps the `message_table` stub as the first argument; the stub stands in
+  for the stream, and the printer stub ignores it.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
