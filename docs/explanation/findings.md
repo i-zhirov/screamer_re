@@ -5364,9 +5364,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `bios_video`, `error_report`, `frame_step`, `list_destroy`, and `memory_available`.  The
   `harness_dos.py` copy step now gives each source an indexed 8.3 name (`S0.C`, `S1.C`, ...)
   before the compile.  The `shutdown` period build links, runs with markers 1 to 8, and diffs
-  12 of 14 instructions; the other period builds keep their diffs.
-  Evidence: `python3 tools/rebuild/harness_dos.py build --module shutdown` and the build of the
-  other five modules with their original diffs.
+  12 of 14 instructions; the other period builds keep their diffs.  The `bios_video` and
+  `error_report` period builds also link, hold `main_` in the map, and print their markers
+  (`F C D` and `R R R D`).
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module shutdown`, `bios_video`, and
+  `error_report`, the clean build logs, the maps, and the run output.
 - To reproduce the original frame, use `-od` without `-of+` for the prologue and the
   `list_destroy` epilogue: the registers-before-frame layout follows from the flag, not from the
   version.  The open problem is the `frame_step` epilogue.  (1) Build `list_destroy` with `-od`
