@@ -80,6 +80,27 @@ class HarnessTestCase(unittest.TestCase):
         )
         self.assertEqual(len(lines), 5)
 
+    def test_build_script_ignores_period_flags(self) -> None:
+        module = self.module(
+            name="list_destroy",
+            exe="ldmod.exe",
+            map="list_destroy.map",
+            sources=[
+                {
+                    "file": "list_destroy.c",
+                    "compiler": "wcc386",
+                    "flags": ["-of+", "-od"],
+                    "period_flags": ["-od"],
+                },
+            ],
+        )
+        lines = harness.build_script(module).splitlines()
+        self.assertIn(
+            "wcc386 -bt=dos -s -zq -of+ -od -fo=/w/list_destroy.obj"
+            " list_destroy.c",
+            lines,
+        )
+
     def test_build_script_source_flags(self) -> None:
         module = self.module(
             name="list_destroy",

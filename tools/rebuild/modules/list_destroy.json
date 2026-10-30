@@ -20,6 +20,9 @@
       "flags": [
         "-of+",
         "-od"
+      ],
+      "period_flags": [
+        "-od"
       ]
     },
     {

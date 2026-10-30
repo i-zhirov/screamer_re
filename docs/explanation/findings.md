@@ -5347,12 +5347,18 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   version, the flags, or the pragmas; a different optimization setting or a hand-written routine
   remains the explanation.
   Evidence: the 9.5, 9.01d, 8.5a, and 10.0a `-of+` builds of `frame_step.c`.
-- The shared module recipe cannot simply change to `-od`.  The period build improves to 25 of 25
-  instructions, but the V2 declared check drops from 22 of 25 to 19 of 25, because both harnesses
-  read the same recipe.  A per-harness flag set would be needed to use `-od` for the period build
-  and keep `-of+ -od` for the V2 check.
-  Evidence: `python3 tools/rebuild/run.py run --module list_destroy` with the recipe flags
-  changed to `-od` reports `FAIL (instructions 19/25, bytes 22/54)`.
+- The module record holds a per-harness flag set: `period_flags` replaces `flags` in
+  `harness_dos.py`, and the V2 harness keeps `flags`.  The period build of `list_destroy` and
+  `memory_available` uses `-od` and matches the original instruction sequence: 25 of 25 and 27 of
+  27 instructions; the verdict is `the modules hold the same instructions in a different order`.
+  The V2 harness keeps `-of+ -od`, so the declared checks stay at their measured values:
+  `list_destroy` 17 of 25 and `memory_available` 24 of 27.  These numbers correct an earlier
+  note: 22 of 25 was the period build of `list_destroy`, not the V2 build.  The V2 build holds 17
+  of 25 with `-of+ -od` and 19 of 25 with `-od`; it cannot reach 22 of 25 for `list_destroy`,
+  because its frame layout differs.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` and
+  `memory_available`, the diffs, `python3 tools/rebuild/harness.py build --module ...`, and
+  `python3 tools/rebuild/run.py run --module ...`.
 - To reproduce the original frame, use `-od` without `-of+` for the prologue and the
   `list_destroy` epilogue: the registers-before-frame layout follows from the flag, not from the
   version.  The open problem is the `frame_step` epilogue.  (1) Build `list_destroy` with `-od`

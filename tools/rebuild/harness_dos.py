@@ -54,7 +54,7 @@ def object_name(index: int) -> str:
 def compile_line(source: dict, index: int) -> str:
     compiler = source["compiler"]
     flags = list(WCC_FLAGS if compiler == "wcc386" else WASM_FLAGS)
-    flags += list(source.get("flags", []))
+    flags += list(source.get("period_flags", source.get("flags", [])))
     return " ".join([compiler, *flags, f"-fo=D:\\{object_name(index)}", source["file"]])
 
 

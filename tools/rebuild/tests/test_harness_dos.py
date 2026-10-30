@@ -56,6 +56,22 @@ class HarnessDosTestCase(unittest.TestCase):
             " list_destroy.c",
         )
 
+    def test_compile_line_period_flags_override(self) -> None:
+        line = harness_dos.compile_line(
+            {
+                "file": "list_destroy.c",
+                "compiler": "wcc386",
+                "flags": ["-of+", "-od"],
+                "period_flags": ["-od"],
+            },
+            0,
+        )
+        self.assertEqual(
+            line,
+            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -od -fo=D:\\O0.OBJ"
+            " list_destroy.c",
+        )
+
     def test_link_rsp_standard_libs(self) -> None:
         text = harness_dos.link_rsp(self.module(), 2)
         self.assertEqual(
