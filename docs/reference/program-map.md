@@ -165,7 +165,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x2807c` | `race_frame` | blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8` | derived |
 | `0x29d08` | `menu_space_init` | loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music | observed |
 | `0x29f80` | `menu_frame` | loads `gfx\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits | observed |
-| `0x2a1b0` | `race_cleanup` | tears the race down and releases the `OPT_PCX` resource | observed |
+| `0x2a1b0` | `race_cleanup` | the original at `0x2a1b0` holds 24 instructions and 97 bytes: the frame, the twelve cleanup calls at `0x264ec`, `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`, `0x2f326`, `0x1f6f8`, and `0x2fe68`, and the epilogue; the two argument call pairs receive the imported data addresses and the last two calls receive the pointer at `DAT_000062ac` and the address `DAT_000062b0` | observed |
 | `0x2aa84` | `frame_step` | calls `default_data_copy`, `joystick_update`, and `frame_timer` | derived |
 | `0x2ff14` | `music_play` | processes a music request record and sets a state from 0 to 6 | derived |
 | `0x8c160` | `memset` | fills `count >> 2` dwords with the value byte replicated | observed |

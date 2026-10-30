@@ -400,7 +400,9 @@ The files:
 | `panel_draw_centered_main.c` | the `panel_draw_centered` test harness: the measure and draw stubs and the three width cases |
 | `runtime_free.asm` | the rebuilt run-time `free` module: the free-list walk and the heap release call |
 | `runtime_free_main.c` | the run-time `free` test harness: the free list and the heap stub with the `[eax] [ebx]` convention |
-| `modules/*.json` | the fifty-two module records: the sources, the compiler, the link, and the run expectations |
+| `race_cleanup.c` | the rebuilt `race_cleanup` module: the twelve cleanup calls and the data addresses |
+| `race_cleanup_main.c` | the `race_cleanup` test harness: the twelve stubs and the call-order check |
+| `modules/*.json` | the fifty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

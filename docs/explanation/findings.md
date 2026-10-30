@@ -5804,6 +5804,30 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module runtime_free` and
   `work/rebuild/rf_out.txt`.
 
+## The race_cleanup module
+
+- `race_cleanup` at `0x2a1b0` holds 24 instructions and 97 bytes: the two register saves, the
+  frame, twelve cleanup calls, and the epilogue.  The calls run in this order: `0x264ec`,
+  `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`,
+  `0x2f326`, `0x1f6f8`, and `0x2fe68`.  The first two calls that take arguments receive the data
+  addresses `0x6530` and `0x6350`, then `0x6530` and `0xfed`; the last two receive the pointer at
+  `0x62ac` and the address `0x62b0`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2a1b0 --count 24`.
+- The call targets have no recovered names, so the rebuilt module names them `cleanup_01` through
+  `cleanup_12` and records the addresses in the source comment.  A later analysis can replace a
+  name without a rebuild change.
+  Evidence: `tools/rebuild/race_cleanup.c`.
+- The rebuild with `-of+` holds 25 instructions, because OpenWatcom V2 adds the extra
+  `lea esp,[ebp-4]` restore and keeps the data addresses in different registers.  The identity
+  check stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2a1b0
+  --rebuilt work/rebuild/rcmod.exe --rebuilt-map work/rebuild/race_cleanup.map
+  --rebuilt-symbol race_cleanup_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the twelve stubs run in the
+  original order, and the argument stubs receive the imported data addresses.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_cleanup` and
+  `work/rebuild/rc_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

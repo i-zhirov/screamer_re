@@ -100,7 +100,7 @@ floating-point instructions.
 | `0x2f205` | `memory_free` (done) | 90 | 33 | 2 | 0 |
 | `0x2e7cc` | `panel_draw_centered` (done) | 93 | 34 | 2 | 0 |
 | `0xd2008` | `free` (done) | 94 | 35 | 1 | 0 |
-| `0x2a1b0` | `race_cleanup` | 97 | 24 | 12 | 0 |
+| `0x2a1b0` | `race_cleanup` (done) | 97 | 24 | 12 | 0 |
 | `0x4d030` | `vis_tab_load` | 101 | 31 | 6 | 0 |
 | `0x1ccd8` | `object_state_save` | 105 | 29 | 0 | 2 |
 | `0x26448` | `input_poll` | 108 | 27 | 2 | 0 |
@@ -192,9 +192,9 @@ floating-point instructions.
 
 ## Position
 
-Fifty-one modules carry a recipe and a result: the twelve Phase A modules, the
+Fifty-two modules carry a recipe and a result: the twelve Phase A modules, the
 eleven modules of the earlier batches, the twenty-three Phase B modules, and the
-first five Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
-`0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, and
-the run-time `free` at `0xd2008`.  The next module is `race_cleanup` at
-`0x2a1b0`.
+first six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+`0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
+run-time `free` at `0xd2008`, and `race_cleanup` at `0x2a1b0`.  The next module
+is `vis_tab_load` at `0x4d030`.
