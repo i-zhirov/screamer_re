@@ -18,10 +18,6 @@
       "compiler": "wcc386",
       "file": "memory_available.c",
       "flags": [
-        "-of+",
-        "-od"
-      ],
-      "period_flags": [
         "-od"
       ]
     },

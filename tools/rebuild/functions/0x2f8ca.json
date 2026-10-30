@@ -26,12 +26,12 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 31,
+        "bytes_equal": 43,
         "bytes_total": 58,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 24,
+        "detail": "the modules hold the same instructions in a different order",
+        "instructions_equal": 27,
         "instructions_total": 27,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
@@ -42,6 +42,6 @@
   "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
   "section": "Program functions",
   "size": 5,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "memory_available_"
 }

@@ -5348,11 +5348,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   remains the explanation.
   Evidence: the 9.5, 9.01d, 8.5a, and 10.0a `-of+` builds of `frame_step.c`.
 - The module record holds a per-harness flag set: `period_flags` replaces `flags` in
-  `harness_dos.py`, and the V2 harness keeps `flags`.  The period build of `list_destroy` and
-  `memory_available` uses `-od` and matches the original instruction sequence: 25 of 25 and 27 of
-  27 instructions; the verdict is `the modules hold the same instructions in a different order`.
-  The V2 harness keeps `-of+ -od`, so the declared checks stay at their measured values:
-  `list_destroy` 17 of 25 and `memory_available` 24 of 27.  These numbers correct an earlier
+  `harness_dos.py`, and the V2 harness keeps `flags`.  The `list_destroy` record keeps
+  `-of+ -od` for the V2 harness and uses `-od` for the period build; the `memory_available`
+  record uses `-od` for both harnesses.  Both period builds match the original instruction
+  sequence: 25 of 25 and 27 of 27 instructions.  The V2 declared checks now hold `list_destroy`
+  17 of 25 and `memory_available` 27 of 27 (status `verified`).  These numbers correct an earlier
   note: 22 of 25 was the period build of `list_destroy`, not the V2 build.  The V2 build holds 17
   of 25 with `-of+ -od` and 19 of 25 with `-od`; it cannot reach 22 of 25 for `list_destroy`,
   because its frame layout differs.
