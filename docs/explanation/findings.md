@@ -6382,3 +6382,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, file
   `watcom-10.0-la/watcom10la.iso` (SHA-256
   `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`) and the failed run.
+
+
+## The run-time stream formatter at 0xd429f
+
+- The function at `0xd429f` is the run-time `__fprtf`, not a DPMI interrupt
+  issuer.  It saves the file flag bits `0x30`, clears them, allocates the buffer
+  through `0xddda9` when the buffer pointer at `+8` is zero, moves the `+0xd`
+  bit 2 to bit 0, formats through `0xd68c0` with the table at `0xc428e`,
+  restores the flags and calls `0xddfa8`, returns `-1` when the `+0xc` bit
+  `0x20` is set, and restores the saved bits.  The callers are `printf` at
+  `0x3009b` and `fprintf` at `0x4bf64`.  The earlier record name
+  `dpmi_issue_int` is a misnomer.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd429f --count 60` and the
+  rebuilt module `tools/rebuild/fprtf.c`.
+- The rebuilt function passes all four behavior paths: the normal path clears
+  and restores the `0x30` bits, the null buffer calls the allocate stub, the
+  `+0xd` bit 2 change calls the restore stub, and the `0x20` flag returns `-1`.
+  The identity stays open: 28 of 52 instructions equal, because the V2 compiler
+  emits a stack frame and a different register order.
+  Evidence: `python3 tools/rebuild/harness.py run --module fprtf` and
+  `python3 tools/rebuild/run.py run --function 0xd429f`.
+- A harness output file name longer than the 8.3 limit is truncated by DOS, so
+  the harness does not find the file.  `fprtf_out.txt` became `FPRTF_OU.TXT`;
+  the run reported every marker missing while the file held all five.  The
+  module now writes `fp_out.txt`.  Keep every harness output name within 8.3.
+  Evidence: `ls work/rebuild/FPRTF_OU.TXT` and the first failed run.

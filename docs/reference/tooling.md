@@ -334,6 +334,8 @@ The files:
 | `dpmi_call_main.c` | the `dpmi_call` test harness: the DPMI entry stub and the result check |
 | `fprintf.c` | the rebuilt `fprintf` module, after the run-time file `bld/clib/streamio/c/fprintf.c` |
 | `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
+| `fprtf.c` | the rebuilt `__fprtf` run-time stream formatter: the file flags, the buffer allocation, the format call, and the restore |
+| `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
 | `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
 | `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
 | `hud_update.c` | the rebuilt `hud_update` module: the three overlay calls, gated on the session state |
@@ -428,7 +430,7 @@ The files:
 | `list_create_main.c` | the `list_create` test harness: the list record and the three stubs |
 | `pool_init.c` | the rebuilt `pool_init` module: the DPMI 0x0500 query and the page conversions |
 | `pool_init_main.c` | the `pool_init` test harness: the pool record and the two DPMI stubs |
-| `modules/*.json` | the sixty-six module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the sixty-seven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

@@ -52,20 +52,21 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: sixty-five named modules are rebuilt with the harness and the
+  progress: sixty-six named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
-  first nineteen Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+  first twenty Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
   `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
   run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
   `0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
   `race_loop` at `0x27700`, `setup_load` at `0x1bb58`, `music_play` at
   `0x2ff14`, `race_state_begin` at `0x294c8`, `net_race_screen` at `0x28ba4`,
   `dos_memory_alloc` at `0x2f0fc`, `video_present` at `0x27ec8`,
-  `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, and `pool_init` at
-  `0x2f904`; twenty-one modules match the original, and forty-four rebuilds hold
-  the recorded difference; the `video_fill` module holds an assembly
+  `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
+  `0x2f904`, and `__fprtf` at `0xd429f`; twenty-one modules match the original,
+  and forty-five rebuilds hold the recorded difference; the `video_fill` module
+  holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
@@ -126,12 +127,12 @@ The plan follows the size order, starting with the smallest functions.
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
     A functions, the whole twenty-three-function Phase B batch, and the first
-    nineteen Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+    twenty Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
     `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`,
     the run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load`
     at `0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
     `race_loop` at `0x27700`, `setup_load` at `0x1bb58`, `music_play` at
     `0x2ff14`, `race_state_begin` at `0x294c8`, `net_race_screen` at `0x28ba4`,
     `dos_memory_alloc` at `0x2f0fc`, `video_present` at `0x27ec8`,
-    `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, and `pool_init` at
-    `0x2f904` are done).
+    `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
+    `0x2f904`, and `__fprtf` at `0xd429f` are done).
