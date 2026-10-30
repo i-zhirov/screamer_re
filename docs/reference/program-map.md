@@ -358,7 +358,7 @@ TABS tables.
 | --- | --- | --- | --- |
 | `0x4c810` | `stream_layer_init` | stores the stream pointer, clears the state word, and runs the six stream layer setup calls | derived |
 | `0x4cf94` | `persptab_load` | opens `TABS\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000` | derived |
-| `0x4d030` | `vis_tab_load` | opens `TABS\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell | derived |
+| `0x4d030` | `vis_tab_load` | the original at `0x4d030` holds 31 instructions and 101 bytes: it opens `TABS\VIS.TAB` with the mode `rb` through `fopen` at `0xc5fe5`, runs the error report, BIOS video, and exit path with the value `0x16` on failure, reads `0x27500` bytes into the buffer at `DAT_0007c1c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245` | derived |
 <!-- end generated: The TABS table loaders -->
 
 The call order is `persptab_load` first and `vis_tab_load` second, so the

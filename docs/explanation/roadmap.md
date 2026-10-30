@@ -52,15 +52,15 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: fifty-two named modules are rebuilt with the harness and the
+  progress: fifty-three named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
-  first six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+  first seven Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
   `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
-  run-time `free` at `0xd2008`, and `race_cleanup` at `0x2a1b0`; twenty-one
-  modules match the original, and thirty-one rebuilds hold the recorded
-  difference; the `video_fill` module holds an assembly
+  run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, and `vis_tab_load`
+  at `0x4d030`; twenty-one modules match the original, and thirty-two rebuilds
+  hold the recorded difference; the `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
@@ -121,6 +121,7 @@ The plan follows the size order, starting with the smallest functions.
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
     A functions, the whole twenty-three-function Phase B batch, and the first
-    six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+    seven Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
     `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`,
-    the run-time `free` at `0xd2008`, and `race_cleanup` at `0x2a1b0` are done).
+    the run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, and
+    `vis_tab_load` at `0x4d030` are done).

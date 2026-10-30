@@ -5828,6 +5828,34 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_cleanup` and
   `work/rebuild/rc_out.txt`.
 
+## The vis_tab_load module
+
+- `vis_tab_load` at `0x4d030` holds 31 instructions and 101 bytes: the three register saves, the
+  frame, the stream slot, the `fopen` call at `0xc5fe5`, the three-call error path, the `fread`
+  call at `0xc607b`, the handle close at `0xc6245`, and the epilogue.  The function opens
+  `TABS\VIS.TAB` with the mode `rb`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d030 --count 31`.
+- The read count is `0x27500`, not the `0x40740` of the earlier note.  The `TABS/VIS.TAB` file is
+  `161024` bytes, which is `0x27500`, and the `fread` call passes that count in `ebx`.  The
+  `TABS/PERSP01.TAB` loader at `0x4cf94` uses `0x40740`, so the earlier note copied the wrong
+  count from that loader.
+  Evidence: the `fread` call at `0x4d081` and the `ls -l` size of `TABS/VIS.TAB`.
+- On failure the function runs `error_report(3)`, `bios_video(0x16)`, and `exit(0x16)`.  The `exit`
+  call does not return, so the read path that follows the three calls is unreachable in the game.
+  The harness stub returns, so the rebuilt module falls through to the read path, and the failure
+  marker checks only the three error calls.
+  Evidence: the three calls at `0x4d056`, `0x4d060`, and `0x4d06a`, and `tools/rebuild/vis_tab_load_main.c`.
+- The rebuild with `-of+` holds 32 instructions, because OpenWatcom V2 saves `esi` and lays out the
+  frame differently.  The identity check stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4d030
+  --rebuilt work/rebuild/vtlmod.exe --rebuilt-map work/rebuild/vis_tab_load.map
+  --rebuilt-symbol vis_tab_load_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the success path opens, reads
+  `0x27500` bytes into the buffer, and closes the handle, and the failure path runs the three error
+  calls.
+  Evidence: `python3 tools/rebuild/harness.py run --module vis_tab_load` and
+  `work/rebuild/vtl_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

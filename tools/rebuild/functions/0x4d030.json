@@ -1,17 +1,48 @@
 {
   "address": "0x4d030",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "opens `TABS\\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell"
+      "text": "the original at `0x4d030` holds 31 instructions and 101 bytes: it opens `TABS\\VIS.TAB` with the mode `rb` through `fopen` at `0xc5fe5`, runs the error report, BIOS video, and exit path with the value `0x16` on failure, reads `0x27500` bytes into the buffer at `DAT_0007c1c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
     }
   ],
+  "module": "vis_tab_load",
   "name": "vis_tab_load",
   "notes": [],
-  "role": "opens `TABS\\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 96,
+        "detail": "the instruction counts differ, 31 and 32",
+        "instructions_equal": 25,
+        "instructions_total": 31,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d030",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:7045ba6a9fdddbbc23a5ff18809e91c4b8a1997060aa9f091d7854160c67da3d",
+    "source_digest": "sha256:015e9ef86a2fd59c02cd8cdb76af5c0b09de43caff21348b30ba869908fd452d",
+    "tool": "run.py"
+  },
+  "role": "opens TABS\\VIS.TAB, reads 0x27500 bytes into the buffer at DAT_0007c1c4, and closes the handle",
   "section": "The TABS table loaders",
-  "size": 3,
-  "status": "named"
+  "size": 101,
+  "status": "rebuilt",
+  "symbol": "vis_tab_load_"
 }
