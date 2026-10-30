@@ -323,7 +323,7 @@ reads back.
 <!-- begin generated: The graphics decoders -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x10ba4` | `graphics_load` | loads a graphics file by name | inferred |
+| `0x10ba4` | `graphics_load` | the original at `0x10ba4` holds 40 instructions and 88 bytes and copies the two name arguments into the object-3 buffers at offsets `0x7f80` and `0x7fb4`, which the loader relocates to linear `0x107f80` and `0x107fb4`; a buffer holds up to `0x33` characters and the terminator | derived |
 | `0x1b5a4` | `pcx_load` | seeks 0x300 bytes before the end, reads the palette, shifts every palette byte right by 2, reads the 128-byte PCX header, and decodes the RLE runs | observed |
 | `0x2a364` | `loading_screen` | clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\graf.dat` | derived |
 <!-- end generated: The graphics decoders -->

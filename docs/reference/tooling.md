@@ -390,7 +390,9 @@ The files:
 | `sound_driver_set_main.c` | the `sound_driver_set` test harness: the request block and the driver stub |
 | `main_invoker.asm` | the rebuilt `main invoker` module: the stack alignment and the startup calls |
 | `main_invoker_main.c` | the `main invoker` test harness: the startup stubs |
-| `modules/*.json` | the forty-six module records: the sources, the compiler, the link, and the run expectations |
+| `graphics_load.c` | the rebuilt `graphics_load` module: the two name copies into the static name buffers |
+| `graphics_load_main.c` | the `graphics_load` test harness: the two name buffers and the two copy checks |
+| `modules/*.json` | the forty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

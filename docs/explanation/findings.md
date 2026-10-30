@@ -5677,6 +5677,38 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The Phase B batch is complete: all twenty-three Phase B functions carry a recipe and a result.
   Evidence: `python3 tools/rebuild/store.py list --module stream_layer_init` and the status page.
 
+## The graphics_load module and the LE fixups
+
+- `graphics_load` at `0x10ba4` holds 40 instructions and 88 bytes: the register saves, the frame,
+  the two argument slots, two inline two-byte string copy loops, and the epilogue.  The function
+  copies the first name argument into the buffer at object-3 offset `0x7f80` and the second name
+  argument into the buffer at object-3 offset `0x7fb4`.  The two buffers are `0x34` bytes apart, so
+  each holds a path of up to `0x33` characters and the terminator.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10ba4 --count 40`.
+- Observation: the raw instruction operands are `0x7f80` and `0x7fb4`, but the run-time addresses
+  are `0x107f80` and `0x107fb4`.  Object 3 has base `0x100000`, and the LE fixup records relocate
+  the two operands by that base.  Object 3 has seven file-backed pages (`0x7000` bytes), so both
+  destinations are uninitialized data below the stack at object offset `0x472c0`.
+  Evidence: `python3 tools/le.py info STARTH.EXE` (object 3 base `0x100000`, size `0x472c0`, seven
+  pages) and the two raw operands in the disassembly.
+- The rebuilt source uses `strcpy` with the `-oi` option.  The option expands the call into the same
+  two-byte copy loop as the original.  The frame differs: OpenWatcom V2 saves the registers after
+  the frame and keeps the arguments in registers, while the original compiler saves the registers
+  before the frame and spills the arguments to the two slots.  The rebuild holds 37 instructions
+  and the identity check stays open, so the store records `rebuilt`.
+  Evidence: `tools/rebuild/graphics_load.c`, `tools/rebuild/modules/graphics_load.json`, and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10ba4
+  --rebuilt work/rebuild/glmod.exe --rebuilt-map work/rebuild/graphics_load.map
+  --rebuilt-symbol graphics_load_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: both calls store both names,
+  and the second call stores the empty first name and the one-character second name.  The run
+  exits 1, because the open identity check is a failed check and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/harness.py run --module graphics_load`,
+  `work/rebuild/gl_out.txt`, and `python3 tools/rebuild/run.py run --function 0x10ba4`.
+- The record size was `2`, because the candidate scan treats the `push ebp` at `0x10ba6` as a
+  second function start.  The record now holds the measured size `88`.
+  Evidence: the record and `python3 tools/le.py near STARTH.EXE 0x10ba6`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

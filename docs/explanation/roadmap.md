@@ -52,12 +52,13 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: forty-six named modules are rebuilt with the harness and the
+  progress: forty-seven named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
-  twelve Phase A modules, and the twenty-three Phase B modules from
-  `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`; twenty
-  modules match the original, and twenty-six rebuilds hold the recorded
-  difference; the `video_fill` module holds an assembly
+  twelve Phase A modules, the twenty-three Phase B modules from
+  `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
+  first Phase C module `graphics_load` at `0x10ba4`; twenty modules match the
+  original, and twenty-seven rebuilds hold the recorded difference; the
+  `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
@@ -117,5 +118,5 @@ The plan follows the size order, starting with the smallest functions.
     original byte for byte, the first exact match; the behavior run needs more work).
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
-    A functions and the whole twenty-three-function Phase B batch are done,
-    and Phase C starts with `graphics_load` at `0x10ba4`).
+    A functions, the whole twenty-three-function Phase B batch, and the first
+    Phase C module `graphics_load` at `0x10ba4` are done).
