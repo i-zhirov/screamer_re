@@ -1,17 +1,48 @@
 {
   "address": "0x1ccd8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418`"
+      "text": "the original at `0x1ccd8` holds 29 instructions and 105 bytes: it copies the four dword fields at `+0x454`, `+0x45c`, `+0x498`, and `+0x4a0` into `+0x160`, `+0x168`, `+0x16c`, and `+0x174`, and the float at `+0x418` into `+0x178`"
     }
   ],
+  "module": "object_state_save",
   "name": "object_state_save",
   "notes": [],
-  "role": "saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 70,
+        "detail": "the instruction counts differ, 29 and 17",
+        "instructions_equal": 10,
+        "instructions_total": 17,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ccd8",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:b649c5958965e047c10c28bbf0b7c1f918902558ffdd11e7eae0b4f41f33231b",
+    "source_digest": "sha256:fb522b2c124b79f67514e5e446b8e7c0136305e729d1e5389ef10ac06d87bd3f",
+    "tool": "run.py"
+  },
+  "role": "saves the previous object position from the four dword fields and the float field",
   "section": "object_transform callees",
-  "size": 1,
-  "status": "named"
+  "size": 105,
+  "status": "rebuilt",
+  "symbol": "object_state_save_"
 }

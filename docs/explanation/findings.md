@@ -5856,6 +5856,27 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module vis_tab_load` and
   `work/rebuild/vtl_out.txt`.
 
+## The object_state_save module
+
+- `object_state_save` at `0x1ccd8` holds 29 instructions and 105 bytes: the two register saves, the
+  frame, the object slot, the four dword copies, the float copy, and the epilogue.  It copies the
+  fields at `+0x454`, `+0x45c`, `+0x498`, and `+0x4a0` into `+0x160`, `+0x168`, `+0x16c`, and
+  `+0x174`, and the float at `+0x418` into `+0x178`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ccd8 --count 29`.
+- The rebuild with `-of+` holds 17 instructions, because OpenWatcom V2 keeps the object pointer in
+  a register and drops the repeated loads from the object slot.  The identity check stays open and
+  the store records `rebuilt`.
+  Evidence: `tools/rebuild/object_state_save.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1ccd8
+  --rebuilt work/rebuild/ossmod.exe --rebuilt-map work/rebuild/object_state_save.map
+  --rebuilt-symbol object_state_save_`.
+- The module uses the FPU for the float copy, so the recipe links the shared `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/object_state_save.json` and the build.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the four dword fields hold the
+  four source values, and the float field holds the source bit pattern.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_state_save` and
+  `work/rebuild/oss_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

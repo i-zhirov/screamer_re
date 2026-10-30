@@ -250,7 +250,7 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 <!-- begin generated: object_transform callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x1ccd8` | `object_state_save` | saves the previous position at `+0x160`, `+0x168`, `+0x16c`, `+0x174`, and `+0x178` from `+0x454`, `+0x45c`, `+0x498`, `+0x4a0`, and `+0x418` | derived |
+| `0x1ccd8` | `object_state_save` | the original at `0x1ccd8` holds 29 instructions and 105 bytes: it copies the four dword fields at `+0x454`, `+0x45c`, `+0x498`, and `+0x4a0` into `+0x160`, `+0x168`, `+0x16c`, and `+0x174`, and the float at `+0x418` into `+0x178` | derived |
 | `0x1d6bc` | `object_integrate` | integrates the position at `+0x454` and `+0x45c` from the float velocity at `+0x460` and `+0x468` and the factor at `+0x450` with the frame delta `DAT_00118e04`, damps the factor with `DAT_0010cf08 + 0x13c`, and clamps it at 0 | derived |
 <!-- end generated: object_transform callees -->
 

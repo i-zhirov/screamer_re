@@ -1,0 +1,32 @@
+{
+  "exe": "ossmod.exe",
+  "map": "object_state_save.map",
+  "name": "object_state_save",
+  "run": {
+    "command": "ossmod.exe > oss_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "oss_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_state_save.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_state_save_main.c"
+    }
+  ]
+}
