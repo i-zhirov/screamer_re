@@ -274,7 +274,7 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 | `0x289bc` | `overlay_queue_update` | walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4 | inferred |
 | `0x28b5c` | `menu_enter` | saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value | derived |
 | `0x28ba4` | `net_race_screen` | the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `menu_space_init`, `0x2e82c`, and `0x29bac` | inferred |
-| `0x294c8` | `race_state_begin` | sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
+| `0x294c8` | `race_state_begin` | the original at `0x294c8` holds 35 instructions and 117 bytes: it stores the constants 2.0, 0.6, 1.0, 20000, and -12.566371 at `DAT_00120378`, `DAT_00120380`, `DAT_0012037c`, `DAT_001203b0`, and `DAT_0012038c`, sets `DAT_0011fac8` to -1, copies the old state into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1 | derived |
 | `0x2dddc` | `net_player_add` | takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it | inferred |
 <!-- end generated: overlay_dispatch callees -->
 

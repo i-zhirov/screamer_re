@@ -414,7 +414,9 @@ The files:
 | `setup_load_main.c` | the `setup_load` test harness: the format stub and the file stubs |
 | `music_play.c` | the rebuilt `music_play` module: the request state machine and the three calls |
 | `music_play_main.c` | the `music_play` test harness: the four state paths and the three stubs |
-| `modules/*.json` | the fifty-nine module records: the sources, the compiler, the link, and the run expectations |
+| `race_state_begin.c` | the rebuilt `race_state_begin` module: the five constants and the state copies |
+| `race_state_begin_main.c` | the `race_state_begin` test harness: the nine state words and the bit-pattern checks |
+| `modules/*.json` | the sixty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

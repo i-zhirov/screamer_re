@@ -5982,6 +5982,33 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the ready track without the select word starts only.
   Evidence: `python3 tools/rebuild/harness.py run --module music_play` and `work/rebuild/mp_out.txt`.
 
+## The race_state_begin module
+
+- `race_state_begin` at `0x294c8` holds 35 instructions and 117 bytes: the six register saves, the
+  frame, the parameter slot, the six constant stores, the saved-state copy, the parameter store,
+  the state store, and the epilogue.  The function sets the race constants 2.0, 0.6, 1.0, 20000,
+  and -12.566371, sets the previous-state word to -1, copies the old state into the saved-state
+  word, stores the parameter in the race parameter word, and sets the state to 1.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x294c8 --count 35`.
+- The float constants travel as the immediate bit patterns `0x40000000`, `0x3f19999a`,
+  `0x3f800000`, and `0xc1490fdb`.  The last value is -4π rounded to a float.  The module uses the
+  literal `-12.566370964f`, which builds to the same bit pattern.
+  Evidence: the immediates at `0x294d6` and the behavior check.
+- The rebuild with `-of+` holds 17 instructions, because OpenWatcom V2 stores the immediates
+  directly and does not load them into the six registers first.  The identity check stays open and
+  the store records `rebuilt`.
+  Evidence: `tools/rebuild/race_state_begin.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x294c8
+  --rebuilt work/rebuild/rsbmod.exe --rebuilt-map work/rebuild/race_state_begin.map
+  --rebuilt-symbol race_state_begin_`.
+- The module uses the FPU support, so the recipe links the shared `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/race_state_begin.json` and the link errors.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the five constants hold the
+  original bit patterns, the saved state holds the old state 7, the parameter holds 0x1234, and the
+  state is 1.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_state_begin` and
+  `work/rebuild/rsb_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
