@@ -1,0 +1,28 @@
+{
+  "exe": "scmod.exe",
+  "map": "stream_close.map",
+  "name": "stream_close",
+  "run": {
+    "command": "scmod.exe > sc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "sc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_close.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_close_main.c"
+    }
+  ]
+}

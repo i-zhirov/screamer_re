@@ -96,7 +96,7 @@ floating-point instructions.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x10ba4` | `graphics_load` (done) | 88 | 40 | 0 | 0 |
-| `0x4c38d` | `stream_close` | 89 | 34 | 3 | 0 |
+| `0x4c38d` | `stream_close` (done) | 89 | 34 | 3 | 0 |
 | `0x2f205` | `memory_free` | 90 | 33 | 2 | 0 |
 | `0x2e7cc` | `panel_draw_centered` | 93 | 34 | 2 | 0 |
 | `0xd2008` | `free` | 94 | 35 | 1 | 0 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-Forty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Forty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
-the first Phase C module `graphics_load` at `0x10ba4`.  The next module is
-`stream_close` at `0x4c38d`.
+the first two Phase C modules `graphics_load` at `0x10ba4` and `stream_close` at
+`0x4c38d`.  The next module is `memory_free` at `0x2f205`.

@@ -392,7 +392,9 @@ The files:
 | `main_invoker_main.c` | the `main invoker` test harness: the startup stubs |
 | `graphics_load.c` | the rebuilt `graphics_load` module: the two name copies into the static name buffers |
 | `graphics_load_main.c` | the `graphics_load` test harness: the two name buffers and the two copy checks |
-| `modules/*.json` | the forty-eight module records: the sources, the compiler, the link, and the run expectations |
+| `stream_close.c` | the rebuilt `stream_close` module: the two buffer releases and the handle close |
+| `stream_close_main.c` | the `stream_close` test harness: the stream record and the three tracking stubs |
+| `modules/*.json` | the forty-nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

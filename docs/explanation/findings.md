@@ -5709,6 +5709,26 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   second function start.  The record now holds the measured size `88`.
   Evidence: the record and `python3 tools/le.py near STARTH.EXE 0x10ba6`.
 
+## The stream_close module
+
+- `stream_close` at `0x4c38d` holds 34 instructions and 89 bytes: the six register saves, the
+  frame, the stream slot, the buffer at `stream + 0x1c` released through the run-time `free` at
+  `0xd2008`, the buffer at `stream + 0xb0` released through the wrapper `free` at `0x300ec` when
+  the flag at `stream + 0x10` is set, the handle at `stream + 0x00` closed through `0xc6245`, and
+  the zero return.  The function is the counterpart of `fopen`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c38d --count 34`.
+- The rebuild with `-of+` holds 19 instructions, because OpenWatcom V2 keeps the stream pointer in
+  `edx` and drops the repeated loads from the stream slot.  The identity check stays open and the
+  store records `rebuilt`.
+  Evidence: `tools/rebuild/stream_close.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4c38d
+  --rebuilt work/rebuild/scmod.exe --rebuilt-map work/rebuild/stream_close.map
+  --rebuilt-symbol stream_close_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the first call releases both
+  buffers and closes the handle, and the second call releases no buffer and closes the handle.
+  Evidence: `python3 tools/rebuild/harness.py run --module stream_close` and
+  `work/rebuild/sc_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
