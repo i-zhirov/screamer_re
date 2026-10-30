@@ -5509,10 +5509,15 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   so the value is a pointer, but it travels in `eax` as `mov eax,imm32`, which is the same
   encoding for an integer and a relocatable address, so the byte compare cannot separate them.
   Evidence: the two disassemblies.
-- The game holds twelve further print sites, in the two functions at `0x2edb0` and `0x4bf85`,
-  and each already uses the relocatable form `mov eax,<address>; push eax` for the format string
-  and the stream `0x2fd2`.  Neither function is a record yet, and neither needs the fix.
-  Evidence: the caller scan of the printer `0x4bf64` (35 calls, 21 inside `error_report`) and
-  the disassembly at `0x2eddf` and `0x4bfbd`.
+- The game holds twelve further print sites, in two functions that start at `0x2edad` and
+  `0x4bf88` (the register-save prologue begins before the `push ebp` that the prologue scan
+  matches).  Each site already uses the relocatable form `mov eax,<address>; push eax` for the
+  format string and the stream `0x2fd2`, so neither needs the fix.  Both functions now hold a
+  named record: `memory_error_report` at `0x2edad` prints the memory-handler errors and reads
+  the status at `+0xc`, and `file_error_report` at `0x4bf88` prints the engine file errors and
+  reads the status at `+0xac`.  Every print site of the printer `0x4bf64` is covered by a
+  record.
+  Evidence: the caller scan of the printer `0x4bf64` (35 calls, 21 inside `error_report`), the
+  disassembly at `0x2eddf` and `0x4bfbd`, and the rows of `docs/reference/program-map.md`.
 - Result: no module besides `error_report` pushes a small integer constant, and no module still
   pushes one where a relocatable pointer is expected.

@@ -1,0 +1,18 @@
+{
+  "address": "0x4bf88",
+  "checks": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the six bodies print the engine file strings at 0x1608, 0x1622, 0x1644, 0x1653, and 0x1685; the dispatch compares the status at [arg+0xac] at 0x4c060"
+    }
+  ],
+  "name": "file_error_report",
+  "notes": [],
+  "object_offset": "0x3bf88",
+  "role": "reports the engine file errors and the interface name from +0x78 through the printer at 0x4bf64",
+  "section": "The resource layer",
+  "size": 5,
+  "status": "named"
+}

@@ -476,7 +476,7 @@ services.
 <!-- begin generated: The resource layer -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls the DPMI helper `0x4bf64` for each case | inferred |
+| `0x2edad` | `memory_error_report` | the six bodies print the memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2; the dispatch compares the status at [arg+0xc] at 0x2ee84 | observed |
 | `0x2efc2` | `resource_read` | reads the current record and caches it through `0x2f062` | inferred |
 | `0x2f0fc` | `dos_memory_alloc` | calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address | derived |
 | `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
@@ -486,6 +486,7 @@ services.
 | `0x2f904` | `pool_init` | queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages | inferred |
 | `0x4bf23` | `dpmi_fill_regs` | fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS | observed |
 | `0x4bf4b` | `dpmi_call` | calls the interrupt through `0xd4410` and returns the value from EBX | inferred |
+| `0x4bf88` | `file_error_report` | the six bodies print the engine file strings at 0x1608, 0x1622, 0x1644, 0x1653, and 0x1685; the dispatch compares the status at [arg+0xac] at 0x4c060 | observed |
 <!-- end generated: The resource layer -->
 
 `list_create` allocates `count * 0x1c` bytes.  This confirms the 28-byte record
