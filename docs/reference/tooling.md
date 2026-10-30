@@ -418,7 +418,9 @@ The files:
 | `race_state_begin_main.c` | the `race_state_begin` test harness: the nine state words and the bit-pattern checks |
 | `net_race_screen.c` | the rebuilt `net_race_screen` dispatcher: the menu tables and the case switch |
 | `net_race_screen_main.c` | the `net_race_screen` test harness: the menu record and the eighteen step stubs |
-| `modules/*.json` | the sixty-one module records: the sources, the compiler, the link, and the run expectations |
+| `dos_memory_alloc.c` | the rebuilt `dos_memory_alloc` module: the DPMI 0x0100 request and the selector store |
+| `dos_memory_alloc_main.c` | the `dos_memory_alloc` test harness: the two DPMI stubs and the request capture |
+| `modules/*.json` | the sixty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

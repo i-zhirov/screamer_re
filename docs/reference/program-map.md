@@ -477,7 +477,7 @@ services.
 | --- | --- | --- | --- |
 | `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case | inferred |
 | `0x2efc2` | `resource_read` | reads the current record and caches it through `0x2f062` | inferred |
-| `0x2f0fc` | `dos_memory_alloc` | calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address | derived |
+| `0x2f0fc` | `dos_memory_alloc` | the original at `0x2f0fc` holds 41 instructions and 118 bytes: it sets `0x0100` at result word 0, sets the paragraph count `(size >> 4) + 1` at word 1, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status, and otherwise returns the segment word times 16 and stores the selector word at the third argument | derived |
 | `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
 | `0x2f205` | `memory_free` | the original at `0x2f205` holds 33 instructions and 90 bytes: it builds the local register block with `0x0502` at offset 0 and the address words at offsets `0x10` and `0x14`, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, and returns the status at block offset `0x18` | derived |
 | `0x2f25f` | `resource_find` | walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066` | derived |

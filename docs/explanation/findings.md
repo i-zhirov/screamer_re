@@ -6034,6 +6034,36 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   entry runs the overlay, each known id runs its case, and the unknown id runs no case.
   Evidence: `work/rebuild/nrs_out.txt`.
 
+## The dos_memory_alloc module
+
+- `dos_memory_alloc` at `0x2f0fc` holds 41 instructions and 118 bytes: the four register saves, the
+  frame, the 0x3c-byte local area, the DPMI function 0x0100 setup, the `dpmi_fill_regs` call at
+  `0x4bf23`, the `dpmi_call` call at `0x4bf4b`, the status test, the segment shift, the selector
+  store, and the epilogue.  The function allocates a DOS memory block through DPMI.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f0fc --count 41`.
+- The paragraph count is `(size >> 4) + 1`.  The function writes `0x0100` to result word 0 and the
+  paragraph count to word 1.  After the call it returns 0 when word 6 is not zero.  Otherwise it
+  returns the segment in word 0 times 16 and stores the selector in word 3 at the third argument.
+  The first argument is stored and never used.
+  Evidence: the stores at `0x2f111` and `0x2f11f` and the reads at `0x2f13d`, `0x2f14c`, and
+  `0x2f155`.
+- The result block and the request block are the same local area.  The rebuild therefore captures
+  the two request words in the `dpmi_call` stub before the stub writes the result.  A harness that
+  reads the block after the call sees the result word in place of the request word.
+  Evidence: `tools/rebuild/dos_memory_alloc_main.c`.
+- The rebuild with `-of+` holds 32 instructions, because OpenWatcom V2 keeps the block address in
+  registers and folds the repeated loads.  The identity check stays open and the store records
+  `rebuilt`.
+  Evidence: `tools/rebuild/dos_memory_alloc.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f0fc
+  --rebuilt work/rebuild/dmamod.exe --rebuilt-map work/rebuild/dos_memory_alloc.map
+  --rebuilt-symbol dos_memory_alloc_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the success path requests 0x13
+  paragraphs, returns the segment times 16, and stores the selector; the non-zero status returns 0
+  and leaves the selector.
+  Evidence: `python3 tools/rebuild/harness.py run --module dos_memory_alloc` and
+  `work/rebuild/dma_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
