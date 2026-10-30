@@ -420,7 +420,9 @@ The files:
 | `net_race_screen_main.c` | the `net_race_screen` test harness: the menu record and the eighteen step stubs |
 | `dos_memory_alloc.c` | the rebuilt `dos_memory_alloc` module: the DPMI 0x0100 request and the selector store |
 | `dos_memory_alloc_main.c` | the `dos_memory_alloc` test harness: the two DPMI stubs and the request capture |
-| `modules/*.json` | the sixty-two module records: the sources, the compiler, the link, and the run expectations |
+| `video_present.c` | the rebuilt `video_present` module: the palette scale and offset mapping |
+| `video_present_main.c` | the `video_present` test harness: the palette stub and the three scale cases |
+| `modules/*.json` | the sixty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

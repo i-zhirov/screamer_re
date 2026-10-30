@@ -6064,6 +6064,34 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module dos_memory_alloc` and
   `work/rebuild/dma_out.txt`.
 
+## The video_present module
+
+- `video_present` at `0x27ec8` holds 40 instructions and 122 bytes: the three register saves, the
+  frame, the 0x310-byte local area, the loop over the 0x300 source bytes from `0xcf5c` to `0xd25c`,
+  the scale and offset arithmetic, the `0x4d9f4` rounding helper, the `palette_set` call at
+  `0x81a05`, and the `ret 8` epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27ec8 --count 40`.
+- The function maps each source byte with `(byte - offset) * scale + offset`, rounds it, stores it
+  in the local palette, and passes the palette to `palette_set`.  The scale at `[ebp + 0x10]` and
+  the offset at `[ebp + 0x14]` arrive on the stack; the `ret 8` epilogue pops them.
+  Evidence: the stack reads at `0x27f0f` and `0x27f12` and the `ret 8` at `0x27f3f`.
+- The source bytes are unsigned.  The harness fills the second case with the even values `2 * i`,
+  so the half scale produces exact integers and the check does not depend on the rounding mode.  The
+  value at index `0xff` is `0xfe`, so the half scale gives `0x7f`, not `0xff`.
+  Evidence: `tools/rebuild/video_present_main.c`.
+- The rebuild with `-of+` holds 29 instructions, because OpenWatcom V2 keeps the loop variables in
+  registers and uses the register calling convention instead of the stack convention.  The identity
+  check stays open and the store records `rebuilt`.
+  Evidence: `tools/rebuild/video_present.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x27ec8
+  --rebuilt work/rebuild/vpmod.exe --rebuilt-map work/rebuild/video_present.map
+  --rebuilt-symbol video_present_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, and `D`: the scale 1.0 copies the
+  source, the scale 0.5 halves the even bytes, and the scale 2.0 with the offset 10 lifts the byte
+  20 to 30.
+  Evidence: `python3 tools/rebuild/harness.py run --module video_present` and
+  `work/rebuild/vp_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

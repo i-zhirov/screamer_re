@@ -207,7 +207,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x1f94c` | `view_move` | calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument | derived |
-| `0x27ec8` | `video_present` | called after every draw step | inferred |
+| `0x27ec8` | `video_present` | the original at `0x27ec8` holds 40 instructions and 122 bytes: the frame, the 0x310-byte local area, the loop over the 0x300 source bytes at `DAT_0010cf5c` from `0xcf5c` to `0xd25c`, the arithmetic `(byte - offset) * scale + offset` with the `0x4d9f4` rounding helper, the `palette_set` call at `0x81a05`, and the `ret 8` epilogue; the scale and the offset arrive on the stack | inferred |
 | `0x4d9f4` | `fp_helper` | rounds the value on the FPU stack to an integer | observed |
 <!-- end generated: motion_update callees -->
 
