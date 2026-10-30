@@ -5315,39 +5315,50 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   markers and the diff holds 3 of 3 instructions.
   Evidence: the unpack to completion, `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
   Availability`, the `free` run, and the diff.
-- Open question: the `-of+` epilogue and the register-save order suggest the original build may use
-  a compiler whose code generator omits the redundant `mov esp,ebp` and saves the registers before
-  the frame.  The shipped 10.0, 10.5, and 10.6 releases were tested and do not explain it.  The
-  initial 10.0 release (the "10.0 Limited Availability" build, March 1994) loads and builds
-  modules, but its `-of+` epilogue adds `mov esp,ebp` and its `-of+ -od` prologue saves the
-  registers after the frame, as the 10.0a build does.  The 10.5 release (July 1995) also adds
-  `mov esp,ebp` and saves the registers after the frame.  The archive copy of the 10.5 disc holds
-  a truncated `WCC386.EXE` (65536 bytes), so the test uses the complete `WPP386.EXE` ("WATCOM
-  C++32 Optimizing Compiler Version 10.5") in C mode.  The 10.6 release (February 1996) also adds
-  `mov esp,ebp` and saves the registers after the frame.  The run-time banners of the 10.5 and
-  10.6 releases end in `1988-1995`, so the game does not use them: the game's banner ends in
-  `1988-1994`.  The 10.0a toolchain stays the closest verified match.
-  Evidence: the Internet Archive item `watcom-c-cpp-compilers-collection`, files
-  `watcom-10.0-la/watcom10la.iso` (SHA-256
-  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`),
-  `watcom-10.5/Watcom_C++_10.5.iso` (SHA-256
-  `e7d8275b71f05c782b69918365c770716bde8f56a08fcdc62fe23dc43d808b9b`), and
-  `watcom-10.6/WATCOM_C106.iso` (SHA-256
-  `18dd98ae9c8d883e2d680bf9e4eda1c4bf78376c5f05e071b55e57a6619aecf2`), the version banners,
-  and the object diffs.
-- Remaining candidates: no shipping release in the archive explains the epilogue.  The archive
-  holds 10.0 Limited Availability, 10.0a, 10.5, 10.6, 11.0, 11.0a, and 11.0b.  The 11.0
-  releases are from 1996 or later, and the 11.0b run-time banner ends in `1988-1995`.  The
-  remaining explanation is a private or patched build of 10.0/10.0a, or an unreleased
-  intermediate build between 10.0a (November 1994) and 10.5 (July 1995), whose backend omits the
-  redundant `mov esp,ebp` and saves the registers before the frame.
-- To verify a private or patched build, use the whole executable, not one function.  A private
-  build must still print the 10.0a run-time banner (`1988-1994`) and carry the `WSTUB.EXE` stub
-  (`patch level .a`), so the game itself confirms the link-time artifacts but not the compiler.
-  (1) Build many reconstructed modules with the measured compiler and diff each one against the
-  original.  If the only difference is the `-of+` epilogue and the prologue order, the difference
-  is a systematic backend change.  If the differences are scattered, the reconstruction is
-  incomplete.  (2) Count the `mov esp,ebp` epilogues in the game.  A compiler that omits the
-  instruction shows none; the 10.0a build shows one for each `-of+` function that changes `esp`.
-  (3) Accept the build only with the compiler binary.  A version string or a banner alone does
-  not prove the code generator.
+- The differences do not come from compiler options, calling conventions, or pragmas.  A sweep of
+  35 option combinations on the 10.0a compiler gave the same prologue (`push ebp; mov ebp,esp;
+  push <registers>; sub esp,N`) and the same epilogue (`mov esp,ebp; pop ebp; <registers>; ret`)
+  in every case.  The sweep covered the optimization sub-options (`-oa` to `-ox`), `-of+` with
+  `-od`, `-os`, `-ot+`, `-ol+`, the calling conventions (`-4r`, `-3r`), the target models (`-bw`,
+  `-bd`, `-bm`, `-br`, `-bq`, `-bc`), the Windows prologue (`-zW` and `-zW -bw`), and the code and
+  data options (`-zp8`, `-zp1`, `-zu`, `-zA`, `-zr`, `-zk0`, `-zk1`, `-zk2`, `-zi`, `-zc`, `-zg`,
+  `-e`, `-4`).  Five `#pragma aux` variants (custom `parm`, `value`, and `modify` lists on the
+  function and on the callees), `__cdecl` and `__stdcall` arguments, `#pragma pack(8)`,
+  `#pragma off (check_stack)`, and a prototype-less callee also kept the same prologue and
+  epilogue.  The per-module flags in `tools/rebuild/modules/` match the original: `printf` and
+  `free` have no `-of+` and no frame in the original, and `frame_step` and `list_destroy` have
+  `-of+` and a frame.
+  Evidence: the 10.0a `WCC386.EXE` builds of `frame_step.c` and `list_destroy.c` into
+  `work/opt/*.OBJ` and their disassembly.
+- The original code uses one frame layout throughout: the compiler saves the registers before the
+  frame and puts the locals directly below `ebp`.  The text holds 205 prologues of the form
+  `push ebx; push ecx; [push edx]; push esi; push edi; push ebp; mov ebp,esp` (for example at
+  0x11c00 and 0x1821c), and they store the register arguments at `[ebp-4]` and above.  The same
+  compiler emits `mov esp,ebp` only when the function needs the frame restored; 116 frame
+  functions without locals end in `pop ebp; ret` (for example `frame_step`).  No tested 10.x
+  compiler produces this layout: 10.0 Limited Availability, 10.0a, 10.5, 10.6, and 11.0b all save
+  the registers after the frame and emit `mov esp,ebp` even when the function has no locals.
+  Evidence: the byte census of `STARTH.EXE` object 1 and the disassembly at 0x11c00, 0x1821c,
+  0x2aa84, and 0x2ed77.
+- Open question: the original frame layout (registers saved before the frame, smart epilogue)
+  matches no 10.x release, so the code generator is older than 10.0.  The pre-10.0 releases
+  (8.x and 9.x) stay unverified: the archive holds them only as packed WPK/REX files
+  (`watcom-9.5/discmaster/Sybase - Watcom C++ 9.5b.zip` holds `32/06/WCC386.DOS` as a packed
+  image) and the installer is interactive.  The 10.0a toolchain stays the closest verified match
+  for the link-time artifacts (run-time banner `1988-1994`, `WSTUB.EXE` patch level `.a`), but not
+  for the code.
+- Remaining candidates: a pre-10.0 compiler (8.x or 9.x) for the game code, linked with the 10.0a
+  run-time and stub.  This fits the mixed evidence: the banner and the stub are 10.0a, while the
+  frame layout is older.  A private or patched 10.0/10.0a build is unlikely, because it would have
+  to change the frame generator itself.
+- To verify a candidate build, use the frame layout as the first test and the whole executable as
+  the acceptance test.  (1) Build `list_destroy` and `frame_step` with the candidate compiler.
+  The original saves the registers before the frame, places the locals directly below `ebp`, and
+  omits `mov esp,ebp` when the function has no locals; a 10.x build saves the registers after the
+  frame and adds `mov esp,ebp`.  (2) Census the original text (object 1) for the two prologue
+  forms and the two epilogue forms; one build must produce the same mix.  (3) Build many modules
+  and diff each one against the original.  If the only difference is the frame layout, the
+  candidate is the code generator; if the differences are scattered, the reconstruction is
+  incomplete.  (4) Accept the build only with the compiler binary.  The run-time banner
+  (`1988-1994`) and the `WSTUB.EXE` stub (`patch level .a`) prove the link-time artifacts, not the
+  code generator.
