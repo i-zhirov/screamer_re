@@ -5492,3 +5492,27 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
   --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
   --rebuilt-symbol error_report_`.
+
+## The format-string audit of the other modules
+
+- Only `error_report` pushes immediate arguments.  The other nine modules push registers only
+  (the prologue saves) or no registers at all: `free` and `memcpy` push nothing, `exit` and
+  `printf` push `edx` or `ebx`, and `shutdown`, `bios_video`, `list_destroy`,
+  `memory_available`, and `frame_step` push their saved registers.  Their calls pass the
+  arguments in `eax`, `edx`, `ebx`, and `ecx` under the register convention, so no stack push
+  exists, and the short-push form cannot appear.
+  Evidence: the decode of the original functions at `0x300ec`, `0x300be`, `0x300d6`, `0x3009b`,
+  `0x128ac`, `0x108e4`, `0x2ed77`, `0x2f8ca`, `0x2aa84`, and `0x8c150`.
+- The remaining constant arguments are register arguments: `engine_shutdown` loads `0` with
+  `xor eax,eax` and `0x62b0` with `mov eax,0x62b0`, and `bios_video` loads the interrupt number
+  `0x10` with `mov eax,0x10`.  The callee of the `0x62b0` call at `0x2fc90` reads `[eax+0x14]`,
+  so the value is a pointer, but it travels in `eax` as `mov eax,imm32`, which is the same
+  encoding for an integer and a relocatable address, so the byte compare cannot separate them.
+  Evidence: the two disassemblies.
+- The game holds twelve further print sites, in the two functions at `0x2edb0` and `0x4bf85`,
+  and each already uses the relocatable form `mov eax,<address>; push eax` for the format string
+  and the stream `0x2fd2`.  Neither function is a record yet, and neither needs the fix.
+  Evidence: the caller scan of the printer `0x4bf64` (35 calls, 21 inside `error_report`) and
+  the disassembly at `0x2eddf` and `0x4bfbd`.
+- Result: no module besides `error_report` pushes a small integer constant, and no module still
+  pushes one where a relocatable pointer is expected.
