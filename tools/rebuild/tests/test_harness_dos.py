@@ -34,12 +34,12 @@ class HarnessDosTestCase(unittest.TestCase):
         line = harness_dos.compile_line({"file": "free.c", "compiler": "wcc386"}, 0)
         self.assertEqual(
             line,
-            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -fo=D:\\O0.OBJ free.c",
+            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -fo=D:\\O0.OBJ S0.C",
         )
 
     def test_compile_line_wasm_holds_no_stack_flag(self) -> None:
         line = harness_dos.compile_line({"file": "memcpy.asm", "compiler": "wasm"}, 1)
-        self.assertEqual(line, "wasm -bt=dos -zq -fo=D:\\O1.OBJ memcpy.asm")
+        self.assertEqual(line, "wasm -bt=dos -zq -fo=D:\\O1.OBJ S1.ASM")
 
     def test_compile_line_source_flags(self) -> None:
         line = harness_dos.compile_line(
@@ -52,8 +52,7 @@ class HarnessDosTestCase(unittest.TestCase):
         )
         self.assertEqual(
             line,
-            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -of+ -od -fo=D:\\O0.OBJ"
-            " list_destroy.c",
+            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -of+ -od -fo=D:\\O0.OBJ S0.C",
         )
 
     def test_compile_line_period_flags_override(self) -> None:
@@ -68,8 +67,7 @@ class HarnessDosTestCase(unittest.TestCase):
         )
         self.assertEqual(
             line,
-            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -od -fo=D:\\O0.OBJ"
-            " list_destroy.c",
+            "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -od -fo=D:\\O0.OBJ S0.C",
         )
 
     def test_link_rsp_standard_libs(self) -> None:
@@ -103,7 +101,7 @@ class HarnessDosTestCase(unittest.TestCase):
         self.assertIn("PATH=C:\\WATCOM\\BIN;C:\\WATCOM\\BINB", text)
         self.assertIn("set WATCOM=C:\\WATCOM", text)
         self.assertIn("wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -fo=D:\\O0.OBJ"
-                      " free.c >> D:\\dos_build.log", text)
+                      " S0.C >> D:\\dos_build.log", text)
         self.assertIn("C:\\WATCOM\\BIN\\WLINK @D:\\dos_link.rsp"
                       " >> D:\\dos_build.log", text)
         self.assertTrue(text.endswith("exit\n"))

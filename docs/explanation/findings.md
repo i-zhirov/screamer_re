@@ -5358,6 +5358,15 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` and
   `memory_available`, the diffs, `python3 tools/rebuild/harness.py build --module ...`, and
   `python3 tools/rebuild/run.py run --module ...`.
+- The period build of `shutdown` did not link, and the cause was not a missing stub.  The DOS
+  tools truncate a long file name to eight characters, so `shutdown.c` and `shutdown_main.c` both
+  become `SHUTDOWN.C`, and the compiler reads `shutdown.c` twice.  The same collision hits
+  `bios_video`, `error_report`, `frame_step`, `list_destroy`, and `memory_available`.  The
+  `harness_dos.py` copy step now gives each source an indexed 8.3 name (`S0.C`, `S1.C`, ...)
+  before the compile.  The `shutdown` period build links, runs with markers 1 to 8, and diffs
+  12 of 14 instructions; the other period builds keep their diffs.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module shutdown` and the build of the
+  other five modules with their original diffs.
 - To reproduce the original frame, use `-od` without `-of+` for the prologue and the
   `list_destroy` epilogue: the registers-before-frame layout follows from the flag, not from the
   version.  The open problem is the `frame_step` epilogue.  (1) Build `list_destroy` with `-od`
