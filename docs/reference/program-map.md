@@ -167,7 +167,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x29f80` | `menu_frame` | loads `gfx\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits | observed |
 | `0x2a1b0` | `race_cleanup` | the original at `0x2a1b0` holds 24 instructions and 97 bytes: the frame, the twelve cleanup calls at `0x264ec`, `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`, `0x2f326`, `0x1f6f8`, and `0x2fe68`, and the epilogue; the two argument call pairs receive the imported data addresses and the last two calls receive the pointer at `DAT_000062ac` and the address `DAT_000062b0` | observed |
 | `0x2aa84` | `frame_step` | calls `default_data_copy`, `joystick_update`, and `frame_timer` | derived |
-| `0x2ff14` | `music_play` | processes a music request record and sets a state from 0 to 6 | derived |
+| `0x2ff14` | `music_play` | the original at `0x2ff14` holds 39 instructions and 111 bytes: a negative word at `+0x04` sets the state 6, a zero ready result from `0xd4239` sets the state 5, and otherwise the function starts the track through `0xd38e6`, selects it through `0x2febc` when the word at `+0x0c` is 1, and sets the state 0; it returns the state it wrote | derived |
 | `0x8c160` | `memset` | fills `count >> 2` dwords with the value byte replicated | observed |
 <!-- end generated: frame_update callees -->
 

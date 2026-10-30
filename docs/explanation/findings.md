@@ -5959,6 +5959,29 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   and exits with -1.
   Evidence: `python3 tools/rebuild/harness.py run --module setup_load` and `work/rebuild/sl_out.txt`.
 
+## The music_play module
+
+- `music_play` at `0x2ff14` holds 39 instructions and 111 bytes: the three register saves, the
+  frame, the request slot, the two state guards, the ready check at `0xd4239`, the start call at
+  `0xd38e6`, the selection call at `0x2febc`, the state stores, and the epilogue.  The function
+  processes a music request record and returns the state it wrote.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ff14 --count 39`.
+- A negative word at `+0x04` writes the state 6 and returns at once.  A zero ready result writes the
+  state 5 and skips the start call.  Otherwise the function starts the track, runs the selection
+  when the word at `+0x0c` is 1, writes the state 0, and returns 0.
+  Evidence: the guards at `0x2ff22` and `0x2ff32` and the selection test at `0x2ff46`.
+- The rebuild with `-of+` holds 32 instructions, because OpenWatcom V2 keeps the record pointer in a
+  register and folds the repeated loads.  The identity check stays open and the store records
+  `rebuilt`.
+  Evidence: `tools/rebuild/music_play.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2ff14
+  --rebuilt work/rebuild/mpmod.exe --rebuilt-map work/rebuild/music_play.map
+  --rebuilt-symbol music_play_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, `3`, and `D`: the negative word
+  sets the state 6, the zero ready result sets the state 5, the ready track starts and selects, and
+  the ready track without the select word starts only.
+  Evidence: `python3 tools/rebuild/harness.py run --module music_play` and `work/rebuild/mp_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

@@ -1,17 +1,48 @@
 {
   "address": "0x2ff14",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "processes a music request record and sets a state from 0 to 6"
+      "text": "the original at `0x2ff14` holds 39 instructions and 111 bytes: a negative word at `+0x04` sets the state 6, a zero ready result from `0xd4239` sets the state 5, and otherwise the function starts the track through `0xd38e6`, selects it through `0x2febc` when the word at `+0x0c` is 1, and sets the state 0; it returns the state it wrote"
     }
   ],
+  "module": "music_play",
   "name": "music_play",
   "notes": [],
-  "role": "processes a music request record and sets a state from 0 to 6",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 92,
+        "detail": "the instruction counts differ, 39 and 32",
+        "instructions_equal": 6,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2ff14",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:aa3e1ca21973751304c75964484c48844c6b6637f318c32c0c2fbf99bcf89a73",
+    "source_digest": "sha256:689afd5f21ecfae6a8c0acb0704a910e3cefe3a68d1a945a08f762d774023c0f",
+    "tool": "run.py"
+  },
+  "role": "processes a music request record and sets the state from 0 to 6",
   "section": "frame_update callees",
-  "size": 2,
-  "status": "named"
+  "size": 111,
+  "status": "rebuilt",
+  "symbol": "music_play_"
 }
