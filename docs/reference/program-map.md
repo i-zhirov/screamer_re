@@ -481,7 +481,7 @@ services.
 | `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
 | `0x2f205` | `memory_free` | the original at `0x2f205` holds 33 instructions and 90 bytes: it builds the local register block with `0x0502` at offset 0 and the address words at offsets `0x10` and `0x14`, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, and returns the status at block offset `0x18` | derived |
 | `0x2f25f` | `resource_find` | walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066` | derived |
-| `0x2f470` | `resource_free` | frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise | derived |
+| `0x2f470` | `resource_free` | the original at `0x2f470` holds 47 instructions and 126 bytes: it selects the 0x1c-byte record at `*resource + index * 0x1c`, reads the address at `+0x10`, calls `0x2f40b` when the flag bit 0 at `+0x18` is set and `memory_free` at `0x2f205` otherwise, and returns -1 on a non-zero free result and 0 on success | derived |
 | `0x2f904` | `pool_init` | queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages | inferred |
 | `0x4bf23` | `dpmi_fill_regs` | fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs | observed |
 | `0x4bf4b` | `dpmi_call` | calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block | inferred |

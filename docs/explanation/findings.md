@@ -6092,6 +6092,28 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module video_present` and
   `work/rebuild/vp_out.txt`.
 
+## The resource_free module
+
+- `resource_free` at `0x2f470` holds 47 instructions and 126 bytes: the five register saves, the
+  frame, the two argument slots, the record address arithmetic, the flag test at `+0x18` bit 0, the
+  two free calls at `0x2f40b` and `0x2f205`, the return paths, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f470 --count 47`.
+- The function selects the 0x1c-byte record at `*resource + index * 0x1c` and reads the address at
+  `+0x10`.  A set flag bit 0 uses the DOS memory free at `0x2f40b`; a clear bit uses
+  `memory_free` at `0x2f205`.  A non-zero free result returns -1, and a success returns 0.
+  Evidence: the flag test at `0x2f48e` and the two calls at `0x2f4a5` and `0x2f4ca`.
+- The rebuild with `-of+` holds 23 instructions, because OpenWatcom V2 keeps the record address in
+  registers and folds the repeated arithmetic.  The identity check stays open and the store records
+  `rebuilt`.
+  Evidence: `tools/rebuild/resource_free.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f470
+  --rebuilt work/rebuild/rsfmod.exe --rebuilt-map work/rebuild/resource_free.map
+  --rebuilt-symbol resource_free_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, `3`, and `D`: the clear flag calls
+  `memory_free`, the set flag calls `dos_memory_free`, and the two non-zero results return -1.
+  Evidence: `python3 tools/rebuild/harness.py run --module resource_free` and
+  `work/rebuild/rsf_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
