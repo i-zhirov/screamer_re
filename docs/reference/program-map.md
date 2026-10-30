@@ -547,7 +547,7 @@ the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 | `0x15460` | `list_file_load` | builds a file name, opens it, and parses records until `END_LIST` | observed |
 | `0x15720` | `palette_build` | fills a 50-entry table with floating-point ramp values | derived |
 | `0x1b304` | `controls_load` | reads three 28-byte records from a `cfg` file | derived |
-| `0x1bb58` | `setup_load` | reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure | observed |
+| `0x1bb58` | `setup_load` | the original at `0x1bb58` holds 35 instructions and 111 bytes: it builds `%s\config\setup.cfg` with the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the path with the mode `rb` through `fopen` at `0xc5fe5`, reports `Run SETUP before.` through `0xc656e` and exits with -1 on failure, reads `0x90` bytes into the buffer at `DAT_00008058` through `fread` at `0xc607b`, and closes the handle through `0xc6245` | observed |
 | `0x1bf38` | `config_load` | reads `screamer.cfg` and sets a flag from a character | observed |
 | `0x1f1a0` | `mouse_init` | calls interrupt 33h and delays | observed |
 | `0x25db0` | `dpmi_real_int` | sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path | derived |

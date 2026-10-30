@@ -410,7 +410,9 @@ The files:
 | `input_poll_main.c` | the `input_poll` test harness: the five gate cases and the two stubs |
 | `race_loop.c` | the rebuilt `race_loop` module: the race start, the frame loop, and the race end |
 | `race_loop_main.c` | the `race_loop` test harness: the ten stubs and the explicit order checks |
-| `modules/*.json` | the fifty-seven module records: the sources, the compiler, the link, and the run expectations |
+| `setup_load.c` | the rebuilt `setup_load` module: the `setup.cfg` path, the read, and the error path |
+| `setup_load_main.c` | the `setup_load` test harness: the format stub and the file stubs |
+| `modules/*.json` | the fifty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

@@ -5932,6 +5932,33 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   comparison failed even when the recorded order was correct; the explicit comparisons pass.
   Evidence: `python3 tools/rebuild/harness.py run --module race_loop` and `work/rebuild/rl_out.txt`.
 
+## The setup_load module
+
+- `setup_load` at `0x1bb58` holds 35 instructions and 111 bytes: the three register saves, the
+  frame, the 0x68-byte path buffer, the `sprintf` call at `0x4d32c`, the `fopen` call at
+  `0xc5fe5`, the two-call error path, the `fread` call at `0xc607b`, the handle close at
+  `0xc6245`, and the epilogue.  The function builds `%s\config\setup.cfg` with the base path at
+  `DAT_00007edc`, opens the path with the mode `rb`, and reads `0x90` bytes into the buffer at
+  `DAT_00008058`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1bb58 --count 35`.
+- On failure the function reports `Run SETUP before.` through `0xc656e` and calls `exit(-1)` at
+  `0x300be`.  The exit call does not return, so the read path is unreachable in the game.  The
+  harness exit stub returns, so the failure marker checks the two error calls.
+  Evidence: the calls at `0x1bb92` and `0x1bb9c`.
+- The read buffer at `0x8058` is the same address that `table_lookup` tests as a flag.  The first
+  dword of the setup data therefore selects the table behavior.
+  Evidence: `tools/rebuild/table_lookup.c` and the `fread` call at `0x1bbb3`.
+- The rebuild with `-of+` holds 37 instructions, because OpenWatcom V2 lays out the vararg call and
+  the frame differently.  The identity check stays open and the store records `rebuilt`.
+  Evidence: `tools/rebuild/setup_load.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1bb58
+  --rebuilt work/rebuild/slmod.exe --rebuilt-map work/rebuild/setup_load.map
+  --rebuilt-symbol setup_load_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the success path builds the
+  path, opens it, reads `0x90` bytes, and closes the handle; the failure path reports the message
+  and exits with -1.
+  Evidence: `python3 tools/rebuild/harness.py run --module setup_load` and `work/rebuild/sl_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
