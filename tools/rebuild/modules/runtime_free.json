@@ -1,0 +1,26 @@
+{
+  "exe": "rfmod.exe",
+  "map": "runtime_free.map",
+  "name": "runtime_free",
+  "run": {
+    "command": "rfmod.exe > rf_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "runtime_free.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "runtime_free_main.c"
+    }
+  ]
+}

@@ -5779,6 +5779,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module panel_draw_centered` and
   `work/rebuild/pdc_out.txt`.
 
+## The run-time free module
+
+- The run-time `free` at `0xd2008` holds 35 instructions and 94 bytes: the four register saves,
+  the free-list walk from `DAT_001031d0`, the heap release call at `0xe0a84`, the largest-free
+  size update in `DAT_001031d8`, the heap flag clear at `0x27de5`, and the epilogue.  The module is
+  assembly, because the original is the run-time allocator code.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd2008 --count 35`.
+- The rebuild matches all 35 instructions.  The only differing operands are the link-time addresses
+  of the three data words and the heap call, so the identity check passes and the store records
+  `verified`.
+  Evidence: `tools/rebuild/runtime_free.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0xd2008
+  --rebuilt work/rebuild/rfmod.exe --rebuilt-map work/rebuild/runtime_free.map
+  --rebuilt-symbol free_`.
+- Observation: the heap routine at `0xe0a84` does not use the C register calling convention.  The
+  run-time `free` passes the released block in `eax` and the free-list node in `ebx`.  The C stub
+  in the harness therefore carries `#pragma aux heap_free parm [eax] [ebx]`; without the pragma the
+  stub reads the node from `edx` and the behavior check fails.
+  Evidence: the call at `0xd2039` and `tools/rebuild/runtime_free_main.c`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, and `D`: the walk stops at the
+  first free node, the largest-free size rises to the node value, and the end-pointer guard keeps
+  the size.
+  Evidence: `python3 tools/rebuild/harness.py run --module runtime_free` and
+  `work/rebuild/rf_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

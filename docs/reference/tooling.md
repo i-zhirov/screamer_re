@@ -398,7 +398,9 @@ The files:
 | `memory_free_main.c` | the `memory_free` test harness: the two DPMI stubs and the request checks |
 | `panel_draw_centered.c` | the rebuilt `panel_draw_centered` module: the measure, the centering, and the draw |
 | `panel_draw_centered_main.c` | the `panel_draw_centered` test harness: the measure and draw stubs and the three width cases |
-| `modules/*.json` | the fifty-one module records: the sources, the compiler, the link, and the run expectations |
+| `runtime_free.asm` | the rebuilt run-time `free` module: the free-list walk and the heap release call |
+| `runtime_free_main.c` | the run-time `free` test harness: the free list and the heap stub with the `[eax] [ebx]` convention |
+| `modules/*.json` | the fifty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

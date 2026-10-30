@@ -434,7 +434,7 @@ Evidence: the Ghidra references to `0x118e04`.
 | --- | --- | --- | --- |
 | `0xd1ec0` | `memset` | replicates the value byte over the dword and calls the run-time core at `0xe0860` | observed |
 | `0xd1f25` | `malloc` | rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0` | observed |
-| `0xd2008` | `free` | walks the free list and keeps the largest free block in `DAT_001031d8` | observed |
+| `0xd2008` | `free` | the original at `0xd2008` holds 35 instructions and 94 bytes: it walks the free list from `DAT_001031d0`, stops before the next free block, releases the block through the heap routine at `0xe0a84`, keeps the largest free size in `DAT_001031d8`, and clears the heap flag at `0x27de5` | observed |
 | `0xd2066` | `memmove` | copies `count` bytes from the source to the destination and returns the destination | observed |
 | `0xd429f` | `dpmi_issue_int` | clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0` | inferred |
 | `0xd4410` | `dpmi_int31_entry` | writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt | inferred |
