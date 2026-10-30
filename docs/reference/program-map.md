@@ -150,7 +150,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x211e0` | `input_map` | reads the control bits `DAT_00118e1c` and dispatches the game action | inferred |
 | `0x21e6c` | `motion_update` | scales the object position with the time base, calls `FUN_0001f94c`, and advances the time base with a wrap at 1.0 | derived |
 | `0x24da0` | `joystick_update` | walks the 28-byte control records at `DAT_001197d8` with floating-point scaling | derived |
-| `0x26448` | `input_poll` | counts to 8 and reads the mouse and keyboard state; the shared input poll | observed |
+| `0x26448` | `input_poll` | the original at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path | observed |
 | `0x27770` | `race_start` | sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)` | derived |
 | `0x2786c` | `object_update_all` | walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record | derived |
 | `0x279a4` | `race_end` | tears the race down through 13 calls | derived |

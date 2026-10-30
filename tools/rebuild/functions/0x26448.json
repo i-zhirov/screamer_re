@@ -1,17 +1,48 @@
 {
   "address": "0x26448",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "counts to 8 and reads the mouse and keyboard state; the shared input poll"
+      "text": "the original at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path"
     }
   ],
+  "module": "input_poll",
   "name": "input_poll",
   "notes": [],
-  "role": "counts to 8 and reads the mouse and keyboard state; the shared input poll",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 108,
+        "detail": "the instruction counts differ, 27 and 37",
+        "instructions_equal": 2,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x26448",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:7beeee1b1e694a2777775effd92958b8ec2527aaafe1476b804823f3154fd22d",
+    "source_digest": "sha256:7ce8c4e6e734e318319b9105763fd3e1e0df1442597ac9fd3c22c11108ac8c86",
+    "tool": "run.py"
+  },
+  "role": "counts the polls to 8, reads the input, and applies it when the device state allows",
   "section": "race_loop callees",
-  "size": 4792,
-  "status": "named"
+  "size": 108,
+  "status": "rebuilt",
+  "symbol": "input_poll_"
 }

@@ -5877,6 +5877,35 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_state_save` and
   `work/rebuild/oss_out.txt`.
 
+## The input_poll module
+
+- `input_poll` at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the
+  early-exit block at `0x264b4`.  The function tests the flag bit 0 at `DAT_0016669e` and
+  `DAT_00166684`, rejects a set flag bit 0 at `DAT_00166688`, counts `DAT_001666bc` to 8, resets
+  the counter, reads the input through `0x260e0`, and applies the input through `0x263cc` when the
+  device word bit 9 is clear and `DAT_001666ac` is set.  It returns 0 on every early exit and
+  `DAT_00166696` on the normal path.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x26448 --count 30`.
+- The apply call receives the state `DAT_00166696` in `eax` and the device pointer in `edx`.  The
+  device word is read at `device + 3`, not at the start of the device block.
+  Evidence: the loads at `0x26489` and `0x2649d` and the call at `0x264a8`.
+- The `function_body` sweep stops at the first `ret` at `0x264b3`, so the record carries the size
+  108 and the identity check compares only the first 27 instructions.  The four-byte early-exit
+  block at `0x264b4` is part of the function, and the behavior check covers it.
+  Evidence: `tools/le.py near STARTH.EXE 0x264b4` and the record size.
+- The rebuild with `-of+` holds 37 instructions, because OpenWatcom V2 does not use `pushal`, keeps
+  the state words in registers, and lays out the early exits differently.  The identity check stays
+  open and the store records `rebuilt`.
+  Evidence: `tools/rebuild/input_poll.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x26448
+  --rebuilt work/rebuild/ipmod.exe --rebuilt-map work/rebuild/input_poll.map
+  --rebuilt-symbol input_poll_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, `3`, `4`, and `D`: the normal path
+  resets the counter, reads the input, and applies it; a counter below 8 returns 0; a clear first
+  flag returns 0; a set device bit 9 skips the apply; and a null device pointer returns 0.
+  Evidence: `python3 tools/rebuild/harness.py run --module input_poll` and
+  `work/rebuild/ip_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

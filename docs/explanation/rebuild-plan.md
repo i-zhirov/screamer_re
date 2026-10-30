@@ -103,7 +103,7 @@ floating-point instructions.
 | `0x2a1b0` | `race_cleanup` (done) | 97 | 24 | 12 | 0 |
 | `0x4d030` | `vis_tab_load` (done) | 101 | 31 | 6 | 0 |
 | `0x1ccd8` | `object_state_save` (done) | 105 | 29 | 0 | 2 |
-| `0x26448` | `input_poll` | 108 | 27 | 2 | 0 |
+| `0x26448` | `input_poll` (done) | 108 | 27 | 2 | 0 |
 | `0x27700` | `race_loop` | 110 | 34 | 10 | 0 |
 | `0x1bb58` | `setup_load` | 111 | 35 | 6 | 0 |
 | `0x2ff14` | `music_play` | 111 | 39 | 3 | 0 |
@@ -192,10 +192,10 @@ floating-point instructions.
 
 ## Position
 
-Fifty-four modules carry a recipe and a result: the twelve Phase A modules, the
+Fifty-five modules carry a recipe and a result: the twelve Phase A modules, the
 eleven modules of the earlier batches, the twenty-three Phase B modules, and the
-first eight Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+first nine Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
 `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
 run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
-`0x4d030`, and `object_state_save` at `0x1ccd8`.  The next module is
-`input_poll` at `0x26448`.
+`0x4d030`, `object_state_save` at `0x1ccd8`, and `input_poll` at `0x26448`.  The
+next module is `race_loop` at `0x27700`.

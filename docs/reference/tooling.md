@@ -406,7 +406,9 @@ The files:
 | `vis_tab_load_main.c` | the `vis_tab_load` test harness: the file stubs and the two paths |
 | `object_state_save.c` | the rebuilt `object_state_save` module: the four dword copies and the float copy |
 | `object_state_save_main.c` | the `object_state_save` test harness: the object record and the five field checks |
-| `modules/*.json` | the fifty-five module records: the sources, the compiler, the link, and the run expectations |
+| `input_poll.c` | the rebuilt `input_poll` module: the three gates, the counter, the read, and the apply |
+| `input_poll_main.c` | the `input_poll` test harness: the five gate cases and the two stubs |
+| `modules/*.json` | the fifty-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

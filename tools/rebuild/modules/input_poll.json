@@ -1,0 +1,31 @@
+{
+  "exe": "ipmod.exe",
+  "map": "input_poll.map",
+  "name": "input_poll",
+  "run": {
+    "command": "ipmod.exe > ip_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "ip_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "input_poll.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "input_poll_main.c"
+    }
+  ]
+}
