@@ -6114,6 +6114,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module resource_free` and
   `work/rebuild/rsf_out.txt`.
 
+## The list_create module
+
+- `list_create` at `0x2ecf8` holds 46 instructions and 127 bytes: the five register saves, the
+  frame, the two argument slots, the `pool_init` call at `0x2f904`, the `malloc` call at `0xd1f25`,
+  the pointer check, the two store paths, the `memset` call at `0xd1ec0`, and the epilogue.  The
+  function allocates `count` records of 0x1c bytes.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ecf8 --count 46`.
+- The list record holds the pointer at `+0`, the cursor at `+4`, and the count at `+8`.  A success
+  stores the pointer, the count, and the cursor 0, then zeroes `count * 0x1c` bytes.  A failed
+  allocation stores the pointer 0, the cursor 0, and the count 0.  The function returns the list
+  pointer.
+  Evidence: the stores at `0x2ed21`, `0x2ed49`, and `0x2ed4f`, and the failure path at `0x2ed2b`.
+- The rebuild with `-of+` holds 26 instructions, because OpenWatcom V2 keeps the list pointer in a
+  register and folds the repeated loads.  The identity check stays open and the store records
+  `rebuilt`.
+  Evidence: `tools/rebuild/list_create.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2ecf8
+  --rebuilt work/rebuild/lcrmod.exe --rebuilt-map work/rebuild/list_create.map
+  --rebuilt-symbol list_create_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the success path stores the
+  pointer, the cursor 0, and the count 3, and zeroes 0x54 bytes; the failure path stores the pointer
+  0, the cursor 0, and the count 0.
+  Evidence: `python3 tools/rebuild/harness.py run --module list_create` and
+  `work/rebuild/lcr_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

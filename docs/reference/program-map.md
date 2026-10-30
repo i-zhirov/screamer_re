@@ -109,7 +109,7 @@ original Watcom symbol names.
 | `0x128ac` | `engine_shutdown` | counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down | derived |
 | `0x27700` | `race_loop` | the original at `0x27700` holds 34 instructions and 110 bytes: it calls `race_start` at `0x27770`, returns a non-zero start result, and otherwise runs the loop body `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`, `input_map`, `object_update_all`, and `video_fill` until `DAT_0011ce44` reaches 4, then calls `race_end` at `0x279a4` and returns 0 | derived |
 | `0x27f94` | `frame_update` | clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input | derived |
-| `0x2ecf8` | `list_create` | allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block | derived |
+| `0x2ecf8` | `list_create` | the original at `0x2ecf8` holds 46 instructions and 127 bytes: it calls `pool_init` at `0x2f904`, allocates `count * 0x1c` bytes through `malloc` at `0xd1f25`, stores the pointer at `+0`, the cursor 0 at `+4`, and the count at `+8`, zeroes the block through `memset` at `0xd1ec0`, and returns the list pointer; a failed allocation stores the pointer 0 and the count 0 | derived |
 | `0x2ed77` | `list_destroy` | releases the block when the pointer is set; counterpart of `list_create` | observed |
 | `0x2f8ca` | `memory_available` | probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000` | derived |
 | `0x30050` | `memory_alloc` | allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1 | derived |

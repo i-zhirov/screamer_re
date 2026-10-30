@@ -424,7 +424,9 @@ The files:
 | `video_present_main.c` | the `video_present` test harness: the palette stub and the three scale cases |
 | `resource_free.c` | the rebuilt `resource_free` module: the record address and the two free paths |
 | `resource_free_main.c` | the `resource_free` test harness: the record table and the two free stubs |
-| `modules/*.json` | the sixty-four module records: the sources, the compiler, the link, and the run expectations |
+| `list_create.c` | the rebuilt `list_create` module: the allocation and the list stores |
+| `list_create_main.c` | the `list_create` test harness: the list record and the three stubs |
+| `modules/*.json` | the sixty-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |
