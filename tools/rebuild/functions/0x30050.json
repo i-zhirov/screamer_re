@@ -1,17 +1,48 @@
 {
   "address": "0x30050",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`"
+      "text": "allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1"
     }
   ],
+  "module": "memory_alloc",
   "name": "memory_alloc",
   "notes": [],
-  "role": "allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 74,
+        "detail": "the instruction counts differ, 31 and 27",
+        "instructions_equal": 7,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x30050",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:d6e1ff2d70f00a228d3965e7ce0b6cad7e5fba7a981c2768de8dff3dc54d9fd6",
+    "source_digest": "sha256:995908d3043787c12b005ed7f4156db2b6f2c4e05eff76f3fb26df23bfc08530",
+    "tool": "run.py"
+  },
+  "role": "allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1",
   "section": "Program functions",
   "size": 75,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "memory_alloc_"
 }

@@ -1,17 +1,48 @@
 {
   "address": "0x22df8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400`"
+      "text": "advances the timing when the replay flag is set: the timing subtraction, the replay read, and the filter entry from the frame rate"
     }
   ],
+  "module": "timing_update",
   "name": "timing_update",
   "notes": [],
-  "role": "reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 33,
+        "detail": "the instruction counts differ, 20 and 11",
+        "instructions_equal": 1,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22df8",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:1512dc7ffaefe2e867a1ef02344ea40bd240a8cab44c531dd17ffc517017e44d",
+    "source_digest": "sha256:c1d2af84c659d27672433f4d568923f037cac45bedcccc9182f4e529b0caf9f2",
+    "tool": "run.py"
+  },
+  "role": "advances the timing when the replay flag is set: the timing subtraction, the replay read, and the filter entry from the frame rate",
   "section": "The timing and filter layer",
   "size": 1,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "timing_update_"
 }

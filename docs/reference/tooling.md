@@ -370,7 +370,27 @@ The files:
 | `object_physics_main.c` | the `object_physics` test harness: the four step stubs and the state gate |
 | `dpmi_real_int.asm` | the rebuilt `dpmi_real_int` module: the real-mode interrupt setup |
 | `dpmi_real_int_main.c` | the `dpmi_real_int` test harness: the state words and the error path stubs |
-| `modules/*.json` | the thirty-six module records: the sources, the compiler, the link, and the run expectations |
+| `object_player_input.c` | the rebuilt `object_player_input` module: the gated drive step and the revolution step |
+| `object_player_input_main.c` | the `object_player_input` test harness: the input bits and the step stubs |
+| `stream_layer_init.c` | the rebuilt `stream_layer_init` module: the stream layer setup calls |
+| `stream_layer_init_main.c` | the `stream_layer_init` test harness: the six setup stubs |
+| `view_move.c` | the rebuilt `view_move` module: the view helper and the position setters |
+| `view_move_main.c` | the `view_move` test harness: the three view stubs |
+| `video_block_swap_a.asm` | the rebuilt `video_block_swap_a` module: the byte-swap and dword swap |
+| `video_block_swap_a_main.c` | the `video_block_swap_a` test harness: the video buffer and the swap check |
+| `timing_update.c` | the rebuilt `timing_update` module: the timing advance and the filter entry |
+| `timing_update_main.c` | the `timing_update` test harness: the replay stubs and the float check |
+| `panel_show.c` | the rebuilt `panel_show` module: the panel state stores |
+| `panel_show_main.c` | the `panel_show` test harness: the panel state and the update stub |
+| `table_lookup.c` | the rebuilt `table_lookup` module: the table entry lookup |
+| `table_lookup_main.c` | the `table_lookup` test harness: the lookup stub and the flag gate |
+| `memory_alloc.c` | the rebuilt `memory_alloc` module: the allocator and the out-of-memory handlers |
+| `memory_alloc_main.c` | the `memory_alloc` test harness: the allocator and the handler stubs |
+| `sound_driver_set.asm` | the rebuilt `sound_driver_set` module: the HMI request block and the driver call |
+| `sound_driver_set_main.c` | the `sound_driver_set` test harness: the request block and the driver stub |
+| `main_invoker.asm` | the rebuilt `main invoker` module: the stack alignment and the startup calls |
+| `main_invoker_main.c` | the `main invoker` test harness: the startup stubs |
+| `modules/*.json` | the forty-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the input fingerprint |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results. `--skip-unchanged` reports a record whose input fingerprint matches the previous run without running its checks |

@@ -1,18 +1,49 @@
 {
   "address": "0x1f94c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8`"
+      "text": "calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument"
     }
   ],
+  "module": "view_move",
   "name": "view_move",
   "notes": [],
   "object_offset": "0xf94c",
-  "role": "calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 47,
+        "detail": "the instruction counts differ, 22 and 18",
+        "instructions_equal": 7,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f94c",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:b37b065afd13eafafa51782f6354a711cd623bd8e71dd0b198d846a665b85636",
+    "source_digest": "sha256:dc089e120d265d84336ed192375e70f96fddf54937b604cea67ae8d63aa63526",
+    "tool": "run.py"
+  },
+  "role": "calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument",
   "section": "motion_update callees",
   "size": 71,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "view_move_"
 }

@@ -112,7 +112,7 @@ original Watcom symbol names.
 | `0x2ecf8` | `list_create` | allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block | derived |
 | `0x2ed77` | `list_destroy` | releases the block when the pointer is set; counterpart of `list_create` | observed |
 | `0x2f8ca` | `memory_available` | probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000` | derived |
-| `0x30050` | `memory_alloc` | allocates the size argument and retries through the out-of-memory handler pointers `DAT_001274ac` and `DAT_001274a8` | derived |
+| `0x30050` | `memory_alloc` | allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1 | derived |
 | `0x3009b` | `printf` | holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions | observed |
 | `0x300be` | `exit` | calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code | observed |
 | `0x300ec` | `free` | forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions | observed |
@@ -189,7 +189,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x19ab0` | `player_update` | runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20` | inferred |
-| `0x1c760` | `object_player_input` | reads the input bits `DAT_00118e1c` and the state at `+0x2f8` | derived |
+| `0x1c760` | `object_player_input` | runs the proximity check, the drive step gated on the state at `+0x2f8` and the input bits `DAT_00118e1c`, and the revolution step | derived |
 | `0x1c79c` | `object_prepare` | runs the preparation steps, gated on the state at `+0x414` | derived |
 | `0x1c810` | `object_physics` | runs the physics and collision steps, gated on the state at `+0x414` | derived |
 | `0x1c84c` | `object_car_link` | indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position | derived |
@@ -206,7 +206,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 <!-- begin generated: motion_update callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x1f94c` | `view_move` | calls `0x1f8b4` and `0x265b4` with the position `param_1 * 2 >> 8` | derived |
+| `0x1f94c` | `view_move` | calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument | derived |
 | `0x27ec8` | `video_present` | called after every draw step | inferred |
 | `0x4d9f4` | `fp_helper` | rounds the value on the FPU stack to an integer | observed |
 <!-- end generated: motion_update callees -->
@@ -218,13 +218,13 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 <!-- begin generated: race_frame callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x1075f` | `video_block_swap_a` | byte-swaps and swaps dwords between the buffer and the region 0x9f dwords ahead, 80 by 400 dwords; gated on the flag 0x10 | derived |
+| `0x1075f` | `video_block_swap_a` | byte-swaps and swaps dwords between the front of the video buffer and the region `0x9f` dwords ahead, 80 passes of 400 dwords | derived |
 | `0x107a1` | `video_block_swap_b` | swaps 200 rows of 160 dwords between the front of the video buffer and the region `0xf960` dwords ahead | derived |
 | `0x28160` | `overlay_dispatch` | reads the option flags in `DAT_000f0002` and calls the overlay for the set flag | derived |
 | `0x29564` | `race_state_update` | switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8` | derived |
 | `0x29610` | `race_heading_update` | angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap | inferred |
 | `0x29818` | `fade_update` | ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present` | derived |
-| `0x2dfac` | `panel_show` | sets a panel position and the visible flag, then calls `0x25af0` | inferred |
+| `0x2dfac` | `panel_show` | stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel | inferred |
 | `0x2e0b4` | `race_panel_0` | the overlay for the race state 0 | inferred |
 | `0x2e21c` | `race_panel_2` | the overlay for the race state 2 | inferred |
 | `0x2e58c` | `race_panel_3` | the overlay for the race state 3 | inferred |
@@ -270,7 +270,7 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 <!-- begin generated: overlay_dispatch callees -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x1f718` | `table_lookup` | calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058` | inferred |
+| `0x1f718` | `table_lookup` | returns the table entry for the index when the table flag is set, and `-1` otherwise | inferred |
 | `0x289bc` | `overlay_queue_update` | walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4 | inferred |
 | `0x28b5c` | `menu_enter` | saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value | derived |
 | `0x28ba4` | `net_race_screen` | the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `menu_space_init`, `0x2e82c`, and `0x29bac` | inferred |
@@ -356,7 +356,7 @@ TABS tables.
 <!-- begin generated: The TABS table loaders -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x4c810` | `stream_layer_init` | calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e` | derived |
+| `0x4c810` | `stream_layer_init` | stores the stream pointer, clears the state word, and runs the six stream layer setup calls | derived |
 | `0x4cf94` | `persptab_load` | opens `TABS\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000` | derived |
 | `0x4d030` | `vis_tab_load` | opens `TABS\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell | derived |
 <!-- end generated: The TABS table loaders -->
@@ -410,7 +410,7 @@ proximity check enables the physics of the objects near the reference point.
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x128e0` | `race_session_start` | sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540` | inferred |
-| `0x22df8` | `timing_update` | reads the flag `DAT_00118e1c & 0x40`; sets the filter table `DAT_0010cf08` to `&DAT_001080e8 + round(1 / DAT_00118e04) * 400` | derived |
+| `0x22df8` | `timing_update` | advances the timing when the replay flag is set: the timing subtraction, the replay read, and the filter entry from the frame rate | derived |
 <!-- end generated: The timing and filter layer -->
 
 `timing_update` divides 1 by the frame delta `DAT_00118e04` and selects a
@@ -551,7 +551,7 @@ the Ghidra references to `0x100074`, `0x1000a3`, `0x1000d1`, and `0x1000ff`.
 | `0x1bf38` | `config_load` | reads `screamer.cfg` and sets a flag from a character | observed |
 | `0x1f1a0` | `mouse_init` | calls interrupt 33h and delays | observed |
 | `0x25db0` | `dpmi_real_int` | sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path | derived |
-| `0x262a8` | `sound_driver_set` | fills an HMI request block and calls the sound driver | inferred |
+| `0x262a8` | `sound_driver_set` | builds the HMI request block at `DAT_001166a4` from the argument and the state words, and calls the sound driver when the driver state is set | inferred |
 | `0x4c8f0` | `video_buf_load` | loads the `VIDEO_BUF` resource through `resource_get`, stores the pointer in `DAT_00021504` and `DAT_00121528`, and releases the stream on failure | observed |
 | `0x8bdec` | `vesa_set_mode` | allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h | derived |
 <!-- end generated: Subsystem initialisation -->

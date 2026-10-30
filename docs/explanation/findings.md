@@ -5626,6 +5626,57 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module dpmi_real_int` and
   `work/rebuild/dpri_out.txt`.
 
+## The object_player_input module
+
+- `object_player_input` at `0x1c760` holds 18 instructions and 58 bytes: the frame, the argument
+  slot, the proximity check at `0x1e30c`, the guard on the state at `+0x2f8` and the input bits
+  `DAT_00118e1c`, the drive step at `0x1cee0`, the revolution step at `0x1d30c`, and the
+  epilogue.  The function runs the proximity check, and when the state at `+0x2f8` is clear and
+  the input bits hold bit 0 or bit 2, it runs the drive step.  The revolution step always runs.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c760 --count 18`.
+- The rebuild with `-of+` holds 17 instructions and 49 bytes, because the V2 compiler keeps the
+  object pointer in a register and drops the argument slot and its reloads.  The identity check
+  stays open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1c760
+  --rebuilt work/rebuild/opimod.exe --rebuilt-map work/rebuild/object_player_input.map
+  --rebuilt-symbol object_player_input_`.
+- The run passes.  The harness prints `0`, `1`, `2`, and `D`: with the state clear and the bits
+  set all three steps run, and with the state set or the bits clear the drive step does not run.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_player_input` and
+  `work/rebuild/opi_out.txt`.
+
+## The last Phase B modules
+
+- `video_block_swap_a` at `0x1075f` holds 25 instructions and 66 bytes: `pushad`, the video buffer
+  pointer, the far pointer at `0x27c` bytes ahead, the two counters, the byte-swap and dword swap
+  loop, and the epilogue.  The module is assembly, because the original is library-style code.
+  The diff reports 25 of 25 instructions equal and the identity check passes; the store records
+  `verified`.  The assembler needs the `.486` model, because `bswap` is a 486 instruction.
+  Evidence: `tools/rebuild/video_block_swap_a.asm` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x1075f
+  --rebuilt work/rebuild/vbsamod.exe --rebuilt-map work/rebuild/video_block_swap_a.map
+  --rebuilt-symbol video_block_swap_a_`.
+- `sound_driver_set` at `0x262a8` holds 24 compared instructions and 79 bytes: the state guards,
+  the HMI request block built at `DAT_001166a4`, the driver call, and the epilogue.  The module is
+  assembly, the identity check passes, and the store records `verified`.
+  Evidence: `tools/rebuild/sound_driver_set.asm` and the diff.
+- `main invoker` at `0xd4324` holds 26 instructions and 79 bytes: the stack alignment, the two
+  stack grow calls, the main call with the argument pair, the exit call, and the epilogue.  The
+  module is assembly, because the original adjusts the stack pointer directly.  The diff reports
+  the link-time addresses verdict, the identity check passes, and the store records `verified`.
+  Evidence: `tools/rebuild/main_invoker.asm` and the diff.
+- `stream_layer_init`, `view_move`, `panel_show`, `table_lookup`, `memory_alloc`, and
+  `timing_update` are C modules.  The rebuilds hold fewer instructions than the originals, because
+  the V2 compiler keeps the arguments in registers and drops the argument slots and their reloads,
+  so the identity checks stay open and the store records `rebuilt` for all six.  The run passes for
+  each one.
+  Evidence: the six `diff_module.py` runs and the six harness runs.
+- The `timing_update` module needs the FPU stubs, and the stub source now also provides the
+  `__CHP` FPU exception check that the compiler emits before a float-to-int conversion.
+  Evidence: `tools/rebuild/fpu_stub.asm` and the link errors.
+- The Phase B batch is complete: all twenty-three Phase B functions carry a recipe and a result.
+  Evidence: `python3 tools/rebuild/store.py list --module stream_layer_init` and the status page.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

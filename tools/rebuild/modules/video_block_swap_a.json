@@ -1,0 +1,24 @@
+{
+  "exe": "vbsamod.exe",
+  "map": "video_block_swap_a.map",
+  "name": "video_block_swap_a",
+  "run": {
+    "command": "vbsamod.exe > vbsa_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "vbsa_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "video_block_swap_a.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_block_swap_a_main.c"
+    }
+  ]
+}

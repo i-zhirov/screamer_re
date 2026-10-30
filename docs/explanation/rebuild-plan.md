@@ -80,16 +80,16 @@ floating-point instructions.
 | `0xd4410` | `dpmi_int31_entry` (done) | 56 | 28 | 1 | 0 |
 | `0x1c810` | `object_physics` (done) | 57 | 18 | 4 | 0 |
 | `0x25db0` | `dpmi_real_int` (done) | 58 | 17 | 0 | 0 |
-| `0x1c760` | `object_player_input` | 58 | 18 | 3 | 0 |
-| `0x4c810` | `stream_layer_init` | 61 | 19 | 6 | 0 |
-| `0x1f94c` | `view_move` | 65 | 22 | 3 | 0 |
-| `0x1075f` | `video_block_swap_a` | 66 | 25 | 0 | 0 |
-| `0x22df8` | `timing_update` | 71 | 20 | 1 | 3 |
-| `0x2dfac` | `panel_show` | 71 | 22 | 1 | 0 |
-| `0x1f718` | `table_lookup` | 74 | 28 | 1 | 0 |
-| `0x30050` | `memory_alloc` | 75 | 31 | 3 | 0 |
-| `0x262a8` | `sound_driver_set` | 79 | 24 | 1 | 0 |
-| `0xd4324` | `main invoker` | 79 | 26 | 4 | 0 |
+| `0x1c760` | `object_player_input` (done) | 58 | 18 | 3 | 0 |
+| `0x4c810` | `stream_layer_init` (done) | 61 | 19 | 6 | 0 |
+| `0x1f94c` | `view_move` (done) | 65 | 22 | 3 | 0 |
+| `0x1075f` | `video_block_swap_a` (done) | 66 | 25 | 0 | 0 |
+| `0x22df8` | `timing_update` (done) | 71 | 20 | 1 | 3 |
+| `0x2dfac` | `panel_show` (done) | 71 | 22 | 1 | 0 |
+| `0x1f718` | `table_lookup` (done) | 74 | 28 | 1 | 0 |
+| `0x30050` | `memory_alloc` (done) | 75 | 31 | 3 | 0 |
+| `0x262a8` | `sound_driver_set` (done) | 79 | 24 | 1 | 0 |
+| `0xd4324` | `main invoker` (done) | 79 | 26 | 4 | 0 |
 
 ### Phase C: 81 to 160 bytes
 
@@ -192,9 +192,7 @@ floating-point instructions.
 
 ## Position
 
-Twenty-seven modules carry a recipe and a result: the twelve Phase A modules,
-the eleven modules of the earlier batches, and the first four Phase B modules.
-The next modules are the remaining Phase B functions in table order.  The
-first four Phase B functions are done: `music_bank_reset` at `0x2f9b0`,
-`object_gear_state` at `0x1db38`, `sprintf` at `0x4d32c`, and `object_prepare`
-at `0x1c79c`.
+Forty-six modules carry a recipe and a result: the twelve Phase A modules, the
+eleven modules of the earlier batches, and the twenty-three Phase B modules.
+The whole Phase B batch is done.  The next modules are the Phase C functions
+in table order, and the first one is `graphics_load` at `0x10ba4`.

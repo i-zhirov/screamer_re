@@ -1,18 +1,49 @@
 {
   "address": "0x2dfac",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "sets a panel position and the visible flag, then calls `0x25af0`"
+      "text": "stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel"
     }
   ],
+  "module": "panel_show",
   "name": "panel_show",
   "notes": [],
   "object_offset": "0x1dfac",
-  "role": "sets a panel position and the visible flag, then calls `0x25af0`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 51,
+        "detail": "the instruction counts differ, 22 and 14",
+        "instructions_equal": 7,
+        "instructions_total": 14,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2dfac",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:8696ef00ad7c0ee972cf628fd287b44d7d7c1c47e728ed7b11f18d73d71db501",
+    "source_digest": "sha256:a8f36f263f32a0c7de728eba38244afe558e97c50bab3f8a8cb500edf4b3ff82",
+    "tool": "run.py"
+  },
+  "role": "stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel",
   "section": "race_frame callees",
   "size": 75,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "panel_show_"
 }

@@ -9,6 +9,7 @@
 .model flat
 public __8087
 public __init_387_emulator
+public __CHP
 .code
 __8087 proc near
         ret
@@ -16,6 +17,9 @@ __8087 endp
 __init_387_emulator proc near
         ret
 __init_387_emulator endp
+__CHP proc near
+        ret
+__CHP endp
 .data
 public _fltused_
 _fltused_ dd 0
