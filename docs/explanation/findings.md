@@ -5729,6 +5729,32 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module stream_close` and
   `work/rebuild/sc_out.txt`.
 
+## The memory_free module
+
+- `memory_free` at `0x2f205` holds 33 instructions and 90 bytes: the five register saves, the
+  frame, the two argument slots, the local register block and segment set, the `dpmi_fill_regs`
+  call at `0x4bf23`, the `dpmi_call` call at `0x4bf4b`, and the epilogue.  The function calls the
+  DPMI function 0x0502 (free memory block): it stores 0x0502 at block offset 0, the high address
+  word at offset `0x10`, and the low address word at offset `0x14`, then returns the status dword
+  at offset `0x18`.  The first argument is stored and not used.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f205 --count 33`.
+- The only caller is `resource_free` at `0x2f470`, which passes the resource pointer in `eax` and
+  the block address in `edx` at the call site `0x2f4ca`.  The rebuilt module keeps the two-argument
+  signature, so the calling convention stays the same.
+  Evidence: the call site at `0x2f4ca` and `tools/rebuild/functions/0x2f470.json`.
+- The rebuild with `-of+` holds 24 instructions, because OpenWatcom V2 keeps the local block
+  address in a register and collapses the repeated loads.  The identity check stays open and the
+  store records `rebuilt`.
+  Evidence: `tools/rebuild/memory_free.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f205
+  --rebuilt work/rebuild/mfmod.exe --rebuilt-map work/rebuild/memory_free.map
+  --rebuilt-symbol memory_free_`.
+- The behavior check passes.  The harness prints `0`, `1`, and `D`: the call holds the interrupt
+  0x31, one block for the input and the result, the segment set, the free request 0x0502, and the
+  split address, and the module returns the status at block offset 0x18.
+  Evidence: `python3 tools/rebuild/harness.py run --module memory_free` and
+  `work/rebuild/mf_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
