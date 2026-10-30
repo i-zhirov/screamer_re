@@ -28,18 +28,17 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 47,
+        "bytes_equal": 9,
+        "bytes_total": 51,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 1,
+        "instructions_equal": 3,
         "instructions_total": 16,
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:df626d8468a90af0e3104f82004ba3becaa6e3e085172ad94ec673147926f6f5",
-    "source_digest": "sha256:2c0c4ec2df8a438358b4cea7b47cde8599a9551404784bfcbb35ae5da82a291c",
+    "date": "2026-10-30",
+    "source_digest": "sha256:037cc227ce0a1597056beeff03bc6902e8ebbccf83e206ad88fc91f31dd9eb40",
     "tool": "run.py"
   },
   "role": "dispatches on the code through a jump table to one message stub per code",

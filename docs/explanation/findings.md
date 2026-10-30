@@ -5379,3 +5379,46 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   prologue and epilogue forms after every change; one build must produce the same mix.  (4) Accept
   a compiler only with its binary.  The run-time banner (`1988-1994`) and the `WSTUB.EXE` stub
   (`patch level .a`) prove the link-time artifacts, not the code generator.
+
+## The error_report switch range and the missing case
+
+- The original switch holds the codes -1 through 22, not 0 through 19.  The dispatch at
+  `0x10978` is `mov eax,[ebp-4]; inc eax; cmp eax,0x17; ja 0x10b87; jmp dword ptr
+  cs:[eax*4+0x918]`, and a controlled 10.0a build shows the bias: a source with the cases
+  0 through 23 emits `cmp eax,0x17` and no `inc`, and a source with the cases -1 through 22
+  emits `inc eax` and `cmp eax,0x17`.  The original holds the `inc`, so its table holds 24
+  entries and covers 24 codes.
+  Evidence: `work/opt/T24.C` and `work/opt/TM1.C`, built with the 10.0a `wcc386` and linked
+  with `wlink system dos4g`; `python3 tools/le.py disasm work/opt/T24.EXE 0x10070 --count 5`
+  holds `cmp eax,0x17` and `python3 tools/le.py disasm work/opt/TM1.EXE 0x10070 --count 5`
+  holds `inc eax; cmp eax,0x17`.
+- The 24 table entries map the code c to the entry c+1: the entries 0 through 19 hold the
+  message offsets `0x44` through `0x35a` for the codes -1 through 18, the entries 20 through
+  22 hold the default body `0x10b87` for the codes 19, 20, and 21, and the entry 23 holds
+  `0x10b71` for the code 22.  The code 0 therefore prints the offset `0x6f`, not `0x44`.
+  Evidence: the jump table at the linear `0x10918` and the body dumps from `0x10996` to
+  `0x10b87`.
+- The reconstruction was shifted by one and lacked the code 22.  The source now holds `case
+  -1` at `0x44`, the cases 0 through 18 at `0x6f` through `0x35a`, `case 22` at `0x369`, and
+  the default at `0x383`; the codes 19, 20, and 21 fall to the default.  Two callers in the
+  game pass the constant 22: `mov eax,0x16; call 0x10978` at `0x4cfbf` and `0x4d05b`.
+  Evidence: `tools/rebuild/error_report.c`, the nine call sites to `0x10978`, and the body
+  at `0x10b71` (`push 0x369; push 0x2fd2; call 0x4bf64`).
+- The module compiles with `-of+` and the corrected range.  The original keeps an EBP frame
+  and stores the code at `[ebp-4]`, and the `-of+` period build reproduces the frame and the
+  dispatch (`inc eax; cmp eax,0x17`, 24 entries).  The period diff holds 10 of 16
+  instructions, up from 1 of 14.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
+- Two differences stay.  The rebuild saves `ebx`, `ecx`, and `edx` around the printer call
+  while the original saves none, so the original's printer declaration tells the compiler
+  that the callee preserves those registers.  The rebuild also shares the body tails through
+  jumps and one epilogue while the original expands every body: each of the 21 bodies holds
+  its own `push`s, its own `call 0x4bf64`, and its own `mov esp,ebp; pop ebp; ret`.
+  Evidence: the two disassemblies and the diff.
+- The V2 declared check holds 3 of 16 instructions, and the behavior check still fails.  The
+  harness prints a screen of `U` bytes and writes an empty `err_out.txt`, a fault of the
+  harness print stub that already shows in the earlier record.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x10978` and the run log.

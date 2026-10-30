@@ -16,7 +16,10 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "error_report.c"
+      "file": "error_report.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
