@@ -304,7 +304,7 @@ The files:
 | `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
 | `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
 | `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
-| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over the codes -1 through 22 with a compiler jump table that the link does not relocate; built with `-of+` |
+| `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over the codes -1 through 22 with a compiler jump table that the link does not relocate; built with `-of+ -ot`, a volatile parameter, and the `modify exact` printer pragma |
 | `error_report_main.c` | the `error_report` test harness: the message table and the variadic printer stub |
 | `bios_video.c` | the rebuilt `bios_video` module: the register sets and the interrupt 10h call |
 | `bios_video_main.c` | the `bios_video` test harness: the fill and call markers |
@@ -374,8 +374,8 @@ module source and its test harness would otherwise share one name.  A source
 may hold a `period_flags` list, which replaces its `flags` for the period
 harness; the V2 harness keeps `flags`.  No record needs it now:
 `list_destroy` and `memory_available` use `-od` for both harnesses, and both
-harnesses match the original instruction sequence.  `error_report` uses `-of+`
-for both harnesses, because the original keeps an EBP frame.  The `frame_step`
+harnesses match the original instruction sequence.  `error_report` uses `-of+ -ot`
+for both harnesses, because the original keeps an EBP frame and expands every case body.  The `frame_step`
 `-of+` epilogue (`mov esp,ebp`) stays a limit; see the last findings section.
 
 The module rebuild:

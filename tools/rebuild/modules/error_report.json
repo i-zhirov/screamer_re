@@ -18,7 +18,8 @@
       "compiler": "wcc386",
       "file": "error_report.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {

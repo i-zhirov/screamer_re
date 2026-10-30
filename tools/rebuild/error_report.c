@@ -7,7 +7,7 @@
  *     mov [ebp-4],eax          ; the code argument
  *     mov eax,[ebp-4]
  *     inc eax                   ; the Watcom jump-table bias
- *     cmp eax,0x17              ; 23 entries
+ *     cmp eax,0x17              ; 24 entries, one per code -1 to 22
  *     ja 0x10b87                ; the default
  *     jmp dword ptr cs:[eax*4 + 0x918]
  *
@@ -21,11 +21,24 @@
  * the default body, and the code 22 prints the offset 0x369.  A period Watcom 10.0a build
  * emits `inc eax` with `cmp eax,0x17` only for a range that starts at -1 and ends at 22;
  * a range that starts at 0 emits no `inc`.  Two callers in the game pass the constant 22.
+ *
+ * The parameter is volatile.  The original stores the argument to the frame and reloads it
+ * before the switch (`sub esp,4`, `mov [ebp-4],eax`, `mov eax,[ebp-4]`); a plain parameter
+ * stays in eax and produces no local.  The volatile qualifier reproduces the store and the
+ * reload, and the same frame-local pattern appears 32 times in the original text.
+ *
+ * The module builds with `-of+ -ot`.  The frame is forced, and the time optimization keeps
+ * one full body per code: the size optimization merges the common call tails, and the
+ * original does not merge them.
  */
 extern void __cdecl report(char *table, ...);
+/* The original saves no register around the call: the printer declaration reports that
+ * only eax changes.  The auxiliary pragma also keeps the C name mapping (`_*`), because a
+ * pragma without a name string maps the symbol to its default object name. */
+#pragma aux report "_*" modify exact [eax];
 extern char message_table[];
 
-void error_report(int code)
+void error_report(volatile int code)
 {
     switch (code) {
     case -1: report(message_table, 0x44); break;

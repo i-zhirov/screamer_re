@@ -5422,3 +5422,39 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   harness prints a screen of `U` bytes and writes an empty `err_out.txt`, a fault of the
   harness print stub that already shows in the earlier record.
   Evidence: `python3 tools/rebuild/run.py run --function 0x10978` and the run log.
+
+## The error_report register saves, the body expansion, and the frame local
+
+- The printer declaration carries an auxiliary pragma, so the build saves no register
+  around the call.  A plain `extern void __cdecl report(char *table, ...)` made the
+  compiler save `ebx`, `ecx`, and `edx` for the whole function.  The pragma
+  `#pragma aux report "_*" modify exact [eax];` reports that only `eax` changes, and the
+  three saves and their epilogue pops disappear.  The name string `"_*"` is required: a
+  pragma without it maps the symbol to `report_` instead of `_report`, and the link fails.
+  Evidence: `work/opt/V1.C` (no pragma, `push ebx; push ecx; push edx`) against
+  `work/opt/V8.C` and `V9.C` (`modify exact [eax ecx edx]`, one save fewer), and
+  `work/opt/VEAX.C` and `VEMPTY.C` (`modify exact [eax]` and `[]`, no save), built with the
+  10.0a compiler.
+- The module builds with `-of+ -ot`.  The default optimization and `-os` merge the common
+  call tails: after the first body, the remaining bodies push their constants and jump into
+  the first body's `push` and `call`.  `-ot` keeps one full body per code, as the original
+  does.  `-oc` alone expands only the first body, and `-od` recovers no jump table.
+  Evidence: `work/opt/E1.C` (`-of+ -ot`, every body full) against `E2.C` (`-os`) and `E3.C`
+  (`-ou`), which keep the jumps.
+- The `code` parameter is volatile.  The original stores the argument to the frame and
+  reloads it before the switch (`sub esp,4`, `mov [ebp-4],eax`, `mov eax,[ebp-4]`).  A plain
+  parameter stays in `eax`, and neither `-of+`, `-ot`, `-d1`, nor `-d1+` produces the store.
+  A `volatile int` parameter reproduces the store and the reload exactly.  The same
+  frame-local pattern appears 32 times in the original text, so it is a code-generator trait
+  of the original source form.
+  Evidence: `work/opt/S2.C` against `S1.C` (a plain local copy) and the parameter census
+  of `STARTH.EXE` object 1 for the byte sequence `83 ec 04 89 45 fc 8b 45 fc`.
+- The period diff now holds 16 of 16 instructions, up from 10 of 16.  The four remaining
+  operand differences are the link-time addresses: the default target, the jump-table
+  address, the message-table base, and the printer address.  One byte-level difference
+  stays: the original encodes a small `push` as `68 44 00 00 00` and the 10.0a build as
+  `6a 44`; `-or`, `-oa`, `-os`, and `-ot` do not change it.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
