@@ -229,7 +229,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | `0x2e21c` | `race_panel_2` | the overlay for the race state 2 | inferred |
 | `0x2e58c` | `race_panel_3` | the overlay for the race state 3 | inferred |
 | `0x2e724` | `race_panel_4` | the overlay for the race state 4 | inferred |
-| `0x2e7cc` | `panel_draw_centered` | reads the size through `0x254a8`, centers it on 0x140, and draws through `0x25020` | derived |
+| `0x2e7cc` | `panel_draw_centered` | the original at `0x2e7cc` holds 34 instructions and 93 bytes: it measures the text through `0x254a8`, halves the measured width with a signed division, centers the half width on the `0x140` screen width, and draws through `0x25020` with the doubled position | derived |
 | `0x81a70` | `sound_update` | a sound library update with the driver block `DAT_00106350` | inferred |
 | `0x8ac78` | `camera_update` | sets the position vector at `+0x3c`, `+0x40`, and `+0x44` and clears the velocity at `+0x6c`, `+0x70`, and `+0x74` | inferred |
 | `0x8c150` | `memcpy` | copies `param_2` dwords to `param_1` | observed |

@@ -1,0 +1,29 @@
+{
+  "exe": "pdcmod.exe",
+  "map": "panel_draw_centered.map",
+  "name": "panel_draw_centered",
+  "run": {
+    "command": "pdcmod.exe > pdc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "pdc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "panel_draw_centered.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "panel_draw_centered_main.c"
+    }
+  ]
+}

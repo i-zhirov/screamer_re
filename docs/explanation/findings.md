@@ -5755,6 +5755,30 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module memory_free` and
   `work/rebuild/mf_out.txt`.
 
+## The panel_draw_centered module
+
+- `panel_draw_centered` at `0x2e7cc` holds 34 instructions and 93 bytes: the frame, the four
+  argument slots, the measure call at `0x254a8`, the signed halving of the measured width, the
+  centering on the `0x140` screen width, the draw call at `0x25020`, and the epilogue.  The
+  function measures the text, halves the measured width, centers that width, and draws the text
+  with the doubled position.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e7cc --count 34`.
+- The measure call receives the two output pointers in `eax` and `edx`, the text in `ebx`, and the
+  font in `ecx`.  The draw call receives the position in `eax` and `edx`, the text in `ebx`, the
+  font in `ecx`, and the fifth argument on the stack.
+  Evidence: the register loads before the two calls at `0x2e7ea` and `0x2e820`.
+- The rebuild with `-of+` holds 37 instructions, because OpenWatcom V2 saves the two registers it
+  uses and lays out the halves and the product differently.  The identity check stays open and the
+  store records `rebuilt`.
+  Evidence: `tools/rebuild/panel_draw_centered.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2e7cc
+  --rebuilt work/rebuild/pdcmod.exe --rebuilt-map work/rebuild/panel_draw_centered.map
+  --rebuilt-symbol panel_draw_centered_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, and `D`: the even width centers on
+  `0x140`, the negative width uses the signed division, and the odd width rounds toward zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module panel_draw_centered` and
+  `work/rebuild/pdc_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

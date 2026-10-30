@@ -98,7 +98,7 @@ floating-point instructions.
 | `0x10ba4` | `graphics_load` (done) | 88 | 40 | 0 | 0 |
 | `0x4c38d` | `stream_close` (done) | 89 | 34 | 3 | 0 |
 | `0x2f205` | `memory_free` (done) | 90 | 33 | 2 | 0 |
-| `0x2e7cc` | `panel_draw_centered` | 93 | 34 | 2 | 0 |
+| `0x2e7cc` | `panel_draw_centered` (done) | 93 | 34 | 2 | 0 |
 | `0xd2008` | `free` | 94 | 35 | 1 | 0 |
 | `0x2a1b0` | `race_cleanup` | 97 | 24 | 12 | 0 |
 | `0x4d030` | `vis_tab_load` | 101 | 31 | 6 | 0 |
@@ -192,8 +192,8 @@ floating-point instructions.
 
 ## Position
 
-Forty-nine modules carry a recipe and a result: the twelve Phase A modules,
-the eleven modules of the earlier batches, the twenty-three Phase B modules, and
-the first three Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
-`0x4c38d`, and `memory_free` at `0x2f205`.  The next module is
-`panel_draw_centered` at `0x2e7cc`.
+Fifty modules carry a recipe and a result: the twelve Phase A modules, the
+eleven modules of the earlier batches, the twenty-three Phase B modules, and the
+first four Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+`0x4c38d`, `memory_free` at `0x2f205`, and `panel_draw_centered` at `0x2e7cc`.
+The next module is `free` at `0xd2008`.
