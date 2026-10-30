@@ -6009,6 +6009,31 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_state_begin` and
   `work/rebuild/rsb_out.txt`.
 
+## The net_race_screen function extent
+
+- The first-return body of `net_race_screen` at `0x28ba4` holds 34 instructions and 118 bytes: the
+  state guard, the menu index and the two table reads, the menu-id switch, and the epilogue.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x28ba4 --count 34`.
+- Observation: the function does not end at that return.  The case blocks after it run to
+  `0x293a7`, so the full function holds 646 instructions and 2052 bytes.  The `function_body` sweep
+  in `tools/le.py` stops at the first `ret`, so the plan table and the record carry the first-return
+  size.  The same limitation applies to `race_state_update` at `0x29564`, which the project already
+  rebuilt as a dispatcher with step stubs.
+  Evidence: the disassembly from `0x28ba4` to `0x293a7` and the `race_state_update` module.
+- The dispatcher reads the menu index at `DAT_0011fb60`, the entry at `DAT_0011fb08`, and the record
+  base at `DAT_00102de8`, then switches on the record id at offset `+4`.  The case ids are 0x00,
+  0x01, 0x02, 0x03, 0x04, 0x15, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, and 0x4d2.
+  The id 0x1c selects the low case when `DAT_00120880 < 0x7a1200` and the high case otherwise.
+  Evidence: the dispatch at `0x28bbf` and the case targets in `tools/rebuild/net_race_screen.c`.
+- The rebuild keeps the dispatcher and represents each case body and the state 2 overlay body at
+  `0x28fd6` as a step function.  The behavior harness runs the overlay entry, the ids 0, 0x1c, 0x1f,
+  and 0x4d2, and an unknown id.  The store records `rebuilt`.
+  Evidence: `tools/rebuild/net_race_screen.c`, `tools/rebuild/net_race_screen_main.c`, and
+  `python3 tools/rebuild/harness.py run --module net_race_screen`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, `3`, `4`, `5`, and `D`: the overlay
+  entry runs the overlay, each known id runs its case, and the unknown id runs no case.
+  Evidence: `work/rebuild/nrs_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and
