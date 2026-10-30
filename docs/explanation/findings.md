@@ -5906,6 +5906,32 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module input_poll` and
   `work/rebuild/ip_out.txt`.
 
+## The race_loop module
+
+- `race_loop` at `0x27700` holds 34 instructions and 110 bytes: the three register saves, the frame,
+  the `race_start` call at `0x27770`, the start-result test, the loop body, the exit test on
+  `DAT_0011ce44`, the `race_end` call at `0x279a4`, and the epilogue.  The loop body calls
+  `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`,
+  `input_map`, `object_update_all`, and `video_fill`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27700 --count 34`.
+- The loop is a do-while: the body runs once before the first `DAT_0011ce44 != 4` test, and the
+  test at `0x2775f` jumps back to the body start at `0x2771b`.  A non-zero start result returns at
+  once and skips the loop and `race_end`.
+  Evidence: the `jne 0x2771b` at `0x2775f` and the start test at `0x27714`.
+- The rebuild with `-of+` holds 24 instructions, because OpenWatcom V2 keeps the loop state in
+  registers and drops the repeated loads.  The identity check stays open and the store records
+  `rebuilt`.
+  Evidence: `tools/rebuild/race_loop.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x27700
+  --rebuilt work/rebuild/rlmod.exe --rebuilt-map work/rebuild/race_loop.map
+  --rebuilt-symbol race_loop_`.
+- The behavior check passes.  The harness prints `0`, `1`, `2`, `3`, and `D`: a non-zero start
+  result returns at once, the state 4 runs the loop once, a clear input flag skips the input poll,
+  and the second iteration sees the state 4 and exits.  The order checks use explicit step
+  comparisons.  The first harness version compared the order through a string pointer, and that
+  comparison failed even when the recorded order was correct; the explicit comparisons pass.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_loop` and `work/rebuild/rl_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

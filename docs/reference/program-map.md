@@ -107,7 +107,7 @@ original Watcom symbol names.
 | `0x10978` | `error_report` | dispatches on the code through a jump table to one message stub per code | observed |
 | `0x127a0` | `engine_init` | calls 17 setup functions, loads `MENU` from `%s\DATA\MUSIC.DAT`, and reads the video mode | derived |
 | `0x128ac` | `engine_shutdown` | counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down | derived |
-| `0x27700` | `race_loop` | starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4 | derived |
+| `0x27700` | `race_loop` | the original at `0x27700` holds 34 instructions and 110 bytes: it calls `race_start` at `0x27770`, returns a non-zero start result, and otherwise runs the loop body `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`, `input_map`, `object_update_all`, and `video_fill` until `DAT_0011ce44` reaches 4, then calls `race_end` at `0x279a4` and returns 0 | derived |
 | `0x27f94` | `frame_update` | clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input | derived |
 | `0x2ecf8` | `list_create` | allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block | derived |
 | `0x2ed77` | `list_destroy` | releases the block when the pointer is set; counterpart of `list_create` | observed |

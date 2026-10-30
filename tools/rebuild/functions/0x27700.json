@@ -1,17 +1,48 @@
 {
   "address": "0x27700",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4"
+      "text": "the original at `0x27700` holds 34 instructions and 110 bytes: it calls `race_start` at `0x27770`, returns a non-zero start result, and otherwise runs the loop body `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`, `input_map`, `object_update_all`, and `video_fill` until `DAT_0011ce44` reaches 4, then calls `race_end` at `0x279a4` and returns 0"
     }
   ],
+  "module": "race_loop",
   "name": "race_loop",
   "notes": [],
-  "role": "starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 90,
+        "detail": "the instruction counts differ, 34 and 24",
+        "instructions_equal": 6,
+        "instructions_total": 24,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27700",
+    "date": "2026-10-30",
+    "fingerprint": "sha256:bea61fe3520eaff4690acce218fa2e47c609bf5ce3b513d796430f9c40f02eb4",
+    "source_digest": "sha256:a9f6b3376202a42d2f5793a964be41ff9682aef34380b47e15432c08e2200137",
+    "tool": "run.py"
+  },
+  "role": "starts a race, runs the frame loop until the session state reaches 4, and ends the race",
   "section": "Program functions",
-  "size": 2,
-  "status": "named"
+  "size": 110,
+  "status": "rebuilt",
+  "symbol": "race_loop_"
 }
