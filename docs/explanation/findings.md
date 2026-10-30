@@ -5521,3 +5521,12 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   disassembly at `0x2eddf` and `0x4bfbd`, and the rows of `docs/reference/program-map.md`.
 - Result: no module besides `error_report` pushes a small integer constant, and no module still
   pushes one where a relocatable pointer is expected.
+
+## The prologue scan and the mid-prologue records
+
+- The prologue scan matched `push ebp; mov ebp,esp`, so it reported the `push ebp` inside the prologue of a function that saves registers first.  Of the 758 records, 545 (all unnamed candidates) sat one to five bytes after the true entry, and their `size` measured the span to the next `push ebp` instead of to the next function.
+  Evidence: the byte scan of the original image at each record address and the `funcs` list.
+- The scan now walks back over the canonical register saves (`ebx`, `ecx`, `edx`, `esi`, `edi`) before the `push ebp`, so it reports the first register save as the function entry.  The `near` command uses the same walk.
+  Evidence: `python3 tools/le.py funcs STARTH.EXE` lists `0x2ed77`, `0x2edad`, `0x2f8ca`, and `0x4bf88` and no longer lists `0x2ed7b`, `0x2edb2`, `0x2f8cf`, or `0x4bf8d`.
+- The seed deletes the lost unknown records, so a real run migrates the store.  The run added 459 records at the true entries and removed the 545 mid-prologue records; 86 of the mid-prologue records shared an entry with an existing record and only lost their duplicate.  The store holds 683 records, no record sits mid-prologue, and the seed reports no difference.
+  Evidence: `python3 tools/rebuild/store.py seed --original STARTH.EXE` (added 459, lost 545), `store.py check` (683 records, 0 violations), and the record scan against the original bytes (0 mid-prologue).

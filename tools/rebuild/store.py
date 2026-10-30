@@ -65,7 +65,6 @@ RUN_STATUSES = ("rebuilt", "matching", "verified")
 LOAD_BASE = 0x1C2000
 ENTRY_ADDRESS = 0x300F8
 EXIT_FLUSH_ADDRESS = 0x300D6
-PRINT_SITE_ADDRESSES = (0x2EDAD, 0x4BF88)
 SEED_LIMIT = 10000
 DEFAULT_ORIGINAL = (
     Path.home() / "Documents/Screamer.app/Contents/Resources/game/STARTH.EXE"
@@ -483,10 +482,6 @@ def scan_candidates(original: Path) -> list[int]:
             candidates.add(int(line, 16))
     candidates.add(ENTRY_ADDRESS)
     candidates.add(EXIT_FLUSH_ADDRESS)
-    # The scan matches `push ebp; mov ebp,esp`, so it stops inside the prologue of a
-    # function that saves registers first.  The two print-site functions save five
-    # registers before `push ebp`, and their entries stay on the list.
-    candidates.update(PRINT_SITE_ADDRESSES)
     return sorted(candidates)
 
 
@@ -539,6 +534,8 @@ def seed(check: bool, original: Path) -> int:
         if address in following:
             record["size"] = following[address] - address
         save_record(record)
+    for address in lost:
+        record_path(address).unlink(missing_ok=True)
     return 0
 
 
