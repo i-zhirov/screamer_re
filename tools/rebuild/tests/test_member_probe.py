@@ -225,6 +225,14 @@ class MemberProbeTestCase(unittest.TestCase):
             self.probe(None, 0, "break", limit=1, close_error=OSError)
         self.assert_game_copy_restored()
 
+    def test_restores_the_original_game_copy_on_a_child_close_os_error(self) -> None:
+        original = bytearray(self.exe.read_bytes())
+        original[member_probe.MEMBER_OPEN_FILE] = 0x57
+        self.exe.write_bytes(bytes(original))
+        with self.assertRaises(OSError):
+            self.probe(None, 0, "break", limit=1, close_error=OSError)
+        self.assertEqual(self.exe.read_bytes(), bytes(original))
+
     def test_propagates_an_os_error_from_the_game_copy_restore(self) -> None:
         real_write_bytes = Path.write_bytes
         calls = {"count": 0}
