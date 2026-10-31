@@ -207,6 +207,19 @@ class MemberProbeTestCase(unittest.TestCase):
         )
         self.assert_game_copy_restored()
 
+    def test_swallows_a_timeout_error_from_the_child_close(self) -> None:
+        errors = io.StringIO()
+        with redirect_stderr(errors):
+            names = self.probe(
+                None, 0, "break", limit=1, close_error=TimeoutError
+            )
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assertIn(
+            "note: the control connection ended during the restore",
+            errors.getvalue(),
+        )
+        self.assert_game_copy_restored()
+
     def test_propagates_a_non_connection_error_during_the_restore(self) -> None:
         with self.assertRaises(RuntimeError):
             self.probe(RuntimeError, 1, "restore")
