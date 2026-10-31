@@ -21,7 +21,8 @@ Stages:
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
-with code 0 when every check passes and code 1 when a check fails.
+with code 0 when every check passes and code 1 when a check fails.  It exits
+with code 2 before any stage when the debugger control port is already in use.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
@@ -37,6 +38,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +51,7 @@ sys.path.insert(0, str(Path(__file__).parent / "rebuild"))
 import store as store_module  # noqa: E402
 
 TOOLS = (
+    "pipeline_check.py",
     "le.py",
     "inventory.py",
     "extract_cd_image.py",
@@ -119,6 +122,21 @@ def last_line(text: str) -> str:
     """The last non-empty line of a tool output."""
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     return lines[-1] if lines else ""
+
+
+def debugger_port_free(port: int) -> bool:
+    """Return False when another process already holds the debugger port.
+
+    The debugger control session binds the loopback address with
+    `SO_REUSEADDR`, so the probe matches that bind.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            server.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
 
 
 def check_syntax(checks: Checks) -> None:
@@ -772,6 +790,14 @@ def main() -> int:
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
     parser.add_argument("--skip-runtime", action="store_true")
     args = parser.parse_args()
+
+    if not args.skip_runtime and not debugger_port_free(args.port):
+        print(
+            f"error: the debugger control port {args.port} is already in use; "
+            "stop the other DOSBox-X session or run with --port",
+            file=sys.stderr,
+        )
+        return 2
 
     game_dir = args.game_dir.resolve()
     work_root = args.work_root.resolve()

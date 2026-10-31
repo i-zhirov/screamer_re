@@ -314,6 +314,10 @@ through the store.
   `save_record` marks a new address and `remove_record` marks a deletion, and
   the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,
   so a later migration cannot leave a stale extent.
+- The pipeline checks the debugger control port before the run-time stages.
+  When another process holds the port (`--port`, default 9876), it prints a
+  clear error and exits with code 2, so a bound port cannot surface as a stage 9
+  bind error.
 
 ### Dependency Management
 
