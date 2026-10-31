@@ -21,6 +21,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import store  # noqa: E402
 
 
+class FakeImage:
+    """The seed reads only the object table of the image."""
+
+    def object_at(self, address: int) -> None:
+        return None
+
+
 class StoreTestCase(unittest.TestCase):
     """A test case with a temporary store and a temporary evidence root."""
 
@@ -676,10 +683,10 @@ class ExtentTestCase(unittest.TestCase):
         store.FUNCTIONS_DIR = self.saved
         self.temporary.cleanup()
 
-    def write(self, address: str, size: int | None) -> None:
+    def write(self, address: str, size: int | None, status: str = "unknown") -> None:
         record = {
             "address": address,
-            "status": "unknown",
+            "status": status,
             "checks": [],
             "evidence": [],
             "notes": [],
@@ -729,15 +736,11 @@ class ExtentTestCase(unittest.TestCase):
         self.write("0x115", 16)
         self.write("0x125", None)
 
-        class Image:
-            def object_at(self, address: int) -> None:
-                return None
-
         # The fixed scan reports the true entries: the seed adds them, drops the
         # mid-prologue records, and recomputes the extents.
         with mock.patch.object(
             store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
-        ), mock.patch.object(store.le, "load", return_value=Image()), (
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
             contextlib.redirect_stdout(io.StringIO())
         ):
             self.assertEqual(store.seed(False, self.original()), 0)
@@ -755,17 +758,67 @@ class ExtentTestCase(unittest.TestCase):
             [],
         )
 
+    def test_initial_seed_leaves_no_overlap(self) -> None:
+        # The first seed: the empty store takes one record per candidate.
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+        self.assertEqual(store.candidate_addresses(), [0x100, 0x110, 0x120])
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
+    def test_manual_candidate_addition_leaves_no_overlap(self) -> None:
+        # The store before the two manual candidates.  The exit record reaches
+        # the free entry and the free record reaches the start-up block.
+        self.write("0x300be", 0x300ec - 0x300be, "named")
+        self.write("0x300ec", 0x30170 - 0x300ec, "named")
+        self.write("0x30170", None, "named")
+
+        # The prologue scan reports the free and the start-up entries; the scan
+        # adds the run-time entry and the exit helper itself.
+        scan = mock.Mock(
+            returncode=0,
+            stdout="candidate function starts: 2\n  0x000300ec\n  0x00030170\n",
+            stderr="",
+        )
+        with mock.patch.object(store.subprocess, "run", return_value=scan), (
+            mock.patch.object(store.le, "load", return_value=FakeImage())
+        ), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(store.seed(False, self.original()), 0)
+
+        self.assertEqual(
+            store.candidate_addresses(),
+            [0x300BE, 0x300D6, 0x300EC, 0x300F8, 0x30170],
+        )
+        self.assertEqual(store.load_record(0x300BE)["size"], 0x300D6 - 0x300BE)
+        self.assertEqual(store.load_record(0x300D6)["size"], 0x300EC - 0x300D6)
+        self.assertEqual(store.load_record(0x300EC)["size"], 0x300F8 - 0x300EC)
+        self.assertEqual(store.load_record(0x300F8)["size"], 0x30170 - 0x300F8)
+        self.assertNotIn("size", store.load_record(0x30170))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
     def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
         self.write("0x100", 99)
         self.write("0x120", 4)
 
-        class Image:
-            def object_at(self, address: int) -> None:
-                return None
-
         with mock.patch.object(
             store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
-        ), mock.patch.object(store.le, "load", return_value=Image()), (
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
             contextlib.redirect_stdout(io.StringIO())
         ):
             self.assertEqual(store.seed(False, self.original()), 0)
