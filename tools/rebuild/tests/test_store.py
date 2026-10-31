@@ -5,6 +5,8 @@ Usage:
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import re
 import struct
@@ -12,6 +14,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -699,7 +702,43 @@ class ExtentTestCase(unittest.TestCase):
         self.assertEqual(store.recompute_sizes(), 2)
         self.assertEqual(store.load_record(0x100)["size"], 16)
         self.assertNotIn("size", store.load_record(0x110))
-        self.assertEqual(store.overlap_addresses([store.load_record(0x100), store.load_record(0x110)]), [])
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(0x100), store.load_record(0x110)]
+            ),
+            [],
+        )
+
+    def original(self) -> Path:
+        path = self.root / "STARTH.EXE"
+        path.write_bytes(b"ORIGINAL")
+        return path
+
+    def test_seed_check_reports_an_overlap(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x110", 4)
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110]
+        ), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(store.seed(True, self.original()), 1)
+
+    def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", 4)
+
+        class Image:
+            def object_at(self, address: int) -> None:
+                return None
+
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=Image()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
 
 
 if __name__ == "__main__":

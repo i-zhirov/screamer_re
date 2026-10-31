@@ -575,10 +575,17 @@ def seed(check: bool, original: Path) -> int:
     addresses = candidate_addresses()
     records = {address: load_record(address) for address in addresses}
     added, lost = seed_diff(candidates, records)
+    overlaps = overlap_addresses(list(records.values()))
     print(f"added: {len(added)}")
     print(f"lost: {len(lost)}")
+    print(f"overlaps: {len(overlaps)}")
     if check:
-        if added or lost:
+        for address, extra in overlaps:
+            print(
+                f"{record_path(address)}: the size reaches {extra} bytes "
+                "past the next entry"
+            )
+        if added or lost or overlaps:
             return 1
         print("no difference")
         return 0
@@ -601,6 +608,7 @@ def seed(check: bool, original: Path) -> int:
         save_record(record)
     for address in lost:
         record_path(address).unlink(missing_ok=True)
+    recompute_sizes()
     return 0
 
 
