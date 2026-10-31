@@ -146,6 +146,26 @@ def candidate_addresses() -> list[int]:
     return sorted(addresses)
 
 
+def mid_prologue_addresses(image: le.LinearExecutable) -> list[int]:
+    """The record addresses that sit inside a prologue instead of at its entry.
+
+    The prologue scan walks back over the register saves, so a record that still
+    sits at the `push ebp` of a prologue that saves registers first is a stale
+    candidate.  The check reads the five bytes before the address, the longest
+    register-save run, and the three bytes of the `push ebp; mov ebp,esp` match.
+    """
+    offenders: list[int] = []
+    for address in candidate_addresses():
+        data = image.read(address - 5, 8)
+        if data is None or len(data) != 8:
+            continue
+        if data[5:8] != b"\x55\x89\xe5":
+            continue
+        if le.prologue_start(data, 5) != 5:
+            offenders.append(address)
+    return offenders
+
+
 def advance_status(checks: list[str], verdicts: dict[str, str]) -> str | None:
     """Return the status the declared checks support, or None for no write.
 
@@ -616,7 +636,7 @@ def command_list(arguments: argparse.Namespace) -> int:
     return 0
 
 
-def command_check() -> int:
+def command_check(original: Path | None) -> int:
     violations: list[str] = []
     count = 0
     for address in candidate_addresses():
@@ -626,6 +646,14 @@ def command_check() -> int:
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
             violations.extend(validate_module(path))
+    if original is not None:
+        if not original.is_file():
+            print(f"error: the original image {original} is missing", file=sys.stderr)
+            return 2
+        for address in mid_prologue_addresses(le.load(original)):
+            violations.append(
+                f"{record_path(address)}: the address sits inside a prologue"
+            )
     for violation in violations:
         print(violation)
     print(f"{count} records, {len(violations)} violations")
@@ -725,7 +753,14 @@ def parse_arguments() -> argparse.Namespace:
     list_parser.add_argument("--module", help="keep one module")
     list_parser.add_argument("--json", action="store_true", help="print JSON")
 
-    subparsers.add_parser("check", help="prove every invariant of the model")
+    check_parser = subparsers.add_parser(
+        "check", help="prove every invariant of the model"
+    )
+    check_parser.add_argument(
+        "--original",
+        type=Path,
+        help="the original LE executable; adds the prologue-entry check",
+    )
     return parser.parse_args()
 
 
@@ -740,7 +775,7 @@ def main() -> int:
             return command_note(arguments)
         if arguments.command == "list":
             return command_list(arguments)
-        return command_check()
+        return command_check(arguments.original)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

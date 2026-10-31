@@ -599,5 +599,47 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(lost, [0x300F0])
 
 
+class PrologueTestCase(unittest.TestCase):
+    """A function record must sit at the entry, not inside the prologue.
+
+    The scan walks back over the register saves, so a record that still sits at
+    the `push ebp` of a prologue that saves registers first is a stale candidate.
+    The walk itself is a pure function and runs everywhere; the store check needs
+    the original image and skips without it.
+    """
+
+    def test_prologue_start_walks_back_over_the_saves(self) -> None:
+        self.assertEqual(
+            store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x89\xe5", 5), 0
+        )
+        self.assertEqual(store.le.prologue_start(b"\x55\x89\xe5", 0), 0)
+        self.assertEqual(store.le.prologue_start(b"\x90\x55\x89\xe5", 1), 1)
+        self.assertEqual(store.le.prologue_start(b"\x53\x55\x89\xe5", 1), 0)
+        self.assertEqual(store.le.prologue_start(b"\x52\x53\x55\x89\xe5", 2), 1)
+
+    def test_mid_prologue_addresses_reports_a_stale_candidate(self) -> None:
+        class Image:
+            def __init__(self, data: bytes) -> None:
+                self.data = data
+
+            def read(self, address: int, count: int) -> bytes:
+                return self.data[address : address + count]
+
+        saved = store.candidate_addresses
+        try:
+            store.candidate_addresses = lambda: [0x100, 0x105]
+            image = Image(b"\x00" * 0x104 + b"\x53\x55\x89\xe5\xc3")
+            self.assertEqual(store.mid_prologue_addresses(image), [0x105])
+        finally:
+            store.candidate_addresses = saved
+
+    @unittest.skipUnless(
+        store.DEFAULT_ORIGINAL.is_file(), "the original image is absent"
+    )
+    def test_no_record_sits_mid_prologue(self) -> None:
+        image = store.le.load(store.DEFAULT_ORIGINAL)
+        self.assertEqual(store.mid_prologue_addresses(image), [])
+
+
 if __name__ == "__main__":
     unittest.main()

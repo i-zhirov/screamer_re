@@ -677,7 +677,15 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     The store is the only module registry, so the stage runs the store check,
     the seed check, and the drift check, and it renders the status page.
     """
-    result = run([sys.executable, "tools/rebuild/store.py", "check"])
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/store.py",
+            "check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
     checks.check(
         "stage 12: the store holds no violation",
         result.returncode == 0,
