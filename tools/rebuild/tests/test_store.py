@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import re
+import struct
 import sys
 import tempfile
 import unittest
@@ -617,28 +618,45 @@ class PrologueTestCase(unittest.TestCase):
         self.assertEqual(store.le.prologue_start(b"\x53\x55\x89\xe5", 1), 0)
         self.assertEqual(store.le.prologue_start(b"\x52\x53\x55\x89\xe5", 2), 1)
 
-    def test_mid_prologue_addresses_reports_a_stale_candidate(self) -> None:
+    def test_non_entry_addresses_reports_each_form(self) -> None:
         class Image:
-            def __init__(self, data: bytes) -> None:
+            def __init__(self, data: bytes, code: range) -> None:
                 self.data = data
+                self.code = code
 
             def read(self, address: int, count: int) -> bytes:
-                return self.data[address : address + count]
+                return bytes(self.data[address : address + count])
 
+            def object_at(self, target: int) -> object | None:
+                return object() if target in self.code else None
+
+        data = bytearray(b"\x40" * 0x200)
+        data[0x104] = 0x53
+        data[0x105:0x108] = b"\x55\x89\xe5"
+        data[0x10F:0x112] = b"\x00\x00\x00"
+        data[0x11F] = 0xE9
+        data[0x120:0x124] = struct.pack("<i", 0x140 - (0x11F + 5))
+        image = Image(data, range(0x100, 0x200))
         saved = store.candidate_addresses
         try:
-            store.candidate_addresses = lambda: [0x100, 0x105]
-            image = Image(b"\x00" * 0x104 + b"\x53\x55\x89\xe5\xc3")
-            self.assertEqual(store.mid_prologue_addresses(image), [0x105])
+            store.candidate_addresses = lambda: [0x105, 0x110, 0x120, 0x130]
+            self.assertEqual(
+                store.non_entry_addresses(image),
+                [
+                    (0x105, "sits inside a prologue"),
+                    (0x110, "sits in alignment padding"),
+                    (0x120, "sits inside a jump"),
+                ],
+            )
         finally:
             store.candidate_addresses = saved
 
     @unittest.skipUnless(
         store.DEFAULT_ORIGINAL.is_file(), "the original image is absent"
     )
-    def test_no_record_sits_mid_prologue(self) -> None:
+    def test_no_record_sits_outside_an_entry(self) -> None:
         image = store.le.load(store.DEFAULT_ORIGINAL)
-        self.assertEqual(store.mid_prologue_addresses(image), [])
+        self.assertEqual(store.non_entry_addresses(image), [])
 
 
 if __name__ == "__main__":

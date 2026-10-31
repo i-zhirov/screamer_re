@@ -26,6 +26,7 @@ import hashlib
 import json
 import re
 import subprocess
+import struct
 import sys
 from datetime import date
 from pathlib import Path
@@ -146,23 +147,67 @@ def candidate_addresses() -> list[int]:
     return sorted(addresses)
 
 
-def mid_prologue_addresses(image: le.LinearExecutable) -> list[int]:
-    """The record addresses that sit inside a prologue instead of at its entry.
+PADDING_BYTES = (0x00, 0x90, 0xCC)
 
-    The prologue scan walks back over the register saves, so a record that still
-    sits at the `push ebp` of a prologue that saves registers first is a stale
-    candidate.  The check reads the five bytes before the address, the longest
-    register-save run, and the three bytes of the `push ebp; mov ebp,esp` match.
+
+def _jump_span(image: le.LinearExecutable, address: int, data: bytes) -> bool:
+    """Tell whether `address` sits inside a jump or a call instruction.
+
+    A data table can hold a jump opcode just before a real function entry, so a
+    relative jump counts only when its target is mapped.  The indirect form
+    `jmp/call dword ptr [abs]` of a thunk counts without a target.
     """
-    offenders: list[int] = []
+    base = address - 5
+    for step in range(1, 6):
+        position = 5 - step
+        if position < 0:
+            break
+        opcode = data[position]
+        if opcode in (0xE9, 0xE8):
+            length = 5
+        elif opcode == 0xEB:
+            length = 2
+        elif opcode == 0xFF and data[position + 1] in (0x15, 0x25):
+            length = 6
+        else:
+            continue
+        if step >= length:
+            continue
+        if opcode == 0xFF:
+            return True
+        if opcode == 0xEB:
+            relative = struct.unpack_from("<b", data, position + 1)[0]
+            target = base + position + 2 + relative
+        else:
+            relative = struct.unpack_from("<i", data, position + 1)[0]
+            target = base + position + length + relative
+        if image.object_at(target) is not None:
+            return True
+    return False
+
+
+def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
+    """The record addresses that are not a function entry, with the reason.
+
+    Three forms are caught: a stale candidate at the `push ebp` of a prologue
+    that saves registers first, an address inside a run of alignment padding, and
+    an address inside a jump or call instruction such as a thunk.
+    """
+    offenders: list[tuple[int, str]] = []
     for address in candidate_addresses():
-        data = image.read(address - 5, 8)
-        if data is None or len(data) != 8:
+        data = image.read(address - 5, 12)
+        if data is None or len(data) != 12:
             continue
-        if data[5:8] != b"\x55\x89\xe5":
+        if data[5:8] == b"\x55\x89\xe5" and le.prologue_start(data[:8], 5) != 5:
+            offenders.append((address, "sits inside a prologue"))
             continue
-        if le.prologue_start(data, 5) != 5:
-            offenders.append(address)
+        if data[5] in PADDING_BYTES and (
+            data[4] in PADDING_BYTES or data[6] in PADDING_BYTES
+        ):
+            offenders.append((address, "sits in alignment padding"))
+            continue
+        if _jump_span(image, address, data):
+            offenders.append((address, "sits inside a jump"))
     return offenders
 
 
@@ -650,10 +695,8 @@ def command_check(original: Path | None) -> int:
         if not original.is_file():
             print(f"error: the original image {original} is missing", file=sys.stderr)
             return 2
-        for address in mid_prologue_addresses(le.load(original)):
-            violations.append(
-                f"{record_path(address)}: the address sits inside a prologue"
-            )
+        for address, reason in non_entry_addresses(le.load(original)):
+            violations.append(f"{record_path(address)}: the address {reason}")
     for violation in violations:
         print(violation)
     print(f"{count} records, {len(violations)} violations")
