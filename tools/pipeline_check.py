@@ -223,23 +223,29 @@ def verify_reference_digests(checks: Checks, game_dir: Path) -> None:
 
 def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float) -> None:
     """Hook the member open and check the first member name."""
-    from member_probe import run_probe
-
-    result = run(
-        [
-            sys.executable,
-            "tools/member_probe.py",
-            "--game-dir",
-            str(work_dir / "game"),
-            "--work-dir",
-            str(work_dir),
-            "--port",
-            str(port),
-            "--timeout",
-            str(timeout),
-        ],
-        timeout=timeout + 30,
-    )
+    command = [
+        sys.executable,
+        "tools/member_probe.py",
+        "--game-dir",
+        str(work_dir / "game"),
+        "--work-dir",
+        str(work_dir),
+        "--port",
+        str(port),
+        "--limit",
+        "55",
+        "--timeout",
+        str(timeout),
+    ]
+    result = run(command, timeout=timeout + 30)
+    if result.returncode != 0 and (
+        "closed the control connection" in result.stderr
+        or "timed out" in result.stderr
+    ):
+        # The debugger can close the connection or time out before the probe
+        # reports the first member.  The same run passes on a retry, so repeat
+        # it once.
+        result = run(command, timeout=timeout + 30)
     checks.check("stage 9: the member probe runs", result.returncode == 0, result.stderr.strip())
     checks.check(
         "stage 9: the member probe observes the first member",

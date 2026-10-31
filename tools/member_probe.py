@@ -20,6 +20,10 @@ the `ESI` value at the new top, which is exactly what the skipped `push esi` doe
 The member open then runs with a correct frame, and the opcode stays in place, so the
 next member open fires the same breakpoint.
 
+The DOSBox-X control connection can close or time out when the game exits, after the
+member list is complete.  A close or a timeout after the first member open ends the
+run with the collected names; either before the first member open is an error.
+
 Usage:
     python3 tools/member_probe.py [--game-dir DIR] [--limit N]
 """
@@ -79,54 +83,63 @@ def run_probe(
             session.request("EXEC", "BPINT 3")
             session.request("EXEC", "RUN")
             deadline = time.time() + timeout
-            while time.time() < deadline and len(names) < limit:
-                session.request("BREAK", timeout=10.0)
-                response = session.request("EXEC", "EV " + " ".join(REGISTERS), timeout=10.0)
-                values = response.lines[-1].split() if response.lines else []
-                if len(values) < len(REGISTERS):
+            try:
+                while time.time() < deadline and len(names) < limit:
+                    session.request("BREAK", timeout=10.0)
+                    response = session.request("EXEC", "EV " + " ".join(REGISTERS), timeout=10.0)
+                    values = response.lines[-1].split() if response.lines else []
+                    if len(values) < len(REGISTERS):
+                        session.request("EXEC", "RUN", timeout=10.0)
+                        time.sleep(1)
+                        continue
+                    registers = dict(zip(REGISTERS, (int(value, 16) for value in values)))
+                    eip = registers["EIP"]
+                    probe = f"P{len(names):02d}.BIN"
+                    session.request(
+                        "EXEC", f"MEMDUMPBIN 0150:{eip:X} 5 {probe}", timeout=10.0
+                    )
+                    path = work_dir / probe
+                    head = path.read_bytes()[:5] if path.exists() else b""
+                    if head != MEMBER_OPEN_PATCHED:
+                        session.request("EXEC", "RUN", timeout=10.0)
+                        time.sleep(1)
+                        continue
+                    dump = f"N{len(names):02d}.BIN"
+                    session.request(
+                        "EXEC",
+                        f"MEMDUMPBIN 0150:{STACK_DUMP_BASE:X} {STACK_DUMP_SIZE:X} {dump}",
+                        timeout=10.0,
+                    )
+                    name = ""
+                    offset = registers["EBX"] - STACK_DUMP_BASE
+                    stack = work_dir / dump
+                    if stack.exists() and 0 <= offset < STACK_DUMP_SIZE:
+                        raw = stack.read_bytes()[offset : offset + 32]
+                        name = raw.split(b"\x00")[0].decode("latin1", "replace")
+                    names.append(name)
+                    print(
+                        f"member open {len(names) - 1}: t={time.monotonic() - started:6.1f}s "
+                        f"EIP={eip:X} EBX={registers['EBX']:X} name={name!r}"
+                    )
+                    # Repair the skipped push esi: the frame needs the ESI on the stack.
+                    esp = registers["ESP"] - 4
+                    session.request("EXEC", f"SR ESP {esp:X}", timeout=10.0)
+                    value = registers["ESI"]
+                    session.request(
+                        "EXEC",
+                        f"SMV {esp:X} " + " ".join(f"{byte:02X}" for byte in value.to_bytes(4, "little")),
+                        timeout=10.0,
+                    )
                     session.request("EXEC", "RUN", timeout=10.0)
-                    time.sleep(1)
-                    continue
-                registers = dict(zip(REGISTERS, (int(value, 16) for value in values)))
-                eip = registers["EIP"]
-                probe = f"P{len(names):02d}.BIN"
-                session.request(
-                    "EXEC", f"MEMDUMPBIN 0150:{eip:X} 5 {probe}", timeout=10.0
-                )
-                path = work_dir / probe
-                head = path.read_bytes()[:5] if path.exists() else b""
-                if head != MEMBER_OPEN_PATCHED:
-                    session.request("EXEC", "RUN", timeout=10.0)
-                    time.sleep(1)
-                    continue
-                dump = f"N{len(names):02d}.BIN"
-                session.request(
-                    "EXEC",
-                    f"MEMDUMPBIN 0150:{STACK_DUMP_BASE:X} {STACK_DUMP_SIZE:X} {dump}",
-                    timeout=10.0,
-                )
-                name = ""
-                offset = registers["EBX"] - STACK_DUMP_BASE
-                stack = work_dir / dump
-                if stack.exists() and 0 <= offset < STACK_DUMP_SIZE:
-                    raw = stack.read_bytes()[offset : offset + 32]
-                    name = raw.split(b"\x00")[0].decode("latin1", "replace")
-                names.append(name)
+                    time.sleep(0.05)
+            except (ConnectionError, TimeoutError) as error:
+                if not names:
+                    raise
                 print(
-                    f"member open {len(names) - 1}: t={time.monotonic() - started:6.1f}s "
-                    f"EIP={eip:X} EBX={registers['EBX']:X} name={name!r}"
+                    f"note: the control connection ended after "
+                    f"{len(names)} member opens: {error}",
+                    file=sys.stderr,
                 )
-                # Repair the skipped push esi: the frame needs the ESI on the stack.
-                esp = registers["ESP"] - 4
-                session.request("EXEC", f"SR ESP {esp:X}", timeout=10.0)
-                value = registers["ESI"]
-                session.request(
-                    "EXEC",
-                    f"SMV {esp:X} " + " ".join(f"{byte:02X}" for byte in value.to_bytes(4, "little")),
-                    timeout=10.0,
-                )
-                session.request("EXEC", "RUN", timeout=10.0)
-                time.sleep(0.05)
     finally:
         child.close()
         data[MEMBER_OPEN_FILE] = original[0]

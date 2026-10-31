@@ -223,6 +223,13 @@ menu space init loads the menu data first.  The sample loads are the `SFXSBASE`
 records and the two `MAP1` records, 14 members from `skidfx.RAW` to `airplane.RAW`.
 The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
 `TRAIN.RAW` do not appear, so the run-time trace confirms the static conclusion.
+
+The DOSBox-X control connection can close or time out when the game exits, after the
+member list is complete.  The tool ends the run with the collected names when the
+close or timeout follows the first member open; either before the first member open
+is an error.  The pipeline caps the probe at the 55-open demo window, and it repeats
+the probe once when the connection closes or times out before the first member.
+
 The module base varies between runs, so the hook recognizes the stop by the patched
 bytes and not by the module address.  The tool restores the game copy at the end of
 every run.
@@ -698,7 +705,9 @@ view, the radare2 cross-check, the container member probe, the sound bank decode
 the record run, and the store check.  The check pins the reference values from
 the reference pages.  The tool exits with code 0 when every check passes.  The
 radare2 stage is skipped when `r2` is not on PATH, and the record run is skipped
-when Docker is missing.
+when Docker is missing.  The member probe stage caps the probe at the 55-open
+demo window and repeats it once when the control connection closes or times out
+before the first member, because that failure is transient.
 
 ```sh
 python3 tools/pipeline_check.py \

@@ -6416,3 +6416,17 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/store.py check`,
   `python3 -m unittest discover -s tools/rebuild/tests`, and
   `python3 tools/rebuild/harness.py run --module dpmi_int31_entry`.
+
+## The member probe control connection
+
+- The member probe sometimes loses the DOSBox-X control connection or hits a
+  request timeout after the member list is complete, because the game exits
+  before the next debugger request.  The probe now ends the run with the
+  collected names when the close or timeout follows the first member open, and
+  the pipeline repeats the probe once when either happens before the first
+  member.  Either before the first member still fails the stage.  The change
+  makes stage 9 pass on the first pipeline attempt; the earlier full runs
+  failed only this stage.
+  Evidence: the stage 9 failures (`error: DOSBox-X closed the control
+  connection`), the direct probe run (`error: timed out` after 50 member
+  opens), and the clean stage 9 after the change.
