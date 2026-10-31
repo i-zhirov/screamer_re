@@ -18,7 +18,9 @@ frame that is four bytes too high, and the return address comes from the wrong s
 slot.  The tool repairs the frame: it decrements the stack pointer by four and writes
 the `ESI` value at the new top, which is exactly what the skipped `push esi` does.
 The member open then runs with a correct frame, and the opcode stays in place, so the
-next member open fires the same breakpoint.
+next member open fires the same breakpoint.  The tool keeps the full pre-patch copy
+as a backup, and the backup restore and the final restore retry once after a partial
+write.
 
 The DOSBox-X control connection can close or time out when the game exits, after the
 member list is complete.  A close or a timeout after the first member open ends the
@@ -46,6 +48,14 @@ STACK_DUMP_SIZE = 0x2000
 REGISTERS = ("EAX", "EBX", "ECX", "EDX", "ESI", "EDI", "EBP", "ESP", "EIP")
 
 
+def write_retry(exe: Path, payload: bytes) -> None:
+    """Write the game copy, retrying once after a partial write."""
+    try:
+        exe.write_bytes(payload)
+    except OSError:
+        exe.write_bytes(payload)
+
+
 def run_probe(
     game_dir: Path,
     work_dir: Path,
@@ -65,7 +75,7 @@ def run_probe(
         exe.write_bytes(bytes(data))
     except OSError:
         try:
-            exe.write_bytes(backup)
+            write_retry(exe, backup)
         except OSError:
             pass
         raise
@@ -167,7 +177,7 @@ def run_probe(
             )
         finally:
             data[MEMBER_OPEN_FILE] = original[0]
-            exe.write_bytes(bytes(data))
+            write_retry(exe, bytes(data))
             print("game copy restored")
     return names
 

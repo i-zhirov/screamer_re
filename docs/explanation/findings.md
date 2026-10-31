@@ -6432,7 +6432,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   close propagates after the game copy is restored.  An `OSError` from the
   game-copy restore propagates and leaves the copy patched, so a failed restore
   stays loud.  A patch-write failure restores the full backup before the error
-  propagates, and a backup read failure leaves the copy untouched.  The change
+  propagates, and a backup read failure leaves the copy untouched.  The backup
+  restore and the final restore retry once after a partial write, so a
+  transient partial failure still ends with the original bytes.  The change
   makes stage 9 pass on the first pipeline attempt; the earlier full runs
   failed only this stage.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control
