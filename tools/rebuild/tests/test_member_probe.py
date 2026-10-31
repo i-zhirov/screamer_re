@@ -270,6 +270,27 @@ class MemberProbeTestCase(unittest.TestCase):
                 self.probe(None, 0, "break", limit=1)
         self.assert_game_copy_restored()
 
+    def test_restores_the_original_game_copy_after_a_partial_patch_write(
+        self,
+    ) -> None:
+        real_write_bytes = Path.write_bytes
+        calls = {"count": 0}
+
+        def write_bytes(path: Path, data: bytes) -> int:
+            if path == self.exe:
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    real_write_bytes(
+                        path, data[: member_probe.MEMBER_OPEN_FILE + 1]
+                    )
+                    raise OSError("simulated partial patch write failure")
+            return real_write_bytes(path, data)
+
+        with mock.patch.object(Path, "write_bytes", write_bytes):
+            with self.assertRaises(OSError):
+                self.probe(None, 0, "break", limit=1)
+        self.assert_game_copy_restored()
+
     def test_leaves_the_original_game_copy_on_a_backup_read_error(self) -> None:
         real_read_bytes = Path.read_bytes
 
