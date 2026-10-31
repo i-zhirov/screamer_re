@@ -254,6 +254,35 @@ class MemberProbeTestCase(unittest.TestCase):
             self.probe(None, 0, "break", limit=1, child=child)
         self.assert_game_copy_restored()
 
+    def test_restores_the_original_game_copy_on_a_patch_write_error(self) -> None:
+        real_write_bytes = Path.write_bytes
+        calls = {"count": 0}
+
+        def write_bytes(path: Path, data: bytes) -> int:
+            if path == self.exe:
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    raise OSError("simulated patch write failure")
+            return real_write_bytes(path, data)
+
+        with mock.patch.object(Path, "write_bytes", write_bytes):
+            with self.assertRaises(OSError):
+                self.probe(None, 0, "break", limit=1)
+        self.assert_game_copy_restored()
+
+    def test_leaves_the_original_game_copy_on_a_backup_read_error(self) -> None:
+        real_read_bytes = Path.read_bytes
+
+        def read_bytes(path: Path) -> bytes:
+            if path == self.exe:
+                raise OSError("simulated backup read failure")
+            return real_read_bytes(path)
+
+        with mock.patch.object(Path, "read_bytes", read_bytes):
+            with self.assertRaises(OSError):
+                self.probe(None, 0, "break", limit=1)
+        self.assert_game_copy_restored()
+
     def test_propagates_an_os_error_from_the_game_copy_restore(self) -> None:
         real_write_bytes = Path.write_bytes
         calls = {"count": 0}

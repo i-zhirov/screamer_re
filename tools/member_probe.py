@@ -58,9 +58,17 @@ def run_probe(
     exe = game_dir / "STARTH.EXE"
     data = bytearray(exe.read_bytes())
     original = bytes(data[MEMBER_OPEN_FILE : MEMBER_OPEN_FILE + 5])
+    backup = bytes(data)
     print(f"member open bytes: {original.hex(' ')}")
     data[MEMBER_OPEN_FILE] = 0xCC
-    exe.write_bytes(bytes(data))
+    try:
+        exe.write_bytes(bytes(data))
+    except OSError:
+        try:
+            exe.write_bytes(backup)
+        except OSError:
+            pass
+        raise
 
     env = dict(os.environ)
     env["TERM"] = "xterm-256color"

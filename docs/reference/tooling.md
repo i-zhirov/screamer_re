@@ -232,9 +232,11 @@ names, and the game copy is restored even when the child close raises.  A
 non-connection exception from the restore still propagates; only the
 control-connection errors are swallowed.  A generic `OSError` from the child
 close propagates after the game copy is restored, and an `OSError` from the
-game-copy restore propagates and leaves the copy patched.  The pipeline caps the
-probe at the 55-open demo window, and it repeats the probe once when the
-connection closes or times out before the first member.
+game-copy restore propagates and leaves the copy patched.  A patch-write
+failure restores the full backup before the error propagates, and a backup read
+failure leaves the copy untouched.  The pipeline caps the probe at the 55-open
+demo window, and it repeats the probe once when the connection closes or times
+out before the first member.
 
 The module base varies between runs, so the hook recognizes the stop by the patched
 bytes and not by the module address.  The tool restores the game copy at the end of

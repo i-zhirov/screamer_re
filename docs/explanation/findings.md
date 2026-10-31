@@ -6431,8 +6431,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   control-connection errors are swallowed.  A generic `OSError` from the child
   close propagates after the game copy is restored.  An `OSError` from the
   game-copy restore propagates and leaves the copy patched, so a failed restore
-  stays loud.  The change makes stage 9 pass on the first pipeline attempt; the
-  earlier full runs failed only this stage.
+  stays loud.  A patch-write failure restores the full backup before the error
+  propagates, and a backup read failure leaves the copy untouched.  The change
+  makes stage 9 pass on the first pipeline attempt; the earlier full runs
+  failed only this stage.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control
   connection`), the direct probe run (`error: timed out` after 50 member
   opens), and the clean stage 9 after the change.
