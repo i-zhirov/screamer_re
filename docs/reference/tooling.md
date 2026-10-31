@@ -717,7 +717,9 @@ the reference pages.  The tool exits with code 0 when every check passes.  The
 radare2 stage is skipped when `r2` is not on PATH, and the record run is skipped
 when Docker is missing.  The member probe stage caps the probe at the 55-open
 demo window and repeats it once when the control connection closes or times out
-before the first member, because that failure is transient.
+before the first member, because that failure is transient.  It also repeats the
+probe once when a mid-run timeout ends the run before the sample loads, because
+the fallback then makes the run look successful.
 
 ```sh
 python3 tools/pipeline_check.py \
