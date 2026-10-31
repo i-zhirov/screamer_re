@@ -41,7 +41,7 @@
   },
   "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
   "section": "Program functions",
-  "size": 5,
+  "size": 58,
   "status": "verified",
   "symbol": "memory_available_"
 }

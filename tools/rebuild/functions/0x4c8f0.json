@@ -12,6 +12,6 @@
   "notes": [],
   "role": "loads the `VIDEO_BUF` resource",
   "section": "Subsystem initialisation",
-  "size": 2,
+  "size": 56,
   "status": "named"
 }

@@ -12,6 +12,6 @@
   "notes": [],
   "role": "ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present`",
   "section": "race_frame callees",
-  "size": 4,
+  "size": 156,
   "status": "named"
 }

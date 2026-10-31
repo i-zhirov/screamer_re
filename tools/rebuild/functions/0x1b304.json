@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads three 28-byte records from a `cfg` file",
   "section": "Subsystem initialisation",
-  "size": 3,
+  "size": 144,
   "status": "named"
 }

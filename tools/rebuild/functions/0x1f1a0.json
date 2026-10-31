@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls interrupt 33h and delays",
   "section": "Subsystem initialisation",
-  "size": 3,
+  "size": 236,
   "status": "named"
 }

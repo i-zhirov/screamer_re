@@ -12,6 +12,6 @@
   "notes": [],
   "role": "compares the frame counter with `FUN_0001fa04` and sets `DAT_00101e04` after 1000",
   "section": "object_update_all callees",
-  "size": 1,
+  "size": 60,
   "status": "named"
 }

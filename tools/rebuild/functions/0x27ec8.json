@@ -12,6 +12,6 @@
   "notes": [],
   "role": "called after every draw step",
   "section": "motion_update callees",
-  "size": 2,
+  "size": 124,
   "status": "named"
 }

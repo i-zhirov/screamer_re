@@ -12,6 +12,6 @@
   "notes": [],
   "role": "builds a file name, opens it, and parses records until `END_LIST`",
   "section": "Subsystem initialisation",
-  "size": 2,
+  "size": 584,
   "status": "named"
 }

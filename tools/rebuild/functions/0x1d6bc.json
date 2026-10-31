@@ -12,6 +12,6 @@
   "notes": [],
   "role": "integrates the position at `+0x454` and `+0x45c` from the float velocity at `+0x460` and `+0x468` and the factor at `+0x450` with the frame delta `DAT_00118e04`, damps the factor with `DAT_0010cf08 + 0x13c`, and clamps it at 0",
   "section": "object_transform callees",
-  "size": 1,
+  "size": 376,
   "status": "named"
 }

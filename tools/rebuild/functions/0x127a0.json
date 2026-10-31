@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls 17 setup functions, loads `MENU` from `%s\\DATA\\MUSIC.DAT`, and reads the video mode",
   "section": "Program functions",
-  "size": 4,
+  "size": 268,
   "status": "named"
 }

@@ -12,6 +12,6 @@
   "notes": [],
   "role": "returns the word at `stream + 0x70`",
   "section": "Resource loader",
-  "size": 5,
+  "size": 48,
   "status": "named"
 }

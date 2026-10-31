@@ -12,6 +12,6 @@
   "notes": [],
   "role": "copies the dwords and then the bytes",
   "section": "The runtime memory manager",
-  "size": 43,
+  "size": 38,
   "status": "named"
 }

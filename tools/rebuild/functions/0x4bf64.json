@@ -12,6 +12,6 @@
   "notes": [],
   "role": "wraps `0xd429f` with the real-mode buffer and the protected-mode buffer",
   "section": "The runtime memory manager",
-  "size": 41,
+  "size": 36,
   "status": "named"
 }

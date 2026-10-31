@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure",
   "section": "Subsystem initialisation",
-  "size": 3,
+  "size": 112,
   "status": "named"
 }

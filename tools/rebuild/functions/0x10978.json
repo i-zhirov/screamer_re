@@ -43,7 +43,7 @@
   },
   "role": "dispatches on the code through a jump table to one message stub per code",
   "section": "Program functions",
-  "size": 558,
+  "size": 556,
   "status": "matching",
   "symbol": "error_report_"
 }

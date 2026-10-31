@@ -13,6 +13,6 @@
   "object_offset": "0x3bf88",
   "role": "reports the engine file errors and the interface name from +0x78 through the printer at 0x4bf64",
   "section": "The resource layer",
-  "size": 5,
+  "size": 261,
   "status": "named"
 }

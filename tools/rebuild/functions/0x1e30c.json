@@ -12,6 +12,6 @@
   "notes": [],
   "role": "measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate",
   "section": "The vehicle state chain",
-  "size": 4,
+  "size": 264,
   "status": "named"
 }

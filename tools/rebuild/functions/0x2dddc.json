@@ -12,6 +12,6 @@
   "notes": [],
   "role": "takes a 0x38-byte record from `0xc6fbc` and copies the name `DAT_001203cc` into it",
   "section": "overlay_dispatch callees",
-  "size": 5,
+  "size": 396,
   "status": "named"
 }

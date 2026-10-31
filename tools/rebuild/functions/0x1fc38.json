@@ -12,6 +12,6 @@
   "notes": [],
   "role": "waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02",
   "section": "race_loop callees",
-  "size": 2,
+  "size": 312,
   "status": "named"
 }

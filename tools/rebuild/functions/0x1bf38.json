@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads `screamer.cfg` and sets a flag from a character",
   "section": "Subsystem initialisation",
-  "size": 1,
+  "size": 2088,
   "status": "named"
 }

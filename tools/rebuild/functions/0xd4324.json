@@ -12,6 +12,6 @@
   "object_offset": "0xc4324",
   "role": "loads `argc` and `argv`, calls `main`",
   "section": "Startup path",
-  "size": 1,
+  "size": 236,
   "status": "named"
 }

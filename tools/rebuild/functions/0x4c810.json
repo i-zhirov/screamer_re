@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e`",
   "section": "The TABS table loaders",
-  "size": 1,
+  "size": 64,
   "status": "named"
 }

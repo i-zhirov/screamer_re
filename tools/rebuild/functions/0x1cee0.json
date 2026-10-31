@@ -12,6 +12,6 @@
   "notes": [],
   "role": "computes the drive force from `+0x2e4`, `+0x2f0`, and the throttle `+0x3fc`; sets the brake flag `+0x2c0` when the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times the frame delta",
   "section": "The vehicle state chain",
-  "size": 1,
+  "size": 300,
   "status": "named"
 }

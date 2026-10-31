@@ -12,6 +12,6 @@
   "notes": [],
   "role": "builds `%s\\DATA\\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d`",
   "section": "The sound loaders",
-  "size": 2,
+  "size": 688,
   "status": "named"
 }

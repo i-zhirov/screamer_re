@@ -13,6 +13,6 @@
   "object_offset": "0x1e7cc",
   "role": "reads the size through `0x254a8`, centers it on 0x140, and draws through `0x25020`",
   "section": "race_frame callees",
-  "size": 101,
+  "size": 96,
   "status": "named"
 }

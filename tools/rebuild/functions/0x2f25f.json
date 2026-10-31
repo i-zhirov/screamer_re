@@ -12,6 +12,6 @@
   "notes": [],
   "role": "walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066`",
   "section": "The resource layer",
-  "size": 4,
+  "size": 199,
   "status": "named"
 }

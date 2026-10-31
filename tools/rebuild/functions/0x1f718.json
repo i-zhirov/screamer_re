@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058`",
   "section": "overlay_dispatch callees",
-  "size": 3,
+  "size": 76,
   "status": "named"
 }

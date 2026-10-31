@@ -12,6 +12,6 @@
   "notes": [],
   "role": "saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value",
   "section": "overlay_dispatch callees",
-  "size": 2,
+  "size": 72,
   "status": "named"
 }

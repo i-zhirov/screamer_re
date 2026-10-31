@@ -12,6 +12,6 @@
   "notes": [],
   "role": "starts a race through `FUN_00027770` and loops until the session state `DAT_0011ce44` reaches 4",
   "section": "Program functions",
-  "size": 2,
+  "size": 112,
   "status": "named"
 }

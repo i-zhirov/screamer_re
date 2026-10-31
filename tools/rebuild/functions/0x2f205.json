@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls INT 31h AX=0x0502 with the address in EBX:ECX",
   "section": "The resource layer",
-  "size": 4,
+  "size": 90,
   "status": "named"
 }

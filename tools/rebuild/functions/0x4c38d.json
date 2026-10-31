@@ -12,6 +12,6 @@
   "notes": [],
   "role": "frees the buffers and closes the handle; the counterpart of `fopen`",
   "section": "Resource loader",
-  "size": 5,
+  "size": 89,
   "status": "named"
 }

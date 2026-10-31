@@ -13,6 +13,6 @@
   "object_offset": "0x1f9b0",
   "role": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct",
   "section": "The sound loaders",
-  "size": 50,
+  "size": 48,
   "status": "named"
 }

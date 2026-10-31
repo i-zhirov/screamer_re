@@ -13,6 +13,6 @@
   "object_offset": "0x17a34",
   "role": "gated on the session state `DAT_0011ce44`",
   "section": "object_update_all callees",
-  "size": 45,
+  "size": 40,
   "status": "named"
 }

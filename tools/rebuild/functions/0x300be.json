@@ -42,7 +42,7 @@
   },
   "role": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code",
   "section": "Program functions",
-  "size": 46,
+  "size": 24,
   "status": "verified",
   "symbol": "exit_"
 }

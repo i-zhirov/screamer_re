@@ -12,6 +12,6 @@
   "notes": [],
   "role": "opens `TABS\\VIS.TAB` with the mode `rb` and reads `fread(buffer, 1, 0x40740, stream)` into the `VIS.TAB` cell",
   "section": "The TABS table loaders",
-  "size": 3,
+  "size": 104,
   "status": "named"
 }

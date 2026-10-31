@@ -12,6 +12,6 @@
   "notes": [],
   "role": "computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`",
   "section": "object_physics callees",
-  "size": 1,
+  "size": 216,
   "status": "named"
 }

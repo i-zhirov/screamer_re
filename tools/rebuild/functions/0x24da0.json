@@ -12,6 +12,6 @@
   "notes": [],
   "role": "walks the 28-byte control records at `DAT_001197d8` with floating-point scaling",
   "section": "race_loop callees",
-  "size": 5,
+  "size": 2176,
   "status": "named"
 }

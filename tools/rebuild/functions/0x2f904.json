@@ -12,6 +12,6 @@
   "notes": [],
   "role": "queries the free memory through INT 31h AX=0x0500 and keeps the pool size at `+0x24` in 4 KB pages",
   "section": "The resource layer",
-  "size": 5,
+  "size": 129,
   "status": "named"
 }

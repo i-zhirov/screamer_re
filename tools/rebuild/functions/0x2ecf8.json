@@ -12,6 +12,6 @@
   "notes": [],
   "role": "allocates `count` records of `0x1c` bytes, stores the pointer, the cursor, and the count, and zeroes the block",
   "section": "Program functions",
-  "size": 4,
+  "size": 127,
   "status": "named"
 }

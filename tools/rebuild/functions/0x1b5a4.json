@@ -13,6 +13,6 @@
   "object_offset": "0xb5a4",
   "role": "seeks 0x300 bytes before the end, reads the palette, shifts every palette byte right by 2, reads the 128-byte PCX header, and decodes the RLE runs",
   "section": "The graphics decoders",
-  "size": 407,
+  "size": 404,
   "status": "named"
 }

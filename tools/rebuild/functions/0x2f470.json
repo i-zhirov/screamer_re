@@ -12,6 +12,6 @@
   "notes": [],
   "role": "frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise",
   "section": "The resource layer",
-  "size": 4,
+  "size": 126,
   "status": "named"
 }

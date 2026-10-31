@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls INT 31h AX=0x0100 with the size in 16-byte paragraphs; the segment times 16 is the linear address",
   "section": "The resource layer",
-  "size": 3,
+  "size": 118,
   "status": "named"
 }

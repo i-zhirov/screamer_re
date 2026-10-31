@@ -12,6 +12,6 @@
   "notes": [],
   "role": "processes a music request record and sets a state from 0 to 6",
   "section": "frame_update callees",
-  "size": 2,
+  "size": 112,
   "status": "named"
 }

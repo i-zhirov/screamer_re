@@ -13,6 +13,6 @@
   "object_offset": "0x810",
   "role": "allocates the engine object and creates its list",
   "section": "Subsystem initialisation",
-  "size": 185,
+  "size": 184,
   "status": "named"
 }

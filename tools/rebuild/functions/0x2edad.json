@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reports a memory-handler fault, the slot count, and the handler name through the printer at 0x4bf64",
   "section": "The resource layer",
-  "size": 5,
+  "size": 291,
   "status": "named"
 }

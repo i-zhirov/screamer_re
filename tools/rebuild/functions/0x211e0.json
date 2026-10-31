@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads the control bits `DAT_00118e1c` and dispatches the game action",
   "section": "race_loop callees",
-  "size": 4,
+  "size": 240,
   "status": "named"
 }

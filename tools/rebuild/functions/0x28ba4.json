@@ -12,6 +12,6 @@
   "notes": [],
   "role": "the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `menu_space_init`, `0x2e82c`, and `0x29bac`",
   "section": "overlay_dispatch callees",
-  "size": 5,
+  "size": 2052,
   "status": "named"
 }

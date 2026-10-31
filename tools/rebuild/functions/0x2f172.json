@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address",
   "section": "The resource layer",
-  "size": 3,
+  "size": 147,
   "status": "named"
 }

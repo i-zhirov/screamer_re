@@ -13,6 +13,6 @@
   "object_offset": "0x9ab0",
   "role": "runs five steps on the player structure `DAT_00110a20`",
   "section": "object_update_all callees",
-  "size": 61,
+  "size": 56,
   "status": "named"
 }

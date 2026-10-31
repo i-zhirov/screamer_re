@@ -12,6 +12,6 @@
   "notes": [],
   "role": "loads `gfx\\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits",
   "section": "frame_update callees",
-  "size": 5,
+  "size": 560,
   "status": "named"
 }

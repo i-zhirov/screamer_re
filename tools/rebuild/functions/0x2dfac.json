@@ -13,6 +13,6 @@
   "object_offset": "0x1dfac",
   "role": "sets a panel position and the visible flag, then calls `0x25af0`",
   "section": "race_frame callees",
-  "size": 75,
+  "size": 72,
   "status": "named"
 }

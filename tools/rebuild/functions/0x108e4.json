@@ -42,7 +42,7 @@
   },
   "role": "builds a record with the argument and calls interrupt 10h through the run-time",
   "section": "Program functions",
-  "size": 3,
+  "size": 148,
   "status": "rebuilt",
   "symbol": "bios_video_"
 }

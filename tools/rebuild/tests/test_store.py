@@ -659,5 +659,48 @@ class PrologueTestCase(unittest.TestCase):
         self.assertEqual(store.non_entry_addresses(image), [])
 
 
+class ExtentTestCase(unittest.TestCase):
+    """A record's size must not reach past the next entry."""
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        self.saved = store.FUNCTIONS_DIR
+        store.FUNCTIONS_DIR = self.root / "functions"
+        store.FUNCTIONS_DIR.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        store.FUNCTIONS_DIR = self.saved
+        self.temporary.cleanup()
+
+    def write(self, address: str, size: int | None) -> None:
+        record = {
+            "address": address,
+            "status": "unknown",
+            "checks": [],
+            "evidence": [],
+            "notes": [],
+        }
+        if size is not None:
+            record["size"] = size
+        store.save_record(record)
+
+    def test_overlap_addresses_reports_a_stale_size(self) -> None:
+        records = [
+            {"address": "0x100", "size": 20},
+            {"address": "0x110", "size": 4},
+            {"address": "0x120"},
+        ]
+        self.assertEqual(store.overlap_addresses(records), [(0x100, 4)])
+
+    def test_recompute_sizes_rewrites_the_stale_reach(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x110", 99)
+        self.assertEqual(store.recompute_sizes(), 2)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x110))
+        self.assertEqual(store.overlap_addresses([store.load_record(0x100), store.load_record(0x110)]), [])
+
+
 if __name__ == "__main__":
     unittest.main()

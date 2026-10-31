@@ -681,12 +681,63 @@ def command_list(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def overlap_addresses(records: list[dict]) -> list[tuple[int, int]]:
+    """The records whose `size` reaches past the next entry.
+
+    Returns the address and the number of bytes past the next entry.  The `size`
+    is the distance to the next entry of the moment the record was seeded, so a
+    moved entry leaves a stale reach.
+    """
+    ordered = sorted(records, key=lambda record: int(record["address"], 16))
+    offenders: list[tuple[int, int]] = []
+    for record, following in zip(ordered, ordered[1:]):
+        address = int(record["address"], 16)
+        size = record.get("size")
+        if size is None:
+            continue
+        next_address = int(following["address"], 16)
+        if address + size > next_address:
+            offenders.append((address, address + size - next_address))
+    return offenders
+
+
+def recompute_sizes() -> int:
+    """Rewrite `size` as the distance to the next entry and return the count.
+
+    The seed writes the field only for a new record, so an entry that moves
+    leaves the survivors with a stale reach.  The last record holds no next
+    entry, so its field is removed.
+    """
+    addresses = candidate_addresses()
+    updated = 0
+    for index, address in enumerate(addresses):
+        record = load_record(address)
+        if index + 1 < len(addresses):
+            size = addresses[index + 1] - address
+            if record.get("size") == size:
+                continue
+            record["size"] = size
+        elif "size" in record:
+            del record["size"]
+        else:
+            continue
+        save_record(record)
+        updated += 1
+    return updated
+
+
 def command_check(original: Path | None) -> int:
     violations: list[str] = []
     count = 0
+    records: list[dict] = []
     for address in candidate_addresses():
         count += 1
         violations.extend(validate_record(record_path(address)))
+        records.append(load_record(address))
+    for address, extra in overlap_addresses(records):
+        violations.append(
+            f"{record_path(address)}: the size reaches {extra} bytes past the next entry"
+        )
     if MODULES_DIR.is_dir():
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
@@ -796,6 +847,9 @@ def parse_arguments() -> argparse.Namespace:
     list_parser.add_argument("--module", help="keep one module")
     list_parser.add_argument("--json", action="store_true", help="print JSON")
 
+    subparsers.add_parser(
+        "size", help="rewrite the size of every record as the distance to the next entry"
+    )
     check_parser = subparsers.add_parser(
         "check", help="prove every invariant of the model"
     )
@@ -818,6 +872,9 @@ def main() -> int:
             return command_note(arguments)
         if arguments.command == "list":
             return command_list(arguments)
+        if arguments.command == "size":
+            print(f"updated {recompute_sizes()} records")
+            return 0
         return command_check(arguments.original)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)

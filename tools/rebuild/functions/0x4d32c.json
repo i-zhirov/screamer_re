@@ -12,6 +12,6 @@
   "notes": [],
   "role": "formats into a buffer through the run-time `vsprintf` and writes the terminator",
   "section": "Resource loader",
-  "size": 53,
+  "size": 52,
   "status": "named"
 }
