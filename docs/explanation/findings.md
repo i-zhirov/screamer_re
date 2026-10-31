@@ -6424,7 +6424,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   before the next debugger request.  The probe now ends the run with the
   collected names when the close or timeout follows the first member open, and
   the pipeline repeats the probe once when either happens before the first
-  member.  Either before the first member still fails the stage.  The change
+  member.  Either before the first member still fails the stage.  A close while
+  the probe restores the frame or the game copy also keeps the collected names,
+  and the game copy is restored even when the child close raises.  The change
   makes stage 9 pass on the first pipeline attempt; the earlier full runs
   failed only this stage.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control

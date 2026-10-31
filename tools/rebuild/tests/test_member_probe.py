@@ -31,24 +31,48 @@ class FakeSession:
         work_dir: Path,
         error: type[Exception] | None,
         members_before_error: int,
+        error_at: str,
     ) -> None:
         self.work_dir = work_dir
         self.error = error
         self.members_before_error = members_before_error
+        self.error_at = error_at
         self.members = 0
 
     def __enter__(self) -> "FakeSession":
         return self
 
     def __exit__(self, *_exc: object) -> None:
+        if (
+            self.error is not None
+            and self.error_at == "exit"
+            and self.members > 0
+        ):
+            raise self.error(
+                "simulated control connection close during the restore"
+            )
         return None
 
     def request(
         self, command: str, payload: str = "", timeout: float | None = None
     ) -> FakeResponse:
-        if command == "BREAK":
-            if self.error is not None and self.members >= self.members_before_error:
+        if self.error is not None:
+            if (
+                self.error_at == "break"
+                and command == "BREAK"
+                and self.members >= self.members_before_error
+            ):
                 raise self.error("simulated control connection close")
+            if (
+                self.error_at == "restore"
+                and command == "EXEC"
+                and payload.startswith("SR ESP")
+                and self.members > 0
+            ):
+                raise self.error(
+                    "simulated control connection close during the restore"
+                )
+        if command == "BREAK":
             return FakeResponse([])
         if command == "EXEC" and payload.startswith("EV "):
             values = [
@@ -81,11 +105,14 @@ class FakeSession:
 class FakePtyProcess:
     """A stand-in for the DOSBox-X child process."""
 
-    def __init__(self, *_args: object, **_kwargs: object) -> None:
-        pass
+    def __init__(self, close_error: type[Exception] | None = None) -> None:
+        self.close_error = close_error
 
     def close(self) -> None:
-        pass
+        if self.close_error is not None:
+            raise self.close_error(
+                "simulated control connection close during the restore"
+            )
 
 
 class MemberProbeTestCase(unittest.TestCase):
@@ -104,33 +131,66 @@ class MemberProbeTestCase(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def probe(self, error: type[Exception], members_before_error: int) -> list[str]:
-        session = FakeSession(self.work, error, members_before_error)
-        with mock.patch.object(member_probe, "PtyProcess", FakePtyProcess), \
-                mock.patch.object(
-                    member_probe,
-                    "ControlSession",
-                    lambda port, timeout: session,
-                ), \
-                mock.patch.object(member_probe.time, "sleep", lambda seconds: None):
+    def probe(
+        self,
+        error: type[Exception] | None,
+        members_before_error: int = 1,
+        error_at: str = "break",
+        limit: int = 200,
+        close_error: type[Exception] | None = None,
+    ) -> list[str]:
+        session = FakeSession(
+            self.work, error, members_before_error, error_at
+        )
+        with mock.patch.object(
+            member_probe,
+            "PtyProcess",
+            lambda *args, **kwargs: FakePtyProcess(close_error),
+        ), mock.patch.object(
+            member_probe,
+            "ControlSession",
+            lambda port, timeout: session,
+        ), mock.patch.object(member_probe.time, "sleep", lambda seconds: None):
             return member_probe.run_probe(
-                self.game, self.work, 9999, 200, 300.0, "dosbox-x"
+                self.game, self.work, 9999, limit, 300.0, "dosbox-x"
             )
 
-    def test_returns_the_names_when_the_connection_closes_mid_run(self) -> None:
-        names = self.probe(ConnectionError, 1)
-        self.assertEqual(names, ["MENU.dtr"])
+    def assert_game_copy_restored(self) -> None:
         self.assertEqual(
             self.exe.read_bytes()[member_probe.MEMBER_OPEN_FILE], 0
         )
 
+    def test_returns_the_names_when_the_connection_closes_mid_run(self) -> None:
+        names = self.probe(ConnectionError, 1, "break")
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
+
     def test_returns_the_names_when_the_connection_times_out_mid_run(self) -> None:
-        names = self.probe(TimeoutError, 1)
+        names = self.probe(TimeoutError, 1, "break")
         self.assertEqual(names, ["MENU.dtr"])
 
     def test_raises_when_the_connection_closes_before_the_first_member(self) -> None:
         with self.assertRaises(ConnectionError):
-            self.probe(ConnectionError, 0)
+            self.probe(ConnectionError, 0, "break")
+
+    def test_returns_the_names_when_the_connection_closes_during_the_restore(
+        self,
+    ) -> None:
+        names = self.probe(ConnectionError, 1, "restore")
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
+
+    def test_returns_the_names_when_the_session_closes_during_the_restore(
+        self,
+    ) -> None:
+        names = self.probe(ConnectionError, 1, "exit", limit=1)
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
+
+    def test_restores_the_game_copy_when_the_child_close_fails(self) -> None:
+        names = self.probe(None, 0, "break", limit=1, close_error=ConnectionError)
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
 
 
 if __name__ == "__main__":

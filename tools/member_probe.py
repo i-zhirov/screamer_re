@@ -140,8 +140,23 @@ def run_probe(
                     f"{len(names)} member opens: {error}",
                     file=sys.stderr,
                 )
+    except (ConnectionError, TimeoutError) as error:
+        if not names:
+            raise
+        print(
+            f"note: the control connection ended during the restore after "
+            f"{len(names)} member opens: {error}",
+            file=sys.stderr,
+        )
     finally:
-        child.close()
+        try:
+            child.close()
+        except (ConnectionError, TimeoutError) as error:
+            print(
+                f"note: the control connection ended during the restore after "
+                f"{len(names)} member opens: {error}",
+                file=sys.stderr,
+            )
         data[MEMBER_OPEN_FILE] = original[0]
         exe.write_bytes(bytes(data))
         print("game copy restored")
