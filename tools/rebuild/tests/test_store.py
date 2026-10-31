@@ -722,6 +722,39 @@ class ExtentTestCase(unittest.TestCase):
         ), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(store.seed(True, self.original()), 1)
 
+    def test_mid_prologue_migration_leaves_no_overlap(self) -> None:
+        # The store before the migration: the candidates sit at the `push ebp`
+        # inside the prologue, and each size reaches the next old candidate.
+        self.write("0x105", 16)
+        self.write("0x115", 16)
+        self.write("0x125", None)
+
+        class Image:
+            def object_at(self, address: int) -> None:
+                return None
+
+        # The fixed scan reports the true entries: the seed adds them, drops the
+        # mid-prologue records, and recomputes the extents.
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=Image()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+
+        self.assertEqual(store.candidate_addresses(), [0x100, 0x110, 0x120])
+        for address in (0x105, 0x115, 0x125):
+            self.assertFalse(store.record_path(address).exists())
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
     def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
         self.write("0x100", 99)
         self.write("0x120", 4)
