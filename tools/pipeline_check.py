@@ -238,13 +238,21 @@ def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float
         str(timeout),
     ]
     result = run(command, timeout=timeout + 30)
-    if result.returncode != 0 and (
-        "closed the control connection" in result.stderr
-        or "timed out" in result.stderr
-    ):
+    samples_missing = (
+        "name='skidfx.RAW'" not in result.stdout
+        or "name='airplane.RAW'" not in result.stdout
+    )
+    if (
+        result.returncode != 0
+        and (
+            "closed the control connection" in result.stderr
+            or "timed out" in result.stderr
+        )
+    ) or (result.returncode == 0 and samples_missing):
         # The debugger can close the connection or time out before the probe
-        # reports the first member.  The same run passes on a retry, so repeat
-        # it once.
+        # reports the first member.  A mid-run timeout can also end the probe
+        # before the sample loads, and the fallback then makes the run look
+        # successful.  Repeat the probe once in both cases.
         result = run(command, timeout=timeout + 30)
     checks.check("stage 9: the member probe runs", result.returncode == 0, result.stderr.strip())
     checks.check(
