@@ -891,6 +891,22 @@ class ExtentTestCase(unittest.TestCase):
         self.assertEqual(store.load_record(0x100)["size"], 16)
         self.assertEqual(store.load_record(0x110)["size"], 16)
 
+    def test_sync_extents_is_a_no_op_when_nothing_is_dirty(self) -> None:
+        self.write("0x100", 16)
+        self.write("0x110", None)
+        # The two new records set the mark, so the first sync runs the recompute.
+        with mock.patch.object(
+            store, "recompute_sizes", wraps=store.recompute_sizes
+        ) as first:
+            self.assertEqual(store.sync_extents(), 0)
+        first.assert_called_once()
+        record = store.load_record(0x110)
+        # The clean store skips the recompute: the hooks stay cheap.
+        with mock.patch.object(store, "recompute_sizes") as second:
+            self.assertEqual(store.sync_extents(), 0)
+        second.assert_not_called()
+        self.assertEqual(store.load_record(0x110), record)
+
     def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
         self.write("0x100", 99)
         self.write("0x120", 4)
