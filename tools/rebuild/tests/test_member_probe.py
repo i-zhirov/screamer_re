@@ -192,6 +192,25 @@ class MemberProbeTestCase(unittest.TestCase):
         self.assertEqual(names, ["MENU.dtr"])
         self.assert_game_copy_restored()
 
+    def test_propagates_a_non_connection_error_during_the_restore(self) -> None:
+        with self.assertRaises(RuntimeError):
+            self.probe(RuntimeError, 1, "restore")
+        self.assert_game_copy_restored()
+
+    def test_propagates_a_non_connection_error_when_the_session_restores(
+        self,
+    ) -> None:
+        with self.assertRaises(RuntimeError):
+            self.probe(RuntimeError, 1, "exit", limit=1)
+        self.assert_game_copy_restored()
+
+    def test_propagates_a_non_connection_error_when_the_child_close_fails(
+        self,
+    ) -> None:
+        with self.assertRaises(RuntimeError):
+            self.probe(None, 0, "break", limit=1, close_error=RuntimeError)
+        self.assert_game_copy_restored()
+
 
 if __name__ == "__main__":
     unittest.main()

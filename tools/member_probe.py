@@ -157,9 +157,10 @@ def run_probe(
                 f"{len(names)} member opens: {error}",
                 file=sys.stderr,
             )
-        data[MEMBER_OPEN_FILE] = original[0]
-        exe.write_bytes(bytes(data))
-        print("game copy restored")
+        finally:
+            data[MEMBER_OPEN_FILE] = original[0]
+            exe.write_bytes(bytes(data))
+            print("game copy restored")
     return names
 
 

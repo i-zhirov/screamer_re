@@ -6426,9 +6426,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the pipeline repeats the probe once when either happens before the first
   member.  Either before the first member still fails the stage.  A close while
   the probe restores the frame or the game copy also keeps the collected names,
-  and the game copy is restored even when the child close raises.  The change
-  makes stage 9 pass on the first pipeline attempt; the earlier full runs
-  failed only this stage.
+  and the game copy is restored even when the child close raises.  A
+  non-connection exception from the restore still propagates; only the
+  control-connection errors are swallowed.  The change makes stage 9 pass on the
+  first pipeline attempt; the earlier full runs failed only this stage.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control
   connection`), the direct probe run (`error: timed out` after 50 member
   opens), and the clean stage 9 after the change.

@@ -228,9 +228,11 @@ The DOSBox-X control connection can close or time out when the game exits, after
 member list is complete.  The tool ends the run with the collected names when the
 close or timeout follows the first member open; either before the first member open
 is an error.  A close during the frame or game-copy restore keeps the collected
-names, and the game copy is restored even when the child close raises.  The pipeline
-caps the probe at the 55-open demo window, and it repeats the probe once when the
-connection closes or times out before the first member.
+names, and the game copy is restored even when the child close raises.  A
+non-connection exception from the restore still propagates; only the
+control-connection errors are swallowed.  The pipeline caps the probe at the
+55-open demo window, and it repeats the probe once when the connection closes or
+times out before the first member.
 
 The module base varies between runs, so the hook recognizes the stop by the patched
 bytes and not by the module address.  The tool restores the game copy at the end of
