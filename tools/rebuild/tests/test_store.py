@@ -759,7 +759,9 @@ class ExtentTestCase(unittest.TestCase):
         )
 
     def test_initial_seed_leaves_no_overlap(self) -> None:
-        # The first seed: the empty store takes one record per candidate.
+        # The first seed: the store already holds the analysis record, whose
+        # extent spans the region that the scan now splits into three entries.
+        self.write("0x100", 0x40, "named")
         with mock.patch.object(
             store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
         ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
