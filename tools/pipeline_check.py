@@ -22,7 +22,9 @@ Stages:
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
 with code 0 when every check passes and code 1 when a check fails.  It exits
-with code 2 before any stage when the debugger control port is already in use.
+with code 2 before any stage when the debugger control port is already in use,
+the game directory is missing, the reference executable is missing, or the work
+root cannot be created.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
@@ -800,8 +802,29 @@ def main() -> int:
         return 2
 
     game_dir = args.game_dir.resolve()
+    if not game_dir.is_dir():
+        print(
+            f"error: the game directory {args.game_dir} is missing or not a "
+            "directory",
+            file=sys.stderr,
+        )
+        return 2
+    if not (game_dir / args.exe).is_file():
+        print(
+            f"error: the reference executable {args.exe} is missing in "
+            f"{args.game_dir}",
+            file=sys.stderr,
+        )
+        return 2
     work_root = args.work_root.resolve()
-    work_root.mkdir(parents=True, exist_ok=True)
+    try:
+        work_root.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        print(
+            f"error: the work root {args.work_root} cannot be created: {error}",
+            file=sys.stderr,
+        )
+        return 2
 
     checks = Checks()
     check_syntax(checks)

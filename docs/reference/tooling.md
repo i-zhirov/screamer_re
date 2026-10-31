@@ -584,7 +584,9 @@ the reference pages.  The tool exits with code 0 when every check passes.  The
 radare2 stage is skipped when `r2` is not on PATH, and the record run is skipped
 when Docker is missing.  The tool checks the debugger control port before the
 run-time stages: when another process holds the port, it prints a clear error
-and exits with code 2 before any stage.  Use `--port` to pick another port.
+and exits with code 2 before any stage.  Before any stage it also refuses a
+missing game directory, a missing reference executable, and a work root it
+cannot create, with the same exit code.  Use `--port` to pick another port.
 
 ```sh
 python3 tools/pipeline_check.py \
