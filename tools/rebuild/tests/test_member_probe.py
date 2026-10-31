@@ -8,6 +8,7 @@ from __future__ import annotations
 import io
 import sys
 import tempfile
+import threading
 import unittest
 from contextlib import redirect_stderr
 from pathlib import Path
@@ -117,6 +118,13 @@ class FakePtyProcess:
             )
 
 
+class FakeKillProcess:
+    """A child process whose kill call fails."""
+
+    def kill(self) -> None:
+        raise OSError("simulated kill failure")
+
+
 class MemberProbeTestCase(unittest.TestCase):
     """Run the probe loop with a session that ends after the first member."""
 
@@ -140,14 +148,16 @@ class MemberProbeTestCase(unittest.TestCase):
         error_at: str = "break",
         limit: int = 200,
         close_error: type[Exception] | None = None,
+        child: object | None = None,
     ) -> list[str]:
         session = FakeSession(
             self.work, error, members_before_error, error_at
         )
+        pty = child if child is not None else FakePtyProcess(close_error)
         with mock.patch.object(
             member_probe,
             "PtyProcess",
-            lambda *args, **kwargs: FakePtyProcess(close_error),
+            lambda *args, **kwargs: pty,
         ), mock.patch.object(
             member_probe,
             "ControlSession",
@@ -231,6 +241,20 @@ class MemberProbeTestCase(unittest.TestCase):
         self.exe.write_bytes(bytes(original))
         with self.assertRaises(OSError):
             self.probe(None, 0, "break", limit=1, close_error=OSError)
+        self.assertEqual(self.exe.read_bytes(), bytes(original))
+
+    def test_restores_the_original_game_copy_on_a_child_kill_os_error(
+        self,
+    ) -> None:
+        original = bytearray(self.exe.read_bytes())
+        original[member_probe.MEMBER_OPEN_FILE] = 0x57
+        self.exe.write_bytes(bytes(original))
+        child = member_probe.PtyProcess.__new__(member_probe.PtyProcess)
+        child._stop = threading.Event()
+        child.process = FakeKillProcess()
+        child.master = -1
+        with self.assertRaises(OSError):
+            self.probe(None, 0, "break", limit=1, child=child)
         self.assertEqual(self.exe.read_bytes(), bytes(original))
 
     def test_propagates_an_os_error_from_the_game_copy_restore(self) -> None:
