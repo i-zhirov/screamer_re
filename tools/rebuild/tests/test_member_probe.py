@@ -136,7 +136,10 @@ class MemberProbeTestCase(unittest.TestCase):
         self.game.mkdir()
         self.work.mkdir()
         self.exe = self.game / "STARTH.EXE"
-        self.exe.write_bytes(bytes(member_probe.MEMBER_OPEN_FILE + 5))
+        original = bytearray(member_probe.MEMBER_OPEN_FILE + 5)
+        original[member_probe.MEMBER_OPEN_FILE] = 0x57
+        self.exe.write_bytes(bytes(original))
+        self.original = bytes(original)
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -168,9 +171,7 @@ class MemberProbeTestCase(unittest.TestCase):
             )
 
     def assert_game_copy_restored(self) -> None:
-        self.assertEqual(
-            self.exe.read_bytes()[member_probe.MEMBER_OPEN_FILE], 0
-        )
+        self.assertEqual(self.exe.read_bytes(), self.original)
 
     def test_returns_the_names_when_the_connection_closes_mid_run(self) -> None:
         names = self.probe(ConnectionError, 1, "break")
@@ -180,10 +181,12 @@ class MemberProbeTestCase(unittest.TestCase):
     def test_returns_the_names_when_the_connection_times_out_mid_run(self) -> None:
         names = self.probe(TimeoutError, 1, "break")
         self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
 
     def test_raises_when_the_connection_closes_before_the_first_member(self) -> None:
         with self.assertRaises(ConnectionError):
             self.probe(ConnectionError, 0, "break")
+        self.assert_game_copy_restored()
 
     def test_returns_the_names_when_the_connection_closes_during_the_restore(
         self,
@@ -236,26 +239,20 @@ class MemberProbeTestCase(unittest.TestCase):
         self.assert_game_copy_restored()
 
     def test_restores_the_original_game_copy_on_a_child_close_os_error(self) -> None:
-        original = bytearray(self.exe.read_bytes())
-        original[member_probe.MEMBER_OPEN_FILE] = 0x57
-        self.exe.write_bytes(bytes(original))
         with self.assertRaises(OSError):
             self.probe(None, 0, "break", limit=1, close_error=OSError)
-        self.assertEqual(self.exe.read_bytes(), bytes(original))
+        self.assert_game_copy_restored()
 
     def test_restores_the_original_game_copy_on_a_child_kill_os_error(
         self,
     ) -> None:
-        original = bytearray(self.exe.read_bytes())
-        original[member_probe.MEMBER_OPEN_FILE] = 0x57
-        self.exe.write_bytes(bytes(original))
         child = member_probe.PtyProcess.__new__(member_probe.PtyProcess)
         child._stop = threading.Event()
         child.process = FakeKillProcess()
         child.master = -1
         with self.assertRaises(OSError):
             self.probe(None, 0, "break", limit=1, child=child)
-        self.assertEqual(self.exe.read_bytes(), bytes(original))
+        self.assert_game_copy_restored()
 
     def test_propagates_an_os_error_from_the_game_copy_restore(self) -> None:
         real_write_bytes = Path.write_bytes
