@@ -5,11 +5,13 @@ Usage:
 """
 from __future__ import annotations
 
+import argparse
 import contextlib
 import io
 import json
 import re
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -813,6 +815,81 @@ class ExtentTestCase(unittest.TestCase):
             ),
             [],
         )
+
+    def test_a_new_record_schedules_the_extent_recompute(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+        # A migration adds a record between the two entries without a seed.
+        store.save_record(
+            {
+                "address": "0x110",
+                "status": "unknown",
+                "checks": [],
+                "evidence": [],
+                "notes": [],
+            }
+        )
+        self.assertEqual(store.sync_extents(), 2)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+
+    def test_a_removed_record_schedules_the_extent_recompute(self) -> None:
+        self.write("0x100", 16)
+        self.write("0x110", 16)
+        self.write("0x120", None)
+        store.remove_record(0x110)
+        self.assertEqual(store.sync_extents(), 1)
+        self.assertEqual(store.load_record(0x100)["size"], 0x20)
+
+    def test_the_command_dispatch_syncs_a_future_migration(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+
+        def migration(arguments: argparse.Namespace) -> int:
+            store.save_record(
+                {
+                    "address": "0x110",
+                    "status": "unknown",
+                    "checks": [],
+                    "evidence": [],
+                    "notes": [],
+                }
+            )
+            return 0
+
+        with mock.patch.object(
+            store, "parse_arguments", return_value=argparse.Namespace(command="set")
+        ), mock.patch.object(store, "command_set", migration):
+            self.assertEqual(store.main(), 0)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+
+    def test_the_exit_hook_syncs_the_extents(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+        # A migration that imports the store and exits without a sync.
+        script = (
+            "import sys\n"
+            "from pathlib import Path\n"
+            "sys.path.insert(0, sys.argv[1])\n"
+            "import store\n"
+            "store.FUNCTIONS_DIR = Path(sys.argv[2])\n"
+            "store.save_record({'address': '0x110', 'status': 'unknown',"
+            " 'checks': [], 'evidence': [], 'notes': []})\n"
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                script,
+                str(Path(store.__file__).resolve().parent),
+                str(store.FUNCTIONS_DIR),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
 
     def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
         self.write("0x100", 99)

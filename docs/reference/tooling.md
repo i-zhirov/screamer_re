@@ -313,7 +313,7 @@ The files:
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
 | `modules/*.json` | the ten module records: the sources, the compiler, the flags, the `period_flags`, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, and the edits |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the extent guard |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
 | `view.py` | render the self-contained status page of the store |

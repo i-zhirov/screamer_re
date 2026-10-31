@@ -4,7 +4,8 @@ The store holds one function record per candidate of STARTH.EXE under
 `functions/0x<address>.json` and one module record per build unit under
 `modules/<name>.json`.  This tool reads and writes a record, validates every
 invariant of the data model, seeds the candidate records from the original image,
-and edits one record from the command line.
+and edits one record from the command line.  A mutation that changes the set of
+record addresses recomputes every extent before the process ends.
 
 Usage:
     python3 tools/rebuild/store.py seed [--check] [--original PATH]
@@ -22,6 +23,7 @@ missing record, a missing original image, or a bad argument.
 from __future__ import annotations
 
 import argparse
+import atexit
 import hashlib
 import json
 import re
@@ -73,6 +75,7 @@ DEFAULT_ORIGINAL = (
 LE_TOOL = Path(__file__).resolve().parent.parent / "le.py"
 FINDINGS_DOCUMENT = Path("docs/explanation/findings.md")
 ADDRESS_PATTERN = re.compile(r"^0x[0-9a-f]+$")
+_extents_dirty = False
 
 
 def record_path(address: int) -> Path:
@@ -112,8 +115,33 @@ def load_record(address: int) -> dict:
 
 
 def save_record(record: dict) -> None:
+    global _extents_dirty
     address = int(record["address"], 16)
-    _write_json(record_path(address), record)
+    path = record_path(address)
+    new_address = not path.exists()
+    _write_json(path, record)
+    if new_address:
+        _extents_dirty = True
+
+
+def remove_record(address: int) -> None:
+    global _extents_dirty
+    record_path(address).unlink(missing_ok=True)
+    _extents_dirty = True
+
+
+def sync_extents() -> int:
+    """Recompute the extents when a mutation changed the record addresses.
+
+    `save_record` marks a new address and `remove_record` marks a deletion.  The
+    seed, the command dispatch, and the exit hook call this function, so a later
+    migration cannot leave a stale reach behind.
+    """
+    global _extents_dirty
+    if not _extents_dirty:
+        return 0
+    _extents_dirty = False
+    return recompute_sizes()
 
 
 def save_result(address: int, result: dict, status: str | None) -> None:
@@ -607,8 +635,8 @@ def seed(check: bool, original: Path) -> int:
             record["size"] = following[address] - address
         save_record(record)
     for address in lost:
-        record_path(address).unlink(missing_ok=True)
-    recompute_sizes()
+        remove_record(address)
+    sync_extents()
     return 0
 
 
@@ -887,6 +915,11 @@ def main() -> int:
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
+    finally:
+        sync_extents()
+
+
+atexit.register(sync_extents)
 
 
 if __name__ == "__main__":

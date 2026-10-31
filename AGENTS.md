@@ -310,6 +310,10 @@ through the store.
   fingerprint of an unchanged record itself.  A documentation-only change to a
   record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`) must
   not invalidate a result.
+- A mutation that changes the record addresses must call `sync_extents()`.
+  `save_record` marks a new address and `remove_record` marks a deletion, and
+  the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,
+  so a later migration cannot leave a stale extent.
 
 ### Dependency Management
 
