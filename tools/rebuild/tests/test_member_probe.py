@@ -5,9 +5,11 @@ Usage:
 """
 from __future__ import annotations
 
+import io
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 from unittest import mock
 
@@ -190,6 +192,19 @@ class MemberProbeTestCase(unittest.TestCase):
     def test_restores_the_game_copy_when_the_child_close_fails(self) -> None:
         names = self.probe(None, 0, "break", limit=1, close_error=ConnectionError)
         self.assertEqual(names, ["MENU.dtr"])
+        self.assert_game_copy_restored()
+
+    def test_swallows_a_connection_error_from_the_child_close(self) -> None:
+        errors = io.StringIO()
+        with redirect_stderr(errors):
+            names = self.probe(
+                None, 0, "break", limit=1, close_error=ConnectionError
+            )
+        self.assertEqual(names, ["MENU.dtr"])
+        self.assertIn(
+            "note: the control connection ended during the restore",
+            errors.getvalue(),
+        )
         self.assert_game_copy_restored()
 
     def test_propagates_a_non_connection_error_during_the_restore(self) -> None:
