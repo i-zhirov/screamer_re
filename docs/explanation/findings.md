@@ -6428,8 +6428,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the probe restores the frame or the game copy also keeps the collected names,
   and the game copy is restored even when the child close raises.  A
   non-connection exception from the restore still propagates; only the
-  control-connection errors are swallowed.  The change makes stage 9 pass on the
-  first pipeline attempt; the earlier full runs failed only this stage.
+  control-connection errors are swallowed.  A generic `OSError` from the child
+  close propagates after the game copy is restored.  An `OSError` from the
+  game-copy restore propagates and leaves the copy patched, so a failed restore
+  stays loud.  The change makes stage 9 pass on the first pipeline attempt; the
+  earlier full runs failed only this stage.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control
   connection`), the direct probe run (`error: timed out` after 50 member
   opens), and the clean stage 9 after the change.

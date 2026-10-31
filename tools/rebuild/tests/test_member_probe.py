@@ -220,6 +220,29 @@ class MemberProbeTestCase(unittest.TestCase):
         )
         self.assert_game_copy_restored()
 
+    def test_propagates_an_os_error_from_the_child_close(self) -> None:
+        with self.assertRaises(OSError):
+            self.probe(None, 0, "break", limit=1, close_error=OSError)
+        self.assert_game_copy_restored()
+
+    def test_propagates_an_os_error_from_the_game_copy_restore(self) -> None:
+        real_write_bytes = Path.write_bytes
+        calls = {"count": 0}
+
+        def write_bytes(path: Path, data: bytes) -> int:
+            if path == self.exe:
+                calls["count"] += 1
+                if calls["count"] == 2:
+                    raise OSError("simulated restore failure")
+            return real_write_bytes(path, data)
+
+        with mock.patch.object(Path, "write_bytes", write_bytes):
+            with self.assertRaises(OSError):
+                self.probe(None, 0, "break", limit=1)
+        self.assertEqual(
+            self.exe.read_bytes()[member_probe.MEMBER_OPEN_FILE], 0xCC
+        )
+
     def test_propagates_a_non_connection_error_during_the_restore(self) -> None:
         with self.assertRaises(RuntimeError):
             self.probe(RuntimeError, 1, "restore")
