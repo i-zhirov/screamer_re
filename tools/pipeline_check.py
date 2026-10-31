@@ -23,8 +23,8 @@ The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
 with code 0 when every check passes and code 1 when a check fails.  It exits
 with code 2 before any stage when the debugger control port is already in use,
-the game directory is missing, the reference executable is missing, or the work
-root cannot be created.
+the game directory is missing, the reference executable is missing or does not
+parse as an LE image, or the work root cannot be created.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
@@ -822,6 +822,15 @@ def main() -> int:
     except OSError as error:
         print(
             f"error: the work root {args.work_root} cannot be created: {error}",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        le_module.load(game_dir / args.exe)
+    except (ValueError, OSError) as error:
+        print(
+            f"error: the reference executable {args.exe} is not a valid LE "
+            f"image: {error}",
             file=sys.stderr,
         )
         return 2

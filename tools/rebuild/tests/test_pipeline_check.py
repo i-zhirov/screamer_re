@@ -67,7 +67,8 @@ class PreflightTestCase(unittest.TestCase):
         self.assertIn(message, result.stderr)
         self.assertNotIn("[PASS]", result.stdout)
         self.assertNotIn("checks,", result.stdout)
-        self.assertFalse(work_root.exists())
+        written = list(work_root.iterdir()) if work_root.exists() else []
+        self.assertEqual(written, [], "the preflight wrote nothing")
 
     def free_port(self) -> int:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as picker:
@@ -108,6 +109,18 @@ class PreflightTestCase(unittest.TestCase):
             result = self.run_check(game, work_root, self.free_port())
             self.assert_no_stage(
                 result, "the reference executable STARTH.EXE is missing", work_root
+            )
+
+    def test_an_invalid_exe_exits_two_before_any_stage(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            game = root / "game"
+            game.mkdir()
+            (game / "STARTH.EXE").write_bytes(b"not an MZ image")
+            work_root = root / "work"
+            result = self.run_check(game, work_root, self.free_port())
+            self.assert_no_stage(
+                result, "is not a valid LE image", work_root
             )
 
     def test_a_blocked_work_root_exits_two_before_any_stage(self) -> None:

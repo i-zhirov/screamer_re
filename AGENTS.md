@@ -316,9 +316,10 @@ through the store.
   so a later migration cannot leave a stale extent.
 - The pipeline checks the debugger control port and the inputs before any
   stage.  When another process holds the port (`--port`, default 9876), when
-  the game directory or the reference executable is missing, or when the work
-  root cannot be created, it prints a clear error and exits with code 2, so a
-  bad input cannot surface as a stage failure or a stage 9 bind error.
+  the game directory or the reference executable is missing, when the reference
+  executable does not parse as an LE image, or when the work root cannot be
+  created, it prints a clear error and exits with code 2, so a bad input cannot
+  surface as a stage failure or a stage 9 bind error.
 
 ### Dependency Management
 
