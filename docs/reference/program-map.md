@@ -261,7 +261,7 @@ calls `race_panel_2`, 3 calls `race_panel_3`, and 4 calls `race_panel_4`.
 | --- | --- | --- | --- |
 | `0x1d834` | `object_gear_step` | switches on the state at `+0x2f8`; case 2 sets the float fields `+0x2fc`, `+0x300`, `+0x304`, `+0x308`, and `+0x30c` to 3000.0 and 12.0 and moves to case 1; case 1 integrates the position `+0x49c` and the three velocities with the damping `DAT_0010cf08 + 0x184` | derived |
 | `0x1db38` | `object_gear_state` | sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4` | derived |
-| `0x1df34` | `object_slide_step` | computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0` | derived |
+| `0x1df34` | `object_slide_step` | computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`<br>the original at 0x1df34 holds 65 instructions and 215 bytes: it forms the slide from `+0x418`, `+0x2f4`, `+0x27c`, and `+0x280`, clamps it between -2.0 and 2.0 with the slots at `0x100b4c` and `0x100b50`, and calls `filter_update` at 0x22b80 for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0` with the values `slide * 0.5`, `slide * 0.02`, and `-abs(slide * 0.02)`; the guard is the low bit of the state at `+0x25c` | derived |
 | `0x1e00c` | `object_collision` | calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec` | inferred |
 <!-- end generated: object_physics callees -->
 

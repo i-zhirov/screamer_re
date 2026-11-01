@@ -489,7 +489,9 @@ The files:
 | `game_main_main.c` | the `game_main` test harness: the two globals, the thirteen stubs, and the four paths |
 | `frame_update.c` | the rebuilt `frame_update` module: the key-state clear, the memory probe, the menu calls, the frame loop, the input and music calls, and the exit path |
 | `frame_update_main.c` | the `frame_update` test harness: the key state, the race context, the ten stubs, and the four paths |
-| `modules/*.json` | the eighty-seven module records: the sources, the compiler, the link, and the run expectations |
+| `object_slide_step.c` | the rebuilt `object_slide_step` module: the guard, the squared slide, the clamp, and the three filter calls |
+| `object_slide_step_main.c` | the `object_slide_step` test harness: the object record, the four constants, the two stubs, and the four paths |
+| `modules/*.json` | the eighty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

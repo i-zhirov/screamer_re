@@ -1,0 +1,34 @@
+{
+  "exe": "oslmod.exe",
+  "map": "object_slide_step.map",
+  "name": "object_slide_step",
+  "run": {
+    "command": "oslmod.exe > osl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "osl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_slide_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_slide_step_main.c"
+    }
+  ]
+}

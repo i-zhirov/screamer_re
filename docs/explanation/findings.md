@@ -7604,3 +7604,65 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module frame_update`,
   `work/rebuild/fupd_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x27f94`.
+
+## The object_slide_step module at 0x1df34
+
+- Observation: the original body at `0x1df34` holds 65 instructions and 215
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  216-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1df34 --count 65` and
+  `tools/rebuild/functions/0x1df34.json`.
+- Observation: the function has a frame.  It saves `edx` and `ebp`, sets `ebp`,
+  and subtracts 8 from `esp`.  It stores the first argument from `eax` in the
+  slot `[ebp-8]` and the slide in the slot `[ebp-4]`.  The rebuild uses the
+  option `-of+`.
+  Evidence: the prologue at `0x1df34` through `0x1df3e`.
+- Observation: the guard is the low bit of the byte at `+0x25c`.  When the bit
+  is clear, the slide is 0.
+  Evidence: the `test` at `0x1df41`, the `je` at `0x1df48`, and the zero store
+  at `0x1df77`.
+- Observation: when the bit is set, the function computes
+  `slide = (v * w) * (v * w) * (x - y)`, where `v`, `w`, `x`, and `y` are the
+  floats at `+0x418`, `+0x2f4`, `+0x27c`, and `+0x280`.  The product `v * w` is
+  squared with `fmul st(0)`.
+  Evidence: the FPU block at `0x1df4d` through `0x1df72`.
+- Observation: the function clamps the slide between 2.0 and -2.0.  The two
+  float constants sit at module linear `0x100b4c` and `0x100b50`, in object 3.
+  Evidence: the `fcomp` at `0x1df7f`, the store of `0x40000000` at `0x1df8a`,
+  the `fcomp` at `0x1df96`, the store of `0xc0000000` at `0x1dfa1`, and the data
+  at file offset `0xf734c`.
+- Observation: the function calls `filter_update` at `0x22b80` three times.
+  The values are `slide * 0.5`, `slide * 0.02`, and `-abs(slide * 0.02)`, and
+  the targets are the floats at `+0x4c8`, `+0x4b8`, and `+0x4b0`.  The table
+  indexes are `0x4f`, `0x4c`, and `0x4c`.  The doubles 0.5 and 0.02 sit at
+  module linear `0x100b54` and `0x100b5c`.
+  Evidence: the three call blocks at `0x1dfa8` through `0x1e001` and the data at
+  file offset `0xf734c`.
+- Inference: the function smooths the three parts of the object toward the
+  slide offset.  The first part takes half of the slide, and the second and the
+  third parts take the small rate with opposite signs.
+  Evidence: the three arguments and the named callee `filter_update`.
+- Observation: the rebuild holds 63 instructions and 213 bytes.  The identity
+  check stays open at 4 of 63 instructions and 15 of 213 bytes.  The store
+  records `rebuilt`.  The behavior check passes.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1df34 --rebuilt work/rebuild/oslmod.exe --rebuilt-map
+  work/rebuild/object_slide_step.map --rebuilt-symbol object_slide_step_` and
+  `python3 tools/rebuild/run.py run --function 0x1df34`.
+- Observation: the module uses the FPU, so the recipe links the shared
+  `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/object_slide_step.json` and the build.
+- Observation: the first harness read the four float constants from the
+  constant segment, which this harness does not load, so the clamp read the
+  wrong values.  The module now reads the constants through the extern globals
+  `slide_max`, `slide_min`, `slide_half`, and `slide_rate`, and the harness sets
+  the exact bit patterns.  This follows the `palette_build` module.  The
+  behavior check passes after the change.
+  Evidence: the failing run of the first harness and the passing run after the
+  change.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  The paths cover the guard clear, the high clamp, the
+  low clamp, and a slide inside the range.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_slide_step`,
+  `work/rebuild/osl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1df34`.
