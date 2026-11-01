@@ -1,0 +1,33 @@
+{
+  "exe": "mtnmod.exe",
+  "map": "motion_update.map",
+  "name": "motion_update",
+  "run": {
+    "command": "mtnmod.exe > mtn_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mtn_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "motion_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "motion_update_main.c"
+    }
+  ]
+}

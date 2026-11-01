@@ -7480,3 +7480,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module resource_find`,
   `work/rebuild/rfnd_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2f25f`.
+
+## The motion_update module at 0x21e6c
+
+- Observation: the original body at `0x21e6c` holds 53 instructions and 202
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  212-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21e6c --count 53` and
+  `tools/rebuild/functions/0x21e6c.json`.
+- Observation: the function has a frame.  It saves `ebx`, `edx`, and `ebp`, sets
+  `ebp`, and subtracts 0xc from `esp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x21e6c` through `0x21e71`.
+- Observation: the function returns when the time base `DAT_00118e38` is below
+  zero.  The compare is `0.0 > time`, and the `ja` at `0x21e7f` jumps to the
+  shared epilogue.
+  Evidence: the `fldz`, the `fcomp`, and the `ja` at `0x21e74` through
+  `0x21e7f`.
+- Observation: the function reads the three signed values `DAT_0011d2c0`,
+  `DAT_0011d2bc`, and `DAT_0011d2c4`.  It multiplies each value by the time base
+  and converts the result to an integer with the helper at `0x4d9f4`.  The
+  helper rounds the value on the FPU stack toward zero.  The three results reach
+  `view_move` at `0x1f94c` in `eax`, `edx`, and `ebx`.
+  Evidence: the three `fild`/`fmul`/`call`/`fistp` groups at `0x21e85` through
+  `0x21ebe` and the loads at `0x21ec1` through `0x21eca`.
+- Observation: the function calls `video_present` at `0x27ec8` with the time
+  base and the offset 0.
+  Evidence: the pushes at `0x21ecf` and `0x21ed1` and the call at `0x21ed7`.
+- Observation: the function advances the time base with
+  `time = DAT_00118e08 * 2.0 + time`.  The constant 2.0 sits at the data slot
+  `0x100d51`.  The function then returns while the new value is below 1.0.
+  Evidence: the float block at `0x21edc` through `0x21f01` and the 2.0 value at
+  module linear `0x100d51`.
+- Observation: when the new value reaches 1.0, the function sets the time base
+  to -1.0, calls `video_present` with 1.0 and the offset 0, and calls
+  `view_move` with the three raw values.
+  Evidence: the block at `0x21f03` through `0x21f2b`.
+- Inference: the time base is a normalized animation phase.  The function
+  interpolates the object position from the origin to the raw position, and it
+  presents the palette at the matching scale.  At the phase end it restores the
+  raw position and marks the phase with -1.0.  The next call returns at the
+  negative guard until another writer starts a new phase.
+  Evidence: the two scale paths, the 2.0 advance, and the -1.0 marker.
+- Observation: the rebuild holds 48 instructions and 199 bytes.  The identity
+  check stays open at 31 of 48 instructions and 84 of 199 bytes.  The compiler
+  keeps the saved registers in another order, places the float compare as an
+  integer compare, and reuses `fld1`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21e6c --rebuilt work/rebuild/mtnmod.exe --rebuilt-map
+  work/rebuild/motion_update.map --rebuilt-symbol motion_update_`.
+- Observation: the module uses the FPU, so the recipe links the shared
+  `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/motion_update.json` and the build.
+- Observation: a float literal of 2.0 in this harness got the constant-pool
+  address 0, and the run read the wrong value.  The module now reads the 2.0
+  value from the extern `DAT_00100d51`, and the harness defines it.  The
+  behavior check passes.
+  Evidence: the failing run of the first harness and the passing run after the
+  change.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover the negative guard, the normal scale and
+  advance, and the wrap with the second raw move.
+  Evidence: `python3 tools/rebuild/harness.py run --module motion_update`,
+  `work/rebuild/mtn_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x21e6c`.

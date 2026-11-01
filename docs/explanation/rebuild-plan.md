@@ -138,7 +138,7 @@ floating-point instructions.
 | `0x22e94` | `replay_read` (done) | 190 | 58 | 0 | 0 |
 | `0x10020` | `main` (done) | 194 | 56 | 15 | 0 |
 | `0x2f25f` | `resource_find` (done) | 199 | 69 | 2 | 0 |
-| `0x21e6c` | `motion_update` | 202 | 53 | 7 | 19 |
+| `0x21e6c` | `motion_update` (done) | 202 | 53 | 7 | 19 |
 | `0x27f94` | `frame_update` | 212 | 63 | 11 | 0 |
 | `0x1df34` | `object_slide_step` | 215 | 65 | 3 | 22 |
 | `0x2f9e0` | `music_bank_load` | 220 | 72 | 4 | 0 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-Eighty-four modules carry a recipe and a result: the twelve Phase A modules,
+Eighty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
 the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
@@ -208,8 +208,8 @@ the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
 `palette_build` at `0x15720`, `fade_update` at `0x29818`,
 `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-`0x4c08d`, `resource_read` at `0x2efc2`, and the first six Phase D modules
+`0x4c08d`, `resource_read` at `0x2efc2`, and the first seven Phase D modules
 `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
-`0x10020`, and `resource_find` at `0x2f25f`.  The next module is
-`motion_update` at `0x21e6c`.
+`0x10020`, `resource_find` at `0x2f25f`, and `motion_update` at `0x21e6c`.
+The next module is `frame_update` at `0x27f94`.

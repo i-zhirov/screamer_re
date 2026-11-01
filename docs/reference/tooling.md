@@ -475,6 +475,8 @@ The files:
 | `resource_read_main.c` | the `resource_read` test harness: the resource record, the three stubs, and the four paths |
 | `resource_find.c` | the rebuilt `resource_find` module: the record walk, the key test, the free call, and the array shift |
 | `resource_find_main.c` | the `resource_find` test harness: the resource record, the four records, the two stubs, and the four paths |
+| `motion_update.c` | the rebuilt `motion_update` module: the time guard, the three scaled values, the view move, the palette present, the advance, and the wrap |
+| `motion_update_main.c` | the `motion_update` test harness: the time base, the frame value, the three position values, and the three paths |
 | `race_panel_4.c` | the rebuilt `race_panel_4` module: the centered title, the name format, and the two draws |
 | `race_panel_4_main.c` | the `race_panel_4` test harness: the title, the count, the name, and the three paths |
 | `engine_interface_init.c` | the rebuilt `engine_interface_init` module: the object allocation, the list creation, the record clear loop, and the two state clears |
@@ -485,7 +487,7 @@ The files:
 | `replay_read_main.c` | the `replay_read` test harness: the three records, the replay globals, and the four paths |
 | `game_main.c` | the rebuilt `main` module as `game_main`: the allocation, the list, the memory check, the two messages, the engine loop, the error path, and the cleanup |
 | `game_main_main.c` | the `game_main` test harness: the two globals, the thirteen stubs, and the four paths |
-| `modules/*.json` | the eighty-five module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the eighty-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
