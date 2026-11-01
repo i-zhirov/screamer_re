@@ -220,7 +220,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | --- | --- | --- | --- |
 | `0x1075f` | `video_block_swap_a` | byte-swaps and swaps dwords between the front of the video buffer and the region `0x9f` dwords ahead, 80 passes of 400 dwords | derived |
 | `0x107a1` | `video_block_swap_b` | swaps 200 rows of 160 dwords between the front of the video buffer and the region `0xf960` dwords ahead | derived |
-| `0x28160` | `overlay_dispatch` | reads the option flags in `DAT_000f0002` and calls the overlay for the set flag | derived |
+| `0x28160` | `overlay_dispatch` | reads the option flags in `DAT_000f0002` and calls the overlay for the set flag<br>the first-return body at `0x28160` holds 42 instructions and 152 bytes: the option-flag test at `DAT_000f0002`, the mode check against `0x20`, the state switch through the compiler table at `cs:[eax*4 + 0x1813c]`, the case 0 stack pop, and the epilogue; the case targets are `0x281ab`, `0x281f8`, `0x282a2`, `0x282e6`, `0x28358`, `0x2837d`, and `0x283da`, and the full function extends to `0x289bc` (2140 bytes). The rebuild keeps the dispatcher, implements case 0, and represents the other case bodies as step functions | derived |
 | `0x29564` | `race_state_update` | switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8` | derived |
 | `0x29610` | `race_heading_update` | angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap | inferred |
 | `0x29818` | `fade_update` | ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present` | derived |

@@ -6884,3 +6884,57 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module memory_alloc_small`,
   `work/rebuild/mas_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2f172`.
+
+## The overlay_dispatch module at 0x28160
+
+- Observation: the first-return body at `0x28160` holds 42 instructions and 152
+  bytes, up to the return at `0x281f7`.  The plan row holds the same body
+  counts.  The full function extends to `0x289bc` and holds 2140 bytes, and the
+  store keeps that true extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x28160 --count 42` and the
+  `size` field of `tools/rebuild/functions/0x28160.json`.
+- Observation: the byte operand `[3]` selects the top-level path.  The Ghidra
+  name of the slot is `DAT_000f0002`.  A clear flag jumps to the second overlay
+  path at `0x283ff`.
+  Evidence: the compare at `0x2816b` and the branch at `0x28172`.
+- Observation: with the flag set, the function clears `DAT_0011d24c`, reads the
+  mode `DAT_0011fb68`, and returns through the shared epilogue at `0x289b1`
+  when the mode is `0x20`.  It then clears `DAT_00200988` and reads the state
+  `DAT_0011fac4`.  A state above 8 jumps to the shared entry at `0x282e6`, and
+  the other states run through the compiler jump table at
+  `cs:[eax*4 + 0x1813c]`.
+  Evidence: the stores at `0x28180` and `0x28194`, the compare at `0x28186`,
+  the bounds check at `0x2819a`, and the jump at `0x281a3`.
+- Observation: the jump table holds nine object offsets.  They map the state
+  values 0 through 8 to the linear addresses `0x281ab`, `0x282e6`, `0x281f8`,
+  `0x282a2`, `0x283da`, `0x2837d`, `0x282e6`, `0x282e6`, and `0x28358`.
+  Evidence: the 36 bytes at linear `0x2813c`.
+- Observation: case 0 at `0x281ab` pops the stack.  When `DAT_0011fb58` is not
+  zero, it loads `DAT_00120350[DAT_0011fb58 - 1]` into `DAT_0011fb60`,
+  decrements `DAT_0011fb58`, and calls `0x1f718` with 0.  When the stack is
+  empty, it sets `DAT_0011d234` and `DAT_00007ed8` to 1, sets
+  `DAT_0011fb68` to `0x20`, and returns.
+  Evidence: the body at `0x281ab` through `0x281f7`.
+- Observation: the rebuild keeps the dispatcher, implements case 0, and
+  represents the other case bodies as step functions.  The DOS/4G loader does
+  not relocate the compiler jump table of the rebuilt image, so the rebuild
+  uses an if chain, as `race_state_update` does.
+  Evidence: `tools/rebuild/overlay_dispatch.c` and the jump table at
+  `0x1005d` of the first switch build, which jumps through the address 0.
+- Observation: the rebuild with `-of+` holds 66 instructions and 223 bytes.
+  The identity check stays open at 9 of 42 instructions and 19 of 152 bytes,
+  and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x28160 --rebuilt work/rebuild/odmod.exe --rebuilt-map
+  work/rebuild/overlay_dispatch.map --rebuilt-symbol overlay_dispatch_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, and `D`.  It runs the two overlay paths, the mode path,
+  every state case, and the two case 0 stack paths.
+  Evidence: `python3 tools/rebuild/harness.py run --module overlay_dispatch`,
+  `work/rebuild/od_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x28160`.
+- Inference: `DAT_0011fac4` is the overlay state, `DAT_0011fb58` is the depth of
+  a small stack, and `DAT_0011fb68` is the next overlay mode.  The function
+  selects the overlay step for the current state and advances the stack.
+  Evidence: the state dispatch at `0x281a3`, the stack pop at `0x281b5` through
+  `0x281cc`, and the mode store at `0x281ef`.

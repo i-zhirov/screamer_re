@@ -459,7 +459,9 @@ The files:
 | `controls_load_main.c` | the `controls_load` test harness: the format stub, the file stubs, and the two handle paths |
 | `memory_alloc_small.c` | the rebuilt `memory_alloc` module at `0x2f172`: the DPMI 0x0501 request and the address reassembly |
 | `memory_alloc_small_main.c` | the `memory_alloc` test harness at `0x2f172`: the two DPMI stubs and the request checks |
-| `modules/*.json` | the seventy-two module records: the sources, the compiler, the link, and the run expectations |
+| `overlay_dispatch.c` | the rebuilt `overlay_dispatch` module: the option flag, the mode, and the state dispatcher |
+| `overlay_dispatch_main.c` | the `overlay_dispatch` test harness: the seven step stubs and the two stack paths |
+| `modules/*.json` | the seventy-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
