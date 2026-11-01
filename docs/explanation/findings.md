@@ -6139,6 +6139,51 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module pool_init` and
   `work/rebuild/pi_out.txt`.
 
+## The race_session_start module
+
+- `race_session_start` at `0x128e0` holds 42 instructions and 136 bytes up to the
+  second error return.  The true extent continues to `0x12c0b` and holds 812
+  bytes.  The plan row counts the body up to the second error return.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x128e0 --count 200` and the
+  record extent.
+- The function sets `_DAT_00118e1c` to 0x102, calls `0x131a8`, sets
+  `DAT_0011521c` to 0x1234 and `_DAT_0011cb14` to 1, clears the five state
+  globals, calls `0x13580` and `0x13540`, and returns a non-zero result at once
+  from each of the two load calls.
+  Evidence: the stores at `0x128ee`, `0x1293a`, and `0x12940`, and the calls at
+  `0x128fb`, `0x12946`, and `0x1294e`.
+- Observation: the switch sends the modes 1 and 2 to `0x12c0c`, the mode 4 to
+  `0x12e18`, the mode 0x10 to `0x12d0c`, the mode 0x20 to `0x13120`, the mode
+  0x40 to `0x130a0`, and the mode 0x100 to `0x12f50`.  The mode 3 takes the
+  default path.  This corrects the earlier note that groups the mode 3 with the
+  modes 1 and 2.
+  Evidence: the comparisons at `0x1296d` through `0x1298e` and at `0x12b0e`
+  through `0x12b30`.
+- Inference: the handler names follow the mode value.  The other call targets
+  keep the address in the source comment, because the analysis has no name for
+  them.
+  Evidence: `tools/rebuild/race_session_start.c`.
+- The default path runs `view_move(0, 0, 0)` at `0x1f94c` and
+  `0x21da8(value ^ 1)`.  A non-zero value also runs `0x4cf3c` and `0x258d0` with
+  the buffer `0xcf5c`.  The function then clears 0x3e800 bytes at the pointer
+  `DAT_00021528`, runs `video_fill`, prepares the panel, refreshes the input,
+  runs `player_update`, and clears the five frame words.
+  Evidence: the calls at `0x12a56` through `0x12c01`.
+- The rebuild with `-of+` holds 140 instructions, because OpenWatcom V2 puts the
+  frame first, saves three registers, keeps the parameter in `ecx`, and shares
+  one error epilogue.  The identity check stays open at 13 of 42 instructions
+  and 12 of 136 bytes, and the store records `rebuilt`.
+  Evidence: `tools/rebuild/race_session_start.c` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x128e0 --rebuilt work/rebuild/rssmod.exe --rebuilt-map
+  work/rebuild/race_session_start.map --rebuilt-symbol race_session_start_`.
+- The behavior check passes.  The harness prints `0` through `9`, `A`, `B`,
+  `C`, and `D`: the two error paths return at once, every mode runs the correct
+  handler, the default path runs for the mode 3, and the input and table
+  branches set the expected words.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_session_start`
+  and `work/rebuild/rss_out.txt`.
+
 ## The frame_step module and the call order
 
 - `frame_step` at `0x2aa84` holds 7 instructions and 20 bytes: the frame `push ebp` and

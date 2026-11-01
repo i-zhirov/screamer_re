@@ -1,17 +1,48 @@
 {
   "address": "0x128e0",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540`"
+      "text": "the original at `0x128e0` holds 42 instructions and 136 bytes up to the second error return and extends to `0x12c0b` (812 bytes): it sets `_DAT_00118e1c` to 0x102, calls `0x131a8`, sets `DAT_0011521c` to 0x1234 and `_DAT_0011cb14` to 1, clears five state globals, calls `0x13580` and `0x13540`, dispatches the game mode `DAT_0011d260` to the handlers `0x12c0c` for the modes 1 and 2, `0x12e18` for 4, `0x12d0c` for 0x10, `0x13120` for 0x20, `0x130a0` for 0x40, and `0x12f50` for 0x100, takes the default path `view_move(0, 0, 0)` at `0x1f94c` and `0x21da8(value ^ 1)` for every other mode including 3, then runs the frame setup and clears the state words"
     }
   ],
+  "module": "race_session_start",
   "name": "race_session_start",
   "notes": [],
-  "role": "sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 136,
+        "detail": "the instruction counts differ, 42 and 140",
+        "instructions_equal": 13,
+        "instructions_total": 42,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x128e0",
+    "date": "2026-11-01",
+    "fingerprint": "sha256:60f06b46b26412d5647ecb98b0b5d2b55749aa8552a1fac0fd7221920d720072",
+    "source_digest": "sha256:14b91145762891fbc1feb2b0be981686dab2a26ee1cca8b3421055f7a6de59dd",
+    "tool": "run.py"
+  },
+  "role": "sets the race flags, loads the race data and the track, dispatches on the game mode, and prepares the frame state",
   "section": "The timing and filter layer",
   "size": 812,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_session_start_"
 }

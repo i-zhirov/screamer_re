@@ -288,7 +288,7 @@ globals, and then dispatches on the game mode `DAT_0011d260`.
 
 | Mode | Handler | Name | Confidence |
 | --- | --- | --- | --- |
-| 1, 2, 3 | `0x12c0c` | `game_mode_1_start` | inferred |
+| 1, 2 | `0x12c0c` | `game_mode_1_start` | inferred |
 | 4 | `0x12e18` | `game_mode_4_start` | inferred |
 | 0x10 | `0x12d0c` | `game_mode_10_start` | inferred |
 | 0x20 | `0x13120` | `game_mode_20_start` | inferred |
@@ -409,7 +409,7 @@ proximity check enables the physics of the objects near the reference point.
 <!-- begin generated: The timing and filter layer -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x128e0` | `race_session_start` | sets `_DAT_00118e1c` to 0x102 and `DAT_0011521c` to 0x1234, clears the state globals, and calls `0x131a8` and `0x13540` | inferred |
+| `0x128e0` | `race_session_start` | the original at `0x128e0` holds 42 instructions and 136 bytes up to the second error return and extends to `0x12c0b` (812 bytes): it sets `_DAT_00118e1c` to 0x102, calls `0x131a8`, sets `DAT_0011521c` to 0x1234 and `_DAT_0011cb14` to 1, clears five state globals, calls `0x13580` and `0x13540`, dispatches the game mode `DAT_0011d260` to the handlers `0x12c0c` for the modes 1 and 2, `0x12e18` for 4, `0x12d0c` for 0x10, `0x13120` for 0x20, `0x130a0` for 0x40, and `0x12f50` for 0x100, takes the default path `view_move(0, 0, 0)` at `0x1f94c` and `0x21da8(value ^ 1)` for every other mode including 3, then runs the frame setup and clears the state words | derived |
 | `0x22df8` | `timing_update` | advances the timing when the replay flag is set: the timing subtraction, the replay read, and the filter entry from the frame rate | derived |
 <!-- end generated: The timing and filter layer -->
 
