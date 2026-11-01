@@ -7794,3 +7794,43 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module camera_update`,
   `work/rebuild/cam_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x8ac78`.
+
+## The stream_read module at 0x4c4e5
+
+- Observation: the original body at `0x4c4e5` holds 80 instructions and 226
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  226-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c4e5 --count 80` and
+  `tools/rebuild/functions/0x4c4e5.json`.
+- Observation: the original uses an EBP frame.  It saves `ecx`, `esi`, `edi`,
+  and `ebp`, reserves 28 bytes, and stores the three register arguments at
+  `[ebp - 0xc]`, `[ebp - 8]`, and `[ebp - 4]`.  The rebuild uses `-of+`.
+  Evidence: the prologue at `0x4c4e5` through `0x4c4fa`.
+- Observation: a set flag at `stream + 0x10` runs the compressed path.  The
+  path adds the count to the position at `stream + 0x0c`, clamps the count to
+  the size at `stream + 0x08`, sets the position to the size, and calls the
+  expander at `0x4d3fc`.  The expander receives the buffer at `stream + 0xb0`,
+  the output buffer, the field at `stream + 0x6c`, the count, and the handle at
+  `stream + 0x00` as the fifth stack argument.
+  Evidence: the block at `0x4c4fa` through `0x4c55d`.
+- Observation: a clear flag at `stream + 0x10` runs the raw path.  The path
+  calls `fread(buffer, 1, count, handle)` at `0xc607b`, adds the byte count to
+  the position, and clamps the result and the position to the size.
+  Evidence: the block at `0x4c55f` through `0x4c5b4`.
+- Inference: the position is the number of bytes consumed, and the size is the
+  total stream length.  The clamp keeps a short read at the stream end from
+  moving the position past the size.
+  Evidence: the two clamp blocks.
+- Observation: the rebuild holds 51 instructions and 119 bytes.  The identity
+  check stays open at 22 of 51 instructions and 4 of 119 bytes.  OpenWatcom V2
+  keeps the arguments in `esi` and `edi` instead of the stack slots, so the two
+  bodies differ.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c4e5 --rebuilt work/rebuild/srdmod.exe --rebuilt-map
+  work/rebuild/stream_read.map --rebuilt-symbol stream_read_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the compressed path, the compressed
+  clamp, the raw path, the raw clamp, and the read of zero bytes.
+  Evidence: `python3 tools/rebuild/harness.py run --module stream_read`,
+  `work/rebuild/srd_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4c4e5`.
