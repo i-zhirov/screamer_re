@@ -1,17 +1,56 @@
 {
   "address": "0x279a4",
-  "checks": [],
-  "confidence": "derived",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "tears the race down through 13 calls"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x279a4` holds 36 instructions and 141 bytes: the frame with one local, the thirteen calls at `0x1f8b4` (value 0), `0x1f8dc`, `0x2fe68` (`DAT_000062b0`, `DAT_00006350`), `0x264ec`, `0x1b180`, `0x115f8` (`DAT_00006530`), `0x11304` (`DAT_00006530`), the gated `0x15874` on `DAT_0018e3c == 0`, `0x4cf2c`, `0x1f6f8`, `0x1b58c`, `0x25640`, and `0x258b8`, then the copies `DAT_001d274 = DAT_001d22c` and `DAT_001d230 = DAT_0018e3c`"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller is `race_loop` at `0x27761`, after the loop exit test; the plan row records 141 bytes, 36 instructions, 13 calls, and 0 FPU"
     }
   ],
+  "module": "race_end",
   "name": "race_end",
   "notes": [],
-  "role": "tears the race down through 13 calls",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 20,
+        "bytes_total": 136,
+        "detail": "the instruction counts differ, 36 and 32",
+        "instructions_equal": 10,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x279a4",
+    "date": "2026-11-01",
+    "fingerprint": "sha256:983128ff7984c437ab7ea72cce4e7280ddaec0ee4496bfa33ecf06d975ac55cc",
+    "source_digest": "sha256:508afa9c0b01ae922e053ecf7e47cfc106216f7e4f96e40d94a686d3334a45d1",
+    "tool": "run.py"
+  },
+  "role": "tears the race down through thirteen calls and copies the two final state words",
   "section": "race_loop callees",
   "size": 144,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_end_"
 }

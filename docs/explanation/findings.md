@@ -6748,3 +6748,49 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x2ffc4 --rebuilt work/rebuild/msmod.exe --rebuilt-map
   work/rebuild/music_start.map --rebuilt-symbol music_start_` and
   `python3 tools/rebuild/run.py run --function 0x2ffc4`.
+
+## The race_end module
+
+- Observation: `race_end` at `0x279a4` holds 36 instructions and 141 bytes up
+  to the return at `0x27a30`.  The plan row holds the same body counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x279a4 --count 36` and
+  `python3 tools/le.py calls STARTH.EXE 0x279a4`.
+- Observation: the function calls thirteen targets in order: `0x1f8b4` with the
+  value 0, `0x1f8dc`, `0x2fe68` with `DAT_000062b0` and `DAT_00006350`,
+  `0x264ec`, `0x1b180`, `0x115f8` with `DAT_00006530`, `0x11304` with
+  `DAT_00006530`, `0x15874`, `0x4cf2c`, `0x1f6f8`, `0x1b58c`, `0x25640`, and
+  `0x258b8`.  The first two argument calls load the data addresses into `eax`
+  and `edx`.
+  Evidence: the call sites from `0x279ae` to `0x27a12`.
+- Observation: the call at `0x15874` is gated.  The function tests the dword at
+  `DAT_0018e3c` at `0x279e5` and skips the call when the dword is non-zero.
+  When the dword is zero, the function loads 1 into `ebx`, calls `0x15874`, and
+  stores `ebx` to `DAT_0018e3c`.
+  Evidence: the test at `0x279e5`, the `jne 0x279fe` at `0x279ec`, and the
+  store at `0x279f8`.
+- Observation: the last two stores copy `DAT_001d22c` to `DAT_001d274` and
+  `DAT_0018e3c` to `DAT_001d230`.
+  Evidence: the loads and stores from `0x27a17` to `0x27a26`.
+- Observation: the only caller is `race_loop` at `0x27761`, after the loop exit
+  test on `DAT_0011ce44`.
+  Evidence: the caller scan of the object 1 code and `python3 tools/le.py
+  disasm STARTH.EXE 0x27700 --count 40`.
+- Inference: the gated call and the flag set fit a one-time teardown step.  The
+  name `race_end` and the plan description fit the data flow.  The thirteen
+  targets have no recovered names.
+  Evidence: the thirteen call sites and the gated flag store.
+- Observation: the rebuild with `-of+` holds 32 instructions and 136 bytes.
+  OpenWatcom V2 drops the saved `ebx`, the frame local, and the `ebx`-held
+  constant, and stores 1 to `DAT_0018e3c` directly after the gated call.  The
+  identity check stays open at 10 of 32 instructions and 20 of 136 bytes, and
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x279a4 --rebuilt work/rebuild/remod.exe --rebuilt-map
+  work/rebuild/race_end.map --rebuilt-symbol race_end_`.
+- Observation: the behavior check passes.  The harness prints `0`, `1`, and
+  `D`.  A zero flag runs all thirteen calls, receives the data addresses, sets
+  the flag to 1, and copies the two final values.  A non-zero flag keeps its
+  value, skips the gated call, and still copies the two final values.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_end`,
+  `work/rebuild/re_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x279a4`.

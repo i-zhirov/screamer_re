@@ -153,7 +153,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x26448` | `input_poll` | the original at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path | observed |
 | `0x27770` | `race_start` | sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)` | derived |
 | `0x2786c` | `object_update_all` | walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record | derived |
-| `0x279a4` | `race_end` | tears the race down through 13 calls | derived |
+| `0x279a4` | `race_end` | tears the race down through 13 calls<br>the original at `0x279a4` holds 36 instructions and 141 bytes: the frame with one local, the thirteen calls at `0x1f8b4` (value 0), `0x1f8dc`, `0x2fe68` (`DAT_000062b0`, `DAT_00006350`), `0x264ec`, `0x1b180`, `0x115f8` (`DAT_00006530`), `0x11304` (`DAT_00006530`), the gated `0x15874` on `DAT_0018e3c == 0`, `0x4cf2c`, `0x1f6f8`, `0x1b58c`, `0x25640`, and `0x258b8`, then the copies `DAT_001d274 = DAT_001d22c` and `DAT_001d230 = DAT_0018e3c`<br>the only caller is `race_loop` at `0x27761`, after the loop exit test; the plan row records 141 bytes, 36 instructions, 13 calls, and 0 FPU | observed |
 | `0x2aa98` | `video_fill` | calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer | derived |
 <!-- end generated: race_loop callees -->
 

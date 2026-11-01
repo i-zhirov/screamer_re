@@ -453,7 +453,9 @@ The files:
 | `race_session_start_main.c` | the `race_session_start` test harness: the state words and the twenty-four stubs |
 | `music_start.c` | the rebuilt `music_start` module: the status chain, the six messages, and the exit |
 | `music_start_main.c` | the `music_start` test harness: the nine status paths and the two stubs |
-| `modules/*.json` | the sixty-nine module records: the sources, the compiler, the link, and the run expectations |
+| `race_end.c` | the rebuilt `race_end` module: the thirteen teardown calls, the gated call, and the two copies |
+| `race_end_main.c` | the `race_end` test harness: the thirteen stubs and the two flag paths |
+| `modules/*.json` | the seventy module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
