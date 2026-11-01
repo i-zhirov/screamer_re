@@ -457,7 +457,9 @@ The files:
 | `race_end_main.c` | the `race_end` test harness: the thirteen stubs and the two flag paths |
 | `controls_load.c` | the rebuilt `controls_load` module: the controls path, the open, and the three reads |
 | `controls_load_main.c` | the `controls_load` test harness: the format stub, the file stubs, and the two handle paths |
-| `modules/*.json` | the seventy-one module records: the sources, the compiler, the link, and the run expectations |
+| `memory_alloc_small.c` | the rebuilt `memory_alloc` module at `0x2f172`: the DPMI 0x0501 request and the address reassembly |
+| `memory_alloc_small_main.c` | the `memory_alloc` test harness at `0x2f172`: the two DPMI stubs and the request checks |
+| `modules/*.json` | the seventy-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

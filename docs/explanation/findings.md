@@ -6833,3 +6833,54 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module controls_load`,
   `work/rebuild/cl_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x1b304`.
+
+## The memory_alloc module at 0x2f172
+
+- Observation: `memory_alloc` at `0x2f172` holds 49 instructions and 147 bytes
+  up to the return at `0x2f204`.  The plan row holds the same body counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f172 --count 49`.
+- Observation: the function calls the DPMI function `0x0501`.  It writes
+  `0x0501` to block offset 0, the high size word to block offset 4, and the low
+  size word to block offset 8.  Then it fills the 12-byte segment set through
+  `dpmi_fill_regs` at `0x4bf23` and calls the interrupt 0x31 path through
+  `dpmi_call` at `0x4bf4b`.
+  Evidence: the stores at `0x2f187`, `0x2f194`, and `0x2f19f`, and the two
+  calls at `0x2f1a5` and `0x2f1b8`.
+- Observation: the status at block offset `0x18` selects the result.  A
+  non-zero status returns 0.  A zero status stores the address from block
+  offsets `0x10` and `0x14` at the third argument and returns the size words
+  from block offsets 4 and 8.
+  Evidence: the test at `0x2f1bd` and the two reassemblies at `0x2f1cc` through
+  `0x2f1f8`.
+- Observation: the three call sites at `0x2ef62`, `0x2ef8e`, and `0x2f02e` pass
+  the resource object in `eax`, the size in `edx`, and the record address field
+  at `+0x10` in `ebx`.  The call at `0x2ef62` runs after the DOS memory path at
+  `0x2f0fc` fails, and the call at `0x2ef8e` handles a size at or above
+  `0x96000`.
+  Evidence: the call sites at `0x2ef62`, `0x2ef8e`, and `0x2f02e`.
+- Inference: the resource layer keeps the DPMI block address at record offset
+  `+0x10` and the DOS selector at the same field on the DOS path.  The flag at
+  `+0x18` selects the free path, and `resource_free` reads the address from
+  `+0x10`.
+  Evidence: the `memory_alloc` store at `0x2f1e0`, the `memory_free` input at
+  `0x2f21f` through `0x2f230`, and `tools/rebuild/functions/0x2f470.json`.
+- Observation: the module recipe name is `memory_alloc_small`, because the
+  `memory_alloc` recipe belongs to the different function at `0x30050`.  The
+  record name stays `memory_alloc` and the record module field names the unique
+  recipe.
+  Evidence: `tools/rebuild/modules/memory_alloc_small.json` and
+  `tools/rebuild/functions/0x2f172.json`.
+- Observation: the rebuild with `-of+` holds 39 instructions and 112 bytes.
+  OpenWatcom V2 saves `ebp` before the other registers, keeps the address
+  pointer in `esi`, and folds the repeated loads.  The identity check stays open
+  at 10 of 39 instructions and 4 of 112 bytes, and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f172 --rebuilt work/rebuild/masmod.exe --rebuilt-map
+  work/rebuild/memory_alloc_small.map --rebuilt-symbol memory_alloc_small_`.
+- Observation: the behavior check passes.  The harness prints `0`, `1`, and
+  `D`.  The success path sends the request `0x0501` with the size words `0x1234`
+  and `0x5678`, returns the size `0x12345678`, and stores the address
+  `0x9abcdef0`.  The failure path returns 0 and leaves the address.
+  Evidence: `python3 tools/rebuild/harness.py run --module memory_alloc_small`,
+  `work/rebuild/mas_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2f172`.
