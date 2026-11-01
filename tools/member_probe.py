@@ -134,6 +134,12 @@ def run_probe(
                         f"the capture ends after {len(names)} member opens"
                     )
                     break
+                except TimeoutError:
+                    print(
+                        "the debugger read timed out; "
+                        f"the capture ends after {len(names)} member opens"
+                    )
+                    break
     finally:
         child.close()
         data[MEMBER_OPEN_FILE] = original[0]

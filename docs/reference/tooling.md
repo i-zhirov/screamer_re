@@ -207,8 +207,8 @@ member open.  The tool patches a copy of the game executable with the INT 3 opco
 `0xCC` at the file offset of the member open `FUN_0004C08D` and of its call site
 in the sample loader, sets the `BPINT 3` breakpoint, runs the game, and reads the
 member name from the stack at every stop.  When the game exits and closes the
-control connection before the member limit, the capture ends cleanly and the
-tool reports the members it observed.
+control connection, or when a debugger read times out, the capture ends cleanly
+before the member limit and the tool reports the members it observed.
 
 ```sh
 python3 tools/member_probe.py --limit 40
