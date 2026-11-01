@@ -7390,3 +7390,54 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_frame`,
   `work/rebuild/rcf_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2807c`.
+
+## The game_main module at 0x10020
+
+- Observation: the original body at `0x10020` holds 56 instructions and 194
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  371-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10020 --count 56` and
+  `tools/rebuild/functions/0x10020.json`.
+- Observation: the function has a frame.  It saves `ebx`, `edx`, and `ebp`,
+  sets `ebp`, and subtracts 4 from `esp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x10020` through `0x10027`.
+- Observation: the function calls `memory_alloc` at `0x30050` with the size
+  `0x4c`.  When the result is not zero, it calls `list_create` at `0x2ecf8`
+  with the result and the count `0x96`.  It stores the final result at
+  `DAT_000062ac`.
+  Evidence: the calls at `0x1002d` through `0x10040`.
+- Observation: the function calls `memory_available` at `0x2f8ca` with the
+  list pointer and compares the result with `0x61a800` (6400000).  When the
+  result is lower, it prints two messages through `printf` at `0x3009b`.  The
+  second message receives the shortfall `0x61a800 - memory_available(...)`.
+  The format strings are at the object 3 offsets 4 and 0x29.  The image holds
+  `\nNot enough memory to play SCREAMER\n` and `You need another %d bytes\n`.
+  Evidence: the compare at `0x1004a`, the pushes at `0x10051` and `0x10070`,
+  and the strings at file offset `0xf6805`.
+- Observation: the normal path calls `engine_init` at `0x127a0`.  The loop
+  tests `DAT_00007ed8` against 1, then calls `race_loop` at `0x27700` and
+  `frame_update` at `0x27f94`.  A non-zero race result calls `bios_video` at
+  `0x108e4` with the mode 3, `error_report` at `0x10978` with the code, and
+  the run-time exit at `0x300be` with the code.  After the loop the function
+  calls `engine_shutdown` at `0x128ac`.
+  Evidence: the calls at `0x10084` through `0x100c2`.
+- Observation: the cleanup guards on `DAT_000062ac`.  It calls `list_destroy`
+  at `0x2ed77` with the pointer and the value 0, then passes the return value
+  to `free` at `0x300ec`.  The nested form matches the original, because the
+  second call reuses the pointer in `eax` and reloads nothing.
+  Evidence: the block at `0x100cc` through `0x100d7`.
+- Observation: the rebuild holds 55 instructions and 189 bytes.  The identity
+  check stays open at 21 of 55 instructions and 20 of 189 bytes.  The compiler
+  keeps the list pointer in `edx` and the race result in `edx` with no stack
+  slot, while the original saves `ebx` and spills the result to `[ebp-4]`.
+  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x10020 --rebuilt work/rebuild/gmmod.exe --rebuilt-map
+  work/rebuild/game_main.map --rebuilt-symbol game_main_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  The paths cover the low-memory messages and the
+  shortfall, the normal loop with the shutdown, the error path, and the failed
+  allocation.
+  Evidence: `python3 tools/rebuild/harness.py run --module game_main`,
+  `work/rebuild/gm_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x10020`.

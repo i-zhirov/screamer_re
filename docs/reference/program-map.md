@@ -102,7 +102,7 @@ original Watcom symbol names.
 <!-- begin generated: Program functions -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x10020` | `main` | called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX | derived |
+| `0x10020` | `main` | called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX<br>the original at `0x10020` holds 56 instructions and 194 bytes: the frame, the allocation of `0x4c` bytes, the list of `0x96` records at `DAT_000062ac`, the memory check against `0x61a800`, the two low-memory messages at object 3 offsets 4 and 0x29, `engine_init`, the `race_loop` and `frame_update` loop on `DAT_00007ed8`, the error path through `bios_video(3)`, `error_report`, and `exit`, `engine_shutdown`, and the cleanup | derived |
 | `0x108e4` | `bios_video` | builds a record with the argument and calls interrupt 10h through the run-time | inferred |
 | `0x10978` | `error_report` | dispatches on the code through a jump table to one message stub per code | observed |
 | `0x127a0` | `engine_init` | calls 17 setup functions, loads `MENU` from `%s\DATA\MUSIC.DAT`, and reads the video mode | derived |
