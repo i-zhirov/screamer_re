@@ -465,7 +465,9 @@ The files:
 | `palette_build_main.c` | the `palette_build` test harness: the table, the three constants, and the power stub |
 | `fade_update.c` | the rebuilt `fade_update` module: the state read, the two fade paths, the two clamps, and the `video_present` call |
 | `fade_update_main.c` | the `fade_update` test harness: the state word, the rate, the fade value, and the seven paths |
-| `modules/*.json` | the seventy-five module records: the sources, the compiler, the link, and the run expectations |
+| `persptab_load.c` | the rebuilt `persptab_load` module: the open, the resource read, the read, and the cell advance |
+| `persptab_load_main.c` | the `persptab_load` test harness: the file stubs, the resource stub, and the three paths |
+| `modules/*.json` | the seventy-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

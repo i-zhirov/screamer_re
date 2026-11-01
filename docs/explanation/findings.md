@@ -7034,3 +7034,38 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module fade_update`,
   `work/rebuild/fu_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x29818`.
+
+## The persptab_load module at 0x4cf94
+
+- Observation: the body at `0x4cf94` holds 43 instructions and 155 bytes.  The
+  plan row holds the same counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cf94 --count 43`.
+- Observation: the function opens `TABS\persp01.tab` with the mode `rb` through
+  the call at `0xc5fe5`.  On failure it calls `0x108e4` with 3, `0x10978` with
+  `0x16`, and `0x300be` with `0x16`.  The store names the three calls
+  `bios_video`, `error_report`, and `exit`.
+  Evidence: the calls at `0x4cfa7`, `0x4cfba`, `0x4cfc4`, and `0x4cfce`, and
+  the store records `0x108e4`, `0x10978`, and `0x300be`.
+- Observation: the function calls `resource_read` at `0x2efc2` with the
+  resource structure `DAT_00021574`, the value `0x1747`, and the size `0x40740`.
+  It stores the result in `DAT_000214ec`, reports a null result through the
+  call at `0x2edad`, reads `0x40740` bytes through `fread` at `0xc607b`, adds
+  `0x40000` to the cell, and closes the handle through `0xc6245`.
+  Evidence: the code at `0x4cfd3` through `0x4d02e`.
+- Inference: `DAT_000214ec` is the `PERSPTAB` cell, and the `0x40000` advance
+  points the cell to the second half of the table.  The earlier finding holds
+  the same reading.
+  Evidence: the store note and the earlier `PERSPTAB` finding.
+- Observation: the rebuild with `-of+` holds 44 instructions and 150 bytes.
+  The identity check stays open at 37 of 43 instructions and 24 of 150 bytes.
+  The shared toolchain uses its own prologue, keeps the handle in `esi`, and
+  tests the register instead of the frame slot.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cf94 --rebuilt work/rebuild/ptlmod.exe --rebuilt-map
+  work/rebuild/persptab_load.map --rebuilt-symbol persptab_load_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  It runs the success path, the open-failure path, and the
+  resource-failure path.
+  Evidence: `python3 tools/rebuild/harness.py run --module persptab_load`,
+  `work/rebuild/PTL_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
+  0x4cf94`.

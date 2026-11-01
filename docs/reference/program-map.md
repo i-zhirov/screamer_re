@@ -357,7 +357,7 @@ TABS tables.
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x4c810` | `stream_layer_init` | stores the stream pointer, clears the state word, and runs the six stream layer setup calls | derived |
-| `0x4cf94` | `persptab_load` | opens `TABS\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000` | derived |
+| `0x4cf94` | `persptab_load` | opens `TABS\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000`<br>the original at `0x4cf94` holds 43 instructions and 155 bytes: it opens `TABS\persp01.tab` with the mode `rb` through `fopen` at `0xc5fe5`, runs the BIOS video call with 3, the error report with `0x16`, and the exit with `0x16` on failure, calls `resource_read` at `0x2efc2` with the second argument `0x1747` and the size `0x40740`, stores the result in `DAT_000214ec`, reports a null result through `0x2edad`, reads `0x40740` bytes through `fread` at `0xc607b`, advances the cell by `0x40000`, and closes the handle through `0xc6245` | derived |
 | `0x4d030` | `vis_tab_load` | the original at `0x4d030` holds 31 instructions and 101 bytes: it opens `TABS\VIS.TAB` with the mode `rb` through `fopen` at `0xc5fe5`, runs the error report, BIOS video, and exit path with the value `0x16` on failure, reads `0x27500` bytes into the buffer at `DAT_0007c1c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245` | derived |
 <!-- end generated: The TABS table loaders -->
 
