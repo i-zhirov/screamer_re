@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: seventy-eight named modules are rebuilt with the harness and the
+  progress: seventy-nine named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
@@ -69,8 +69,9 @@ current host.
   `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at
   `0x28160`, `palette_build` at `0x15720`, `fade_update` at `0x29818`,
   `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-  `0x4c08d`, and `resource_read` at `0x2efc2`;
-  twenty-one modules match the original, and fifty-seven rebuilds hold the
+  `0x4c08d`, `resource_read` at `0x2efc2`, and the first Phase D module
+  `race_panel_4` at `0x2e724`;
+  twenty-one modules match the original, and fifty-eight rebuilds hold the
   recorded difference; the `video_fill` module
   holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -146,5 +147,6 @@ The plan follows the size order, starting with the smallest functions.
     `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
     `palette_build` at `0x15720`, `fade_update` at `0x29818`,
     `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-    `0x4c08d`, and `resource_read` at `0x2efc2` are done; the result is
-    twenty-one matches and fifty-seven open rebuilds).
+    `0x4c08d`, `resource_read` at `0x2efc2`, and the first Phase D module
+    `race_panel_4` at `0x2e724` are done; the result is twenty-one matches and
+    fifty-eight open rebuilds).

@@ -7190,3 +7190,59 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module resource_read`,
   `work/rebuild/rr_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2efc2`.
+
+## The race_panel_4 module at 0x2e724
+
+- Observation: the original body at `0x2e724` holds 50 instructions and 167
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  168-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e724 --count 50` and
+  `tools/rebuild/functions/0x2e724.json`.
+- Observation: the function has a frame: it saves `ebx`, `ecx`, `edx`, and
+  `ebp`, sets `ebp`, subtracts `0x94` from `esp`, and subtracts `0x82` from
+  `ebp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2e724` through `0x2e736`.
+- Observation: the centered title call at `0x2e7cc` receives the pointer at
+  `DAT_0011fc38` in `eax`, the y `2` in `edx`, the font `3` in `ebx`, and the
+  color `2` in `ecx`.
+  Evidence: the loads at `0x2e736` through `0x2e747`.
+- Observation: the format call at `0x4d32c` receives the local buffer at
+  `[ebp-0x12]`, the format `\001%s` at object-3 offset `0x12f7`, and the player
+  name at `DAT_001203cc` at object-3 offset `0x203cc`.  The code stores the
+  value `0x83` from `edx` after the call, because the call preserves `edx`.
+  Evidence: the pushes at `0x2e74c` through `0x2e75f` and the store at
+  `0x2e767`.
+- Observation: the first draw call at `0x25020` receives the doubled position
+  `(0x106, 0x98)`, the buffer in `ebx`, the font `2` in `ecx`, and the color `2`
+  on the stack.
+  Evidence: the loads at `0x2e76a` through `0x2e785`.
+- Observation: the second draw call shifts the raw x by `DAT_0011d244 * 21`,
+  adds the base `0x83`, doubles the result, doubles the y `0x58`, and passes
+  the separator `\001-` at object-3 offset `0x12fb`.  The font and the color
+  stay `2`.
+  Evidence: the arithmetic at `0x2e78a` through `0x2e7a2` and the draw at
+  `0x2e7bb`.
+- Observation: the literals and the globals are object-3 offsets in the code.
+  The loader adds the object base `0x100000`.  The title pointer
+  `DAT_0011fc38`, the count `DAT_0011d244`, and the name `DAT_001203cc` are
+  object-3 cells.
+  Evidence: the data at linear `0x1012f7`, `0x1012fb`, and `0x1203cc`.
+- Inference: the title, the player name, and the separator form the overlay of
+  the race state 4.  The 21-pixel shift places one name entry for each count
+  unit.
+  Evidence: the call sequence and the strings.
+- Observation: the rebuild with `-of+` holds 37 instructions and 131 bytes.  The
+  identity check stays open at 11 of 37 instructions and 24 of 131 bytes.  The
+  shared toolchain saves the frame before the register saves, keeps the buffer
+  at `[ebp-0x8c]`, and folds the constants.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2e724 --rebuilt work/rebuild/rp4mod.exe --rebuilt-map
+  work/rebuild/race_panel_4.map --rebuilt-symbol race_panel_4_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The first path uses the count 0, the second path uses the
+  count 5, and the third path uses a second title and the count 2.  The `draw`
+  stub copies the text at call time, because the module buffer is a stack local
+  and a later call overwrites that stack area.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_panel_4`,
+  `work/rebuild/rp4_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2e724`.

@@ -228,7 +228,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | `0x2e0b4` | `race_panel_0` | the overlay for the race state 0 | inferred |
 | `0x2e21c` | `race_panel_2` | the overlay for the race state 2 | inferred |
 | `0x2e58c` | `race_panel_3` | the overlay for the race state 3 | inferred |
-| `0x2e724` | `race_panel_4` | the overlay for the race state 4 | inferred |
+| `0x2e724` | `race_panel_4` | the overlay for the race state 4<br>the original at 0x2e724 holds 50 instructions and 167 bytes: it reads the title pointer at DAT_0011fc38, calls panel_draw_centered at 0x2e7cc with the y 2, the font 3, and the color 2, formats the name at DAT_001203cc with the format \001%s through sprintf at 0x4d32c, draws the buffer at (0x106, 0x98), shifts x by 21 pixels for each unit of DAT_0011d244, and draws the separator \001- at (2 * (0x83 + DAT_0011d244 * 21), 0xb0) through draw at 0x25020 | derived |
 | `0x2e7cc` | `panel_draw_centered` | the original at `0x2e7cc` holds 34 instructions and 93 bytes: it measures the text through `0x254a8`, halves the measured width with a signed division, centers the half width on the `0x140` screen width, and draws through `0x25020` with the doubled position | derived |
 | `0x81a70` | `sound_update` | a sound library update with the driver block `DAT_00106350` | inferred |
 | `0x8ac78` | `camera_update` | sets the position vector at `+0x3c`, `+0x40`, and `+0x44` and clears the velocity at `+0x6c`, `+0x70`, and `+0x74` | inferred |

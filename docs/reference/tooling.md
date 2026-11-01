@@ -473,7 +473,9 @@ The files:
 | `fopen_main.c` | the `fopen` test harness: the stream record, the three stubs, and the three paths |
 | `resource_read.c` | the rebuilt `resource_read` module: the full-table test, the record select, the allocation, and the cache call |
 | `resource_read_main.c` | the `resource_read` test harness: the resource record, the three stubs, and the four paths |
-| `modules/*.json` | the seventy-nine module records: the sources, the compiler, the link, and the run expectations |
+| `race_panel_4.c` | the rebuilt `race_panel_4` module: the centered title, the name format, and the two draws |
+| `race_panel_4_main.c` | the `race_panel_4` test harness: the title, the count, the name, and the three paths |
+| `modules/*.json` | the eighty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
