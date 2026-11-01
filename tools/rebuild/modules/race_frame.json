@@ -1,9 +1,9 @@
 {
-  "exe": "rfmod.exe",
+  "exe": "rcfmod.exe",
   "map": "race_frame.map",
   "name": "race_frame",
   "run": {
-    "command": "rfmod.exe > rf_out.txt",
+    "command": "rcfmod.exe > rcf_out.txt",
     "expect": [
       "0",
       "1",
@@ -12,7 +12,7 @@
       "4",
       "D"
     ],
-    "output": "rf_out.txt",
+    "output": "rcf_out.txt",
     "timeout": 180
   },
   "sources": [

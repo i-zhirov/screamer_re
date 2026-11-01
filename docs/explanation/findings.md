@@ -5166,11 +5166,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   matches the original byte for byte: 25 of 25 bytes equal, 12 of 12 instructions equal, and the
   verdict is `the modules are byte-identical`.  This is the third exact match.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x8c160
-  --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memset.map --rebuilt-symbol
+  --rebuilt work/rebuild/msetmod.exe --rebuilt-map work/rebuild/memset.map --rebuilt-symbol
   memset_`.
 - The run passes.  The harness prints `V` and `D`: the first 16 bytes hold the repeated value and
   the rest stays the pattern.
-  Evidence: `python3 tools/rebuild/harness.py run --module memset` and `work/rebuild/mem_out.txt`.
+  Evidence: `python3 tools/rebuild/harness.py run --module memset` and `work/rebuild/mset_out.txt`.
 - `dpmi_fill_regs` at `0x4bf23` holds 16 instructions and 40 bytes: the `edx` save, the pointer
   moved to `edx`, the six segment reads `cs`, `ds`, `es`, `ss`, `fs`, and `gs`, the six word
   stores, and the epilogue.  It fills the 12-byte real-mode segment set in the order `es`, `cs`,
@@ -7353,7 +7353,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   registers in another order, and reads the module globals through short
   offsets.  The store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x2807c --rebuilt work/rebuild/rfmod.exe --rebuilt-map
+  --original-address 0x2807c --rebuilt work/rebuild/rcfmod.exe --rebuilt-map
   work/rebuild/race_frame.map --rebuilt-symbol race_frame_`.
 - Observation: the behavior check passes.  The harness prints the markers `0`,
   `1`, `2`, `3`, `4`, and `D`.  The paths cover the state 5 skip, the state 0
@@ -7361,5 +7361,5 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   both swaps, the state 4 path, the fade argument, and the two frame-flag
   conditions.
   Evidence: `python3 tools/rebuild/harness.py run --module race_frame`,
-  `work/rebuild/rf_out.txt`, and `python3 tools/rebuild/run.py run --function
+  `work/rebuild/rcf_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2807c`.

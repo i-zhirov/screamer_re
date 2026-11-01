@@ -628,6 +628,29 @@ class StoreTestCase(unittest.TestCase):
         violations = store.validate_module(path)
         self.assertTrue(any("redirect" in violation for violation in violations))
 
+    def test_module_name_collisions(self) -> None:
+        first = self.full_module()
+        first["name"] = "first"
+        first["exe"] = "same.exe"
+        first["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("first", first)
+        second = self.full_module()
+        second["name"] = "second"
+        second["exe"] = "same.exe"
+        second["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("second", second)
+        violations = store.module_name_violations()
+        self.assertTrue(any("executable" in violation for violation in violations))
+        self.assertTrue(any("output" in violation for violation in violations))
+
     def test_seed_diff_added_and_lost(self) -> None:
         candidates = [0x300EC]
         records = {

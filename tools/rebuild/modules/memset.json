@@ -1,14 +1,14 @@
 {
-  "exe": "memmod.exe",
+  "exe": "msetmod.exe",
   "map": "memset.map",
   "name": "memset",
   "run": {
-    "command": "memmod.exe > mem_out.txt",
+    "command": "msetmod.exe > mset_out.txt",
     "expect": [
       "V",
       "D"
     ],
-    "output": "mem_out.txt",
+    "output": "mset_out.txt",
     "timeout": 180
   },
   "sources": [

@@ -559,6 +559,37 @@ def _run_violations(path: Path, record: dict) -> list[str]:
     return violations
 
 
+def module_name_violations() -> list[str]:
+    """Return one message per duplicate executable or output name."""
+    seen: dict[tuple[str, str], str] = {}
+    violations: list[str] = []
+    if not MODULES_DIR.is_dir():
+        return violations
+    for path in sorted(MODULES_DIR.glob("*.json")):
+        try:
+            record = _read_json(path)
+        except ValueError as error:
+            violations.append(str(error))
+            continue
+        run = record.get("run") or {}
+        names = (
+            ("executable", record.get("exe")),
+            ("map", record.get("map")),
+            ("output", run.get("output")),
+        )
+        for kind, value in names:
+            if not isinstance(value, str) or not value:
+                continue
+            key = (kind, value.lower())
+            if key in seen:
+                violations.append(
+                    f"{path}: the {kind} {value!r} is also used by {seen[key]}"
+                )
+            else:
+                seen[key] = path.name
+    return violations
+
+
 def validate_module(
     path: Path, record: dict | None = None, root: Path | None = None
 ) -> list[str]:
@@ -824,6 +855,7 @@ def command_check(original: Path | None) -> int:
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
             violations.extend(validate_module(path))
+        violations.extend(module_name_violations())
     if original is not None:
         if not original.is_file():
             print(f"error: the original image {original} is missing", file=sys.stderr)
