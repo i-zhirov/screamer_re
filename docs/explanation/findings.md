@@ -7246,3 +7246,52 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_panel_4`,
   `work/rebuild/rp4_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2e724`.
+
+## The engine_interface_init module at 0x10810
+
+- Observation: the original body at `0x10810` holds 51 instructions and 183
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  184-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10810 --count 51` and
+  `tools/rebuild/functions/0x10810.json`.
+- Observation: the function has a frame: it saves `ebp`, sets `ebp`, subtracts
+  `0xc` from `esp`, and stores the two register arguments at `[ebp-0xc]` and
+  `[ebp-8]`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x10810` through `0x10819`.
+- Observation: the function calls `memory_alloc` at `0x30050` with the size
+  `0x4c`.  When the result is not zero, it calls `list_create` at `0x2ecf8`
+  with the result and the count `0xb4`.  It stores the final result at
+  `DAT_0000801c`.
+  Evidence: the calls at `0x1081c` through `0x10834`.
+- Observation: the loop runs `0x78` times and addresses records of `0x1c`
+  bytes at the first argument.  Each record sets the fields `+0x14`, `+0x0c`,
+  and `+0x10` to 0 and the field `+0x18` to -1.
+  Evidence: the loop at `0x10839` through `0x108b0`.
+- Observation: the function clears the byte at `DAT_00007fe8` and the dword at
+  the second argument.
+  Evidence: the stores at `0x108b2` through `0x108bd`.
+- Observation: the caller at `0x1286b` in `engine_init` passes the address
+  `0x6530` in `eax` and the address `0x6350` in `edx`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x127a0 --count 71`.
+- Inference: the allocated object is the engine interface list header, the
+  first argument is the `0x78`-record table, and the second argument is a state
+  word.  The first argument address `0x6530` is the record table that
+  `race_session_start` passes to `object_list_link`.
+  Evidence: the `list_create` source, the loop stride, and the shared address
+  in `race_session_start`.
+- Observation: the rebuild with `-of+` holds 31 instructions and 106 bytes.
+  The identity check stays open at 10 of 31 instructions and 10 of 106 bytes.
+  The shared toolchain keeps the arguments in `ecx` and `ebx`, uses `imul` for
+  the `0x1c` stride, and folds the address calculation.  The original
+  recomputes the address with `lea`, `sub`, and `shl` for each field.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x10810 --rebuilt work/rebuild/eiimod.exe --rebuilt-map
+  work/rebuild/engine_interface_init.map --rebuilt-symbol
+  engine_interface_init_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, and `D`.  The first path uses the successful allocation and a distinct
+  list result, and the second path uses a failed allocation.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  engine_interface_init`, `work/rebuild/eii_out.txt`, and `python3
+  tools/rebuild/run.py run --function 0x10810`.

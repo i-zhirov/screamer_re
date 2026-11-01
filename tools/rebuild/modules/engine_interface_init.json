@@ -1,0 +1,28 @@
+{
+  "exe": "eiimod.exe",
+  "map": "engine_interface_init.map",
+  "name": "engine_interface_init",
+  "run": {
+    "command": "eiimod.exe > eii_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "eii_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "engine_interface_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "engine_interface_init_main.c"
+    }
+  ]
+}
