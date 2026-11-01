@@ -7295,3 +7295,71 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module
   engine_interface_init`, `work/rebuild/eii_out.txt`, and `python3
   tools/rebuild/run.py run --function 0x10810`.
+
+## The race_frame module at 0x2807c
+
+- Observation: the original body at `0x2807c` holds 48 instructions and 189
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  228-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2807c --count 48` and
+  `tools/rebuild/functions/0x2807c.json`.
+- Observation: the function has a frame: it saves `ebx`, `edx`, and `ebp`,
+  sets `ebp`, and subtracts `0x3c` from `esp`.  The rebuild uses the option
+  `-of+`.
+  Evidence: the prologue at `0x2807c` through `0x28081`.
+- Observation: the function copies `0x3e800` bytes from `DAT_0011fad0` to
+  `DAT_00121528` through `memcpy` at `0x8c150`.  It passes the destination in
+  `eax`, the source in `edx`, and the count in `ebx`.
+  Evidence: the call at `0x28094` and the `memcpy` module at
+  `tools/rebuild/memcpy.asm`.
+- Observation: the flag byte `DAT_0011d274` gates the two swaps.  The flag
+  `0x10` calls `video_block_swap_a` at `0x1075f`, and the flag `0x20` calls
+  `video_block_swap_b` at `0x107a1`.
+  Evidence: the tests and the calls at `0x28099` through `0x280b5`.
+- Observation: the function calls `overlay_dispatch` at `0x28160`,
+  `race_heading_update` at `0x29610`, `race_state_update` at `0x29564`,
+  `camera_update` at `0x8ac78` with the object `0x109a0`, and `sound_update`
+  at `0x81a70` with the block `0x6350`.
+  Evidence: the calls at `0x280b5` through `0x280d3`.
+- Observation: the compiler jump table at `cs:[eax*4 + 0x18068]` selects the
+  overlay for the race state `DAT_001203b8`.  The entries are `0x180ea`,
+  `0x18104`, `0x180f1`, `0x180f8`, and `0x180ff`.  The state 0 calls
+  `race_panel_0` at `0x2e0b4`, the state 1 calls nothing, the state 2 calls
+  `race_panel_2` at `0x2e21c`, the state 3 calls `race_panel_3` at `0x2e58c`,
+  and the state 4 calls `race_panel_4` at `0x2e724`.  A value above 4 skips the
+  table.
+  Evidence: the switch at `0x280d8` through `0x28104` and the table bytes at
+  linear `0x28068`.
+- Observation: the function calls `fade_update` at `0x29818` with the float
+  `DAT_00120378`.  The argument goes on the stack, as the `fade_update` module
+  requires.
+  Evidence: the push at `0x28104` and the call at `0x2810a`.
+- Observation: the function loads the float `DAT_0011d24c`, compares it with
+  the constant at `0xee0`, and sets `DAT_0011d234` to 1 when the value is above
+  the constant and `DAT_0011fac4` is 0.  The three FPU instructions are `fld`,
+  `fcomp`, and `fnstsw`.
+  Evidence: the compare and the store at `0x2810f` through `0x28129`.
+- Inference: `DAT_0011d24c` is a frame value and the constant at `0xee0` is a
+  frame limit.  The flag `DAT_0011d234` ends the `frame_update` loop.
+  Evidence: the `frame_update` loop in this document.
+- Observation: the constant at `0xee0` sits in a low segment that the shared
+  harness image does not load.  The rebuild reads the threshold through the
+  global `frame_limit`, and the harness sets the bit pattern.
+  Evidence: the failed direct read at linear `0xee0` and the `palette_build`
+  constant pattern.
+- Observation: the rebuild with `-of+` holds 54 instructions and 197 bytes.
+  The identity check stays open at 10 of 48 instructions and 23 of 189 bytes.
+  The rebuild uses an if chain instead of the compiler jump table, saves the
+  registers in another order, and reads the module globals through short
+  offsets.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2807c --rebuilt work/rebuild/rfmod.exe --rebuilt-map
+  work/rebuild/race_frame.map --rebuilt-symbol race_frame_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, `4`, and `D`.  The paths cover the state 5 skip, the state 0
+  path with the swap A, the state 2 path with the swap B, the state 3 path with
+  both swaps, the state 4 path, the fade argument, and the two frame-flag
+  conditions.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_frame`,
+  `work/rebuild/rf_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2807c`.

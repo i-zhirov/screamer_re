@@ -1,0 +1,35 @@
+{
+  "exe": "rfmod.exe",
+  "map": "race_frame.map",
+  "name": "race_frame",
+  "run": {
+    "command": "rfmod.exe > rf_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_frame.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_frame_main.c"
+    }
+  ]
+}
