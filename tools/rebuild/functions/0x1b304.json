@@ -1,17 +1,52 @@
 {
   "address": "0x1b304",
-  "checks": [],
-  "confidence": "derived",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads three 28-byte records from a `cfg` file"
+      "text": "the original at `0x1b304` holds 40 instructions and 144 bytes: it builds `%s\\config\\controls.cfg` with the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the path with the mode `rb` through `fopen` at `0xc5fe5`, reads six 28-byte records into `0x197d8`, forty 28-byte records into `0x192a4`, and ten 4-byte records into `0x19704` through `fread` at `0xc607b`, closes the handle through `0xc6245`, and has no open-failure test"
+    },
+    {
+      "kind": "note",
+      "text": "the primary caller is `engine_init` at `0x127d4`; the other caller at `0x1fe17` runs when `DAT_0018e30` is non-zero; the plan row records 144 bytes, 40 instructions, 6 calls, and 0 FPU"
     }
   ],
+  "module": "controls_load",
   "name": "controls_load",
   "notes": [],
-  "role": "reads three 28-byte records from a `cfg` file",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 138,
+        "detail": "the instruction counts differ, 40 and 41",
+        "instructions_equal": 36,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b304",
+    "date": "2026-11-01",
+    "fingerprint": "sha256:cf0bf0e68378dd534299c606c000b765bf6891c305fac81609aa7cbe0de32ca1",
+    "source_digest": "sha256:052e0043725a2824fea88519782f30ba3f9a56f597cea12bfef9286a1e7cc82f",
+    "tool": "run.py"
+  },
+  "role": "reads the controls configuration from `controls.cfg`",
   "section": "Subsystem initialisation",
   "size": 144,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "controls_load_"
 }

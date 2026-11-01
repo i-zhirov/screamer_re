@@ -455,7 +455,9 @@ The files:
 | `music_start_main.c` | the `music_start` test harness: the nine status paths and the two stubs |
 | `race_end.c` | the rebuilt `race_end` module: the thirteen teardown calls, the gated call, and the two copies |
 | `race_end_main.c` | the `race_end` test harness: the thirteen stubs and the two flag paths |
-| `modules/*.json` | the seventy module records: the sources, the compiler, the link, and the run expectations |
+| `controls_load.c` | the rebuilt `controls_load` module: the controls path, the open, and the three reads |
+| `controls_load_main.c` | the `controls_load` test harness: the format stub, the file stubs, and the two handle paths |
+| `modules/*.json` | the seventy-one module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

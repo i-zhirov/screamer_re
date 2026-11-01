@@ -118,7 +118,7 @@ floating-point instructions.
 | `0x128e0` | `race_session_start` (done) | 136 | 42 | 3 | 0 |
 | `0x2ffc4` | `music_start` (done) | 140 | 41 | 7 | 0 |
 | `0x279a4` | `race_end` (done) | 141 | 36 | 13 | 0 |
-| `0x1b304` | `controls_load` | 144 | 40 | 6 | 0 |
+| `0x1b304` | `controls_load` (done) | 144 | 40 | 6 | 0 |
 | `0x2f172` | `memory_alloc` | 147 | 49 | 2 | 0 |
 | `0x28160` | `overlay_dispatch` | 152 | 42 | 1 | 0 |
 | `0x15720` | `palette_build` | 152 | 55 | 1 | 12 |
@@ -192,9 +192,9 @@ floating-point instructions.
 
 ## Position
 
-Sixty-nine modules carry a recipe and a result: the twelve Phase A modules, the
+Seventy modules carry a recipe and a result: the twelve Phase A modules, the
 eleven modules of the earlier batches, the twenty-three Phase B modules, and the
-first twenty-three Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+first twenty-four Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
 `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
 run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
 `0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
@@ -203,5 +203,5 @@ run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
 `dos_memory_alloc` at `0x2f0fc`, `video_present` at `0x27ec8`,
 `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
 `0x2f904`, `__fprtf` at `0xd429f`, `race_session_start` at `0x128e0`,
-`music_start` at `0x2ffc4`, and `race_end` at `0x279a4`.  The next module is
-`controls_load` at `0x1b304`.
+`music_start` at `0x2ffc4`, `race_end` at `0x279a4`, and `controls_load` at
+`0x1b304`.  The next module is `memory_alloc` at `0x2f172`.

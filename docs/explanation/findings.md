@@ -6794,3 +6794,42 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_end`,
   `work/rebuild/re_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x279a4`.
+
+## The controls_load module
+
+- Observation: `controls_load` at `0x1b304` holds 40 instructions and 144 bytes
+  up to the return at `0x1b393`.  The plan row holds the same body counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b304 --count 40`.
+- Observation: the function builds `%s\config\controls.cfg` with the base path
+  at `DAT_00007edc`.  It opens the file with the mode `rb` and keeps the handle
+  in the frame slot at `[ebp+0x7e]`.  The format sits at object-3 offset `0x9af`
+  (linear `0x1009af`) and the mode sits at object-3 offset `0x9c6`.
+  Evidence: the `sprintf` call at `0x1b324`, the `fopen` call at `0x1b334`, the
+  store at `0x1b339`, and the object-3 data at the two linear addresses.
+- Observation: the function reads three blocks.  It reads six 28-byte records
+  into `0x197d8`, forty 28-byte records into `0x192a4`, and ten 4-byte records
+  into `0x19704`.  Then it closes the handle at `0xc6245`.
+  Evidence: the three `fread` calls at `0x1b34e`, `0x1b365`, and `0x1b37c`, the
+  size and count pairs `0x1c` and 6, `0x1c` and `0x28`, and 4 and `0xa`, and
+  the close at `0x1b384`.
+- Observation: the function has no open-failure test.  When `fopen` returns
+  zero, the three reads and the close receive the zero handle.
+  Evidence: the straight-line body from `0x1b339` to `0x1b384`.
+- Inference: the three blocks are the controls configuration.  The record role
+  now says this.  The first block holds six records, the second block holds
+  forty, and the third block holds ten.
+  Evidence: the three size and count pairs.
+- Observation: the rebuild with `-of+` holds 41 instructions and 138 bytes.
+  OpenWatcom V2 saves `ebp` before the other registers, keeps the handle in
+  `esi`, and uses the local slot at `[ebp-0x90]`.  The identity check stays open
+  at 36 of 40 instructions and 16 of 138 bytes, and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b304 --rebuilt work/rebuild/clmod.exe --rebuilt-map
+  work/rebuild/controls_load.map --rebuilt-symbol controls_load_`.
+- Observation: the behavior check passes.  The harness prints `0`, `1`, and
+  `D`.  A valid handle reaches the three reads with the original sizes and
+  counts and then the close.  A zero handle still reaches the three reads and
+  the close.
+  Evidence: `python3 tools/rebuild/harness.py run --module controls_load`,
+  `work/rebuild/cl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1b304`.
