@@ -479,7 +479,9 @@ The files:
 | `engine_interface_init_main.c` | the `engine_interface_init` test harness: the allocation and list stubs, the record table, and the two paths |
 | `race_frame.c` | the rebuilt `race_frame` module: the buffer copy, the two swap flags, the frame updates, the overlay switch, the fade call, and the frame flag |
 | `race_frame_main.c` | the `race_frame` test harness: the two buffers, the twelve stubs, and the five paths |
-| `modules/*.json` | the eighty-two module records: the sources, the compiler, the link, and the run expectations |
+| `replay_read.c` | the rebuilt `replay_read` module: the record address, the two dword copies, the six 16-bit copies, the index advance, and the two end-marker tests |
+| `replay_read_main.c` | the `replay_read` test harness: the three records, the replay globals, and the four paths |
+| `modules/*.json` | the eighty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

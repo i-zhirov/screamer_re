@@ -1206,6 +1206,33 @@ Authority.
 - `race_session_start` at `0x128e0` sets the signature `DAT_0011521c` to 0x1234
   and clears the state globals.  Evidence: the decompiled `FUN_000128e0`.
 
+## The replay record read
+
+- `replay_read` at `0x22e94` holds 58 instructions and 190 bytes.  It computes
+  the record address from `DAT_00118e5c + DAT_00118e64 * 0x14`.  It copies the
+  dword fields at `+0x00` and `+0x04` to `DAT_00118e04` and `DAT_00118e08`.
+  Evidence: the disassembly of `FUN_00022e94`.
+- The assembly loads a dword two bytes below each 16-bit field and shifts the
+  high word.  For example, the load at `+0x06` and the shift select the signed
+  word at `+0x08`.  The six copies go from `+0x08` to `+0x12` into
+  `DAT_00119880` through `DAT_00119894`.  The layout matches the replay record
+  table in `docs/reference/file-formats.md`.
+  Evidence: the disassembly of `FUN_00022e94`.
+- The function writes the incremented index back to `DAT_00118e64`.  It returns
+  1 when the new index equals `DAT_00118e68` or `DAT_00118e70`, and it returns
+  0 for any other index.
+  Evidence: the disassembly of `FUN_00022e94`.
+- The rebuilt module builds and the behavior check passes.  The identity check
+  stays open: 24 of 54 instructions and 18 of 176 bytes match.  The OpenWatcom
+  V2 prologue and the register saves differ from the original Watcom 10.0a
+  output.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x22e94`.
+- The record pointer in the rebuild is volatile.  The original reloads the
+  pointer from the frame before every field copy, and the plain local stays in
+  a register in the rebuild.
+  Evidence: the disassembly of `FUN_00022e94` and the rebuilt
+  `tools/rebuild/replay_read.c`.
+
 ## The resource layer and the DPMI services
 
 - The resource layer allocates its buffers through the DPMI services of

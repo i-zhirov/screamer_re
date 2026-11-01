@@ -309,7 +309,7 @@ uses `DAT_00118e60`.
 <!-- begin generated: The replay records -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x22e94` | `replay_read` | reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers | derived |
+| `0x22e94` | `replay_read` | reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers<br>the original at 0x22e94 holds 58 instructions and 190 bytes: the record address from the index at DAT_00118e64, the two dword copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08, +0x0a, +0x0c, +0x0e, +0x10, and +0x12, the index advance, and the two end-marker tests; the behavior check passes; the identity check stays open because the prologue and the register saves differ | derived |
 | `0x22f54` | `replay_write` | writes the 20-byte record and advances the index with a wrap | derived |
 <!-- end generated: The replay records -->
 
