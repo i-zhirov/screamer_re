@@ -7069,3 +7069,40 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module persptab_load`,
   `work/rebuild/PTL_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
   0x4cf94`.
+
+## The config_load module at 0x1bf38
+
+- Observation: the original body at `0x1bf38` holds 46 instructions and 155
+  bytes.  The record keeps the true extent of 2088 bytes, and the diff reads the
+  155-byte body.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1bf38 --count 46`.
+- Observation: the function opens `screamer.cfg` with the mode `rt` through the
+  call at `0xc5fe5`.  On failure it calls `0xc656e` with
+  `Files damaged. Re-install Screamer.` and `0x300be` with -1.
+  Evidence: the code at `0x1bf3f` through `0x1bf66`, and the store records
+  `0xc656e` and `0x300be`.
+- Observation: the function reads `%s%s%s` into `DAT_00007edc`,
+  `DAT_00007f10`, and `DAT_00007f44` through `fscanf` at `0xc6618`.  It then
+  reads two `%c` values into the local at `[ebp - 4]`.  The flag
+  `DAT_00007f78` receives 1 when the second character is `n`, and the function
+  closes the handle through `0xc6245`.
+  Evidence: the code at `0x1bf6b` through `0x1bfce`.
+- Inference: the three string buffers hold the configuration fields, and the
+  two characters encode two yes-or-no options.  The strings are `rt` and
+  `screamer.cfg` at `0xab1` and `0xab4` in the data segment.  The purpose of
+  each field is open.
+  Evidence: the data dump and the earlier `Subsystem initialisation` finding.
+- Observation: the rebuild with `-of+` holds 43 instructions and 141 bytes.
+  The identity check stays open at 18 of 43 instructions and 18 of 141 bytes.
+  The shared toolchain saves the registers after the frame, keeps the stream in
+  `edx` instead of the frame slot, and uses `movzx` where the original uses
+  `and eax,0xff`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1bf38 --rebuilt work/rebuild/cfglmod.exe --rebuilt-map
+  work/rebuild/config_load.map --rebuilt-symbol config_load_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  It runs the success path with the character `n`, the
+  success path with another character, and the open-failure path.
+  Evidence: `python3 tools/rebuild/harness.py run --module config_load`,
+  `work/rebuild/CFG_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
+  0x1bf38`.
