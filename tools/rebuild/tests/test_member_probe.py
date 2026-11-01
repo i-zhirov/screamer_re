@@ -30,11 +30,13 @@ class FakeSession:
         registers: str,
         failure: BaseException,
         fail_at: int = 2,
+        fail_on_run_after: int | None = None,
     ) -> None:
         self.work_dir = work_dir
         self.registers = registers
         self.failure = failure
         self.fail_at = fail_at
+        self.fail_on_run_after = fail_on_run_after
         self.captures = 0
 
     def __enter__(self) -> "FakeSession":
@@ -48,6 +50,13 @@ class FakeSession:
             self.captures += 1
             if self.captures >= self.fail_at:
                 raise self.failure
+        if (
+            self.fail_on_run_after is not None
+            and kind == "EXEC"
+            and text == "RUN"
+            and self.captures >= self.fail_on_run_after
+        ):
+            raise self.failure
         if kind == "EXEC" and text.startswith("EV "):
             return mock.Mock(lines=["", self.registers])
         if kind == "EXEC" and text.startswith("MEMDUMPBIN"):
@@ -80,6 +89,7 @@ class CaptureTestCase(unittest.TestCase):
             "DOSBox-X closed the control connection"
         )
         self.fail_at = 2
+        self.fail_on_run_after = None
         self.registers = " ".join(
             [
                 "0",
@@ -99,7 +109,11 @@ class CaptureTestCase(unittest.TestCase):
 
     def session(self, *arguments: object, **keywords: object) -> FakeSession:
         return FakeSession(
-            self.work, self.registers, self.failure, self.fail_at
+            self.work,
+            self.registers,
+            self.failure,
+            self.fail_at,
+            self.fail_on_run_after,
         )
 
     def patched(self) -> contextlib.ExitStack:
@@ -179,6 +193,40 @@ class CaptureTestCase(unittest.TestCase):
         ), contextlib.redirect_stdout(output):
             self.assertEqual(member_probe.main(), 0)
         self.assertIn("observed 0 member opens", output.getvalue())
+
+    def test_a_timeout_on_the_final_read_keeps_the_full_list(self) -> None:
+        self.failure = TimeoutError("timed out")
+        self.fail_at = 100
+        self.fail_on_run_after = 2
+        output = io.StringIO()
+        with self.patched(), contextlib.redirect_stdout(output):
+            names = member_probe.run_probe(
+                self.game, self.work, 9876, 2, 60.0, "dosbox-x"
+            )
+        self.assertEqual(names, [NAME, NAME])
+        self.assertIn(
+            "the capture ends after 2 member opens", output.getvalue()
+        )
+
+    def test_the_command_line_exits_zero_after_the_full_list(self) -> None:
+        self.failure = TimeoutError("timed out")
+        self.fail_at = 100
+        self.fail_on_run_after = 2
+        output = io.StringIO()
+        arguments = [
+            "member_probe.py",
+            "--game-dir",
+            str(self.game),
+            "--work-dir",
+            str(self.work),
+            "--limit",
+            "2",
+        ]
+        with self.patched(), mock.patch.object(
+            sys, "argv", arguments
+        ), contextlib.redirect_stdout(output):
+            self.assertEqual(member_probe.main(), 0)
+        self.assertIn("observed 2 member opens", output.getvalue())
 
     def test_the_command_line_exits_zero(self) -> None:
         output = io.StringIO()
