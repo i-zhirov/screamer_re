@@ -7666,3 +7666,83 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_slide_step`,
   `work/rebuild/osl_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x1df34`.
+
+## The music_bank_load module at 0x2f9e0
+
+- Observation: the original first block at `0x2f9e0` holds 72 instructions
+  and 220 bytes up to the early `ret 4` at `0x2fab9`.  The merged store record
+  keeps the 688-byte extent, and the function continues to the `ret 4` at
+  `0x2fc8d`.  The plan row holds the first-block counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f9e0 --count 72` and
+  `tools/rebuild/functions/0x2f9e0.json`.
+- Observation: the function has a frame.  It saves `esi`, `edi`, and `ebp`,
+  sets `ebp`, subtracts `0xd4` from `esp`, and then subtracts `0x7e` from
+  `ebp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2f9e0` through `0x2f9eb`.
+- Observation: the function takes four arguments in `eax`, `edx`, `ebx`, and
+  `ecx`, and the fifth argument from the stack.  It clears the field `+0x04`
+  to -1, stores the fifth argument at `+0x98`, and copies the `ecx` name to
+  `+0x18`.
+  Evidence: the four argument slots at `0x2f9ee` through `0x2f9f7`, the two
+  field stores at `0x2f9fd` and `0x2fa0d`, and the copy loop at `0x2fa1d`
+  through `0x2fa33`.
+- Observation: the first call at `0xd25d7` takes three zero arguments.  A
+  non-zero result sets the status at `+0x10` to 1 and jumps to the epilogue.
+  Evidence: the three zero loads at `0x2fa36` through `0x2fa3a`, the call at
+  `0x2fa3c`, and the status store at `0x2fa48`.
+- Observation: the function clears the 0x24-byte state buffer at object-1
+  offset `0x20b7c` through the `memset` at `0xd1ec0`, copies the third
+  argument to a local, and calls `0xd2783` with the second argument and the
+  bank field `+0x08`.  The call passes two far pointers to the state buffer
+  and to the bank field.  A non-zero result clears the handle at `0x2234c`,
+  calls `0xd2743`, sets the status to 2, and returns at `0x2fab9`.
+  Evidence: the `memset` call at `0x2fa60`, the argument store at `0x2fa68`,
+  the far-pointer pushes at `0x2fa71` through `0x2fa7e`, the call at
+  `0x2fa88`, and the error block at `0x2fa96` through `0x2fab9`.
+- Observation: the success path opens `melodic.bnk` and then `drum.bnk`
+  through the member open `0x4c08d` with the category `rb`.  It reads each
+  member with `0x4c4e5` into a resource from `0x2efc2`, and stores the two
+  resource pointers in the globals `0x20b6c` and `0x20b74`.  It stores the
+  stream status after each read in `0x20b70` and `0x20b78`, and it closes each
+  stream with `0x4c38d`.
+  Evidence: the two open blocks at `0x2facc` and `0x2fb56`, the two read
+  blocks at `0x2fae3` through `0x2fb3e` and `0x2fb6a` through `0x2fbc5`, and
+  the module globals.
+- Observation: the strings sit in object 3.  The offsets `0x14ec` and
+  `0x1508` hold `rb`, `0x14ef` holds `melodic.bnk`, `0x14fb` holds
+  `MELODIC_BANK`, `0x150b` holds `drum.bnk`, and `0x1514` holds `DRUM_BANK`.
+  Evidence: the data dump at linear `0x1014ec` through `0x101514`.
+- Observation: for the driver values `0xa002` and `0xa009`, the function
+  installs the two resources through `0xd2ed9` and ORs the two results into
+  the status at `+0x10`.
+  Evidence: the two comparisons at `0x2fbca` and `0x2fbd3`, and the two call
+  blocks at `0x2fbdc` and `0x2fc02`.
+- Observation: a non-zero status releases `MELODIC_BANK` and `DRUM_BANK`
+  through `0x2f326`, clears the handle at `0x2234c`, calls `0xd2743`, sets the
+  status to 3, and returns.  The zero status calls `0xd3d14` with the value
+  `0x7f`, sets the active flag at `+0x14` to 1, and returns the status 0.
+  Evidence: the release block at `0x2fc21` through `0x2fc6a` and the success
+  block at `0x2fc6d` through `0x2fc84`.
+- Inference: the statuses 1, 2, and 3 name the sound-system failure, the
+  driver-open failure, and the bank failure.  `music_start` reports the
+  non-zero status and terminates the game.
+  Evidence: the three status stores and the `music_start` message chain.
+- Observation: the rebuild holds 145 instructions and 592 bytes up to its
+  single return.  OpenWatcom V2 merges the returns into one epilogue, so the
+  first return does not sit at the early block.  The identity check stays open
+  at 19 of 72 instructions and 15 of 220 bytes.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f9e0 --rebuilt work/rebuild/mblmod.exe --rebuilt-map
+  work/rebuild/music_bank_load.map --rebuilt-symbol music_bank_load_`.
+- Observation: the rebuild passes near pointers to `0xd2783` in place of the
+  original far pointers and segment.  The flat target needs no far pointer.
+  This difference does not change the behavior in the harness.
+  Evidence: `tools/rebuild/music_bank_load.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the success path, the sound-system
+  failure, the driver-open failure, the install failure for `0xa002`, the
+  install success for `0xa009`, the zero melodic resource, and the failed
+  melodic open.
+  Evidence: `python3 tools/rebuild/harness.py run --module music_bank_load`,
+  `work/rebuild/mbl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2f9e0`.
