@@ -451,7 +451,9 @@ The files:
 | `pool_init_main.c` | the `pool_init` test harness: the pool record and the two DPMI stubs |
 | `race_session_start.c` | the rebuilt `race_session_start` module: the two loads, the mode switch, and the frame setup |
 | `race_session_start_main.c` | the `race_session_start` test harness: the state words and the twenty-four stubs |
-| `modules/*.json` | the sixty-eight module records: the sources, the compiler, the link, and the run expectations |
+| `music_start.c` | the rebuilt `music_start` module: the status chain, the six messages, and the exit |
+| `music_start_main.c` | the `music_start` test harness: the nine status paths and the two stubs |
+| `modules/*.json` | the sixty-nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

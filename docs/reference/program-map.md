@@ -378,7 +378,7 @@ loads the sample bank.
 | `0x1f2e0` | `sound_bank_load` | builds `%s\data\sound.dat`, walks the 36-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a missing member calls the exit | derived |
 | `0x2f9b0` | `music_bank_reset` | clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct | derived |
 | `0x2f9e0` | `music_bank_load` | builds `%s\DATA\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d` | derived |
-| `0x2ffc4` | `music_start` | starts the music from the bank | derived |
+| `0x2ffc4` | `music_start` | the original at `0x2ffc4` holds 41 instructions and 140 bytes: it reads the status word at `+0x10` of the music bank struct, sends the statuses 1 to 6 through the jump table at object offset `0x1ffac` to the messages `0x1577`, `0x1596`, `0x15b6`, `0x15ca`, `0x15e2`, and `0x15f5`, prints the message through `0x3009b`, and calls `exit(-1)` at `0x300be` for a non-zero status; a zero status returns at once<br>the only caller is `engine_init` at `0x1284d`, after `music_bank_load` at `0x1283f`; `music_bank_load` writes the status at `0x2f9e0` and `music_bank_reset` clears it at `0x2f9b0` | derived |
 <!-- end generated: The sound loaders -->
 
 The callers: the Watcom startup calls `music_bank_reset` at `0x10013`, so the

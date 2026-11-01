@@ -6707,3 +6707,44 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the stage 9 failures (`error: DOSBox-X closed the control
   connection`), the direct probe run (`error: timed out` after 50 member
   opens), and the clean stage 9 after the change.
+
+## The music_start module
+
+- Observation: `music_start` at `0x2ffc4` holds 41 instructions and 140 bytes up
+  to the return at `0x3004f`.  The plan row holds the same body counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ffc4 --count 41` and
+  `python3 tools/le.py calls STARTH.EXE 0x2ffc4`.
+- Observation: the function reads the status word at `+0x10` of the music bank
+  struct.  The statuses 1 through 6 select six messages through the jump table
+  at object offset `0x1ffac`.  The messages sit at data-segment offsets
+  `0x1577`, `0x1596`, `0x15b6`, `0x15ca`, `0x15e2`, and `0x15f5`.  Each case
+  pushes the message and calls `printf` at `0x3009b`.  A non-zero status then
+  calls `exit(-1)` at `0x300be`.  A zero status returns at once.
+  Evidence: the six call sites from `0x2ffe6` to `0x30031`, the exit call at
+  `0x30047`, and the object 3 data at the linear `0x101577` through `0x1015f5`.
+- Observation: the only caller is `engine_init` at `0x1284d`, after
+  `music_bank_load` at `0x1283f`.  `music_bank_load` writes the status `1` and
+  `2` at `0x2f9e0`.  `music_bank_reset` clears the status at `0x2f9b0`.
+  Evidence: the caller scan and `python3 tools/le.py disasm STARTH.EXE 0x12820
+  --count 12`.
+- Inference: the description "starts the music from the bank" does not fit this
+  address.  The function calls no playback routine.  It reports the load status
+  and terminates on a failure.  The record role and the record evidence now say
+  this, and the plan description deviates from the code.
+  Evidence: the 41-instruction body and the seven call targets.
+- Observation: the rebuild with `-of+` and a C switch crashed.  The pinned
+  OpenWatcom V2 compiler does not place the compiler jump table in the code
+  object, so the rebuilt `jmp` read the entry at `CS:0`.  The run stopped at
+  `1A0:00000001`, the same fault as the `error_report` module.  The source now
+  holds an if-else chain with one print call per state, and the behavior passes.
+  Evidence: the first run and `python3 tools/rebuild/harness.py run --module
+  music_start`.
+- Observation: the rebuild holds 43 instructions and 134 bytes.  The identity
+  check stays open at 8 of 41 instructions and 22 of 134 bytes, and the store
+  records `rebuilt`.  The behavior check passes.  The harness prints `0` through
+  `8` and `D`: the zero status prints nothing, the six in-range statuses print
+  their message and exit, and the statuses 7 and -1 print nothing and exit.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2ffc4 --rebuilt work/rebuild/msmod.exe --rebuilt-map
+  work/rebuild/music_start.map --rebuilt-symbol music_start_` and
+  `python3 tools/rebuild/run.py run --function 0x2ffc4`.
