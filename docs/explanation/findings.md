@@ -6989,3 +6989,48 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   first base, the first exponent, and table entry 0 when the module used the
   literals.
   Evidence: the diagnostic harness run and `tools/rebuild/palette_build.c`.
+
+## The fade_update module at 0x29818
+
+- Observation: the body at `0x29818` holds 48 instructions and 154 bytes.  It
+  saves five registers, makes the frame, and returns at `0x298af`.  The plan
+  row holds the same counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29818 --count 48`.
+- Observation: the function reads the state `DAT_0011fac8`.  State 0 does
+  nothing.  State 1 runs the fade-in path.  Every other state runs the fade-out
+  path.
+  Evidence: the reads at `0x2981f` and `0x2982d`, the compare at `0x29825`, and
+  the branch at `0x29830`.
+- Observation: the fade-in path computes
+  `DAT_0011d224 = DAT_0018e08 * delta + DAT_0011d224`.  When the value is at
+  least 1.0, it stores 1.0 and clears the state.  The float argument sits at
+  `[ebp + 0x18]`, after the five saved registers.
+  Evidence: the code at `0x29832` through `0x29869`.
+- Observation: the fade-out path computes
+  `DAT_0011d224 = DAT_0011d224 - DAT_0018e08 * delta`.  When the value is
+  below 0.0, it stores 0.0 and clears the state.
+  Evidence: the code at `0x2986b` through `0x29897`.
+- Observation: every active path calls the routine at `0x27ec8` with the fade
+  value and the offset 0.  That routine is `video_present`.  The callee removes
+  the two stack arguments with `ret 8`.  The function removes the float argument
+  with `ret 4`.
+  Evidence: the pushes at `0x2989d` and `0x2989f`, the call at `0x298a5`, and
+  the epilogue at `0x298af`.
+- Inference: `DAT_0011d224` is the fade level, `DAT_0018e08` is the fade rate,
+  and `DAT_0011fac8` is the fade direction.  The state 1 fades in.  The state 2
+  fades out.
+  Evidence: the two arithmetic paths and the `video_present` calls.
+- Observation: the rebuild with `-of+` holds 37 instructions and 142 bytes.
+  The identity check stays open at 2 of 48 instructions and 7 of 142 bytes.
+  The shared toolchain uses its own prologue, its register allocation, and a
+  `cmp` clamp for the fade-in path.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29818 --rebuilt work/rebuild/fumod.exe --rebuilt-map
+  work/rebuild/fade_update.map --rebuilt-symbol fade_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  It runs the idle path, the two fade-in paths, the two
+  fade-out paths, the two exact clamp values, and the recorded
+  `video_present` arguments.
+  Evidence: `python3 tools/rebuild/harness.py run --module fade_update`,
+  `work/rebuild/fu_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x29818`.

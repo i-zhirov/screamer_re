@@ -463,7 +463,9 @@ The files:
 | `overlay_dispatch_main.c` | the `overlay_dispatch` test harness: the seven step stubs and the two stack paths |
 | `palette_build.c` | the rebuilt `palette_build` module: the two loops and the power ramp table |
 | `palette_build_main.c` | the `palette_build` test harness: the table, the three constants, and the power stub |
-| `modules/*.json` | the seventy-four module records: the sources, the compiler, the link, and the run expectations |
+| `fade_update.c` | the rebuilt `fade_update` module: the state read, the two fade paths, the two clamps, and the `video_present` call |
+| `fade_update_main.c` | the `fade_update` test harness: the state word, the rate, the fade value, and the seven paths |
+| `modules/*.json` | the seventy-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

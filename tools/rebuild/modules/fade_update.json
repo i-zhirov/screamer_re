@@ -1,0 +1,37 @@
+{
+  "exe": "fumod.exe",
+  "map": "fade_update.map",
+  "name": "fade_update",
+  "run": {
+    "command": "fumod.exe > fu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "fu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "fade_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "fade_update_main.c"
+    }
+  ]
+}
