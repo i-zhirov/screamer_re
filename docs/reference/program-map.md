@@ -519,7 +519,7 @@ and `5` when the `3D_BLKOBJ` chunk is missing.
 | `0x10bfc` | `object_load` | reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records | observed |
 | `0x2eed0` | `resource_get` | looks a resource up by name in the engine resource list and loads it from its file when missing | observed |
 | `0x4bf64` | `fprintf` | formats into a stream through the run-time `__fprtf` at `0xd429f` | observed |
-| `0x4c08d` | `fopen` | opens the path through the run-time file layer and fills the stream record; returns `-1` on failure | derived |
+| `0x4c08d` | `fopen` | opens the path through the run-time file layer and fills the stream record; returns `-1` on failure<br>the original at `0x4c08d` holds 48 instructions and 155 bytes: it opens the path with the mode `rb` through `0xc5fe5`, copies the path to `stream + 0x78` and sets the state at `stream + 0xac` to 1 when the open fails, copies the category to `stream + 0x20` and the path to `stream + 0x24`, calls the member open `0x4c128` with the member name, and returns -1 on either failure and 0 on success | observed |
 | `0x4c38d` | `stream_close` | the original at `0x4c38d` holds 34 instructions and 89 bytes: it frees the buffer at `stream + 0x1c` through the run-time `free` at `0xd2008`, frees the buffer at `stream + 0xb0` through the wrapper `free` at `0x300ec` when the flag at `stream + 0x10` is set, closes the handle at `stream + 0x00` through `0xc6245`, and returns 0 | derived |
 | `0x4c4e5` | `stream_read` | buffered read; advances the position and clamps it to the stream size | derived |
 | `0x4c7e0` | `stream_status` | returns the word at `stream + 0x70` | inferred |

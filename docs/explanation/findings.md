@@ -7106,3 +7106,42 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module config_load`,
   `work/rebuild/CFG_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
   0x1bf38`.
+
+## The fopen module at 0x4c08d
+
+- Observation: the original body at `0x4c08d` holds 48 instructions and 155
+  bytes.  The plan row holds the same counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c08d --count 48`.
+- Observation: the function takes four arguments in `eax`, `edx`, `ebx`, and
+  `ecx`: the stream record, the container path, the member name, and the
+  category.  It opens the path with the mode `rb` through the call at
+  `0xc5fe5` and stores the handle at `stream + 0x00`.
+  Evidence: the four argument slots at `0x4c098` through `0x4c0a1` and the call
+  at `0x4c0ac`.
+- Observation: when the open fails, the function copies the path to
+  `stream + 0x78`, sets the state at `stream + 0xac` to 1, and returns -1.
+  When the open succeeds, it copies the category to `stream + 0x20`, copies the
+  path to `stream + 0x24`, and calls the member search `0x4c128` with the member
+  name.  A failed search returns -1.  A found member returns 0.
+  Evidence: the copy calls at `0x4c0c9`, `0x4c0ed`, and `0x4c0fb`, the member
+  call at `0x4c106`, and the two result stores at `0x4c10f` and `0x4c118`.
+- Observation: the module is the member open of the container file layer, not
+  the printf stream formatter.  The callers pass `melodic.bnk` with
+  `MELODIC_BANK` and `drum.bnk` with `DRUM_BANK`.  The mode string at object-3
+  offset `0x16ae` is `rb`.
+  Evidence: the call site at `0x2facc` in `music_bank_load` and the data dump at
+  linear `0x1016ae`.
+- Observation: the rebuild with `-of+` holds 34 instructions and 94 bytes.  The
+  identity check stays open at 11 of 34 instructions and 6 of 94 bytes.  The
+  shared toolchain saves the registers after the frame, keeps the stream pointer
+  and the path in `esi` and `edi`, and tests the returned handle directly
+  instead of the stored slot.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c08d --rebuilt work/rebuild/fopmod.exe --rebuilt-map
+  work/rebuild/fopen.map --rebuilt-symbol fopen_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  It runs the success path, the open-failure path, and the
+  member-failure path.
+  Evidence: `python3 tools/rebuild/harness.py run --module fopen`,
+  `work/rebuild/FOP_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
+  0x4c08d`.
