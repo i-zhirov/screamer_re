@@ -487,7 +487,9 @@ The files:
 | `replay_read_main.c` | the `replay_read` test harness: the three records, the replay globals, and the four paths |
 | `game_main.c` | the rebuilt `main` module as `game_main`: the allocation, the list, the memory check, the two messages, the engine loop, the error path, and the cleanup |
 | `game_main_main.c` | the `game_main` test harness: the two globals, the thirteen stubs, and the four paths |
-| `modules/*.json` | the eighty-six module records: the sources, the compiler, the link, and the run expectations |
+| `frame_update.c` | the rebuilt `frame_update` module: the key-state clear, the memory probe, the menu calls, the frame loop, the input and music calls, and the exit path |
+| `frame_update_main.c` | the `frame_update` test harness: the key state, the race context, the ten stubs, and the four paths |
+| `modules/*.json` | the eighty-seven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

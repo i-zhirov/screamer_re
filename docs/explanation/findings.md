@@ -7543,3 +7543,64 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module motion_update`,
   `work/rebuild/mtn_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x21e6c`.
+
+## The frame_update module at 0x27f94
+
+- Observation: the original body at `0x27f94` holds 63 instructions and 212
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  232-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27f94 --count 63` and
+  `tools/rebuild/functions/0x27f94.json`.
+- Observation: the function has a frame.  It saves `ebx`, `edx`, `esi`, `edi`,
+  and `ebp`, sets `ebp`, and subtracts 8 from `esp`.  The rebuild uses the
+  option `-of+`.
+  Evidence: the prologue at `0x27f94` through `0x27f9b`.
+- Observation: the function clears the 20 dwords at `DAT_0001fb08` with a local
+  index.  It then sets `DAT_00020988` and the frame value `DAT_0011d24c` to 0.
+  Evidence: the loop at `0x27f9e` through `0x27fbd` and the two stores at
+  `0x27fc6` and `0x27fcc`.
+- Observation: the function calls `memory_available` at `0x2f8ca` with the list
+  pointer `DAT_000062ac` and stores the result at `DAT_00020880`.
+  Evidence: the load at `0x27fc1`, the call at `0x27fd2`, and the store at
+  `0x27fd7`.
+- Observation: the function calls `menu_space_init` at `0x29d08` and
+  `menu_frame` at `0x29f80`.
+  Evidence: the calls at `0x27fdc` and `0x27fe1`.
+- Observation: the counter `DAT_000207f8` increments and resets to 0 when the
+  new value is above 5.  The counter therefore cycles through the six values 0
+  to 5.
+  Evidence: the block at `0x27fe6` through `0x27ff8`.
+- Observation: the frame loop calls `frame_step` at `0x2aa84` and `race_frame`
+  at `0x2807c`.  When the word at `DAT_00002dec + 0x48` is non-zero, the input
+  poll at `0x26448` runs only when `DAT_0011d2c0` and `DAT_0011d2cc` are
+  non-zero, and the music call at `0x2ff14` receives the record
+  `DAT_000062b0`.  `video_fill` at `0x2aa98` runs on every turn.
+  Evidence: the block at `0x28008` through `0x2803b`.
+- Inference: `DAT_00002dec` is the race context pointer and the word at `+0x48`
+  is an active flag.  The two input flags gate the local input poll, and
+  `DAT_000062b0` is the music request record.
+  Evidence: the context read, the two guards, and the fixed record address.
+- Observation: the loop continues while the frame flag `DAT_0011d234` is 0.
+  When the flag is not 0, the function calls `memset` at `0x8c160` with the
+  destination `DAT_00121528`, the count `0x3e800`, and the value 0, then calls
+  `video_fill` again and `race_cleanup` at `0x2a1b0`.
+  Evidence: the test at `0x2803b`, the `memset` block at `0x28045` through
+  `0x28051`, and the calls at `0x28056` and `0x2805b`.
+- Observation: the rebuild holds 53 instructions and 189 bytes.  The identity
+  check stays open at 14 of 53 instructions and 19 of 189 bytes.  OpenWatcom V2
+  saves the registers in another order, uses registers for the key clear, and
+  compares the context word and the frame flag directly.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27f94 --rebuilt work/rebuild/fupdmod.exe --rebuilt-map
+  work/rebuild/frame_update.map --rebuilt-symbol frame_update_`.
+- Observation: the module and the harness hold the float `DAT_0011d24c`, so the
+  recipe links the shared `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/frame_update.json` and the build.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  The paths cover the full path with the input and
+  music calls, the counter wrap that skips both calls, the input skip with the
+  music call, and the three-turn loop.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_update`,
+  `work/rebuild/fupd_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x27f94`.
