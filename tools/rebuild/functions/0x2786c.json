@@ -12,6 +12,6 @@
   "notes": [],
   "role": "walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record",
   "section": "race_loop callees",
-  "size": 5,
+  "size": 312,
   "status": "named"
 }

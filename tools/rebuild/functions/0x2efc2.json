@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads the current record and caches it through `0x2f062`",
   "section": "The resource layer",
-  "size": 3,
+  "size": 160,
   "status": "named"
 }

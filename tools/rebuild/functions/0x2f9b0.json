@@ -43,7 +43,7 @@
   },
   "role": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct",
   "section": "The sound loaders",
-  "size": 50,
+  "size": 48,
   "status": "rebuilt",
   "symbol": "music_bank_reset_"
 }

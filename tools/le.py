@@ -539,10 +539,32 @@ def print_call_tree(
     return 0
 
 
+SAVE_REGISTERS = {0x53: 0, 0x51: 1, 0x52: 2, 0x56: 3, 0x57: 4}
+
+
+def prologue_start(data: bytes, position: int) -> int:
+    """Walk from a `push ebp; mov ebp,esp` match back over the register saves.
+
+    Watcom saves the used registers in the canonical order `ebx`, `ecx`, `edx`,
+    `esi`, `edi` and then `ebp`, so a function that uses registers starts before
+    the `push ebp` that the raw pattern matches.  The walk stops at the first
+    byte that is not a register save or that breaks the order.
+    """
+    start = position
+    previous = len(SAVE_REGISTERS)
+    while start > 0:
+        index = SAVE_REGISTERS.get(data[start - 1])
+        if index is None or index >= previous:
+            break
+        previous = index
+        start -= 1
+    return start
+
+
 def print_functions(
     exe: LinearExecutable, start: int | None, end: int | None, limit: int
 ) -> int:
-    """List candidate function starts: the Watcom prologue `push ebp; mov ebp,esp`."""
+    """List candidate function starts: the Watcom prologue and its register saves."""
     obj = exe.object_at(exe.entry_linear)
     if obj is None:
         print("the entry object is missing", file=sys.stderr)
@@ -557,7 +579,7 @@ def print_functions(
     found: list[int] = []
     position = data.find(pattern)
     while position != -1 and len(found) < limit:
-        found.append(low + position)
+        found.append(low + prologue_start(data, position))
         position = data.find(pattern, position + 1)
     print(f"candidate function starts: {len(found)}")
     for candidate in found:
@@ -581,7 +603,7 @@ def print_nearest_function(exe: LinearExecutable, address: int) -> int:
     if position == -1:
         print(f"no prologue below {address:#x}")
         return 1
-    start = low + position
+    start = low + prologue_start(data, position)
     print(f"nearest prologue: {start:#x} ({address - start:#x} bytes below {address:#x})")
     return 0
 

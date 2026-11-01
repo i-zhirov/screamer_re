@@ -12,6 +12,6 @@
   "notes": [],
   "role": "bounds the file index, initializes the object record, and copies the chunk table from the file record",
   "section": "Resource loader",
-  "size": 2,
+  "size": 396,
   "status": "named"
 }

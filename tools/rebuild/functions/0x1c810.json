@@ -43,7 +43,7 @@
   },
   "role": "runs the physics and collision steps, gated on the state at `+0x414`",
   "section": "object_update_all callees",
-  "size": 62,
+  "size": 60,
   "status": "rebuilt",
   "symbol": "object_physics_"
 }

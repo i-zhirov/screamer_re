@@ -43,7 +43,7 @@
   },
   "role": "counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down",
   "section": "Program functions",
-  "size": 57,
+  "size": 52,
   "status": "rebuilt",
   "symbol": "engine_shutdown_"
 }

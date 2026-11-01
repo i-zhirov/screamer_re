@@ -42,7 +42,7 @@
   },
   "role": "dispatches the menu id from the two tables and the state 2 overlay",
   "section": "overlay_dispatch callees",
-  "size": 118,
+  "size": 2052,
   "status": "rebuilt",
   "symbol": "net_race_screen_"
 }

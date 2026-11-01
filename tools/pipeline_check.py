@@ -21,7 +21,10 @@ Stages:
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
-with code 0 when every check passes and code 1 when a check fails.
+with code 0 when every check passes and code 1 when a check fails.  It exits
+with code 2 before any stage when the debugger control port is already in use,
+the game directory is missing, the reference executable is missing or does not
+parse as an LE image, or the work root cannot be created.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
@@ -38,6 +41,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -50,6 +54,7 @@ sys.path.insert(0, str(Path(__file__).parent / "rebuild"))
 import store as store_module  # noqa: E402
 
 TOOLS = (
+    "pipeline_check.py",
     "le.py",
     "inventory.py",
     "extract_cd_image.py",
@@ -120,6 +125,21 @@ def last_line(text: str) -> str:
     """The last non-empty line of a tool output."""
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     return lines[-1] if lines else ""
+
+
+def debugger_port_free(port: int) -> bool:
+    """Return False when another process already holds the debugger port.
+
+    The debugger control session binds the loopback address with
+    `SO_REUSEADDR`, so the probe matches that bind.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            server.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
 
 
 def check_syntax(checks: Checks) -> None:
@@ -694,7 +714,15 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     The store is the only module registry, so the stage runs the store check,
     the seed check, and the drift check, and it renders the status page.
     """
-    result = run([sys.executable, "tools/rebuild/store.py", "check"])
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/store.py",
+            "check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
     checks.check(
         "stage 12: the store holds no violation",
         result.returncode == 0,
@@ -788,9 +816,47 @@ def main() -> int:
     parser.add_argument("--skip-runtime", action="store_true")
     args = parser.parse_args()
 
+    if not args.skip_runtime and not debugger_port_free(args.port):
+        print(
+            f"error: the debugger control port {args.port} is already in use; "
+            "stop the other DOSBox-X session or run with --port",
+            file=sys.stderr,
+        )
+        return 2
+
     game_dir = args.game_dir.resolve()
+    if not game_dir.is_dir():
+        print(
+            f"error: the game directory {args.game_dir} is missing or not a "
+            "directory",
+            file=sys.stderr,
+        )
+        return 2
+    if not (game_dir / args.exe).is_file():
+        print(
+            f"error: the reference executable {args.exe} is missing in "
+            f"{args.game_dir}",
+            file=sys.stderr,
+        )
+        return 2
     work_root = args.work_root.resolve()
-    work_root.mkdir(parents=True, exist_ok=True)
+    try:
+        work_root.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        print(
+            f"error: the work root {args.work_root} cannot be created: {error}",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        le_module.load(game_dir / args.exe)
+    except (ValueError, OSError) as error:
+        print(
+            f"error: the reference executable {args.exe} is not a valid LE "
+            f"image: {error}",
+            file=sys.stderr,
+        )
+        return 2
 
     checks = Checks()
     check_syntax(checks)

@@ -43,7 +43,7 @@
   },
   "role": "calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument",
   "section": "motion_update callees",
-  "size": 71,
+  "size": 68,
   "status": "rebuilt",
   "symbol": "view_move_"
 }

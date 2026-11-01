@@ -42,7 +42,7 @@
   },
   "role": "builds the setup.cfg path, reads 0x90 bytes, and reports the SETUP error on failure",
   "section": "Subsystem initialisation",
-  "size": 111,
+  "size": 112,
   "status": "rebuilt",
   "symbol": "setup_load_"
 }

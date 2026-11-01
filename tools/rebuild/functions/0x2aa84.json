@@ -43,7 +43,7 @@
   },
   "role": "calls `default_data_copy`, `joystick_update`, and `frame_timer`",
   "section": "frame_update callees",
-  "size": 22,
+  "size": 20,
   "status": "rebuilt",
   "symbol": "frame_step_"
 }

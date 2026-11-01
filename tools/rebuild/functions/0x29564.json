@@ -42,7 +42,7 @@
   },
   "role": "switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8`",
   "section": "race_frame callees",
-  "size": 1,
+  "size": 172,
   "status": "rebuilt",
   "symbol": "race_state_update_"
 }

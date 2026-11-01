@@ -42,7 +42,7 @@
   },
   "role": "maps the 0x300 palette bytes with the scale and offset and passes them to palette_set",
   "section": "motion_update callees",
-  "size": 122,
+  "size": 124,
   "status": "rebuilt",
   "symbol": "video_present_"
 }

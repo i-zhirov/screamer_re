@@ -42,7 +42,7 @@
   },
   "role": "processes a music request record and sets the state from 0 to 6",
   "section": "frame_update callees",
-  "size": 111,
+  "size": 112,
   "status": "rebuilt",
   "symbol": "music_play_"
 }

@@ -12,6 +12,6 @@
   "notes": [],
   "role": "clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\\graf.dat`",
   "section": "The graphics decoders",
-  "size": 3,
+  "size": 500,
   "status": "named"
 }

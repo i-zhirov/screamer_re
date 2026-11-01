@@ -12,6 +12,6 @@
   "notes": [],
   "role": "buffered read; advances the position and clamps it to the stream size",
   "section": "Resource loader",
-  "size": 3,
+  "size": 226,
   "status": "named"
 }

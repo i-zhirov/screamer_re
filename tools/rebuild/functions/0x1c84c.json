@@ -12,6 +12,6 @@
   "notes": [],
   "role": "indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position",
   "section": "object_update_all callees",
-  "size": 2,
+  "size": 864,
   "status": "named"
 }

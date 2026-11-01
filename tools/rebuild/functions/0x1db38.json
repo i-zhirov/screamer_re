@@ -43,7 +43,7 @@
   },
   "role": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`",
   "section": "object_physics callees",
-  "size": 97,
+  "size": 92,
   "status": "rebuilt",
   "symbol": "object_gear_state_"
 }

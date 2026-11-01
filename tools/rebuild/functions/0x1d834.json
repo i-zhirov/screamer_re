@@ -12,6 +12,6 @@
   "notes": [],
   "role": "switches on the state at `+0x2f8`; case 2 sets the float fields `+0x2fc`, `+0x300`, `+0x304`, `+0x308`, and `+0x30c` to 3000.0 and 12.0 and moves to case 1; case 1 integrates the position `+0x49c` and the three velocities with the damping `DAT_0010cf08 + 0x184`",
   "section": "object_physics callees",
-  "size": 2,
+  "size": 772,
   "status": "named"
 }

@@ -43,7 +43,7 @@
   },
   "role": "runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20`",
   "section": "object_update_all callees",
-  "size": 61,
+  "size": 56,
   "status": "rebuilt",
   "symbol": "player_update_"
 }

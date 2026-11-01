@@ -12,6 +12,6 @@
   "notes": [],
   "role": "blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8`",
   "section": "frame_update callees",
-  "size": 2,
+  "size": 228,
   "status": "named"
 }

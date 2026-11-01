@@ -42,7 +42,7 @@
   },
   "role": "advances the timing when the replay flag is set: the timing subtraction, the replay read, and the filter entry from the frame rate",
   "section": "The timing and filter layer",
-  "size": 1,
+  "size": 156,
   "status": "rebuilt",
   "symbol": "timing_update_"
 }

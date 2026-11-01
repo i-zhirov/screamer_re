@@ -42,7 +42,7 @@
   },
   "role": "copies `count` bytes from the source to the destination and returns the destination",
   "section": "The runtime memory manager",
-  "size": 43,
+  "size": 38,
   "status": "verified",
   "symbol": "memmove_"
 }

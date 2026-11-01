@@ -1,17 +1,17 @@
 {
   "address": "0x2edad",
   "checks": [],
-  "confidence": "inferred",
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case"
+      "text": "the six bodies print the memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2; the dispatch compares the status at [arg+0xc] at 0x2ee84"
     }
   ],
-  "name": "stream_release",
+  "name": "memory_error_report",
   "notes": [],
-  "role": "dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case",
+  "role": "reports a memory-handler fault, the slot count, and the handler name through the printer at 0x4bf64",
   "section": "The resource layer",
-  "size": 5,
+  "size": 291,
   "status": "named"
 }

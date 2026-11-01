@@ -12,6 +12,6 @@
   "notes": [],
   "role": "sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)`",
   "section": "race_loop callees",
-  "size": 4,
+  "size": 252,
   "status": "named"
 }

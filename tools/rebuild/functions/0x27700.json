@@ -42,7 +42,7 @@
   },
   "role": "starts a race, runs the frame loop until the session state reaches 4, and ends the race",
   "section": "Program functions",
-  "size": 110,
+  "size": 112,
   "status": "rebuilt",
   "symbol": "race_loop_"
 }

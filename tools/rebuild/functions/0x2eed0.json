@@ -12,6 +12,6 @@
   "notes": [],
   "role": "looks a resource up by name in the engine resource list and loads it from its file when missing",
   "section": "Resource loader",
-  "size": 3,
+  "size": 242,
   "status": "named"
 }

@@ -12,6 +12,6 @@
   "notes": [],
   "role": "scales the object position with the time base, calls `FUN_0001f94c`, and advances the time base with a wrap at 1.0",
   "section": "race_loop callees",
-  "size": 2,
+  "size": 212,
   "status": "named"
 }

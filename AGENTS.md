@@ -144,9 +144,9 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 ```
 
 The full check runs every stage and needs Docker and DOSBox-X.  It takes
-about 8 minutes and reports 57 checks.  Inside the Nix dev shell
-the radare2 stage adds four checks, so the run reports 61 checks.  With
-`--skip-runtime` it reports 42 checks and takes about 16 seconds:
+about 20 minutes and reports 113 checks.  Inside the Nix dev shell
+the radare2 stage adds four checks, so the run reports 117 checks.  With
+`--skip-runtime` it reports 98 checks and takes about a minute:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
@@ -314,6 +314,16 @@ through the store.
   fingerprint of an unchanged record itself.  A documentation-only change to a
   record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`) must
   not invalidate a result.
+- A mutation that changes the record addresses must call `sync_extents()`.
+  `save_record` marks a new address and `remove_record` marks a deletion, and
+  the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,
+  so a later migration cannot leave a stale extent.
+- The pipeline checks the debugger control port and the inputs before any
+  stage.  When another process holds the port (`--port`, default 9876), when
+  the game directory or the reference executable is missing, when the reference
+  executable does not parse as an LE image, or when the work root cannot be
+  created, it prints a clear error and exits with code 2, so a bad input cannot
+  surface as a stage failure or a stage 9 bind error.
 
 ### Dependency Management
 

@@ -3,33 +3,6 @@
 This page records the investigation log.  Each finding carries its evidence.
 The page separates observations from open questions.
 
-## The record run skips records with unchanged inputs
-
-- `run.py run --skip-unchanged` reports a record with `PASS` and the detail
-  `the inputs are unchanged since the previous run`, and runs no check for it,
-  when the fingerprint of the recorded result equals the current input
-  fingerprint.  The fingerprint covers the module recipe, the module sources,
-  the shared harness sources, the record fields, the participating tools, the
-  original image, and the built artifacts.  A record without a recorded result
-  or without a stored fingerprint always runs.
-  Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --no-write
-  --skip-unchanged --original
-  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
-- The first run after the framework change records the fingerprints and runs
-  every module once.  The runs after that skip the unchanged modules and
-  functions, so the record run takes only the hashing time for them.
-  Evidence: the same command on a record that holds a stored fingerprint
-  prints the unchanged detail and runs no build, no diff, and no DOSBox run.
-- `pipeline_check.py` passes `--skip-unchanged` to the record run and verifies
-  the stored fingerprint of an unchanged record itself, so a tampered or a
-  stale store record fails even when the runner skips it.
-  Evidence: `python3 tools/pipeline_check.py --game-dir
-  ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime`.
-- The status page keeps the module-source digest for its stale mark, because
-  it must render without the game image.  The runner uses the full input
-  fingerprint instead.
-  Evidence: `python3 tools/rebuild/view.py html` renders with no game directory.
-
 ## The track data files are LZW text
 
 - The `DATA` files (`MAP*.DAT`, `GEN.DAT`, `LOCAL.DAT`) hold one LZW stream
@@ -6302,10 +6275,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   /nonexistent/STARTH.EXE`.
 - The status page renders the store.
   Evidence: `python3 tools/rebuild/view.py html`.
-- The pipeline check reports 57 checks and 0 failures and takes about 8 minutes
-  40 seconds.  Inside the Nix dev shell the radare2 stage adds four checks, so
-  the run reports 61 checks.  With `--skip-runtime` it reports 42 checks and
-  takes about 16 seconds.  The earlier sections in this file record the check
+- The pipeline check reports 113 checks and 0 failures and takes about 20
+  minutes.  Inside the Nix dev shell the radare2 stage adds four checks, so the
+  run reports 117 checks.  With `--skip-runtime` it reports 98 checks and takes
+  about a minute.  The earlier sections in this file record the check
   count at the time they were written, not the current count.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
@@ -6375,6 +6348,253 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   emits it exactly as the V2 compiler does, and the original omits it, so the 10.0a build is not
   byte-perfect for this case either.
   Evidence: `python3 tools/rebuild/harness_dos.py build --module frame_step` and the diff.
+- The initial 10.0 compiler is verified and runs.  The earlier `Loader read error` was not a
+  property of the compiler: the WPACK unpack writes the output file progressively, and a harness
+  that stops DOSBox-X as soon as the file appears leaves a truncated image (65 KB to 81 KB of
+  517764 bytes), which the loader rejects.  When the unpack runs to completion, the full
+  `WCC386.EXE` loads and prints `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
+  Availability`.  The full toolchain builds and runs a module: the period `free` prints all four
+  markers and the diff holds 3 of 3 instructions.
+  Evidence: the unpack to completion, `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
+  Availability`, the `free` run, and the diff.
+- The registers-before-frame prologue comes from the `-od` flag without `-of+`, not from a
+  different compiler.  A sweep of 35 option combinations on the 10.0a compiler, four calling
+  conventions, and five `#pragma aux` variants kept the frame-first prologue only because each
+  combination also passed `-of+`.  Plain `-od` gives the original prologue
+  `push ebx; push ecx; push esi; push edi; push ebp; mov ebp,esp; sub esp,0xc` and the original
+  epilogue `mov esp,ebp; pop ebp; pop edi; pop esi; pop ecx; pop ebx; ret`.  The module recipe
+  passes `-of+ -od`; the original used `-od` alone.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` with the recipe
+  flags changed to `-od` gives 25 of 25 instructions equal and 44 of 54 bytes equal (the recipe
+  with `-of+ -od` gives 22 of 25 and 33 of 54).  The only remaining difference is the local slot
+  order: the original stores `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and the temporary at
+  `[ebp-0xc]`, while the 10.0a build stores them at `[ebp-0xc]`, `[ebp-8]`, and `[ebp-4]`.
+  The original text uses this form widely: 205 prologues of the form
+  `push ebx; push ecx; [push edx]; push esi; push edi; push ebp; mov ebp,esp` (for example at
+  0x11c00 and 0x1821c), and 116 frame functions without locals end in `pop ebp; ret`.
+  Evidence: the byte census of `STARTH.EXE` object 1 and the disassembly at 0x11c00, 0x1821c,
+  0x2aa84, and 0x2ed77.
+- The same `-od` prologue appears in every tested pre-10.0 and 10.x compiler, so the layout does
+  not separate the versions.  The 9.5 compiler (extracted non-interactively with
+  `Z:\AUTOTYPE.COM` and the installer `unpack` command; `WCC386.EXE` 627702 bytes, banner
+  `WATCOM C32 Optimizing Compiler  Version 9.5`), the 9.01d compiler (banner `WATCOM C 386
+  Optimizing Compiler  Version 9.01`), and the 8.5a compiler (banner `WATCOM C 386 Optimizing
+  Compiler  Version 8.5a`) all produce the registers-first prologue with `-od` and the frame-first
+  prologue with `-of+`.  The 8.5a `-od` build is frameless.
+  Evidence: the 9.5, 9.01d, and 8.5a builds of `list_destroy.c` and the version banners.
+- The `-of+` epilogue stays conservative in every tested compiler: 8.5a, 9.01d, 9.5, 10.0 Limited
+  Availability, 10.0a, 10.5, 10.6, and 11.0b all emit `mov esp,ebp; pop ebp; ret` for
+  `frame_step`.  The original emits `pop ebp; ret`.  The 9.5 `-of+` build goes further and adds
+  `lea esp,[ebp-0x14]` with five register pops.  So `frame_step` is not explained by the compiler
+  version, the flags, or the pragmas; a different optimization setting or a hand-written routine
+  remains the explanation.
+  Evidence: the 9.5, 9.01d, 8.5a, and 10.0a `-of+` builds of `frame_step.c`.
+- The module record holds a per-harness flag set: `period_flags` replaces `flags` in
+  `harness_dos.py`, and the V2 harness keeps `flags`.  No module needs a split, so every record
+  uses one flag set and no record holds `period_flags`.  The `list_destroy` and
+  `memory_available` records use `-od` for both harnesses.  Both period builds match the
+  original instruction sequence: 25 of 25 and 27 of 27 instructions.  The V2 declared checks now
+  hold `list_destroy` 19 of 25 and `memory_available` 27 of 27 (status `verified`).  These
+  numbers correct an earlier note: 22 of 25 was the period build of `list_destroy`, not the V2
+  build.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module list_destroy` and
+  `memory_available`, the diffs, `python3 tools/rebuild/harness.py build --module ...`, and
+  `python3 tools/rebuild/run.py run --module ...`.
+- The period build of `shutdown` did not link, and the cause was not a missing stub.  The DOS
+  tools truncate a long file name to eight characters, so `shutdown.c` and `shutdown_main.c` both
+  become `SHUTDOWN.C`, and the compiler reads `shutdown.c` twice.  The same collision hits
+  `bios_video`, `error_report`, `frame_step`, `list_destroy`, and `memory_available`.  The
+  `harness_dos.py` copy step now gives each source an indexed 8.3 name (`S0.C`, `S1.C`, ...)
+  before the compile.  The `shutdown` period build links, runs with markers 1 to 8, and diffs
+  12 of 14 instructions; the other period builds keep their diffs.  The `bios_video` and
+  `error_report` period builds also link, hold `main_` in the map, and print their markers
+  (`F C D` and `R R R D`).
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module shutdown`, `bios_video`, and
+  `error_report`, the clean build logs, the maps, and the run output.
+- To reproduce the original frame, use `-od` without `-of+` for the prologue and the
+  `list_destroy` epilogue: the registers-before-frame layout follows from the flag, not from the
+  version.  The open problem is the `frame_step` epilogue.  (1) Build `list_destroy` with `-od`
+  and diff it; the instructions must match 25 of 25, and the local slot order may stay the only
+  difference.  (2) For `frame_step`, the `-of+` epilogue is conservative in every tested compiler
+  (8.5a to 11.0b), so the original's `pop ebp; ret` needs a setting, a source form, or a
+  hand-written routine that is not yet found.  (3) Census the original text (object 1) for the
+  prologue and epilogue forms after every change; one build must produce the same mix.  (4) Accept
+  a compiler only with its binary.  The run-time banner (`1988-1994`) and the `WSTUB.EXE` stub
+  (`patch level .a`) prove the link-time artifacts, not the code generator.
+
+## The error_report switch range and the missing case
+
+- The original switch holds the codes -1 through 22, not 0 through 19.  The dispatch at
+  `0x10978` is `mov eax,[ebp-4]; inc eax; cmp eax,0x17; ja 0x10b87; jmp dword ptr
+  cs:[eax*4+0x918]`, and a controlled 10.0a build shows the bias: a source with the cases
+  0 through 23 emits `cmp eax,0x17` and no `inc`, and a source with the cases -1 through 22
+  emits `inc eax` and `cmp eax,0x17`.  The original holds the `inc`, so its table holds 24
+  entries and covers 24 codes.
+  Evidence: `work/opt/T24.C` and `work/opt/TM1.C`, built with the 10.0a `wcc386` and linked
+  with `wlink system dos4g`; `python3 tools/le.py disasm work/opt/T24.EXE 0x10070 --count 5`
+  holds `cmp eax,0x17` and `python3 tools/le.py disasm work/opt/TM1.EXE 0x10070 --count 5`
+  holds `inc eax; cmp eax,0x17`.
+- The 24 table entries map the code c to the entry c+1: the entries 0 through 19 hold the
+  message offsets `0x44` through `0x35a` for the codes -1 through 18, the entries 20 through
+  22 hold the default body `0x10b87` for the codes 19, 20, and 21, and the entry 23 holds
+  `0x10b71` for the code 22.  The code 0 therefore prints the offset `0x6f`, not `0x44`.
+  Evidence: the jump table at the linear `0x10918` and the body dumps from `0x10996` to
+  `0x10b87`.
+- The reconstruction was shifted by one and lacked the code 22.  The source now holds `case
+  -1` at `0x44`, the cases 0 through 18 at `0x6f` through `0x35a`, `case 22` at `0x369`, and
+  the default at `0x383`; the codes 19, 20, and 21 fall to the default.  Two callers in the
+  game pass the constant 22: `mov eax,0x16; call 0x10978` at `0x4cfbf` and `0x4d05b`.
+  Evidence: `tools/rebuild/error_report.c`, the nine call sites to `0x10978`, and the body
+  at `0x10b71` (`push 0x369; push 0x2fd2; call 0x4bf64`).
+- The module compiles with `-of+` and the corrected range.  The original keeps an EBP frame
+  and stores the code at `[ebp-4]`, and the `-of+` period build reproduces the frame and the
+  dispatch (`inc eax; cmp eax,0x17`, 24 entries).  The period diff holds 10 of 16
+  instructions, up from 1 of 14.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
+- Two differences stay.  The rebuild saves `ebx`, `ecx`, and `edx` around the printer call
+  while the original saves none, so the original's printer declaration tells the compiler
+  that the callee preserves those registers.  The rebuild also shares the body tails through
+  jumps and one epilogue while the original expands every body: each of the 21 bodies holds
+  its own `push`s, its own `call 0x4bf64`, and its own `mov esp,ebp; pop ebp; ret`.
+  Evidence: the two disassemblies and the diff.
+- The V2 declared check holds 3 of 16 instructions, and the behavior check still fails.  The
+  harness prints a screen of `U` bytes and writes an empty `err_out.txt`, a fault of the
+  harness print stub that already shows in the earlier record.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x10978` and the run log.
+
+## The error_report register saves, the body expansion, and the frame local
+
+- The printer declaration carries an auxiliary pragma, so the build saves no register
+  around the call.  A plain `extern void __cdecl report(char *table, ...)` made the
+  compiler save `ebx`, `ecx`, and `edx` for the whole function.  The pragma
+  `#pragma aux report "_*" modify exact [eax];` reports that only `eax` changes, and the
+  three saves and their epilogue pops disappear.  The name string `"_*"` is required: a
+  pragma without it maps the symbol to `report_` instead of `_report`, and the link fails.
+  Evidence: `work/opt/V1.C` (no pragma, `push ebx; push ecx; push edx`) against
+  `work/opt/V8.C` and `V9.C` (`modify exact [eax ecx edx]`, one save fewer), and
+  `work/opt/VEAX.C` and `VEMPTY.C` (`modify exact [eax]` and `[]`, no save), built with the
+  10.0a compiler.
+- The module builds with `-of+ -ot`.  The default optimization and `-os` merge the common
+  call tails: after the first body, the remaining bodies push their constants and jump into
+  the first body's `push` and `call`.  `-ot` keeps one full body per code, as the original
+  does.  `-oc` alone expands only the first body, and `-od` recovers no jump table.
+  Evidence: `work/opt/E1.C` (`-of+ -ot`, every body full) against `E2.C` (`-os`) and `E3.C`
+  (`-ou`), which keep the jumps.
+- The `code` parameter is volatile.  The original stores the argument to the frame and
+  reloads it before the switch (`sub esp,4`, `mov [ebp-4],eax`, `mov eax,[ebp-4]`).  A plain
+  parameter stays in `eax`, and neither `-of+`, `-ot`, `-d1`, nor `-d1+` produces the store.
+  A `volatile int` parameter reproduces the store and the reload exactly.  The same
+  frame-local pattern appears 32 times in the original text, so it is a code-generator trait
+  of the original source form.
+  Evidence: `work/opt/S2.C` against `S1.C` (a plain local copy) and the parameter census
+  of `STARTH.EXE` object 1 for the byte sequence `83 ec 04 89 45 fc 8b 45 fc`.
+- The period diff now holds 16 of 16 instructions, up from 10 of 16.  The four remaining
+  operand differences are the link-time addresses: the default target, the jump-table
+  address, the message-table base, and the printer address.  One byte-level difference
+  stays: the original encodes a small `push` as `68 44 00 00 00` and the 10.0a build as
+  `6a 44`; `-or`, `-oa`, `-os`, and `-ot` do not change it.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
+
+## The short push encoding and the format-string arguments
+
+- The original passes format-string addresses, not integer offsets.  The offsets `0x44`, `0x6f`,
+  `0x74`, `0xa3`, `0x369`, and `0x383` are data-segment addresses: `0x44` holds "Cannot free
+  memory of a duplicated object!", `0x6f` holds "OK.\n", `0x74` holds "Error while searching for
+  object file: %s.3dx\n", `0x369` holds "General failure: aborted.", and `0x383` holds
+  "Unknown error in engine interface <%s>.\n".  The printer at `0x4bf64` loads the first argument
+  into `eax` and the second into `edx` and calls `0xd429f`, which reads `[eax+0xc]` as a stream
+  status byte, so the call is a `fprintf`-style call with a stream and a format string.
+  Evidence: the object 3 data dump at the linear `0x100044`, the disassembly of `0x4bf64` and
+  `0xd429f`, and the pushed values.
+- The 10.0a compiler shortens an integer constant that fits in a signed byte to `push imm8`
+  (`6A ib`), and no flag disables it.  `-ot`, `-os`, `-or`, `-oa`, `-oc`, `-od`, `-d1`, and
+  `-d1+` all keep `6a 44`, and the 10.0 Limited Availability compiler does the same.
+  Evidence: `work/opt/TY.C` (eleven argument types and casts, all `6a 44`), `H1.C`, `H2.C`, and
+  `H3.C` (the optimization options), `F1.C` and `F2.C` (the debug options), and `G1.C` (the LA
+  build).
+- A relocatable operand restores the long encoding.  A string literal or a symbol address is
+  unknown at compile time, so the compiler emits `push imm32` (`68 id`) with a relocation even
+  when the value is small.  One test file holds `report(stream, "Cannot free memory ...")` as
+  `68 04 00 00 00` (the literal at offset 4), `report(stream, "OK.\n")` as `68 30 00 00 00`, and
+  `report(stream, 0x44)` as `6a 44`.
+  Evidence: `work/opt/SL.C` and `python3 tools/le.py disasm work/opt/SL.EXE 0x10030 --count 8`.
+- The module passes the game's format strings, so the period build emits the long encoding and
+  the diff holds 16 of 16 instructions with the same 52-byte length.  The byte compare rises from
+  29 of 49 to 44 of 52.  The eight differing bytes are the link-time addresses: the jump-table
+  address, the format-string address, the stream address, the printer address, and the `ja`
+  target.  The harness keeps the `message_table` stub as the first argument; the stub stands in
+  for the stream, and the printer stub ignores it.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module error_report` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x10978
+  --rebuilt work/rebuild/errmod.exe --rebuilt-map work/rebuild/error_report.map
+  --rebuilt-symbol error_report_`.
+
+## The format-string audit of the other modules
+
+- Only `error_report` pushes immediate arguments.  The other nine modules push registers only
+  (the prologue saves) or no registers at all: `free` and `memcpy` push nothing, `exit` and
+  `printf` push `edx` or `ebx`, and `shutdown`, `bios_video`, `list_destroy`,
+  `memory_available`, and `frame_step` push their saved registers.  Their calls pass the
+  arguments in `eax`, `edx`, `ebx`, and `ecx` under the register convention, so no stack push
+  exists, and the short-push form cannot appear.
+  Evidence: the decode of the original functions at `0x300ec`, `0x300be`, `0x300d6`, `0x3009b`,
+  `0x128ac`, `0x108e4`, `0x2ed77`, `0x2f8ca`, `0x2aa84`, and `0x8c150`.
+- The remaining constant arguments are register arguments: `engine_shutdown` loads `0` with
+  `xor eax,eax` and `0x62b0` with `mov eax,0x62b0`, and `bios_video` loads the interrupt number
+  `0x10` with `mov eax,0x10`.  The callee of the `0x62b0` call at `0x2fc90` reads `[eax+0x14]`,
+  so the value is a pointer, but it travels in `eax` as `mov eax,imm32`, which is the same
+  encoding for an integer and a relocatable address, so the byte compare cannot separate them.
+  Evidence: the two disassemblies.
+- The game holds twelve further print sites, in two functions that start at `0x2edad` and
+  `0x4bf88` (the register-save prologue begins before the `push ebp` that the prologue scan
+  matches).  Each site already uses the relocatable form `mov eax,<address>; push eax` for the
+  format string and the stream `0x2fd2`, so neither needs the fix.  Both functions now hold a
+  named record: `memory_error_report` at `0x2edad` prints the memory-handler errors and reads
+  the status at `+0xc`, and `file_error_report` at `0x4bf88` prints the engine file errors and
+  reads the status at `+0xac`.  Every print site of the printer `0x4bf64` is covered by a
+  record.
+  Evidence: the caller scan of the printer `0x4bf64` (35 calls, 21 inside `error_report`), the
+  disassembly at `0x2eddf` and `0x4bfbd`, and the rows of `docs/reference/program-map.md`.
+- Result: no module besides `error_report` pushes a small integer constant, and no module still
+  pushes one where a relocatable pointer is expected.
+
+## The prologue scan and the mid-prologue records
+
+- The prologue scan matched `push ebp; mov ebp,esp`, so it reported the `push ebp` inside the prologue of a function that saves registers first.  Of the 758 records, 545 (all unnamed candidates) sat one to five bytes after the true entry, and their `size` measured the span to the next `push ebp` instead of to the next function.
+  Evidence: the byte scan of the original image at each record address and the `funcs` list.
+- The scan now walks back over the canonical register saves (`ebx`, `ecx`, `edx`, `esi`, `edi`) before the `push ebp`, so it reports the first register save as the function entry.  The `near` command uses the same walk.
+  Evidence: `python3 tools/le.py funcs STARTH.EXE` lists `0x2ed77`, `0x2edad`, `0x2f8ca`, and `0x4bf88` and no longer lists `0x2ed7b`, `0x2edb2`, `0x2f8cf`, or `0x4bf8d`.
+- The seed deletes the lost unknown records, so a real run migrates the store.  The run added 459 records at the true entries and removed the 545 mid-prologue records; 86 of the mid-prologue records shared an entry with an existing record and only lost their duplicate.  The store holds 683 records, no record sits mid-prologue, and the seed reports no difference.
+  Evidence: `python3 tools/rebuild/store.py seed --original STARTH.EXE` (added 459, lost 545), `store.py check` (683 records, 0 violations), and the record scan against the original bytes (0 mid-prologue).
+- The invariant is now guarded.  `store.py check --original` reports every record that is not a function entry: one that sits inside a prologue, in a run of alignment padding, or inside a jump or call instruction such as a thunk.  A relative jump counts only when its target is mapped, so the data tables that hold the same bytes before a real entry do not raise a false alarm.  The pipeline stage 12 passes the image to the check.  The unit suite adds a pure test of the walk-back, a test of each form against a synthetic image, and a store test that skips when the image is absent.
+  Evidence: `python3 tools/rebuild/store.py check --original STARTH.EXE` (683 records, 0 violations); a temporary record at `0x4bf85` reports `sits in alignment padding` and one at `0x300f9` reports `sits inside a jump`; `python3 -m unittest discover -s tools/rebuild/tests` (108 tests).
+
+## The stale function extents
+
+- 59 of the 672 records hold a `size` that reaches past the next entry.  55 reach one to five bytes past it, the count of the register saves that the old next candidate sat after: the entry was a mid-prologue address, so the span recorded at seed time ends a few bytes inside the next function.  The other four are `exit` (`0x300be`, 22 bytes past `0x300d6`, the helper entry added later), `music_start` (`0x2ffc4`, 168 bytes past `0x30050`), the `entry jump` (`0x300f8`, the whole start-up block), and an unnamed record at `0x4da3a` (263734 bytes past the `0x81a70` entry added later).
+- The seed writes `size` only for a new record, as the distance to the next entry of the moment.  The mid-prologue migration moved the entries and later candidates were added without a recompute, so the surviving records kept a stale reach.
+  Evidence: the scan of `tools/rebuild/functions/*.json` against the sorted addresses; `store.py seed` does not touch a record that already exists.
+- The store now recomputes the field and guards it.  `store.py size` rewrites `size` for every record as the distance to the next entry and removes it from the last record; the run updated 604 records.  `store.py check` reports a record whose size reaches past the next entry, and the pipeline stage 12 runs the check with the image.  The check reported 59 overlaps before the pass and 0 after it.
+  Evidence: `python3 tools/rebuild/store.py check` (683 records, 59 violations before the pass, 0 after), `store.py size` (updated 604 records), and the `ExtentTestCase` tests.
+- The seed path holds the same rule.  A seed run recomputes every size after it adds the records, so a new entry shifts the previous record's reach instead of leaving an overlap behind.  The check mode prints `overlaps: N`, lists the offending records, and exits 1.
+  Evidence: a temporary `size` of 9999 on `0x10978` makes `store.py seed --check` print `overlaps: 1` and `the size reaches 9443 bytes past the next entry`; the unit suite adds `test_seed_check_reports_an_overlap` and `test_seed_rewrites_the_sizes_after_an_addition`.
+- The unit suite replays the migration end to end.  `test_mid_prologue_migration_leaves_no_overlap` builds a store whose records sit at the `push ebp` inside the prologue, feeds the fixed scan the true entries, runs the seed, and asserts that the mid-prologue records are gone, that the new entries hold the recomputed extents, and that no record overlaps the next entry.  With the recompute removed the test fails with `5 != 16`.
+  Evidence: `python3 -m unittest discover -s tools/rebuild/tests` (113 tests).
+- The other address shifts hold the same replay.  `test_initial_seed_leaves_no_overlap` starts from a store with the analysis record, whose extent spans the region that the scan now splits into three entries, and `test_manual_candidate_addition_leaves_no_overlap` runs on a store without the run-time entry and the exit helper: the scan reports only the prologue entries, the seed adds `0x300f8` and `0x300d6` itself, and the neighbours' extents shrink to the new entries.  With the recompute removed the first test fails with `64 != 16` and the second with `46 != 24`.
+  Evidence: `python3 -m unittest discover -s tools/rebuild/tests` (115 tests).
+- A store-level guard keeps the extents fresh.  `save_record` marks a new address and `remove_record` marks a deletion; `sync_extents()` recomputes the extents when the mark is set.  The seed, the command dispatch (`main`'s `finally`), and the exit hook (`atexit`) call it, so a later migration cannot leave a stale reach even when it forgets the recompute.  A clean store makes `sync_extents` a no-op, so the command dispatch and the exit hook stay cheap.  With the mark removed the new-record, the removed-record, and the three migration replays fail with `0 != 2`, `0 != 1`, `64 != 16`, `46 != 24`, and `5 != 16`.
+  Evidence: `python3 -m unittest discover -s tools/rebuild/tests` (120 tests).
+- The pipeline checks the debugger port before the run-time stages.  A bound port made the entry probe and the member probe fail with `Address already in use` inside stage 9.  `debugger_port_free` binds the loopback address with `SO_REUSEADDR`, the same bind as the control session, and `main` exits with code 2 with the message `error: the debugger control port 9876 is already in use; stop the other DOSBox-X session or run with --port` before any stage.
+  Evidence: `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game` with a listener on port 9876 exits 2 and prints the message.  The integration test `test_a_held_port_exits_two_before_any_stage` holds an ephemeral port, runs the command, and asserts the exit code 2, the message, no stage report, and no work directory.  The same preflight refuses a missing game directory, a missing reference executable, a reference executable that does not parse as an LE image, and a work root it cannot create, each with exit code 2 and no stage report; the integration tests `test_a_missing_game_dir_exits_two_before_any_stage`, `test_a_missing_exe_exits_two_before_any_stage`, `test_an_invalid_exe_exits_two_before_any_stage`, and `test_a_blocked_work_root_exits_two_before_any_stage` prove it.  `le.load` accepts the MZ header, the LE signature, and the tables of the reference image; the shipped `STARTH.EXE` is a DOS/4GW LE image, not a Windows PE image.
+- The member probe ends the capture when the game closes the control connection.  The probe's loop requested the debugger after the game exit, and the `ConnectionError` from the closed socket made the probe exit 1, so stage 9 reported `the member probe runs` as a failure.  `run_probe` now catches `ConnectionError` and `TimeoutError` in the capture loop, prints the number of observed members, and breaks, so the observed members stay the result and the tool exits 0.
+  Evidence: the full pipeline with the earlier failing run reported `1 failures` and `error: DOSBox-X closed the control connection`; after the change the same command reports `57 checks, 0 failures`.  The unit tests `test_a_closed_connection_ends_the_capture` and `test_the_command_line_exits_zero` simulate the closed connection mid-capture, `test_a_read_timeout_ends_the_capture` and `test_the_command_line_exits_zero_after_a_timeout` simulate a timed-out `BREAK` read, `test_a_timeout_on_the_first_read_observes_no_members` and `test_the_command_line_exits_zero_with_no_members` simulate the timeout before the first member open, `test_a_timeout_on_the_final_read_keeps_the_full_list` and `test_the_command_line_exits_zero_after_the_full_list` simulate the timeout after the last member open, and `test_a_failure_on_the_final_write_keeps_the_full_list` and `test_the_command_line_exits_zero_after_the_final_write` simulate the timeout on the last member's repair write; without the handling the first of each pair raises the exception and the second reports `1 != 0`.
+
 - Open question: the `-of+` epilogue and the register-save order suggest the original build may use
   the initial 10.0 release.  The "10.0 Limited Availability" image (dated March 1994) holds such a
   compiler, but its `WCC386.EXE` does not load under DOSBox-X (the loader reports `Loader read

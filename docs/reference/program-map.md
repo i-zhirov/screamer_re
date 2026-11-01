@@ -475,7 +475,7 @@ services.
 <!-- begin generated: The resource layer -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
-| `0x2edad` | `stream_release` | dispatches on the status at `+0xc` and calls `fprintf` at `0x4bf64` for each case | inferred |
+| `0x2edad` | `memory_error_report` | the six bodies print the memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2; the dispatch compares the status at [arg+0xc] at 0x2ee84 | observed |
 | `0x2efc2` | `resource_read` | reads the current record and caches it through `0x2f062` | inferred |
 | `0x2f0fc` | `dos_memory_alloc` | the original at `0x2f0fc` holds 41 instructions and 118 bytes: it sets `0x0100` at result word 0, sets the paragraph count `(size >> 4) + 1` at word 1, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status, and otherwise returns the segment word times 16 and stores the selector word at the third argument | derived |
 | `0x2f172` | `memory_alloc` | calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address | derived |
@@ -485,6 +485,7 @@ services.
 | `0x2f904` | `pool_init` | the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0 | inferred |
 | `0x4bf23` | `dpmi_fill_regs` | fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs | observed |
 | `0x4bf4b` | `dpmi_call` | calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block | inferred |
+| `0x4bf88` | `file_error_report` | the six bodies print the engine file strings at 0x1608, 0x1622, 0x1644, 0x1653, and 0x1685; the dispatch compares the status at [arg+0xac] at 0x4c060 | observed |
 <!-- end generated: The resource layer -->
 
 `list_create` allocates `count * 0x1c` bytes.  This confirms the 28-byte record

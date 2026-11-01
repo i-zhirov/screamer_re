@@ -43,7 +43,7 @@
   },
   "role": "measures the text, centers the halved width on 0x140, and draws the text",
   "section": "race_frame callees",
-  "size": 93,
+  "size": 96,
   "status": "rebuilt",
   "symbol": "panel_draw_centered_"
 }

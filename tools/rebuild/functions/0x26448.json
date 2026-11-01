@@ -42,7 +42,7 @@
   },
   "role": "counts the polls to 8, reads the input, and applies it when the device state allows",
   "section": "race_loop callees",
-  "size": 108,
+  "size": 4792,
   "status": "rebuilt",
   "symbol": "input_poll_"
 }

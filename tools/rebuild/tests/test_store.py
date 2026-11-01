@@ -5,16 +5,29 @@ Usage:
 """
 from __future__ import annotations
 
+import argparse
+import contextlib
+import io
 import json
 import re
+import struct
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import store  # noqa: E402
+
+
+class FakeImage:
+    """The seed reads only the object table of the image."""
+
+    def object_at(self, address: int) -> None:
+        return None
 
 
 class StoreTestCase(unittest.TestCase):
@@ -626,6 +639,316 @@ class StoreTestCase(unittest.TestCase):
         added, lost = store.seed_diff(candidates, records)
         self.assertEqual(added, [0x300EC])
         self.assertEqual(lost, [0x300F0])
+
+
+class PrologueTestCase(unittest.TestCase):
+    """A function record must sit at the entry, not inside the prologue.
+
+    The scan walks back over the register saves, so a record that still sits at
+    the `push ebp` of a prologue that saves registers first is a stale candidate.
+    The walk itself is a pure function and runs everywhere; the store check needs
+    the original image and skips without it.
+    """
+
+    def test_prologue_start_walks_back_over_the_saves(self) -> None:
+        self.assertEqual(
+            store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x89\xe5", 5), 0
+        )
+        self.assertEqual(store.le.prologue_start(b"\x55\x89\xe5", 0), 0)
+        self.assertEqual(store.le.prologue_start(b"\x90\x55\x89\xe5", 1), 1)
+        self.assertEqual(store.le.prologue_start(b"\x53\x55\x89\xe5", 1), 0)
+        self.assertEqual(store.le.prologue_start(b"\x52\x53\x55\x89\xe5", 2), 1)
+
+    def test_non_entry_addresses_reports_each_form(self) -> None:
+        class Image:
+            def __init__(self, data: bytes, code: range) -> None:
+                self.data = data
+                self.code = code
+
+            def read(self, address: int, count: int) -> bytes:
+                return bytes(self.data[address : address + count])
+
+            def object_at(self, target: int) -> object | None:
+                return object() if target in self.code else None
+
+        data = bytearray(b"\x40" * 0x200)
+        data[0x104] = 0x53
+        data[0x105:0x108] = b"\x55\x89\xe5"
+        data[0x10F:0x112] = b"\x00\x00\x00"
+        data[0x11F] = 0xE9
+        data[0x120:0x124] = struct.pack("<i", 0x140 - (0x11F + 5))
+        image = Image(data, range(0x100, 0x200))
+        saved = store.candidate_addresses
+        try:
+            store.candidate_addresses = lambda: [0x105, 0x110, 0x120, 0x130]
+            self.assertEqual(
+                store.non_entry_addresses(image),
+                [
+                    (0x105, "sits inside a prologue"),
+                    (0x110, "sits in alignment padding"),
+                    (0x120, "sits inside a jump"),
+                ],
+            )
+        finally:
+            store.candidate_addresses = saved
+
+    @unittest.skipUnless(
+        store.DEFAULT_ORIGINAL.is_file(), "the original image is absent"
+    )
+    def test_no_record_sits_outside_an_entry(self) -> None:
+        image = store.le.load(store.DEFAULT_ORIGINAL)
+        self.assertEqual(store.non_entry_addresses(image), [])
+
+
+class ExtentTestCase(unittest.TestCase):
+    """A record's size must not reach past the next entry."""
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        self.saved = store.FUNCTIONS_DIR
+        store.FUNCTIONS_DIR = self.root / "functions"
+        store.FUNCTIONS_DIR.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        store.FUNCTIONS_DIR = self.saved
+        self.temporary.cleanup()
+
+    def write(self, address: str, size: int | None, status: str = "unknown") -> None:
+        record = {
+            "address": address,
+            "status": status,
+            "checks": [],
+            "evidence": [],
+            "notes": [],
+        }
+        if size is not None:
+            record["size"] = size
+        store.save_record(record)
+
+    def test_overlap_addresses_reports_a_stale_size(self) -> None:
+        records = [
+            {"address": "0x100", "size": 20},
+            {"address": "0x110", "size": 4},
+            {"address": "0x120"},
+        ]
+        self.assertEqual(store.overlap_addresses(records), [(0x100, 4)])
+
+    def test_recompute_sizes_rewrites_the_stale_reach(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x110", 99)
+        self.assertEqual(store.recompute_sizes(), 2)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x110))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(0x100), store.load_record(0x110)]
+            ),
+            [],
+        )
+
+    def original(self) -> Path:
+        path = self.root / "STARTH.EXE"
+        path.write_bytes(b"ORIGINAL")
+        return path
+
+    def test_seed_check_reports_an_overlap(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x110", 4)
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110]
+        ), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(store.seed(True, self.original()), 1)
+
+    def test_mid_prologue_migration_leaves_no_overlap(self) -> None:
+        # The store before the migration: the candidates sit at the `push ebp`
+        # inside the prologue, and each size reaches the next old candidate.
+        self.write("0x105", 16)
+        self.write("0x115", 16)
+        self.write("0x125", None)
+
+        # The fixed scan reports the true entries: the seed adds them, drops the
+        # mid-prologue records, and recomputes the extents.
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+
+        self.assertEqual(store.candidate_addresses(), [0x100, 0x110, 0x120])
+        for address in (0x105, 0x115, 0x125):
+            self.assertFalse(store.record_path(address).exists())
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
+    def test_initial_seed_leaves_no_overlap(self) -> None:
+        # The first seed: the store already holds the analysis record, whose
+        # extent spans the region that the scan now splits into three entries.
+        self.write("0x100", 0x40, "named")
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+        self.assertEqual(store.candidate_addresses(), [0x100, 0x110, 0x120])
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
+    def test_manual_candidate_addition_leaves_no_overlap(self) -> None:
+        # The store before the two manual candidates.  The exit record reaches
+        # the free entry and the free record reaches the start-up block.
+        self.write("0x300be", 0x300ec - 0x300be, "named")
+        self.write("0x300ec", 0x30170 - 0x300ec, "named")
+        self.write("0x30170", None, "named")
+
+        # The prologue scan reports the free and the start-up entries; the scan
+        # adds the run-time entry and the exit helper itself.
+        scan = mock.Mock(
+            returncode=0,
+            stdout="candidate function starts: 2\n  0x000300ec\n  0x00030170\n",
+            stderr="",
+        )
+        with mock.patch.object(store.subprocess, "run", return_value=scan), (
+            mock.patch.object(store.le, "load", return_value=FakeImage())
+        ), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(store.seed(False, self.original()), 0)
+
+        self.assertEqual(
+            store.candidate_addresses(),
+            [0x300BE, 0x300D6, 0x300EC, 0x300F8, 0x30170],
+        )
+        self.assertEqual(store.load_record(0x300BE)["size"], 0x300D6 - 0x300BE)
+        self.assertEqual(store.load_record(0x300D6)["size"], 0x300EC - 0x300D6)
+        self.assertEqual(store.load_record(0x300EC)["size"], 0x300F8 - 0x300EC)
+        self.assertEqual(store.load_record(0x300F8)["size"], 0x30170 - 0x300F8)
+        self.assertNotIn("size", store.load_record(0x30170))
+        self.assertEqual(
+            store.overlap_addresses(
+                [store.load_record(address) for address in store.candidate_addresses()]
+            ),
+            [],
+        )
+
+    def test_a_new_record_schedules_the_extent_recompute(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+        # A migration adds a record between the two entries without a seed.
+        store.save_record(
+            {
+                "address": "0x110",
+                "status": "unknown",
+                "checks": [],
+                "evidence": [],
+                "notes": [],
+            }
+        )
+        self.assertEqual(store.sync_extents(), 2)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+
+    def test_a_removed_record_schedules_the_extent_recompute(self) -> None:
+        self.write("0x100", 16)
+        self.write("0x110", 16)
+        self.write("0x120", None)
+        store.remove_record(0x110)
+        self.assertEqual(store.sync_extents(), 1)
+        self.assertEqual(store.load_record(0x100)["size"], 0x20)
+
+    def test_the_command_dispatch_syncs_a_future_migration(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+
+        def migration(arguments: argparse.Namespace) -> int:
+            store.save_record(
+                {
+                    "address": "0x110",
+                    "status": "unknown",
+                    "checks": [],
+                    "evidence": [],
+                    "notes": [],
+                }
+            )
+            return 0
+
+        with mock.patch.object(
+            store, "parse_arguments", return_value=argparse.Namespace(command="set")
+        ), mock.patch.object(store, "command_set", migration):
+            self.assertEqual(store.main(), 0)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+
+    def test_the_exit_hook_syncs_the_extents(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", None)
+        # A migration that imports the store and exits without a sync.
+        script = (
+            "import sys\n"
+            "from pathlib import Path\n"
+            "sys.path.insert(0, sys.argv[1])\n"
+            "import store\n"
+            "store.FUNCTIONS_DIR = Path(sys.argv[2])\n"
+            "store.save_record({'address': '0x110', 'status': 'unknown',"
+            " 'checks': [], 'evidence': [], 'notes': []})\n"
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                script,
+                str(Path(store.__file__).resolve().parent),
+                str(store.FUNCTIONS_DIR),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+
+    def test_sync_extents_is_a_no_op_when_nothing_is_dirty(self) -> None:
+        self.write("0x100", 16)
+        self.write("0x110", None)
+        # The two new records set the mark, so the first sync runs the recompute.
+        with mock.patch.object(
+            store, "recompute_sizes", wraps=store.recompute_sizes
+        ) as first:
+            self.assertEqual(store.sync_extents(), 0)
+        first.assert_called_once()
+        record = store.load_record(0x110)
+        # The clean store skips the recompute: the hooks stay cheap.
+        with mock.patch.object(store, "recompute_sizes") as second:
+            self.assertEqual(store.sync_extents(), 0)
+        second.assert_not_called()
+        self.assertEqual(store.load_record(0x110), record)
+
+    def test_seed_rewrites_the_sizes_after_an_addition(self) -> None:
+        self.write("0x100", 99)
+        self.write("0x120", 4)
+
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x100, 0x110, 0x120]
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, self.original()), 0)
+        self.assertEqual(store.load_record(0x100)["size"], 16)
+        self.assertEqual(store.load_record(0x110)["size"], 16)
+        self.assertNotIn("size", store.load_record(0x120))
 
 
 class ShippedModuleTestCase(unittest.TestCase):

@@ -42,7 +42,7 @@
   },
   "role": "sets the race constants, saves the old state, stores the parameter, and sets the state to 1",
   "section": "overlay_dispatch callees",
-  "size": 117,
+  "size": 156,
   "status": "rebuilt",
   "symbol": "race_state_begin_"
 }

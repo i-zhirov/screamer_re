@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records",
   "section": "Resource loader",
-  "size": 3,
+  "size": 728,
   "status": "named"
 }

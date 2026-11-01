@@ -51,11 +51,23 @@ def object_name(index: int) -> str:
     return f"O{index}.OBJ"
 
 
+def source_name(index: int, source: dict) -> str:
+    """The DOS copy name of a source, safe for the 8.3 name limit.
+
+    The DOS tools truncate a long name to eight characters.  A module source and its
+    test harness, for example `shutdown.c` and `shutdown_main.c`, then share the name
+    `SHUTDOWN.C`, and the compiler reads the first file twice.  The index prefix keeps
+    the copy names unique.
+    """
+    suffix = ".ASM" if source["compiler"] == "wasm" else ".C"
+    return f"S{index}{suffix}"
+
+
 def compile_line(source: dict, index: int) -> str:
     compiler = source["compiler"]
     flags = list(WCC_FLAGS if compiler == "wcc386" else WASM_FLAGS)
-    flags += list(source.get("flags", []))
-    return " ".join([compiler, *flags, f"-fo=D:\\{object_name(index)}", source["file"]])
+    flags += list(source.get("period_flags", source.get("flags", [])))
+    return " ".join([compiler, *flags, f"-fo=D:\\{object_name(index)}", source_name(index, source)])
 
 
 def link_rsp(module: dict, count: int) -> str:
@@ -123,8 +135,10 @@ def command_build(name: str, timeout: int) -> int:
     WORK_DIR.mkdir(parents=True, exist_ok=True)
     for stale in WORK_DIR.glob("O*.OBJ"):
         stale.unlink()
-    for source in module["sources"]:
-        shutil.copy2(REBUILD_DIR / source["file"], WORK_DIR / source["file"])
+    for index, source in enumerate(module["sources"]):
+        shutil.copy2(
+            REBUILD_DIR / source["file"], WORK_DIR / source_name(index, source)
+        )
     (WORK_DIR / RSP_NAME).write_text(link_rsp(module, len(module["sources"])))
     (WORK_DIR / CONF_NAME).write_text(conf_text(module, len(module["sources"])))
     log_path = WORK_DIR / LOG_NAME

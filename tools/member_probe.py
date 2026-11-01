@@ -101,8 +101,8 @@ def run_probe(
             session.request("EXEC", "BPINT 3")
             session.request("EXEC", "RUN")
             deadline = time.time() + timeout
-            try:
-                while time.time() < deadline and len(names) < limit:
+            while time.time() < deadline and len(names) < limit:
+                try:
                     session.request("BREAK", timeout=10.0)
                     response = session.request("EXEC", "EV " + " ".join(REGISTERS), timeout=10.0)
                     values = response.lines[-1].split() if response.lines else []
@@ -150,14 +150,18 @@ def run_probe(
                     )
                     session.request("EXEC", "RUN", timeout=10.0)
                     time.sleep(0.05)
-            except (ConnectionError, TimeoutError) as error:
-                if not names:
-                    raise
-                print(
-                    f"note: the control connection ended after "
-                    f"{len(names)} member opens: {error}",
-                    file=sys.stderr,
-                )
+                except ConnectionError:
+                    print(
+                        "the game closed the control connection; "
+                        f"the capture ends after {len(names)} member opens"
+                    )
+                    break
+                except TimeoutError:
+                    print(
+                        "the debugger read timed out; "
+                        f"the capture ends after {len(names)} member opens"
+                    )
+                    break
     except (ConnectionError, TimeoutError) as error:
         if not names:
             raise

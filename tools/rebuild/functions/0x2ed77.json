@@ -42,7 +42,7 @@
   },
   "role": "releases the block when the pointer is set; counterpart of `list_create`",
   "section": "Program functions",
-  "size": 4,
+  "size": 54,
   "status": "rebuilt",
   "symbol": "list_destroy_"
 }

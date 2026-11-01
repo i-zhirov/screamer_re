@@ -42,7 +42,7 @@
   },
   "role": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08`",
   "section": "object_gear_step and object_slide_step callees",
-  "size": 1,
+  "size": 52,
   "status": "rebuilt",
   "symbol": "filter_update_"
 }

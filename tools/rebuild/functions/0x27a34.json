@@ -43,7 +43,7 @@
   },
   "role": "gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set",
   "section": "object_update_all callees",
-  "size": 45,
+  "size": 40,
   "status": "rebuilt",
   "symbol": "hud_update_"
 }

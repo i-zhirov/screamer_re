@@ -12,6 +12,6 @@
   "notes": [],
   "role": "reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers",
   "section": "The replay records",
-  "size": 2,
+  "size": 192,
   "status": "named"
 }

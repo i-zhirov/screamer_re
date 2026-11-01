@@ -42,7 +42,7 @@
   },
   "role": "stores the stream pointer, clears the state word, and runs the six stream layer setup calls",
   "section": "The TABS table loaders",
-  "size": 1,
+  "size": 64,
   "status": "rebuilt",
   "symbol": "stream_layer_init_"
 }

@@ -42,7 +42,7 @@
   },
   "role": "opens TABS\\VIS.TAB, reads 0x27500 bytes into the buffer at DAT_0007c1c4, and closes the handle",
   "section": "The TABS table loaders",
-  "size": 101,
+  "size": 104,
   "status": "rebuilt",
   "symbol": "vis_tab_load_"
 }

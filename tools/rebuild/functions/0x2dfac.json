@@ -43,7 +43,7 @@
   },
   "role": "stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel",
   "section": "race_frame callees",
-  "size": 75,
+  "size": 72,
   "status": "rebuilt",
   "symbol": "panel_show_"
 }

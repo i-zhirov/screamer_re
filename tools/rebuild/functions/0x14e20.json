@@ -12,6 +12,6 @@
   "notes": [],
   "role": "hooks interrupt 9 and drives the keyboard LEDs",
   "section": "Subsystem initialisation",
-  "size": 5,
+  "size": 408,
   "status": "named"
 }

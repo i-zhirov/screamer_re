@@ -42,7 +42,7 @@
   },
   "role": "saves the previous object position from the four dword fields and the float field",
   "section": "object_transform callees",
-  "size": 105,
+  "size": 108,
   "status": "rebuilt",
   "symbol": "object_state_save_"
 }

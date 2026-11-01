@@ -12,6 +12,6 @@
   "notes": [],
   "role": "clears the key state, reads the clock, advances a 6-frame counter, waits for the frame flag `DAT_0011d234`, and handles input",
   "section": "Program functions",
-  "size": 4,
+  "size": 232,
   "status": "named"
 }

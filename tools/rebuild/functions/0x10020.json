@@ -13,6 +13,6 @@
   "object_offset": "0x20",
   "role": "called by the Watcom startup at `0xd4364` with `argc` in EAX and `argv` in EDX",
   "section": "Program functions",
-  "size": 2,
+  "size": 371,
   "status": "named"
 }

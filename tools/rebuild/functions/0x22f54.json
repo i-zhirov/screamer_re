@@ -12,6 +12,6 @@
   "notes": [],
   "role": "writes the 20-byte record and advances the index with a wrap",
   "section": "The replay records",
-  "size": 4,
+  "size": 228,
   "status": "named"
 }

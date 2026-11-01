@@ -42,7 +42,7 @@
   },
   "role": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer",
   "section": "race_loop callees",
-  "size": 2,
+  "size": 32,
   "status": "rebuilt",
   "symbol": "video_fill_"
 }

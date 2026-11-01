@@ -42,7 +42,7 @@
   },
   "role": "computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000",
   "section": "object_update_all callees",
-  "size": 1,
+  "size": 60,
   "status": "rebuilt",
   "symbol": "race_timeout_"
 }

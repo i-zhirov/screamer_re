@@ -12,6 +12,6 @@
   "notes": [],
   "role": "opens the path through the run-time file layer and fills the stream record; returns `-1` on failure",
   "section": "Resource loader",
-  "size": 2,
+  "size": 155,
   "status": "named"
 }

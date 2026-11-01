@@ -42,7 +42,7 @@
   },
   "role": "returns the table entry for the index when the table flag is set, and `-1` otherwise",
   "section": "overlay_dispatch callees",
-  "size": 3,
+  "size": 76,
   "status": "rebuilt",
   "symbol": "table_lookup_"
 }

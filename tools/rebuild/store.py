@@ -4,7 +4,8 @@ The store holds one function record per candidate of STARTH.EXE under
 `functions/0x<address>.json` and one module record per build unit under
 `modules/<name>.json`.  This tool reads and writes a record, validates every
 invariant of the data model, seeds the candidate records from the original image,
-and edits one record from the command line.
+and edits one record from the command line.  A mutation that changes the set of
+record addresses recomputes every extent before the process ends.
 
 Usage:
     python3 tools/rebuild/store.py seed [--check] [--original PATH]
@@ -22,10 +23,12 @@ missing record, a missing original image, or a bad argument.
 from __future__ import annotations
 
 import argparse
+import atexit
 import hashlib
 import json
 import re
 import subprocess
+import struct
 import sys
 from datetime import date
 from pathlib import Path
@@ -75,6 +78,7 @@ ADDRESS_PATTERN = re.compile(r"^0x[0-9a-f]+$")
 DOS_NAME_CHARS = frozenset(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$#@!%&'()-~^`{}"
 )
+_extents_dirty = False
 
 
 def record_path(address: int) -> Path:
@@ -114,8 +118,33 @@ def load_record(address: int) -> dict:
 
 
 def save_record(record: dict) -> None:
+    global _extents_dirty
     address = int(record["address"], 16)
-    _write_json(record_path(address), record)
+    path = record_path(address)
+    new_address = not path.exists()
+    _write_json(path, record)
+    if new_address:
+        _extents_dirty = True
+
+
+def remove_record(address: int) -> None:
+    global _extents_dirty
+    record_path(address).unlink(missing_ok=True)
+    _extents_dirty = True
+
+
+def sync_extents() -> int:
+    """Recompute the extents when a mutation changed the record addresses.
+
+    `save_record` marks a new address and `remove_record` marks a deletion.  The
+    seed, the command dispatch, and the exit hook call this function, so a later
+    migration cannot leave a stale reach behind.
+    """
+    global _extents_dirty
+    if not _extents_dirty:
+        return 0
+    _extents_dirty = False
+    return recompute_sizes()
 
 
 def save_result(address: int, result: dict, status: str | None) -> None:
@@ -147,6 +176,70 @@ def candidate_addresses() -> list[int]:
             continue
         addresses.append(int(path.stem, 16))
     return sorted(addresses)
+
+
+PADDING_BYTES = (0x00, 0x90, 0xCC)
+
+
+def _jump_span(image: le.LinearExecutable, address: int, data: bytes) -> bool:
+    """Tell whether `address` sits inside a jump or a call instruction.
+
+    A data table can hold a jump opcode just before a real function entry, so a
+    relative jump counts only when its target is mapped.  The indirect form
+    `jmp/call dword ptr [abs]` of a thunk counts without a target.
+    """
+    base = address - 5
+    for step in range(1, 6):
+        position = 5 - step
+        if position < 0:
+            break
+        opcode = data[position]
+        if opcode in (0xE9, 0xE8):
+            length = 5
+        elif opcode == 0xEB:
+            length = 2
+        elif opcode == 0xFF and data[position + 1] in (0x15, 0x25):
+            length = 6
+        else:
+            continue
+        if step >= length:
+            continue
+        if opcode == 0xFF:
+            return True
+        if opcode == 0xEB:
+            relative = struct.unpack_from("<b", data, position + 1)[0]
+            target = base + position + 2 + relative
+        else:
+            relative = struct.unpack_from("<i", data, position + 1)[0]
+            target = base + position + length + relative
+        if image.object_at(target) is not None:
+            return True
+    return False
+
+
+def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
+    """The record addresses that are not a function entry, with the reason.
+
+    Three forms are caught: a stale candidate at the `push ebp` of a prologue
+    that saves registers first, an address inside a run of alignment padding, and
+    an address inside a jump or call instruction such as a thunk.
+    """
+    offenders: list[tuple[int, str]] = []
+    for address in candidate_addresses():
+        data = image.read(address - 5, 12)
+        if data is None or len(data) != 12:
+            continue
+        if data[5:8] == b"\x55\x89\xe5" and le.prologue_start(data[:8], 5) != 5:
+            offenders.append((address, "sits inside a prologue"))
+            continue
+        if data[5] in PADDING_BYTES and (
+            data[4] in PADDING_BYTES or data[6] in PADDING_BYTES
+        ):
+            offenders.append((address, "sits in alignment padding"))
+            continue
+        if _jump_span(image, address, data):
+            offenders.append((address, "sits inside a jump"))
+    return offenders
 
 
 def advance_status(checks: list[str], verdicts: dict[str, str]) -> str | None:
@@ -556,10 +649,17 @@ def seed(check: bool, original: Path) -> int:
     addresses = candidate_addresses()
     records = {address: load_record(address) for address in addresses}
     added, lost = seed_diff(candidates, records)
+    overlaps = overlap_addresses(list(records.values()))
     print(f"added: {len(added)}")
     print(f"lost: {len(lost)}")
+    print(f"overlaps: {len(overlaps)}")
     if check:
-        if added or lost:
+        for address, extra in overlaps:
+            print(
+                f"{record_path(address)}: the size reaches {extra} bytes "
+                "past the next entry"
+            )
+        if added or lost or overlaps:
             return 1
         print("no difference")
         return 0
@@ -580,11 +680,16 @@ def seed(check: bool, original: Path) -> int:
         if address in following:
             record["size"] = following[address] - address
         save_record(record)
+    for address in lost:
+        remove_record(address)
+    sync_extents()
     return 0
 
 
 def command_set(arguments: argparse.Namespace) -> int:
     record = load_record(arguments.function)
+    if arguments.clear_evidence:
+        record["evidence"] = []
     if arguments.name is not None:
         record["name"] = arguments.name
     if arguments.role is not None:
@@ -658,16 +763,73 @@ def command_list(arguments: argparse.Namespace) -> int:
     return 0
 
 
-def command_check() -> int:
+def overlap_addresses(records: list[dict]) -> list[tuple[int, int]]:
+    """The records whose `size` reaches past the next entry.
+
+    Returns the address and the number of bytes past the next entry.  The `size`
+    is the distance to the next entry of the moment the record was seeded, so a
+    moved entry leaves a stale reach.
+    """
+    ordered = sorted(records, key=lambda record: int(record["address"], 16))
+    offenders: list[tuple[int, int]] = []
+    for record, following in zip(ordered, ordered[1:]):
+        address = int(record["address"], 16)
+        size = record.get("size")
+        if size is None:
+            continue
+        next_address = int(following["address"], 16)
+        if address + size > next_address:
+            offenders.append((address, address + size - next_address))
+    return offenders
+
+
+def recompute_sizes() -> int:
+    """Rewrite `size` as the distance to the next entry and return the count.
+
+    The seed writes the field only for a new record, so an entry that moves
+    leaves the survivors with a stale reach.  The last record holds no next
+    entry, so its field is removed.
+    """
+    addresses = candidate_addresses()
+    updated = 0
+    for index, address in enumerate(addresses):
+        record = load_record(address)
+        if index + 1 < len(addresses):
+            size = addresses[index + 1] - address
+            if record.get("size") == size:
+                continue
+            record["size"] = size
+        elif "size" in record:
+            del record["size"]
+        else:
+            continue
+        save_record(record)
+        updated += 1
+    return updated
+
+
+def command_check(original: Path | None) -> int:
     violations: list[str] = []
     count = 0
+    records: list[dict] = []
     for address in candidate_addresses():
         count += 1
         violations.extend(validate_record(record_path(address)))
+        records.append(load_record(address))
+    for address, extra in overlap_addresses(records):
+        violations.append(
+            f"{record_path(address)}: the size reaches {extra} bytes past the next entry"
+        )
     if MODULES_DIR.is_dir():
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
             violations.extend(validate_module(path))
+    if original is not None:
+        if not original.is_file():
+            print(f"error: the original image {original} is missing", file=sys.stderr)
+            return 2
+        for address, reason in non_entry_addresses(le.load(original)):
+            violations.append(f"{record_path(address)}: the address {reason}")
     for violation in violations:
         print(violation)
     print(f"{count} records, {len(violations)} violations")
@@ -732,6 +894,11 @@ def parse_arguments() -> argparse.Namespace:
         help="declare a check; repeatable",
     )
     set_parser.add_argument(
+        "--clear-evidence",
+        action="store_true",
+        help="drop the current evidence entries before the additions",
+    )
+    set_parser.add_argument(
         "--evidence",
         nargs=2,
         action="append",
@@ -762,7 +929,17 @@ def parse_arguments() -> argparse.Namespace:
     list_parser.add_argument("--module", help="keep one module")
     list_parser.add_argument("--json", action="store_true", help="print JSON")
 
-    subparsers.add_parser("check", help="prove every invariant of the model")
+    subparsers.add_parser(
+        "size", help="rewrite the size of every record as the distance to the next entry"
+    )
+    check_parser = subparsers.add_parser(
+        "check", help="prove every invariant of the model"
+    )
+    check_parser.add_argument(
+        "--original",
+        type=Path,
+        help="the original LE executable; adds the prologue-entry check",
+    )
     return parser.parse_args()
 
 
@@ -777,10 +954,18 @@ def main() -> int:
             return command_note(arguments)
         if arguments.command == "list":
             return command_list(arguments)
-        return command_check()
+        if arguments.command == "size":
+            print(f"updated {recompute_sizes()} records")
+            return 0
+        return command_check(arguments.original)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
+    finally:
+        sync_extents()
+
+
+atexit.register(sync_extents)
 
 
 if __name__ == "__main__":
