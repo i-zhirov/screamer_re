@@ -26,23 +26,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 31,
+        "bytes_equal": 43,
         "bytes_total": 58,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 24,
+        "detail": "the modules hold the same instructions in a different order",
+        "instructions_equal": 27,
         "instructions_total": 27,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:7d9f22650ff44cf4578bbead1d012a51e83125bf7f246cd76ad03e0f7251d369",
+    "date": "2026-11-01",
+    "fingerprint": "sha256:b57849cf8ef3737a8c27c6eb16d334152bf837ded9c30dbe0983ad058a6053fd",
     "source_digest": "sha256:d5e72b9ada92ef440218f04138abfa8eec1d358b5c973a4e08f8e9015efb2e21",
     "tool": "run.py"
   },
   "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
   "section": "Program functions",
   "size": 58,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "memory_available_"
 }
