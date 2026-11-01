@@ -80,53 +80,60 @@ def run_probe(
             session.request("EXEC", "RUN")
             deadline = time.time() + timeout
             while time.time() < deadline and len(names) < limit:
-                session.request("BREAK", timeout=10.0)
-                response = session.request("EXEC", "EV " + " ".join(REGISTERS), timeout=10.0)
-                values = response.lines[-1].split() if response.lines else []
-                if len(values) < len(REGISTERS):
+                try:
+                    session.request("BREAK", timeout=10.0)
+                    response = session.request("EXEC", "EV " + " ".join(REGISTERS), timeout=10.0)
+                    values = response.lines[-1].split() if response.lines else []
+                    if len(values) < len(REGISTERS):
+                        session.request("EXEC", "RUN", timeout=10.0)
+                        time.sleep(1)
+                        continue
+                    registers = dict(zip(REGISTERS, (int(value, 16) for value in values)))
+                    eip = registers["EIP"]
+                    probe = f"P{len(names):02d}.BIN"
+                    session.request(
+                        "EXEC", f"MEMDUMPBIN 0150:{eip:X} 5 {probe}", timeout=10.0
+                    )
+                    path = work_dir / probe
+                    head = path.read_bytes()[:5] if path.exists() else b""
+                    if head != MEMBER_OPEN_PATCHED:
+                        session.request("EXEC", "RUN", timeout=10.0)
+                        time.sleep(1)
+                        continue
+                    dump = f"N{len(names):02d}.BIN"
+                    session.request(
+                        "EXEC",
+                        f"MEMDUMPBIN 0150:{STACK_DUMP_BASE:X} {STACK_DUMP_SIZE:X} {dump}",
+                        timeout=10.0,
+                    )
+                    name = ""
+                    offset = registers["EBX"] - STACK_DUMP_BASE
+                    stack = work_dir / dump
+                    if stack.exists() and 0 <= offset < STACK_DUMP_SIZE:
+                        raw = stack.read_bytes()[offset : offset + 32]
+                        name = raw.split(b"\x00")[0].decode("latin1", "replace")
+                    names.append(name)
+                    print(
+                        f"member open {len(names) - 1}: t={time.monotonic() - started:6.1f}s "
+                        f"EIP={eip:X} EBX={registers['EBX']:X} name={name!r}"
+                    )
+                    # Repair the skipped push esi: the frame needs the ESI on the stack.
+                    esp = registers["ESP"] - 4
+                    session.request("EXEC", f"SR ESP {esp:X}", timeout=10.0)
+                    value = registers["ESI"]
+                    session.request(
+                        "EXEC",
+                        f"SMV {esp:X} " + " ".join(f"{byte:02X}" for byte in value.to_bytes(4, "little")),
+                        timeout=10.0,
+                    )
                     session.request("EXEC", "RUN", timeout=10.0)
-                    time.sleep(1)
-                    continue
-                registers = dict(zip(REGISTERS, (int(value, 16) for value in values)))
-                eip = registers["EIP"]
-                probe = f"P{len(names):02d}.BIN"
-                session.request(
-                    "EXEC", f"MEMDUMPBIN 0150:{eip:X} 5 {probe}", timeout=10.0
-                )
-                path = work_dir / probe
-                head = path.read_bytes()[:5] if path.exists() else b""
-                if head != MEMBER_OPEN_PATCHED:
-                    session.request("EXEC", "RUN", timeout=10.0)
-                    time.sleep(1)
-                    continue
-                dump = f"N{len(names):02d}.BIN"
-                session.request(
-                    "EXEC",
-                    f"MEMDUMPBIN 0150:{STACK_DUMP_BASE:X} {STACK_DUMP_SIZE:X} {dump}",
-                    timeout=10.0,
-                )
-                name = ""
-                offset = registers["EBX"] - STACK_DUMP_BASE
-                stack = work_dir / dump
-                if stack.exists() and 0 <= offset < STACK_DUMP_SIZE:
-                    raw = stack.read_bytes()[offset : offset + 32]
-                    name = raw.split(b"\x00")[0].decode("latin1", "replace")
-                names.append(name)
-                print(
-                    f"member open {len(names) - 1}: t={time.monotonic() - started:6.1f}s "
-                    f"EIP={eip:X} EBX={registers['EBX']:X} name={name!r}"
-                )
-                # Repair the skipped push esi: the frame needs the ESI on the stack.
-                esp = registers["ESP"] - 4
-                session.request("EXEC", f"SR ESP {esp:X}", timeout=10.0)
-                value = registers["ESI"]
-                session.request(
-                    "EXEC",
-                    f"SMV {esp:X} " + " ".join(f"{byte:02X}" for byte in value.to_bytes(4, "little")),
-                    timeout=10.0,
-                )
-                session.request("EXEC", "RUN", timeout=10.0)
-                time.sleep(0.05)
+                    time.sleep(0.05)
+                except ConnectionError:
+                    print(
+                        "the game closed the control connection; "
+                        f"the capture ends after {len(names)} member opens"
+                    )
+                    break
     finally:
         child.close()
         data[MEMBER_OPEN_FILE] = original[0]
