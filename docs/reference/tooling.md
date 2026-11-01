@@ -493,7 +493,9 @@ The files:
 | `object_slide_step_main.c` | the `object_slide_step` test harness: the object record, the four constants, the two stubs, and the four paths |
 | `music_bank_load.c` | the rebuilt `music_bank_load` module: the bank field stores, the sound-system call, the driver open, the two member reads, the two installs, and the status stores |
 | `music_bank_load_main.c` | the `music_bank_load` test harness: the bank record, the four globals, the state buffer, the eleven stubs, and the seven paths |
-| `modules/*.json` | the eighty-nine module records: the sources, the compiler, the link, and the run expectations |
+| `camera_update.c` | the rebuilt `camera_update` module: the transform and projection calls, the saved position, the two clears, and the nine scaled basis values |
+| `camera_update_main.c` | the `camera_update` test harness: the camera record, the three globals, the two stubs, and the three paths |
+| `modules/*.json` | the ninety module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

@@ -7746,3 +7746,51 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module music_bank_load`,
   `work/rebuild/mbl_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2f9e0`.
+
+## The camera_update module at 0x8ac78
+
+- Observation: the original body at `0x8ac78` holds 64 instructions and 225
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  4468-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8ac78 --count 64` and
+  `tools/rebuild/functions/0x8ac78.json`.
+- Observation: the original has no EBP frame.  It saves all general registers
+  with `pushal`, saves `ds`, `es`, `fs`, and `gs`, stores the argument in the
+  global `0x7a7ac`, and sets `ds` from the selector at `cs:[0x214d4]`.  The
+  rebuild does not use `-of+`.
+  Evidence: the prologue at `0x8ac78` through `0x8ac8c`.
+- Observation: the function calls the transform at `0x8b610` with the pointer
+  and the projection at `0x82c14`.  The projection reads the same pointer from
+  the global `0x7a7ac`.
+  Evidence: the two calls at `0x8ac94` and `0x8ac99`, and the read at `0x82c23`.
+- Observation: the record holds a 3x3 integer basis at `+0x18`, the position
+  vector at `+0x3c`, a second 3x3 integer basis at `+0x48`, and the velocity
+  vector at `+0x6c`.  The function copies the position to `saved_position` at
+  `0x7ad94`, `0x7ad98`, and `0x7ad9c`, clears the velocity and then the
+  position, and scales the nine values of the second basis by the float at
+  `0x7ad90` into the nine floats at `0x7ad60`.
+  Evidence: the field stores at `0x8aca4` through `0x8ad4d`.
+- Observation: the nine basis values are visited in the order 0, 3, 6, 1, 4, 7,
+  2, 5, 8.  The 27 FPU instructions are nine `fild`, `fmul`, and `fstp` groups.
+  Evidence: the FPU block at `0x8ace5` through `0x8ad4d`.
+- Inference: the transform and the projection prepare the screen position
+  before the function saves the position and resets the motion state.  The
+  scaled basis is the camera basis for the next frame.
+  Evidence: the call order and the saved position.
+- Observation: the rebuild holds 46 instructions and 221 bytes.  The identity
+  check stays open at 7 of 46 instructions and 18 of 221 bytes.  The rebuilt
+  prologue saves only `edx`, and the rebuilt code keeps the pointer in `edx`
+  and stores the clears as immediate fields of the record.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8ac78 --rebuilt work/rebuild/camupd.exe --rebuilt-map
+  work/rebuild/camera_update.map --rebuilt-symbol camera_update_`.
+- Observation: the module uses the FPU, so the recipe links the shared
+  `fpu_stub.asm`.
+  Evidence: `tools/rebuild/modules/camera_update.json` and the build.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the scale 0.5, the scale -2.0, and the
+  scale 1.0.  The transform and projection stubs check the pointer.
+  Evidence: `python3 tools/rebuild/harness.py run --module camera_update`,
+  `work/rebuild/cam_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x8ac78`.
