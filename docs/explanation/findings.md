@@ -6320,9 +6320,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   /nonexistent/STARTH.EXE`.
 - The status page renders the store.
   Evidence: `python3 tools/rebuild/view.py html`.
-- The pipeline check reports 113 checks and 0 failures and takes about 20
+- The pipeline check reports 116 checks and 0 failures and takes about 20
   minutes.  Inside the Nix dev shell the radare2 stage adds four checks, so the
-  run reports 117 checks.  With `--skip-runtime` it reports 98 checks and takes
+  run reports 120 checks.  With `--skip-runtime` it reports 101 checks and takes
   about a minute.  The earlier sections in this file record the check
   count at the time they were written, not the current count.
   Evidence: `python3 tools/pipeline_check.py --game-dir
