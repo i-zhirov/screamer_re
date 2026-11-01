@@ -1,0 +1,30 @@
+{
+  "exe": "rfndmod.exe",
+  "map": "resource_find.map",
+  "name": "resource_find",
+  "run": {
+    "command": "rfndmod.exe > rfnd_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rfnd_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "resource_find.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "resource_find_main.c"
+    }
+  ]
+}

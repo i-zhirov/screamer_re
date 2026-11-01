@@ -69,11 +69,12 @@ current host.
   `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at
   `0x28160`, `palette_build` at `0x15720`, `fade_update` at `0x29818`,
   `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-  `0x4c08d`, `resource_read` at `0x2efc2`, and the first five Phase D modules
+  `0x4c08d`, `resource_read` at `0x2efc2`, and the first six Phase D modules
   `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
-  `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, and `main` at
-  `0x10020`; twenty-one modules match the original, and sixty-two rebuilds hold
-  the recorded difference; the `video_fill` module holds an assembly
+  `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
+  `0x10020`, and `resource_find` at `0x2f25f`; twenty-one modules match the
+  original, and sixty-three rebuilds hold the recorded difference; the
+  `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
 - Rebuild the data pipeline that produces the shipped data files.
@@ -147,8 +148,8 @@ The plan follows the size order, starting with the smallest functions.
     `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
     `palette_build` at `0x15720`, `fade_update` at `0x29818`,
     `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-    `0x4c08d`, `resource_read` at `0x2efc2`, and the first five Phase D modules
+    `0x4c08d`, `resource_read` at `0x2efc2`, and the first six Phase D modules
     `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
-    `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, and `main` at
-    `0x10020` are done; the result is twenty-one matches and sixty-two open
-    rebuilds).
+    `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
+    `0x10020`, and `resource_find` at `0x2f25f` are done; the result is
+    twenty-one matches and sixty-three open rebuilds).

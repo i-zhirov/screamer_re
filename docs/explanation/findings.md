@@ -7441,3 +7441,42 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module game_main`,
   `work/rebuild/gm_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x10020`.
+
+## The resource_find module at 0x2f25f
+
+- Observation: the original body at `0x2f25f` holds 69 instructions and 199
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  199-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f25f --count 69` and
+  `tools/rebuild/functions/0x2f25f.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `esi`, `edi`,
+  and `ebp`, sets `ebp`, and subtracts 0x14 from `esp`.  The rebuild uses the
+  option `-of+`.
+  Evidence: the prologue at `0x2f25f` through `0x2f266`.
+- Observation: the function walks the records of `*resource` up to the count at
+  `+0x04`.  The record stride is 0x1c.  A key equal to the record field at
+  `+0xc` calls `resource_free` at `0x2f470` with the resource and the index.
+  Evidence: the loop at `0x2f288` through `0x2f2ac`.
+- Observation: a non-zero free result returns -1.  Otherwise the function
+  shifts the records after the match one slot to the left with the memmove at
+  `0xd2066`.  The size is `(count - index) * 0x1c`.  Then it sets the result to
+  0 and decrements the count at `+0x04`.
+  Evidence: the block at `0x2f2be` through `0x2f2f5`.
+- Observation: the status at `+0x0c` is 3 when the result is -1 and 0
+  otherwise.  A missing key and a failed free return -1.
+  Evidence: the block at `0x2f2f9` through `0x2f315`.
+- Observation: the rebuild holds 53 instructions and 139 bytes.  The identity
+  check stays open at 13 of 53 instructions and 1 of 139 bytes.  The compiler
+  keeps the resource pointer in `ecx` and the index in `ebx`, uses `lea` for
+  the next record, and folds the loop test, while the original spills both
+  arguments to the frame and reloads them.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f25f --rebuilt work/rebuild/rfndmod.exe --rebuilt-map
+  work/rebuild/resource_find.map --rebuilt-symbol resource_find_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  The paths cover the match at index 0, the match at
+  index 1, the missing key, and the failed free.  The harness copies the bytes
+  in its memmove stub and checks the shifted record data.
+  Evidence: `python3 tools/rebuild/harness.py run --module resource_find`,
+  `work/rebuild/rfnd_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2f25f`.
