@@ -121,7 +121,7 @@ floating-point instructions.
 | `0x1b304` | `controls_load` (done) | 144 | 40 | 6 | 0 |
 | `0x2f172` | `memory_alloc` (done) | 147 | 49 | 2 | 0 |
 | `0x28160` | `overlay_dispatch` (done) | 152 | 42 | 1 | 0 |
-| `0x15720` | `palette_build` | 152 | 55 | 1 | 12 |
+| `0x15720` | `palette_build` (done) | 152 | 55 | 1 | 12 |
 | `0x29818` | `fade_update` | 154 | 48 | 1 | 14 |
 | `0x4cf94` | `persptab_load` | 155 | 43 | 8 | 0 |
 | `0x1bf38` | `config_load` | 155 | 46 | 7 | 0 |
@@ -192,17 +192,18 @@ floating-point instructions.
 
 ## Position
 
-Seventy-two modules carry a recipe and a result: the twelve Phase A modules, the
-eleven modules of the earlier batches, the twenty-three Phase B modules, and the
-first twenty-six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
-`0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
-run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
-`0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
+Seventy-three modules carry a recipe and a result: the twelve Phase A modules,
+the eleven modules of the earlier batches, the twenty-three Phase B modules, and
+the first twenty-seven Phase C modules `graphics_load` at `0x10ba4`,
+`stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
+`panel_draw_centered` at `0x2e7cc`, the run-time `free` at `0xd2008`,
+`race_cleanup` at `0x2a1b0`, `vis_tab_load` at `0x4d030`,
+`object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
 `race_loop` at `0x27700`, `setup_load` at `0x1bb58`, `music_play` at `0x2ff14`,
 `race_state_begin` at `0x294c8`, `net_race_screen` at `0x28ba4`,
 `dos_memory_alloc` at `0x2f0fc`, `video_present` at `0x27ec8`,
 `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
 `0x2f904`, `__fprtf` at `0xd429f`, `race_session_start` at `0x128e0`,
 `music_start` at `0x2ffc4`, `race_end` at `0x279a4`, `controls_load` at
-`0x1b304`, `memory_alloc` at `0x2f172`, and `overlay_dispatch` at
-`0x28160`.  The next module is `palette_build` at `0x15720`.
+`0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`, and
+`palette_build` at `0x15720`.  The next module is `fade_update` at `0x29818`.

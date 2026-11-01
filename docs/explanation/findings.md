@@ -5091,7 +5091,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The list_destroy module and the unoptimized build
 
-- `list_destroy` at `0x2ed77` is 25 instructions and 54 bytes: the five register saves `ebx`, `ecx`,
+- `list_destroy` at `0x2ed77` is 25 instructions and 54 bytes: the four register saves `ebx`, `ecx`,
   `esi`, `edi`, and `ebp`, the frame `mov ebp,esp` and `sub esp,0xc`, the two arguments stored at
   `[ebp-8]` and `[ebp-4]`, the guard `cmp dword ptr [eax],0` with the short skip, the `free` call at
   `0xd2008`, the return of the first argument through the temporary at `[ebp-0xc]`, and the epilogue.
@@ -5112,7 +5112,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --rebuilt work/rebuild/ldmod.exe --rebuilt-map work/rebuild/list_destroy.map --rebuilt-symbol
   list_destroy_`.
 - The four differences repeat the `bios_video` set, and the register-save count pins the compiler
-  version.  The original saves five registers including `ebp`; the V2 `-od` build saves six and the V2
+  version.  The original saves four registers including `ebp`; the V2 `-od` build saves six and the V2
   `-od` build for this module saves four plus the frame, so the original Watcom 10.x build saves one
   register fewer than the V2 build in the same mode.
   Evidence: the four diffs.
@@ -5144,7 +5144,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `lea esp,[ebp-0x14]`.  The branch form does not apply, because this module has no conditional.
   Evidence: the two diffs.
 - The register-save count follows the registers the function uses.  `list_destroy` uses `edx` only for
-  the free call, and the original saves five registers; `memory_available` holds the first call result
+  the free call, and the original saves four registers; `memory_available` holds the first call result
   in `edx` across the second call, and the original saves six.  The V2 `-od` build saves the same
   six here, so the save set is not the difference for this module.
   Evidence: the three module diffs.
@@ -5704,7 +5704,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The memory_free module
 
-- `memory_free` at `0x2f205` holds 33 instructions and 90 bytes: the five register saves, the
+- `memory_free` at `0x2f205` holds 33 instructions and 90 bytes: the four register saves, the
   frame, the two argument slots, the local register block and segment set, the `dpmi_fill_regs`
   call at `0x4bf23`, the `dpmi_call` call at `0x4bf4b`, and the epilogue.  The function calls the
   DPMI function 0x0502 (free memory block): it stores 0x0502 at block offset 0, the high address
@@ -6067,7 +6067,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The resource_free module
 
-- `resource_free` at `0x2f470` holds 47 instructions and 126 bytes: the five register saves, the
+- `resource_free` at `0x2f470` holds 47 instructions and 126 bytes: the four register saves, the
   frame, the two argument slots, the record address arithmetic, the flag test at `+0x18` bit 0, the
   two free calls at `0x2f40b` and `0x2f205`, the return paths, and the epilogue.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f470 --count 47`.
@@ -6089,7 +6089,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The list_create module
 
-- `list_create` at `0x2ecf8` holds 46 instructions and 127 bytes: the five register saves, the
+- `list_create` at `0x2ecf8` holds 46 instructions and 127 bytes: the four register saves, the
   frame, the two argument slots, the `pool_init` call at `0x2f904`, the `malloc` call at `0xd1f25`,
   the pointer check, the two store paths, the `memset` call at `0xd1ec0`, and the epilogue.  The
   function allocates `count` records of 0x1c bytes.
@@ -6938,3 +6938,54 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   selects the overlay step for the current state and advances the stack.
   Evidence: the state dispatch at `0x281a3`, the stack pop at `0x281b5` through
   `0x281cc`, and the mode store at `0x281ef`.
+
+## The palette_build module at 0x15720
+
+- Observation: the body at `0x15720` holds 55 instructions and 152 bytes.  It
+  saves four registers, makes the frame, reserves 0x14 bytes, and returns at
+  `0x157b7`.  The plan row holds the same counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15720 --count 55`.
+- Observation: the two loops fill a table.  The outer loop runs from 0 to 49 and
+  the inner loop runs from 0 to 99.  The row base is `0x80e8 + 400 * i` and the
+  entry address is the row base plus `4 * j`.  The table therefore holds 50
+  rows of 100 floats.  The row base has the linear address `0x1080e8`, in
+  writable object 3.
+  Evidence: the arithmetic at `0x15743` through `0x1575c`, and the store at
+  `0x157a4` through `0x157ad`.
+- Observation: the float constant at `[ebp - 4]` is `0x3ba3d70a` (0.005).  The
+  `fadd qword ptr [0x66e]` adds the double 0.5 and the `fdivr qword ptr
+  [0x676]` divides the double 50.0 by `i + 1`.  So the ramp value is
+  `j * 0.005f + 0.5` and the exponent is `50.0 / (i + 1)`.
+  Evidence: the bytes at `0x15729`, `0x1577a`, and `0x1578a`, and the double
+  values at object 3 offsets `0x66e` and `0x676`.
+- Observation: the call at `0x1579f` passes the exponent first and the ramp
+  value second.  The two qword arguments reach the routine at `0xc21e2`, which
+  reads both and calls the routine at `0xc20a6`.  That routine uses `fyl2x` and
+  the `f2xm1` square-and-multiply loop at `0xc21bf`, so it computes a power.
+  The function stores the result as a float.
+  Evidence: the disassembly at `0xc21e2`, `0xc20a6`, and `0xc21bf`.
+- Inference: the function computes
+  `table[i][j] = (float)pow(j * 0.005f + 0.5, 50.0 / (i + 1))`.  The ramp
+  starts at 0.5 for column 0 and the exponent falls from 50.0 to 1.0 over the
+  rows.
+  Evidence: the argument order and the power routine.
+- Observation: the rebuild with `-of+` holds 40 instructions and 106 bytes.
+  The identity check stays open at 5 of 55 instructions and 5 of 106 bytes,
+  because the shared toolchain uses its own frame and register code.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15720 --rebuilt work/rebuild/pbmod.exe --rebuilt-map
+  work/rebuild/palette_build.map --rebuilt-symbol palette_build_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  It checks 5000 stub calls, the first and the last
+  argument pair, and the entries at the row and column edges.
+  Evidence: `python3 tools/rebuild/harness.py run --module palette_build`,
+  `work/rebuild/pb_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x15720`.
+- Observation: in the shared harness image the double literals of this module
+  read as zero at run time.  The rebuild therefore reads the three constants
+  from the globals `palette_step`, `palette_base`, and `palette_scale`, and the
+  harness sets the exact bit patterns.  A diagnostic build printed zero for the
+  first base, the first exponent, and table entry 0 when the module used the
+  literals.
+  Evidence: the diagnostic harness run and `tools/rebuild/palette_build.c`.

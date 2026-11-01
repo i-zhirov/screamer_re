@@ -52,11 +52,11 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: seventy-two named modules are rebuilt with the harness and the
+  progress: seventy-three named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
-  first twenty-six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+  first twenty-seven Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
   `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
   run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
   `0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
@@ -66,9 +66,9 @@ current host.
   `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
   `0x2f904`, `__fprtf` at `0xd429f`, `race_session_start` at `0x128e0`,
   `music_start` at `0x2ffc4`, `race_end` at `0x279a4`, `controls_load` at
-  `0x1b304`, `memory_alloc` at `0x2f172`, and `overlay_dispatch` at
-  `0x28160`;
-  twenty-one modules match the original, and fifty-one rebuilds hold the
+  `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at
+  `0x28160`, and `palette_build` at `0x15720`;
+  twenty-one modules match the original, and fifty-two rebuilds hold the
   recorded difference; the `video_fill` module
   holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -131,7 +131,7 @@ The plan follows the size order, starting with the smallest functions.
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
     A functions, the whole twenty-three-function Phase B batch, and the first
-    twenty-six Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
+    twenty-seven Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
     `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`,
     the run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load`
     at `0x4d030`, `object_state_save` at `0x1ccd8`, `input_poll` at `0x26448`,
@@ -141,5 +141,6 @@ The plan follows the size order, starting with the smallest functions.
     `resource_free` at `0x2f470`, `list_create` at `0x2ecf8`, `pool_init` at
     `0x2f904`, `__fprtf` at `0xd429f`, `race_session_start` at `0x128e0`,
     `music_start` at `0x2ffc4`, `race_end` at `0x279a4`, `controls_load` at
-    `0x1b304`, `memory_alloc` at `0x2f172`, and `overlay_dispatch` at `0x28160` are
-    done; the result is twenty-one matches and fifty-one open rebuilds).
+    `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`, and
+    `palette_build` at `0x15720` are done; the result is twenty-one matches and
+    fifty-two open rebuilds).
