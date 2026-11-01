@@ -471,7 +471,9 @@ The files:
 | `config_load_main.c` | the `config_load` test harness: the file stubs and the three paths |
 | `fopen.c` | the rebuilt `fopen` module: the container open, the two string copies, and the member search |
 | `fopen_main.c` | the `fopen` test harness: the stream record, the three stubs, and the three paths |
-| `modules/*.json` | the seventy-eight module records: the sources, the compiler, the link, and the run expectations |
+| `resource_read.c` | the rebuilt `resource_read` module: the full-table test, the record select, the allocation, and the cache call |
+| `resource_read_main.c` | the `resource_read` test harness: the resource record, the three stubs, and the four paths |
+| `modules/*.json` | the seventy-nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

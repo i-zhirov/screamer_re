@@ -7145,3 +7145,48 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module fopen`,
   `work/rebuild/FOP_OUT.TXT`, and `python3 tools/rebuild/run.py run --function
   0x4c08d`.
+
+## The resource_read module at 0x2efc2
+
+- Observation: the original body at `0x2efc2` holds 56 instructions and 160
+  bytes.  The plan row holds the same counts.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2efc2 --count 56`.
+- Observation: the function reads the resource structure.  The record array is
+  at `+0x00`, the count at `+0x04`, the limit at `+0x08`, the status at `+0x0c`,
+  and the name buffer at `+0x10`.
+  Evidence: the loads and stores at `0x2efd7` through `0x2f000`.
+- Observation: when the count equals the limit, the function sets the status at
+  `+0x0c` to 2, copies the name to `resource + 0x10`, and returns 0.  The copy
+  goes through the `sprintf` call at `0x4d32c` with the format `%.11s`.
+  Evidence: the branch at `0x2efe3` and the call at `0x2f000`.
+- Observation: the literals `0x14c5`, `0x14cb`, `0x14d1`, and `0x14d7` are
+  four copies of `%.11s` in the data object at base `0x100000`.  The code holds
+  the object offset, and the loader adds the object base.
+  Evidence: the data dump at file offsets `0xf7cc5` through `0xf7cd7`.
+- Observation: the normal path selects the record at
+  `*resource + count * 0x1c`.  It calls `memory_alloc_small` at `0x2f172` with
+  the resource, the size, and the address cell `record + 0x10`.  Then it clears
+  the flag at `record + 0x18` and calls `0x2f062` with the resource, the record,
+  the allocation result, the name, and the size.
+  Evidence: the code at `0x2f011` through `0x2f055`.
+- Inference: the record holds the name at `+0x00`, the allocation result at
+  `+0x0c`, the address cell at `+0x10`, the requested size at `+0x14`, and the
+  free flag at `+0x18`.  The routine at `0x2f062` writes the name, the
+  allocation result, and the requested size.  `resource_free` frees the value at
+  `+0x10`.
+  Evidence: the cache routine at `0x2f062` and the `resource_free` record access
+  at `0x2f4c4`.
+- Observation: the rebuild with `-of+` holds 41 instructions and 104 bytes.  The
+  identity check stays open at 12 of 41 instructions and 4 of 104 bytes.  The
+  shared toolchain saves the frame before the register saves and keeps the
+  resource and the name in `esi` and `ecx`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2efc2 --rebuilt work/rebuild/rrout.exe --rebuilt-map
+  work/rebuild/resource_read.map --rebuilt-symbol resource_read_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  It runs the full-table path, the first-record path,
+  the second-record path with the 0x1c-byte stride, and the allocation-failure
+  path.
+  Evidence: `python3 tools/rebuild/harness.py run --module resource_read`,
+  `work/rebuild/rr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2efc2`.

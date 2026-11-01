@@ -126,7 +126,7 @@ floating-point instructions.
 | `0x4cf94` | `persptab_load` (done) | 155 | 43 | 8 | 0 |
 | `0x1bf38` | `config_load` (done) | 155 | 46 | 7 | 0 |
 | `0x4c08d` | `fopen` (done) | 155 | 48 | 5 | 0 |
-| `0x2efc2` | `resource_read` | 160 | 56 | 3 | 0 |
+| `0x2efc2` | `resource_read` (done) | 160 | 56 | 3 | 0 |
 
 ### Phase D: 161 to 300 bytes
 
@@ -192,9 +192,9 @@ floating-point instructions.
 
 ## Position
 
-Seventy-seven modules carry a recipe and a result: the twelve Phase A modules,
+Seventy-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
-the first thirty-one Phase C modules `graphics_load` at `0x10ba4`,
+the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
 `panel_draw_centered` at `0x2e7cc`, the run-time `free` at `0xd2008`,
 `race_cleanup` at `0x2a1b0`, `vis_tab_load` at `0x4d030`,
@@ -207,5 +207,6 @@ the first thirty-one Phase C modules `graphics_load` at `0x10ba4`,
 `music_start` at `0x2ffc4`, `race_end` at `0x279a4`, `controls_load` at
 `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
 `palette_build` at `0x15720`, `fade_update` at `0x29818`,
-`persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, and `fopen` at
-`0x4c08d`.  The next module is `resource_read` at `0x2efc2`.
+`persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
+`0x4c08d`, and `resource_read` at `0x2efc2`.  The next module is `race_panel_4`
+at `0x2e724`.
