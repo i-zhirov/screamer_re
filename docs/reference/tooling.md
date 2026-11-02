@@ -516,7 +516,9 @@ The files:
 | `object_proximity_check_fpu.asm` | the `object_proximity_check` FPU run-time stubs: the no-op init and the truncating `__CHP` |
 | `object_transform.c` | the rebuilt `object_transform` module: the two callee calls, the two position sums, the conditional height copy, the three float sums, the height minus two store, and the vertical sum |
 | `object_transform_main.c` | the `object_transform` test harness: the object record, the two callee stubs, the float bit patterns, and the three paths |
-| `modules/*.json` | the one hundred module records: the sources, the compiler, the link, and the run expectations |
+| `race_start.c` | the rebuilt `race_start` module: the screen rectangle, the choice load, the five state copies, the context reads, the `MAP%d` build, the mode stores, and the `race_session_start` call |
+| `race_start_main.c` | the `race_start` test harness: the screen and state globals, the race context, the car table, the three stubs, and the two paths |
+| `modules/*.json` | the one hundred and one module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

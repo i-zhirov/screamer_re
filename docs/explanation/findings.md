@@ -8366,3 +8366,53 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the position update.  The `object_state_save` record carries the name, and
   the `object_integrate` record is still `named`.
   Evidence: the callee records and the disassembly of each callee.
+
+## The race_start module at 0x27770
+
+- Observation: the original body at `0x27770` holds 66 instructions and 251
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  252-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27770 --count 66` and
+  `tools/rebuild/functions/0x27770.json`.
+- Observation: the function first stores the screen rectangle 0, 0x280, 0, and
+  0x190 at `0x15ce4` through `0x15cf0`, then calls `0x1bbc8`.
+  Evidence: the stores at `0x27786` through `0x27798` and the call at
+  `0x2779e`.
+- Observation: the call target `0x1bbc8` builds `%s\config\choice.dat` and
+  reads the file.  The function therefore names it `choice_load`.
+  Evidence: the `sprintf` call at `0x1bbe1`, the `fopen` call at `0x1bbf1`, and
+  the format string at data offset `0xa75`.
+- Observation: the function copies `DAT_001207f4`, `DAT_0012080c`,
+  `DAT_00120808`, `DAT_00120810`, and `DAT_00120814` to `DAT_0011d2a8`,
+  `DAT_0011d2c0`, `DAT_0011d2bc`, `DAT_0011d2c4`, and `DAT_0011d2a4`, and sets
+  the level `DAT_0011d2b4` to 1.
+  Evidence: the block at `0x277a3` through `0x277df`.
+- Observation: the function reads the race context `DAT_00002dec`.  It copies
+  the word at `+0x48` to `DAT_0011d2cc`, copies the index at `+8` to
+  `DAT_0011d2b8`, and calls `0x8bd54` with `DAT_001021d8[index]`.
+  Evidence: the block at `0x277e5` through `0x277fe`.
+- Inference: `0x8bd54` stores its argument in eight data cells and sets two
+  derived cells.  The module names it `state_cells_set`, because the call has
+  no other visible effect.
+  Evidence: the disassembly of `0x8bd54` through `0x8bd93`.
+- Observation: the function clears `DAT_00118e30` and `DAT_0011ce54`, builds
+  `MAP%d` from `DAT_001207f8 + 1` into `DAT_0011d294`, sets
+  `DAT_0011d260` to 0x100, sets `DAT_0011d2b4` to 1 again, copies the old
+  `DAT_0011d274` to `DAT_0011d22c`, clears `DAT_0011d274`, and calls
+  `race_session_start(1)` at `0x128e0`.  A non-zero result returns at once.
+  Evidence: the block at `0x27803` through `0x2786a`.
+- Observation: the rebuild with `-of+` holds 57 instructions and 231 bytes.
+  The identity check stays open at 29 of 57 instructions and 30 of 231 bytes.
+  The V2 toolchain uses `ecx` in place of `ebx` and stores the constants as
+  immediates where the original loads them into registers.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27770 --rebuilt work/rebuild/rstmod.exe --rebuilt-map
+  work/rebuild/race_start.map --rebuilt-symbol race_start_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, and `D`.  It runs the success path with the index 2, the flag 7, and
+  `MAP1`, and the non-zero result path with the counter 5, the index 3, the flag
+  0xffff, `MAP6`, and the result 0x999.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_start`,
+  `work/rebuild/rst_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x27770`.
