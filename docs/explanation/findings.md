@@ -8737,3 +8737,57 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_update_all`,
   `work/rebuild/oupd_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2786c`.
+
+## The keyboard_hook module at 0x14e20
+
+- Observation: the original body at `0x14e20` holds 100 instructions and 334
+  bytes up to the early-exit block at `0x14f6e`.  The plan row holds the same
+  counts.  The merged store record keeps the 408-byte extent, which includes
+  the trailing NOP at `0x14fb7`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x14e20 --count 100` and
+  `tools/rebuild/functions/0x14e20.json`.
+- Observation: the install path sends the keyboard controller command `0xed`
+  to port `0x60`, waits on the input buffer bit and the output buffer bit of
+  port `0x64` with the timeout `0xffff`, reads the acknowledge from port
+  `0x60`, and repeats the sequence up to four times while the acknowledge is
+  not `0xfa`.  It then writes `0` to port `0x60`, clears bits 4, 5, and 6 of
+  the BIOS keyboard flags at `0040:0017`, reads the real-mode interrupt 9
+  vector with INT 21h AX=3509h, and installs the handler at CS:0xe4 with INT
+  21h AX=2509h.
+  Evidence: the port instructions at `0x14e4c` through `0x14ec5`, the GS
+  access at `0x14ed1` and `0x14ee1`, and the two `dpmi_call` calls at
+  `0x14f01` and `0x14f60`.
+- Observation: the zero-argument path restores the saved real-mode interrupt 9
+  vector with INT 21h AX=2509h.  It reads the saved segment from the word
+  `0xcf0c` and the saved offset from the dword `0xcf10`.
+  Evidence: the block at `0x14f6e` and the `dpmi_call` at `0x14fa9`.
+- Inference: the handler at CS:0xe4 is the raw keyboard interrupt 9 service.
+  It reads the scancode from port `0x60` and stores the make or break state in
+  a 128-byte table at `DS:0x113`.  The handler is at linear `0x100e4`, which is
+  object 1 offset `0xe4`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x100e4 --count 15` and the
+  object base `0x10000` from `python3 tools/le.py info STARTH.EXE`.
+- Observation: the rebuilt module holds 79 instructions and 302 bytes.  The
+  identity check stays open at 25 of 79 instructions and 35 of 302 bytes.  The
+  V2 toolchain saves the frame pointer first, keeps the loop counters in
+  registers, calls the `inportb` and `outportb` helpers instead of the two
+  inline port reads and the two inline port writes, and replaces the byte
+  read-modify-write of the BIOS flags with one `and gs:[...],0x8f`.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x14e20 --rebuilt work/rebuild/kbhmod.exe --rebuilt-map
+  work/rebuild/keyboard_hook.map --rebuilt-symbol keyboard_hook_`.
+- Observation: the rebuild calls `inportb` and `outportb` instead of the
+  inline port instructions.  This is a deviation from the original.  The
+  harness needs the calls to simulate the controller and to prove the
+  acknowledge and the retry paths.  The two DPMI calls stay external, as in the
+  original.
+  Evidence: `tools/rebuild/keyboard_hook.c` and
+  `tools/rebuild/keyboard_hook_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the first-acknowledge install, the
+  one-retry install, the four-attempt install, the uninstall, and the BIOS flag
+  mask.
+  Evidence: `python3 tools/rebuild/harness.py run --module keyboard_hook`,
+  `work/rebuild/kbh_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x14e20`.
