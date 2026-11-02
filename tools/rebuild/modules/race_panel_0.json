@@ -1,0 +1,35 @@
+{
+  "exe": "rp0mod.exe",
+  "map": "race_panel_0.map",
+  "name": "race_panel_0",
+  "run": {
+    "command": "rp0mod.exe > rp0_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rp0_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_0.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_panel_0_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_0_main.c"
+    }
+  ]
+}

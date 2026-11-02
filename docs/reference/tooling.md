@@ -536,7 +536,10 @@ The files:
 | `object_integrate.c` | the rebuilt `object_integrate` module: the two truncated position sums, the factor damping, the factor threshold, the target compare, the dwell timer, and the two snap stores |
 | `object_integrate_main.c` | the `object_integrate` test harness: the object record, the frame delta, the damping table, the two constants, and the eight paths |
 | `object_integrate_fpu.asm` | the `object_integrate` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and nine module records: the sources, the compiler, the link, and the run expectations |
+| `race_panel_0.c` | the rebuilt `race_panel_0` module: the two centered axis targets, the two smoothed positions, the x offset, the two truncating conversions, the two panel calls, and the state title |
+| `race_panel_0_main.c` | the `race_panel_0` test harness: the race object, the two axis positions, the three constants, the two title pointers, the two stubs, and the five paths |
+| `race_panel_0_fpu.asm` | the `race_panel_0` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and ten module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

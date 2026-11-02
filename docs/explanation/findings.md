@@ -8840,3 +8840,60 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_integrate`,
   `work/rebuild/oint_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x1d6bc`.
+
+## The race_panel_0 module at 0x2e0b4
+
+- Observation: the original body at `0x2e0b4` holds 103 instructions and 357
+  bytes up to the `ret` at `0x2e218`.  The plan row holds the same counts.  The
+  merged store record keeps the 360-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e0b4 --count 103` and
+  `tools/rebuild/functions/0x2e0b4.json`.
+- Observation: each axis target centers half of an object field on the `0x140`
+  screen width.  The x target uses the field at `+0x134` and the y target uses
+  the field at `+0x120`.  The signed division by two uses the sign-correction
+  pattern, and the second division uses a plain arithmetic shift.
+  Evidence: the two blocks at `0x2e0bd` through `0x2e0dd` and `0x2e140`
+  through `0x2e160`.
+- Observation: the x position `DAT_00020824` moves up by the frame delta
+  `DAT_0018e08` times the step at `0x12d4` while the target stays above it, and
+  it snaps down to the target when the target stays below it.  The y position
+  `DAT_00020828` uses the same pattern with the step at `0x12dc`.
+  Evidence: the `fcomp`, `fld`, `fmul`, `fadd`, and `fstp` blocks at
+  `0x2e0e0` through `0x2e117` and `0x2e163` through `0x2e19a`.
+- Observation: the function adds the offset at `0x12d8` to the x position only.
+  It then converts the x sum and the y position to an integer through the
+  helper at `0x4d9f4`, which truncates toward zero.
+  Evidence: the `fadd` at `0x2e128` and the two `call 0x4d9f4` sites at
+  `0x2e130` and `0x2e1b0`.
+- Observation: the function draws the two panels through `panel_show` at
+  `0x2dfac` with the arguments `(x, 0, 0xf)` and `(y, 0x10, 0xe)`.
+  Evidence: the calls at `0x2e13b` and `0x2e1bb` and the register sets
+  `ebx=0xf`, `edx=0`, `ebx=0xe`, and `edx=0x10`.
+- Observation: when the race state `DAT_00020988` is 1 or 2 and the low seven
+  bits of the frame counter `DAT_000007fd` stay below `0x48`, the function
+  draws the matching title through `panel_draw_centered` at `0x2e7cc`.  The
+  title pointers sit at `DAT_0011fc58` and `DAT_0011fc5c`.  The call uses y
+  `0xbe`, font 0, and color 2.
+  Evidence: the state and blink tests at `0x2e1c0` through `0x2e20d`.
+- Observation: the rebuild uses the module-local `race_panel_0_fpu.asm` stub.
+  The stub makes `__CHP` truncate toward zero.  The shared `fpu_stub.asm`
+  leaves the default round-to-nearest mode, so a negative sum would round away
+  from zero.  This deviation keeps the two conversions correct for negative
+  values.
+  Evidence: `tools/rebuild/race_panel_0_fpu.asm` and the negative path in
+  `tools/rebuild/race_panel_0_main.c`.
+- Observation: the rebuilt module holds 110 instructions and 363 bytes.  The
+  identity check stays open at 12 of 103 instructions and 69 of 357 bytes.
+  The V2 toolchain saves the frame pointer first, keeps the object pointer in
+  `eax`, uses `cdq`, keeps the y target in a second local slot, and reorders
+  the title arguments.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2e0b4 --rebuilt work/rebuild/rp0mod.exe --rebuilt-map
+  work/rebuild/race_panel_0.map --rebuilt-symbol race_panel_0_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the x increment, the y snap, the y
+  increment, the x snap, both title states, the blink guard, and the negative
+  truncation.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_panel_0`,
+  `work/rebuild/rp0_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2e0b4`.
