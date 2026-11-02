@@ -145,7 +145,7 @@ call_target=0x10020
       and
       `python3 tools/le.py near ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0xd4364`
 
-- [ ] **Task 2: Cross-check environment and loader check**
+- [x] **Task 2: Cross-check environment and loader check**
     - **Implements:** FR-008, FR-009, SC-002, design §Component Interfaces
       (`flake.nix`, `install_loader.sh`), §Rollout And Compatibility
     - **Create `tools/rebuild/tests/test_ghidra_identity.py`**
