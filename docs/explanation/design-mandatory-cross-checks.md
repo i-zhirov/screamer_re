@@ -201,6 +201,11 @@ A developer wants the raw view of one tool.
   extension and its version.
 - The Ghidra analysis and the loader install dominate the setup time. The
   first `cross-check` shell entry downloads a large Ghidra closure.
+- The Ghidra `.image` block holds the raw file at file offset 0. The
+  loader's object blocks come from a byte array and have no file source.
+  The page-0 file offset comes from the LE page table in `.image`.
+- Ghidra 12.0.4 appends ` (GhidraScript)` to each logged script line. The
+  wrapper strips it.
 
 ## Approaches Considered
 
@@ -388,8 +393,8 @@ flowchart LR
     does not download. It prints `ok` and the Ghidra version, then exits 0.
     Otherwise it prints the exact install command and exits 2.
   - A run filters the `=== identity` marker, strips the
-    `INFO  LeIdentity.java> ` prefix, and checks all seven keys before it
-    exits 0.
+    `INFO  LeIdentity.java> ` prefix and the optional ` (GhidraScript)`
+    suffix, and checks all seven keys before it exits 0.
 - **Failure Modes**: A missing marker or key, or a Java `error:` line,
   makes the wrapper exit 2. It does not trust the `analyzeHeadless` exit
   code alone.
@@ -404,9 +409,16 @@ flowchart LR
     `getSymbolTable().getExternalEntryPointIterator()`. Exactly one address
     must be present. Zero or several addresses print `entry=unknown`.
   - `page0_module`: `0x10000`, the address being mapped.
-  - `page0_file`: `sourceInfo.getFileBytesOffset(pageAddress)` from the
-    `MemoryBlockSourceInfo` that contains `0x10000`. Select the source info
-    from `block.getSourceInfos()`.
+  - `page0_file`: parse the LE object page table from the `.image` block.
+    Read `e_lfanew` at file offset `0x3c`. Read the LE header at `e_lfanew`:
+    `page_size` at `+0x28`, `object_table_offset` at `+0x40`,
+    `object_page_table_offset` at `+0x48`, and `data_pages_offset` at
+    `+0x80`. Read object 1 at `e_lfanew + object_table_offset` and take its
+    `page_table_index` at `+0x0c`. Read the page-0 entry at
+    `e_lfanew + object_page_table_offset + (page_table_index - 1) * 4` as a
+    big-endian 32-bit value. The file page is `value >> 8`. The file offset
+    is `data_pages_offset + (file_page - 1) * page_size`. A failed read or
+    an invalid value prints `unknown`.
   - `main`: `getFunctionContaining(main).getEntryPoint()`.
   - `caller`: the entry point of `getFunctionContaining(callSite)`.
   - `call_target`: the target of the call at `callSite`.
@@ -498,7 +510,7 @@ Fact sources:
 | Fact | `le.py` | radare2 | Ghidra |
 | --- | --- | --- | --- |
 | `entry` | `exe.entry_linear` | `ie` row of type `program`, `vaddr` | the one external entry point |
-| `page0` | `page_at(0x10000)`: module `0x10000`, file offset | `iS` row `vaddr 0x00010000`: `paddr` and `vaddr` | `page0_module` and `page0_file` |
+| `page0` | `page_at(0x10000)`: module `0x10000`, file offset | `iS` row `vaddr 0x00010000`: `paddr` and `vaddr` | the LE page table parse from `.image` |
 | `main` | the greatest `function_starts()` entry at or below `--main` | `pdf` at `--main`: `fcn.00010020` | `main` |
 | `caller` | `nearest_function_start(callSite)`, the `call` at the site | the `CALL XREF` line at `--call-site` | `caller`, `call_site`, `call_target` |
 
@@ -551,6 +563,8 @@ prints `unknown`. An `unknown` field makes the fact `differ`.
   one at `--call-site`.
 - The Ghidra parser test includes zero and two entry points and expects
   `unknown`.
+- The wrapper test includes the ` (GhidraScript)` suffix and expects the
+  suffix to be stripped.
 - A shell test covers `install_loader.sh --check` with a temporary
   `GHIDRA_INSTALL_DIR`, a fake `Ghidra/application.properties`, a temporary
   `GHIDRA_USER_DIR`, and a fake extension.
@@ -601,6 +615,7 @@ python3 tools/pipeline_check.py \
 | Loader install needs network | A clean runner fails the preflight | `install_loader.sh --check` prints the command, the runner installs once |
 | Ghidra 12.1 breaks the loader | The stage cannot run | Keep the 12.0.4 pin, print the version in `--check` |
 | The Ghidra analysis yields different boundaries | A false positive on `main` or `caller` | The first implementation run records the real values. If they differ, stop and record a finding. Do not weaken the fact without a design change |
+| The Java page-table parse differs from `le.py` | The `page0` fact fails | The first real run compares it with `le.py` and radare2. A mismatch is a finding |
 | Ghidra returns several entry points | The `entry` fact is `unknown` | Fail the fact and record the iterator in the findings |
 | The `le.py` helper refactor changes the scan | The store seed and the record extents change | A regression test locks the `funcs` output. Run the seed only after the test passes |
 | The `le.py` change invalidates the stored fingerprints | The next run re-verifies every record | Expected. The record files stay unchanged. The run reports the recomputed fingerprints |

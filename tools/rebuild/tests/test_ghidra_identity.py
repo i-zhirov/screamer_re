@@ -244,8 +244,27 @@ class IdentityRunTestCase(IdentityTestCase):
             for line in body.splitlines()
         )
 
+    def suffixed(self, body: str) -> str:
+        return "".join(
+            f"INFO  LeIdentity.java> {line} (GhidraScript)  \n"
+            for line in body.splitlines()
+        )
+
     def run_with(self, body: str) -> subprocess.CompletedProcess:
         self.fake_analyze_headless(self.prefixed(body))
+        return self.run_identity(
+            "--exe",
+            str(self.write_executable()),
+            "--project-dir",
+            str(self.root / "proj"),
+            "--main",
+            "0x10020",
+            "--call-site",
+            "0xd4364",
+        )
+
+    def run_suffixed(self, body: str) -> subprocess.CompletedProcess:
+        self.fake_analyze_headless(self.suffixed(body))
         return self.run_identity(
             "--exe",
             str(self.write_executable()),
@@ -263,6 +282,14 @@ class IdentityRunTestCase(IdentityTestCase):
         self.assertIn("=== identity", result.stdout)
         for key in IDENTITY_KEYS.splitlines():
             self.assertIn(key, result.stdout)
+
+    def test_identity_run_strips_the_ghidra_script_suffix(self) -> None:
+        result = self.run_suffixed("=== identity\n" + IDENTITY_KEYS)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("=== identity\n", result.stdout)
+        for key in IDENTITY_KEYS.splitlines():
+            self.assertIn(key + "\n", result.stdout)
+        self.assertNotIn("GhidraScript", result.stdout)
 
     def test_identity_run_accepts_an_unknown_entry(self) -> None:
         keys = IDENTITY_KEYS.replace("entry=0x300f8", "entry=unknown")

@@ -82,6 +82,11 @@ call_target=0x10020
   The record files stay unchanged.
 - The `flake.nix` `cross-check` shell contains Python, capstone, radare2,
   Ghidra, `curl`, and `unzip`.
+- The Ghidra `.image` block is the raw file at file offset 0. The object
+  blocks have no file source. The page-0 file offset comes from the LE page
+  table in `.image`.
+- Ghidra 12.0.4 appends ` (GhidraScript)` to each logged script line. The
+  wrapper strips it.
 - `identity.sh --check` uses `install_loader.sh --check`.
 - The Java script cannot set the process exit code. `identity.sh` maps a
   missing marker or key, or a Java `error:` line, to exit 2.
@@ -204,6 +209,10 @@ call_target=0x10020
         - `test_identity_run_accepts_the_seven_keys` — a fake
           `analyzeHeadless` prints the marker and seven prefixed keys. The
           wrapper exits 0, and stdout holds `=== identity` and all seven keys.
+        - `test_identity_run_strips_the_ghidra_script_suffix` — a fake
+          `analyzeHeadless` appends ` (GhidraScript)` to the marker and every
+          key. The wrapper strips it, exits 0, and stdout holds the marker and
+          the seven keys without the suffix.
         - `test_identity_run_accepts_an_unknown_entry` — a fake run prints
           `entry=unknown` with the other six keys. The wrapper exits 0.
         - `test_identity_run_rejects_a_missing_marker` — keys without the
@@ -225,7 +234,8 @@ call_target=0x10020
           ADDR --call-site ADDR`.
         - The run captures combined output to a file under the project
           directory, filters from `=== identity`, and strips the
-          `INFO  LeIdentity.java> ` prefix.
+          `INFO  LeIdentity.java> ` prefix and the optional ` (GhidraScript)`
+          suffix.
         - The run requires the marker and all seven keys. It fails with exit
           2 on a missing marker, a missing key, a Java `error:` line, or an
           `analyzeHeadless` failure. It removes the project directory on
@@ -242,10 +252,17 @@ call_target=0x10020
           `getSymbolTable().getExternalEntryPointIterator()`. Exactly one
           address prints its value. Zero or several print `entry=unknown`.
         - `page0_module`: `0x10000`.
-        - `page0_file`: from the `MemoryBlockSourceInfo` in
-          `getMemory().getBlock(toAddr(0x10000)).getSourceInfos()` that
-          contains `0x10000`, print
-          `sourceInfo.getFileBytesOffset(pageAddress)`.
+        - `page0_file`: parse the LE object page table from the `.image`
+          block. Read `e_lfanew` at file offset `0x3c`. Read the LE header at
+          `e_lfanew`: `page_size` at `+0x28`, `object_table_offset` at
+          `+0x40`, `object_page_table_offset` at `+0x48`, and
+          `data_pages_offset` at `+0x80`. Read object 1 at
+          `e_lfanew + object_table_offset` and take its `page_table_index` at
+          `+0x0c`. Read the page-0 entry at
+          `e_lfanew + object_page_table_offset + (page_table_index - 1) * 4`
+          as a big-endian 32-bit value. The file page is `value >> 8`. The
+          file offset is `data_pages_offset + (file_page - 1) * page_size`.
+          A failed read or an invalid value prints `unknown`.
         - `main`: `getFunctionContaining(mainAddress).getEntryPoint()`.
         - `caller`: `getFunctionContaining(callSite).getEntryPoint()`.
         - `call_target`: the first address from the flows of
@@ -259,7 +276,7 @@ call_target=0x10020
       and
       `nix develop .#cross-check --command sh tools/ghidra/identity.sh --check`
 
-- [ ] **Task 4: `tools/cross_check.py`**
+- [x] **Task 4: `tools/cross_check.py`**
     - **Implements:** FR-002, FR-003, FR-004, FR-010, FR-015, FR-017,
       SC-004, SC-008, design §Component Interfaces (`cross_check.py`),
       §Data Model, §Error Handling And Edge Cases
@@ -549,3 +566,12 @@ call_target=0x10020
         - `python3 tools/rebuild/store.py check` passes.
         - `git diff --exit-code -- tools/rebuild/functions tools/rebuild/modules tools/rebuild/contracts`
           prints nothing.
+
+## Deviations
+
+- The Ghidra loader creates the object blocks from a byte array, so
+  `sourceInfo.getFileBytesOffset(0x10000)` returns -1. The page-0 file
+  offset is parsed from the LE object page table in the `.image` block
+  instead. The user approved this change.
+- Ghidra 12.0.4 appends ` (GhidraScript)` to each logged script line.
+  `identity.sh` strips the optional suffix before the marker and key checks.

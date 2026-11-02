@@ -133,12 +133,14 @@ run_mode() {
         > "$OUTPUT" 2>&1 || STATUS=$?
 
     sed -n '/=== identity/,$p' "$OUTPUT" \
-        | sed 's/^INFO  LeIdentity.java> //' > "$FILTERED"
+        | sed -e 's/^INFO  LeIdentity\.java> //' \
+              -e 's/ (GhidraScript)[[:space:]]*$//' \
+              -e 's/[[:space:]]*$//' > "$FILTERED"
 
     if [ "$STATUS" -ne 0 ]; then
         fail_run "analyzeHeadless failed with status $STATUS"
     fi
-    if grep -q 'error:' "$OUTPUT"; then
+    if grep -q '^error:' "$FILTERED"; then
         fail_run "the identity script reported an error"
     fi
     if ! grep -q "^$MARKER$" "$FILTERED"; then
