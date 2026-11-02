@@ -8266,3 +8266,53 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the two call sites and the disassembly of each callee.
 - Limit: the original has no symbol name for these calls.  The helper names in
   the module stay inferred.
+
+## The resource_get module at 0x2eed0
+
+- Observation: the original body at `0x2eed0` holds 78 instructions and 242
+  bytes.  The plan row holds the same counts.  The merged store record keeps
+  the 242-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2eed0 --count 78` and
+  `tools/rebuild/functions/0x2eed0.json`.
+- Observation: the function reads the resource structure.  The record array is
+  at `+0x00`, the count at `+0x04`, the limit at `+0x08`, the status at `+0x0c`,
+  and the name buffer at `+0x10`.
+  Evidence: the loads and stores at `0x2eedc` through `0x2eef3`.
+- Observation: when the count equals the limit, the function sets the status at
+  `+0x0c` to 2, copies the name to `resource + 0x10`, and returns 0.  The copy
+  goes through the `sprintf` call at `0x4d32c` with the format `%.11s`.
+  Evidence: the branch at `0x2eef1`, the call at `0x2ef0e`, and the literal
+  `0x14c5`.
+- Observation: the literals `0x14c5`, `0x14cb`, `0x14d1`, and `0x14d7` are
+  four copies of `%.11s` in the data object at base `0x100000`.  The code holds
+  the object offset, and the loader adds the object base.
+  Evidence: the data dump at file offsets `0xf7cc5` through `0xf7cd7`.
+- Observation: the normal path selects the record at
+  `*resource + count * 0x1c`.  A size below `0x96000` first calls
+  `dos_memory_alloc` at `0x2f0fc` with the resource, the size, and the address
+  cell `record + 0x10`.  A non-zero result sets the flag at `record + 0x18` to
+  1.  A zero result calls `memory_alloc_small` at `0x2f172` with the same
+  arguments and clears the flag.  A size of `0x96000` or more calls
+  `memory_alloc_small` directly and clears the flag.  The function then calls
+  `0x2f062` with the resource, the record, the allocation result, the name, and
+  the size.
+  Evidence: the code at `0x2ef22` through `0x2efb5`.
+- Inference: the threshold `0x96000` separates a DOS memory request from the
+  small DPMI request.  The flag at `+0x18` selects the free path in
+  `resource_free`.
+  Evidence: the two allocation calls and the `resource_free` record access at
+  `0x2f4c4`.
+- Observation: the rebuild with `-of+` holds 55 instructions and 145 bytes.  The
+  identity check stays open at 15 of 55 instructions and 3 of 145 bytes.  The
+  shared toolchain saves the frame before the register saves and keeps the
+  resource and the name in `esi` and `ecx`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2eed0 --rebuilt work/rebuild/rgetmod.exe --rebuilt-map
+  work/rebuild/resource_get.map --rebuilt-symbol resource_get_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, `4`, and `D`.  It runs the full-table path, the small-size DOS
+  path, the failed DOS fallback, the size at the limit `0x96000`, and the
+  second-record path.
+  Evidence: `python3 tools/rebuild/harness.py run --module resource_get`,
+  `work/rebuild/rget_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2eed0`.

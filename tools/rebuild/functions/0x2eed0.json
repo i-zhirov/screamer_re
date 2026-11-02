@@ -1,17 +1,52 @@
 {
   "address": "0x2eed0",
-  "checks": [],
-  "confidence": "observed",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "looks a resource up by name in the engine resource list and loads it from its file when missing"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2eed0 holds 78 instructions and 242 bytes: the full-table test on the count at +0x04 and the limit at +0x08, the status write at +0x0c, the sprintf name copy at 0x4d32c, the record select at *resource + count * 0x1c, the size limit 0x96000, the DOS allocation at 0x2f0fc with the fallback at 0x2f172, the flag writes at +0x18, and the cache call at 0x2f062"
     }
   ],
+  "module": "resource_get",
   "name": "resource_get",
   "notes": [],
-  "role": "looks a resource up by name in the engine resource list and loads it from its file when missing",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 145,
+        "detail": "the instruction counts differ, 78 and 55",
+        "instructions_equal": 15,
+        "instructions_total": 55,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2eed0",
+    "date": "2026-11-02",
+    "fingerprint": "sha256:4e9da579bf00733f98e6b39f6ed3bda56281391758b9656bda11f7f65eec1c3b",
+    "source_digest": "sha256:4ac12c19126b12659c0618238e90ae5b5c328115b5e18abacaf573c7e291c498",
+    "tool": "run.py"
+  },
+  "role": "loads a resource by name through the DOS or the small allocation and caches the record",
   "section": "Resource loader",
   "size": 242,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "resource_get_"
 }
