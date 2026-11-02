@@ -35,6 +35,11 @@ original DOS platform first and modern platforms later.
   from Homebrew.  The static cross-check uses radare2 6.2.4 from the Nix
   dev shell.  The decompilation uses Ghidra 12.0.4 from the `ghidra` dev
   shell with the `yetmorecode/ghidra-lx-loader` extension.
+- **Cross-checks**: the full pipeline compares four identity facts from
+  `tools/le.py`, radare2 6.2.4, and Ghidra 12.0.4 with
+  `tools/cross_check.py`.  The facts are the entry, the page-0 mapping, the
+  `main` function, and the `main` caller.  The check runs in the
+  `cross-check` dev shell.
 - **Toolchains**: the module rebuild uses the pinned OpenWatcom V2 container
   harness.  The period Watcom C/C++ 10.0a toolchain (the original build
   toolchain, abandonware) runs under DOSBox-X and stays alongside the V2
@@ -80,8 +85,12 @@ screamer_re/
 │       ├── program-map.md      # the recovered startup path and functions
 │       └── tooling.md         # tools, commands, host tools, and limits
 ├── tools/
+│   ├── cross_check.py         # compare four identity facts across three tools
 │   ├── dosboxx_control.py     # drive the DOSBox-X debugger control socket
-│   ├── ghidra/                # Ghidra loader install and decompile scripts
+│   ├── ghidra/                # Ghidra loader install, decompile, and identity scripts
+│   │   ├── identity.sh        # run the identity script or check the Ghidra setup
+│   │   ├── LeIdentity.java    # the Ghidra headless identity script
+│   │   └── ...                # the loader install and decompile scripts
 │   ├── entry_probe.py         # find the program entry in a CPU log
 │   ├── export_assets.py       # export the graphics assets as PNG files
 │   ├── extract_cd_image.py    # extract the CD data track to a plain ISO
@@ -133,7 +142,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -143,13 +152,27 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8c150 --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_
 ```
 
-The full check runs every stage and needs Docker and DOSBox-X.  It takes
-about 8 minutes and reports 57 checks.  Inside the Nix dev shell
-the radare2 stage adds four checks, so the run reports 61 checks.  With
-`--skip-runtime` it reports 42 checks and takes about 16 seconds:
+The full check runs every stage in the `cross-check` shell.  It needs Docker,
+DOSBox-X, and the installed Ghidra loader.  It takes about 8 minutes plus the
+Ghidra import and reports 61 checks.  `--skip-cross` skips stage 8 and the
+tool preflight, so the run reports 57 checks.  `--skip-runtime` skips stages
+5, 6, 7, and 9 and still runs stage 8, so the run reports 46 checks.  Both
+flags report 42 checks and take about 16 seconds:
 
 ```sh
-python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
+python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --skip-cross
+nix develop .#cross-check --command python3 tools/cross_check.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --main 0x10020 --call-site 0xd4364 --work-root work
+```
+
+Check the Ghidra setup without a run:
+
+```sh
+nix develop .#cross-check --command sh tools/ghidra/install_loader.sh --check
+nix develop .#cross-check --command sh tools/ghidra/identity.sh --check
 ```
 
 - **Decompile**: run the Ghidra decompiler on the functions of interest:
@@ -176,7 +199,8 @@ open ~/Documents/Screamer.app
     - `python3 -m py_compile tools/le.py tools/inventory.py
       tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py
       tools/gfx_container.py tools/export_assets.py tools/sound_bank.py
-      tools/member_probe.py tools/rebuild/diff_module.py
+      tools/member_probe.py tools/cross_check.py
+      tools/rebuild/diff_module.py
       tools/rebuild/store.py tools/rebuild/harness.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
@@ -289,6 +313,13 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
+- The full check reports 61 checks in the `cross-check` shell.  `--skip-cross`
+  gives 57 checks, `--skip-runtime` gives 46 checks, and both flags give 42
+  checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
+  and the tool preflight.
+- `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
+  updates every computed fingerprint, so the next verification run re-verifies
+  every record once.  The record files stay unchanged.
 - The pre-commit hook regenerates `work/rebuild/status.html`, and the CI
   `status` job regenerates the page and publishes it as an artifact.  The page
   is generated output, so it stays out of git.

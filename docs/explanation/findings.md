@@ -1499,7 +1499,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 28 checks and 0 failures.  Evidence: the tool output.
+The check reports 61 checks and 0 failures in the `cross-check` shell.  It
+reports 57 checks with `--skip-cross`, 46 checks with `--skip-runtime`, and 42
+checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -5613,3 +5615,49 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Unknown: the project holds no measurement of what the rebuild would gain or
   lose if the identity engine used radare2 or Ghidra.  It has no such
   comparison.
+- Note: the pipeline stage is now mandatory.  The bullets above record the
+  earlier state.  See
+  [The three-tool cross-check is mandatory](#the-three-tool-cross-check-is-mandatory).
+
+## The three-tool cross-check is mandatory
+
+- The full pipeline compares four identity facts from `tools/le.py`, radare2
+  6.2.4, and Ghidra 12.0.4.  Stage 8 runs the compare on every full run, and
+  the preflight refuses a missing capstone library, radare2, or Ghidra setup
+  before stage 1.
+  Evidence: `tools/cross_check.py`, `tools/pipeline_check.py`, and
+  `tools/ghidra/identity.sh`.
+- The three tools agree on the shipped `STARTH.EXE`:
+
+  ```text
+  entry: agree le=0x300f8 r2=0x300f8 ghidra=0x300f8
+  page0: agree le=0x1a800->0x10000 r2=0x1a800->0x10000 ghidra=0x1a800->0x10000
+  main: agree le=0x10020 r2=0x10020 ghidra=0x10020
+  caller: agree le=0xd4364@0xd4324->0x10020 r2=0xd4364@0xd4324->0x10020 ghidra=0xd4364@0xd4324->0x10020
+  ```
+
+  Evidence: `nix develop .#cross-check --command python3 tools/cross_check.py
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --main 0x10020 --call-site 0xd4364 --work-root work`.
+- The identity values are the entry `0x300f8`, page 0 at file `0x1a800` and
+  module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
+  `0xd4364` to `0x10020`.
+  Evidence: the four `agree` lines above.
+- The check counts are 61 checks for the full run, 57 checks with
+  `--skip-cross`, 46 checks with `--skip-runtime`, and 42 checks with both
+  flags.  `--skip-cross` skips stage 8 and the tool preflight.
+  `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
+  Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game` and the same
+  command with `--skip-cross`, with `--skip-runtime`, and with both flags.
+- The Ghidra loader creates the object blocks from a byte array, so the
+  source info has no file bytes offset.  The page-0 file offset comes from the
+  LE page table in the `.image` block.  Ghidra 12.0.4 appends
+  ` (GhidraScript)` to each logged script line, and `identity.sh` strips the
+  optional suffix.
+  Evidence: `tools/ghidra/LeIdentity.java` and `tools/ghidra/identity.sh`.
+- `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper
+  change updates every computed fingerprint, so the next verification run
+  re-verifies every record once.  The record files stay unchanged.
+  Evidence: `tools/rebuild/store.py` and the unchanged records under
+  `tools/rebuild/functions/`.

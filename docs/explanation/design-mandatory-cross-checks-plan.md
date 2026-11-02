@@ -504,7 +504,7 @@ call_target=0x10020
       and
       `grep -q "nix develop .#cross-check" .github/workflows/pipeline.yml`
 
-- [ ] **Task 7: Documentation**
+- [x] **Task 7: Documentation**
     - **Implements:** FR-012, SC-005, design §Rollout And Compatibility,
       §Testing Strategy
     - **Modify `README.md`**
