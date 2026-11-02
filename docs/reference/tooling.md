@@ -539,7 +539,9 @@ The files:
 | `race_panel_0.c` | the rebuilt `race_panel_0` module: the two centered axis targets, the two smoothed positions, the x offset, the two truncating conversions, the two panel calls, and the state title |
 | `race_panel_0_main.c` | the `race_panel_0` test harness: the race object, the two axis positions, the three constants, the two title pointers, the two stubs, and the five paths |
 | `race_panel_0_fpu.asm` | the `race_panel_0` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and ten module records: the sources, the compiler, the link, and the run expectations |
+| `net_player_add.c` | the rebuilt `net_player_add` module: the slot call, the 0x38-byte record stores, the name copy, the context and lookup reads, the two cell stores, the default block copy, and the register call |
+| `net_player_add_main.c` | the `net_player_add` test harness: the record array, the context pointer, the lookup table, the three stubs, and the three paths |
+| `modules/*.json` | the one hundred and eleven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

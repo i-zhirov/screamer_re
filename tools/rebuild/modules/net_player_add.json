@@ -1,0 +1,30 @@
+{
+  "exe": "npamod.exe",
+  "map": "net_player_add.map",
+  "name": "net_player_add",
+  "run": {
+    "command": "npamod.exe > npa_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "npa_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "net_player_add.c",
+      "flags": [
+        "-of+",
+        "-oi"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "net_player_add_main.c"
+    }
+  ]
+}

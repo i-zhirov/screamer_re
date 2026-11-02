@@ -8897,3 +8897,68 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_panel_0`,
   `work/rebuild/rp0_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2e0b4`.
+
+## The net_player_add module at 0x2dddc
+
+- Observation: the original body at `0x2dddc` holds 111 instructions and 394
+  bytes up to the `ret` at `0x2df65`.  The plan row holds the same counts.  The
+  merged store record keeps the 396-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2dddc --count 111` and
+  `tools/rebuild/functions/0x2dddc.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `esi`,
+  `edi`, and `ebp` before the frame, sets `ebp`, and subtracts 8 from `esp`.
+  The local slot `[ebp-8]` holds the argument and the local slot `[ebp-4]`
+  holds the index.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2dddc` through `0x2dde7` and the stores at
+  `0x2dde7` and `0x2ddef`.
+- Observation: the call at `0xc6fbc` returns the value at `DAT_0012229c`, and
+  the function uses that value as the record index.  The record array sits at
+  object-3 offset `0x2099c`, so the loader relocates it to linear `0x12099c`.
+  The stride is 0x38 bytes: the code computes `index * 8 - index` and then
+  multiplies the result by 8.
+  Evidence: the call and the stride arithmetic at `0x2ddea` through `0x2ddfe`
+  and the callee at `0xc6fbc`.
+- Observation: the function stores the argument at `+0x04` and the index at
+  `+0x08`.  It copies the name from `DAT_001203cc` to `+0x0c` with the inline
+  two-byte copy loop.  It stores the cell `DAT_001203c4` at `+0x10` and the
+  cell `DAT_001203c8` at `+0x14`.
+  Evidence: the stores at `0x2de08`, `0x2de24`, and `0x2de74` through
+  `0x2de8d`, and the copy loop at `0x2de49` through `0x2de5f`.
+- Observation: the function reads the context pointer `DAT_00102dec` at
+  object-3 offset `0x2dec`.  It stores the field at `+0x18` of that context at
+  record `+0x1c`.  It uses the field at `+0x28` of that context as the index
+  into the table at object-3 offset `0x21e4` and stores the table value at
+  record `+0x18`.
+  Evidence: the reads at `0x2de94` through `0x2dec6`.
+- Observation: the function stores `DAT_0011d274` at `+0x20` and
+  `DAT_0011d230` at `+0x24`.  It calls `0xc7100` with the address of the
+  0x10-byte block at `+0x28`.  The callee copies 16 bytes from `0x21678` to
+  that address.
+  Evidence: the stores at `0x2decd` through `0x2def8`, the call at `0x2df17`,
+  and the callee at `0xc7100`.
+- Observation: the function calls `0xc7478` with the record base, the size
+  `0xc`, the name at record `+0x0c`, the value `0x74`, and the count `9`.  The
+  callee reads every argument from the stack, so the module declares the two
+  calls `__cdecl`.
+  Evidence: the pushes at `0x2df33` through `0x2df51` and the callee frame at
+  `0xc7478`.
+- Observation: the `-oi` option expands `strcpy` into the same two-byte copy
+  loop as the original.
+  Evidence: the copy loop at `0x2de49` through `0x2de5f` and the module
+  recipe flags.
+- Observation: the rebuilt module holds 69 instructions and 203 bytes.  The
+  identity check stays open at 22 of 69 instructions and 18 of 203 bytes.  The
+  V2 toolchain saves the frame pointer first, keeps the record pointer in
+  `edx`, uses `imul edx, eax, 0x38` once, and stores every field through that
+  register.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2dddc --rebuilt work/rebuild/npamod.exe --rebuilt-map
+  work/rebuild/net_player_add.map --rebuilt-symbol net_player_add_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover the slot 0, the slot 1 with the 0x38-byte
+  stride, and the slot 2 with an 8-character name so the field stores must run
+  after the copy.  Each path checks the record fields, the default block
+  address, and the five register arguments.
+  Evidence: `python3 tools/rebuild/harness.py run --module net_player_add`,
+  `work/rebuild/npa_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2dddc`.
