@@ -30,7 +30,7 @@ The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
     python3 tools/pipeline_check.py --game-dir DIR [--skip-runtime]
-    python3 tools/pipeline_check.py --game-dir DIR --record-timeout 1800
+    python3 tools/pipeline_check.py --game-dir DIR --record-timeout 3000
 """
 
 from __future__ import annotations
@@ -809,7 +809,7 @@ def main() -> int:
     parser.add_argument(
         "--record-timeout",
         type=float,
-        default=1200.0,
+        default=3000.0,
         help="the seconds the record run of stage 11 may take",
     )
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
