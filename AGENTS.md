@@ -144,9 +144,9 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 ```
 
 The full check runs every stage and needs Docker and DOSBox-X.  It takes
-about 20 minutes and reports 128 checks.  Inside the Nix dev shell
-the radare2 stage adds four checks, so the run reports 132 checks.  With
-`--skip-runtime` it reports 113 checks and takes about a minute:
+about 20 minutes and reports 140 checks.  Inside the Nix dev shell
+the radare2 stage adds four checks, so the run reports 144 checks.  With
+`--skip-runtime` it reports 125 checks and takes about a minute:
 
 ```sh
 python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
