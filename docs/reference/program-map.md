@@ -152,7 +152,7 @@ until the quit flag `DAT_00107ed8` is 1.
 | `0x24da0` | `joystick_update` | walks the 28-byte control records at `DAT_001197d8` with floating-point scaling | derived |
 | `0x26448` | `input_poll` | the original at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path | observed |
 | `0x27770` | `race_start` | sets the 640x400 screen rectangle, loads the choice file, copies the state globals, and calls `race_session_start(1)`<br>the original at `0x27770` holds 66 instructions and 251 bytes: the five register saves, the frame, the 4-byte local, the four stores 0, 0x280, 0, and 0x190 at `0x15ce4` through `0x15cf0`, the call at `0x1bbc8`, the five state copies, the context reads at `+0x48` and `+8`, the call at `0x8bd54` with the table value `DAT_001021d8[index]`, the two clears, the `MAP%d` build at `0x4d32c` with `DAT_001207f8 + 1`, the mode store `0x100`, the `DAT_0011d274` copy, and the `race_session_start(1)` call at `0x128e0` | derived |
-| `0x2786c` | `object_update_all` | walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record | derived |
+| `0x2786c` | `object_update_all` | the original at 0x2786c holds 84 instructions and 309 bytes up to the ret at 0x279a0: the six register saves, the frame, the five loops over the DAT_0010f8ec records at DAT_00110ab8 with the 0x590-byte stride and the shared counter DAT_0010634c, the seven calls at 0x27f44, 0x19ab0, 0x205c4, 0x20954, 0x8ac78, 0x81ab0, and 0x27a34, and the epilogue<br>the five passes call object_transform at 0x1cd44, object_player_input at 0x1c760, object_physics at 0x1c810, object_prepare at 0x1c79c, and object_car_link at 0x1c84c on each record; the seven calls pass 1 to opponent_update, 0x109a0 to camera_update, and 0x6350 to sound_effects_update | derived |
 | `0x279a4` | `race_end` | tears the race down through 13 calls<br>the original at `0x279a4` holds 36 instructions and 141 bytes: the frame with one local, the thirteen calls at `0x1f8b4` (value 0), `0x1f8dc`, `0x2fe68` (`DAT_000062b0`, `DAT_00006350`), `0x264ec`, `0x1b180`, `0x115f8` (`DAT_00006530`), `0x11304` (`DAT_00006530`), the gated `0x15874` on `DAT_0018e3c == 0`, `0x4cf2c`, `0x1f6f8`, `0x1b58c`, `0x25640`, and `0x258b8`, then the copies `DAT_001d274 = DAT_001d22c` and `DAT_001d230 = DAT_0018e3c`<br>the only caller is `race_loop` at `0x27761`, after the loop exit test; the plan row records 141 bytes, 36 instructions, 13 calls, and 0 FPU | observed |
 | `0x2aa98` | `video_fill` | calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer | derived |
 <!-- end generated: race_loop callees -->
@@ -182,8 +182,9 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 
 ### object_update_all callees
 
-`object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x164 bytes at
-`DAT_00110ab8` and runs four passes over every record.
+`object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x590 bytes at
+`DAT_00110ab8` and runs five passes over every record.  It then runs the seven
+subsystem calls.
 
 <!-- begin generated: object_update_all callees -->
 | Module address | Name | Evidence | Confidence |

@@ -792,11 +792,12 @@ Authority.
 
 ## The object pipeline and the race frame
 
-- `object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x164 bytes
-  at
-  `DAT_00110ab8`.  Every record passes `object_transform` (`0x1cd44`),
-  `object_player_input` (`0x1c760`), `object_physics` (`0x1c810`), and
-  `object_prepare` (`0x1c79c`).  Evidence: the decompiled `FUN_0002786c`.
+- `object_update_all` at `0x2786c` walks `DAT_0010f8ec` records of 0x590 bytes
+  at `DAT_00110ab8`.  Every record passes `object_transform` (`0x1cd44`),
+  `object_player_input` (`0x1c760`), `object_physics` (`0x1c810`),
+  `object_prepare` (`0x1c79c`), and `object_car_link` (`0x1c84c`).  The
+  function then runs the seven subsystem calls.  Evidence: the disassembly of
+  `FUN_0002786c` and the finding "The object_update_all module at 0x2786c".
 - `object_transform` writes the world position at `+0x498`, `+0x49c`, and
   `+0x4a0`
   and the float fields at `+0x4a4` to `+0x4ac` from the position and the
@@ -8695,3 +8696,44 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   round to 7 and the phase word would change.
   Evidence: the helper at `0x4d9f4`, `tools/rebuild/fpu_stub.asm`, and
   `tools/rebuild/frame_timer_fpu.asm`.
+
+## The object_update_all module at 0x2786c
+
+- Observation: the original body at `0x2786c` holds 84 instructions and 309
+  bytes up to the `ret` at `0x279a0`.  The plan row holds the same counts.  The
+  merged store record keeps the 312-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2786c --count 84` and
+  `tools/rebuild/functions/0x2786c.json`.
+- Observation: the function runs five passes over the `DAT_0010f8ec` records at
+  `DAT_00110ab8`.  The stride is 0x590 bytes, and the shared loop counter is
+  `DAT_0010634c`.  The five passes call `object_transform` at `0x1cd44`,
+  `object_player_input` at `0x1c760`, `object_physics` at `0x1c810`,
+  `object_prepare` at `0x1c79c`, and `object_car_link` at `0x1c84c`.
+  Evidence: the `imul eax,eax,0x590` at `0x27893`, `0x278c4`, `0x278f5`,
+  `0x27926`, and `0x27956`, and the five loop bodies from `0x27884` through
+  `0x27966`.
+- Observation: the seven calls after the passes run `race_timeout` at
+  `0x27f44`, `player_update` at `0x19ab0`, `ai_update` at `0x205c4`,
+  `opponent_update` at `0x20954` with the value 1, `camera_update` at
+  `0x8ac78` with the record `0x109a0`, `sound_effects_update` at `0x81ab0`
+  with the driver `0x6350`, and `hud_update` at `0x27a34`.
+  Evidence: the instructions from `0x27968` through `0x27995`.
+- Observation: the old note recorded the stride as 0x164 bytes and four
+  passes.  The disassembly shows the stride 0x590 and five passes.  This
+  section replaces that note.
+  Evidence: the `imul` immediates above and the five loop bodies.
+- Observation: the rebuilt module holds 69 instructions and 285 bytes.  The
+  identity check stays open at 14 of 69 instructions and 16 of 285 bytes.  The
+  V2 toolchain saves the frame first, keeps the count in memory, uses `cmp`
+  with a memory operand, and omits the jump-to-test form of the loop.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2786c --rebuilt work/rebuild/oupdmod.exe --rebuilt-map
+  work/rebuild/object_update_all.map --rebuilt-symbol object_update_all_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover a zero count, one record, and three
+  records.  The sequence proves the five passes, the record order, the stride,
+  and the seven calls in order.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_update_all`,
+  `work/rebuild/oupd_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2786c`.
