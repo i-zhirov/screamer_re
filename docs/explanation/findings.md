@@ -8010,3 +8010,68 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   name pointers differ.
   Evidence: `tools/rebuild/object_load_main.c` and the run output in
   `work/rebuild/objl_out.txt`.
+
+## The mouse_init module at 0x1f1a0
+
+- Observation: the plan row records a 233-byte body of 67 instructions and 12
+  calls.  The merged store record keeps the 236-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f1a0 --count 67` and
+  `tools/rebuild/functions/0x1f1a0.json`.
+- Observation: the original has an EBP frame.  It saves `ebx`, `ecx`, `edx`,
+  and `ebp`, reserves 8 bytes, and restores the stack with `mov esp,ebp`.
+  Evidence: the prologue at `0x1f1a0` through `0x1f1a8` and the epilogue at
+  `0x1f282` through `0x1f288`.
+- Observation: the first call at `0xc8245` receives the rate `0xff00` in `eax`
+  and the value 0 in `edx`.
+  Evidence: the stores at `0x1f1a9` through `0x1f1b0`.
+- Observation: the first timer install at `0xc835b` receives the rate `0x64`,
+  the code handler `CS:0x20d`, and the id slot `DAT_00018d8c`.
+  Evidence: the argument setup at `0x1f1b5` through `0x1f1c7`.
+- Observation: a non-zero timer install status calls `exit` at `0x300be` with
+  the value -1.
+  Evidence: the test at `0x1f1cc` and the call at `0x1f1d5`.
+- Observation: when `DAT_00008058` is zero, the function returns before the
+  mouse calls.
+  Evidence: the test at `0x1f1da` and the branch to `0x1f282`.
+- Observation: the mouse system start at `0xc8f81` receives three zero values.
+  Evidence: the three clears at `0x1f1e7` through `0x1f1ed`.
+- Observation: the function stores the value `0x2b11` at `DAT_00001e50`.
+  Evidence: the store at `0x1f20a`.
+- Observation: the mouse handler install at `0xc903a` receives the setup word
+  `DAT_00008058`, the handler `DAT_00008060`, the state block `DAT_00001e40`,
+  and the id slot `DAT_00018d94`.
+  Evidence: the argument setup at `0x1f1f2` through `0x1f215`.
+- Observation: a non-zero handler install status runs `0xc8321` with 0, then
+  `0xc8ffa`, and then `exit` at `0x300be` with the value 1.
+  Evidence: the test at `0x1f220` through the call at `0x1f235`.
+- Observation: the second timer install at `0xc835b` receives the rate `0x1e`,
+  the far pointer `DAT_00001e5c`, and the id slot `DAT_00018d90`.
+  Evidence: the argument setup at `0x1f23a` through `0x1f252`.
+- Observation: a non-zero second timer status runs `0xc8321` with 0, then
+  `0xc98f9` with `DAT_00018d94`, 1, and 1, and then `exit` at `0x300be` with
+  the value 1.
+  Evidence: the test at `0x1f25a` through the call at `0x1f27d`.
+- Inference: `0xc8245` and `0xc835b` are timer calls, and `0xc8f81`,
+  `0xc8ffa`, `0xc903a`, and `0xc98f9` are mouse calls.  The store records for
+  these addresses stay unknown.
+  Evidence: the register use, the call order, and the two EBP-frame call sites
+  at `0x1f28c`.
+- Correction: an earlier finding names `CS:0x18D8C` as the mouse handler.  The
+  disassembly shows the code handler at `CS:0x20D`.  The value at
+  `DS:0x18D8C` is the timer id.
+  Evidence: the pushes at `0x1f1b5` through `0x1f1c0` and the handler code at
+  `0x1020d`.
+- Observation: the rebuilt module holds 62 instructions and 219 bytes.  The
+  identity check stays open: 19 of 62 instructions and 24 of 219 bytes match.
+  The store records the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f1a0 --rebuilt work/rebuild/msimod.exe --rebuilt-map
+  work/rebuild/mouse_init.map --rebuilt-symbol mouse_init_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the two exit paths, the zero setup word,
+  the success path, and the failed handler install.
+  Evidence: `python3 tools/rebuild/harness.py run --module mouse_init`,
+  `work/rebuild/msi_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f1a0`.
+- Limit: the library function names are inferred from the register use and the
+  call order.  The original has no symbol name for these calls.
