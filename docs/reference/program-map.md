@@ -193,7 +193,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | `0x1c79c` | `object_prepare` | runs the preparation steps, gated on the state at `+0x414` | derived |
 | `0x1c810` | `object_physics` | runs the physics and collision steps, gated on the state at `+0x414` | derived |
 | `0x1c84c` | `object_car_link` | indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position | derived |
-| `0x1cd44` | `object_transform` | writes the world position at `+0x498`, `+0x49c`, and `+0x4a0` and the float fields at `+0x4a4` to `+0x4ac` from the position and the velocity | derived |
+| `0x1cd44` | `object_transform` | writes the world position at `+0x498`, `+0x49c`, and `+0x4a0` and the float fields at `+0x4a4` to `+0x4ac` from the position and the velocity<br>the original at 0x1cd44 holds 61 instructions and 244 bytes: it calls object_integrate at 0x1d6bc and object_state_save at 0x1ccd8, writes the world position at +0x498 and +0x4a0 from +0x258 and +0x260 plus +0x454 and +0x45c, copies +0x238 to +0x49c while +0x2f8 is zero, writes the float sums at +0x4a4, +0x4a8, and +0x4ac, stores +0x238 minus 2 at +0x2c4, and stores +0x4a8 plus +0x4c8 at +0x4bc | derived |
 | `0x205c4` | `ai_update` | float computation through `0x11c00` and `0x2218c` | inferred |
 | `0x20954` | `opponent_update` | walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180` | inferred |
 | `0x27a34` | `hud_update` | gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set | inferred |

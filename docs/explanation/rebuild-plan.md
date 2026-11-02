@@ -152,7 +152,7 @@ floating-point instructions.
 | `0x211e0` | `input_map` (done) | 239 | 62 | 2 | 0 |
 | `0x1e30c` | `object_proximity_check` (done) | 241 | 74 | 3 | 13 |
 | `0x2eed0` | `resource_get` (done) | 242 | 78 | 5 | 0 |
-| `0x1cd44` | `object_transform` | 244 | 61 | 2 | 12 |
+| `0x1cd44` | `object_transform` (done) | 244 | 61 | 2 | 12 |
 | `0x27770` | `race_start` | 251 | 66 | 4 | 0 |
 | `0x127a0` | `engine_init` | 266 | 71 | 16 | 0 |
 | `0x2edad` | `stream_release` | 291 | 97 | 8 | 0 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-Ninety-eight modules carry a recipe and a result: the twelve Phase A modules,
+Ninety-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
 the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
@@ -208,8 +208,8 @@ the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
 `palette_build` at `0x15720`, `fade_update` at `0x29818`,
 `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-`0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty Phase D modules
-`race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
+`0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-one Phase D
+modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
 `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
 `frame_update` at `0x27f94`, `object_slide_step` at `0x1df34`,
@@ -217,5 +217,6 @@ the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_read` at `0x4c4e5`, `malloc` at `0xd1f25`, `replay_write` at
 `0x22f54`, `object_load` at `0x10bfc`, `mouse_init` at `0x1f1a0`,
 `sound_effects_update` at `0x81ab0`, `input_map` at `0x211e0`,
-`object_proximity_check` at `0x1e30c`, and `resource_get` at `0x2eed0`.
-The next module is `object_transform` at `0x1cd44`.
+`object_proximity_check` at `0x1e30c`, `resource_get` at `0x2eed0`, and
+`object_transform` at `0x1cd44`.
+The next module is `race_start` at `0x27770`.

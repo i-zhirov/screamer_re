@@ -514,7 +514,9 @@ The files:
 | `object_proximity_check.c` | the rebuilt `object_proximity_check` module: the two distance guards, the truncated deltas, the squared sum, the `sqrt` call, and the gate store |
 | `object_proximity_check_main.c` | the `object_proximity_check` test harness: the object record, the two references, the three constants, the `sqrt` stub, and the six paths |
 | `object_proximity_check_fpu.asm` | the `object_proximity_check` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the ninety-nine module records: the sources, the compiler, the link, and the run expectations |
+| `object_transform.c` | the rebuilt `object_transform` module: the two callee calls, the two position sums, the conditional height copy, the three float sums, the height minus two store, and the vertical sum |
+| `object_transform_main.c` | the `object_transform` test harness: the object record, the two callee stubs, the float bit patterns, and the three paths |
+| `modules/*.json` | the one hundred module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

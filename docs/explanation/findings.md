@@ -8316,3 +8316,53 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module resource_get`,
   `work/rebuild/rget_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2eed0`.
+
+## The object_transform module at 0x1cd44
+
+- Observation: the original body at `0x1cd44` holds 61 instructions and 244
+  bytes.  The plan row holds the same counts.  The merged store record keeps
+  the 244-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1cd44 --count 61` and
+  `tools/rebuild/functions/0x1cd44.json`.
+- Observation: the function first calls `object_integrate` at `0x1d6bc` and
+  then `object_state_save` at `0x1ccd8`, and it passes the object pointer in
+  `eax` to both calls.
+  Evidence: the calls at `0x1cd51` and `0x1cd59`.
+- Observation: the function writes the world position at `+0x498` from
+  `+0x258 + +0x454`, and the world position at `+0x4a0` from
+  `+0x260 + +0x45c`.
+  Evidence: the loads, the adds, and the stores at `0x1cd5e` through
+  `0x1cd8e`.
+- Observation: when the flag at `+0x2f8` is zero, the function copies the
+  height at `+0x238` to `+0x49c`.  A non-zero flag leaves `+0x49c` unchanged.
+  Evidence: the compare and the branch at `0x1cd97` and `0x1cd9e`.
+- Observation: the function writes three float sums: `+0x4a4` from `+0x23c`
+  and `+0x314`, `+0x4a8` from `+0x27c` and `+0x318`, and `+0x4ac` from
+  `+0x244` and `+0x31c`.  It then writes `+0x2c4` from `+0x238 - 2` and
+  `+0x4bc` from the new `+0x4a8` value and `+0x4c8`.
+  Evidence: the FPU sequences at `0x1cdb2` through `0x1ce2d`.
+- Observation: the module uses the shared `fpu_stub.asm`.  The module adds
+  float values and stores them, and it holds no float-to-integer conversion.
+  The stub for `__CHP` therefore stays a bare return, and no local stub is
+  necessary.
+  Evidence: the twelve FPU instructions and the `object_transform` module
+  record.
+- Observation: the rebuild with `-of+` holds 36 instructions and 168 bytes.
+  The identity check stays open at 11 of 36 instructions and 11 of 168 bytes.
+  The V2 toolchain saves the frame before the `edx` save, keeps the object in
+  `edx` across the two calls, and emits `lea esp,[ebp-4]` in the epilogue.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1cd44 --rebuilt work/rebuild/otrmod.exe --rebuilt-map
+  work/rebuild/object_transform.map --rebuilt-symbol object_transform_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  It runs the flag-zero path, the flag-set path with a
+  preserved `+0x49c`, and a negative-value path.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_transform`,
+  `work/rebuild/otr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1cd44`.
+- Inference: the callees `0x1d6bc` and `0x1ccd8` are `object_integrate` and
+  `object_state_save`.  The names come from the call order, the state copy, and
+  the position update.  The `object_state_save` record carries the name, and
+  the `object_integrate` record is still `named`.
+  Evidence: the callee records and the disassembly of each callee.
