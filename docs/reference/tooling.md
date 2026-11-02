@@ -501,7 +501,9 @@ The files:
 | `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
 | `replay_write.c` | the rebuilt `replay_write` module: the enable guard, the record address, the two float copies, the six 16-bit copies, the index advance, the wrap, and the second-marker update |
 | `replay_write_main.c` | the `replay_write` test harness: the five records, the replay globals, and the four paths |
-| `modules/*.json` | the ninety-three module records: the sources, the compiler, the link, and the run expectations |
+| `object_load.c` | the rebuilt `object_load` module: the free-slot walk, the record walk, the `%s.3DX` name build, the member open, the `3D_HEADER` read, the `3D_BLKOBJ` look-up, the six block-word clears, the handle store, the block bind, and the chunk link |
+| `object_load_main.c` | the `object_load` test harness: the four object records, the eight-slot handle table, the two name buffers, the seven stubs, and the six paths |
+| `modules/*.json` | the ninety-four module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

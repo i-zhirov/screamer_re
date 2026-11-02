@@ -7943,3 +7943,70 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module replay_write`,
   `work/rebuild/rpwr_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x22f54`.
+
+## The object_load module at 0x10bfc
+
+- Observation: the plan row records a 232-byte first block of 69 instructions
+  and 5 calls.  The function continues past the early return, and the merged
+  store record keeps the 728-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10bfc --count 69` and
+  `tools/rebuild/functions/0x10bfc.json`.
+- Observation: the original has an EBP frame.  It saves `ecx`, `esi`, `edi`, and
+  `ebp`, reserves 0x100 bytes, and lowers `ebp` by 0x82.  The rebuild uses
+  `-of+`.
+  Evidence: the prologue at `0x10bfc` through `0x10c08`.
+- Observation: the function scans `DAT_00021540` for the first handle slot
+  whose value is -1.
+  Evidence: the walk at `0x10c17` through `0x10c3b`.
+- Observation: the function walks the 0x1c-byte records from the start index to
+  the start index plus the count.  The load flag at `+0x14` equal to 1 selects a
+  record.
+  Evidence: the loop test at `0x10e1d` through `0x10e41` and the stride at
+  `0x10e2c`.
+- Observation: a selected record builds `%s.3DX` from the record name, copies
+  the name to `DAT_00007fe8`, and opens the member through `0x4c08d` with the
+  base path `DAT_00007f80` and the mode `rb` at `0x1003b3`.
+  Evidence: the name build at `0x10e43` through `0x10e64`, the copy at
+  `0x10e8d` through `0x10ea4`, and the open at `0x10ea7`.
+- Observation: a failed open returns 2.
+  Evidence: the test at `0x10eaf` and the return at `0x10eb7`.
+- Observation: the function reads the file size from `stream + 0x70` through
+  `0x4c7e0`, loads the `3D_HEADER` resource through `0x2eed0`, and reads the
+  whole file into it through `0x4c4e5`.  A missing header returns 3.
+  Evidence: the status call at `0x10c4f`, the resource call at `0x10c64`, the
+  read at `0x10c85`, and the return at `0x10c72`.
+- Observation: the object count at `+0x14` of the loaded data gives the block
+  size `count * 0x20 + 0x60`.  The function loads `3D_BLKOBJ` with that size
+  through `0x2eed0`.  A missing block returns 5.
+  Evidence: the count at `0x10c95`, the size at `0x10c9b` through `0x10ca4`,
+  the look-up at `0x10cb4`, and the return at `0x10cd4`.
+- Observation: the function clears the six list words at `+0x24`, `+0x28`,
+  `+0x2c`, `+0x30`, `+0x34`, and `+0x38` of the block object.
+  Evidence: the six stores at `0x10cf7` through `0x10d7e`.
+- Observation: the function stores the loaded file in the handle table, sets
+  the record field at `+0x14` to the file, advances the slot, writes the -1
+  marker, binds the block through `0x4cc10`, and stores `block + 0x40` at
+  `record + 0x10`.
+  Evidence: the handle store at `0x10d81` through `0x10dc6`, the bind at
+  `0x10de5`, and the chunk link at `0x10e14`.
+- Observation: the rebuilt module holds 104 instructions and 390 bytes.  The
+  identity check stays open: 14 of 69 instructions and 11 of 232 bytes match.
+  The plan row and the identity check compare only the first block, and the
+  rebuild lays out the early return, the frame, and the loops differently.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x10bfc --rebuilt work/rebuild/objlmod.exe --rebuilt-map
+  work/rebuild/object_load.map --rebuilt-symbol object_load_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the success, the free-slot search with
+  the skipped record, the open failure, the missing header, the missing block,
+  and the skipped record.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_load`,
+  `work/rebuild/objl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x10bfc`.
+- Observation: the harness selects the two resources by call order.  In this
+  DOS/4G run the literal bytes at the two name pointers read as zero, so a
+  content compare cannot separate them.  The stub checks instead that the two
+  name pointers differ.
+  Evidence: `tools/rebuild/object_load_main.c` and the run output in
+  `work/rebuild/objl_out.txt`.
