@@ -499,7 +499,9 @@ The files:
 | `stream_read_main.c` | the `stream_read` test harness: the stream record, the two buffers, the two stubs, and the five paths |
 | `malloc_rt.c` | the rebuilt `malloc` module as `malloc_rt`: the size checks, the round-up, the free-list walk, the cursor and largest-free update, the three helper calls, and the heap-flag clear |
 | `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
-| `modules/*.json` | the ninety-two module records: the sources, the compiler, the link, and the run expectations |
+| `replay_write.c` | the rebuilt `replay_write` module: the enable guard, the record address, the two float copies, the six 16-bit copies, the index advance, the wrap, and the second-marker update |
+| `replay_write_main.c` | the `replay_write` test harness: the five records, the replay globals, and the four paths |
+| `modules/*.json` | the ninety-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

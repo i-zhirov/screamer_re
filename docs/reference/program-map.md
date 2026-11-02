@@ -310,7 +310,7 @@ uses `DAT_00118e60`.
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
 | `0x22e94` | `replay_read` | reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers<br>the original at 0x22e94 holds 58 instructions and 190 bytes: the record address from the index at DAT_00118e64, the two dword copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08, +0x0a, +0x0c, +0x0e, +0x10, and +0x12, the index advance, and the two end-marker tests; the behavior check passes; the identity check stays open because the prologue and the register saves differ | derived |
-| `0x22f54` | `replay_write` | writes the 20-byte record and advances the index with a wrap | derived |
+| `0x22f54` | `replay_write` | writes the 20-byte record at `DAT_00118e5c + index * 0x14` and advances the index with a wrap at the end marker<br>the original at 0x22f54 holds 64 instructions and 228 bytes: the five register saves, the frame, the four-byte local area, the two float copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08 through +0x12, the index advance at DAT_00118e64, the wrap test against DAT_00118e68, and the second-marker update at DAT_00118e70; the behavior check passes; the identity check stays open because the register saves and the record address differ | observed |
 <!-- end generated: The replay records -->
 
 A record holds the frame delta at `+0x00`, a state word at `+0x04`, and six

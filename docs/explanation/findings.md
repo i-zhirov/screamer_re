@@ -7897,3 +7897,49 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module malloc_rt`,
   `work/rebuild/mlc_out.txt`, and `python3 tools/rebuild/run.py run --function
   0xd1f25`.
+
+## The replay_write module at 0x22f54
+
+- Observation: the original body at `0x22f54` holds 64 instructions and 228
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  228-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22f54 --count 64` and
+  `tools/rebuild/functions/0x22f54.json`.
+- Observation: the original has an EBP frame.  It saves `ebx`, `ecx`, `edx`,
+  `edi`, and `ebp`, and reserves four bytes for the record slot.  The rebuild
+  uses `-of+`.
+  Evidence: the prologue at `0x22f54` through `0x22f5b`.
+- Observation: the enable flag `DAT_00118e60` guards the body.  A zero flag
+  skips the write and the index update.
+  Evidence: the test at `0x22f5e` and the jump at `0x22f65`.
+- Observation: the function writes the 20-byte record at
+  `DAT_00118e5c + DAT_00118e64 * 0x14`.  It copies the two float fields at
+  `+0x00` and `+0x04` with `fld` and `fstp`, and the six signed 16-bit fields at
+  `+0x08`, `+0x0a`, `+0x0c`, `+0x0e`, `+0x10`, and `+0x12` from
+  `DAT_00119880` through `DAT_00119894`.
+  Evidence: the copies at `0x22f88` through `0x22fee`.
+- Observation: the index advances by one.  When the new index equals the end
+  marker `DAT_00118e68`, the function decrements the index again, so the writer
+  stops at the last slot.  The second marker `DAT_00118e70` becomes
+  `DAT_00118e68 - 2` when the index is the last slot, and equals the index
+  otherwise.
+  Evidence: the advance at `0x22ff2` through `0x2302b`.
+- Observation: the rebuilt module holds 58 instructions and 219 bytes.  The
+  identity check stays open: 24 of 58 instructions and 16 of 219 bytes match.
+  OpenWatcom V2 saves fewer registers and computes the record offset with one
+  `imul`, so the two bodies differ.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22f54 --rebuilt work/rebuild/rpwrmod.exe --rebuilt-map
+  work/rebuild/replay_write.map --rebuilt-symbol replay_write_`.
+- Observation: the record pointer is volatile.  The original reloads the pointer
+  from the frame before every field copy.  This reload keeps the same shape in
+  the rebuild.
+  Evidence: the loads at `0x22f8e` through `0x22feb` and
+  `tools/rebuild/replay_write.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover the clear enable flag, an ordinary
+  index, an index one below the end, and an index whose advance reaches the
+  end.
+  Evidence: `python3 tools/rebuild/harness.py run --module replay_write`,
+  `work/rebuild/rpwr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x22f54`.

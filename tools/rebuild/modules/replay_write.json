@@ -1,0 +1,34 @@
+{
+  "exe": "rpwrmod.exe",
+  "map": "replay_write.map",
+  "name": "replay_write",
+  "run": {
+    "command": "rpwrmod.exe > rpwr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rpwr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_write.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_write_main.c"
+    }
+  ]
+}

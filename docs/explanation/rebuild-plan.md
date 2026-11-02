@@ -145,7 +145,7 @@ floating-point instructions.
 | `0x8ac78` | `camera_update` (done) | 225 | 64 | 2 | 27 |
 | `0x4c4e5` | `stream_read` (done) | 226 | 80 | 2 | 0 |
 | `0xd1f25` | `malloc` (done) | 227 | 84 | 3 | 0 |
-| `0x22f54` | `replay_write` | 228 | 64 | 0 | 4 |
+| `0x22f54` | `replay_write` (done) | 228 | 64 | 0 | 4 |
 | `0x10bfc` | `object_load` | 232 | 69 | 5 | 0 |
 | `0x1f1a0` | `mouse_init` | 233 | 67 | 12 | 0 |
 | `0x81ab0` | `sound_effects_update` | 235 | 51 | 10 | 0 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-Ninety-one modules carry a recipe and a result: the twelve Phase A modules,
+Ninety-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
 the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
@@ -208,11 +208,12 @@ the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
 `palette_build` at `0x15720`, `fade_update` at `0x29818`,
 `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-`0x4c08d`, `resource_read` at `0x2efc2`, and the first thirteen Phase D modules
+`0x4c08d`, `resource_read` at `0x2efc2`, and the first fourteen Phase D modules
 `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
 `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
 `frame_update` at `0x27f94`, `object_slide_step` at `0x1df34`,
 `music_bank_load` at `0x2f9e0`, `camera_update` at `0x8ac78`,
-`stream_read` at `0x4c4e5`, and `malloc` at `0xd1f25`.
-The next module is `replay_write` at `0x22f54`.
+`stream_read` at `0x4c4e5`, `malloc` at `0xd1f25`, and `replay_write` at
+`0x22f54`.
+The next module is `object_load` at `0x10bfc`.
