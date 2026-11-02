@@ -9017,3 +9017,55 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module
   object_init_from_file`, `work/rebuild/oif_out.txt`, and
   `python3 tools/rebuild/run.py run --function 0x4cc10`.
+
+## The pcx_load module at 0x1b5a4
+
+- Observation: the original body at `0x1b5a4` holds 108 instructions and 401
+  bytes up to the `ret` at `0x1b734`.  The plan row holds the same counts.  The
+  store record keeps the 404-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b5a4 --count 108` and
+  `tools/rebuild/functions/0x1b5a4.json`.
+- Observation: the original has the EBP frame.  It reserves `0x1d4` bytes,
+  subtracts `0x82` from `ebp`, and stores the four register arguments at
+  `[ebp + 0x76]`, `[ebp + 0x6e]`, `[ebp + 0x62]`, and `[ebp + 0x6a]`.  The
+  rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x1b5a4` through `0x1b5bc`.
+- Observation: the function builds the container path with the `sprintf` call
+  at `0x4d32c`.  The format is `%s\%s`, the first part is the base path at
+  `DAT_00007edc`, and the second part is the first argument.  The `fopen` call
+  at `0x4c08d` opens that path, uses the second argument as the member name,
+  and passes `rb`.  A failed open passes the stream to `file_error_report` at
+  `0x4bf88` and continues.
+  Evidence: the call block at `0x1b5bf` through `0x1b5f9` and the strings at
+  `0x1009ef` and `0x1009f5`.
+- Observation: the function seeks 0x300 bytes before the end through the call
+  at `0x4c5c7`, reads the 0x300-byte palette into the fourth argument through
+  `stream_read`, and shifts every palette byte right by 2 with `shr`.  It then
+  rewinds, reads the 0x80-byte header, and computes the pixel count as
+  `(xmax - xmin + 1) * (ymax - ymin + 1)`.
+  Evidence: the seek block at `0x1b5fe` through `0x1b621`, the shift loop at
+  `0x1b62d` through `0x1b645`, and the header read at `0x1b656`.
+- Observation: the function decodes the RLE runs into the third argument.  A
+  byte with the mask `0xc0` equal to `0xc0` repeats the next byte
+  `byte & 0x3f` times.  The other bytes are literals.  The loop stops when the
+  pixel count reaches zero.  The function then calls `stream_close` at
+  `0x4c38d` and returns 0.
+  Evidence: the loop at `0x1b696` through `0x1b71b` and the epilogue at
+  `0x1b720` through `0x1b734`.
+- Observation: the rebuilt module holds 102 instructions and 340 bytes.  The
+  identity check stays open at 8 of 102 instructions and 11 of 340 bytes.  The
+  V2 toolchain saves `esi` and `edi`, keeps the arguments in registers, builds
+  the frame without the `sub ebp` step, and folds the palette shift into a
+  register move.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b5a4 --rebuilt work/rebuild/pcxmod.exe --rebuilt-map
+  work/rebuild/pcx_load.map --rebuilt-symbol pcx_load_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover a 3x2 image with two RLE runs and one
+  literal byte, a 63x1 image with one run of 0x3f bytes, a 1x1 image with the
+  literal byte 0xbf, and a failed open that calls `file_error_report`.  The
+  harness holds the input strings in the data segment, because this harness
+  does not load the constant segment.
+  Evidence: `python3 tools/rebuild/harness.py run --module pcx_load`,
+  `work/rebuild/pcx_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1b5a4`.

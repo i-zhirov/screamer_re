@@ -543,7 +543,9 @@ The files:
 | `net_player_add_main.c` | the `net_player_add` test harness: the record array, the context pointer, the lookup table, the three stubs, and the three paths |
 | `object_init_from_file.c` | the rebuilt `object_init_from_file` module: the index bound, the message call, the handle table read, the object field stores, the 0x20-byte chunk records, and the end marker |
 | `object_init_from_file_main.c` | the `object_init_from_file` test harness: the file record, the object record, the 1002-slot handle table, the message stub, and the four paths |
-| `modules/*.json` | the one hundred and twelve module records: the sources, the compiler, the link, and the run expectations |
+| `pcx_load.c` | the rebuilt `pcx_load` module: the path build, the open, the two seeks, the palette read and the 6-bit shift, the header read, the size arithmetic, and the RLE decode |
+| `pcx_load_main.c` | the `pcx_load` test harness: the base path, the simulated PCX member, the stream stubs, the open and error stubs, and the four paths |
+| `modules/*.json` | the one hundred and thirteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
