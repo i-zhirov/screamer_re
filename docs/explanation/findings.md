@@ -8148,3 +8148,62 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the ten call sites and the disassembly of each callee.
 - Limit: the original has no symbol name for these calls.  The helper names in
   the module stay inferred.
+
+## The input_map module at 0x211e0
+
+- Observation: the plan row records a 239-byte body of 62 instructions and 2
+  calls.  The body starts at `0x211e0` and ends at the `ret` at `0x212ce`.
+  The `nop` at `0x212cf` is padding.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x211e0 --count 62`.
+- Observation: the merged store record keeps the 240-byte extent.  The diff
+  uses the body that ends at the first `ret`, not the record size.
+  Evidence: `tools/rebuild/functions/0x211e0.json` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x211e0 --rebuilt work/rebuild/inpmod.exe
+  --rebuilt-map work/rebuild/input_map.map --rebuilt-symbol input_map_`.
+- Observation: the control byte at `0x18e1d` is the high byte of the input
+  word at `0x18e1c`.
+  Evidence: the word load at `0x21228` and the byte load at `0x212b3`.
+- Observation: bit `0x20` of the control byte requests the race exit.  When
+  one of the four flags `0x3b`, `0x1e`, `0x3`, and `0x19880` is set, the
+  function sets bit 1 of the exit byte `0x1ce44`.  When all four flags are
+  zero, the function returns.
+  Evidence: the tests and the store at `0x211ea` through `0x21223`.
+- Observation: the input word bit mask `0x401c` returns before the rest of the
+  function.
+  Evidence: the test at `0x2122f` and the jump at `0x21234`.
+- Observation: the function calls `0x21338` and clears the dword `0x7f9` when
+  the overlay flag `0x1b` is set and the mode `0x1d260` is not `0x10`.  The
+  callee at `0x21338` saves and restores `ecx`, so the store writes zero.
+  Evidence: the call at `0x2124f`, the store at `0x21254`, and the callee
+  epilogue at `0x219e8`.
+- Observation: the release flag `0x34` sets the overlay state `0x18f90` and
+  advances the counter `0x1d2a4` from 0 through 3 only when `0x18f90` is zero.
+  A clear release flag sets `0x18f90` to zero.
+  Evidence: the tests and the stores at `0x2125a` through `0x21293`.
+- Observation: the reset gate `0x3` stores the dead local `0xffffff`, calls
+  `0x101b4` with the value 1, and sets the input bits `0x220` when the control
+  byte holds bit 0.  The helper `0x101b4` adds `0x113` to its argument and
+  clears the dword at the result.
+  Evidence: the stores and the call at `0x212a2` through `0x212be`, and the
+  helper at `0x101b4`.
+- Observation: the rebuilt module holds 58 instructions and 233 bytes.  The
+  identity check stays open: 13 of 58 instructions and 35 of 233 bytes match.
+  The register save order and the missing `mov dl`, `mov cl`, `mov dx`, and
+  `mov ah` forms cause the difference.  The store records the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x211e0 --rebuilt work/rebuild/inpmod.exe --rebuilt-map
+  work/rebuild/input_map.map --rebuilt-symbol input_map_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the normal path, the two exit-request
+  paths, the input mask return, the mode 0x10 skip, the counter wrap, the clear
+  release flag, and the clear control bit.
+  Evidence: `python3 tools/rebuild/harness.py run --module input_map`,
+  `work/rebuild/inp_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x211e0`.
+- Inference: `0x21338` is an overlay update, and `0x101b4` is an input reset
+  helper.  The names come from the register use and the call order.  The store
+  records for these addresses stay unknown.
+  Evidence: the two call sites and the disassembly of each callee.
+- Limit: the original has no symbol name for these calls.  The helper names in
+  the module stay inferred.

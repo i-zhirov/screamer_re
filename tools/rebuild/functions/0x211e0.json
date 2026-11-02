@@ -1,17 +1,52 @@
 {
   "address": "0x211e0",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "reads the control bits `DAT_00118e1c` and dispatches the game action"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x211e0 holds 62 instructions and 239 bytes up to the ret at 0x212ce: it tests bit 0x20 of the control byte 0x18e1d and sets bit 1 of the exit byte 0x1ce44 when one of the flags 0x3b, 0x1e, 0x3, or 0x19880 is set; otherwise it returns at once when the input word 0x18e1c holds 0x401c; it calls 0x21338 and clears 0x7f9 when the flag 0x1b is set and the mode 0x1d260 is not 0x10; it advances the counter 0x1d2a4 from 0 through 3 while the flag 0x34 is set and 0x18f90 is zero; and it calls 0x101b4 with 1 and sets the input bits 0x220 when the flag 0x3 is set and the control byte holds bit 0"
     }
   ],
+  "module": "input_map",
   "name": "input_map",
   "notes": [],
-  "role": "reads the control bits `DAT_00118e1c` and dispatches the game action",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 233,
+        "detail": "the instruction counts differ, 62 and 58",
+        "instructions_equal": 13,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x211e0",
+    "date": "2026-11-02",
+    "fingerprint": "sha256:9e6146ec48b95015df828b91fcf6b7ea1cd38913b3df65649d4b8ac7bff359a9",
+    "source_digest": "sha256:abb969134a4782157bed0dfa884d5cbe471e890f9d0e0bac50f169ee686176ae",
+    "tool": "run.py"
+  },
+  "role": "reads the input control word and the exit flags, runs the overlay update, advances the gear counter, and sets the input reset bits",
   "section": "race_loop callees",
   "size": 240,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "input_map_"
 }
