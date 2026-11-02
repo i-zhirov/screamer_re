@@ -364,6 +364,11 @@ def _load_capstone() -> ctypes.CDLL | None:
     return None
 
 
+def capstone_available() -> bool:
+    """Return true when the capstone library loads.  Do not decode."""
+    return _load_capstone() is not None
+
+
 @dataclass
 class Insn:
     address: int
@@ -561,26 +566,55 @@ def prologue_start(data: bytes, position: int) -> int:
     return start
 
 
-def print_functions(
-    exe: LinearExecutable, start: int | None, end: int | None, limit: int
-) -> int:
-    """List candidate function starts: the Watcom prologue and its register saves."""
+def function_starts(
+    exe: LinearExecutable,
+    start: int | None = None,
+    end: int | None = None,
+    limit: int = 10000,
+) -> list[int]:
+    """Return candidate function starts: the Watcom prologue and its register saves."""
     obj = exe.object_at(exe.entry_linear)
     if obj is None:
-        print("the entry object is missing", file=sys.stderr)
-        return 1
+        raise ValueError("the entry object is missing")
     low = obj.reloc_base if start is None else start
     high = obj.reloc_base + obj.virtual_size if end is None else end
     data = exe.read(low, high - low)
     if data is None:
-        print("the range is not mapped to a file offset", file=sys.stderr)
-        return 1
+        raise ValueError("the range is not mapped to a file offset")
     pattern = b"\x55\x89\xe5"
     found: list[int] = []
     position = data.find(pattern)
     while position != -1 and len(found) < limit:
         found.append(low + prologue_start(data, position))
         position = data.find(pattern, position + 1)
+    return found
+
+
+def nearest_function_start(exe: LinearExecutable, address: int) -> int | None:
+    """Return the candidate function start nearest below an address."""
+    obj = exe.object_at(address)
+    if obj is None:
+        raise ValueError("the address is unmapped")
+    low = obj.reloc_base
+    data = exe.read(low, address - low + 1)
+    if data is None:
+        raise ValueError("the range is not mapped to a file offset")
+    pattern = b"\x55\x89\xe5"
+    position = data.rfind(pattern)
+    if position == -1:
+        return None
+    return low + prologue_start(data, position)
+
+
+def print_functions(
+    exe: LinearExecutable, start: int | None, end: int | None, limit: int
+) -> int:
+    """List candidate function starts: the Watcom prologue and its register saves."""
+    try:
+        found = function_starts(exe, start, end, limit)
+    except ValueError as error:
+        print(error, file=sys.stderr)
+        return 1
     print(f"candidate function starts: {len(found)}")
     for candidate in found:
         print(f"  {candidate:#010x}")
@@ -589,21 +623,14 @@ def print_functions(
 
 def print_nearest_function(exe: LinearExecutable, address: int) -> int:
     """Print the candidate function start nearest below an address."""
-    obj = exe.object_at(address)
-    if obj is None:
-        print("the address is unmapped", file=sys.stderr)
+    try:
+        start = nearest_function_start(exe, address)
+    except ValueError as error:
+        print(error, file=sys.stderr)
         return 1
-    low = obj.reloc_base
-    data = exe.read(low, address - low + 1)
-    if data is None:
-        print("the range is not mapped to a file offset", file=sys.stderr)
-        return 1
-    pattern = b"\x55\x89\xe5"
-    position = data.rfind(pattern)
-    if position == -1:
+    if start is None:
         print(f"no prologue below {address:#x}")
         return 1
-    start = low + prologue_start(data, position)
     print(f"nearest prologue: {start:#x} ({address - start:#x} bytes below {address:#x})")
     return 0
 

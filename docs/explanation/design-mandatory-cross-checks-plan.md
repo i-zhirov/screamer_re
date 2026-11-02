@@ -5,7 +5,7 @@
 > command passes.
 
 - **Date**: 2026-11-02
-- **Status**: Approved
+- **Status**: In Progress
 - **Design**: `docs/explanation/design-mandatory-cross-checks.md`
 - **Depends on**: —
 - **Manual prerequisites**: Run
@@ -89,7 +89,7 @@ call_target=0x10020
 
 ## Tasks
 
-- [ ] **Task 1: Public function-start helpers in `tools/le.py`**
+- [x] **Task 1: Public function-start helpers in `tools/le.py`**
     - **Implements:** FR-013, SC-007, design §Component Interfaces
       (`tools/le.py`), §Testing Strategy
     - **Create `tools/rebuild/tests/test_le_helpers.py`**
