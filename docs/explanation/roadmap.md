@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred seven named modules are rebuilt with the harness and the
+  progress: one hundred eight named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -83,9 +83,9 @@ current host.
   `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
   `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
   `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-  Phase E module `object_update_all` at `0x2786c`, and `keyboard_hook` at
-  `0x14e20`;
-  twenty-two modules match the original, and eighty-five rebuilds hold the
+  three Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+  `0x14e20`, and `object_integrate` at `0x1d6bc`;
+  twenty-two modules match the original, and eighty-six rebuilds hold the
   recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -175,6 +175,6 @@ The plan follows the size order, starting with the smallest functions.
     `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
     `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
     `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-    Phase E module `object_update_all` at `0x2786c`, and `keyboard_hook` at
-    `0x14e20` are done;
-    the result is twenty-two matches and eighty-five open rebuilds).
+    three Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+    `0x14e20`, and `object_integrate` at `0x1d6bc` are done;
+    the result is twenty-two matches and eighty-six open rebuilds).

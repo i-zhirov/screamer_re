@@ -533,7 +533,10 @@ The files:
 | `object_update_all_main.c` | the `object_update_all` test harness: the record count, the counter, the record storage, the twelve stubs, the sequence check, and the three paths |
 | `keyboard_hook.c` | the rebuilt `keyboard_hook` module: the controller command and acknowledge loop, the LED data, the BIOS keyboard flag clear, the get-vector call, and the install and restore set-vector calls |
 | `keyboard_hook_main.c` | the `keyboard_hook` test harness: the register block, the segment set, the saved vector, the controller stub, the DPMI stub, and the five paths |
-| `modules/*.json` | the one hundred and eight module records: the sources, the compiler, the link, and the run expectations |
+| `object_integrate.c` | the rebuilt `object_integrate` module: the two truncated position sums, the factor damping, the factor threshold, the target compare, the dwell timer, and the two snap stores |
+| `object_integrate_main.c` | the `object_integrate` test harness: the object record, the frame delta, the damping table, the two constants, and the eight paths |
+| `object_integrate_fpu.asm` | the `object_integrate` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

@@ -166,7 +166,7 @@ floating-point instructions.
 | --- | --- | --- | --- | --- | --- |
 | `0x2786c` | `object_update_all` (done) | 309 | 84 | 12 | 0 |
 | `0x14e20` | `keyboard_hook` (done) | 334 | 100 | 2 | 0 |
-| `0x1d6bc` | `object_integrate` | 339 | 82 | 4 | 34 |
+| `0x1d6bc` | `object_integrate` (done) | 339 | 82 | 4 | 34 |
 | `0x2e0b4` | `race_panel_0` | 357 | 103 | 5 | 29 |
 | `0x2dddc` | `net_player_add` | 394 | 111 | 3 | 0 |
 | `0x4cc10` | `object_init_from_file` | 396 | 120 | 1 | 0 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-One hundred seven modules carry a recipe and a result: the twelve Phase A modules,
+One hundred eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -222,6 +222,6 @@ modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
 `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
 `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-Phase E module `object_update_all` at `0x2786c`, and `keyboard_hook` at
-`0x14e20`.
-The next module is `object_integrate` at `0x1d6bc`.
+three Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+`0x14e20`, and `object_integrate` at `0x1d6bc`.
+The next module is `race_panel_0` at `0x2e0b4`.

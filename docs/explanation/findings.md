@@ -8791,3 +8791,52 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module keyboard_hook`,
   `work/rebuild/kbh_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x14e20`.
+
+## The object_integrate module at 0x1d6bc
+
+- Observation: the original body at `0x1d6bc` holds 82 instructions and 339
+  bytes up to the first `ret` at `0x1d80e`.  The plan row holds the same
+  counts.  The merged store record keeps the 376-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d6bc --count 82` and
+  `tools/rebuild/functions/0x1d6bc.json`.
+- Observation: the function adds the scaled velocity to the position at
+  `+0x454` and `+0x45c`.  The scale is the velocity at `+0x460` and `+0x468`
+  times the factor at `+0x450` times the frame delta `DAT_00118e04`.  Each sum
+  truncates toward zero through the helper at `0x4d9f4`.
+  Evidence: the `fld`, `fmul`, `fild`, `faddp`, `call 0x4d9f4`, and `fistp`
+  blocks at `0x1d6c9` through `0x1d6f1` and `0x1d6fa` through `0x1d722`.
+- Observation: the function multiplies the factor by the damping at
+  `DAT_0010cf08 + 0x13c`.  It then clears the factor when the damped value
+  stays below 10.0.  The constant sits at object 3 offset `0xb24`.
+  Evidence: the `fmul` at `0x1d736`, the `fcomp` at `0x1d74b`, and the
+  `fstp` of 0 at `0x1d759`.
+- Observation: when both positions equal the target at `+0x160` and `+0x168`,
+  the function adds the frame delta to the dwell timer `+0x46c`.  When the
+  timer reaches 3.0, it multiplies both positions by the scale at
+  `DAT_0010cf08 + 0x180` and truncates.  The threshold constant sits at object
+  3 offset `0xb28`.  Otherwise the function clears the timer.
+  Evidence: the two target compares at `0x1d76f` and `0x1d787`, the timer
+  update at `0x1d79c`, the `fcomp` at `0x1d7b1`, the two snap blocks at
+  `0x1d7c5` and `0x1d7ec`, and the timer clear at `0x1d812`.
+- Observation: the rebuilt module holds 62 instructions and 267 bytes.  The
+  identity check stays open at 9 of 62 instructions and 22 of 267 bytes.  The
+  V2 toolchain saves the frame pointer first, keeps the object pointer in
+  `edx`, reuses the local slot for the factor, uses a short jump, and stores
+  the dwell timer with `fst` before the compare.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d6bc --rebuilt work/rebuild/ointmod.exe --rebuilt-map
+  work/rebuild/object_integrate.map --rebuilt-symbol object_integrate_`.
+- Observation: the rebuild uses the module-local `object_integrate_fpu.asm`
+  stub.  The stub makes `__CHP` truncate toward zero.  The shared
+  `fpu_stub.asm` leaves the default round-to-nearest mode, so a negative sum
+  would round away from zero.  This deviation keeps the four conversions
+  correct for negative values.
+  Evidence: `tools/rebuild/object_integrate_fpu.asm` and the two negative
+  paths in `tools/rebuild/object_integrate_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the integration, the factor clamp, the
+  dwell accumulation, the snap, both truncation directions, the threshold
+  boundary, and the damping reduction.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_integrate`,
+  `work/rebuild/oint_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1d6bc`.
