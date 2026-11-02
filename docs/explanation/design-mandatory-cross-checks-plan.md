@@ -489,7 +489,7 @@ call_target=0x10020
       `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --skip-cross`
       gives `42 checks, 0 failures`.
 
-- [ ] **Task 6: CI workflow**
+- [x] **Task 6: CI workflow**
     - **Implements:** FR-008, SC-001, design §Rollout And Compatibility,
       §Non-Functional Requirements (Portability)
     - **Modify `.github/workflows/pipeline.yml`**
