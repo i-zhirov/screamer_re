@@ -526,7 +526,10 @@ The files:
 | `memory_error_report_main.c` | the `memory_error_report` test harness: the record stub, the printer stub, the exit stub, and the seven paths |
 | `object_drive_step.c` | the rebuilt `object_drive_step` module: the mode guard, the target and the bound, the accelerate branch, the brake branch, and the two clamps |
 | `object_drive_step_main.c` | the `object_drive_step` test harness: the object record, the two globals, the float bit patterns, and the eight paths |
-| `modules/*.json` | the one hundred and five module records: the sources, the compiler, the link, and the run expectations |
+| `frame_timer.c` | the rebuilt `frame_timer` module: the frame counter wait, the raw and smooth deltas, the two clamps, the filter table pointer, and the phase word |
+| `frame_timer_fpu.asm` | the `frame_timer` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `frame_timer_main.c` | the `frame_timer` test harness: the counter, the five timing floats, the eight constants, and the six paths |
+| `modules/*.json` | the one hundred and six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

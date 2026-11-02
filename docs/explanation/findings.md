@@ -8615,3 +8615,83 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module sound_update`,
   `work/rebuild/sud_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x81a70`.
+
+## The frame_timer module at 0x1fc38
+
+- Observation: the original body at `0x1fc38` holds 76 instructions and 299
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  312-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fc38 --count 76` and
+  `tools/rebuild/functions/0x1fc38.json`.
+- Observation: the function waits until the frame counter `DAT_000007f9` is 2
+  or more and then clears the counter.  The original loop reloads the counter
+  on every turn.
+  Evidence: the load at `0x1fc40`, the compare at `0x1fc46`, and the branch at
+  `0x1fc49`.
+- Observation: the old smooth delta goes to `DAT_00118e14`.  The raw delta is
+  `counter * 0.01` in `DAT_00118e08`.  The smooth delta is
+  `(old * 9.0 + raw) / 10.0` in `DAT_00118e04`.  The raw delta accumulates in
+  `DAT_00118e10`.
+  Evidence: the `fild` and `fmul` at `0x1fc53` and `0x1fc56`, the copy at
+  `0x1fc5c` through `0x1fc61`, the smooth step at `0x1fc66` through
+  `0x1fc80`, and the accumulate at `0x1fc86` through `0x1fc98`.
+- Observation: the smooth delta clamps at 0.2 and 0.02.  The comparisons use
+  the double constants, and the stores use the float immediates `0x3e4ccccd`
+  and `0x3ca3d70a`.
+  Evidence: the compares at `0x1fca4` and `0x1fcbf`, the stores at `0x1fcaf`
+  and `0x1fcca`, and the constants at `0x100c68` and `0x100c70`.
+- Observation: the frame rate is the truncated `1 / delta`.  The filter table
+  pointer is `0x80e8 + 400 * rate`.  The original calls the Watcom helper at
+  `0x4d9f4`, which truncates toward zero.
+  Evidence: the divide at `0x1fcd6`, the helper call at `0x1fcea`, the scaled
+  rate at `0x1fcf2` through `0x1fd19`, and the pointer store at `0x1fd23`.
+- Observation: the phase `DAT_00118e0c` advances by `delta * 0.3` and wraps at
+  1.0.  The word `DAT_0002153c` holds the phase scaled by 65535 and truncated.
+  Evidence: the multiply at `0x1fce2`, the phase step at `0x1fd00` through
+  `0x1fd40`, and the scale and store at `0x1fd46` through `0x1fd57`.
+- Observation: the original constants sit in object 3 at `0x100c58` through
+  `0x100c84`: the double 0.01, the floats 9.0 and 10.0, the doubles 0.2, 0.02,
+  and 0.3, and the floats -1.0 and 65535.0.
+  Evidence: the references at `0x1fc56`, `0x1fc6c`, `0x1fc80`, `0x1fca4`,
+  `0x1fcbf`, `0x1fce2`, `0x1fd3a`, and `0x1fd4c`, and the data at
+  `0x100c58`.
+- Observation: the original has the EBP frame and the 0xc-byte local area, so
+  the module builds with `-of+`.
+  Evidence: the frame at `0x1fc3b` and the local area at `0x1fc3d`.
+- Observation: the rebuilt exe keeps the numeric constants in the object-2
+  data page at module offset `0x20000`.  At run time that page reads zero, so
+  the literal constants in the module gave zero deltas and the behavior check
+  failed.
+  Evidence: the map segment `CONST` at `0002:00000000` and the runtime read of
+  the relocated object-2 base.
+- Observation: the module now takes the eight constants through the globals
+  `frame_delta_scale`, `frame_delta_gain`, `frame_delta_norm`,
+  `frame_delta_high`, `frame_delta_low`, `frame_phase_step`,
+  `frame_phase_wrap`, and `frame_phase_scale`.  The harness sets the exact bit
+  patterns.  This is the same pattern as `object_proximity_check`.
+  Evidence: `tools/rebuild/frame_timer.c` and
+  `tools/rebuild/frame_timer_main.c`.
+- Observation: the rebuild holds 62 instructions and 278 bytes.  The identity
+  check stays open at 27 of 62 instructions and 24 of 278 bytes.  The V2
+  toolchain saves the frame pointer first, keeps the counter in `eax`, computes
+  the raw delta before the smooth step, uses `imul` for the `400 * rate`
+  product, compares the phase with an immediate, and reads the constants from
+  the globals.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1fc38 --rebuilt work/rebuild/ftmmod.exe --rebuilt-map
+  work/rebuild/frame_timer.map --rebuilt-symbol frame_timer_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the plain delta, the upper clamp with
+  the truncated frame rate 4, the lower clamp with the frame rate 50, the phase
+  wrap from 1.0, a phase step that stays below 1.0, and a phase step that
+  crosses 1.0.
+  Evidence: `python3 tools/rebuild/harness.py run --module frame_timer`,
+  `work/rebuild/ftm_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1fc38`.
+- Observation: the two conversions truncate toward zero.  The shared
+  `fpu_stub.asm` defines `__CHP` as a bare return, so the module uses the local
+  `frame_timer_fpu.asm` stub with the truncating `__CHP`, the same stub as
+  `object_proximity_check`.  Without the stub, a frame rate such as 6.896 would
+  round to 7 and the phase word would change.
+  Evidence: the helper at `0x4d9f4`, `tools/rebuild/fpu_stub.asm`, and
+  `tools/rebuild/frame_timer_fpu.asm`.
