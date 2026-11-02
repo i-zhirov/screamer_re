@@ -79,10 +79,12 @@ python3 tools/inventory.py \
   ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
-Run the full pipeline end to end.  The check needs Docker, DOSBox-X, and the
-installed Ghidra loader, and takes about 8 minutes plus the Ghidra import:
+Run the full pipeline end to end.  The check needs Docker, DOSBox-X, a built
+driver artifact, and the installed Ghidra loader, and takes about 8 minutes
+plus the Ghidra import:
 
 ```sh
+python3 tools/rebuild/harness.py build --module driver
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```

@@ -1,7 +1,7 @@
 # Mandatory three-tool cross-check — Design
 
 - **Date**: 2026-11-02
-- **Status**: Approved
+- **Status**: Implemented
 - **Input**: "Implement mandatory cross-checks with all three tools
   (`tools/le.py`, Ghidra, and radare2)."
 
@@ -179,8 +179,11 @@ A developer wants the raw view of one tool.
   loader uses.
 - radare2 is version 6.2.4.
 - The loader install needs network access and a writable home directory.
-- The full check already needs Docker, DOSBox-X, the installed game, and
-  the reference executable.
+- The full check already needs Docker, DOSBox-X, the installed game, the
+  reference executable, and a built `driver.exe` in `work/rebuild`.  Build
+  the driver with
+  `python3 tools/rebuild/harness.py build --module driver` before a full
+  check on a clean `work/`.
 - The full check takes about 8 minutes today. The Ghidra import adds time.
 - The stage-11 count depends on Docker and the number of records with a
   stored result. The documented counts use the current 11 records.
@@ -581,6 +584,7 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 nix develop .#cross-check --command python3 tools/cross_check.py \
     --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
     --main 0x10020 --call-site 0xd4364 --work-root work
+python3 tools/rebuild/harness.py build --module driver
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
     --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/pipeline_check.py \

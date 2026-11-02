@@ -5,13 +5,15 @@
 > command passes.
 
 - **Date**: 2026-11-02
-- **Status**: In Progress
+- **Status**: Implemented
 - **Design**: `docs/explanation/design-mandatory-cross-checks.md`
 - **Depends on**: —
 - **Manual prerequisites**: Run
   `nix develop .#cross-check --command sh tools/ghidra/install_loader.sh`
   once per user. The loader install needs network access and a writable home
-  directory.
+  directory. Build the driver artifact with
+  `python3 tools/rebuild/harness.py build --module driver` before a full
+  check on a clean `work/`.
 - **Goal**: Add one mandatory pipeline stage that compares four identity facts
   from `tools/le.py`, radare2, and Ghidra on every full run.
 
@@ -544,7 +546,7 @@ call_target=0x10020
       and
       `grep -n "skip-cross\|cross-check" README.md AGENTS.md docs/reference/tooling.md docs/explanation/findings.md`
 
-- [ ] **Task 8: Full verification**
+- [x] **Task 8: Full verification**
     - **Implements:** FR-010, FR-011, SC-001, SC-003, SC-004, SC-006,
       SC-007, design §Testing Strategy, §Success Criteria
     - **No new behavior.** Run the complete gate and confirm the documented
@@ -575,3 +577,10 @@ call_target=0x10020
   instead. The user approved this change.
 - Ghidra 12.0.4 appends ` (GhidraScript)` to each logged script line.
   `identity.sh` strips the optional suffix before the marker and key checks.
+- `identity.sh --check` prints the check command when `analyzeHeadless` is
+  missing. Installing the loader cannot provide `analyzeHeadless`, so the
+  check command is the correct hint.
+- The stage-8 command uses `sys.executable` instead of the literal `python3`,
+  matching the existing tool invocations.
+- The full check needs a built `driver.exe` in `work/rebuild`. The manual
+  prerequisites add the build command.

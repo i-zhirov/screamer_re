@@ -5591,11 +5591,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   install.
   Evidence: `AGENTS.md:250-251, 331-336`, `flake.nix:43-55`, and
   `tools/ghidra/install_loader.sh:1-13`.
-- The radare2 cross-check is optional by design.  Stage 8 is skipped when `r2`
-  is not on `PATH`.  The core rebuild checks must run on a host without `r2` or
-  Ghidra.
-  Evidence: `tools/pipeline_check.py:501-505` and
-  `docs/reference/tooling.md:586-587`.
+- At the time of this finding, the radare2 cross-check was optional.  Stage 8
+  was skipped when `r2` was not on `PATH`.  The core rebuild checks then ran
+  on a host without `r2` or Ghidra.
+  Evidence: the stage-8 radare2 check at the time of this finding.  The
+  current gate is the mandatory three-tool cross-check.
 - The docs do not reject Ghidra or radare2 for LE parsing.  radare2 has a
   native LE parser, and Ghidra reads LE through the LX/LE loader.
   Evidence: `docs/reference/tooling.md:637-639` and `:653-656`.
@@ -5604,9 +5604,11 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   642.  `le.py` applies no fixup and does not decompress.
   Evidence: `docs/reference/tooling.md:691-695` and `:745`, and the radare2
   cross-check table in this page.
-- Stage 8 uses radare2 as the independent cross-check of `le.py`.  It compares
-  the entry point, the page 0 mapping, `main`, and the `main` caller.
-  Evidence: `tools/pipeline_check.py:4-20` and `:501-532`.
+- At the time of this finding, stage 8 used radare2 as the independent
+  cross-check of `le.py`.  It compared the entry point, the page 0 mapping,
+  `main`, and the `main` caller.
+  Evidence: the stage-8 radare2 check at the time of this finding.  The
+  current gate is the mandatory three-tool cross-check.
 - The records do not cite Ghidra or radare2.  The names and roles came from
   `program-map.md` in a one-time import.
   Evidence: a search of `tools/rebuild/functions/*.json` and

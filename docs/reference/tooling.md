@@ -598,6 +598,7 @@ also refuses a missing capstone library, radare2, or Ghidra setup, unless
 `--skip-cross` is set.
 
 ```sh
+python3 tools/rebuild/harness.py build --module driver
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
@@ -644,6 +645,7 @@ radare2, Ghidra, `curl`, and `unzip`:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
+python3 tools/rebuild/harness.py build --module driver
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```

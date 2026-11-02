@@ -153,14 +153,15 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 ```
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
-DOSBox-X, and the installed Ghidra loader.  It takes about 8 minutes plus the
-Ghidra import and reports 61 checks.  `--skip-cross` skips stage 8 and the
+DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
+about 8 minutes plus the Ghidra import and reports 61 checks.  `--skip-cross` skips stage 8 and the
 tool preflight, so the run reports 57 checks.  `--skip-runtime` skips stages
 5, 6, 7, and 9 and still runs stage 8, so the run reports 46 checks.  Both
 flags report 42 checks and take about 16 seconds:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
+python3 tools/rebuild/harness.py build --module driver
 nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross
 nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
