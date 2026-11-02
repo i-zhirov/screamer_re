@@ -190,7 +190,7 @@ call_target=0x10020
       and
       `nix develop .#cross-check --command sh tools/ghidra/install_loader.sh --check`
 
-- [ ] **Task 3: Ghidra identity script and wrapper**
+- [x] **Task 3: Ghidra identity script and wrapper**
     - **Implements:** FR-002, FR-009, design §Component Interfaces
       (`identity.sh`, `LeIdentity.java`), §Error Handling And Edge Cases
     - **Modify `tools/rebuild/tests/test_ghidra_identity.py`**
