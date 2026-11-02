@@ -410,7 +410,7 @@ call_target=0x10020
       and
       `nix develop .#cross-check --command python3 tools/cross_check.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --main 0x10020 --call-site 0xd4364 --work-root work`
 
-- [ ] **Task 5: Pipeline preflight and stage 8**
+- [x] **Task 5: Pipeline preflight and stage 8**
     - **Implements:** FR-001, FR-005, FR-006, FR-007, FR-014, FR-016,
       SC-001, SC-002, SC-003, SC-009, design §Component Interfaces
       (`pipeline_check.py`), §Data Flow, §Skip modes
