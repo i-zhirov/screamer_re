@@ -52,10 +52,11 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred three named modules are rebuilt with the harness and the
+  progress: one hundred four named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
-  twelve Phase A modules, the twenty-three Phase B modules from
-  `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
+  twelve Phase A modules, the twenty-four Phase B modules from
+  `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
+  including `sound_update` at `0x81a70`, and the
   first thirty-two Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
   `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`, the
   run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load` at
@@ -82,7 +83,7 @@ current host.
   `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
   `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`, and
   `object_drive_step` at `0x1cee0`;
-  twenty-two modules match the original, and eighty-one rebuilds hold the
+  twenty-two modules match the original, and eighty-two rebuilds hold the
   recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -144,7 +145,8 @@ The plan follows the size order, starting with the smallest functions.
     original byte for byte, the first exact match; the behavior run needs more work).
 12. Rebuild the game modules in size order (in progress: the plan in
     `rebuild-plan.md` orders the remaining functions by size; the twelve Phase
-    A functions, the whole twenty-three-function Phase B batch, and the first
+    A functions, the whole twenty-four-function Phase B batch including
+    `sound_update` at `0x81a70`, and the first
     thirty-two Phase C modules `graphics_load` at `0x10ba4`, `stream_close` at
     `0x4c38d`, `memory_free` at `0x2f205`, `panel_draw_centered` at `0x2e7cc`,
     the run-time `free` at `0xd2008`, `race_cleanup` at `0x2a1b0`, `vis_tab_load`
@@ -171,4 +173,4 @@ The plan follows the size order, starting with the smallest functions.
     `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
     `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`, and
     `object_drive_step` at `0x1cee0` are done;
-    the result is twenty-two matches and eighty-one open rebuilds).
+    the result is twenty-two matches and eighty-two open rebuilds).

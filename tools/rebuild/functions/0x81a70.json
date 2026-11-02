@@ -1,17 +1,53 @@
 {
   "address": "0x81a70",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
+  "count": 16,
   "evidence": [
     {
       "kind": "note",
       "text": "a sound library update with the driver block `DAT_00106350`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x81a70 holds a 62-byte entry of 16 instructions up to the jump at 0x81aac: it stores the driver pointer 0x6350 in the global 0x7451c, saves all registers and the four segment registers, calls the reset helper at 0x82e0c, clears the active count 0x72488, loads the destination 0x40330 in edi, and jumps to the shared service body at 0x81ac6; the neighbour sound_effects_update at 0x81ab0 holds the shared body; the plan row counted 299 bytes because the body sweep follows the jump to the first ret at 0x81b9a"
     }
   ],
+  "module": "sound_update",
   "name": "sound_update",
   "notes": [],
-  "role": "a sound library update with the driver block `DAT_00106350`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81a70",
+    "date": "2026-11-02",
+    "fingerprint": "sha256:e2f8057141576a6ef2c0b682e8416eade130f2ff160e50a520242c1048f6e8d1",
+    "source_digest": "sha256:cfb696cbdd7f17f98865a54c7108d0f6209ff17c965dbac5d285049dc64ec987",
+    "tool": "run.py"
+  },
+  "role": "stores the sound driver pointer, resets the sound library, clears the active count, and enters the shared sound service body",
   "section": "race_frame callees",
   "size": 64,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "sound_update_"
 }

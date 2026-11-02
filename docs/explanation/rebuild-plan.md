@@ -82,6 +82,7 @@ floating-point instructions.
 | `0x25db0` | `dpmi_real_int` (done) | 58 | 17 | 0 | 0 |
 | `0x1c760` | `object_player_input` (done) | 58 | 18 | 3 | 0 |
 | `0x4c810` | `stream_layer_init` (done) | 61 | 19 | 6 | 0 |
+| `0x81a70` | `sound_update` (done) | 62 | 16 | 1 | 0 |
 | `0x1f94c` | `view_move` (done) | 65 | 22 | 3 | 0 |
 | `0x1075f` | `video_block_swap_a` (done) | 66 | 25 | 0 | 0 |
 | `0x22df8` | `timing_update` (done) | 71 | 20 | 1 | 3 |
@@ -157,7 +158,6 @@ floating-point instructions.
 | `0x127a0` | `engine_init` (done) | 266 | 71 | 16 | 0 |
 | `0x2edad` | `memory_error_report` (done) | 291 | 97 | 8 | 0 |
 | `0x1cee0` | `object_drive_step` (done) | 297 | 83 | 0 | 33 |
-| `0x81a70` | `sound_update` | 299 | 68 | 11 | 0 |
 | `0x1fc38` | `frame_timer` | 299 | 76 | 2 | 34 |
 
 ### Phase E: over 300 bytes
@@ -192,9 +192,10 @@ floating-point instructions.
 
 ## Position
 
-One hundred three modules carry a recipe and a result: the twelve Phase A modules,
-the eleven modules of the earlier batches, the twenty-three Phase B modules, and
-the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
+One hundred four modules carry a recipe and a result: the twelve Phase A modules,
+the eleven modules of the earlier batches, the twenty-four Phase B modules,
+including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
+`graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
 `panel_draw_centered` at `0x2e7cc`, the run-time `free` at `0xd2008`,
 `race_cleanup` at `0x2a1b0`, `vis_tab_load` at `0x4d030`,
@@ -221,4 +222,4 @@ modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
 `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`, and
 `object_drive_step` at `0x1cee0`.
-The next module is `sound_update` at `0x81a70`.
+The next module is `frame_timer` at `0x1fc38`.

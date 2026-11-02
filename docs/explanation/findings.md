@@ -8562,3 +8562,56 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module object_drive_step`,
   `work/rebuild/odr_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x1cee0`.
+
+## The sound_update module at 0x81a70
+
+- Observation: the plan row recorded 299 bytes, 68 instructions, and 11 calls.
+  The merged store record holds the size 64.  The next entry
+  `sound_effects_update` starts at `0x81ab0`, 64 bytes after `0x81a70`.
+  Evidence: `docs/explanation/rebuild-plan.md`,
+  `tools/rebuild/functions/0x81a70.json`, and
+  `python3 tools/le.py disasm STARTH.EXE 0x81ab0 --count 1`.
+- Observation: the real body of `sound_update` holds 16 instructions and 62
+  bytes.  It starts at `0x81a70` and ends at the jump at `0x81aac`.  The two
+  bytes at `0x81aae` are padding.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81a70 --count 16`.
+- Observation: the plan row was wrong because the body sweep of
+  `le.function_body` does not stop at the jump.  The jump is not the first
+  instruction, so the sweep follows the shared body to the first `ret` at
+  `0x81b9a` and counts 299 bytes and 68 instructions.  The shared body belongs
+  to `sound_effects_update` at `0x81ab0`.  The plan row now holds 62 bytes, 16
+  instructions, and 1 call.
+  Evidence: the `jmp` at `0x81aac`, the `ret` at `0x81b9a`, and the
+  `le.function_body` sweep.
+- Observation: the entry stores the driver pointer in the global `0x7451c`,
+  saves all registers and the four segment registers, calls the reset helper at
+  `0x82e0c`, clears the active count `0x72488`, loads the destination `0x40330`
+  in `edi`, and jumps to the shared body at `0x81ac6`.
+  Evidence: the instructions at `0x81a70` through `0x81aac`.
+- Observation: the entry `sound_effects_update` at `0x81ab0` holds the shared
+  body at `0x81ac6`.  This module does not absorb that entry.  It calls the
+  shared body as `sound_service_body`.
+  Evidence: `tools/rebuild/functions/0x81ab0.json` and the finding
+  "The sound_effects_update module at 0x81ab0".
+- Observation: the source update at `0x8a958` uses the destination pointer in
+  `edi`.  The rebuild passes `0x40330` to `sound_service_body`.
+  Evidence: the `push edi` and the `stosd` instructions from `0x8a958` through
+  `0x8a9e7`.
+- Inference: the shared body overwrites `ecx` and `eax` before it reads them, so
+  the rebuild omits the `ecx` and `eax` setup of the original.
+  Evidence: the `lodsd` at `0x8a9cf` and the `mov ecx` at `0x8aac0`.
+- Observation: the record keeps the extent 64 and sets the count 16.  The
+  identity check compares the 16-instruction entry only.
+  Evidence: `tools/rebuild/functions/0x81a70.json`.
+- Observation: the rebuilt module holds 6 instructions and 27 bytes up to the
+  tail jump.  The identity check stays open at 3 of 16 instructions and 4 of 57
+  bytes.  The store records the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81a70 --count 16 --rebuilt work/rebuild/sudmod.exe
+  --rebuilt-map work/rebuild/sound_update.map --rebuilt-symbol sound_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover a set active count, a negative active
+  count, two calls in one run, the call order, and the destination `0x40330`.
+  Evidence: `python3 tools/rebuild/harness.py run --module sound_update`,
+  `work/rebuild/sud_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x81a70`.

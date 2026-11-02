@@ -1,0 +1,26 @@
+{
+  "exe": "sudmod.exe",
+  "map": "sound_update.map",
+  "name": "sound_update",
+  "run": {
+    "command": "sudmod.exe > sud_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "sud_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_update.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_update_main.c"
+    }
+  ]
+}
