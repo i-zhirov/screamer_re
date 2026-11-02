@@ -397,7 +397,7 @@ and `python3 tools/le.py disasm STARTH.EXE 0x127a0` and `0x1f2e0`.
 | --- | --- | --- | --- |
 | `0x1cee0` | `object_drive_step` | computes the drive force from `+0x2e4`, `+0x2f0`, and the throttle `+0x3fc`; sets the brake flag `+0x2c0` when the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times the frame delta | derived |
 | `0x1d30c` | `object_revolution_step` | accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254` | derived |
-| `0x1e30c` | `object_proximity_check` | measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate | derived |
+| `0x1e30c` | `object_proximity_check` | measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate<br>the original at 0x1e30c holds 74 instructions and 241 bytes up to the first `ret`: the two absolute-value guards at 35000 units on `+0x498` and `+0x4a0`, the deltas scaled by 0.1 and truncated with the helper at 0x4d9f4, the squared sum, the `sqrt` call at 0x22bec, the scale by 10.0, and the gate store from the float at `+0x4e4` against 35000.0 at 0x100b98; the rebuild keeps the extent 264 and uses a module-local FPU stub with a truncating `__CHP` | derived |
 <!-- end generated: The vehicle state chain -->
 
 `object_proximity_check` sets the gate at `+0x414`.  `object_physics` and

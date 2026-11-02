@@ -8207,3 +8207,62 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the two call sites and the disassembly of each callee.
 - Limit: the original has no symbol name for these calls.  The helper names in
   the module stay inferred.
+
+## The object_proximity_check module at 0x1e30c
+
+- Observation: the plan row records a 241-byte body of 74 instructions, 3
+  calls, and 13 FPU instructions.  The body starts at `0x1e30c` and ends at the
+  first `ret` at `0x1e3fc`.  The second `ret` at `0x1e411` closes the outside
+  branch.  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e30c --count
+  74`.
+- Observation: the merged store record keeps the 264-byte extent.  The diff
+  uses the body that ends at the first `ret`, not the record size.
+  Evidence: `tools/rebuild/functions/0x1e30c.json` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e30c --rebuilt work/rebuild/opcmod.exe --rebuilt-map
+  work/rebuild/object_proximity_check.map --rebuilt-symbol
+  object_proximity_check_`.
+- Observation: the guard compares the absolute value of the delta between
+  `+0x498` and `DAT_00113ccc` with the immediate `0x88b8`.  A value of 35000 or
+  more jumps to the outside branch, which stores zero at `+0x414` and returns.
+  The same test then runs on `+0x4a0` and `DAT_00113cd0`.
+  Evidence: the `cdq`, `xor`, and `sub` absolute-value sequence and the `cmp
+  eax, 0x88b8` at `0x1e32a` through `0x1e355`.
+- Observation: inside the range, the function forms `DAT_00113ccc - +0x498`
+  and `DAT_00113cd0 - +0x4a0`, scales each delta by the double 0.1 at object 3
+  offset `0xb88`, and truncates it to an integer with the helper at `0x4d9f4`.
+  It squares and adds the two integers, calls `0x22bec`, scales the result by
+  the double 10.0 at offset `0xb90`, and stores the float at `+0x4e4`.  It
+  then compares that float with the float 35000.0 at offset `0xb98` and sets
+  `+0x414` to the result.
+  Evidence: the FPU sequence at `0x1e35b` through `0x1e3ef`, and the data at
+  the object 3 offsets `0xb88`, `0xb90`, and `0xb98`.
+- Observation: `0x22bec` returns zero for a negative argument and otherwise
+  calls `0xc6cbe`, so it is a square-root helper.
+  Evidence: the disassembly of `0x22bec`.
+- Observation: the shared `fpu_stub.asm` defines `__CHP` as a bare return.
+  The compiled `(int)` cast then rounds to nearest, so a negative delta rounds
+  away from zero.  The original helper at `0x4d9f4` sets the truncate control
+  word.  The module therefore uses the local `object_proximity_check_fpu.asm`,
+  which keeps the no-op init symbols and makes `__CHP` truncate.
+  Evidence: the `__CHP` stub in `fpu_stub.asm`, the helper at `0x4d9f4`, and
+  the rebuilt call at `0x100d6`.
+- Observation: the rebuilt module holds 59 instructions and 210 bytes.  The
+  identity check stays open: 7 of 59 instructions and 12 of 210 bytes match.
+  The register save order and the instruction selection cause the difference.
+  The store records the status `rebuilt`.
+  Evidence: the diff command above and `python3 tools/rebuild/run.py run
+  --function 0x1e30c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover a small inside position, the two
+  single-axis guards, the distance at the limit, the distance above the limit,
+  and the negative deltas that truncate toward zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  object_proximity_check`, `work/rebuild/opc_out.txt`, and `python3
+  tools/rebuild/run.py run --function 0x1e30c`.
+- Inference: `0x4d9f4` is the truncating FPU helper and `0x22bec` is the square
+  root.  The names come from the instruction sequence and the call order.  The
+  store records for these addresses stay unknown.
+  Evidence: the two call sites and the disassembly of each callee.
+- Limit: the original has no symbol name for these calls.  The helper names in
+  the module stay inferred.

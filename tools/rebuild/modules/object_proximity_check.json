@@ -1,0 +1,36 @@
+{
+  "exe": "opcmod.exe",
+  "map": "object_proximity_check.map",
+  "name": "object_proximity_check",
+  "run": {
+    "command": "opcmod.exe > opc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "opc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_proximity_check.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "object_proximity_check_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_proximity_check_main.c"
+    }
+  ]
+}

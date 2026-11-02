@@ -1,17 +1,52 @@
 {
   "address": "0x1e30c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1e30c holds 74 instructions and 241 bytes up to the first `ret`: the two absolute-value guards at 35000 units on `+0x498` and `+0x4a0`, the deltas scaled by 0.1 and truncated with the helper at 0x4d9f4, the squared sum, the `sqrt` call at 0x22bec, the scale by 10.0, and the gate store from the float at `+0x4e4` against 35000.0 at 0x100b98; the rebuild keeps the extent 264 and uses a module-local FPU stub with a truncating `__CHP`"
     }
   ],
+  "module": "object_proximity_check",
   "name": "object_proximity_check",
   "notes": [],
-  "role": "measures the distance from the reference `DAT_00113ccc` and `DAT_00113cd0`; inside 35000 units it sets the gate `+0x414` and the value `+0x4e4`, outside it clears the gate",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 210,
+        "detail": "the instruction counts differ, 74 and 59",
+        "instructions_equal": 7,
+        "instructions_total": 59,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1e30c",
+    "date": "2026-11-02",
+    "fingerprint": "sha256:c99fd589fb5b85888286571480a169b4e2df1d36d27f6de548757706bf4810cb",
+    "source_digest": "sha256:ae393912de4d8572cff2494bced4bdd4ab96ed55dd2d9b0e6167642baa7f6ce8",
+    "tool": "run.py"
+  },
+  "role": "measures the object distance from the reference `DAT_00113ccc` and `DAT_00113cd0` and sets the gate `+0x414` from the scaled distance at `+0x4e4` against 35000.0",
   "section": "The vehicle state chain",
   "size": 264,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_proximity_check_"
 }

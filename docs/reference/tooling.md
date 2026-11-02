@@ -509,7 +509,10 @@ The files:
 | `sound_effects_update_main.c` | the `sound_effects_update` test harness: the ten globals, the ten stubs, the call sequence, and the five paths |
 | `input_map.c` | the rebuilt `input_map` module: the exit request, the input mask, the overlay update, the gear counter, and the reset gate |
 | `input_map_main.c` | the `input_map` test harness: the input word, the exit byte, the overlay state, the two stubs, and the eight paths |
-| `modules/*.json` | the ninety-seven module records: the sources, the compiler, the link, and the run expectations |
+| `object_proximity_check.c` | the rebuilt `object_proximity_check` module: the two distance guards, the truncated deltas, the squared sum, the `sqrt` call, and the gate store |
+| `object_proximity_check_main.c` | the `object_proximity_check` test harness: the object record, the two references, the three constants, the `sqrt` stub, and the six paths |
+| `object_proximity_check_fpu.asm` | the `object_proximity_check` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the ninety-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
