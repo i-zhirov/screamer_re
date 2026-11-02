@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: ninety named modules are rebuilt with the harness and the
+  progress: ninety-one named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
@@ -69,14 +69,14 @@ current host.
   `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at
   `0x28160`, `palette_build` at `0x15720`, `fade_update` at `0x29818`,
   `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-  `0x4c08d`, `resource_read` at `0x2efc2`, and the first twelve Phase D modules
+  `0x4c08d`, `resource_read` at `0x2efc2`, and the first thirteen Phase D modules
   `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
   `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
   `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
   `frame_update` at `0x27f94`, `object_slide_step` at `0x1df34`,
-  `music_bank_load` at `0x2f9e0`, `camera_update` at `0x8ac78`, and
-  `stream_read` at `0x4c4e5`;
-  twenty-two modules match the original, and sixty-eight rebuilds hold the
+  `music_bank_load` at `0x2f9e0`, `camera_update` at `0x8ac78`,
+  `stream_read` at `0x4c4e5`, and `malloc` at `0xd1f25`;
+  twenty-two modules match the original, and sixty-nine rebuilds hold the
   recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -152,11 +152,11 @@ The plan follows the size order, starting with the smallest functions.
     `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
     `palette_build` at `0x15720`, `fade_update` at `0x29818`,
     `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-    `0x4c08d`, `resource_read` at `0x2efc2`, and the first twelve Phase D modules
+    `0x4c08d`, `resource_read` at `0x2efc2`, and the first thirteen Phase D modules
     `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
     `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
     `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
     `frame_update` at `0x27f94`, `object_slide_step` at `0x1df34`,
-    `music_bank_load` at `0x2f9e0`, `camera_update` at `0x8ac78`, and
-    `stream_read` at `0x4c4e5`
-    are done; the result is twenty-two matches and sixty-eight open rebuilds).
+    `music_bank_load` at `0x2f9e0`, `camera_update` at `0x8ac78`,
+    `stream_read` at `0x4c4e5`, and `malloc` at `0xd1f25`
+    are done; the result is twenty-two matches and sixty-nine open rebuilds).

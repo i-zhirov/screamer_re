@@ -7834,3 +7834,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module stream_read`,
   `work/rebuild/srd_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x4c4e5`.
+
+## The malloc module at 0xd1f25
+
+- Observation: the original body at `0xd1f25` holds 84 instructions and 227
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  227-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd1f25 --count 84` and
+  `tools/rebuild/functions/0xd1f25.json`.
+- Observation: the original has an EBP frame.  It saves `ebx`, `ecx`, `edx`,
+  `esi`, `edi`, `es`, `fs`, `gs`, and `ebp`, reserves four bytes for the grow
+  flag, and passes the first argument in `eax`.  The rebuild uses `-of+`.
+  Evidence: the prologue at `0xd1f25` through `0xd1f33`.
+- Observation: the function rejects the size 0 and every size above
+  `0xffffffd4`.  It rounds the size up to a multiple of 4 and raises a small
+  size to 12.  The early return writes no heap flag.
+  Evidence: the size checks at `0xd1f35` and `0xd1f39`, the round-up at
+  `0xd1f4a`, the minimum at `0xd1f5a`, and the early return at `0xd1f3e`.
+- Observation: the function walks the free list at `0x31d0`.  It stores the
+  cursor in `0x31d4` and the largest failed block size in `0x31d8`.  A size at
+  or below `0x31d8` restarts the walk at the head and clears `0x31d8`.  A larger
+  size resumes at the cursor `0x31d4` when the cursor is set.
+  Evidence: the branch at `0xd1f64`, the head reload at `0xd1f7c`, the cursor
+  load at `0xd1f6c`, and the loop test at `0xd1fbc`.
+- Observation: the block walk asks the helper at `0xe09dc` for a block.  The
+  helper receives the requested size in `eax`, the data segment in `edx`, and
+  the block in `ebx`.  A null result updates the largest failed size and moves
+  to the next block at `+0x08`.
+  Evidence: the call at `0xd1f9c` and the size read at `0xd1fac`.
+- Observation: when the walk fails, a clear flag calls the grow helper at
+  `0xe0f73` once.  A non-zero result sets the flag and restarts the walk.  The
+  second walk failure calls the helper at `0xe112e`, and the branch at
+  `0xd1fdc` restarts the walk after a non-zero result.  The helper at `0xe112e`
+  is `xor eax,eax` and `ret` in this image, so the branch is not reachable in
+  the shipped binary.
+  Evidence: the grow block at `0xd1fc0` through `0xd1fea` and the helper at
+  `0xe112e`.
+- Inference: the flag at `[esp]` records the single grow attempt.  The second
+  helper is a final chance that the shipped image does not supply.
+  Evidence: the flag store at `0xd1f51`, the set at `0xd1fe6`, and the clear at
+  `0xd1fdc`.
+- Observation: a success returns the block and clears the heap flag at
+  `0x27de5`.  The invalid-size return skips the flag clear.
+  Evidence: the success block at `0xd1fef` and the early return at `0xd1f40`.
+- Observation: the rebuild holds 70 instructions and 195 bytes.  The identity
+  check stays open at 15 of 70 instructions and 27 of 195 bytes.  OpenWatcom V2
+  keeps the size and the pointer in registers, lays the free-list loop out
+  differently, and merges the clears, so the two bodies differ.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0xd1f25 --rebuilt work/rebuild/mlcmod.exe --rebuilt-map
+  work/rebuild/malloc_rt.map --rebuilt-symbol malloc_rt_`.
+- Observation: the flat target has no data segment.  The original passes the
+  data segment to the helper at `0xe09dc`, and the rebuild passes 0.  The helper
+  uses the near block pointer.  This difference does not change the behavior in
+  the harness.
+  Evidence: `tools/rebuild/malloc_rt.c` and the call at `0xd1f9c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the head restart, the size 0, the
+  oversized request, the failed first block, the cursor resume, the grow retry,
+  the expand retry, the double failure, and the minimum size.
+  Evidence: `python3 tools/rebuild/harness.py run --module malloc_rt`,
+  `work/rebuild/mlc_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0xd1f25`.

@@ -497,7 +497,9 @@ The files:
 | `camera_update_main.c` | the `camera_update` test harness: the camera record, the three globals, the two stubs, and the three paths |
 | `stream_read.c` | the rebuilt `stream_read` module: the flag test, the expander call, the raw `fread` call, the position advance, and the two clamps |
 | `stream_read_main.c` | the `stream_read` test harness: the stream record, the two buffers, the two stubs, and the five paths |
-| `modules/*.json` | the ninety-one module records: the sources, the compiler, the link, and the run expectations |
+| `malloc_rt.c` | the rebuilt `malloc` module as `malloc_rt`: the size checks, the round-up, the free-list walk, the cursor and largest-free update, the three helper calls, and the heap-flag clear |
+| `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
+| `modules/*.json` | the ninety-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
