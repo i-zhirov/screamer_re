@@ -8075,3 +8075,76 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   0x1f1a0`.
 - Limit: the library function names are inferred from the register use and the
   call order.  The original has no symbol name for these calls.
+
+## The sound_effects_update module at 0x81ab0
+
+- Observation: the plan row records a 235-byte body of 51 instructions and 10
+  calls.  The body starts at `0x81ab0` and ends at the `ret` at `0x81b9a`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81ab0 --count 51`.
+- Observation: the merged store record keeps the 37320-byte extent.  The diff
+  uses the body that ends at the first `ret`, not the record size.
+  Evidence: `tools/rebuild/functions/0x81ab0.json` and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81ab0 --rebuilt work/rebuild/seumod.exe
+  --rebuilt-map work/rebuild/sound_effects_update.map --rebuilt-symbol
+  sound_effects_update_`.
+- Observation: the neighbour `sound_update` starts at `0x81a70` and joins the
+  shared body at `0x81ac6`.  The module starts at `0x81ab0`.  The module holds
+  the two setup calls of its own entry and the shared body.  It does not hold
+  the `0x81a70` entry.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81a70 --count 80`.
+- Observation: the entry stores the argument in the global `0x7451c` and calls
+  the two helpers at `0x83ca8` and `0x83354`.  The body then calls the source
+  update at `0x8a958`.
+  Evidence: the stores and calls at `0x81ab0` through `0x81ac6`.
+- Observation: the function returns when the active count `0x72488` is zero or
+  negative.  Otherwise it calls the mix prepare at `0x8aa60` and returns when
+  the voice count `0x7aa9c` is zero or negative.
+  Evidence: the tests at `0x81acb` through `0x81aea`.
+- Observation: the helper at `0x83354` writes the active count `0x72488`.
+  Evidence: the store at `0x8339e`.
+- Observation: the function calls `0x83500` with `edi` equal to `0x45790` and
+  `eax` equal to the voice count.  It then stores `0x45790` at `0x7251c` and
+  the voice count at `0x72c10`.
+  Evidence: the setup at `0x81add` through `0x81b04`.
+- Observation: the outer loop calls `0x8af08` and sets the index `0x7445c` to
+  zero.  The helper at `0x8af08` calls `0x8adac`, which writes the voice count
+  `0x74458`.
+  Evidence: the loop at `0x81b09` through `0x81b8c` and the stores at
+  `0x8ae92` and `0x8aed5`.
+- Observation: the inner loop calls `0x8a8d8` and tests `edx`.  When `edx` is
+  non-zero, it calls `0x835c0`, stores `0x694f0` at `0x694ec` and `0x17700000`
+  at `0x7b804` and `0x7b814`, calls `0x836ac`, loads the source pointer
+  `0x4d3c8` in `esi`, and calls `0x843a8`.
+  Evidence: the event path at `0x81b2c` through `0x81b6b`.
+- Observation: the inner loop increments the index `0x7445c` and decrements the
+  voice count `0x74458` until zero.  The outer loop decrements the frame repeat
+  `0x72c10` until zero.
+  Evidence: the loop tails at `0x81b78` through `0x81b8c`.
+- Observation: the original sets DS and ES from the selector at `CS:0x214d4`
+  and uses a CS override for the selector read.  The rebuild omits the segment
+  loads, because the flat target keeps one data segment.
+  Evidence: the instructions at `0x81b09`, `0x81b20`, `0x81b3a`, and
+  `0x81b70`.
+- Observation: the rebuilt module holds 47 instructions and 198 bytes.  The
+  identity check stays open: 15 of 47 instructions and 12 of 198 bytes match.
+  The store records the status `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81ab0 --rebuilt work/rebuild/seumod.exe --rebuilt-map
+  work/rebuild/sound_effects_update.map --rebuilt-symbol
+  sound_effects_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the two guards, the two frames with
+  index reset, the event skip at one index, and the empty event path.
+  Evidence: `python3 tools/rebuild/harness.py run --module sound_effects_update`,
+  `work/rebuild/seu_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x81ab0`.
+- Inference: `0x83ca8` is a timer helper, `0x83354` is a sequence helper,
+  `0x8a958` is a source update, `0x8aa60` is a mix prepare, `0x83500` is a
+  voice mix, `0x8af08` is a frame prepare, `0x8a8d8` is an event next helper,
+  `0x835c0` is an event transform, `0x836ac` is an event render, and `0x843a8`
+  is an event convert.  The names come from the register use and the call
+  order.  The store records for these addresses stay unknown.
+  Evidence: the ten call sites and the disassembly of each callee.
+- Limit: the original has no symbol name for these calls.  The helper names in
+  the module stay inferred.

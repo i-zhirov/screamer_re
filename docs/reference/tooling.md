@@ -505,7 +505,9 @@ The files:
 | `object_load_main.c` | the `object_load` test harness: the four object records, the eight-slot handle table, the two name buffers, the seven stubs, and the six paths |
 | `mouse_init.c` | the rebuilt `mouse_init` module: the timer rate, the two timer installs, the mouse system start, the mouse handler install, the two exit paths, and the epilogue |
 | `mouse_init_main.c` | the `mouse_init` test harness: the setup word, the two state areas, the three timer ids, the far timer callback, the seven stubs, and the five paths |
-| `modules/*.json` | the ninety-five module records: the sources, the compiler, the link, and the run expectations |
+| `sound_effects_update.c` | the rebuilt `sound_effects_update` module: the driver store, the setup calls, the two guards, the voice mix, the song and frame stores, the per-frame event loop, and the event stores |
+| `sound_effects_update_main.c` | the `sound_effects_update` test harness: the ten globals, the ten stubs, the call sequence, and the five paths |
+| `modules/*.json` | the ninety-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

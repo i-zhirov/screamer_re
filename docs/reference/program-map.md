@@ -198,7 +198,7 @@ The count `0x3e800` is 256000, which is 640 times 400: the screen buffer is
 | `0x20954` | `opponent_update` | walks `DAT_0010f178` records of 0xbc bytes at `DAT_0010f180` | inferred |
 | `0x27a34` | `hud_update` | gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set | inferred |
 | `0x27f44` | `race_timeout` | computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000 | derived |
-| `0x81ab0` | `sound_effects_update` | a sound library update in the `0x8xxxx` region | inferred |
+| `0x81ab0` | `sound_effects_update` | the original at 0x81ab0 holds 51 instructions and 235 bytes up to the ret at 0x81b9a: it saves all registers and the four segment registers, stores the driver pointer 0x6350 in the global 0x7451c, calls the two setup helpers at 0x83ca8 and 0x83354, joins the shared body at 0x81ac6, calls the source update at 0x8a958, returns when the active count 0x72488 is zero or negative, calls the mix prepare at 0x8aa60, returns when the voice count 0x7aa9c is zero or negative, mixes the voices through 0x83500, sets the song pointer 0x7251c and the frame repeat 0x72c10, and runs the per-frame loop with 0x8af08, 0x8a8d8, 0x835c0, 0x836ac, and 0x843a8 until the frame repeat reaches zero; the neighbour sound_update at 0x81a70 joins the same body at 0x81ac6 | observed |
 <!-- end generated: object_update_all callees -->
 
 ### motion_update callees
