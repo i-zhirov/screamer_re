@@ -8962,3 +8962,58 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module net_player_add`,
   `work/rebuild/npa_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2dddc`.
+
+## The object_init_from_file module at 0x4cc10
+
+- Observation: the original body at `0x4cc10` holds 120 instructions and 396
+  bytes up to the `ret` at `0x4cd9b`.  The plan row holds the same counts.  The
+  store record keeps the 396-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cc10 --count 120` and
+  `tools/rebuild/functions/0x4cc10.json`.
+- Observation: the original has the EBP frame.  It saves `ebx`, `ecx`, and
+  `ebp`, reserves 0x1c bytes, and stores the object at `[ebp - 0x1c]` and the
+  index at `[ebp - 0x18]`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x4cc10` through `0x4cc1b`.
+- Observation: the function compares the index with `0x3e8`.  An index above
+  the bound loads the value `0x16f0` and calls `0xc656e`, which is the message
+  reporter, but the function continues because the original has no return on
+  that path.  The value `0x16f0` is the data-segment offset of the string
+  `error`.
+  Evidence: the compare at `0x4cc1e`, the message call at `0x4cc2c`, and the
+  data base `0xf6800`.
+- Observation: the function reads the file record from the handle table at
+  `0x21540` with the index as the word offset.
+  Evidence: the two loads at `0x4cc31` through `0x4cc3c`.
+- Observation: the function sets the object field at `+0x04` to 1 and the
+  index at `+0x00`.  It clears the fields at `+0x08`, `+0x0c`, and `+0x10`,
+  then the fields at `+0x14`, `+0x18`, and `+0x1c`.  It sets the field at
+  `+0x20` to -1 and clears the six words at `+0x24` through `+0x38`.
+  Evidence: the stores at `0x4cc3f` through `0x4ccd4`.
+- Observation: the function fills the 0x20-byte records at object + 0x40.  The
+  chunk count is the word at `file + 0x14` and the offset table is at
+  `file + 0x18`.  A table word selects a chunk record at `file + offset`, and
+  the word at `+0x0c` of that record selects the chunk header at
+  `file + word`.  Each record holds the file, the count, and the six header
+  words at `+0x04` through `+0x18`.  The record after the last chunk holds -1
+  at `+0x04`.
+  Evidence: the loop at `0x4ccdb` through `0x4cd8f`.
+- Inference: the offset table points into the file record, and a chunk record
+  holds the offset of its header.  The two offsets are file-relative.
+  Evidence: the two additions at `0x4cd12` through `0x4cd28`.
+- Observation: the rebuilt module holds 64 instructions and 218 bytes.  The
+  identity check stays open at 46 of 64 instructions and 7 of 218 bytes.  The
+  V2 toolchain saves the frame pointer first, keeps the object and file in
+  `ebx` and `ecx`, folds the zero chains into single stores, and merges the
+  loop increment.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cc10 --rebuilt work/rebuild/oifmod.exe --rebuilt-map
+  work/rebuild/object_init_from_file.map --rebuilt-symbol
+  object_init_from_file_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover the two-chunk file, the zero-chunk
+  file, the index 1001 above the bound, and the index 1000 at the bound.  The
+  object starts filled with `0x5a`, so a field that the function does not
+  write fails the check.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  object_init_from_file`, `work/rebuild/oif_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4cc10`.

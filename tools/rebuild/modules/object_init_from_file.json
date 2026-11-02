@@ -1,0 +1,30 @@
+{
+  "exe": "oifmod.exe",
+  "map": "object_init_from_file.map",
+  "name": "object_init_from_file",
+  "run": {
+    "command": "oifmod.exe > oif_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "oif_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_init_from_file.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_init_from_file_main.c"
+    }
+  ]
+}

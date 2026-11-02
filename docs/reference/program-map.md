@@ -524,7 +524,7 @@ and `5` when the `3D_BLKOBJ` chunk is missing.
 | `0x4c38d` | `stream_close` | the original at `0x4c38d` holds 34 instructions and 89 bytes: it frees the buffer at `stream + 0x1c` through the run-time `free` at `0xd2008`, frees the buffer at `stream + 0xb0` through the wrapper `free` at `0x300ec` when the flag at `stream + 0x10` is set, closes the handle at `stream + 0x00` through `0xc6245`, and returns 0 | derived |
 | `0x4c4e5` | `stream_read` | buffered read; advances the position and clamps it to the stream size<br>the original at `0x4c4e5` holds 80 instructions and 226 bytes: the register saves, the frame, the three argument slots, the flag test at `stream + 0x10`, the two clamp branches, the expander call at `0x4d3fc`, the raw `fread` call at `0xc607b`, and the return | derived |
 | `0x4c7e0` | `stream_status` | returns the word at `stream + 0x70` | inferred |
-| `0x4cc10` | `object_init_from_file` | bounds the file index, initializes the object record, and copies the chunk table from the file record | observed |
+| `0x4cc10` | `object_init_from_file` | bounds the file index, initializes the object record, and copies the chunk table from the file record<br>the original at 0x4cc10 holds 120 instructions and 396 bytes: the index bound at 0x3e8, the message call at 0xc656e, the handle table read at 0x21540, the object field stores at +0x00 through +0x38, the 0x20-byte chunk records at object + 0x40 from the file count at +0x14 and the offset table at +0x18, and the end marker -1 | observed |
 | `0x4d32c` | `sprintf` | formats into a buffer through the run-time `vsprintf` and writes the terminator | derived |
 <!-- end generated: Resource loader -->
 
