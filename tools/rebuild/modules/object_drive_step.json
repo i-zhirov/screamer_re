@@ -1,0 +1,38 @@
+{
+  "exe": "odrmod.exe",
+  "map": "object_drive_step.map",
+  "name": "object_drive_step",
+  "run": {
+    "command": "odrmod.exe > odr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "odr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_drive_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_drive_step_main.c"
+    }
+  ]
+}

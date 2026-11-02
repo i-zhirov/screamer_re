@@ -8515,3 +8515,50 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module memory_error_report`,
   `work/rebuild/mer_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2edad`.
+
+## The object_drive_step module at 0x1cee0
+
+- Observation: the original body at `0x1cee0` holds 83 instructions and 297
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  300-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1cee0 --count 83` and
+  `tools/rebuild/functions/0x1cee0.json`.
+- Observation: the mode guard compares `DAT_0000ffa4` with the state at
+  `+0x410`.  While the mode is below the state, the target is
+  `(+0x2e4 + +0x2f0) * +0x3fc` and the bound is `+0x2e4 * +0x3fc`.
+  Otherwise the target and the bound both equal `+0x2e4 * +0x3fc`.
+  Evidence: the compare at `0x1cef3`, the two force equations at `0x1cefe`
+  through `0x1cf2b`, and the single equation at `0x1cf33` through `0x1cf48`.
+- Observation: below the target, the function clears the brake flag `+0x2c0`,
+  adds `+0x2e8 * DAT_00118e04` to the speed `+0x418`, and clamps the speed down
+  to the target.
+  Evidence: the branch at `0x1cf5c` through `0x1cf98`.
+- Observation: at or above the target, the function returns when the speed
+  equals the target.  Above it, the function sets the brake flag `+0x2c0` to 1
+  when the speed is above the bound, subtracts `+0x2ec * DAT_00118e04`, and
+  clamps the speed up to the target.
+  Evidence: the branch at `0x1cf9a` through `0x1cffe`.
+- Observation: the frame delta comes from `DAT_00118e04`, and the mode comes
+  from `DAT_0000ffa4`.  The throttle is the float at `+0x3fc`.
+  Evidence: the loads at `0x1ceed`, `0x1cf72`, `0x1cfd2`, and `0x1cf10`.
+- Observation: the original holds the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: the frame at `0x1cee1` and `0x1cee4`.
+- Observation: the rebuild with `-of+` holds 57 instructions and 212 bytes.  The
+  identity check stays open at 7 of 57 instructions and 15 of 212 bytes.  The
+  V2 toolchain pushes the frame pointer before the `edx` save and keeps the
+  object pointer in `edx`, while the original pushes `edx` first and reloads
+  `eax` from the frame for every access.  The V2 toolchain also keeps the new
+  speed on the FPU stack with `fst` and compares it, while the original stores
+  it with `fstp` and reloads it.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1cee0 --rebuilt work/rebuild/odrmod.exe --rebuilt-map
+  work/rebuild/object_drive_step.map --rebuilt-symbol object_drive_step_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, `4`, `5`, `6`, `7`, and `D`.  It runs the accelerate branch
+  with and without the clamp, the brake branch with and without the brake set,
+  the deceleration clamp, the equal-speed path, the inactive mode, and the
+  negative throttle bound.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_drive_step`,
+  `work/rebuild/odr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1cee0`.
