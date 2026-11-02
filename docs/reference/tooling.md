@@ -520,7 +520,9 @@ The files:
 | `race_start_main.c` | the `race_start` test harness: the screen and state globals, the race context, the car table, the three stubs, and the two paths |
 | `engine_init.c` | the rebuilt `engine_init` module: the configuration and list load, the setup, controls, and mouse calls, the DPMI flag, the music bank block, the palette, keyboard, engine interface, stream, video, and VESA calls, and the rectangle stores |
 | `engine_init_main.c` | the `engine_init` test harness: the flag word, the two setup words, the engine list, the rectangle words, the sixteen stubs, and the four paths |
-| `modules/*.json` | the one hundred and two module records: the sources, the compiler, the link, and the run expectations |
+| `memory_error_report.c` | the rebuilt `memory_error_report` module: the status read, the six message bodies, the comparison tree, and the `exit(-1)` call |
+| `memory_error_report_main.c` | the `memory_error_report` test harness: the record stub, the printer stub, the exit stub, and the seven paths |
+| `modules/*.json` | the one hundred and three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

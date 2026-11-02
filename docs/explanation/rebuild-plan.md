@@ -155,7 +155,7 @@ floating-point instructions.
 | `0x1cd44` | `object_transform` (done) | 244 | 61 | 2 | 12 |
 | `0x27770` | `race_start` (done) | 251 | 66 | 4 | 0 |
 | `0x127a0` | `engine_init` (done) | 266 | 71 | 16 | 0 |
-| `0x2edad` | `memory_error_report` | 291 | 97 | 8 | 0 |
+| `0x2edad` | `memory_error_report` (done) | 291 | 97 | 8 | 0 |
 | `0x1cee0` | `object_drive_step` | 297 | 83 | 0 | 33 |
 | `0x81a70` | `sound_update` | 299 | 68 | 11 | 0 |
 | `0x1fc38` | `frame_timer` | 299 | 76 | 2 | 34 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-One hundred one modules carry a recipe and a result: the twelve Phase A modules,
+One hundred two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-three Phase B modules, and
 the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `stream_close` at `0x4c38d`, `memory_free` at `0x2f205`,
@@ -208,7 +208,7 @@ the first thirty-two Phase C modules `graphics_load` at `0x10ba4`,
 `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
 `palette_build` at `0x15720`, `fade_update` at `0x29818`,
 `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-`0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-three Phase D
+`0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-four Phase D
 modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
 `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
@@ -218,6 +218,6 @@ modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `0x22f54`, `object_load` at `0x10bfc`, `mouse_init` at `0x1f1a0`,
 `sound_effects_update` at `0x81ab0`, `input_map` at `0x211e0`,
 `object_proximity_check` at `0x1e30c`, `resource_get` at `0x2eed0`,
-`object_transform` at `0x1cd44`, `race_start` at `0x27770`, and
-`engine_init` at `0x127a0`.
-The next module is `memory_error_report` at `0x2edad`.
+`object_transform` at `0x1cd44`, `race_start` at `0x27770`,
+`engine_init` at `0x127a0`, and `memory_error_report` at `0x2edad`.
+The next module is `object_drive_step` at `0x1cee0`.

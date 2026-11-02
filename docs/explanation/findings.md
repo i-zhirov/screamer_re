@@ -8467,3 +8467,51 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module engine_init`,
   `work/rebuild/eng_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x127a0`.
+
+## The memory_error_report module at 0x2edad
+
+- Observation: the original body at `0x2edad` holds 97 instructions and 291
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  291-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2edad --count 97` and
+  `tools/rebuild/functions/0x2edad.json`.
+- Observation: the function reads the status at `[arg+0xc]` and the handler name
+  at `[arg+0x10]`.  It reads the slot count at `[arg+0x08]`.
+  Evidence: the loads at `0x2edbe`, `0x2edc1`, `0x2edcf`, and `0x2ee0a`.
+- Observation: the status selects one of six message bodies.  The statuses 1,
+  2, 3, 7, and 9 select the five named messages.  Every other status selects the
+  default message.
+  Evidence: the comparison tree at `0x2ee84` through `0x2eebb`.
+- Observation: the status 1 body prints "Cannot allocate memory for: %s. Out of
+  memory." with the name at `+0x10`.  The status 2 body prints the no-slots
+  message with the name and then "Actual number of slots: %d" with the count at
+  `+0x08`.  The statuses 3, 7, and 9 print one constant message each.  The
+  default prints "Unknown error in memory management".
+  Evidence: the six bodies at `0x2edcc`, `0x2edec`, `0x2ee26`, `0x2ee3f`,
+  `0x2ee58`, and `0x2ee6e`, and the strings at the object 3 offsets `0x1394`,
+  `0x13c4`, `0x13f9`, `0x1415`, `0x1444`, `0x1475`, and `0x14a2`.
+- Observation: every body calls the printer at `0x4bf64` with the stream
+  `0x2fd2` and the format string.  After the body the function calls
+  `exit(-1)` at `0x300be`.
+  Evidence: the printer calls at `0x2eddf`, `0x2edff`, `0x2ee19`, `0x2ee32`,
+  `0x2ee4b`, `0x2ee64`, and `0x2ee7a`, and the exit call at `0x2eec2`.
+- Observation: the status values are sparse, so the compiler builds a
+  comparison tree and not a jump table.  The function stores the status in the
+  frame local at `[ebp-8]` and the argument in `[ebp-4]`.  Both values are
+  volatile.  The original holds the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: the two stores at `0x2edbb` and `0x2edc4` and the tree at `0x2ee84`.
+- Observation: the rebuild with `-of+` holds 57 instructions and 172 bytes.  The
+  identity check stays open at 13 of 57 instructions and 10 of 172 bytes.  The
+  V2 toolchain saves the frame pointer first and uses a different case layout
+  where the original saves the data registers first and uses a binary tree.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2edad --rebuilt work/rebuild/mermod.exe --rebuilt-map
+  work/rebuild/memory_error_report.map --rebuilt-symbol memory_error_report_`.
+- Observation: the behavior check passes.  The harness prints the markers `1`,
+  `2`, `3`, `7`, `9`, `0`, `4`, and `D`.  It runs the five named statuses, the
+  default status 0 below the range, and the default status 4 in a case gap.
+  Evidence: `python3 tools/rebuild/harness.py run --module memory_error_report`,
+  `work/rebuild/mer_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2edad`.
