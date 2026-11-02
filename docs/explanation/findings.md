@@ -8416,3 +8416,54 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_start`,
   `work/rebuild/rst_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x27770`.
+
+## The engine_init module at 0x127a0
+
+- Observation: the original body at `0x127a0` holds 71 instructions and 266
+  bytes.  The plan row holds the same counts.  The merged store record keeps the
+  268-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x127a0 --count 71` and
+  `tools/rebuild/functions/0x127a0.json`.
+- Observation: the function calls `config_load` at `0x1bf38`, then
+  `list_file_load` at `0x15460` with the arguments `0x437` (`GEN`), `0x432`
+  (`MENU`), `0x428` (`CD_TRACKS`), the table `0x1f00`, and the two values 4.
+  Then it calls `setup_load` at `0x1bb58`, `controls_load` at `0x1b304`, and
+  `mouse_init` at `0x1f1a0`.
+  Evidence: the calls at `0x127ad` through `0x127d9` and the strings at the
+  object 3 offsets `0x428` through `0x437`.
+- Observation: the function stores `dpmi_real_int() != 3` at `DAT_0016684`.
+  The result of the call at `0x25db0` is 3 on the normal path.
+  Evidence: the call at `0x127de`, the compare at `0x127e3`, and the store at
+  `0x127ee`.
+- Observation: the setup word `DAT_00008070` guards the sound and music block.
+  When it is zero the block stays unrun.  When it is non-zero and the flag is
+  set, the function calls `sound_driver_set(0)` at `0x262a8`.
+  Evidence: the guard at `0x127f3` and the call at `0x12802`.
+- Observation: the block builds `%s\DATA\MUSIC.DAT` from the config string at
+  `0x7f44` into the local buffer through `sprintf` at `0x4d32c` with the format
+  at `0x43b`.  It clears the flag and calls `music_bank_load` at `0x2f9e0`
+  with the bank struct `0x62b0`, the mode `DAT_00008070`, the size
+  `DAT_00008078`, the local path, and the engine list `DAT_000062ac`.  A
+  non-zero status calls `music_start` at `0x2ffc4`.
+  Evidence: the block at `0x12807` through `0x1284d`.
+- Observation: the normal path calls `palette_build` at `0x15720`,
+  `keyboard_hook(1)` at `0x14e20`, `engine_interface_init` at `0x10810` with
+  the record table `0x6530` and the state word `0x6350`, `stream_layer_init` at
+  `0x4c810` with the engine list, `video_buf_load` at `0x4c8f0`, and
+  `vesa_set_mode(1)` at `0x8bdec`.  It then stores 0, 0, and 0x280 at
+  `DAT_001544c`, `DAT_0015444`, and `DAT_0015448`.
+  Evidence: the block at `0x12852` through `0x128a9`.
+- Observation: the rebuild with `-of+` holds 70 instructions and 271 bytes.
+  The identity check stays open at 44 of 70 instructions and 85 of 266 bytes.
+  The V2 toolchain saves the frame pointer first and uses `esi` and `movzx`
+  where the original saves the data registers first and uses `edi` and `and`.
+  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x127a0 --rebuilt work/rebuild/engmod.exe --rebuilt-map
+  work/rebuild/engine_init.map --rebuilt-symbol engine_init_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  It runs the zero setup word path, the successful
+  music load, the non-zero music status path, and the DPMI result 3 path.
+  Evidence: `python3 tools/rebuild/harness.py run --module engine_init`,
+  `work/rebuild/eng_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x127a0`.

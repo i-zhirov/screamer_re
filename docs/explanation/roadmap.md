@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred named modules are rebuilt with the harness and the
+  progress: one hundred one named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-three Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`, and the
@@ -69,7 +69,7 @@ current host.
   `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at
   `0x28160`, `palette_build` at `0x15720`, `fade_update` at `0x29818`,
   `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-  `0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-two Phase D
+  `0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-three Phase D
   modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
   `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
   `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
@@ -79,8 +79,9 @@ current host.
   `0x22f54`, `object_load` at `0x10bfc`, `mouse_init` at `0x1f1a0`,
   `sound_effects_update` at `0x81ab0`, `input_map` at `0x211e0`,
   `object_proximity_check` at `0x1e30c`, `resource_get` at `0x2eed0`,
-  `object_transform` at `0x1cd44`, and `race_start` at `0x27770`;
-  twenty-two modules match the original, and seventy-eight rebuilds hold the
+  `object_transform` at `0x1cd44`, `race_start` at `0x27770`, and
+  `engine_init` at `0x127a0`;
+  twenty-two modules match the original, and seventy-nine rebuilds hold the
   recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -156,7 +157,7 @@ The plan follows the size order, starting with the smallest functions.
     `0x1b304`, `memory_alloc` at `0x2f172`, `overlay_dispatch` at `0x28160`,
     `palette_build` at `0x15720`, `fade_update` at `0x29818`,
     `persptab_load` at `0x4cf94`, `config_load` at `0x1bf38`, `fopen` at
-    `0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-two Phase D
+    `0x4c08d`, `resource_read` at `0x2efc2`, and the first twenty-three Phase D
     modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
     `race_frame` at `0x2807c`, `replay_read` at `0x22e94`, `main` at
     `0x10020`, `resource_find` at `0x2f25f`, `motion_update` at `0x21e6c`,
@@ -166,5 +167,6 @@ The plan follows the size order, starting with the smallest functions.
     `0x22f54`, `object_load` at `0x10bfc`, `mouse_init` at `0x1f1a0`,
     `sound_effects_update` at `0x81ab0`, `input_map` at `0x211e0`,
     `object_proximity_check` at `0x1e30c`, `resource_get` at `0x2eed0`,
-    `object_transform` at `0x1cd44`, and `race_start` at `0x27770`
-    are done; the result is twenty-two matches and seventy-eight open rebuilds).
+    `object_transform` at `0x1cd44`, `race_start` at `0x27770`, and
+    `engine_init` at `0x127a0` are done; the result is twenty-two matches and
+    seventy-nine open rebuilds).

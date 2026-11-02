@@ -518,7 +518,9 @@ The files:
 | `object_transform_main.c` | the `object_transform` test harness: the object record, the two callee stubs, the float bit patterns, and the three paths |
 | `race_start.c` | the rebuilt `race_start` module: the screen rectangle, the choice load, the five state copies, the context reads, the `MAP%d` build, the mode stores, and the `race_session_start` call |
 | `race_start_main.c` | the `race_start` test harness: the screen and state globals, the race context, the car table, the three stubs, and the two paths |
-| `modules/*.json` | the one hundred and one module records: the sources, the compiler, the link, and the run expectations |
+| `engine_init.c` | the rebuilt `engine_init` module: the configuration and list load, the setup, controls, and mouse calls, the DPMI flag, the music bank block, the palette, keyboard, engine interface, stream, video, and VESA calls, and the rectangle stores |
+| `engine_init_main.c` | the `engine_init` test harness: the flag word, the two setup words, the engine list, the rectangle words, the sixteen stubs, and the four paths |
+| `modules/*.json` | the one hundred and two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
