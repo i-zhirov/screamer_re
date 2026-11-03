@@ -9138,3 +9138,59 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_panel_3`,
   `work/rebuild/rp3_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x2e58c`.
+
+## The overlay_queue_update module at 0x289bc
+
+- Observation: the original body at `0x289bc` holds 117 instructions and 415
+  bytes up to the `ret` at `0x28b5a`.  The plan row holds the same counts.  The
+  store record keeps the 416-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x289bc --count 117` and
+  `tools/rebuild/functions/0x289bc.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `esi`,
+  and `ebp` before the frame, sets `ebp`, and subtracts `0xc` from `esp` for
+  three local slots.
+  Evidence: the prologue at `0x289bc` through `0x289c3`.
+- Observation: the first loop walks the signed source list `DAT_00102108` and
+  stops at the first negative entry.  An entry with the value 0 or with a clear
+  byte at `DAT_00100002[i]` is ready.  A ready entry with the flag
+  `DAT_00120884[i]` set to 1 clears the flag and moves into the queue.  The
+  queue write uses the count `DAT_0012087c` into the table `DAT_0012082c`, and
+  it clears the next slot.  The count stops at 4, so the table holds five
+  entries.  A source entry above 0 with a set byte at `DAT_00100002[i]` sets the
+  flag to 1 and waits.
+  Evidence: the loop at `0x289c6` through `0x28a50`.
+- Observation: the byte test at `0x28a39` uses the address `i + 2` against the
+  data segment.  With the data segment at object 3, the byte is
+  `DAT_00100002[i]`, linear `0x100002 + i`.
+  Evidence: the compare at `0x28a39` and the source index at `0x28a36`.
+- Observation: the second loop walks the nine records of the table at
+  `DAT_00102e04`.  A record holds the five-byte key at `+0`, the value pointer
+  at `+0xc`, the value at `+0x10`, and the xor flag at `+0x14`, with the 0x18
+  stride.  The loop compares the low byte of each of the five queue entries
+  with the key byte.  A zero queue entry stops the compare without a mismatch.
+  A full queue that matches every key byte runs the record: a clear xor flag
+  stores the value through the pointer, and a set xor flag xors the value
+  through the pointer.  The code then calls `table_lookup` at `0x1f718` with 8
+  and clears the count and the first queue entry.  When all nine records
+  mismatch, the code clears the count and the first queue entry.
+  Evidence: the loop at `0x28a52` through `0x28b4d` and the call at `0x28b10`.
+- Observation: the recovered table holds the key `-----` in all nine records.
+  The value pointers hold object-3 offsets such as `0x207f0`, and the xor flag
+  is set in the records that hold it.
+  Evidence: the table bytes at linear `0x102e04` through `0x102edb`.
+- Observation: the rebuilt module holds 86 instructions and 272 bytes.  The
+  identity check stays open at 19 of 86 instructions and 14 of 272 bytes.  The
+  V2 toolchain folds the record stride into `imul` and loads the value pointer
+  and the value directly.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x289bc --rebuilt work/rebuild/oqupd.exe --rebuilt-map
+  work/rebuild/overlay_queue_update.map --rebuilt-symbol
+  overlay_queue_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the empty source, the held entry and the
+  deferred enqueue, the six-entry fill with the count at 4 and the overwritten
+  fifth entry, the xor record, the full queue that mismatches every record, the
+  two-entry key prefix, and the zero source entry with the flag set.
+  Evidence: `python3 tools/rebuild/harness.py run --module overlay_queue_update`,
+  `work/rebuild/oqup_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x289bc`.

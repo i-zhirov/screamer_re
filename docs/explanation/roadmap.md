@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred thirteen named modules are rebuilt with the harness and the
+  progress: one hundred fourteen named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -83,11 +83,12 @@ current host.
   `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
   `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
   `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-  eight Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+  nine Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
   `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at `0x2e0b4`,
   `net_player_add` at `0x2dddc`, `object_init_from_file` at `0x4cc10`,
-  `pcx_load` at `0x1b5a4`, and `race_panel_3` at `0x2e58c`;
-  twenty-two modules match the original, and ninety-one rebuilds hold the
+  `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`, and
+  `overlay_queue_update` at `0x289bc`;
+  twenty-two modules match the original, and ninety-two rebuilds hold the
   recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -177,9 +178,10 @@ The plan follows the size order, starting with the smallest functions.
     `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
     `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
     `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-    eight Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+    nine Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
     `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at
     `0x2e0b4`, `net_player_add` at `0x2dddc`, `object_init_from_file` at
-    `0x4cc10`, `pcx_load` at `0x1b5a4`, and `race_panel_3` at `0x2e58c`
+    `0x4cc10`, `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`, and
+    `overlay_queue_update` at `0x289bc`
     are done;
-    the result is twenty-two matches and ninety-one open rebuilds).
+    the result is twenty-two matches and ninety-two open rebuilds).
