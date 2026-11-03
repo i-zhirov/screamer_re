@@ -9745,3 +9745,62 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module startup`,
   `work/rebuild/stu_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x30170`.
+
+## The joystick_update module at 0x24da0
+
+- Observation: the original body at `0x24da0` holds 201 instructions and 630
+  bytes.  The plan row holds the same counts.  The record keeps the 2176-byte
+  extent to the next entry, so the identity check uses `--count 201`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24da0 --count 201`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x24da0.json`.
+- Observation: the function walks the six 28-byte control records at
+  `0x197d8`.  It stores one dword for each record at `0x19880`.  The control
+  record holds the type at `+0x00`, the kind at `+0x04`, the mode at `+0x08`,
+  the axis index at `+0x0c`, the device index at `+0x10`, and the button mask
+  or the state pointer at `+0x18`.
+  Evidence: the block at `0x24faf` through `0x25015` and the `controls_load`
+  read of six 28-byte records into `0x197d8` and ten 4-byte records into
+  `0x19704`.
+- Observation: a record of type 1 and mode 0 or 2 is an axis.  A kind 1 record
+  first searches the earlier records for the same device and the same axis.
+  When it finds one, it copies the earlier output and makes no read.  This
+  search stops at the current record, so it cannot match itself.
+  Evidence: the block at `0x24dd7` through `0x24e2b`.
+- Observation: otherwise the function reads the axis through the helper at
+  `0x10263` with the mask `1 << device` and the port from `+0x10` of the
+  28-byte axis record at `0x192a4`.  The axis address is
+  `0x192a4 + device * 0x280 + axis * 0x1c`.  The function keeps the low 12
+  bits, divides by the divisor at `+0x0c`, subtracts the center at `+0x04`,
+  and multiplies by the scale at `+0x14` for a positive difference and at
+  `+0x18` for a difference of zero or less.  The helper at `0x4d9f4` truncates
+  the product toward zero.
+  Evidence: the block at `0x24e38` through `0x24ee2` and the helper at
+  `0x4d9f4`.
+- Observation: the value is clamped to the range -1023 through 1023.  A mode 2
+  record sets the full scale 1023 or -1023 when the value passes 511 or -511.
+  A value below 102 in magnitude becomes zero.
+  Evidence: the block at `0x24ee2` through `0x24f49`.
+- Observation: a record of kind other than 1 reads the port from the 10-dword
+  table at `0x19704` through the helper at `0x10257` and tests the mask at
+  `+0x18`.  A set bit stores 1023 and a clear bit stores 0.  A mode other than
+  0 or 2 tests the byte at `+2` of the state pointer at `+0x18` and stores
+  1023 or 0.
+  Evidence: the block at `0x24f50` through `0x24f9b`.
+- Observation: the rebuilt module holds 48 of 201 instructions and 13 of 630
+  bytes.  The identity check stays open.  The V2 toolchain saves fewer
+  registers, uses a different loop shape, and forms the record index with a
+  multiply.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24da0 --count 201 --rebuilt work/rebuild/joymod.exe
+  --rebuilt-map work/rebuild/joystick_update.map --rebuilt-symbol
+  joystick_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, `B`, and `D`.  The paths cover the positive scale, the
+  negative scale with the truncation toward zero, the dead zone, the high and
+  low clamps, the mode 2 high clamp, the duplicate copy with one read, the raw
+  button mask set and clear, the state pointer set and clear, and an unchanged
+  record of another type.
+  Evidence: `python3 tools/rebuild/harness.py run --module joystick_update`,
+  `work/rebuild/joy_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x24da0`.

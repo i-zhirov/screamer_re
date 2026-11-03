@@ -569,7 +569,10 @@ The files:
 | `object_revolution_step_fpu.asm` | the `object_revolution_step` FPU run-time stubs: the no-op init and the truncating `__CHP` |
 | `startup.c` | the rebuilt `startup` module: the DOS version check, the four extender paths, the command-line copy, the `no87=` scan, the program-name copy, the BSS clear, and the exit chain |
 | `startup_main.c` | the `startup` test harness: the DOS and DPMI service stubs, the extender record, the command line, the environment, and the seven paths |
-| `modules/*.json` | the one hundred and twenty-two module records: the sources, the compiler, the link, and the run expectations |
+| `joystick_update.c` | the rebuilt `joystick_update` module: the control record walk, the duplicate search, the axis scaling, the two raw button paths, and the button state path |
+| `joystick_update_main.c` | the `joystick_update` test harness: the six control records, the axis table, the port table, the two stubs, and the twelve paths |
+| `joystick_update_fpu.asm` | the `joystick_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and twenty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
