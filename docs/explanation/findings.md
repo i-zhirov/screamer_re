@@ -9649,3 +9649,53 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module list_file_load`,
   `work/rebuild/lfl_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x15460`.
+
+## The object_revolution_step module at 0x1d30c
+
+- Observation: the original body at `0x1d30c` holds 151 instructions and 589
+  bytes.  It holds the six register saves, the frame with the 0x10-byte local
+  area, 9 calls, and 38 FPU instructions.  The plan row holds the same counts.
+  The record keeps the 592-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d30c --count 151`,
+  `docs/explanation/rebuild-plan.md`, and `tools/rebuild/functions/0x1d30c.json`.
+- Observation: the function multiplies the speed at `+0x418` by the frame delta
+  `DAT_00118e04`, divides the product by the axis call at `0x222e0`, and adds
+  the result to the fraction at `+0x250`.  A fraction below 1.0 leaves the loop.
+  At 1.0 and above the function clears the fraction, toggles the gear at
+  `+0x254`, and advances the index at `+0x24c` from the entry at `+0x10`.
+  Evidence: the block at `0x1d314` through `0x1d3df`.
+- Observation: each loop iteration calls the matrix helper at `0x1d55c` and then
+  truncates the two positions at `+0x2a8` and `+0x2ac` into `+0x258` and
+  `+0x260` with the helper at `0x4d9f4`.  The loop also subtracts the distance
+  from the local step, but the next iteration overwrites the local step, so the
+  subtraction has no effect on the loop control.  The two truncation stores
+  stay.
+  Evidence: the block at `0x1d3e2` through `0x1d450`.
+- Observation: the exit path calls the matrix helper once, truncates the two
+  positions, sets the output at `+0x25c` from the entry at `+0xc`, copies the
+  five state fields, and stores the angle from `0x226bc` at `+0x27c`.  The
+  angle call takes the x, y, and z values at `+0x264`, `+0x268`, and `+0x26c`.
+  Evidence: the block at `0x1d455` through `0x1d558`.
+- Observation: the table lookup uses the base pointer at `DAT_0010f8e4`.  The
+  gear index at `+0x248` selects a 36-byte record, and its first dword points to
+  an entry array with a 56-byte stride.  The entry dword sits at offset `+0xc`
+  for the output and at offset `+0x10` for the next index.
+  Evidence: the block at `0x1d39a` through `0x1d3d9` and the block at `0x1d48b`
+  through `0x1d4c4`.
+- Observation: the rebuilt module holds 89 instructions and 423 bytes.  The
+  identity check stays open at 14 of 89 instructions and 40 of 423 bytes.  The
+  V2 toolchain omits the six register saves, keeps the object in `edx`, uses an
+  integer compare for the 1.0 boundary, and uses multiply immediates for the two
+  table strides.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d30c --rebuilt work/rebuild/orsmod.exe --rebuilt-map
+  work/rebuild/object_revolution_step.map --rebuilt-symbol
+  object_revolution_step_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the no-wrap path, the wrap with gear 0
+  and gear 1, the index update, the negative truncation, the exact 1.0 boundary,
+  and the distance argument 18.  The module uses a local truncating FPU stub,
+  because the shared stub rounds to nearest.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  object_revolution_step`, `work/rebuild/ors_out.txt`, and `python3
+  tools/rebuild/run.py run --function 0x1d30c`.

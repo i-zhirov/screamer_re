@@ -1,0 +1,36 @@
+{
+  "exe": "orsmod.exe",
+  "map": "object_revolution_step.map",
+  "name": "object_revolution_step",
+  "run": {
+    "command": "orsmod.exe > ors_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "ors_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_revolution_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "object_revolution_step_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_revolution_step_main.c"
+    }
+  ]
+}
