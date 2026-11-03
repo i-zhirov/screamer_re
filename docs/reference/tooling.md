@@ -560,7 +560,9 @@ The files:
 | `race_heading_update.c` | the rebuilt `race_heading_update` module: the four scaled angles, the two heading wraps, the power flag, the four interpolations, the frame-step advance, and the base-angle reset |
 | `race_heading_update_main.c` | the `race_heading_update` test harness: the four angles, the three integer pairs, the six outputs, the four constants, the `pow` stub, and the ten paths |
 | `race_heading_update_fpu.asm` | the `race_heading_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and eighteen module records: the sources, the compiler, the link, and the run expectations |
+| `menu_frame.c` | the rebuilt `menu_frame` module: the menu background load, the two draws, the copy, the two swaps, the menu constants, the two screen offsets, the longest string, the run init, and the table lookup |
+| `menu_frame_main.c` | the `menu_frame` test harness: the race object, the pixel and video buffers, the three strings, the menu globals, the nine stubs, and the six paths |
+| `modules/*.json` | the one hundred and nineteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

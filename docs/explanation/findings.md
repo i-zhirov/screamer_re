@@ -9527,3 +9527,64 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   re-verifies every record once.  The record files stay unchanged.
   Evidence: `tools/rebuild/store.py` and the unchanged records under
   `tools/rebuild/functions/`.
+
+## The menu_frame module at 0x29f80
+
+- Observation: the original body at `0x29f80` holds 151 instructions and 560
+  bytes.  It holds the six register saves, the frame with the 0x30c-byte local
+  area, 10 calls, and 4 FPU instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29f80 --count 151`.
+- Observation: the first call is `pcx_load` at `0x1b5a4`.  The file name is
+  `gfx\graf.dat` at object-3 offset `0xfe0`, and the member is `menu1h.pcx` at
+  `0xfd5`.  The pixel buffer is `DAT_001fad0`, and the palette is `0xcf5c`.  A
+  non-zero result calls the cleanup at `0x15150`.
+  Evidence: the block at `0x29f8e` through `0x29fb1`, the bytes at linear
+  `0x100fe0` and `0x100fd5`, and the `menu_frame` row of
+  `docs/reference/program-map.md`.
+- Observation: the function calls `video_present` at `0x27ec8` with the scale 0
+  and the offset 0.  It copies `0x3e800` bytes from `DAT_001fad0` to
+  `DAT_0021528` through `memcpy` at `0x8c150`.  It runs `video_block_swap_a` at
+  `0x1075f` behind the flag `0x10` and `video_block_swap_b` at `0x107a1` behind
+  the flag `0x20` of `DAT_001d274`.  It calls `video_fill` at `0x2aa98` and then
+  `video_present` again with the same arguments.
+  Evidence: the block at `0x29fb1` through `0x2a000`.
+- Observation: the function sets the menu constants.  The frame flag
+  `DAT_001d234` and the overlay words `DAT_001fac0` and `DAT_001fac4` and the
+  game state `DAT_00203b8` become 0.  The frame step `DAT_0018e08` becomes 0.08,
+  and the counter `DAT_000007f9` becomes 8.  The limit `DAT_001fab8` becomes
+  `0x35e`, and the flag `DAT_001d240` becomes 1.  The factors `DAT_0020378` and
+  `DAT_0020380` become 0.6, and the fade state `DAT_001fac8` becomes 1.  The menu
+  value `DAT_001fb64` becomes -1.  The function clears `DAT_001fb58`,
+  `DAT_001d224`, `DAT_001d248`, `DAT_00203a8`, `DAT_002039c`, `DAT_00203ac`,
+  `DAT_00203a0`, `DAT_00109a0`, `DAT_0020384`, `DAT_00109a4`, `DAT_0020388`,
+  `DAT_0020394`, `DAT_00109a8`, `DAT_002038c`, and `DAT_002037c`.  The stores at
+  `DAT_00203b0` and `DAT_00203a4` become `0x1004`.
+  Evidence: the block at `0x2a000` through `0x2a12f`.
+- Observation: the two screen offsets use the fields at `DAT_0015ccc + 0x134`
+  and `+0x120`.  The function divides the field by 2, subtracts the result from
+  `0x140`, divides by 2, and subtracts `0x190` for x or `0x320` for y.  The
+  results land at `DAT_0020824` and `DAT_0020828` as floats.
+  Evidence: the block at `0x2a02e` through `0x2a053` and the block at
+  `0x2a059` through `0x2a129`.
+- Observation: the function keeps the longest of the three strings at
+  `DAT_001fc1c`, `DAT_001fc20`, and `DAT_001fc24` in `DAT_00203b4`.  It calls
+  the run init at `0x2dff4` and `table_lookup` at `0x1f718` with 0.
+  Evidence: the block at `0x2a12f` through `0x2a1a6`.
+- Observation: the two float conversions use `fild` and `fstp`.  The module
+  uses the shared `fpu_stub.asm` and needs no truncating stub.
+  Evidence: `tools/rebuild/modules/menu_frame.json`.
+- Observation: the rebuilt module holds 116 instructions and 490 bytes.  The
+  identity check stays open at 45 of 116 instructions and 45 of 490 bytes.  The
+  V2 toolchain saves the registers in another order, omits the 0x30c-byte local
+  area, and replaces the inline `repne scasb` string length with a helper.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29f80 --rebuilt work/rebuild/mnfmod.exe --rebuilt-map
+  work/rebuild/menu_frame.map --rebuilt-symbol menu_frame_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover both swap flags, the screen offsets with
+  odd field values, the failed load, the three string lengths, the two present
+  calls, the copy, and every constant.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_frame`,
+  `work/rebuild/mnf_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x29f80`.

@@ -1,17 +1,48 @@
 {
   "address": "0x29f80",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "loads `gfx\\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits"
+      "text": "the original at 0x29f80 holds 151 instructions and 560 bytes: the six register saves, the frame, the 0x30c-byte local area, the pcx_load call at 0x1b5a4 with the file gfx\\graf.dat at object-3 offset 0xfe0 and the member menu1h.pcx at 0xfd5, the cleanup at 0x15150 on a non-zero result, the two video_present calls at 0x27ec8 with the scale 0 and the offset 0, the memcpy at 0x8c150 of 0x3e800 bytes from DAT_001fad0 to DAT_0021528, the video swaps at 0x1075f and 0x107a1 behind the flags 0x10 and 0x20 of DAT_001d274, the video_fill call at 0x2aa98, the constants at DAT_001d234, DAT_001fac0, DAT_001fac4, DAT_00203b8, DAT_0018e08 at 0.08, DAT_000007f9 at 8, DAT_001fab8 at 0x35e, DAT_001d240 at 1, DAT_0020378 and DAT_0020380 at 0.6, DAT_001fac8 at 1, and DAT_001fb64 at -1, the zero values at DAT_001fb58, DAT_001d224, DAT_001d248, DAT_00203a8, DAT_002039c, DAT_00203ac, DAT_00203a0, DAT_00109a0, DAT_0020384, DAT_00109a4, DAT_0020388, DAT_0020394, DAT_00109a8, DAT_002038c, and DAT_002037c, the two screen offsets at DAT_0020824 and DAT_0020828 from the fields at DAT_0015ccc +0x134 and +0x120 with the integer division by 2 and the constants 0x190 and 0x320, the longest of the strings at DAT_001fc1c, DAT_001fc20, and DAT_001fc24 at DAT_00203b4, the run init at 0x2dff4, and table_lookup at 0x1f718 with 0"
     }
   ],
+  "module": "menu_frame",
   "name": "menu_frame",
   "notes": [],
-  "role": "loads `gfx\\graf.dat` entry `menu1h.pcx`, blits it, and reads the menu input bits",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 45,
+        "bytes_total": 490,
+        "detail": "the instruction counts differ, 151 and 116",
+        "instructions_equal": 45,
+        "instructions_total": 116,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29f80",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:aac4923574a5517cc6c8ec82ab86903f8a7710f19017b06d3d29cb0e737f5c67",
+    "source_digest": "sha256:78a34ecabba87073779a1a305448e7eee697fd513db0d20f2734a45736c80fa7",
+    "tool": "run.py"
+  },
+  "role": "loads the menu background, initializes the menu state and the two screen offsets, and starts the menu run",
   "section": "frame_update callees",
   "size": 560,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "menu_frame_"
 }

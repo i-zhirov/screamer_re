@@ -1,0 +1,35 @@
+{
+  "exe": "mnfmod.exe",
+  "map": "menu_frame.map",
+  "name": "menu_frame",
+  "run": {
+    "command": "mnfmod.exe > mnf_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mnf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_frame.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_frame_main.c"
+    }
+  ]
+}
