@@ -145,7 +145,10 @@ def le_facts(
     exe: le.LinearExecutable, main: int, call_site: int
 ) -> dict[str, dict[str, int | None]]:
     """Read the four facts from the image with the LE parser."""
-    starts = le.function_starts(exe)
+    try:
+        starts = le.function_starts(exe)
+    except ValueError:
+        starts = []
     below = [start for start in starts if start <= main]
     main_value = max(below) if below else None
     page = exe.page_at(PAGE0_MODULE)
@@ -277,6 +280,7 @@ def run_ghidra(
     original: Path,
     ghidra: Path,
     project_dir: Path,
+    log_path: Path,
     main: int,
     call_site: int,
 ) -> str:
@@ -288,6 +292,8 @@ def run_ghidra(
         str(original),
         "--project-dir",
         str(project_dir),
+        "--log",
+        str(log_path),
         "--main",
         f"{main:#x}",
         "--call-site",
@@ -326,15 +332,19 @@ def _text(value: object) -> str:
     return str(value)
 
 
-def _run_tool(function, *arguments) -> tuple[str, bool]:
+def _run_tool(function, *arguments) -> tuple[str, str, bool]:
     try:
-        return function(*arguments), True
+        return function(*arguments), "", True
     except subprocess.TimeoutExpired as error:
-        return _text(error.stdout), False
+        return _text(error.stdout), _text(error.stderr), False
     except subprocess.SubprocessError as error:
-        return _text(getattr(error, "stdout", "")), False
-    except OSError:
-        return "", False
+        return (
+            _text(getattr(error, "stdout", "")),
+            _text(getattr(error, "stderr", "")),
+            False,
+        )
+    except OSError as error:
+        return "", _text(error), False
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -395,14 +405,22 @@ def main(argv: list[str] | None = None) -> int:
     work_dir.mkdir(parents=True, exist_ok=True)
 
     le_view = le_facts(exe, args.main, args.call_site)
-    r2_text, r2_ok = _run_tool(
+    r2_text, r2_err, r2_ok = _run_tool(
         run_radare2, args.original, r2, args.main
     )
     (work_dir / "r2.txt").write_text(r2_text)
-    ghidra_text, ghidra_ok = _run_tool(
-        run_ghidra, args.original, ghidra, project_dir, args.main, args.call_site
+    (work_dir / "r2.err").write_text(r2_err)
+    ghidra_text, ghidra_err, ghidra_ok = _run_tool(
+        run_ghidra,
+        args.original,
+        ghidra,
+        project_dir,
+        work_dir / "ghidra.log",
+        args.main,
+        args.call_site,
     )
     (work_dir / "ghidra.txt").write_text(ghidra_text)
+    (work_dir / "ghidra.err").write_text(ghidra_err)
 
     r2_view = (
         parse_r2(r2_text, args.call_site)

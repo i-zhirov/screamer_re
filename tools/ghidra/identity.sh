@@ -28,6 +28,7 @@ FILTERED_NAME="identity-keys.txt"
 usage() {
     echo "usage: $0 --check" >&2
     echo "       $0 --exe PATH --project-dir DIR --main ADDR --call-site ADDR" >&2
+    echo "          [--log PATH]" >&2
 }
 
 check_mode() {
@@ -76,6 +77,7 @@ run_mode() {
     PROJECT_DIR=""
     MAIN=""
     CALL_SITE=""
+    LOG=""
     while [ "$#" -gt 0 ]; do
         case "$1" in
             --exe)
@@ -96,6 +98,11 @@ run_mode() {
             --call-site)
                 [ "$#" -ge 2 ] || { usage; exit 2; }
                 CALL_SITE="$2"
+                shift 2
+                ;;
+            --log)
+                [ "$#" -ge 2 ] || { usage; exit 2; }
+                LOG="$2"
                 shift 2
                 ;;
             *)
@@ -136,6 +143,11 @@ run_mode() {
         | sed -e 's/^INFO  LeIdentity\.java> //' \
               -e 's/ (GhidraScript)[[:space:]]*$//' \
               -e 's/[[:space:]]*$//' > "$FILTERED"
+
+    if [ -n "$LOG" ]; then
+        mkdir -p "$(dirname "$LOG")"
+        cp "$OUTPUT" "$LOG"
+    fi
 
     if [ "$STATUS" -ne 0 ]; then
         fail_run "analyzeHeadless failed with status $STATUS"

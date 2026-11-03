@@ -288,6 +288,15 @@ class StageEightTestCase(unittest.TestCase):
         self.assertEqual(len(checks.results), 4)
         self.assertTrue(all(not ok for _, ok, _ in checks.results))
 
+    def test_stage_eight_fails_all_four_on_an_unexpected_return_code(
+        self,
+    ) -> None:
+        result = subprocess.CompletedProcess([], 2, FOUR_AGREE_LINES, "")
+        checks, _ = self.run_stage(result)
+        self.assertEqual(len(checks.results), 4)
+        self.assertTrue(all(not ok for _, ok, _ in checks.results))
+        self.assertIn("the cross-check exited 2", checks.results[0][2])
+
     def test_stage_eight_passes_the_main_and_call_site_constants(self) -> None:
         result = subprocess.CompletedProcess([], 0, FOUR_AGREE_LINES, "")
         _, run_mock = self.run_stage(result)

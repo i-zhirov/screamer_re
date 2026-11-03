@@ -311,6 +311,26 @@ class IdentityRunTestCase(IdentityTestCase):
         result = self.run_with(body)
         self.assertEqual(result.returncode, 2, result.stderr)
 
+    def test_identity_run_saves_the_log_on_failure(self) -> None:
+        log = self.root / "ghidra.log"
+        keys = IDENTITY_KEYS.replace("call_target=0x10020\n", "")
+        self.fake_analyze_headless(self.prefixed("=== identity\n" + keys))
+        result = self.run_identity(
+            "--exe",
+            str(self.write_executable()),
+            "--project-dir",
+            str(self.root / "proj"),
+            "--main",
+            "0x10020",
+            "--call-site",
+            "0xd4364",
+            "--log",
+            str(log),
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertTrue(log.is_file())
+        self.assertIn("=== identity", log.read_text())
+
     def test_identity_run_rejects_a_missing_exe(self) -> None:
         result = self.run_identity(
             "--exe",

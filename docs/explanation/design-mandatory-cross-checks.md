@@ -125,8 +125,8 @@ A developer wants the raw view of one tool.
    `cross_check.py` by hand, **Then** the tool prints four fact lines and
    exits 0, 1, or 2.
 2. **Given** a failed run, **When** the developer reads
-   `<work-root>/cross-check/`, **Then** the raw `r2.txt` and `ghidra.txt`
-   outputs are present.
+   `<work-root>/cross-check/`, **Then** the raw `r2.txt`, `r2.err`,
+   `ghidra.txt`, `ghidra.err`, and `ghidra.log` outputs are present.
 
 ### Functional Requirements
 
@@ -370,14 +370,16 @@ flowchart LR
   - Ghidra: the seven `identity.sh` keys.
   - The compare is integer equality on every field of the fact.
 - **Failure Modes**: A missing tool or an invalid address exits 2. A tool
-  failure during the run exits 1. Raw output is saved under
-  `<work-root>/cross-check/`.
+  failure during the run exits 1. Raw stdout is saved in `r2.txt` and
+  `ghidra.txt`, stderr in `r2.err` and `ghidra.err`, and the Ghidra log in
+  `ghidra.log`, all under `<work-root>/cross-check/`.
 
 ### `tools/ghidra/identity.sh`
 
 - **Purpose**: Run `LeIdentity.java` and check the Ghidra setup.
 - **Interface**:
-  - `identity.sh --exe PATH --project-dir DIR --main ADDR --call-site ADDR`
+  - `identity.sh --exe PATH --project-dir DIR --main ADDR --call-site ADDR
+    [--log PATH]`
   - `identity.sh --check`
 - **Output**:
   ```text
@@ -398,6 +400,8 @@ flowchart LR
   - A run filters the `=== identity` marker, strips the
     `INFO  LeIdentity.java> ` prefix and the optional ` (GhidraScript)`
     suffix, and checks all seven keys before it exits 0.
+  - A run copies the full `analyzeHeadless` log to the `--log` path before
+    it removes the project directory on failure.
 - **Failure Modes**: A missing marker or key, or a Java `error:` line,
   makes the wrapper exit 2. It does not trust the `analyzeHeadless` exit
   code alone.
@@ -454,7 +458,8 @@ flowchart LR
     stage 8 and the tool preflight.
 - **Failure Modes**: A missing capstone, `r2`, or Ghidra exits 2 before
   stage 1. A difference adds FAIL checks and the run exits 1. A missing
-  fact line is FAIL.
+  fact line is FAIL. A cross-check return code outside 0 and 1 fails all
+  four facts.
 
 Skip modes:
 
@@ -528,8 +533,10 @@ prints `unknown`. An `unknown` field makes the fact `differ`.
 | capstone is absent | Preflight exits 2 with the shell command |
 | `r2` is absent | Preflight exits 2 with the shell command |
 | Ghidra or the loader is absent | Preflight exits 2 with the install command |
-| Ghidra analysis fails | Stage 8 reports four FAIL checks and exits 1 |
+| Ghidra analysis fails | Stage 8 reports four FAIL checks and exits 1. The log is kept |
 | Ghidra prints `error:` | `identity.sh` exits 2, stage 8 reports four FAIL checks |
+| A tool writes an error to stderr | `cross_check.py` saves `r2.err` or `ghidra.err` and keeps `ghidra.log` |
+| The cross-check exits 2 or higher | Stage 8 fails all four facts |
 | A fact differs | The fact line says `differ`, stage 8 fails that check |
 | A key is unresolved | The value is `unknown`, the fact is `differ` |
 | An address is not mapped | `cross_check.py` exits 2 with the address |
@@ -549,7 +556,8 @@ prints `unknown`. An `unknown` field makes the fact `differ`.
   The Ghidra project is disposable and lies under
   `<work-root>/cross-check/`.
 - **Observability**: Each fact line names the fact and the value from each
-  tool. The raw outputs stay under `<work-root>/cross-check/`.
+  tool. The raw outputs `r2.txt`, `r2.err`, `ghidra.txt`, `ghidra.err`, and
+  `ghidra.log` stay under `<work-root>/cross-check/`.
 - **Portability**: The loader check reuses the OS-specific logic in
   `install_loader.sh`. The tool paths come from the command line or
   `PATH`.
@@ -568,6 +576,8 @@ prints `unknown`. An `unknown` field makes the fact `differ`.
   `unknown`.
 - The wrapper test includes the ` (GhidraScript)` suffix and expects the
   suffix to be stripped.
+- The cross-check tests cover a missing entry object, a saved stderr, and a
+  return code outside 0 and 1.
 - A shell test covers `install_loader.sh --check` with a temporary
   `GHIDRA_INSTALL_DIR`, a fake `Ghidra/application.properties`, a temporary
   `GHIDRA_USER_DIR`, and a fake extension.

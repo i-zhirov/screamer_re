@@ -668,6 +668,11 @@ radare2, and Ghidra.  See
 [Program map](program-map.md) for the recovered structure and
 [Findings](../explanation/findings.md) for the cross-check table.
 
+The cross-check writes `r2.txt`, `r2.err`, `ghidra.txt`, `ghidra.err`, and
+`ghidra.log` under `<work-root>/cross-check/`.  The stderr files and the
+Ghidra log stay after a failed run.  `identity.sh --log PATH` selects the
+Ghidra log path.
+
 ## Decompilation with Ghidra
 
 Ghidra needs an LX/LE loader for the DOS/4GW executables.  Without the loader,

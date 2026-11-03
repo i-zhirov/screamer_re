@@ -202,6 +202,41 @@ class LeFactsTestCase(unittest.TestCase):
         self.assertIsNone(facts["main"]["main"])
         self.assertIsNone(facts["caller"]["caller"])
 
+    def test_le_facts_marks_a_missing_entry_object_unknown(self) -> None:
+        image = FakeImage()
+        with mock.patch.object(
+            cross_check.le,
+            "function_starts",
+            side_effect=ValueError("the entry object is missing"),
+        ), mock.patch.object(
+            cross_check.le, "nearest_function_start", return_value=None
+        ), mock.patch.object(
+            cross_check.le, "decode", return_value=[]
+        ):
+            facts = cross_check.le_facts(image, MAIN, CALL_SITE)
+        self.assertEqual(facts["entry"]["entry"], ENTRY)
+        self.assertIsNone(facts["main"]["main"])
+        self.assertIsNone(facts["caller"]["caller"])
+
+
+class ToolRunTestCase(unittest.TestCase):
+    def test_run_ghidra_passes_the_log_path(self) -> None:
+        with mock.patch.object(cross_check.subprocess, "run") as run:
+            run.return_value = subprocess.CompletedProcess(
+                [], 0, GHIDRA_TEXT, ""
+            )
+            cross_check.run_ghidra(
+                Path("STARTH.EXE"),
+                Path("tools/ghidra/identity.sh"),
+                Path("work/cross-check/ghidra/proj"),
+                Path("work/cross-check/ghidra.log"),
+                MAIN,
+                CALL_SITE,
+            )
+        command = run.call_args.args[0]
+        self.assertIn("--log", command)
+        self.assertIn("work/cross-check/ghidra.log", command)
+
 
 class CompareTestCase(unittest.TestCase):
     def test_compare_agrees_when_all_three_tools_match(self) -> None:
@@ -386,13 +421,18 @@ class MainTestCase(unittest.TestCase):
         ), mock.patch.object(
             cross_check,
             "run_radare2",
-            side_effect=subprocess.SubprocessError("radare2 failed"),
+            side_effect=subprocess.CalledProcessError(
+                1, ["r2"], "r2 out\n", "r2 error\n"
+            ),
         ), mock.patch.object(
             cross_check, "run_ghidra", return_value=GHIDRA_TEXT
         ):
             self.run_main()
-        self.assertTrue((self.work / "cross-check" / "r2.txt").is_file())
-        self.assertTrue((self.work / "cross-check" / "ghidra.txt").is_file())
+        work = self.work / "cross-check"
+        self.assertEqual((work / "r2.txt").read_text(), "r2 out\n")
+        self.assertEqual((work / "r2.err").read_text(), "r2 error\n")
+        self.assertTrue((work / "ghidra.txt").is_file())
+        self.assertTrue((work / "ghidra.err").is_file())
 
     def test_main_exits_two_on_an_invalid_main_address(self) -> None:
         image = FakeImage(mapped=(CALL_SITE,))

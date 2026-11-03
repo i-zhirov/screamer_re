@@ -604,6 +604,9 @@ def check_cross_tools(
         result = run(command, timeout=CROSS_CHECK_TIMEOUT_SECONDS)
         text = result.stdout
         detail = ""
+        if result.returncode not in (0, 1):
+            text = ""
+            detail = f"the cross-check exited {result.returncode}"
     except subprocess.TimeoutExpired:
         text = ""
         detail = "the cross-check timed out"
