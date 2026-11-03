@@ -185,7 +185,7 @@ The plan follows the size order, starting with the smallest functions.
     `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
     `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
     `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-    twenty-three Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+    twenty-four Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
     `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at
     `0x2e0b4`, `net_player_add` at `0x2dddc`, `object_init_from_file` at
     `0x4cc10`, `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`,
@@ -195,7 +195,7 @@ The plan follows the size order, starting with the smallest functions.
     `object_revolution_step` at `0x1d30c`, `startup` at `0x30170`,
     `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`,
     `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
-    `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`, and `ai_update`
-    at `0x205c4` are done; the
-    result is twenty-two verified modules, one matching module, and one hundred
-    and five open rebuilds).
+    `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`,
+    `ai_update` at `0x205c4`, and `sound_bank_load` at `0x1f2e0` are done;
+    the result is twenty-two verified modules, one matching module, and one
+    hundred and six open rebuilds).

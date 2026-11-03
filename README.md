@@ -125,9 +125,9 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-168 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 164 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 153 checks.  Both flags report 149 checks.
+180 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 176 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 165 checks.  Both flags report 161 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  CI runs the syntax gate and the unit suite on
