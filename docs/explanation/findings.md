@@ -9194,3 +9194,69 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module overlay_queue_update`,
   `work/rebuild/oqup_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x289bc`.
+
+## The opponent_update module at 0x20954
+
+- Observation: the original body at `0x20954` holds 134 instructions and 454
+  bytes up to the `ret` at `0x20b19`.  The plan row holds the same counts.  The
+  store record keeps the 456-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20954 --count 134` and
+  `tools/rebuild/functions/0x20954.json`.
+- Observation: the function has a frame.  It saves `edx`, `esi`, and `ebp`
+  before the frame, sets `ebp`, subtracts `0x14` from `esp`, and stores the
+  argument at `[ebp - 0x14]`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x20954` through `0x2095c`.
+- Observation: a clear flag `DAT_0010cf58` returns at once.  A set flag starts
+  the loop at the record base `DAT_0010f180` and ends it after
+  `DAT_0010f178 * 0xbc` bytes.
+  Evidence: the flag test at `0x2095f` and the end computation at `0x2096c`
+  through `0x2098f`.
+- Observation: a record runs when both absolute differences stay below 0xcb20:
+  `DAT_00113ccc` minus the field at `+0x20`, and `DAT_00113cd0` minus the field
+  at `+0x28`.  A record outside that range also runs when the argument is not
+  zero.  The loop advances by `0xbc` bytes.
+  Evidence: the distance code at `0x209aa` through `0x209dc` and the advance at
+  `0x20994` and `0x20997`.
+- Observation: a running record calls `0x22378` with `DAT_0010f174` and the
+  body at `+0x44` only when the argument is not zero.  It then calls `0x20b1c`
+  with the same two values and the `+0xc` float scaled by `DAT_00118e04`.
+  Evidence: the call at `0x209f0` and the call at `0x20a12`.
+- Observation: the function copies the float at `+0x78` to `+0x30`, copies
+  `+0x54`, `+0x58`, and `+0x5c` to `+0x20`, `+0x24`, and `+0x28`, and writes
+  the three copied values to the target record at `+8`, `+0xc`, and `+0x10`.
+  Evidence: the copies at `0x20a17` through `0x20a81`.
+- Observation: the target record comes from the pointer table at object-3
+  offset `0x653c`.  The index is the field at `+0x18`, the entry stride is
+  `0x1c`, and the first word of the entry holds the pointer.
+  Evidence: the index code at `0x20a23` through `0x20a39`.
+- Observation: the function scales the floats at `+0x2c`, `+0x30`, and `+0x34`
+  by 1024.0 / pi, truncates toward zero, masks with `0x7ff`, and writes the
+  three words at `+0x14`, `+0x18`, and `+0x1c`.  The constants are the float
+  1024.0 at object-3 offset `0xcd9` and the float pi at object-3 offset
+  `0xcdd`.
+  Evidence: the three scale blocks at `0x20a84` through `0x20afa` and the
+  constant bytes at file offset `0xf74d9`.
+- Observation: the function calls `0x21b9c` with the record and with 1 when the
+  argument is zero, and then it advances the loop.
+  Evidence: the call at `0x20b0a` and the clear set by `sete`.
+- Observation: the conversion helper at `0x4d9f4` truncates toward zero.  The
+  module uses the local truncating FPU stub `opponent_update_fpu.asm`, because
+  the shared `fpu_stub.asm` leaves the round-to-nearest mode.
+  Evidence: the helper at `0x4d9f4` through `0x4da10` and
+  `tools/rebuild/opponent_update_fpu.asm`.
+- Observation: the rebuilt module holds 94 instructions and 327 bytes.  The
+  identity check stays open at 14 of 94 instructions and 15 of 327 bytes.  The
+  V2 toolchain keeps the argument in `ebx`, holds the record and the end in
+  registers, folds the record stride into `imul`, and folds the table index
+  into one `imul`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20954 --rebuilt work/rebuild/oppmod.exe --rebuilt-map
+  work/rebuild/opponent_update.map --rebuilt-symbol opponent_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the clear flag, the zero count, the
+  near record with the zero and the one argument, the 0xcb20 boundary on x,
+  the far record on z, the forced far record, the two-record loop, the
+  truncating negative scale with the 0x7ff wrap, and the negative distance.
+  Evidence: `python3 tools/rebuild/harness.py run --module opponent_update`,
+  `work/rebuild/opp_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x20954`.

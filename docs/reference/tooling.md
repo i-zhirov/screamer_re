@@ -549,7 +549,10 @@ The files:
 | `race_panel_3_main.c` | the `race_panel_3` test harness: the 0x34-byte record table, the row cells, the 0.6 threshold, the four stubs, and the six paths |
 | `overlay_queue_update.c` | the rebuilt `overlay_queue_update` module: the gated source loop, the five-slot queue with the next-slot clear, the nine-record key compare, the store or xor through the value pointer, and the mismatch clear |
 | `overlay_queue_update_main.c` | the `overlay_queue_update` test harness: the source list, the enable bytes, the pending flags, the queue, the nine records, the table stub, and the seven paths |
-| `modules/*.json` | the one hundred and fifteen module records: the sources, the compiler, the link, and the run expectations |
+| `opponent_update.c` | the rebuilt `opponent_update` module: the flag gate, the 0xbc-byte record loop, the range test, the three callee calls, the motion copy, the target pointer table, and the three scaled angles |
+| `opponent_update_main.c` | the `opponent_update` test harness: the record list, the camera position, the two constants, the pointer table, the three stubs, and the ten paths |
+| `opponent_update_fpu.asm` | the `opponent_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and sixteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
