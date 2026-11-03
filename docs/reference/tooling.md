@@ -578,7 +578,10 @@ The files:
 | `object_collision.c` | the rebuilt `object_collision` module: the gate, the target scan over the 0x590-byte records, the two default ids, the rotation, the three formed values, the truncated distance store, and the release |
 | `object_collision_main.c` | the `object_collision` test harness: the object record, the record array, the six constants, the two default ids, the seven stubs, and the ten paths |
 | `object_collision_fpu.asm` | the `object_collision` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and twenty-six module records: the sources, the compiler, the link, and the run expectations |
+| `object_car_link.c` | the rebuilt `object_car_link` module: the two table pointers, the position copy, the five scaled and truncated values, the render array stores, and the flags |
+| `object_car_link_main.c` | the `object_car_link` test harness: the object record, the three table entries, the render arrays, the four constants, and the seven paths |
+| `object_car_link_fpu.asm` | the `object_car_link` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and twenty-seven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

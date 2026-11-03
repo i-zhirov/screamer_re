@@ -9981,3 +9981,65 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x1e00c --rebuilt work/rebuild/oclmod.exe --rebuilt-map
   work/rebuild/object_collision.map --rebuilt-symbol object_collision_`.
+
+## The object_car_link module at 0x1c84c
+
+- Observation: the original body at `0x1c84c` holds 238 instructions and 863
+  bytes up to the first `ret`.  The plan row holds the same counts.  The record
+  keeps the 864-byte extent to the next entry at `0x1cbac`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c84c --count 238`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x1c84c.json`.
+- Observation: the 28-byte entry at `DAT_0010653c + index * 28` supplies the
+  link pointer at field 0 and the render pointer at field 4.  The index is the
+  object field `+0x4dc`.  The object field `+4` selects a second entry, and its
+  field 0 is the target pointer.
+  Evidence: the reads at `0x1c85a` through `0x1c8a5`.
+- Observation: the function copies the position `+0x498`, `+0x49c`, and
+  `+0x4a0` into link offsets 8, 0xc, and 0x10.  It scales the floats `+0x4a4`,
+  `+0x4bc`, and `+0x4ac` by 1024.0 and divides by pi, then truncates and masks
+  the low 11 bits into link offsets 0x14, 0x18, and 0x1c.
+  Evidence: the block at `0x1c8a8` through `0x1c953`.
+- Observation: the floats `+0x4b0` and `+0x4b8` form two masked values.  The
+  render pointer indexes the arrays at `+0x2dc`, `+0x2d4`, `+0x2cc`, and
+  `+0x4e0` with a 32-byte stride.  The first value goes to offset 8 of each
+  array.  The second value goes to offset 8 of the first array and to offset
+  0x10 of the other three arrays.
+  Evidence: the block at `0x1c956` through `0x1ca40`.
+- Observation: the render array at `+0x58` supplies an integer at offset 8.
+  The function subtracts the angle `+0x418` divided by 15.0, truncates the
+  result, masks the low 11 bits, and clears bit 0.  The value goes to offset 8
+  of the arrays at `+0x58`, `+0x100`, `+0xac`, and `+0x154`.
+  Evidence: the block at `0x1ca43` through `0x1cae8`.
+- Observation: the target pointer receives the position at offsets 8 and 0x10,
+  the float `+0x2c4` at offset 0xc, and the first masked value at offset 0x18.
+  When the state `+0x2f8` is 0, it also receives the values at 0x14 and 0x1c.
+  The link pointer receives `+0x4e8` at offset 0x3c.
+  Evidence: the block at `0x1caeb` through `0x1cb54`.
+- Observation: the link flags at offset 0x20 come from the table at
+  `DAT_0010d268` indexed by the type `+0x2e0` with a 64-byte stride.  When the
+  field `+0x2c0` is 0, the function sets bit 0x4000.  When the angle `+0x418`
+  is at most 4000.0, it sets bit 0x2000.
+  Evidence: the block at `0x1cb57` through `0x1cba2`.
+- Observation: the four constants live in object 3.  The float at offset 0xaf4
+  is 1024.0, the float at 0xaf8 is pi, the float at 0xafc is 15.0, and the
+  float at 0xb00 is 4000.0.  The harness supplies the four values through
+  globals with the exact bit patterns.  The original truncates with the Watcom
+  helper at 0x4d9f4, so the module uses a local truncating FPU stub, because
+  the shared stub rounds to nearest.
+  Evidence: the reads at `0x1c8de`, `0x1c909`, `0x1c934`, `0x1c95f`,
+  `0x1c9d6`, `0x1ca58`, `0x1cb89`, and `tools/rebuild/object_car_link_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the state copy, the two flag bits, the
+  4000.0 threshold, the negative truncation, the 11-bit mask, and the table
+  selection.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_car_link`,
+  `work/rebuild/ocr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1c84c`.
+- Observation: the rebuilt module holds 152 instructions and 578 bytes.  The
+  identity check stays open at 29 of 578 bytes and 51 of 152 instructions.  The
+  V2 register use and the shared pointer form change the code shape.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1c84c --rebuilt work/rebuild/ocrmod.exe --rebuilt-map
+  work/rebuild/object_car_link.map --rebuilt-symbol object_car_link_`.
