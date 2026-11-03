@@ -9396,3 +9396,24 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module race_heading_update`,
   `work/rebuild/rhu_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x29610`.
+
+## The entry probe tolerates repeated log lines
+
+- Observation: DOSBox-X logs one instruction more than once, and the number of
+  repeats changes between runs.  The entry detector skipped only the repeats of
+  the entry jump itself.  When the log repeated the `sti` three times, the
+  `mov ebx,esp` line fell outside the two-line window.  The fallback then
+  selected the startup instruction as the entry, and stages 5 and 7 failed.
+  Evidence: the pipeline run on 2026-11-03 reported five failures, and
+  `work/entry/run/LOGCPU.TXT` held the entry at `0150:1F20F8` followed by three
+  `sti` lines and `mov ebx,esp`.
+- Observation: the detector now skips each run of equal log lines in the
+  primary scan and in the fallback scan.  A unit test uses a log with repeated
+  entry and `sti` lines.
+  Evidence: `python3 -m unittest tools.rebuild.tests.test_entry_probe` and
+  `python3 tools/entry_probe.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game` reports the entry
+  `0150:1F20F8` and the candidate `entry jump over the Watcom banner`.
+- Observation: the full pipeline then reports 164 checks and 0 failures.
+  Evidence: `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game`.

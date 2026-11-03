@@ -57,11 +57,15 @@ def detect_entry(
         if "jmp  short" not in body:
             continue
         following: list[str] = []
+        previous = (selector, eip, body)
         for step in range(index + 1, len(parsed)):
             next_selector, next_eip, next_body = parsed[step]
-            if (next_selector, next_eip) == (selector, eip):
-                # The debugger logs the current instruction twice.
+            current = (next_selector, next_eip, next_body)
+            if current == previous:
+                # The debugger logs an instruction more than once.  The number
+                # of repeats varies, so skip each run of equal lines.
                 continue
+            previous = current
             following.append(next_body[:60])
             if len(following) == window:
                 break
@@ -79,11 +83,16 @@ def detect_entry(
     for index, (selector, eip, body) in enumerate(parsed):
         for name, signature in candidates:
             if signature in body:
-                following = [
-                    parsed[index + step][2][:60]
-                    for step in range(1, window)
-                    if index + step < len(parsed)
-                ]
+                following: list[str] = []
+                previous = (selector, eip, body)
+                for step in range(index + 1, len(parsed)):
+                    current = parsed[step]
+                    if current == previous:
+                        continue
+                    previous = current
+                    following.append(current[2][:60])
+                    if len(following) == window:
+                        break
                 return {
                     "found": True,
                     "candidate": name,

@@ -798,9 +798,11 @@ python3 tools/dosboxx_control.py script \
 sets an interrupt breakpoint on the game stub's DOS4GW exec call
 (`BPINT 21 "4B"`), and starts a CPU instruction log.  The tool reads the
 growing log, reports the first game instruction, and then stops the emulation.
-The tool needs a terminal for the DOSBox-X debugger, so it runs the emulator
-under a pseudo terminal.  It writes only under `work/`.  It exits with code 0
-when it finds the entry and code 1 when it does not.
+The log scan skips each run of equal lines, because the debugger repeats an
+instruction a varying number of times.  The tool needs a terminal for the
+DOSBox-X debugger, so it runs the emulator under a pseudo terminal.  It writes
+only under `work/`.  It exits with code 0 when it finds the entry and code 1
+when it does not.
 
 ```sh
 python3 tools/entry_probe.py \
