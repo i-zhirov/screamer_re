@@ -9858,3 +9858,61 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module menu_space_init`,
   `work/rebuild/msimenu.txt`, and `python3 tools/rebuild/run.py run --function
   0x29d08`.
+
+## The object_gear_step module at 0x1d834
+
+- Observation: the original body at `0x1d834` holds 133 instructions and 635
+  bytes up to the first `ret`.  The plan row holds the same counts.  The record
+  keeps the 772-byte extent to the next entry at `0x1db38`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d834 --count 133`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x1d834.json`.
+- Observation: the function branches on the state at `+0x2f8` through the jump
+  table at `0x1d824`.  The table holds the CS-relative offsets `0xd8a8`,
+  `0xd85a`, `0xdaaf`, and `0xdac9` for the states 1 through 4.
+  Evidence: the `jmp dword ptr cs:[eax*4 + 0xd824]` at `0x1d852` and the
+  16 bytes at linear `0x1d824`.
+- Observation: the four constants live in object 3.  The float at
+  `0x100b2c` is 6000.0, the double at `0x100b30` is 0.4, the double at
+  `0x100b38` is 0.6, and the float at `0x100b40` is 12.566371.  The harness
+  supplies the four values through globals with the exact bit patterns.
+  Evidence: the reads at `0x1d97e`, `0x1d9d1`, `0x1da32`, and `0x1db0a`.
+- Observation: state 2 sets the state to 1, the timer `+0x2fc` to 3000.0, the
+  counter `+0x300` to 0, the velocities `+0x304` and `+0x308` to 12.0, and the
+  velocity `+0x30c` to 0.  State 1 integrates the position `+0x49c` and the
+  three velocities with the damping at `DAT_0010cf08 + 0x184`, and it
+  subtracts 6000.0 times the frame delta from the timer.
+  Evidence: the block at `0x1d85a` through `0x1d98d`.
+- Observation: when the position stays at or below the target at `+0x238`,
+  the function increments the counter, snaps the position to the target,
+  reflects the timer by 0.4, clears the three integrated values, sets the
+  velocity `+0x30c` from the counter parity and 0.6, sets the velocity
+  `+0x304` to -1.0, and clears the velocity `+0x308`.  When the counter passes
+  3, it clears the three integrated values and the state.
+  Evidence: the block at `0x1d993` through `0x1da65`.
+- Observation: state 3 sets the state to 4 and the velocity `+0x308` to 24.0.
+  State 4 damps that velocity, integrates it into `+0x318`, and clears the
+  value and the state when the value reaches 12.566371.
+  Evidence: the block at `0x1daaf` through `0x1db25`.
+- Observation: the rebuild uses an if-else chain, because the V2 switch jump
+  table at the start of the code object faults in the harness.  The same fault
+  shows in the earlier switch module `error_report`, whose stored run now
+  faults at linear 1.  The rebuild also uses a local truncating FPU stub,
+  because the shared stub rounds to nearest and the original helper at
+  `0x4d9f4` truncates toward zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module error_report` and
+  `work/rebuild/err_out.txt`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the state 1 and state 2 integration,
+  the two wrap branches, the counter reset, the negative truncation, the two
+  state 3 and state 4 branches, and the default path.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_gear_step`,
+  `work/rebuild/ogst_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1d834`.
+- Observation: the rebuilt module holds 109 instructions and 591 bytes.  The
+  identity check stays open at 73 of 591 bytes and 26 of 109 instructions.  The
+  if-else chain and the V2 register use change the code shape.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d834 --rebuilt work/rebuild/ogstmod.exe --rebuilt-map
+  work/rebuild/object_gear_step.map --rebuilt-symbol object_gear_step_`.

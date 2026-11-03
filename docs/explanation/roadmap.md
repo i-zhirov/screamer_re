@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred twenty-three named modules are rebuilt with the harness and the
+  progress: one hundred twenty-four named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -91,9 +91,10 @@ current host.
   `loading_screen` at `0x2a364`, `race_heading_update` at `0x29610`,
   `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`,
   `object_revolution_step` at `0x1d30c`, `startup` at `0x30170`,
-  `joystick_update` at `0x24da0`, and `menu_space_init` at `0x29d08`;
-  twenty-two modules are verified, one is matching, and one hundred rebuilds
-  hold the recorded difference; the
+  `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`, and
+  `object_gear_step` at `0x1d834`;
+  twenty-two modules are verified, one is matching, and one hundred and one
+  rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -190,7 +191,7 @@ The plan follows the size order, starting with the smallest functions.
     `loading_screen` at `0x2a364`, `race_heading_update` at `0x29610`,
     `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`,
     `object_revolution_step` at `0x1d30c`, `startup` at `0x30170`,
-    `joystick_update` at `0x24da0`, and `menu_space_init` at `0x29d08` are
-    done;
+    `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`, and
+    `object_gear_step` at `0x1d834` are done;
     the result is twenty-two verified modules, one matching module, and
-    one hundred open rebuilds).
+    one hundred and one open rebuilds).

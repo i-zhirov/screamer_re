@@ -572,7 +572,10 @@ The files:
 | `joystick_update.c` | the rebuilt `joystick_update` module: the control record walk, the duplicate search, the axis scaling, the two raw button paths, and the button state path |
 | `joystick_update_main.c` | the `joystick_update` test harness: the six control records, the axis table, the port table, the two stubs, and the twelve paths |
 | `joystick_update_fpu.asm` | the `joystick_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and twenty-four module records: the sources, the compiler, the link, and the run expectations |
+| `object_gear_step.c` | the rebuilt `object_gear_step` module: the state branches, the two initialization blocks, the two integration blocks, the position compare, the counter, and the two vector clears |
+| `object_gear_step_main.c` | the `object_gear_step` test harness: the object record, the two globals, the damping table, the four constants, and the eight paths |
+| `object_gear_step_fpu.asm` | the `object_gear_step` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and twenty-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
