@@ -10,7 +10,8 @@ Stages:
 5. entry probe: run the game in DOSBox-X and report the run-time entry.
 6. debugger session: run a session script that breaks in and reads CS:EIP.
 7. cross-check: compare the file view with the run-time view.
-8. radare2 cross-check: compare the parser with radare2 when it is on PATH.
+8. three-tool cross-check: compare the entry, the page-0 mapping, the main
+   function, and the main caller across the parser, radare2, and Ghidra.
 9. member probe: hook the container member open at run time.
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
 11. check_run: run every recorded check of the changed records, verify the
@@ -24,12 +25,15 @@ The check pins the reference artifact: the digests and the addresses come from
 with code 0 when every check passes and code 1 when a check fails.  It exits
 with code 2 before any stage when the debugger control port is already in use,
 the game directory is missing, the reference executable is missing or does not
-parse as an LE image, or the work root cannot be created.
+parse as an LE image, or the work root cannot be created.  Without
+`--skip-cross` it also exits with code 2 before any stage when capstone,
+radare2, or the Ghidra setup is unusable.
 
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
     python3 tools/pipeline_check.py --game-dir DIR [--skip-runtime]
+        [--skip-cross]
 """
 
 from __future__ import annotations
@@ -63,6 +67,7 @@ TOOLS = (
     "export_assets.py",
     "sound_bank.py",
     "member_probe.py",
+    "cross_check.py",
     "rebuild/diff_module.py",
     "rebuild/store.py",
     "rebuild/harness.py",
@@ -77,8 +82,19 @@ STARTH_SHA256 = "1246afc95463f96598d5fee764fc99c847b6d3e0bf8ca2268bd362c664bb28a
 ENTRY_OBJECT_OFFSET = 0x200F8
 ENTRY_MODULE_LINEAR = 0x300F8
 ENTRY_FILE_OFFSET = 0x3A8F8
+MAIN_LINEAR = 0x10020
+MAIN_CALL_SITE = 0xD4364
 ISO_PVD_OFFSET = 0x8000
 ISO_VOLUME_ID_OFFSET = 0x8028
+CROSS_CHECK_TIMEOUT_SECONDS = 2100.0
+
+# The four stage-8 fact names and their check labels, in output order.
+STAGE_EIGHT_CHECKS = (
+    ("entry", "stage 8: the entry agrees in all three tools"),
+    ("page0", "stage 8: the page-0 mapping agrees in all three tools"),
+    ("main", "stage 8: the main function agrees in all three tools"),
+    ("caller", "stage 8: the main caller agrees in all three tools"),
+)
 
 # The progress line of the runner: `[<i>/<n>] <label>: <verdict> (<detail>)`.
 PROGRESS_LINE = re.compile(r"^\[(\d+)/(\d+)\] (.+?): (PASS|FAIL|SKIP) \((.*)\)$")
@@ -498,38 +514,111 @@ def check_cross(
     )
 
 
-def check_radare2(checks: Checks, game_dir: Path, exe_name: str, timeout: float) -> None:
-    """Cross-check the parser against radare2 when it is on PATH."""
+def tool_preflight(skip_cross: bool, timeout: float) -> str | None:
+    """Return the command message of the first unusable tool, or None.
+
+    The tools are checked in the order capstone, radare2, and Ghidra.  The
+    `--skip-cross` flag disables both the check and the stage that needs the
+    tools.
+    """
+    if skip_cross:
+        return None
+    if not le_module.capstone_available():
+        return (
+            "error: the capstone library is missing; run the cross-check in: "
+            "nix develop .#cross-check"
+        )
     if shutil.which("r2") is None:
-        print("radare2 is not on PATH; the static cross-check is skipped")
-        return
-    target = str(game_dir / exe_name)
-    info = run(["r2", "-A", "-q", "-c", "ie", "-c", "iS", "-c", "q", target], timeout=timeout)
-    output = re.sub(r"\x1b\[[0-9;]*m", "", info.stdout)
-    checks.check(
-        "stage 8: radare2 reports the entry point",
-        "0x000300f8" in output,
-        "0x000300f8",
-    )
-    checks.check(
-        "stage 8: radare2 maps page 0 to the reference addresses",
-        "0x0001a800" in output and "0x00010000" in output,
-        "paddr 0x1a800, vaddr 0x10000",
-    )
-    listing = run(
-        ["r2", "-A", "-q", "-c", "s 0x10020; pdf", "-c", "q", target], timeout=timeout
-    )
-    text = re.sub(r"\x1b\[[0-9;]*m", "", listing.stdout)
-    checks.check(
-        "stage 8: radare2 finds the main function",
-        "fcn.00010020" in text,
-        "fcn.00010020",
-    )
-    checks.check(
-        "stage 8: radare2 reports the main caller",
-        "fcn.000d4324" in text and "0xd4364" in text,
-        "call from 0xd4364",
-    )
+        return (
+            "error: radare2 is missing; run the cross-check in: "
+            "nix develop .#cross-check"
+        )
+    try:
+        result = run(
+            ["sh", "tools/ghidra/identity.sh", "--check"], timeout=timeout
+        )
+    except (subprocess.TimeoutExpired, OSError) as error:
+        return (
+            f"error: the Ghidra setup is unusable: {error}; install the "
+            "loader with: nix develop .#cross-check --command sh "
+            "tools/ghidra/install_loader.sh"
+        )
+    if result.returncode != 0:
+        detail = last_line(result.stderr)
+        return (
+            "error: the Ghidra setup is unusable"
+            + (f": {detail}" if detail else "")
+            + "; install the loader with: nix develop .#cross-check "
+            "--command sh tools/ghidra/install_loader.sh"
+        )
+    return None
+
+
+def stage_enabled(stage: int, skip_runtime: bool, skip_cross: bool) -> bool:
+    """Tell whether a stage runs under the two skip flags."""
+    if stage == 8:
+        return not skip_cross
+    if skip_runtime and stage in (5, 6, 7, 9):
+        return False
+    return True
+
+
+def parse_fact_lines(text: str) -> dict[str, str]:
+    """Map each fact name to its full fact line.
+
+    Only the four fact prefixes are accepted, so unrelated tool output cannot
+    become a check.
+    """
+    facts: dict[str, str] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        for name, _ in STAGE_EIGHT_CHECKS:
+            if line.startswith(f"{name}: "):
+                facts[name] = line
+                break
+    return facts
+
+
+def check_cross_tools(
+    checks: Checks, game_dir: Path, exe_name: str, work_root: Path
+) -> None:
+    """Run the three-tool cross-check and add exactly four checks.
+
+    A fact line that agrees passes.  A fact line that differs fails with the
+    line as detail.  A missing fact line fails with `no fact line`, and a
+    timeout fails all four facts.
+    """
+    command = [
+        sys.executable,
+        "tools/cross_check.py",
+        "--original",
+        str(game_dir / exe_name),
+        "--main",
+        f"{MAIN_LINEAR:#x}",
+        "--call-site",
+        f"{MAIN_CALL_SITE:#x}",
+        "--work-root",
+        str(work_root),
+    ]
+    try:
+        result = run(command, timeout=CROSS_CHECK_TIMEOUT_SECONDS)
+        text = result.stdout
+        detail = ""
+        if result.returncode not in (0, 1):
+            text = ""
+            detail = f"the cross-check exited {result.returncode}"
+    except subprocess.TimeoutExpired:
+        text = ""
+        detail = "the cross-check timed out"
+    facts = parse_fact_lines(text)
+    for name, label in STAGE_EIGHT_CHECKS:
+        line = facts.get(name)
+        if line is None:
+            checks.check(label, False, detail or "no fact line")
+        elif line.startswith(f"{name}: agree"):
+            checks.check(label, True, line)
+        else:
+            checks.check(label, False, line)
 
 
 def recorded_records() -> dict[str, dict]:
@@ -791,6 +880,7 @@ def main() -> int:
     parser.add_argument("--timeout", type=float, default=300.0)
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
     parser.add_argument("--skip-runtime", action="store_true")
+    parser.add_argument("--skip-cross", action="store_true")
     args = parser.parse_args()
 
     if not args.skip_runtime and not debugger_port_free(args.port):
@@ -835,18 +925,25 @@ def main() -> int:
         )
         return 2
 
+    message = tool_preflight(args.skip_cross, args.timeout)
+    if message is not None:
+        print(message, file=sys.stderr)
+        return 2
+
     checks = Checks()
     check_syntax(checks)
     check_inventory(checks, game_dir)
     check_cd_image(checks, game_dir, work_root)
     parser_result = check_le_parser(checks, game_dir, args.exe)
-    if args.skip_runtime:
-        print("run-time stages skipped")
-    else:
+    if stage_enabled(5, args.skip_runtime, args.skip_cross):
         runtime = check_runtime(checks, game_dir, work_root, args.port, args.timeout)
         check_session_script(checks, work_root, args.port, args.timeout)
         check_cross(checks, parser_result, runtime, Path(runtime.get("log", "")))
-        check_radare2(checks, game_dir, args.exe, args.timeout)
+    else:
+        print("run-time stages skipped")
+    if stage_enabled(8, args.skip_runtime, args.skip_cross):
+        check_cross_tools(checks, game_dir, args.exe, work_root)
+    if stage_enabled(9, args.skip_runtime, args.skip_cross):
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
     check_run(checks, game_dir, args.skip_runtime)

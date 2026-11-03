@@ -1499,7 +1499,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 28 checks and 0 failures.  Evidence: the tool output.
+The check reports 61 checks and 0 failures in the `cross-check` shell.  It
+reports 57 checks with `--skip-cross`, 46 checks with `--skip-runtime`, and 42
+checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -5552,3 +5554,112 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game` with a listener on port 9876 exits 2 and prints the message.  The integration test `test_a_held_port_exits_two_before_any_stage` holds an ephemeral port, runs the command, and asserts the exit code 2, the message, no stage report, and no work directory.  The same preflight refuses a missing game directory, a missing reference executable, a reference executable that does not parse as an LE image, and a work root it cannot create, each with exit code 2 and no stage report; the integration tests `test_a_missing_game_dir_exits_two_before_any_stage`, `test_a_missing_exe_exits_two_before_any_stage`, `test_an_invalid_exe_exits_two_before_any_stage`, and `test_a_blocked_work_root_exits_two_before_any_stage` prove it.  `le.load` accepts the MZ header, the LE signature, and the tables of the reference image; the shipped `STARTH.EXE` is a DOS/4GW LE image, not a Windows PE image.
 - The member probe ends the capture when the game closes the control connection.  The probe's loop requested the debugger after the game exit, and the `ConnectionError` from the closed socket made the probe exit 1, so stage 9 reported `the member probe runs` as a failure.  `run_probe` now catches `ConnectionError` and `TimeoutError` in the capture loop, prints the number of observed members, and breaks, so the observed members stay the result and the tool exits 0.
   Evidence: the full pipeline with the earlier failing run reported `1 failures` and `error: DOSBox-X closed the control connection`; after the change the same command reports `57 checks, 0 failures`.  The unit tests `test_a_closed_connection_ends_the_capture` and `test_the_command_line_exits_zero` simulate the closed connection mid-capture, `test_a_read_timeout_ends_the_capture` and `test_the_command_line_exits_zero_after_a_timeout` simulate a timed-out `BREAK` read, `test_a_timeout_on_the_first_read_observes_no_members` and `test_the_command_line_exits_zero_with_no_members` simulate the timeout before the first member open, `test_a_timeout_on_the_final_read_keeps_the_full_list` and `test_the_command_line_exits_zero_after_the_full_list` simulate the timeout after the last member open, and `test_a_failure_on_the_final_write_keeps_the_full_list` and `test_the_command_line_exits_zero_after_the_final_write` simulate the timeout on the last member's repair write; without the handling the first of each pair raises the exception and the second reports `1 != 0`.
+
+## The rebuild checks use le.py, not Ghidra or radare2
+
+- No document states a decision to use `tools/le.py` in the rebuild checks
+  instead of Ghidra or radare2.  The role split is visible in the code and the
+  docs, but the project records no comparison.
+  Evidence: a search of `docs/` and `tools/rebuild/` finds no such statement.
+- The rebuild identity engine is the existing `tools/le.py`.  The framework
+  design keeps it unchanged.
+  Evidence: `docs/explanation/design-rebuild-instrumentation.md:262-263` maps
+  `diff_module.py` to `le.py`, and lines 523-525 say the framework does not
+  change the identity engine.
+- The module diff needs the raw machine bytes.  `diff_module.py` reads both
+  images with `le.py`, joins `Insn.raw` for each function body, and reports the
+  byte compare.  A decompiler returns C text, and a disassembler returns a text
+  listing, so neither gives a byte-for-byte verdict directly.
+  Evidence: `tools/rebuild/diff_module.py:1-7`, `:121-163`, and `:217-222`.
+- `le.py` is the only third-party disassembly dependency.  It loads capstone
+  through `ctypes`, and the LE parser itself uses the standard library.
+  Evidence: `tools/le.py:1-7` and `AGENTS.md:250-251`.
+- The input fingerprint treats the analysis code as a versioned input.
+  `TOOL_FILES` includes `le.py`, and `compute_fingerprint` hashes each tool
+  source.  A Ghidra project under `work/ghidra/proj`, the loader extension
+  outside the Nix store, and the radare2 analysis heuristics are not in the
+  fingerprint.
+  Evidence: `tools/rebuild/store.py:48-54` and `:349-391`, and
+  `AGENTS.md:301-312`.
+- A rebuild tool runs and exits and holds no state.  `le.py` is an importable
+  library.  Ghidra needs a project directory and a headless run.  radare2 needs
+  a subprocess and text parsing.
+  Evidence: `AGENTS.md:221-222`, `tools/rebuild/diff_module.py:121-143`, and
+  `tools/ghidra/decompile.sh:32-41`.
+- The dependency rule allows the standard library and one `ctypes` binding to
+  capstone.  Ghidra needs a second nixpkgs input and a manual extension
+  install.
+  Evidence: `AGENTS.md:250-251, 331-336`, `flake.nix:43-55`, and
+  `tools/ghidra/install_loader.sh:1-13`.
+- At the time of this finding, the radare2 cross-check was optional.  Stage 8
+  was skipped when `r2` was not on `PATH`.  The core rebuild checks then ran
+  on a host without `r2` or Ghidra.
+  Evidence: the stage-8 radare2 check at the time of this finding.  The
+  current gate is the mandatory three-tool cross-check.
+- The docs do not reject Ghidra or radare2 for LE parsing.  radare2 has a
+  native LE parser, and Ghidra reads LE through the LX/LE loader.
+  Evidence: `docs/reference/tooling.md:637-639` and `:653-656`.
+- The oracles supply what `le.py` lacks.  Ghidra applies the fixups, decompiles
+  to C, and lists references.  radare2 recovers more functions: 923 against
+  642.  `le.py` applies no fixup and does not decompress.
+  Evidence: `docs/reference/tooling.md:691-695` and `:745`, and the radare2
+  cross-check table in this page.
+- At the time of this finding, stage 8 used radare2 as the independent
+  cross-check of `le.py`.  It compared the entry point, the page 0 mapping,
+  `main`, and the `main` caller.
+  Evidence: the stage-8 radare2 check at the time of this finding.  The
+  current gate is the mandatory three-tool cross-check.
+- The records do not cite Ghidra or radare2.  The names and roles came from
+  `program-map.md` in a one-time import.
+  Evidence: a search of `tools/rebuild/functions/*.json` and
+  `tools/rebuild/modules/*.json` finds no such reference, and the import
+  finding in this page records the one-time import.
+- Unknown: the project holds no measurement of what the rebuild would gain or
+  lose if the identity engine used radare2 or Ghidra.  It has no such
+  comparison.
+- Note: the pipeline stage is now mandatory.  The bullets above record the
+  earlier state.  See
+  [The three-tool cross-check is mandatory](#the-three-tool-cross-check-is-mandatory).
+
+## The three-tool cross-check is mandatory
+
+- The full pipeline compares four identity facts from `tools/le.py`, radare2
+  6.2.4, and Ghidra 12.0.4.  Stage 8 runs the compare on every full run, and
+  the preflight refuses a missing capstone library, radare2, or Ghidra setup
+  before stage 1.
+  Evidence: `tools/cross_check.py`, `tools/pipeline_check.py`, and
+  `tools/ghidra/identity.sh`.
+- The three tools agree on the shipped `STARTH.EXE`:
+
+  ```text
+  entry: agree le=0x300f8 r2=0x300f8 ghidra=0x300f8
+  page0: agree le=0x1a800->0x10000 r2=0x1a800->0x10000 ghidra=0x1a800->0x10000
+  main: agree le=0x10020 r2=0x10020 ghidra=0x10020
+  caller: agree le=0xd4364@0xd4324->0x10020 r2=0xd4364@0xd4324->0x10020 ghidra=0xd4364@0xd4324->0x10020
+  ```
+
+  Evidence: `nix develop .#cross-check --command python3 tools/cross_check.py
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --main 0x10020 --call-site 0xd4364 --work-root work`.
+- The identity values are the entry `0x300f8`, page 0 at file `0x1a800` and
+  module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
+  `0xd4364` to `0x10020`.
+  Evidence: the four `agree` lines above.
+- The check counts are 61 checks for the full run, 57 checks with
+  `--skip-cross`, 46 checks with `--skip-runtime`, and 42 checks with both
+  flags.  `--skip-cross` skips stage 8 and the tool preflight.
+  `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
+  Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game` and the same
+  command with `--skip-cross`, with `--skip-runtime`, and with both flags.
+- The Ghidra loader creates the object blocks from a byte array, so the
+  source info has no file bytes offset.  The page-0 file offset comes from the
+  LE page table in the `.image` block.  Ghidra 12.0.4 appends
+  ` (GhidraScript)` to each logged script line, and `identity.sh` strips the
+  optional suffix.
+  Evidence: `tools/ghidra/LeIdentity.java` and `tools/ghidra/identity.sh`.
+- `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper
+  change updates every computed fingerprint, so the next verification run
+  re-verifies every record once.  The record files stay unchanged.
+  Evidence: `tools/rebuild/store.py` and the unchanged records under
+  `tools/rebuild/functions/`.
