@@ -1,0 +1,36 @@
+{
+  "exe": "rp3mod.exe",
+  "map": "race_panel_3.map",
+  "name": "race_panel_3",
+  "run": {
+    "command": "rp3mod.exe > rp3_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "rp3_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_3.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_3_main.c"
+    }
+  ]
+}

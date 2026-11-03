@@ -9069,3 +9069,72 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module pcx_load`,
   `work/rebuild/pcx_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x1b5a4`.
+
+## The race_panel_3 module at 0x2e58c
+
+- Observation: the original body at `0x2e58c` holds 120 instructions and 408
+  bytes up to the `ret` at `0x2e723`.  The plan row holds the same counts.  The
+  store record keeps the 408-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e58c --count 120` and
+  `tools/rebuild/functions/0x2e58c.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `esi`,
+  `edi`, and `ebp` before the frame, sets `ebp`, and subtracts `0x94` from
+  `esp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2e58c` through `0x2e594`.
+- Observation: the function draws the title pointer `DAT_0011fc34` through
+  `panel_draw_centered` at `0x2e7cc` with the y 2, the font 3, and the color 2.
+  Evidence: the call at `0x2e5ab`.
+- Observation: the index `DAT_001203c8` selects a 0x34-byte record from the
+  table at object-1 offset `0x1d908`.  The text sits at `+0x14` of the record.
+  The code computes the stride with `index * 4 - index`, two shifts, and an add.
+  Evidence: the stride arithmetic at `0x2e5b0` through `0x2e5d1`.
+- Observation: the function measures the text through `text_measure` at
+  `0x254a8` with the font 2.  It halves the measured width and height with a
+  signed division that truncates toward zero.  It sets x to
+  `(0x140 - width / 2) / 2` and y to `0xc8 - 2 * (height / 2)`.  It draws the
+  doubled position through `text_draw` at `0x25020` with the font 2 and the
+  color 2.
+  Evidence: the measure call at `0x2e5da`, the halving at `0x2e5df` through
+  `0x2e5fc`, the centering at `0x2e5ff` through `0x2e618`, and the draw call at
+  `0x2e64b`.
+- Observation: when `DAT_0012081c` stays below `DAT_00120818` and the low six
+  bits of the frame counter `DAT_000007fd` stay below 0x20, the function draws
+  the title pointer `DAT_0011fc54` through `panel_draw_centered` with the y
+  0x20, the font 1, and the color 2.
+  Evidence: the test at `0x2e650` through `0x2e668` and the call at `0x2e67e`.
+- Observation: a non-zero index draws the panel at (8, 0x64) through
+  `panel_show` at `0x2dfac`.  The size is 2 when `DAT_0012039c` stays below
+  `DAT_001203a8` and `DAT_0012037c` stays above 0.6.  Otherwise the size is 0.
+  Evidence: the test at `0x2e683` through `0x2e6c7` and the call at `0x2e6c9`.
+- Observation: the function draws the panel at (0xee, 0x64) when
+  `DAT_00120818` plus 2 differs from the index.  The size is 3 when
+  `DAT_0012039c` stays above `DAT_001203a8` and `DAT_0012037c` stays above 0.6.
+  Otherwise the size is 1.
+  Evidence: the test at `0x2e6ce` through `0x2e70c` and the call at `0x2e716`.
+- Observation: the threshold 0.6 is the double at object-3 offset `0x12ef`,
+  linear `0x1012ef`.  Both compares load the float `DAT_0012037c` and run
+  `fcomp` against that qword.
+  Evidence: the reads of `0x1012ef` and the compares at `0x2e69b` and
+  `0x2e6ef`.
+- Observation: the literal constant lands at DGROUP offset 0 in the rebuilt
+  image.  With the literal constant, the low-threshold path failed, so the
+  compare read a wrong value.  The rebuild reads the threshold through the
+  global `race_panel_3_threshold`, and the harness sets the exact double bits
+  `0x3fe3333333333333`.  The module uses the shared `fpu_stub.asm`, because it
+  has no conversion to an integer.
+  Evidence: the constant at object 2 offset 0 of `work/rebuild/rp3mod.exe`, the
+  failed low-threshold path, and `tools/rebuild/race_panel_3.c`.
+- Observation: the rebuilt module holds 98 instructions and 327 bytes.  The
+  identity check stays open at 23 of 98 instructions and 30 of 327 bytes.  The
+  V2 toolchain saves the frame pointer first, keeps the text in `esi`, folds the
+  stride into `imul`, and uses `cdq`.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2e58c --rebuilt work/rebuild/rp3mod.exe --rebuilt-map
+  work/rebuild/race_panel_3.map --rebuilt-symbol race_panel_3_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the zero index, the second title, the
+  row cell above and below, the low threshold value, the skipped second panel,
+  and the negative width that truncates toward zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_panel_3`,
+  `work/rebuild/rp3_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2e58c`.

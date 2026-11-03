@@ -1,17 +1,52 @@
 {
   "address": "0x2e58c",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "the overlay for the race state 3"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2e58c holds 120 instructions and 408 bytes: it draws the title pointer DAT_0011fc34 at y 2 with the font 3 and the color 2 through panel_draw_centered at 0x2e7cc, measures the text at +0x14 of the 0x34-byte record that the index DAT_001203c8 selects from the table at 0x1d908 through text_measure at 0x254a8, halves the measured width and height with a signed division, centers the half width on the 0x140 screen width, sets y to 0xc8 minus the doubled half height, draws the doubled position with the font 2 and the color 2 through text_draw at 0x25020, draws the title pointer DAT_0011fc54 at y 0x20 with the font 1 and the color 2 when DAT_0012081c stays below DAT_00120818 and the low six bits of DAT_000007fd stay below 0x20, draws the panel at (8, 0x64) with the size 2 when the index is not zero and DAT_0012039c stays below DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 0 otherwise, and draws the panel at (0xee, 0x64) with the size 3 when DAT_00120818 plus 2 differs from the index and DAT_0012039c stays above DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 1 otherwise through panel_show at 0x2dfac; the threshold 0.6 is the double constant at object-3 offset 0x12ef"
     }
   ],
+  "module": "race_panel_3",
   "name": "race_panel_3",
   "notes": [],
-  "role": "the overlay for the race state 3",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 30,
+        "bytes_total": 327,
+        "detail": "the instruction counts differ, 120 and 98",
+        "instructions_equal": 23,
+        "instructions_total": 98,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e58c",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:f66be3573e75b52d64f820614ac1242a0c704db7defb1854ce71f7b12cfab6dd",
+    "source_digest": "sha256:950a7abeaf6fd57b3a89f265464a9aaed37ad4e4c64b281c51cc0700a7c52b54",
+    "tool": "run.py"
+  },
+  "role": "draws the race state 3 title, the measured player row text, the second title, and the two status panels",
   "section": "race_frame callees",
   "size": 408,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_panel_3_"
 }

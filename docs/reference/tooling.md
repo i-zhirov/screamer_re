@@ -545,7 +545,9 @@ The files:
 | `object_init_from_file_main.c` | the `object_init_from_file` test harness: the file record, the object record, the 1002-slot handle table, the message stub, and the four paths |
 | `pcx_load.c` | the rebuilt `pcx_load` module: the path build, the open, the two seeks, the palette read and the 6-bit shift, the header read, the size arithmetic, and the RLE decode |
 | `pcx_load_main.c` | the `pcx_load` test harness: the base path, the simulated PCX member, the stream stubs, the open and error stubs, and the four paths |
-| `modules/*.json` | the one hundred and thirteen module records: the sources, the compiler, the link, and the run expectations |
+| `race_panel_3.c` | the rebuilt `race_panel_3` module: the two title calls, the measured row text, the signed halving, the centered doubled position, the second title, and the two status panels |
+| `race_panel_3_main.c` | the `race_panel_3` test harness: the 0x34-byte record table, the row cells, the 0.6 threshold, the four stubs, and the six paths |
+| `modules/*.json` | the one hundred and fourteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
