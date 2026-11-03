@@ -28,23 +28,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 47,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 1,
+        "bytes_equal": 25,
+        "bytes_total": 51,
+        "detail": "the modules hold the same instructions in a different order",
+        "instructions_equal": 16,
         "instructions_total": 16,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:f8c456bf105c8d0589302f11915e94ea2d319de93252bad24514f0e27d73cbf5",
-    "source_digest": "sha256:2c0c4ec2df8a438358b4cea7b47cde8599a9551404784bfcbb35ae5da82a291c",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:b18c83c520fbcf1bad1d5716eda91da0a3f83902cef6d48b1a63607e8a253644",
+    "source_digest": "sha256:ff990c492fca9b60bcc52b2a2ac5e76da9bd652586840528cd087320ad3f610c",
     "tool": "run.py"
   },
   "role": "dispatches on the code through a jump table to one message stub per code",
   "section": "Program functions",
   "size": 556,
-  "status": "rebuilt",
+  "status": "matching",
   "symbol": "error_report_"
 }

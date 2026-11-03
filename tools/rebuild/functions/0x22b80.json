@@ -35,9 +35,9 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22b80",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:385c98e67292ab21fdd450afd82dae8fa2640a661ce5d9ef79bd0855fa742f68",
-    "source_digest": "sha256:36b6982b09438f825c80ca24c836cc3460f4182db52f92946d95e363119d6837",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:c661e174bacdc6b29548adcc1311296601bd15650e86e5b21fa120baf15692b3",
+    "source_digest": "sha256:5d00accbc31851f2ce9da5bc7562f429262f01d24d8190191310e2be0f93b907",
     "tool": "run.py"
   },
   "role": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08`",

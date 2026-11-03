@@ -30,6 +30,7 @@ jobs:
             tools/rebuild/run.py \
             tools/rebuild/view.py \
             tools/rebuild/docs.py \
+            tools/cross_check.py \
             tools/pipeline_check.py
       - name: run the unit suite
         run: python3 -m unittest discover -s tools/rebuild/tests
@@ -53,7 +54,8 @@ jobs:
   pipeline:
     name: full pipeline
     # The full check needs the installed game and DOSBox-X, so it runs only on a
-    # self-hosted runner that holds both.  Set the repository variable
+    # self-hosted runner that holds both.  The cross-check shell also needs Nix
+    # and the installed LX loader.  Set the repository variable
     # SCREAMER_SELF_HOSTED to true to enable the job.
     if: vars.SCREAMER_SELF_HOSTED == 'true'
     runs-on: [self-hosted, macOS, screamer-artifacts]
@@ -64,4 +66,4 @@ jobs:
           SCREAMER_GAME_DIR: ${{ vars.SCREAMER_GAME_DIR }}
         run: |
           GAME_DIR="${SCREAMER_GAME_DIR:-$HOME/Documents/Screamer.app/Contents/Resources/game}"
-          python3 tools/pipeline_check.py --game-dir "$GAME_DIR"
+          nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir "$GAME_DIR"

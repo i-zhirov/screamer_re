@@ -36,8 +36,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2dfac",
-    "date": "2026-10-30",
-    "fingerprint": "sha256:8696ef00ad7c0ee972cf628fd287b44d7d7c1c47e728ed7b11f18d73d71db501",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:afdb9ad46aff2587ec7bff11bbf8d5677c5f31f1b529e38a734ffaea05c59290",
     "source_digest": "sha256:a8f36f263f32a0c7de728eba38244afe558e97c50bab3f8a8cb500edf4b3ff82",
     "tool": "run.py"
   },

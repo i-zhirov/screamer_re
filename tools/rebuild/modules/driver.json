@@ -12,8 +12,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --module driver",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:89a4ab4ba18785f83f9cee4dd8cf6df1f90b28940f806bf5f3b52910977a025f",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:fa51f43a88cdc7b09449a02f67d118d56c84a783e8d1518c6b8520f1310e9727",
     "source_digest": "sha256:94633c923d23983e742fa45704f85762f7b566499a006ce6c9b150043bae15da",
     "tool": "run.py"
   },

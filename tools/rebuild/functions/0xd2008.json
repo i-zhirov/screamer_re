@@ -35,8 +35,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd2008",
-    "date": "2026-11-01",
-    "fingerprint": "sha256:c052baffd5e9d0a9cc842ff8f8337119f149f2be547bdf8a977c233db2347a60",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:15f0b76ea6ef1f829ebb1ce72c9ac6ad8d1a46d272706c8446ba44dfbf92c56f",
     "source_digest": "sha256:60836ee4588741f92d83a4ed89b97fc687238f61a9aa0ea6189e4a568ef61ebb",
     "tool": "run.py"
   },

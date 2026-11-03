@@ -9,12 +9,15 @@
 | `tools/inventory.py` | build a file inventory with SHA-256 digests |
 | `tools/dosboxx_control.py` | drive the DOSBox-X debugger over its control socket |
 | `tools/entry_probe.py` | find the program entry in a DOSBox-X instruction log |
+| `tools/cross_check.py` | compare four identity facts across `le.py`, radare2, and Ghidra |
 | `tools/pipeline_check.py` | run the pipeline end to end and check the stages agree |
 | `tools/gfx_container.py` | list and extract the members of a graphics container |
 | `tools/export_assets.py` | export the graphics assets as PNG files |
 | `tools/sound_bank.py` | decode the sound formats: the banks, the samples, and the songs |
 | `tools/member_probe.py` | hook the container member open and report the member names |
-| `tools/ghidra/install_loader.sh` | install the LX/LE loader into Ghidra |
+| `tools/ghidra/install_loader.sh` | install or check the LX/LE loader in Ghidra |
+| `tools/ghidra/identity.sh` | run the Ghidra identity script or check the Ghidra setup |
+| `tools/ghidra/LeIdentity.java` | the Ghidra headless identity script |
 | `tools/ghidra/decompile.sh` | decompile functions by address with Ghidra |
 | `tools/ghidra/DecompileFunctions.java` | the Ghidra headless decompile script |
 | `tools/ghidra/FindReferences.java` | the Ghidra headless reference listing script |
@@ -827,41 +830,46 @@ to `LOGCPU.TXT` in the DOSBox-X working directory.
 
 The tool runs every stage of the pipeline and checks that the stages agree: the
 syntax gate, the inventory, the CD image, the LE parser, the entry probe, the
-debugger session script, the cross-checks between the file view and the run-time
-view, the radare2 cross-check, the container member probe, the sound bank decode,
-the record run, and the store check.  The check pins the reference values from
-the reference pages.  The tool exits with code 0 when every check passes.  The
-radare2 stage is skipped when `r2` is not on PATH, and the record run is skipped
-when Docker is missing.  The tool checks the debugger control port before the
-run-time stages: when another process holds the port, it prints a clear error
-and exits with code 2 before any stage.  Before any stage it also refuses a
-missing game directory, a missing reference executable, a reference executable
-that does not parse as an LE image, and a work root it cannot create, with the
-same exit code.  Use `--port` to pick another port.
-when Docker is missing.  The member probe stage caps the probe at the 55-open
-demo window and repeats it once when the control connection closes or times out
-before the first member, because that failure is transient.  It also repeats the
-probe once when a mid-run timeout ends the run before the sample loads, because
-the fallback then makes the run look successful.
+debugger session script, the cross-check between the file view and the run-time
+view, the three-tool cross-check, the container member probe, the sound bank
+decode, the record run, and the store check.  Stage 8 compares the entry, the
+page-0 mapping, the main function, and the main caller from `le.py`, radare2,
+and Ghidra.  It adds exactly four checks.  The check pins the reference values
+from the reference pages.  The tool exits with code 0 when every check passes.
+The record run is skipped when Docker is missing.  The member probe stage caps
+the probe at the 55-open demo window and repeats it once when the control
+connection closes or times out before the first member, because that failure is
+transient.  It also repeats the probe once when a mid-run timeout ends the run
+before the sample loads, because the fallback then makes the run look
+successful.  The tool checks the debugger control port before the run-time
+stages: when another process holds the port, it prints a clear error and exits
+with code 2 before any stage.  Before any stage it also refuses a missing game
+directory, a missing reference executable, a reference executable that does not
+parse as an LE image, and a work root it cannot create, with the same exit
+code.  Use `--port` to pick another port.  It also refuses a missing capstone
+library, radare2, or Ghidra setup, unless `--skip-cross` is set.
 
 ```sh
-python3 tools/pipeline_check.py \
+python3 tools/rebuild/harness.py build --module driver
+nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
 The record run of stage 11 builds and runs every module record, so it needs
 more time as the module count grows.  Use `--record-timeout` to raise the
-budget of that one subprocess; the default is 1200 seconds:
+budget of that one subprocess; the default is 3000 seconds:
 
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
-  --record-timeout 1800
+  --record-timeout 3600
 ```
 
-A run takes about 15 minutes and reports one check per module record in stage
-11 plus the fixed stages.  Use `--skip-runtime` to skip the run-time stages:
-it takes about 16 seconds.
+A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
+import and reports 168 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 164 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 153 checks.  Both flags
+report 149 checks and take about 16 seconds.
 
 The check runs in three places:
 
@@ -889,10 +897,20 @@ nix develop
 r2 -v
 ```
 
-The shell provides Python 3.14.8, capstone 5.0.9, and radare2 6.2.4. 
+The shell provides Python 3.14.8, capstone 5.0.9, and radare2 6.2.4.
 `flake.lock`
 pins the nixpkgs revision.  DOSBox-X stays on Homebrew, because the run-time
 probe depends on the debugger control socket of the tested version.
+
+The full check runs in the `cross-check` shell.  It carries Python, capstone,
+radare2, Ghidra, `curl`, and `unzip`:
+
+```sh
+nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
+python3 tools/rebuild/harness.py build --module driver
+nix develop .#cross-check --command python3 tools/pipeline_check.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+```
 
 ## Static cross-check with radare2
 
@@ -906,9 +924,16 @@ r2 -A -q -c "s 0x10020; pdf" -c "q" STARTH.EXE
 ```
 
 The addresses are module addresses.  They agree with `tools/le.py` and with the
-run-time log.  See
+run-time log.  Stage 8 now enforces the three views.  It compares the entry,
+the page-0 mapping, the main function, and the main caller from `le.py`,
+radare2, and Ghidra.  See
 [Program map](program-map.md) for the recovered structure and
 [Findings](../explanation/findings.md) for the cross-check table.
+
+The cross-check writes `r2.txt`, `r2.err`, `ghidra.txt`, `ghidra.err`, and
+`ghidra.log` under `<work-root>/cross-check/`.  The stderr files and the
+Ghidra log stay after a failed run.  `identity.sh --log PATH` selects the
+Ghidra log path.
 
 ## Decompilation with Ghidra
 
@@ -921,6 +946,18 @@ Install the loader once per user:
 
 ```sh
 nix develop .#ghidra --command sh tools/ghidra/install_loader.sh
+```
+
+Check the installed loader without a download:
+
+```sh
+nix develop .#cross-check --command sh tools/ghidra/install_loader.sh --check
+```
+
+Check the full Ghidra setup:
+
+```sh
+nix develop .#cross-check --command sh tools/ghidra/identity.sh --check
 ```
 
 The script downloads the `yetmorecode/ghidra-lx-loader` release into
@@ -957,7 +994,8 @@ same
 result.
 
 The loader reports the same addresses as `tools/le.py` and radare2, so the three
-views agree.  See [Program map](program-map.md) for the named functions.
+views agree.  Stage 8 now enforces the three views on every full run.  See
+[Program map](program-map.md) for the named functions.
 
 ## Run the game
 

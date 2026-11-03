@@ -26,17 +26,17 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
+        "bytes_equal": 22,
         "bytes_total": 54,
         "detail": "the instruction counts differ, 25 and 26",
-        "instructions_equal": 17,
+        "instructions_equal": 19,
         "instructions_total": 25,
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ed77",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:28a96062c9055c734cbcf074de49108f5d74802fb279507f90d9beaf71a77d9b",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:08f61c2d2cc341e0798bc354e116ff7d47932bacea55b4e527dac769e0a7fb44",
     "source_digest": "sha256:1965e1bbfbddc85bc15f105987dfbda1eccb5424a77c48aa97fb56f0c430b223",
     "tool": "run.py"
   },

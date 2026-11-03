@@ -40,8 +40,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10020",
-    "date": "2026-11-01",
-    "fingerprint": "sha256:4ea6c92e4c110cfea3d525f26cfc0514077c7671cf4e04cae1949eae4a141b41",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:178bcbbcd05641b2c61b62fcf0dc849a991dd3a76178936c6f20f046ba8fa317",
     "source_digest": "sha256:fc4fc31170526e3457fdf63d42abd2507fb33ba0a1fdc8881c73aab3ca9c7cd0",
     "tool": "run.py"
   },

@@ -54,6 +54,23 @@
               export PATH="$GHIDRA_INSTALL_DIR/support:$PATH"
             '';
           };
+
+          # All three views for the mandatory cross-check.  The Ghidra pin
+          # matches the LX/LE loader extension.
+          cross-check = pkgs.mkShell {
+            packages = [
+              pkgs.python3
+              pkgs.capstone
+              pkgs.radare2
+              ghidraPkgs.ghidra
+              pkgs.curl
+              pkgs.unzip
+            ];
+            shellHook = ''
+              export GHIDRA_INSTALL_DIR="${ghidraPkgs.ghidra}/lib/ghidra"
+              export PATH="$GHIDRA_INSTALL_DIR/support:$PATH"
+            '';
+          };
         }
       );
     };

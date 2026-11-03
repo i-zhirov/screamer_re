@@ -35,9 +35,9 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29564",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:7a8bcfacfde081f68f9607a4335b16924890afb9fbfdf89d3ef7b41df936c712",
-    "source_digest": "sha256:973d892afc4e0d03efa493cb495266001738cae083c0f8c801cb5a2146af6ef9",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:91705d9ad660d45052e17ea68a2e9174b84a038786cb3310fe4faaa0640d5cc7",
+    "source_digest": "sha256:fc917e0a8f178158f6a7d416b662790f28cb42a25b8255a0dfc3714ecc430daa",
     "tool": "run.py"
   },
   "role": "switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8`",

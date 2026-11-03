@@ -39,9 +39,9 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15720",
-    "date": "2026-11-01",
-    "fingerprint": "sha256:87e46de6053fa505735accb817abd70a5648cc360dd21899a351415d86466cfa",
-    "source_digest": "sha256:3d469ae7988febfa3b29651a48082241ff8a3702c00d7a393f15a344d4b298f0",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:66de9cf7f4dec3abf2650e7fb7c980264db9e239712809ac9cb2f7eda6d1ed0c",
+    "source_digest": "sha256:080ac19ccf386b69772c55e5dd39616aa13e456099031760909e8a3067e7f8ac",
     "tool": "run.py"
   },
   "role": "fills the 50-row by 100-column palette table with the power ramp `pow(j * 0.005f + 0.5, 50.0 / (i + 1))`",
