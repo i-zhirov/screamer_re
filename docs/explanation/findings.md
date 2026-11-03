@@ -8068,13 +8068,13 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   identity check stays open: 19 of 62 instructions and 24 of 219 bytes match.
   The store records the status `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x1f1a0 --rebuilt work/rebuild/msimod.exe --rebuilt-map
+  --original-address 0x1f1a0 --rebuilt work/rebuild/msimenu.exe --rebuilt-map
   work/rebuild/mouse_init.map --rebuilt-symbol mouse_init_`.
 - Observation: the behavior check passes.  The harness prints the markers `0`
   through `4` and `D`.  The paths cover the two exit paths, the zero setup word,
   the success path, and the failed handler install.
   Evidence: `python3 tools/rebuild/harness.py run --module mouse_init`,
-  `work/rebuild/msi_out.txt`, and `python3 tools/rebuild/run.py run --function
+  `work/rebuild/msimenu.txt`, and `python3 tools/rebuild/run.py run --function
   0x1f1a0`.
 - Limit: the library function names are inferred from the register use and the
   call order.  The original has no symbol name for these calls.
@@ -9804,3 +9804,57 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module joystick_update`,
   `work/rebuild/joy_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x24da0`.
+
+## The menu_space_init module at 0x29d08
+
+- Observation: the original body at `0x29d08` holds 156 instructions and 632
+  bytes.  The plan row holds the same counts.  The record keeps the 632-byte
+  extent, so the identity check uses the whole body.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29d08 --count 156`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x29d08.json`.
+- Observation: the function requests the `NET_SPACE` resource with the size
+  `0x2000` and the `OPT_PCX` resource with the size `0x3e800`.  A zero result
+  runs the memory error report at `0x2edad`, and the function continues.
+  Evidence: the calls at `0x29d2a` and `0x29e37` and the two error branches at
+  `0x29d2f` and `0x29e41`.
+- Observation: the function builds `%s\gfx\graf.dat` and `%s\gfx\menu.dat` from
+  the base path at `0x7edc`.  It builds the sprite member `menuH.spr` and the
+  font member `menuH.fnt`, with `0x48` as the character.  A non-zero sprite or
+  font result runs the cleanup at `0x15150`.
+  Evidence: the `sprintf` calls at `0x29d93`, `0x29da6`, `0x29dcd`, and
+  `0x29dfa`, the string table at `0x100f4d`, and the two branches at
+  `0x29db9` and `0x29de0`.
+- Observation: the function stores the rectangle `0`, `0`, `0x280`, and
+  `0x190` at `DAT_00015ce4` through `DAT_00015cf0` and sets the screen with
+  `0x140`, `0x190`, and `0xc8` at `0x4c850`, which doubles the first value to
+  the width 640 and holds the height 400.
+  Evidence: the stores at `0x29d78` through `0x29d8d` and the call at
+  `0x29e23`.
+- Observation: the function loads four member lists with the base pointers at
+  `DAT_0001fb70`, `DAT_0001fb74`, `DAT_0001fb78`, and `DAT_0001fb7c` and the
+  pointer arrays at `0x1fb80`, `0x1fd10`, `0x1fea0`, and `0x20030`.  It then
+  loads the two list files `GEN`/`MENU`/`CHEATS` and `GEN`/`MENU`/`SOUND_FX`
+  with the strides and counts `0x18`/`0xc` and `0x24`/`0x24`.
+  Evidence: the four calls at `0x29e6f`, `0x29e83`, `0x29e9c`, and
+  `0x29eb5`, and the two calls at `0x29ee0` and `0x29efd`.
+- Observation: the music path runs only when `DAT_0001d2cc` is not zero.  It
+  applies the input state `DAT_00001f04 + 1`, builds `music%d` from
+  `DAT_00001f04`, loads the track into the record `0x62b0`, and selects it
+  with 1.
+  Evidence: the flag test at `0x29f27`, the input apply at `0x29f3b`, the
+  `sprintf` call at `0x29f50`, and the two music calls at `0x29f60` and
+  `0x29f6f`.
+- Observation: the rebuilt module holds 151 instructions and 637 bytes.  The
+  identity check stays open at 72 of 632 bytes and 46 of 151 instructions.
+  OpenWatcom V2 saves the registers after the frame, uses other local offsets,
+  and forms the calls in another order.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29d08 --rebuilt work/rebuild/msimenu.exe --rebuilt-map
+  work/rebuild/menu_space_init.map --rebuilt-symbol menu_space_init_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover the normal path, the two load
+  failures, the music path, and the two zero resources.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_space_init`,
+  `work/rebuild/msimenu.txt`, and `python3 tools/rebuild/run.py run --function
+  0x29d08`.

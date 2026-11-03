@@ -1,17 +1,48 @@
 {
   "address": "0x29d08",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music"
+      "text": "the original at 0x29d08 holds 156 instructions and 632 bytes: the five register saves, the EBP frame with the two local name buffers, the NET_SPACE resource request at 0x2eed0 with the size 0x2000, the choice_load call at 0x1bbc8, the two zero stores at DAT_0002082c and DAT_0002087c, the state_cells_set call at 0x8bd54 with 0xffff54e0, the font table init at 0x25620, the sound slot init at 0x257a0, the rectangle constants at DAT_00015ce4 through DAT_00015cf0, the four sprintf calls at 0x4d32c for the graf path, the sprite member, the font member, and the menu path, the sprite load at 0x257b0, the font load at 0x25658, the cleanup at 0x15150 on a non-zero result, the graphics name copy at 0x10ba4, the material list load at 0x4cd9c, the screen mode set at 0x4c850, the OPT_PCX resource request at 0x2eed0 with the size 0x3e800, the memset at 0x8c160, the video_fill call at 0x2aa98, the four member list loads at 0x1b394 into DAT_0001fb80, DAT_0001fd10, DAT_0001fea0, and DAT_00020030, the two list file loads at 0x15460, the sound bank load at 0x1f2e0, the objects init at 0x2aab8, the view_move call at 0x1f94c, the input apply at 0x263cc, the two music calls at 0x2fcec and 0x2febc behind the flag DAT_0001d2cc, and the epilogue; the harness prints the markers 0, 1, 2, 3, and D for the normal path, the two load failures, the music path, and the two zero resources; the behavior check passes, the rebuild holds 151 instructions and 637 bytes, and the identity check stays open at 72 of 632 bytes and 46 of 151 instructions because OpenWatcom V2 saves the registers after the frame and uses other local offsets"
     }
   ],
+  "module": "menu_space_init",
   "name": "menu_space_init",
   "notes": [],
-  "role": "loads the `NET_SPACE` resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 72,
+        "bytes_total": 632,
+        "detail": "the instruction counts differ, 156 and 151",
+        "instructions_equal": 46,
+        "instructions_total": 151,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29d08",
+    "date": "2026-11-03",
+    "fingerprint": "sha256:d7b61027ad413204ed675ebe68fc6c052fd09b6a060ebd62ed95e588af9414df",
+    "source_digest": "sha256:f9bfbaadfdd915e3f5141ee92c61a9d3917259f29443e930bbc1bd87bd75a29c",
+    "tool": "run.py"
+  },
+  "role": "loads the NET_SPACE resource, builds the menu graphics and the menu model, sets the 640x400 screen, and starts the menu music",
   "section": "frame_update callees",
   "size": 632,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "menu_space_init_"
 }
