@@ -586,7 +586,9 @@ The files:
 | `ai_update.c` | the rebuilt `ai_update` module: the record loop, the motion advance, the three angle turns, the speed fall, the collision branch, the vertical clamp, the stopped branch, and the publish block |
 | `ai_update_main.c` | the `ai_update` test harness: the four records, the target table, the collision outputs, the constants, the two stubs, and the eleven paths |
 | `ai_update_fpu.asm` | the `ai_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and twenty-nine module records: the sources, the compiler, the link, and the run expectations |
+| `sound_bank_load.c` | the rebuilt `sound_bank_load` module: the setup gate, the path build, the sample record loop, the 0x74-byte template copy, the resource read, the type map, and the flags |
+| `sound_bank_load_main.c` | the `sound_bank_load` test harness: the setup word, the sample count, the base path, the eight input records, the eight result records, the six stubs, and the five paths |
+| `modules/*.json` | the one hundred and thirty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

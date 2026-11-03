@@ -10188,3 +10188,61 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x205c4 --rebuilt work/rebuild/aimod.exe --rebuilt-map
   work/rebuild/ai_update.map --rebuilt-symbol ai_update_`.
+
+## The sound_bank_load module at 0x1f2e0
+
+- Observation: the original body at `0x1f2e0` holds 268 instructions and 1046
+  bytes up to the `ret` at `0x1f6f5`.  The plan row holds the same counts.  The
+  store record keeps the 1048-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f2e0 --count 268`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x1f2e0.json`.
+- Observation: the function returns at once when the setup word at
+  `DAT_00008058` is zero.  Otherwise it builds `%s\data\sound.dat` from the
+  base path at `DAT_00007f44` through `sprintf` at `0x4d32c`.
+  Evidence: the gate at `0x1f2f4` through `0x1f2fb` and the build at
+  `0x1f301` through `0x1f316`.
+- Observation: the loop walks the `DAT_00018d84` records of 0x24 bytes at
+  `DAT_0015224`.  For each record it builds the member `%s.RAW`, opens the path
+  with the category `rb` through `0x4c08d`, and copies the 0x74-byte template at
+  object-3 offset 0x1e8c into the record at `DAT_0016034`.  A failed open
+  reports the file error through `0x4bf88` and runs the exit at `0x300be` with
+  the value 0.
+  Evidence: the loop at `0x1f420` through `0x1f4b5` and the error path at
+  `0x1f46b` through `0x1f47c`.
+- Observation: the function reads the size through `0x4c7e0`, gets the resource
+  `SOUND_FX` through `0x2eed0`, reads the member through `0x4c4e5`, stores the
+  size at `+0x08`, and closes the stream through `0x4c38d`.  It stores
+  `index + 1` at `+0x18`.
+  Evidence: the blocks at `0x1f4b6` through `0x1f58f`.
+- Observation: the record fields `+0x0c`, `+0x10`, `+0x14`, `+0x18`, `+0x1c`,
+  and `+0x20` go to the result fields `+0x14`, `+0x0c`, `+0x30`, `+0x34`,
+  `+0x38`, and `+0x40`.  The high nibble of `+0x20` selects the type: 0 gives
+  0, 1 gives 2, 2 gives 1, and 3 gives 3.  The other values keep the template
+  value 2.
+  Evidence: the stores at `0x1f5a8` through `0x1f6e2` and the jump table at
+  object-1 offset `0xf2d0`.
+- Observation: the flags at `+0x28` hold 0x40 for a non-zero field `+0x18`,
+  0x4000 for a non-zero field `+0x10`, and 0x100, 0x400, and 0x200 for bit 0x10
+  of the bytes `+0x0f`, `+0x1f`, and `+0x23`.  These bytes are the high bytes of
+  the dwords `+0x0c`, `+0x1c`, and `+0x20`.
+  Evidence: the flag block at `0x1f33b` through `0x1f41a`.
+- Observation: the original stores a far pointer into the pair at `+0x00` and
+  `+0x04` with the `ds` value.  The rebuild stores a near pointer and leaves
+  the segment at zero, because the flat target needs no far pointer.  The zero
+  check for the pair still runs the memory error report at `0x2edad`.
+  Evidence: the store at `0x1f4e8`, the check at `0x1f500` through `0x1f50e`,
+  and `tools/rebuild/sound_bank_load.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the two records, the four status
+  values, the zero setup word, the two failed opens, and the zero resource.
+  Evidence: `python3 tools/rebuild/harness.py run --module sound_bank_load`,
+  `work/rebuild/sbl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f2e0`.
+- Observation: the rebuilt module holds 223 instructions and 726 bytes.  The
+  identity check stays open at 35 of 223 instructions and 37 of 726 bytes.  The
+  V2 toolchain uses a different register allocation and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f2e0 --rebuilt work/rebuild/sblmod.exe --rebuilt-map
+  work/rebuild/sound_bank_load.map --rebuilt-symbol sound_bank_load_`.
