@@ -10117,3 +10117,74 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x2e21c --rebuilt work/rebuild/rp2mod.exe --rebuilt-map
   work/rebuild/race_panel_2.map --rebuilt-symbol race_panel_2_`.
+
+## The ai_update module at 0x205c4
+
+- Observation: the original body at `0x205c4` holds 260 instructions and 911
+  bytes up to the `ret` at `0x20952`.  The plan row holds the same counts.  The
+  store record keeps the 912-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x205c4 --count 260`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x205c4.json`.
+- Observation: the function saves `edx`, `esi`, and `ebp`, sets `ebp`, and
+  subtracts `0x40` from the stack.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x205c4` through `0x205c9`.
+- Observation: the loop walks `DAT_0010d6f8` records of 0x40 bytes at
+  `DAT_0010d700`.  The flag at `+0x38` makes a record run.  A running record
+  sets the flag at `+0x20`, saves the position at `+0` and `+8`, and advances
+  the position by the speed at `+0x30` times the direction at `+0x24` and
+  `+0x2c` times the frame delta `DAT_00118e04`.
+  Evidence: the loop at `0x205d3` through `0x20721` and the advances at
+  `0x20750` through `0x20795`.
+- Observation: the same product turns the angles at `+0xc`, `+0x10`, and
+  `+0x14` by the doubles at object-3 offsets 0xc8d, 0xc95, and 0xc9d, which
+  hold 0.008, 0.004, and 0.0015.  The speed falls by the frame delta times
+  2000.0, and a negative speed becomes zero.
+  Evidence: the blocks at `0x20798` through `0x20829`.
+- Observation: the collision check at `0x11c00` reads the position through
+  `DAT_00108038` and `DAT_00108040`.  A zero return marks a collision.  The
+  function saves the height at `+4` in `DAT_0010c72c`, restores the saved
+  position, flips the sign bit of the high byte of the direction floats at
+  `+0x24` and `+0x2c`, and scales the speed by the double 0.3 at object-3
+  offset 0xca9.
+  Evidence: the calls and the blocks at `0x20830` through `0x208a6`.
+- Observation: the vertical speed at `+0x34` falls by the frame delta times
+  500.0.  The height takes the truncated sum of the integer height and the
+  vertical speed.  When `DAT_0010c72c` is not below the height, the height
+  clamps to it, the vertical speed reverses through the double 0.8 at offset
+  0xcb5, and a magnitude below 50.0 at offset 0xcbd clears the vertical speed.
+  Evidence: the blocks at `0x208a9` through `0x2091f`.
+- Observation: when both speeds are zero, the record stops.  A collision sets
+  the height to -0x4e20.  Without a collision the function rotates the pair
+  `DAT_0010c734` and `DAT_0010c73c` through `0x2218c` with the angle at `+0x10`
+  plus the float -pi / 2 at offset 0xcc5, turns the result into the angle at
+  `+0xc` with the float pi at 0xcc9, 46080.0 at 0xccd, and pi / 2 at 0xcd1, and
+  clears the run flag.  A non-zero speed keeps the run flag.
+  Evidence: the blocks at `0x205e8` through `0x20646` and `0x20922` through
+  `0x20948`.
+- Observation: a record with the flag at `+0x20` publishes its position and
+  height into the target record from the pointer table `DAT_0010653c` at the
+  0x1c-byte entry named by `+0x18`.  It scales the three angles by the float
+  1024.0 at offset 0xcd5 divided by pi, truncates toward zero, and masks with
+  0x7ff into the words at `+0x14`, `+0x18`, and `+0x1c`.
+  Evidence: the publish block at `0x20649` through `0x20711`.
+- Observation: the original calls the truncating helper at `0x4d9f4` six
+  times.  The rebuild uses the local `ai_update_fpu.asm` truncating `__CHP`
+  stub, because the shared `fpu_stub.asm` returns without the truncate mode.
+  Evidence: the calls at `0x206ae`, `0x206d6`, `0x206fe`, `0x2076c`, `0x20790`,
+  and `0x208d1`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the zero count, the stopped record with
+  and without the publish flag, the running record with and without a
+  collision, the two stop paths, the height clamp, the small vertical speed,
+  the negative fractional truncation, and the negative angle mask.
+  Evidence: `python3 tools/rebuild/harness.py run --module ai_update`,
+  `work/rebuild/ai_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x205c4`.
+- Observation: the rebuilt module holds 181 instructions and 652 bytes.  The
+  identity check stays open at 21 of 181 instructions and 27 of 652 bytes.  The
+  V2 toolchain uses a different register allocation and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x205c4 --rebuilt work/rebuild/aimod.exe --rebuilt-map
+  work/rebuild/ai_update.map --rebuilt-symbol ai_update_`.

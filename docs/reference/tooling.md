@@ -583,7 +583,10 @@ The files:
 | `object_car_link_fpu.asm` | the `object_car_link` FPU run-time stubs: the no-op init and the truncating `__CHP` |
 | `race_panel_2.c` | the rebuilt `race_panel_2` module: the two measured table texts, the `A` buffer, the three title texts, the `%d KMH` value, the two text panels, and the two state panels |
 | `race_panel_2_main.c` | the `race_panel_2` test harness: the 0x44-byte record table, the indirect text table, the row cells, the five stubs, and the four paths |
-| `modules/*.json` | the one hundred and twenty-eight module records: the sources, the compiler, the link, and the run expectations |
+| `ai_update.c` | the rebuilt `ai_update` module: the record loop, the motion advance, the three angle turns, the speed fall, the collision branch, the vertical clamp, the stopped branch, and the publish block |
+| `ai_update_main.c` | the `ai_update` test harness: the four records, the target table, the collision outputs, the constants, the two stubs, and the eleven paths |
+| `ai_update_fpu.asm` | the `ai_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and twenty-nine module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
