@@ -1,0 +1,40 @@
+{
+  "exe": "oclmod.exe",
+  "map": "object_collision.map",
+  "name": "object_collision",
+  "run": {
+    "command": "oclmod.exe > ocl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "ocl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_collision.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "object_collision_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_collision_main.c"
+    }
+  ]
+}

@@ -9916,3 +9916,68 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x1d834 --rebuilt work/rebuild/ogstmod.exe --rebuilt-map
   work/rebuild/object_gear_step.map --rebuilt-symbol object_gear_step_`.
+
+## The object_collision module at 0x1e00c
+
+- Observation: the original body at `0x1e00c` holds 193 instructions and 765
+  bytes up to the first `ret`.  The plan row holds the same counts.  The record
+  keeps the 768-byte extent to the next entry at `0x1c84c`.  The function
+  returns while `DAT_00108058` is 0.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e00c --count 193`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x1e00c.json`.
+- Observation: when the state at `+0x414` is set and the target at `+0x4ec`
+  is -1, the function scans the 0x590-byte records at object-3 offset 0x10ab8
+  while the counter `DAT_00113cc8` is 3.  It skips the own record, a record
+  with the target -1, and a record whose distance at `+0x4e4` is not larger
+  than the object distance.  The first other record with a larger distance
+  supplies the target, clears its own target, and decrements the counter.
+  Evidence: the block at `0x1e081` through `0x1e0f8`.
+- Observation: when the counter stays below 3, the function truncates the
+  distance into `+0x4f0`, takes the default id from the two-entry table at
+  object-3 offset 0x1e30 for the type at `+0x2e0` against 0xc, calls
+  `table_lookup` at 0x1f718, stores the id, and increments the counter.  The
+  table holds 2 for the other types and 10 for type 0xc.
+  Evidence: the block at `0x1e0fe` through `0x1e150` and the 8 bytes at
+  object-3 offset 0x1e30.
+- Observation: the body copies the angle at `+0x418` to `+0x4f4` while the low
+  byte of `DAT_00118e1c` holds bit 0 or bit 2.  It rotates the deltas at
+  `+0x498` and `+0x4a0` against `DAT_00113ccc` and `DAT_00113cd0` with the
+  angle `DAT_00113cd4`.  It forms the values `((+0x4f0 - +0x4e4) * 9.0) +
+  (+0x4f4 * 2.4) + 13568.0`, `((35000.0 - +0x4e4) / 35000.0)^2 * 23552.0`,
+  and `sqrt(abs(rotated_x / +0x4e4)) * 32767.0 * sign + 0x8000`.  It then
+  stores the truncated distance at `+0x4f0`.
+  Evidence: the block at `0x1e177` through `0x1e28e`.
+- Observation: the constants live in object 3.  The float at offset 0xb64 is
+  9.0, the double at 0xb68 is 2.4, the double at 0xb70 is 13568.0, the float
+  at 0xb78 is 35000.0, the float at 0xb7c is 23552.0, and the double at 0xb80
+  is 32767.0.  The harness supplies the six values through globals with the
+  exact bit patterns.
+  Evidence: the reads at `0x1e1dd`, `0x1e1ec`, `0x1e1f4`, `0x1e205`,
+  `0x1e219`, and `0x1e25c`.
+- Observation: the three stores call `0x1f7e4` with the two distance values
+  and `0xc667d` and `0xc6920` with the object-3 pointer, the target id, and
+  the second distance and angle values.  The low bit of `DAT_0011d261` and
+  the flag at `+0x564` gate the three stores.  A clear state releases the
+  target through 0x1f880 and decrements the counter.
+  Evidence: the block at `0x1e28f` through `0x1e2fa`.
+- Observation: the original truncates with the Watcom helper at `0x4d9f4`,
+  so the module uses a local truncating FPU stub.  The harness supplies the
+  stubs for `table_lookup` at 0x1f718, `0x1f7e4`, `0x1f880`, `0x2218c`,
+  `0x22bec`, `0xc667d`, and `0xc6920`.
+  Evidence: `tools/rebuild/object_collision_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the disabled gate, the release path,
+  the scan hit and miss, both default ids, the distance and type compares, the
+  four state flags, the copy at `+0x418`, the negative angle, and the three
+  collision value stores.
+  Evidence: `python3 tools/rebuild/harness.py run --module object_collision`,
+  `work/rebuild/ocl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1e00c`.
+- Observation: the rebuilt module holds 160 instructions and 635 bytes.  The
+  identity check stays open at 45 of 635 bytes and 31 of 160 instructions.
+  The V2 register use and the if-else form change the code shape.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e00c --rebuilt work/rebuild/oclmod.exe --rebuilt-map
+  work/rebuild/object_collision.map --rebuilt-symbol object_collision_`.
