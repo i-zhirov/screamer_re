@@ -9588,3 +9588,64 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module menu_frame`,
   `work/rebuild/mnf_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x29f80`.
+
+## The list_file_load module at 0x15460
+
+- Observation: the original body at `0x15460` holds 161 instructions and 581
+  bytes.  It holds the three register saves, the frame with the 0x5a0-byte local
+  area, 15 calls, and 1 FPU instruction.  The plan row holds the same counts.
+  The merged store record keeps the 584-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15460 --count 161`,
+  `docs/explanation/rebuild-plan.md`, and `tools/rebuild/functions/0x15460.json`.
+- Observation: the four register arguments are the type in `eax`, the name in
+  `edx`, the list name in `ebx`, and the destination table in `ecx`.  The two
+  stack arguments are the record stride and the record width.  `engine_init`
+  passes `GEN`, `MENU`, `CD_TRACKS`, the table `0x1f00`, and the two values 4.
+  Evidence: the prologue at `0x1546e` through `0x15477`, the call at `0x127ca`,
+  and the strings at object-3 offsets `0x437`, `0x432`, and `0x428`.
+- Observation: the function builds `%s\data\%s.dat` from the base path at
+  `DAT_00007edc` and the type through `sprintf` at `0x4d32c`.  It builds
+  `%s.dtr` from the name.  It opens the path as the member with the category
+  `rt` through the open at `0x4c08d`.  A failed open reports the file error at
+  `0x4bf88` and calls `exit(1)` at `0x300be`.
+  Evidence: the block at `0x1547a` through `0x154d3`, the strings at object-3
+  offsets `0x63f`, `0x64e`, and `0x655`, and `docs/reference/program-map.md`.
+- Observation: the function reads whole lines with the mode 1 until the list
+  name, and then reads tokens with the mode 0 until `END_LIST`.  A token `*`
+  reads the field line and the parse continues.  The type byte selects `d` for
+  `atoi` at `0xc2045`, `f` for `atof` at `0xc209c`, `x` for `sscanf` with `%x`
+  at `0xc2024`, and `s` for an inline string copy of 0xc bytes.  The other
+  bytes are separators.  The store index is `row * stride + column`.  A full
+  record advances the row and clears the column.
+  Evidence: the block at `0x154e9` through `0x15667` and the reader at
+  `0x4c695`.
+- Observation: the reader at `0x4c695` takes the stream in `eax`, the buffer in
+  `edx`, and the mode in `ebx`.  The mode 1 stops at the newline.  The mode 0
+  stops at the tab, the space, or the newline.  Both modes end the text with 0.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c695 --count 106`.
+- Observation: the function closes the stream through `0x4c38d` and returns the
+  row count.  The `ret 8` removes the two stack arguments.
+  Evidence: the block at `0x1568e` through `0x156a2`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero.  The temporary probe shows that an initialized array reads 0 until the
+  program writes it.  The harness build defines `LIST_FILE_LOAD_HARNESS`, so the
+  module builds the constant text in local buffers.  The default build keeps
+  the literals of the original.  The harness also builds every text in writable
+  data at run time.  The shared harness needs no change.
+  Evidence: `tools/rebuild/modules/list_file_load.json`,
+  `tools/rebuild/list_file_load.c`, and `tools/rebuild/list_file_load_main.c`.
+- Observation: the rebuilt module holds 208 instructions and 533 bytes.  The
+  identity check stays open at 24 of 161 instructions and 33 of 581 bytes.  The
+  V2 toolchain builds the constant text at run time for the harness, uses other
+  registers, and reorders the field dispatch.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15460 --rebuilt work/rebuild/lflmod.exe --rebuilt-map
+  work/rebuild/list_file_load.map --rebuilt-symbol list_file_load_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, and `D`.  The normal path covers the two formatted names, the open, the
+  line search, the `*` skip, the `d`, `f`, `x`, and `s` fields, the ignored
+  token, two full records, and the close.  The failed open covers the report,
+  the exit 1, and the empty read.
+  Evidence: `python3 tools/rebuild/harness.py run --module list_file_load`,
+  `work/rebuild/lfl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x15460`.

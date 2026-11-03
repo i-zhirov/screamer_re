@@ -562,7 +562,9 @@ The files:
 | `race_heading_update_fpu.asm` | the `race_heading_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
 | `menu_frame.c` | the rebuilt `menu_frame` module: the menu background load, the two draws, the copy, the two swaps, the menu constants, the two screen offsets, the longest string, the run init, and the table lookup |
 | `menu_frame_main.c` | the `menu_frame` test harness: the race object, the pixel and video buffers, the three strings, the menu globals, the nine stubs, and the six paths |
-| `modules/*.json` | the one hundred and nineteen module records: the sources, the compiler, the link, and the run expectations |
+| `list_file_load.c` | the rebuilt `list_file_load` module: the two name builds, the member open, the line and token search, the `*` skip, the `d`, `f`, `x`, and `s` fields, the record stride, and the stream close |
+| `list_file_load_main.c` | the `list_file_load` test harness: the base path, the destination table, the text script, the ten stubs, and the three paths |
+| `modules/*.json` | the one hundred and twenty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
