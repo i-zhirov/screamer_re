@@ -581,7 +581,9 @@ The files:
 | `object_car_link.c` | the rebuilt `object_car_link` module: the two table pointers, the position copy, the five scaled and truncated values, the render array stores, and the flags |
 | `object_car_link_main.c` | the `object_car_link` test harness: the object record, the three table entries, the render arrays, the four constants, and the seven paths |
 | `object_car_link_fpu.asm` | the `object_car_link` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and twenty-seven module records: the sources, the compiler, the link, and the run expectations |
+| `race_panel_2.c` | the rebuilt `race_panel_2` module: the two measured table texts, the `A` buffer, the three title texts, the `%d KMH` value, the two text panels, and the two state panels |
+| `race_panel_2_main.c` | the `race_panel_2` test harness: the 0x44-byte record table, the indirect text table, the row cells, the five stubs, and the four paths |
+| `modules/*.json` | the one hundred and twenty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

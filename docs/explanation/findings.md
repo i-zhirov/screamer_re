@@ -10043,3 +10043,77 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x1c84c --rebuilt work/rebuild/ocrmod.exe --rebuilt-map
   work/rebuild/object_car_link.map --rebuilt-symbol object_car_link_`.
+
+## The race_panel_2 module at 0x2e21c
+
+- Observation: the original body at `0x2e21c` holds 265 instructions and 879
+  bytes up to the `ret` at `0x2e58a`.  The plan row holds the same counts.  The
+  store record keeps the 880-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e21c --count 265`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x2e21c.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `edi`,
+  and `ebp` before the frame, sets `ebp`, and subtracts `0x94` from the stack.
+  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2e21c` through `0x2e223`.
+- Observation: the function draws the title pointer `DAT_0011fc30` through
+  `panel_draw_centered` at `0x2e7cc` with the y 2, the font 3, and the color 2.
+  Evidence: the call at `0x2e240`.
+- Observation: the index `DAT_001203c4` selects a 0x44-byte record from the
+  table at object-3 offset `0x1d550`.  The text at `+0x14` is an inline
+  character array.  The field at `+0x30` selects a text pointer from the table
+  at `0x1fc14`.
+  Evidence: the stride arithmetic at `0x2e245` through `0x2e267` and the
+  indirect reads at `0x2e2d3` through `0x2e2f6`.
+- Observation: both table texts are measured through `text_measure` at
+  `0x254a8` with the font 0.  The function halves the width and the height with
+  a signed division and centers the half width on the 0x140 screen width.  It
+  draws the doubled position through `text_draw` at `0x25020` with the font 0
+  and the color 2.  The first y is three half heights.  The second y is 0xc8
+  minus five half heights.
+  Evidence: the blocks at `0x2e26c` through `0x2e2ce` and at `0x2e2fb` through
+  `0x2e367`.
+- Observation: the function builds a string of `DAT_001203b4` letters `A`,
+  measures it with the font 1, saves the half width, and centers the half width
+  plus 0x40.  It draws the title pointer `DAT_0011fc1c` at y 0xd2 minus five
+  half heights.  The field at `+0x34` goes through `sprintf` at `0x4d32c` with
+  the format at object-3 offset 0x12e0, linear 0x1012e0, `%d KMH`.  The function
+  draws that buffer at `(x + saved) * 2`.  The titles at `DAT_0011fc20` and
+  `DAT_0011fc24` follow one half height apart.  Each title has a panel at
+  `(x + saved, y + 1)` with the size `field + 4` and `field + 9` through
+  `panel_show` at `0x2dfac`.
+  Evidence: the blocks at `0x2e36c` through `0x2e4e2`.
+- Observation: a non-zero index draws the panel at (8, 0x64) with the size 2
+  when `DAT_0012039c` stays below `DAT_001203a8` and `DAT_0012037c` stays above
+  0.6, and with the size 0 otherwise.  The function draws the panel at
+  (0xee, 0x64) with the size 3 when `DAT_001207f0` plus 11 differs from the
+  index and the two cell tests pass, and with the size 1 otherwise.
+  Evidence: the blocks at `0x2e4e7` through `0x2e57a`.
+- Observation: the threshold 0.6 is the double at object-3 offset 0x12e7,
+  linear 0x1012e7, bits `0x3fe3333333333333`.  The rebuild reads it through the
+  global `race_panel_2_threshold`, and the harness sets the exact bits.  The
+  module uses the shared `fpu_stub.asm`, because it has no conversion to an
+  integer.
+  Evidence: the compares at `0x2e505` and `0x2e559` and
+  `tools/rebuild/race_panel_2.c`.
+- Observation: DOS/4G 2.01a leaves the initialized data pages zero in the
+  harness run, so the harness builds the expected strings in the data segment
+  at run time.  The module builds the `A` buffer and the `sprintf` stub builds
+  the ` KMH` suffix at run time.
+  Evidence: `tools/rebuild/race_panel_2_main.c` and the earlier constant-text
+  finding.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover the two table texts, the indirect text,
+  the `A` buffer, the formatted value, the four text panels, the two state
+  panels, the skipped state panels, and the negative width that truncates
+  toward zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_panel_2`,
+  `work/rebuild/rp2_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2e21c`.
+- Observation: the rebuilt module holds 220 instructions and 696 bytes.  The
+  identity check stays open at 58 of 220 instructions and 30 of 696 bytes.  The
+  V2 toolchain uses a different register allocation and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2e21c --rebuilt work/rebuild/rp2mod.exe --rebuilt-map
+  work/rebuild/race_panel_2.map --rebuilt-symbol race_panel_2_`.
