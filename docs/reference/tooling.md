@@ -567,7 +567,9 @@ The files:
 | `object_revolution_step.c` | the rebuilt `object_revolution_step` module: the fraction accumulation, the 1.0 wrap, the gear toggle, the two table index updates, the two truncations, the position shift, and the angle call |
 | `object_revolution_step_main.c` | the `object_revolution_step` test harness: the object record, the two globals, the gear table, the four stubs, and the six paths |
 | `object_revolution_step_fpu.asm` | the `object_revolution_step` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and twenty-one module records: the sources, the compiler, the link, and the run expectations |
+| `startup.c` | the rebuilt `startup` module: the DOS version check, the four extender paths, the command-line copy, the `no87=` scan, the program-name copy, the BSS clear, and the exit chain |
+| `startup_main.c` | the `startup` test harness: the DOS and DPMI service stubs, the extender record, the command line, the environment, and the seven paths |
+| `modules/*.json` | the one hundred and twenty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

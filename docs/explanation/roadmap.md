@@ -83,15 +83,15 @@ current host.
   `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
   `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
   `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-  fifteen Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+  sixteen Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
   `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at `0x2e0b4`,
   `net_player_add` at `0x2dddc`, `object_init_from_file` at `0x4cc10`,
   `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`,
   `overlay_queue_update` at `0x289bc`, `opponent_update` at `0x20954`,
   `loading_screen` at `0x2a364`, `race_heading_update` at `0x29610`,
-  `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`, and
-  `object_revolution_step` at `0x1d30c`;
-  twenty-two modules are verified, one is matching, and ninety-seven rebuilds
+  `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`,
+  `object_revolution_step` at `0x1d30c`, and `startup` at `0x30170`;
+  twenty-two modules are verified, one is matching, and ninety-eight rebuilds
   hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
@@ -181,13 +181,14 @@ The plan follows the size order, starting with the smallest functions.
     `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
     `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
     `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-    fifteen Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+    sixteen Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
     `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at
     `0x2e0b4`, `net_player_add` at `0x2dddc`, `object_init_from_file` at
     `0x4cc10`, `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`,
     `overlay_queue_update` at `0x289bc`, `opponent_update` at `0x20954`,
     `loading_screen` at `0x2a364`, `race_heading_update` at `0x29610`,
-    `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`, and
-    `object_revolution_step` at `0x1d30c` are done;
+    `menu_frame` at `0x29f80`, `list_file_load` at `0x15460`,
+    `object_revolution_step` at `0x1d30c`, and `startup` at `0x30170` are
+    done;
     the result is twenty-two verified modules, one matching module, and
-    ninety-seven open rebuilds).
+    ninety-eight open rebuilds).

@@ -1,0 +1,32 @@
+{
+  "exe": "stumod.exe",
+  "map": "startup.map",
+  "name": "startup",
+  "run": {
+    "command": "stumod.exe > stu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "stu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "startup.c",
+      "flags": [
+        "-dSTARTUP_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "startup_main.c"
+    }
+  ]
+}

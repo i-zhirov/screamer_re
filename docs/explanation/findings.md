@@ -9699,3 +9699,49 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module
   object_revolution_step`, `work/rebuild/ors_out.txt`, and `python3
   tools/rebuild/run.py run --function 0x1d30c`.
+
+## The startup module at 0x30170
+
+- Observation: the original body at `0x30170` holds 196 instructions and 605
+  bytes and ends at the `ret` at `0x303cc`.  The record keeps the 114032-byte
+  extent to the next entry at `0x4bee0`, so the identity check uses
+  `--count 196`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x30170 --count 196`,
+  `docs/explanation/rebuild-plan.md`, and
+  `tools/rebuild/functions/0x30170.json`.
+- Observation: the body is the Watcom C/C++32 DOS-extender start routine from
+  `bld/clib/startup/a/cstrt386.asm` of OpenWatcom V2.  It holds the interrupt
+  enable, the stack alignment to four bytes, the stack top store at `0x4294`,
+  the break store at `0x4280`, the DOS version call, the Phar Lap, CauseWay,
+  Rational DOS/4G, and unknown extender paths, the PSP words, the command-line
+  copy from `PSP:0x81`, the `no87=` environment scan, the program-name copy,
+  the BSS clear with the `0x1000` limit for the Rational extender, the
+  initializer call at `0xd4374`, the main invoker call at `0xd4324`, the
+  message writer at `0x30389`, the finalizer call at `0xd43bf`, the DOS exit,
+  and the DS restore.
+  Evidence: the block at `0x30170` through `0x303cc` and the OpenWatcom V2
+  source file `bld/clib/startup/a/cstrt386.asm`.
+- Observation: the body holds three calls, at `0x3037b` to `0xd4374`, at
+  `0x30382` to `0xd4324`, and at `0x303b7` to `0xd43bf`.  The two data
+  boundaries are `_edata` at `0x62ac` and `_end` at `0x27eb8`, so the BSS
+  spans `0x21c0c` bytes and the Rational path clears the first `0x1000` bytes.
+  Evidence: `python3 tools/le.py calls STARTH.EXE 0x30170` and the block at
+  `0x3032c` through `0x3035e`.
+- Observation: the rebuilt module holds 40 of 196 instructions and 22 of 605
+  bytes.  The C compiler does not produce the inline interrupt forms, the
+  segment moves, or the exact register allocation, so the identity check stays
+  open and the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x30170 --count 196 --rebuilt work/rebuild/stumod.exe
+  --rebuilt-map work/rebuild/startup.map --rebuilt-symbol startup_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the Phar Lap version word, the PSP
+  high address and the resize, the command-line copy, the `no87=` scan, the
+  program name, the full BSS clear, the Rational zero-base and non-zero-base
+  subtypes with the `0x1000` BSS limit, the CauseWay heap break and command
+  offset, the unknown extender, and the message and exit chain.  The harness
+  builds every text at run time, because DOS/4G 2.01a under DOSBox-X leaves the
+  initialized data pages zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module startup`,
+  `work/rebuild/stu_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x30170`.
