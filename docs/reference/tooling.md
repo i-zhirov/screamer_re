@@ -552,7 +552,9 @@ The files:
 | `opponent_update.c` | the rebuilt `opponent_update` module: the flag gate, the 0xbc-byte record loop, the range test, the three callee calls, the motion copy, the target pointer table, and the three scaled angles |
 | `opponent_update_main.c` | the `opponent_update` test harness: the record list, the camera position, the two constants, the pointer table, the three stubs, and the ten paths |
 | `opponent_update_fpu.asm` | the `opponent_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
-| `modules/*.json` | the one hundred and sixteen module records: the sources, the compiler, the link, and the run expectations |
+| `loading_screen.c` | the rebuilt `loading_screen` module: the screen selector, the resource call, the pixel load, the palette, the message, the two swaps, the centered title, the map name, the published fields, the record table, and the error report |
+| `loading_screen_main.c` | the `loading_screen` test harness: the context, the record table, the two buffers, the resource record, the nineteen stubs, and the ten paths |
+| `modules/*.json` | the one hundred and seventeen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

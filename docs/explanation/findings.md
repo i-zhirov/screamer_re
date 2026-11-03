@@ -9260,3 +9260,79 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module opponent_update`,
   `work/rebuild/opp_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x20954`.
+
+## The loading_screen module at 0x2a364
+
+- Observation: the original body at `0x2a364` holds 127 instructions and 498
+  bytes up to the `ret` at `0x2a555`.  The plan row holds the same counts.  The
+  store record keeps the 500-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2a364 --count 127` and
+  `tools/rebuild/functions/0x2a364.json`.
+- Observation: the function has a frame.  It saves `ecx`, `esi`, `edi`, and
+  `ebp` before the frame, sets `ebp`, subtracts `0x320` from `esp`, and stores
+  the three arguments at `[ebp - 0x1c]`, `[ebp - 0x18]`, and `[ebp - 0x20]`.
+  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2a364` through `0x2a379`.
+- Observation: the first call at `0x2f326` receives the pointer
+  `DAT_000062ac` and the name at object-3 offset `0x100a`, which the executable
+  holds as `NET_SPACE`.
+  Evidence: the call at `0x2a383` and the string at file offset `0xf780a`.
+- Observation: a second argument above 6 drops by 6 and sets the bit `0x08` of
+  `DAT_0001d274`.  The function saves the full dword first and restores it at
+  the end.  A value of 6 or less leaves the flag unchanged.
+  Evidence: the compare at `0x2a388` and the set and restore blocks at
+  `0x2a38e` through `0x2a3b5` and `0x2a53c` through `0x2a545`.
+- Observation: the function sets `DAT_000203bc` to the adjusted argument minus
+  1, calls `0x8bd54` with the table value `DAT_000021d8[context +8]`, copies the
+  same context word to `DAT_0001d2b8`, clears 0x3e800 bytes at
+  `DAT_00021528` through `0x8c160`, and fills the screen through `0x2aa98`.
+  Evidence: the block at `0x2a3b8` through `0x2a3f3`.
+- Observation: the function builds `load%d%c.pcx` with the adjusted argument
+  and the letter `H` through `sprintf` at `0x4d32c`, loads the member from
+  `gfx\graf.dat` into `DAT_0001fad0` with the palette at `DAT_0000cf5c`
+  through `pcx_load` at `0x1b5a4`, and runs the cleanup at `0x15150` when the
+  result is not zero.
+  Evidence: the formats at object-3 offsets `0x1014`, `0x1021`, and `0x102e`,
+  and the calls at `0x2a415`, `0x2a428`, and `0x2a431`.
+- Observation: the function sets the palette through `0x81a05`, shows the
+  message buffer through `0x258d0`, copies the pixels through `0x8c150`, runs
+  the swaps at `0x1075f` and `0x107a1` behind the flags `0x10` and `0x20`, and
+  draws `DAT_0001fc3c` at y `0x50` with font 3 and color 0 through `0x2e7cc`.
+  Evidence: the calls at `0x2a43b` through `0x2a48c`.
+- Observation: the function fills the screen again, builds `map%d` at
+  `DAT_0001d294`, publishes `DAT_000203c4` at `DAT_0001d2a0`, the first two
+  arguments at `DAT_0001d2b0` and `DAT_0001d2b4`, and the context words at
+  `+0x38` and `+0x48` at `DAT_0001d2c8` and `DAT_0001d2cc`.
+  Evidence: the block at `0x2a491` through `0x2a4e2`.
+- Observation: the function reads the 0x50-byte record selected by the
+  adjusted argument minus 1 from `DAT_00020430` into `DAT_0001d26c` when the
+  low byte of `DAT_0001d260` holds none of the bits `0x64`, and stores 0
+  otherwise.  The stride computation is `index * 5 * 16`.
+  Evidence: the test at `0x2a4e2` through `0x2a509`.
+- Observation: the function runs `race_cleanup` at `0x2a1b0`, runs `0x1fd70`,
+  and on a non-zero result calls `0x108e4` with 3, `0x10978`, and `0x300be`.
+  The tail then restores the saved flag when the argument was above 6 and calls
+  `0x1be6c`.
+  Evidence: the block at `0x2a50f` through `0x2a54a`.
+- Observation: the rebuilt module holds 118 instructions and 459 bytes.  The
+  identity check stays open at 40 of 118 instructions and 36 of 459 bytes.  The
+  V2 toolchain keeps the arguments in registers, shares the error epilogue, and
+  orders the flag restore and the tail call in another way.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2a364 --rebuilt work/rebuild/ldsmod.exe --rebuilt-map
+  work/rebuild/loading_screen.map --rebuilt-symbol loading_screen_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the normal load, the argument 9 that
+  drops to 3 and sets and restores the flag, the failed load, the two swap
+  flags, the mode 0x40 that skips the table, the error report, the argument 7
+  that drops to 1, and the argument 6 that stays.
+  Evidence: `python3 tools/rebuild/harness.py run --module loading_screen`,
+  `work/rebuild/lds_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2a364`.
+- Observation: the harness cannot read the two literal strings of the module,
+  because this minimal image does not load the constant segment.  The harness
+  therefore checks the member name that `sprintf` writes into the local buffer
+  and the map name, but not the resource name or the container name.
+  Evidence: the note at `tools/rebuild/loading_screen_main.c` and the zero
+  bytes at the low `CONST` offsets in `work/rebuild/loading_screen.map`.
