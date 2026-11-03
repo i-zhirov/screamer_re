@@ -9336,3 +9336,63 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   and the map name, but not the resource name or the container name.
   Evidence: the note at `tools/rebuild/loading_screen_main.c` and the zero
   bytes at the low `CONST` offsets in `work/rebuild/loading_screen.map`.
+
+## The race_heading_update module at 0x29610
+
+- Observation: the original body at `0x29610` holds 136 instructions and 519
+  bytes up to the `ret` at `0x29816`.  The plan row holds the same counts.  The
+  store record keeps the 520-byte extent.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29610 --count 136` and
+  `tools/rebuild/functions/0x29610.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `esi`,
+  `edi`, and `ebp` before the frame, sets `ebp`, and subtracts `0x10` from
+  `esp` for four local slots.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x29610` through `0x29618`.
+- Observation: the function converts `DAT_00120388` and `DAT_00120394` to the
+  headings with the float 1024.0 at object-3 offset `0xf33` and the float pi at
+  `0xf37`.  Each value is truncated toward zero through `0x4d9f4` and masked
+  with `0x7ff`.  The heading pair wraps by `0x800` when the difference is at
+  least `0x400`, in both directions.
+  Evidence: the two conversion blocks at `0x2961b` through `0x29662` and the
+  two wrap blocks at `0x29665` through `0x2969c`.
+- Observation: the flag `DAT_0011d240` selects the interpolation factor.  A set
+  flag calls the power routine at `0xc21e2` with the base `DAT_0012037c` and the
+  double 2.0, and a clear flag copies `DAT_0012037c`.
+  Evidence: the test at `0x2969d` and the calls at `0x296b9` and `0x296c1`.
+- Observation: the function stores the scaled `DAT_00120384` at `DAT_00109a0`
+  and the scaled `DAT_0012038c` at `DAT_00109a8`.  It interpolates the heading
+  pair into `DAT_00109a4` and the three integer pairs `0x2039c`/`0x203a8`,
+  `0x203a0`/`0x203ac`, and `0x203a4`/`0x203b0` into `DAT_00109ac`,
+  `DAT_00109b0`, and `DAT_00109b4`.
+  Evidence: the store and interpolation blocks at `0x296cb` through `0x297b4`.
+- Observation: a zero `DAT_0012037c` returns after the outputs.  Otherwise the
+  function sets `DAT_0012037c` to
+  `DAT_0012037c - DAT_00118e08 * DAT_00120380`.  A negative result copies
+  `DAT_00120394` into `DAT_00120388`, copies the three second integers into the
+  first ones, and clears `DAT_0012037c`.
+  Evidence: the sign test at `0x297ba`, the advance at `0x297c1` through
+  `0x297d7`, and the reset at `0x297e6` through `0x29808`.
+- Observation: the eight conversions to an integer use the truncating helper at
+  `0x4d9f4`.  The module uses the local truncating FPU stub
+  `race_heading_update_fpu.asm`, because the shared `fpu_stub.asm` leaves the
+  round-to-nearest mode.
+  Evidence: the helper at `0x4d9f4` through `0x4da10` and
+  `tools/rebuild/race_heading_update_fpu.asm`.
+- Observation: the rebuilt module holds 130 instructions and 502 bytes.  The
+  identity check stays open at 25 of 130 instructions and 35 of 502 bytes.  The
+  V2 toolchain saves `ebp` first, holds the headings in registers, keeps the
+  pair differences and the interpolation values in local slots, and orders the
+  power arguments in registers.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29610 --rebuilt work/rebuild/rhupd.exe --rebuilt-map
+  work/rebuild/race_heading_update.map --rebuilt-symbol
+  race_heading_update_`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the zero interpolation value, the power
+  flag with the base 0.5 and the exponent 2.0, the two 0x400 wrap boundaries,
+  the 0x3d1 difference without a wrap, the 2*pi mask to 0, the negative angles
+  and the -1.5 truncation, the reset path, the positive frame step, and the
+  negative zero early return.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_heading_update`,
+  `work/rebuild/rhu_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x29610`.

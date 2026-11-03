@@ -175,7 +175,7 @@ floating-point instructions.
 | `0x289bc` | `overlay_queue_update` (done) | 415 | 117 | 1 | 0 |
 | `0x20954` | `opponent_update` (done) | 454 | 134 | 6 | 17 |
 | `0x2a364` | `loading_screen` (done) | 498 | 127 | 21 | 0 |
-| `0x29610` | `race_heading_update` | 519 | 136 | 9 | 48 |
+| `0x29610` | `race_heading_update` (done) | 519 | 136 | 9 | 48 |
 | `0x29f80` | `menu_frame` | 560 | 151 | 10 | 4 |
 | `0x15460` | `list_file_load` | 581 | 161 | 15 | 1 |
 | `0x1d30c` | `object_revolution_step` | 589 | 151 | 9 | 38 |
@@ -192,7 +192,7 @@ floating-point instructions.
 
 ## Position
 
-One hundred sixteen modules carry a recipe and a result: the twelve Phase A modules,
+One hundred seventeen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -222,10 +222,10 @@ modules `race_panel_4` at `0x2e724`, `engine_interface_init` at `0x10810`,
 `object_transform` at `0x1cd44`, `race_start` at `0x27770`,
 `engine_init` at `0x127a0`, `memory_error_report` at `0x2edad`,
 `object_drive_step` at `0x1cee0`, `frame_timer` at `0x1fc38`, the first
-eleven Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
+twelve Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
 `0x14e20`, `object_integrate` at `0x1d6bc`, `race_panel_0` at `0x2e0b4`,
 `net_player_add` at `0x2dddc`, `object_init_from_file` at `0x4cc10`,
 `pcx_load` at `0x1b5a4`, `race_panel_3` at `0x2e58c`,
-`overlay_queue_update` at `0x289bc`, `opponent_update` at `0x20954`, and
-`loading_screen` at `0x2a364`.
-The next module is `race_heading_update` at `0x29610`.
+`overlay_queue_update` at `0x289bc`, `opponent_update` at `0x20954`,
+`loading_screen` at `0x2a364`, and `race_heading_update` at `0x29610`.
+The next module is `menu_frame` at `0x29f80`.

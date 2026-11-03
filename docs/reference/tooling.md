@@ -554,7 +554,10 @@ The files:
 | `opponent_update_fpu.asm` | the `opponent_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
 | `loading_screen.c` | the rebuilt `loading_screen` module: the screen selector, the resource call, the pixel load, the palette, the message, the two swaps, the centered title, the map name, the published fields, the record table, and the error report |
 | `loading_screen_main.c` | the `loading_screen` test harness: the context, the record table, the two buffers, the resource record, the nineteen stubs, and the ten paths |
-| `modules/*.json` | the one hundred and seventeen module records: the sources, the compiler, the link, and the run expectations |
+| `race_heading_update.c` | the rebuilt `race_heading_update` module: the four scaled angles, the two heading wraps, the power flag, the four interpolations, the frame-step advance, and the base-angle reset |
+| `race_heading_update_main.c` | the `race_heading_update` test harness: the four angles, the three integer pairs, the six outputs, the four constants, the `pow` stub, and the ten paths |
+| `race_heading_update_fpu.asm` | the `race_heading_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `modules/*.json` | the one hundred and eighteen module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
