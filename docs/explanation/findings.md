@@ -10246,3 +10246,53 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x1f2e0 --rebuilt work/rebuild/sblmod.exe --rebuilt-map
   work/rebuild/sound_bank_load.map --rebuilt-symbol sound_bank_load_`.
+
+## The car_setup module at 0x142ec
+
+- Observation: the plan row holds the first 65 instructions and 226 bytes up to
+  the early `ret` at `0x143cd`.  The full body continues to the `ret` at
+  `0x1496c`, so the store record keeps the 1668-byte extent and sets no size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x142ec --count 65` and
+  `tools/rebuild/functions/0x142ec.json`.
+- Observation: the two callers at `0x12c0c` and `0x12f50` walk the car count
+  `DAT_0000f8ec` and call the function for each 0x590-byte record at
+  `0x10ab8 + index * 0x590`.  The first callee at `0x11060` searches the
+  0x78-record table at `0x6530` by name through `stricmp` at `0x4d9ba` and
+  loads the object through `0x10bfc`.  The first call loads the record named
+  `SHADOW` from object-3 offset 0x5dc into `+4`.  The second call loads the
+  record named at `0xd25c + index * 0x40` into `+0x4dc`.  The record table at
+  object-3 offset 0x1d5c holds the wheel names `flx`, `fli`, `blx`, `rli`,
+  `frx`, `fri`, `brx`, and `rri`.  The module therefore names the function
+  `car_setup`.
+  Evidence: the calls at `0x12c64` and `0x13006`, the strings at `0x1005dc` and
+  `0x101d5c`, and the callee at `0x11060`.
+- Observation: the function stores the caller index at `+0`.  When the load
+  flag is zero, it returns 0.  Otherwise it clamps the counter
+  `DAT_0000f8f0` against the limit `DAT_0000d6dc`, advances the counter past
+  the reserved slot `DAT_0011d2a0`, and clamps it again.  It selects the model
+  index 0xc when the player count `DAT_0011d2b4` is above 2 and the counter
+  otherwise, stores the index at `+0x2e0`, and gives the second call the name
+  offset `0xd25c + index * 0x40`.
+  Evidence: the blocks at `0x142f5` through `0x143b5`.
+- Observation: a non-zero result from either `0x11060` call returns at once.
+  The first error returns the result through the far epilogue at `0x14966`.
+  The second error returns through the local epilogue at `0x143cd`.
+  Evidence: the tests at `0x14369` through `0x14372` and `0x143c0` through
+  `0x143cd`.
+- Observation: the rebuild covers the 65-instruction prefix.  The load flag
+  zero path returns 0 and the success path returns 0 after the two loads.  The
+  full state reset after `0x1476e` is not in the module.
+  Evidence: `tools/rebuild/car_setup.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the normal slot, the two clamp paths,
+  the forced model 0xc, the two load errors, and the zero load flag.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_setup`,
+  `work/rebuild/car_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x142ec`.
+- Observation: the rebuilt module holds 51 instructions and 171 bytes.  The
+  identity check stays open at 10 of 51 instructions and 13 of 171 bytes.  The
+  original spills the three arguments to locals and saves the registers in a
+  different order.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x142ec --rebuilt work/rebuild/carmod.exe --rebuilt-map
+  work/rebuild/car_setup.map --rebuilt-symbol car_setup_`.

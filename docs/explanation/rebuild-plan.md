@@ -198,7 +198,7 @@ The size is the function body, not the store extent.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x142ec` | unnamed | 226 | 65 | 2 | 0 |
+| `0x142ec` | `car_setup` (done) | 226 | 65 | 2 | 0 |
 | `0x4bf88` | `file_error_report` | 261 | 88 | 7 | 0 |
 | `0x136cc` | unnamed | 277 | 87 | 6 | 0 |
 | `0x2d7c4` | unnamed | 690 | 198 | 28 | 0 |
@@ -213,7 +213,7 @@ The size is the function body, not the store extent.
 
 ## Position
 
-One hundred twenty-nine modules carry a recipe and a result: the twelve Phase A modules,
+One hundred thirty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -254,5 +254,6 @@ twenty-four Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
 `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`,
 `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
 `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`, `ai_update`
-at `0x205c4`, and `sound_bank_load` at `0x1f2e0`.
-The named plan is complete.  The next unnamed function is `0x142ec`.
+at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first Phase F module
+`car_setup` at `0x142ec`.
+The next unnamed function is `file_error_report` at `0x4bf88`.
