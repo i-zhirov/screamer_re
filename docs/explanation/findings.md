@@ -10654,3 +10654,74 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x1db94 --rebuilt work/rebuild/tpumod.exe --rebuilt-map
   work/rebuild/track_progress_update.map --rebuilt-symbol
   track_progress_update_`.
+
+## The player_steering_update module at 0x1629c
+
+- Observation: the original body at `0x1629c` holds 267 instructions and 997
+  bytes up to the `ret` at `0x16680`.  The plan row holds the same counts.  The
+  store record keeps the 1036-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1629c --count 267` and
+  `tools/rebuild/functions/0x1629c.json`.
+- Observation: the only caller is the player update group at `0x15a80`, which
+  calls this function at `0x15aac` after the brake step at `0x16150`.  The
+  group runs on the player object at object-3 offset `0xf91c`, the same object
+  that `player_car_init` fills.  The record therefore takes the section
+  `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1629c`; the block at `0x15a80` through `0x15ab4`; and the
+  `player_car_init` finding above.
+- Observation: the function selects the filter index `0x50`, `0x55`, or `0x58`
+  from the state at `+0x148` and the flags at `+0x110`, `+0x4f4`, and
+  `+0x170`.  It forms the speed ratio `+0x50c / +0x480` and the limit
+  `(1 - sqrt(ratio)) * 0x100720 + 0x100728`.  The doubles at object-3 offsets
+  0x720 and 0x728 hold 0.296706 and 0.0174533, that is 17 degrees and 1 degree
+  in radians.  The float at object-3 offset 0x730 holds 1/1024, so the six
+  control values at `0x119880` scale to a steering angle.  The mode at
+  `0x119818` selects the direct axis, the two-axis sum, or the filtered path.
+  Evidence: the blocks at `0x162a2` through `0x16465`, the filter call at
+  `0x22b80`, and the constants at object-3 offsets 0x720, 0x728, and 0x730.
+- Observation: the keyboard ramp at `+0x2f0`, `+0x4b0`, and `+0x4b8` adds
+  `(value & 0x3f) * 0x10073c * (1 - sqrt(ratio))` with the sign of the low
+  parity bit, and the clamp sets the limit at `+0x10c`.  The float at object-3
+  offset 0x73c holds 0.0008.  The flags at `+0x6c`, `+0xc4`, and the state at
+  `+0x148` reset the angle to zero.  The double at object-3 offset 0x734 holds
+  1e-5 and guards the two filter paths.
+  Evidence: the blocks at `0x16465` through `0x16593` and the constants at
+  object-3 offsets 0x734 and 0x73c.
+- Observation: a non-zero angle gives the turn radius
+  `wheelbase / tan(angle)` at `+0x2f8`, the yaw step
+  `+0x50c * 0x118e04 / radius` at `+0x2f4`, and the heading sum at `+0x4cc`.
+  The function rotates the point `(radius, +0x2b0)` by the old and the new
+  heading through `0x2218c` and stores the two differences at `+0x1c` and
+  `+0x24`.  The rotation routine uses `cos` and `sin`, and the division uses
+  `tan`, so the data flow is a bicycle-model steering step.
+  Evidence: the blocks at `0x16593` through `0x16680` and the disassembly of
+  `0x2218c`, `0x4da66`, `0x4da72`, and `0x4da83`.
+- Inference: the function computes the player steering angle from the joystick
+  and keyboard controls, limits the angle by the speed ratio, and writes the
+  turn radius, the yaw step, the heading, and the position delta.  The caller,
+  the control values, and the steering geometry support the name
+  `player_steering_update`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness links no math library.  The local FPU stub provides
+  `sqrt`, `tan`, `sin`, and `cos` through `fsqrt`, `fptan`, `fsin`, and `fcos`,
+  and it makes `__CHP` truncate toward zero.  The harness `filter_update` stub
+  applies the one-pole filter with the table value of the index.
+  Evidence: `tools/rebuild/player_steering_update_fpu.asm` and
+  `tools/rebuild/player_steering_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the direct mode, the two-axis mode, the
+  direct assignment, the keyboard clamp, the three resets, the filtered
+  assignment, and the epsilon guard.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_steering_update`, `work/rebuild/psu_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1629c`.
+- Observation: the rebuilt module holds 213 instructions and 713 bytes.  The
+  identity check stays open at 19 of 213 instructions and 37 of 713 bytes.  The
+  V2 toolchain uses a different instruction order and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1629c --rebuilt work/rebuild/psumod.exe --rebuilt-map
+  work/rebuild/player_steering_update.map --rebuilt-symbol
+  player_steering_update_`.
