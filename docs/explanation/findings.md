@@ -10329,3 +10329,47 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module file_error_report`,
   `work/rebuild/fer_out.txt`, and `python3 tools/rebuild/run.py run --function
   0x4bf88`.
+
+## The player_car_init module at 0x136cc
+
+- Observation: the plan row holds the first 87 instructions and 277 bytes up to
+  the early `ret` at `0x137e0`.  The full body continues to the `ret` at
+  `0x142ea`, so the store record keeps the 3104-byte extent and sets no size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x136cc --count 87` and
+  `tools/rebuild/functions/0x136cc.json`.
+- Observation: the six callers at `0x12c83`, `0x12d2c`, `0x12e2e`, `0x12f2a`,
+  `0x130fa`, and `0x13181` pass the player object at object-3 offset `0xf91c`
+  and a load flag.  The function copies the selected 0x40-byte `CARS_DATA`
+  record from `0xd25c + DAT_0011d2a0 * 0x40` to the player object at `+0x470`.
+  The format argument at `+0x474` points four bytes into the file name, so
+  `AUTO00` gives `00`.  The animation field at `+0x0c` is a flag: zero
+  selects the letter `A` and a non-zero value selects the letter `B`.
+  Evidence: the section "The car record and its consumer" and the disassembly
+  of `0x136e6` through `0x13728`.
+- Observation: the function builds `COCK%s%c` from the file name tail and the
+  letter, loads the cockpit resource through `0x1b23c`, and builds the same
+  name with the letter `H` through `0x15460("GEN", "CARS", ...)`.  It then
+  loads the `SHADOW` object at `+0x468` and the animation object named at
+  `+0x470` at `+0x460` through `0x11060`.  The module therefore names the
+  function `player_car_init`, because it initializes the player car from the
+  selected car record.
+  Evidence: the calls at `0x1373b` through `0x137c8`, the strings
+  `COCK%s%c` at object-3 offset 0x564, `CARS` at 0x576, `GEN` at 0x57b, and
+  `SHADOW` at 0x57f.
+- Observation: the rebuild covers the 87-instruction prefix.  The zero load
+  flag returns 0 and the success path returns 0 after the two object loads.
+  The state reset after `0x13dcf` is not in the module.
+  Evidence: `tools/rebuild/player_car_init.c`.
+- Observation: the behavior check passes.  The harness prints the markers `1`
+  through `4`, `0`, and `D`.  The paths cover the normal record, the two
+  animation letters, the two object load errors, and the zero load flag.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_car_init`,
+  `work/rebuild/pci_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x136cc`.
+- Observation: the rebuilt module holds 70 instructions and 223 bytes.  The
+  identity check stays open at 12 of 70 instructions and 9 of 223 bytes.  The
+  V2 toolchain saves the registers in a different order and uses a different
+  local layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x136cc --rebuilt work/rebuild/pcimod.exe --rebuilt-map
+  work/rebuild/player_car_init.map --rebuilt-symbol player_car_init_`.

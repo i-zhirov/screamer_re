@@ -1,0 +1,31 @@
+{
+  "exe": "pcimod.exe",
+  "map": "player_car_init.map",
+  "name": "player_car_init",
+  "run": {
+    "command": "pcimod.exe > pci_out.txt",
+    "expect": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "0",
+      "D"
+    ],
+    "output": "pci_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_init_main.c"
+    }
+  ]
+}

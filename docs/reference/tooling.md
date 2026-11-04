@@ -592,7 +592,9 @@ The files:
 | `car_setup_main.c` | the `car_setup` test harness: the four globals, the 0x590-byte car record, the load stub, and the seven paths |
 | `file_error_report.c` | the rebuilt `file_error_report` module: the status read at `+0xac`, the six engine file messages, the interface name at `+0x78`, and the `exit(-2)` call; the if-chain avoids the compiler jump table that the link does not relocate |
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
-| `modules/*.json` | the one hundred and thirty-two module records: the sources, the compiler, the link, and the run expectations |
+| `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
+| `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
+| `modules/*.json` | the one hundred and thirty-three module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
