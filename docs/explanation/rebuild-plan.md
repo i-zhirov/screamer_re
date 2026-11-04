@@ -180,7 +180,7 @@ floating-point instructions.
 | `0x15460` | `list_file_load` (done) | 581 | 161 | 15 | 1 |
 | `0x1d30c` | `object_revolution_step` (done) | 589 | 151 | 9 | 38 |
 | `0x30170` | `startup` (done) | 605 | 196 | 3 | 0 |
-| `0x300f8` | `entry jump` | 607 | 197 | 3 | 0 |
+| `0x300f8` | `entry jump` (not a module: the two-byte jump covers the banner; `startup` holds the body) | 607 | 197 | 3 | 0 |
 | `0x24da0` | `joystick_update` (done) | 630 | 201 | 3 | 5 |
 | `0x29d08` | `menu_space_init` (done) | 632 | 156 | 34 | 0 |
 | `0x1d834` | `object_gear_step` (done) | 635 | 133 | 1 | 44 |
@@ -189,6 +189,27 @@ floating-point instructions.
 | `0x2e21c` | `race_panel_2` (done) | 879 | 265 | 15 | 6 |
 | `0x205c4` | `ai_update` (done) | 911 | 260 | 8 | 77 |
 | `0x1f2e0` | `sound_bank_load` (done) | 1046 | 268 | 12 | 0 |
+
+### Phase F: unnamed functions
+
+The named plan is complete.  These records hold a function body but no name.
+The rebuild infers a descriptive name from the call graph and the data flow.
+The size is the function body, not the store extent.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x142ec` | unnamed | 226 | 65 | 2 | 0 |
+| `0x4bf88` | `file_error_report` | 261 | 88 | 7 | 0 |
+| `0x136cc` | unnamed | 277 | 87 | 6 | 0 |
+| `0x2d7c4` | unnamed | 690 | 198 | 28 | 0 |
+| `0x19ae8` | unnamed | 869 | 223 | 6 | 9 |
+| `0x131a8` | unnamed | 919 | 236 | 38 | 0 |
+| `0x1db94` | unnamed | 926 | 259 | 6 | 37 |
+| `0x1629c` | unnamed | 997 | 267 | 9 | 90 |
+| `0x2e82c` | unnamed | 1185 | 347 | 5 | 6 |
+| `0x16f34` | unnamed | 1236 | 318 | 22 | 157 |
+| `0x2a558` | unnamed | 1323 | 343 | 38 | 13 |
+| `0x2cf68` | unnamed | 1357 | 370 | 33 | 11 |
 
 ## Position
 
@@ -234,4 +255,4 @@ twenty-four Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
 `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
 `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`, `ai_update`
 at `0x205c4`, and `sound_bank_load` at `0x1f2e0`.
-The next module is `entry jump` at `0x300f8`.
+The named plan is complete.  The next unnamed function is `0x142ec`.
