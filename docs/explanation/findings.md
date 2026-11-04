@@ -10520,3 +10520,69 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   distance 264.
   Evidence: the `fild` and `fmul` at `0x19cd1` and the helper at `0x4d9f4`;
   `tools/rebuild/modules/player_view_setup.json`.
+
+## The race_data_load module at 0x131a8
+
+- Observation: the original body at `0x131a8` holds 236 instructions and 919
+  bytes up to the `ret` at `0x1353e`.  The plan row holds the same counts.  The
+  store record keeps the 920-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x131a8 --count 236` and
+  `tools/rebuild/functions/0x131a8.json`.
+- Observation: the caller `race_session_start` at `0x128e0` runs this function
+  at `0x128fb` as its first step after the flag store `_DAT_00118e1c = 0x102`.
+  The caller returns a non-zero result at once.  The record of the caller
+  already names the target `race_data_load`.
+  Evidence: the calls at `0x128fb` and the record
+  `tools/rebuild/functions/0x128e0.json`.
+- Observation: the letter `H` comes from `DAT_0011d2b8 >= 1`, and the letter
+  `L` comes from a smaller value.  The function builds
+  `%s\gfx\%s%c.dat` from the config base `DAT_00007f44`, the track name
+  `DAT_0011d294`, and the letter.  The flag `DAT_0011d274 & 8` adds the suffix
+  `i` to the track name.  The level `DAT_0011d2b4` gives the member letter
+  `A + level`.
+  Evidence: the block at `0x131ce` through `0x132aa` and the decompiled
+  `FUN_000131a8`.
+- Observation: the function loads five lists.  The lists and their sizes are
+  `OSTACLES` 0x24 of 0x24, `TRACK_DATA` 0x10 of 0x10, `OPPONENTS` 0x590 of
+  0x14, `ANIMATIONS` 0xbc of 0x18, and `CARS_DATA` 0x40 of 0x40.  The tables
+  are `DAT_0010f000`, `DAT_0010cf44`, `DAT_00110d9c`, `DAT_0010f180`, and
+  `DAT_0010d25c`.  The count results go to `DAT_0010f8ec`, `DAT_0010f17c`, and
+  `DAT_0010d6dc`.
+  Evidence: the calls at `0x132aa`, `0x132c6`, `0x132e5`, `0x1330c`, and
+  `0x1332e`.
+- Observation: the function loads the graphics path, the track material, and
+  the `.smg` stream.  It sets the screen mode through `0x4c850` with the width
+  0x140, the height 0x190, and the value 0x104.  It copies the first
+  `TRACK_DATA` value, the track color, to all four bytes of the word at
+  `PTR_DAT_0008a844 + 0x10`.  It then builds the track names and loads the track
+  resources.
+  Evidence: the block at `0x13338` through `0x133ba`, the color block at
+  `0x13381` through `0x133a6`, and the calls at `0x133af` and `0x133ba`.
+- Observation: the game mode `DAT_0011d260 == 0x100` loads `attr%c.fnt` and
+  `logo%c.spr` from `%s\gfx\graf.dat`.  Every other mode loads `game%c.fnt`
+  and `game%c.spr` from `%s\gfx\game.dat`, and it also loads the three
+  resources `impres_`, `implet_`, and `cdfront`.  The flag `DAT_0011d2cc`
+  selects the music track `DAT_00001f00` or
+  `DAT_00001f08[DAT_000203bc]`.
+  Evidence: the two branches at `0x133c9` through `0x1352c` and the strings at
+  object-3 offsets 0x4e6 through 0x55c.
+- Inference: the function builds the race file names, loads the race lists and
+  assets, and starts the race music.  The caller name, the list names, and the
+  data flow support the name `race_data_load`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the level zero return, the high and low
+  letters, the replay flag, the `i` suffix, the non-0x100 mode, the mode 0x100,
+  the music flag on and off, the five list loads, the color copy, and the two
+  load branches.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_data_load`,
+  `work/rebuild/rdl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x131a8`.
+- Observation: the rebuilt module holds 233 instructions and 961 bytes.  The
+  identity check stays open at 57 of 233 instructions and 90 of 919 bytes.  The
+  V2 toolchain uses the register calling convention and a different local
+  layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x131a8 --rebuilt work/rebuild/rdlmod.exe --rebuilt-map
+  work/rebuild/race_data_load.map --rebuilt-symbol race_data_load_`.
