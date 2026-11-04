@@ -1,0 +1,33 @@
+{
+  "exe": "fermod.exe",
+  "map": "file_error_report.map",
+  "name": "file_error_report",
+  "run": {
+    "command": "fermod.exe > fer_out.txt",
+    "expect": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "0",
+      "6",
+      "D"
+    ],
+    "output": "fer_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "file_error_report.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "file_error_report_main.c"
+    }
+  ]
+}

@@ -1,18 +1,53 @@
 {
   "address": "0x4bf88",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "the six bodies print the engine file strings at 0x1608, 0x1622, 0x1644, 0x1653, and 0x1685; the dispatch compares the status at [arg+0xac] at 0x4c060"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x4bf88 holds 88 instructions and 261 bytes: it reads the status at [arg+0xac], dispatches through the five-entry jump table at 0x4c04c, prints the five file strings and the default interface string through the printer at 0x4bf64 with the stream 0x2fd2, passes the name at +0x78, and calls exit(-2) at 0x300be; the string immediates 0x1608, 0x1622, 0x1644, 0x1653, 0x1667, and 0x1685 are object-3 offsets"
     }
   ],
+  "module": "file_error_report",
   "name": "file_error_report",
   "notes": [],
   "object_offset": "0x3bf88",
-  "role": "reports the engine file errors and the interface name from +0x78 through the printer at 0x4bf64",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 125,
+        "detail": "the instruction counts differ, 88 and 43",
+        "instructions_equal": 10,
+        "instructions_total": 43,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf88",
+    "date": "2026-11-04",
+    "fingerprint": "sha256:d3d7f3f2dd47061b8e7fd7890d523b4667130e855a58aa92af84beb59757afba",
+    "source_digest": "sha256:9baba7bf41b880b41eef0846d40656b93204bed385ba7ade52bfa9058aa199e0",
+    "tool": "run.py"
+  },
+  "role": "reports the engine file status and the interface name from +0x78 through the printer at 0x4bf64",
   "section": "The resource layer",
   "size": 261,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "file_error_report_"
 }

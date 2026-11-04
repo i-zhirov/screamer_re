@@ -590,7 +590,9 @@ The files:
 | `sound_bank_load_main.c` | the `sound_bank_load` test harness: the setup word, the sample count, the base path, the eight input records, the eight result records, the six stubs, and the five paths |
 | `car_setup.c` | the rebuilt `car_setup` module: the index store, the load-flag gate, the slot counter clamp, the SHADOW load, the model index choice, and the model load |
 | `car_setup_main.c` | the `car_setup` test harness: the four globals, the 0x590-byte car record, the load stub, and the seven paths |
-| `modules/*.json` | the one hundred and thirty-one module records: the sources, the compiler, the link, and the run expectations |
+| `file_error_report.c` | the rebuilt `file_error_report` module: the status read at `+0xac`, the six engine file messages, the interface name at `+0x78`, and the `exit(-2)` call; the if-chain avoids the compiler jump table that the link does not relocate |
+| `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
+| `modules/*.json` | the one hundred and thirty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

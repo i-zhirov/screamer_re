@@ -10296,3 +10296,36 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x142ec --rebuilt work/rebuild/carmod.exe --rebuilt-map
   work/rebuild/car_setup.map --rebuilt-symbol car_setup_`.
+
+## The file_error_report module at 0x4bf88
+
+- Observation: the plan row records 261 bytes, 88 instructions, and 7 calls.
+  The function reads the status at `[arg+0xac]`, selects one of five messages
+  through the jump table at `0x4c04c`, and prints the default interface message
+  for the other values.  The name at `+0x78` is the argument for the messages
+  with `%s`.  The function then calls `exit(-2)` at `0x300be`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4bf88 --count 88`.
+- Observation: the six format strings sit at object-3 offsets 0x1608, 0x1622,
+  0x1644, 0x1653, 0x1667, and 0x1685.  They hold `Cannot open main file: %s`,
+  `File %s not present in main file.`, `Out of memory.`, `Out of file domain.`,
+  `Out of memory to decode file.`, and `Unknown error in Engine interface
+  <%s>.\n`.  The immediates in the code hold these object offsets, and the
+  loader relocates them.
+  Evidence: the object-3 base 0x100000 in `python3 tools/le.py info STARTH.EXE`
+  and the reads at linear 0x101608 through 0x101685.
+- Observation: the V2 build of a dense `switch` emits a data-segment jump table
+  that the link does not relocate.  The run stops with a general-protection
+  fault at the first call.  The module uses an if-chain, so the dispatch is a
+  comparison chain and the behavior check passes.  The identity check stays
+  open at 10 of 43 instructions and 7 of 125 bytes; the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/harness.py run --module file_error_report`
+  and `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4bf88 --rebuilt work/rebuild/fermod.exe --rebuilt-map
+  work/rebuild/file_error_report.map --rebuilt-symbol file_error_report_`.
+- Observation: the behavior check passes.  The harness prints the markers `1`
+  through `6`, `0`, and `D`.  The paths cover the five status values, the two
+  default values, and the exit status -2.
+  Evidence: `python3 tools/rebuild/harness.py run --module file_error_report`,
+  `work/rebuild/fer_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4bf88`.
