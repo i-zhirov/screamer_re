@@ -594,7 +594,7 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the one hundred and thirty-four module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the one hundred and thirty-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, and the 8.3 output-name check |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |

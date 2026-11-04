@@ -10457,3 +10457,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x2d7c4 --rebuilt work/rebuild/nrlmod.exe --rebuilt-map
   work/rebuild/net_race_lobby.map --rebuilt-symbol net_race_lobby_`.
+
+## The player_view_setup module at 0x19ae8
+
+- Observation: the original body at `0x19ae8` holds 223 instructions and 869
+  bytes up to the `ret` at `0x19e4c`.  The plan row holds the same counts.  The
+  store record keeps the 912-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19ae8 --count 223` and
+  `tools/rebuild/functions/0x19ae8.json`.
+- Observation: the player update at `0x19ab0` calls this function as its first
+  step on the player structure `DAT_00110a20`.  The car camera at `0x1a930`
+  calls it at `0x1ae8b` on the view block at `+0x4f8` of the 0x590-byte car
+  records at `DAT_00110ab8`.
+  Evidence: the calls at `0x19ab8` and `0x1ae8b`, the `add eax,0x4f8` at
+  `0x1ae86`, and `python3 tools/le.py disasm STARTH.EXE 0x19ab0 --count 14`.
+- Observation: the seven 0x14-byte slots at `DAT_00101da4` hold the view kind,
+  the render mode, the view distance, the video mode, and the chosen flag.  The
+  static values are the kinds 0, 1, 2, 9, 9, 9, and 3, and the mode 9 marks a
+  special slot.  The byte `DAT_000f003d[kind]` gates the kind, and the input
+  bits `DAT_00118e1c` and `DAT_00118e1d` gate the change.
+  Evidence: the table at object-3 offset 0x1da4, the reads at `0x19b32` through
+  `0x19b8a`, and the decompiled `FUN_00019ae8`.
+- Observation: the function copies the slot distance to `+0x90`, the slot video
+  mode to `+0x8c`, and the render mode to `+0x88`.  It sets the screen mode
+  through `0x4c850` with the width 0x140, the height 0x190, and the value
+  0x104, or with the view distance and the truncated 0.65 product.  It copies
+  the car position `+0x00` through `+0x08` to `+0x18` through `+0x20` and the
+  angle `+0x30` through `+0x38` to `+0x48` through `+0x50`.  It starts the
+  renderer at `0x19e78` or the car camera at `0x1a930`.
+  Evidence: the block at `0x19bcf` through `0x19d13`, the constant `0.65` at
+  object-3 offset 0x8dc, and the calls at `0x19c23`, `0x19c76`, `0x19c80`,
+  `0x19cdd`, `0x19cf6`, and `0x19e3f`.
+- Observation: the chosen slot 4 runs the camera scan over the counter
+  `DAT_00110a1c`, the wrap value `DAT_0010f8ec`, and the car field at
+  `DAT_0011100c` with the 0x590-byte stride.  The slot chosen flag is cleared,
+  and the first free slot is recorded in `DAT_0011d2a8`.
+  Evidence: the block at `0x19d45` through `0x19e2b`.
+- Inference: the function selects and applies a view.  The seven-slot table,
+  the chosen flag, the view distance, the mode copy, the car position copy, and
+  the render and camera calls support the name.  The module records the name
+  `player_view_setup` with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the chosen slot, the kind gate, the
+  special slot 1 fallback, the car-only path, the slot 4 scan, the scan wrap,
+  the distance branch, the early return, the video mode 1 to 2 change, and the
+  blocked input bit.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_view_setup`,
+  `work/rebuild/pvs_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x19ae8`.
+- Observation: the rebuilt module holds 149 instructions and 571 bytes.  The
+  identity check stays open at 43 of 149 instructions and 34 of 571 bytes.  The
+  V2 toolchain uses the register calling convention, keeps the view pointer in
+  `ecx`, and folds the slot address.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19ae8 --rebuilt work/rebuild/pvsmod.exe --rebuilt-map
+  work/rebuild/player_view_setup.map --rebuilt-symbol player_view_setup_`.
+- Observation: the original converts the view distance with the Watcom helper
+  at `0x4d9f4`, which truncates toward zero.  The module uses the local
+  truncating FPU stub `player_view_setup_fpu.asm`, because the shared stub
+  rounds to nearest.  The harness shows the truncated value 171 for the
+  distance 264.
+  Evidence: the `fild` and `fmul` at `0x19cd1` and the helper at `0x4d9f4`;
+  `tools/rebuild/modules/player_view_setup.json`.
