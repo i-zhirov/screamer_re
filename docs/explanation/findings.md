@@ -10586,3 +10586,71 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x131a8 --rebuilt work/rebuild/rdlmod.exe --rebuilt-map
   work/rebuild/race_data_load.map --rebuilt-symbol race_data_load_`.
+
+## The track_progress_update module at 0x1db94
+
+- Observation: the original body at `0x1db94` holds 259 instructions and 926
+  bytes up to the `ret` at `0x1df31`.  The plan row holds the same counts.  The
+  store record keeps the 928-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1db94 --count 259` and
+  `tools/rebuild/functions/0x1db94.json`.
+- Observation: the only caller is `object_prepare` at `0x1c79c`, which calls
+  this function first at `0x1c7a8` on each object.  The record therefore takes
+  the section `object_prepare callees`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1db94`; the block at `0x1c79c` through `0x1c7b7`.
+- Observation: the function reads the 0x20-byte node table at the global
+  `0x7250` and the count at `0x7ed0`.  The loader at `0x150f4` calls
+  `0x1b198` with the destination `0x7250`, and `0x1b198` builds
+  `%s\data\%s.dat`, reads a 4-byte count, and reads `count * 0x20` bytes into
+  the destination.  `race_start` builds the name `MAP%d` into `0x1d294`, so the
+  table holds the track nodes of the current level.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x150f4 --count 29`,
+  `python3 tools/le.py disasm STARTH.EXE 0x1b198 --count 60`, and the strings
+  at object-3 offsets 0x972 and 0x981.
+- Observation: the function examines the node before the current index, the
+  current node, and the next node.  It accepts a node when each absolute axis
+  delta stays below the node radius and the truncated distance does not exceed
+  the radius.  It advances the current index at `+0x320` and the target index
+  at `+0x3f0`, copies the node value and data to `+0x3f4` and `+0x3fc`, and
+  marks the node in the chain at `+0x324` and `+0x328`.  A node after the first
+  is marked only when the previous node is marked.
+  Evidence: the blocks at `0x1dc23` through `0x1dda6`.
+- Observation: a visit to node 0 with every node marked clears the chain, sets
+  the count to one, and increments the lap counter at `+0x40c`.  The function
+  then stores the ratio of the object-to-node distance to the node-to-next-node
+  segment at `+0x404`, and the progress `100 * laps + index + ratio` at
+  `+0x408`.  Both distances scale by the double 0.05 at object-3 offset
+  `0xb44` and truncate to an integer.  A call with no hit sets the target index
+  to -1.
+  Evidence: the blocks at `0x1ddb1` through `0x1df23` and the double at object-3
+  offset 0xb44.
+- Inference: the function advances the track node index, tracks the visited
+  chain and the lap count, and writes the track progress.  The caller, the
+  track table, and the progress formula support the name
+  `track_progress_update`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the C literal `0.05` and the C `sqrt` body did not work in the
+  harness.  The linker emitted `fmul qword ptr [0]` for the literal and
+  `fmul qword ptr [8]` for the 0.5 constant of the Newton step, so the first
+  run produced NaN at `+0x404` and `+0x408`.  The module now reads the global
+  `track_scale`, the harness sets its exact bits, and the local FPU stub
+  provides `sqrt_` through `fsqrt`.
+  Evidence: the first build at `work/rebuild/tpumod.exe`, the disassembly of
+  the rebuilt function, and `tools/rebuild/track_progress_update_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the first node, the forward advance, the
+  lap reset, the segment fraction, the target copy, the no-hit target -1, the
+  unmarked previous node, and the backward wrap to the last node.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  track_progress_update`, `work/rebuild/tpu_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1db94`.
+- Observation: the rebuilt module holds 168 instructions and 619 bytes.  The
+  identity check stays open at 34 of 168 instructions and 27 of 619 bytes.  The
+  V2 toolchain uses a different instruction order and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1db94 --rebuilt work/rebuild/tpumod.exe --rebuilt-map
+  work/rebuild/track_progress_update.map --rebuilt-symbol
+  track_progress_update_`.
