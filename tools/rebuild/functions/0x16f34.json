@@ -1,9 +1,65 @@
 {
   "address": "0x16f34",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_car_view_update module at 0x16f34"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x16f34 holds 318 instructions and 1236 bytes up to the ret at 0x17407, so the record keeps the 1236-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the five callers at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 run before the player physics group at 0x15a80 on the player object at object-3 offset 0xf91c; the callers are the five view groups that the frame update at 0x1ff70 selects, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function normalizes the angles at +0x4c8, +0x4cc, and +0x4d0, filters +0x300 from +0x688 / DAT_0011d254, projects the motion into +0x4b0 and +0x4b8, applies the rates at +0x548 and +0x54c and the shake terms at +0x4fc, +0x500, and +0x508, and writes the render flags at +0x7b4, so the module names the function player_car_view_update"
+    },
+    {
+      "kind": "note",
+      "text": "the state at +0x148 selects the full pitch projection or the flat yaw projection, and the flag at +0x108 selects the pitch path or the roll angle path"
+    }
+  ],
+  "module": "player_car_view_update",
+  "name": "player_car_view_update",
   "notes": [],
   "object_offset": "0x6f34",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 26,
+        "bytes_total": 898,
+        "detail": "the instruction counts differ, 318 and 247",
+        "instructions_equal": 23,
+        "instructions_total": 247,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x16f34",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:4dc5b9bca8141cfc144b8c8d638ffb10df17bdde1b618b9b3fb4fa411f99bce2",
+    "source_digest": "sha256:9d4b89b81bdc6f4ce84ba314dbdcc6fa1d63cb4cb138fbf619a66c4819524dde",
+    "tool": "run.py"
+  },
+  "role": "normalizes the player body angles, filters the view scale, projects the motion into the screen offsets, applies the view rates and shake, and sets the render flags",
+  "section": "The vehicle state chain",
   "size": 1236,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_view_update_"
 }

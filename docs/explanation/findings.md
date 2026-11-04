@@ -10795,3 +10795,80 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x2e82c --rebuilt work/rebuild/rrsmod.exe --rebuilt-map
   work/rebuild/race_record_save.map --rebuilt-symbol race_record_save_`.
+
+## The player_car_view_update module at 0x16f34
+
+- Observation: the original body at `0x16f34` holds 318 instructions and 1236
+  bytes up to the `ret` at `0x17407`.  The plan row holds the same counts.  The
+  store record keeps the 1236-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16f34 --count 318` and
+  `tools/rebuild/functions/0x16f34.json`.
+- Observation: the five callers at `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`,
+  and `0x203c4` pass `0xf91c` in `eax`.  Each caller calls this function first
+  and then the player physics group at `0x15a80`.  The five callers are the view
+  groups that the frame update at `0x1ff70` runs in order.  The function
+  therefore runs on the player object at object-3 offset `0xf91c` before the
+  vehicle state chain, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the direct call sweep for the target `0x16f34`; the call sites at
+  `0x2006a`, `0x201f5`, `0x202e8`, `0x20384`, and `0x203e8`; and the dispatch
+  at `0x1ff70`.
+- Observation: the function normalizes the three body angles at `+0x4c8`,
+  `+0x4cc`, and `+0x4d0` to the range 0 to 2 pi.  The constants sit at
+  object-3 offsets 0x790 and 0x794 and hold 2 pi and -2 pi.
+  Evidence: the blocks at `0x16f3f` through `0x16fd7` and the data at object-3
+  offsets 0x790 and 0x794.
+- Observation: when the input bit 0x10 of `DAT_0011d260` is set, the function
+  filters the view scale `+0x300` through `filter_update` at index `0x58`.  The
+  target is `(+0x688 / DAT_0011d254) * DAT_0010d6e0 + DAT_0010d6e4`.
+  Evidence: the block at `0x16fef` through `0x1702d` and the call to `0x22b80`.
+- Observation: the function copies the speed `+0x50c` to `+0x588` through the
+  helper at `0x15bfc`.  It projects the forward motion into the screen offsets
+  `+0x4b0` and `+0x4b8` with the cosines and the sines at `0x4da66` and
+  `0x4da72`, the speed, the frame delta `DAT_00118e04`, and the view scale
+  `+0x300`.  The state at `+0x148` selects the full pitch projection or the flat
+  yaw projection.  The flag at `+0x108` selects the pitch angle or the roll angle
+  at `+0x4d0`.
+  Evidence: the blocks at `0x17032` through `0x17208` and the helper at
+  `0x15bfc`.
+- Observation: the function adds the lateral rate `+0x54c` with the offsets
+  `+0x550` and `+0x558`, applies the table factors at `DAT_0010cf08 + 0x140`
+  and `+0x16c`, adds the heading rate `+0x548` to `+0x4cc`, clears `+0x54c`
+  below the double 250.0 at object-3 offset 0x798, and adds the shake terms from
+  `+0x4fc`, `+0x500`, and `+0x508`.  The shake scale is the double 2.0 at
+  object-3 offset 0x7a0.
+  Evidence: the blocks at `0x1720e` through `0x1739b` and the data at object-3
+  offsets 0x798 and 0x7a0.
+- Observation: the function writes the render flags at `+0x7b4`.  It copies
+  `+0x47c`, sets bit 0x4000 when `+0x114` is zero, and sets bit 0x2000 when the
+  speed stays at most the float 4000.0 at object-3 offset 0x7a8.  It then clears
+  `+0x18` and `+0x10`.
+  Evidence: the block at `0x173a1` through `0x17407`.
+- Inference: the function prepares the player car for the five view groups.  It
+  normalizes the body angles, filters the view scale, projects the motion into
+  the screen offsets, applies the view rates and the shake, and sets the render
+  flags.  The callers, the player object, and the screen-offset data support the
+  name `player_car_view_update`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness links no math library.  The local FPU stub provides
+  `sin`, `cos`, and `sqrt` through `fsin`, `fcos`, and `fsqrt`, and it makes
+  `__CHP` truncate toward zero.  The original uses the routines at `0x4da72`,
+  `0x4da66`, `0x22bec`, and `0x4d9f4`.
+  Evidence: `tools/rebuild/player_car_view_update_fpu.asm` and
+  `tools/rebuild/player_car_view_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the zero path, the filter path, the roll
+  path, the flat yaw path, the angle normalization, the rate and shake path, the
+  lateral offset path, and the render-flag path.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_view_update`, `work/rebuild/pcvw_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x16f34`.
+- Observation: the rebuilt module holds 247 instructions and 898 bytes.  The
+  identity check stays open at 23 of 247 instructions and 26 of 898 bytes.  The
+  V2 toolchain uses a different frame, instruction order, and local layout.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x16f34 --rebuilt work/rebuild/pcvwmod.exe --rebuilt-map
+  work/rebuild/player_car_view_update.map --rebuilt-symbol
+  player_car_view_update_`.
