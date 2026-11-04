@@ -201,7 +201,7 @@ The size is the function body, not the store extent.
 | `0x142ec` | `car_setup` (done) | 226 | 65 | 2 | 0 |
 | `0x4bf88` | `file_error_report` (done) | 261 | 88 | 7 | 0 |
 | `0x136cc` | `player_car_init` (done) | 277 | 87 | 6 | 0 |
-| `0x2d7c4` | unnamed | 690 | 198 | 28 | 0 |
+| `0x2d7c4` | `net_race_lobby` (done) | 690 | 198 | 28 | 0 |
 | `0x19ae8` | unnamed | 869 | 223 | 6 | 9 |
 | `0x131a8` | unnamed | 919 | 236 | 38 | 0 |
 | `0x1db94` | unnamed | 926 | 259 | 6 | 37 |
@@ -213,7 +213,7 @@ The size is the function body, not the store extent.
 
 ## Position
 
-One hundred thirty-two modules carry a recipe and a result: the twelve Phase A modules,
+One hundred thirty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -254,7 +254,7 @@ twenty-four Phase E modules `object_update_all` at `0x2786c`, `keyboard_hook` at
 `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`,
 `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
 `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`, `ai_update`
-at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first three Phase F modules
-`car_setup` at `0x142ec`, `file_error_report` at `0x4bf88`, and `player_car_init`
-at `0x136cc`.
-The next unnamed function is `0x2d7c4`.
+at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first four Phase F modules
+`car_setup` at `0x142ec`, `file_error_report` at `0x4bf88`, `player_car_init`
+at `0x136cc`, and `net_race_lobby` at `0x2d7c4`.
+The next unnamed function is `0x19ae8`.

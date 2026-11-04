@@ -10373,3 +10373,87 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x136cc --rebuilt work/rebuild/pcimod.exe --rebuilt-map
   work/rebuild/player_car_init.map --rebuilt-symbol player_car_init_`.
+
+## The net_race_lobby module at 0x2d7c4
+
+- Observation: the original body at `0x2d7c4` holds 198 instructions and 690
+  bytes up to the first `ret` at `0x2da75`.  The case blocks continue to the
+  `ret` at `0x2ddda`, so the store record keeps the 1560-byte extent and sets
+  no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2d7c4 --count 198` and
+  `tools/rebuild/functions/0x2d7c4.json`.
+- Observation: the function has a frame.  It saves `ebx`, `ecx`, `edx`, `esi`,
+  `edi`, and `ebp` before the frame.  It subtracts `0xdc` from `esp` and
+  `0x82` from `ebp`.  The rebuild uses the option `-of+`.
+  Evidence: the prologue at `0x2d7c4` through `0x2d7d2`.
+- Observation: the race state dispatcher `race_state_update` at `0x29564`
+  reaches this function through the entry at `0x29605`, which calls `0x2d7c4`.
+  The dispatcher jump table at `cs:[eax*4 + 0x19540]` and the case blocks are
+  the evidence.
+  Evidence: the call at `0x29605` and the disassembly of `0x29564`.
+- Observation: the function reads the 0x38-byte player records at object-3
+  offset `0x2099c`.  The record layout is `+0x04` event, `+0x08` player index,
+  `+0x0c` name, `+0x10` icon cell, `+0x14` car index, `+0x24` player bit, and
+  `+0x28` the 0x10-byte node id.
+  Evidence: the loads at `0x2d89c`, `0x2d8ba`, `0x2dad3`, `0x2db5f`, and
+  `0x2dd76`, and the record layout in `tools/rebuild/net_player_add.c`.
+- Observation: the receive call at `0xc739c` reads the 0xc-byte header into
+  `[ebp + 0x26]` and returns the body pointer.  The copy at `0xc8208` copies
+  the 0x2c-byte body into `[ebp + 0x32]`.  The header and the body form one
+  0x38-byte record, so the node id at `[ebp + 0x4e]` is the record field at
+  `+0x28`.
+  Evidence: the receive block at `0x2d823` through `0x2d84c` and the callees
+  at `0xc739c` and `0xc8208`.
+- Observation: the event code at record `+0x04` selects the paths 0 (join),
+  1 (leave), 2 (start), 3 (exit), and 0x1234 (quit).  The join path adds the
+  node through `0xc712c`, sorts through `0xc6fc8`, finds the index through
+  `0xc7248`, and copies the record.  The leave path removes the index through
+  `0xc71dc`.
+  Evidence: the dispatch at `0x2d84f` through `0x2d87a` and the blocks at
+  `0x2d87c` and `0x2da7e`.
+- Observation: the start path picks the chosen player from the frame counter
+  `DAT_000007fd` on the host.  It stores the choice in `DAT_00120b5c` and calls
+  `net_player_add` at `0x2dddc` with 0x8844 while it holds the cell
+  `DAT_001203c8`.  A client waits for the 0x8844 event and reads the choice
+  from record `+0x14`.
+  Evidence: the block at `0x2d904` through `0x2d9b8`.
+- Observation: when the local player is not the chosen player, the function
+  runs the loading transition.  It calls `video_present` at `0x27ec8` with the
+  scale 0 and the offset 0, calls `video_fill` at `0x2aa98`, loads
+  `menu3h.pcx` from `gfx\graf.dat` into `DAT_0011fad0` with the palette at
+  0xcf5c through `pcx_load` at `0x1b5a4`, copies 0x3e800 bytes to
+  `DAT_0021528` through `memcpy` at `0x8c150`, sets the palette through
+  `0x81a05`, and sets the active flag `DAT_00120994`.
+  Evidence: the block at `0x2d9c5` through `0x2da39`, the strings at 0x12a6,
+  0x12b1, and the data at 0xcf5c.
+- Observation: the active mode calls `net_player_add` at `0x2dddc` with 0x8844
+  and reads the events that target the chosen player.  The event 3 copies the
+  record.  The event 4 calls `0x2a214` and then draws the chosen player and the
+  car name from the table at `0x1d908` with the stride 0x34.
+  Evidence: the block at `0x2dc45` through `0x2ddce`.
+- Observation: the no-message path builds the player bit at `DAT_00120b60`
+  from the field `+0x24`, draws the local player at (0xc, 0x34), and draws the
+  remote players in two columns.  The local name uses the format at 0x12be and
+  the remote names use the format at 0x12c1.
+  Evidence: the block at `0x2daa8` through `0x2dc40` and the strings at 0x12be
+  and 0x12c1.
+- Inference: the function is the network race lobby.  The player record array,
+  the join, leave, and start events, the chosen player, the `net_player_add`
+  call, and the `menu3h.pcx` loading screen support the name.  The module
+  records the name `net_race_lobby` with the confidence `derived`.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the empty message, the join, the leave,
+  the local start, the remote start with the loading transition, the client
+  wait, the active record copy, the active menu transition, the exit event, and
+  the quit event.
+  Evidence: `python3 tools/rebuild/harness.py run --module net_race_lobby`,
+  `work/rebuild/nrl_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2d7c4`.
+- Observation: the rebuilt module holds 154 instructions and 600 bytes.  The
+  identity check stays open at 32 of 154 instructions and 61 of 600 bytes.  The
+  V2 toolchain uses another register order and another local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2d7c4 --rebuilt work/rebuild/nrlmod.exe --rebuilt-map
+  work/rebuild/net_race_lobby.map --rebuilt-symbol net_race_lobby_`.
