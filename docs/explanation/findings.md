@@ -10725,3 +10725,73 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x1629c --rebuilt work/rebuild/psumod.exe --rebuilt-map
   work/rebuild/player_steering_update.map --rebuilt-symbol
   player_steering_update_`.
+
+## The race_record_save module at 0x2e82c
+
+- Observation: the original body at `0x2e82c` holds 347 instructions and 1185
+  bytes.  The plan row holds the same counts.  The store record keeps the
+  1228-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2e82c --count 347` and
+  `tools/rebuild/functions/0x2e82c.json`.
+- Observation: the three callers at `0x1fecf`, `0x29022`, and `0x2a2a8` pass
+  `DAT_001203bc` in `eax`.  The callers sit in the loading-screen path at
+  `0x1fd70`, in `net_race_screen` at `0x28ba4`, and in the race-menu handler
+  at `0x2a214`.  The two latter functions belong to the `race_frame` group, so
+  the record takes the section `race_frame callees`.
+  Evidence: the direct call sweep for the target `0x2e82c`; the call sites at
+  `0x1fecf`, `0x29022`, and `0x2a2a8`; and the records of `0x28ba4` and
+  `0x2a214`.
+- Observation: `choice_load` at `0x1bbc8` fills six 0x50-byte records at
+  object-3 offset `0x20430` with the default lap time 180.0 and the name `GRA`.
+  It fills six records at offset `0x20610` with the default race time 900.0.
+  Each record holds five floats at `+0x00`, five 4-byte names at `+0x14`, five
+  dwords at `+0x28`, and five dwords at `+0x3c`.
+  Evidence: the blocks at `0x1bcfc` through `0x1be60` and the constants
+  `0x43340000` and `0x44610000`.
+- Observation: the function reads the lap time `DAT_0011d26c` and the race time
+  `DAT_0011d268`.  It counts the entries that are smaller than the new time and
+  inserts the new time at that slot, so both tables keep the smallest time
+  first.  The first insert writes the lap table.  The second insert writes the
+  race table and runs only when `DAT_0011d2b0` is 2.
+  Evidence: the comparison loops at `0x2e85c` and `0x2ea0c`, the shift loops at
+  `0x2e8a7` and `0x2ea57`, and the gate at `0x2e9f5`.
+- Observation: the records screen at `0x2d4b8` reads the same two tables.  It
+  formats the race entries as `\001%d. %3s %02d.%02d.%02d R` when the `+0x28`
+  flag is non-zero and as `\001%d. %3s %02d.%02d.%02d` otherwise.  It formats
+  the lap entries with the second pattern.  The `+0x28` flag therefore marks a
+  saved replay.
+  Evidence: the loops at `0x2d555` and `0x2d6f0`, the formats at object-3
+  offsets `0x1254`, `0x126e`, and `0x1288`, and the flag test at `0x2d64c`.
+- Observation: after a successful race insert, the function builds
+  `%s\replays\temp.rpl` from the base path `DAT_00007edc`.  It checks that the
+  file exists through `0xd1d44`, which runs the DOS find-first service.  It
+  scans the five `+0x28` flags for the first free positive number, builds
+  `%s\replays\REPLAY%d%d.RPL` from the track index and that number, deletes the
+  target through `0xd1ed8` (DOS function 0x41), and renames the temporary file
+  through `0xd1edd` (DOS function 0x56).
+  Evidence: the blocks at `0x2ec00` through `0x2eccb`, the formats at object-3
+  offsets `0x12fe` and `0x1312`, and the disassembly of `0xd1d44`, `0xd1ed8`,
+  and `0xd1edd`.
+- Observation: the input word `DAT_00118e1c` gates the save.  The bits `0x1020`
+  return before any table write.
+  Evidence: the test at `0x2e843` and the branch at `0x2e84c`.
+- Inference: the function saves the current lap time and race time into the
+  best-time tables and stores the replay file in the next free slot.  The two
+  tables, the record screen, and the DOS file calls support the name
+  `race_record_save`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the input gate, the lap-only insert,
+  the full lap and race insert, the two full-table cases, the missing temporary
+  file, the equal-time insert, the track index 4, and the fastest lap insert.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_record_save`,
+  `work/rebuild/rrs_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2e82c`.
+- Observation: the rebuilt module holds 159 instructions and 494 bytes.  The
+  identity check stays open at 33 of 159 instructions and 16 of 494 bytes.  The
+  V2 toolchain uses a different instruction order and local layout.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2e82c --rebuilt work/rebuild/rrsmod.exe --rebuilt-map
+  work/rebuild/race_record_save.map --rebuilt-symbol race_record_save_`.
