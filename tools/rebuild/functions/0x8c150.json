@@ -12,6 +12,7 @@
       "text": "copies `param_2` dwords to `param_1`"
     }
   ],
+  "implementation": "assembly",
   "module": "memcpy",
   "name": "memcpy",
   "notes": [],
@@ -35,8 +36,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8c150",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:f9284b56e02eaeded2fa52cec8fb432b46077587252bf61ba00aa61ab8baee9f",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:72a74a9d35c476d27f82e6d92f57fecb38d37a273089f9473e327b30ef1001a4",
     "source_digest": "sha256:fc5cb73c07140075439ee4ee8e309ec98fcf6b4364d2929d66f70f37909d4cbf",
     "tool": "run.py"
   },

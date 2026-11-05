@@ -36,6 +36,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import le  # noqa: E402
+import schema  # noqa: E402
 
 REBUILD_DIR = Path(__file__).resolve().parent
 FUNCTIONS_DIR = REBUILD_DIR / "functions"
@@ -49,6 +50,7 @@ TOOL_FILES = (
     "rebuild/run.py",
     "rebuild/harness.py",
     "rebuild/diff_module.py",
+    "rebuild/oracle.py",
     "rebuild/store.py",
     "le.py",
 )
@@ -460,6 +462,24 @@ def _status_violations(
     return violations
 
 
+def _schema_violations(path: Path, record: dict, name: str) -> list[str]:
+    """Return the JSON Schema violations of one record, or no messages.
+
+    The contracts stay under `contracts/`.  A test store without the contracts
+    has no schema to validate, so the semantic checks alone apply.
+    """
+    schema_path = REBUILD_DIR / "contracts" / name
+    if not schema_path.is_file():
+        return []
+    document = json.loads(schema_path.read_text())
+    return [
+        f"{path}: schema: {message}"
+        for message in schema.validate(
+            record, document, base_dir=schema_path.parent
+        )
+    ]
+
+
 def validate_record(
     path: Path, record: dict | None = None, root: Path | None = None
 ) -> list[str]:
@@ -658,6 +678,8 @@ def command_set(arguments: argparse.Namespace) -> int:
         record["section"] = arguments.section
     if arguments.confidence is not None:
         record["confidence"] = arguments.confidence
+    if arguments.implementation is not None:
+        record["implementation"] = arguments.implementation
     for check in arguments.check:
         checks = record.setdefault("checks", [])
         if check not in checks:
@@ -768,8 +790,13 @@ def command_check(original: Path | None) -> int:
     records: list[dict] = []
     for address in candidate_addresses():
         count += 1
-        violations.extend(validate_record(record_path(address)))
-        records.append(load_record(address))
+        path = record_path(address)
+        violations.extend(validate_record(path))
+        record = load_record(address)
+        records.append(record)
+        violations.extend(
+            _schema_violations(path, record, "record.schema.json")
+        )
     for address, extra in overlap_addresses(records):
         violations.append(
             f"{record_path(address)}: the size reaches {extra} bytes past the next entry"
@@ -778,6 +805,13 @@ def command_check(original: Path | None) -> int:
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
             violations.extend(validate_module(path))
+            try:
+                module_record = load_module(path.stem)
+            except ValueError:
+                continue
+            violations.extend(
+                _schema_violations(path, module_record, "module.schema.json")
+            )
     if original is not None:
         if not original.is_file():
             print(f"error: the original image {original} is missing", file=sys.stderr)
@@ -839,6 +873,11 @@ def parse_arguments() -> argparse.Namespace:
         "--confidence",
         choices=("observed", "derived", "inferred"),
         help="the confidence label",
+    )
+    set_parser.add_argument(
+        "--implementation",
+        choices=("c", "assembly"),
+        help="the source language of the rebuilt function",
     )
     set_parser.add_argument(
         "--check",
