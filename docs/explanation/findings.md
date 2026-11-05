@@ -11498,3 +11498,70 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   spline_interpolate_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee name in the harness stay inferred.
+
+## The player_car_skid_update module at 0x17d14
+
+- Observation: the original body at `0x17d14` holds 290 instructions and 1078
+  bytes up to the `ret` at `0x18149`.  The store record keeps the 1080-byte
+  extent and sets no function size.  The identity check uses the first 290
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x17d14 --count 290` and
+  `tools/rebuild/functions/0x17d14.json`.
+- Observation: the direct call sweep finds one caller at `0x15bc0`.  The caller
+  sits in the effect group at `0x15bac`.  The five view groups at `0x2003c`,
+  `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call that group on the player
+  object at object-3 offset `0xf91c`, after the physics group at `0x15a80`.
+  Evidence: the call sweep for `0x17d14`, the disassembly of `0x15bac`, and the
+  calls at `0x200e0`, `0x20209`, `0x2032b`, `0x20398`, and `0x203fc`.
+- Observation: the function forms the slip value from the speed `+0x50c`, the
+  yaw step `+0x2f4`, the frame delta `DAT_00118e04`, and the table indices
+  `+0x1c0`, `+0x268`, `+0x214`, and `+0x2bc`.  The deceleration path scales
+  `+0x110` by the table entry `DAT_0010cf08 + 0x188`, filters the value into
+  `+0x4f0`, and adds it to the heading `+0x4cc`.
+  Evidence: the blocks at `0x17d26` through `0x17e3c`.
+- Observation: the normal path compares the absolute slip with `+0x184` and
+  the gate with `+0x188`.  A large slip stores the amplitude `+0x4f0`, the
+  rate `+0x4f4`, and the sine and cosine `+0x500` and `+0x508`.  The amplitude
+  clamps at 1.53938 and the rate is `+0x50c^2 / +0x2f8 * +0x670 * 0.2`.  A
+  small slip clears the amplitude and the rate.  A gate above `+0x188` sets
+  `+0x170`.
+  Evidence: the blocks at `0x17e41` through `0x1803f` and the constants at
+  object-3 offsets `0x7d0` through `0x810`.
+- Observation: the tail forms the value from `cos(+0x4d0)`, the root of two,
+  and `+0x4f0`, and filters it into `+0x128` through `0x2211c` with the index
+  `0x5a`.  The filtered slip above 0.23 allocates a table entry through
+  `table_lookup` at `0x1f718` and starts the four effect slots through
+  `0x19828`.  At or below 0.23 it releases the entry through `0x1f880` when the
+  state `+0x148` is below 3.
+  Evidence: the tail block at `0x1803f` through `0x18141`, the tables at
+  object-3 offsets `0x6350` and `0x6530`, and the call sites `0x180f9`,
+  `0x1810a`, and `0x18134`.
+- Inference: the function updates the shake terms and the skid effect of the
+  player car.  The effect group caller, the shake terms that
+  `player_car_view_update` applies, the four effect slots, and the effect gate
+  support the name `player_car_skid_update`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the filter at `0x22b80`, the angle filter at
+  `0x2211c`, the sine at `0x4da72`, the cosine at `0x4da66`, and the square
+  root at `0x22bec`.  The harness links no math library, so the local FPU stub
+  supplies `sin`, `cos`, and `sqrt`.  The constants arrive through globals.
+  Evidence: `tools/rebuild/player_car_skid_update_fpu.asm` and
+  `tools/rebuild/player_car_skid_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the deceleration path, the large and
+  small slip, the two amplitude clamps, the gate above the limit, the two early
+  flags, and the input bit 0x40.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_skid_update`, `work/rebuild/pcsk_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x17d14`.
+- Observation: the rebuilt module holds 290 decoded instructions and 1075
+  bytes.  The identity check stays open at 40 of 290 instructions and 63 of
+  1075 bytes.  The V2 toolchain uses a different instruction order and local
+  layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17d14 --count 290 --rebuilt work/rebuild/pcskmod.exe
+  --rebuilt-map work/rebuild/player_car_skid_update.map --rebuilt-symbol
+  player_car_skid_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
