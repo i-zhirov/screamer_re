@@ -10872,3 +10872,68 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x16f34 --rebuilt work/rebuild/pcvwmod.exe --rebuilt-map
   work/rebuild/player_car_view_update.map --rebuilt-symbol
   player_car_view_update_`.
+
+## The race_results_screen module at 0x2a558
+
+- Observation: the original body at `0x2a558` holds 343 instructions and 1323
+  bytes up to the `ret` at `0x2aa82`.  The plan row holds the same counts.  The
+  store record keeps the 1324-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2a558 --count 343` and
+  `tools/rebuild/functions/0x2a558.json`.
+- Observation: the only direct caller is at `0x2a335`, inside the race-menu
+  handler at `0x2a214`.  The handler is called by `net_race_screen` at
+  `0x2908b` and `net_race_lobby` at `0x2dcf9`.  The named ancestors belong to
+  the race-frame group, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for the target `0x2a558` and the call sites at
+  `0x2a335`, `0x2908b`, and `0x2dcf9`.
+- Observation: the function clears the video buffer, loads `load<N>H.pcx` from
+  `gfx\graf.dat`, sets the palette, shows the message, builds the `map<N>` name,
+  and copies the pixels.  The screen index comes from the chosen player record
+  at object-3 offset `0x2099c`, field `+0x14`.  A value above 5 drops by 6 and
+  sets the flag 0x08 in the saved word at `0x1d274`.
+  Evidence: the blocks at `0x2a56c` through `0x2a6fe` and the string table at
+  module linear `0x101034` through `0x10108b`.
+- Observation: the function runs `race_cleanup`, the session init at `0x1fd70`,
+  the music step, and `menu_space_init`.  The input word `DAT_00118e1c` gates
+  the results: the bits 0x1020 return after `menu_frame`.
+  Evidence: the calls at `0x2a74e` through `0x2a75d` and the test at `0x2a762`.
+- Observation: when the gate is clear, the function loads `champ5h.pcx`, marks
+  the local result record at `0x13cd8` as finished (`-3`) with the race time
+  `DAT_0011d268` at `+0x2c`, collects the records whose status is `-3`, and
+  sorts them in ascending time order.  It then formats each line as
+  `\001%d. %s %s \002%s` with the position, the net player name at `+0x0c`, the
+  time `%02d.%02d.%02d`, and the car text at `0x1d550` record `+0x14`.  It draws
+  the lines through `text_draw` at `0x25020`.
+  Evidence: the blocks at `0x2a771` through `0x2aa25`, the sort at `0x2a8bd`
+  through `0x2a914`, and the formats at module linear `0x10106d` and `0x10107c`.
+- Observation: the wait loop runs `frame_step` and exits on the byte at 3 or
+  the byte at 0x1e.  Otherwise it polls the input through `0x26448` only when
+  `DAT_0011d2c0` and `DAT_0011d2cc` are both non-zero.  It then runs
+  `menu_frame` and restores the saved word at `0x1d274`.
+  Evidence: the loop at `0x2aa39` through `0x2aa67` and the epilogue at
+  `0x2aa69`.
+- Inference: the function is the post-race results screen.  The `champ5h.pcx`
+  background, the finished-result records, the time sort, and the result lines
+  support the name `race_results_screen`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the module uses the FPU and reads the 100.0 constant from
+  `DAT_0010108b`, because the harness does not load the constant pool.  The
+  local FPU stub makes `__CHP` truncate toward zero, because the original uses
+  the helper at `0x4d9f4`.
+  Evidence: `tools/rebuild/race_results_screen_fpu.asm` and
+  `tools/rebuild/race_results_screen_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the full two-finisher sort, the input
+  gate, the failed first load, the first video swap, the track adjust, and the
+  three-finisher hundredths sort.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  race_results_screen`, `work/rebuild/rrsc_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2a558`.
+- Observation: the rebuilt module holds 256 instructions and 970 bytes.  The
+  identity check stays open at 47 of 256 instructions and 56 of 970 bytes.  The
+  V2 toolchain uses a different frame and instruction order.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2a558 --rebuilt work/rebuild/rrscmod.exe --rebuilt-map
+  work/rebuild/race_results_screen.map --rebuilt-symbol race_results_screen_`.

@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred thirty-nine named modules are rebuilt with the harness and the
+  progress: one hundred forty named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -94,14 +94,15 @@ current host.
   `joystick_update` at `0x24da0`, `menu_space_init` at `0x29d08`,
   `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
   `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`, `ai_update`
-  at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first ten Phase F modules
+  at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first eleven Phase F modules
   `car_setup` at `0x142ec`, `file_error_report` at `0x4bf88`, `player_car_init`
   at `0x136cc`, `net_race_lobby` at `0x2d7c4`, `player_view_setup` at
   `0x19ae8`, `race_data_load` at `0x131a8`, `track_progress_update` at
   `0x1db94`, `player_steering_update` at `0x1629c`, `race_record_save` at
-  `0x2e82c`, and `player_car_view_update` at `0x16f34`;
-  twenty-two modules are verified, one is matching, and one hundred and sixteen
-  rebuilds hold the recorded difference; the
+  `0x2e82c`, `player_car_view_update` at `0x16f34`, and
+  `race_results_screen` at `0x2a558`;
+  twenty-two modules are verified, one is matching, and one hundred and
+  seventeen rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -202,11 +203,12 @@ The plan follows the size order, starting with the smallest functions.
     `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
     `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`,
     `ai_update` at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first
-    ten Phase F modules `car_setup` at `0x142ec`, `file_error_report` at
+    eleven Phase F modules `car_setup` at `0x142ec`, `file_error_report` at
     `0x4bf88`, `player_car_init` at `0x136cc`, `net_race_lobby` at
     `0x2d7c4`, `player_view_setup` at `0x19ae8`, `race_data_load` at
     `0x131a8`, `track_progress_update` at `0x1db94`,
     `player_steering_update` at `0x1629c`, `race_record_save` at
-    `0x2e82c`, and `player_car_view_update` at `0x16f34` are done;
+    `0x2e82c`, `player_car_view_update` at `0x16f34`, and
+    `race_results_screen` at `0x2a558` are done;
     the result is twenty-two verified modules, one matching module, and one
-    hundred and sixteen open rebuilds).
+    hundred and seventeen open rebuilds).
