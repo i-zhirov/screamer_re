@@ -217,6 +217,26 @@ The size is the function body, not the store extent.
 | --- | --- | --- | --- | --- | --- |
 | `0x18db0` | `engine_rpm_update` (done) | 1734 | 448 | 10 | 162 |
 
+### Phase H: next unnamed functions
+
+These are the largest unnamed game functions in the object.  The rebuild infers
+a name from the call graph and the data flow, as in Phase F.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x21338` | unnamed | 1715 | 464 | 38 | 47 |
+| `0x1a930` | unnamed | 1425 | 396 | 18 | 126 |
+| `0x2aab8` | unnamed | 1420 | 395 | 32 | 0 |
+| `0x15c1c` | unnamed | 1160 | 306 | 8 | 37 |
+| `0x2b9cc` | unnamed | 1121 | 310 | 15 | 110 |
+| `0x22744` | unnamed | 1081 | 360 | 12 | 85 |
+| `0x17d14` | unnamed | 1078 | 290 | 10 | 106 |
+| `0x2c430` | unnamed | 885 | 230 | 19 | 60 |
+| `0x23a94` | unnamed | 870 | 208 | 16 | 37 |
+| `0x242bc` | unnamed | 829 | 215 | 14 | 23 |
+| `0x2b660` | unnamed | 803 | 219 | 8 | 55 |
+| `0x2d4b8` | unnamed | 779 | 224 | 21 | 24 |
+
 ## Position
 
 One hundred forty-two modules carry a recipe and a result: the twelve Phase A modules,
