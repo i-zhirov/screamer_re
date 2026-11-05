@@ -11341,3 +11341,89 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   player_car_link_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee name in the harness stay inferred.
+
+## The map_object_update module at 0x2b9cc
+
+- Observation: the original body at `0x2b9cc` holds 310 instructions and 1121
+  bytes up to the first `ret` at `0x2be2c`.  The body continues to the shared
+  epilogue at `0x2be6f`, so the store record keeps the 1224-byte extent and
+  sets no function size.  The identity check uses the first 310 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b9cc --count 340` and
+  `tools/rebuild/functions/0x2b9cc.json`.
+- Observation: the only direct caller is at `0x29b86` in the race state update
+  at `0x29918`.  The caller holds 0x50 records at `DAT_001db78`, each 0x64 bytes
+  long, and runs this function on every record at `0x29b82`.
+  Evidence: the direct call sweep for the target `0x2b9cc` and the loop at
+  `0x29b5a` through `0x29b8d`.
+- Observation: the map placement at `0x2b044` fills the same records from a map
+  string.  It stores the character minus 0x20 at `+0x08`, the start positions at
+  `+0x34` and `+0x38`, the target positions at `+0x40` and `+0x44`, the third
+  position at `+0x3c`, the amplitudes at `+0x4c` and `+0x50`, the progress 1.0
+  at `+0x58`, and the timer at `+0x60`.  The caller at `0x29a88` runs the
+  placement before the update, so the records hold map objects.
+  Evidence: the disassembly of `0x2b109` through `0x2b27b` and the call at
+  `0x29a88`.
+- Observation: a record with `+0x08` equal to -1 holds no object.  The function
+  binds the list name at `0x6350` through the helper at `0x11850` and returns.
+  Otherwise it calls the helper at `0x117fc`, reads the slot at
+  `DAT_001d2d0[index * 2]`, and takes the object pointer from the 0x1c-byte
+  entry table at `0x653c`.  The object frame `+0x20` is `DAT_001fab8` times the
+  record id `+0x08` plus 0x226.
+  Evidence: the blocks at `0x2b9e3` through `0x2ba7d` and the helpers at
+  `0x117fc` and `0x11850`.
+- Observation: the function interpolates the object positions `+0x08`, `+0x0c`,
+  and `+0x10` from the record targets `+0x40`, `+0x44`, and `+0x48` back to
+  `+0x34`, `+0x38`, and `+0x3c` with `1 - cos(progress * pi/2)`.  The progress
+  is `+0x58`.  The cosine and the sine of the progress scaled by 2 pi times the
+  amplitudes `+0x4c` and `+0x50` add the sway to the first two positions.
+  Evidence: the blocks at `0x2ba80` through `0x2bbf5` and the data at
+  object-3 offsets 0x10d3 and 0x10d7.
+- Observation: the height `+0x10` also takes a travelling wave.  The phase is
+  `(x + 4608) / 9216` times 2 pi plus `(y + 2080) / 4160` times pi plus
+  `DAT_001d248`.  When the record flag `+0x0c` is zero, the x term is 0.5 and
+  the phase takes the factor 0.25.  The sine of the phase times 150.0 adds to
+  the height.
+  Evidence: the blocks at `0x2bbf8` through `0x2bcc4` and the data at
+  object-3 offsets 0x10db, 0x10df, 0x10e7, 0x10eb, 0x10f3, 0x10f7, and
+  0x10ff.
+- Observation: the record angles `+0x10`, `+0x14`, and `+0x18` scale by
+  1024.0 / pi and mask with 0x7ff into the object angles `+0x14`, `+0x18`, and
+  `+0x1c`.  The progress `+0x58` falls by the frame delta times `+0x5c`, and
+  the timer `+0x60` falls by the frame delta.  Both clamp at zero.
+  Evidence: the blocks at `0x2bcc7` through `0x2bdaa` and the data at
+  object-3 offset 0x1103.
+- Observation: the final block steps the record angle `+0x10`.  With `+0x0c`
+  and `DAT_001fac0` both zero, the angle falls by the frame delta times 4 pi
+  and clamps at 0.05.  Otherwise an angle above pi/2 sets `DAT_001fb64` to -2,
+  the angle rises by the same rate, and an angle above pi clamps at pi.  An
+  angle already at pi returns.
+  Evidence: the blocks at `0x2bdaa` through `0x2be6f` and the data at
+  object-3 offsets 0x1107 and 0x110b.
+- Inference: the function advances the map object records.  It links the
+  object, interpolates the position with the sway and wave offsets, and
+  advances the object angles and timers.  The caller, the placement routine,
+  and the record fields support the name `map_object_update`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` at `0x4da72`, `cos` at `0x4da66`, and
+  the truncate helper at `0x4d9f4`.  The harness links no math library, so the
+  local FPU stub supplies `sin` and `cos` from the hardware and makes `__CHP`
+  truncate toward zero.
+  Evidence: `tools/rebuild/map_object_update_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the unused record, the full path, the
+  two zero clamps, the pi return, the mode set, the interpolation, the overlay
+  path, and the zero-angle return.
+  Evidence: `python3 tools/rebuild/harness.py run --module map_object_update`,
+  `work/rebuild/moupd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2b9cc`.
+- Observation: the rebuilt module holds 310 decoded instructions and 1035
+  bytes.  The identity check stays open at 37 of 310 instructions and 32 of
+  1035 bytes.  The V2 toolchain uses a different instruction order and local
+  layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b9cc --count 310 --rebuilt work/rebuild/mapobj.exe
+  --rebuilt-map work/rebuild/map_object_update.map --rebuilt-symbol
+  map_object_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

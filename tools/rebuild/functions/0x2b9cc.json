@@ -1,9 +1,82 @@
 {
   "address": "0x2b9cc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 310,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x2b9cc holds 310 instructions and 1121 bytes up to the first ret at 0x2be2c; the body continues to the shared epilogue at 0x2be6f, so the record keeps the 1224-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x29b86 is the race state update at 0x29918, which runs this function on each of the 0x50 records at DAT_001db78; the map placement at 0x2b044 fills those records from a map string, so the module names it map_object_update"
+    },
+    {
+      "kind": "note",
+      "text": "a record with the field +0x08 equal to -1 binds the list name 0x6350 through 0x11850 and returns; otherwise the function decays the timers +0x60 and +0x58, looks the object up in DAT_001d2d0 and DAT_0010653c, and sets the object frame +0x20 from DAT_001fab8"
+    },
+    {
+      "kind": "note",
+      "text": "the function interpolates the object positions +0x08, +0x0c, and +0x10 from the record fields +0x40, +0x44, and +0x48 toward +0x34, +0x38, and +0x3c with the cosine of the progress +0x58 scaled by pi/2, adds the cosine and sine of the progress scaled by 2 pi times the amplitudes +0x4c and +0x50, and adds a wave of 150.0 from the normalized position and the phase DAT_001d248"
+    },
+    {
+      "kind": "note",
+      "text": "the three record angles +0x10, +0x14, and +0x18 scale by 1024.0 / pi into the object angles +0x14, +0x18, and +0x1c with the mask 0x7ff; the final block decays the angle +0x10 with 4 pi when the flag +0x0c and DAT_001fac0 are zero, or raises it, sets DAT_001fb64 to -2 above pi/2, and clamps it at pi"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one record, one object block, the entry and slot tables, the frame delta, the phase, and the constants; it covers the unused record, the full path, the two clamps, the pi return, the mode set, the interpolation, the overlay path, and the zero-angle return; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b9cc --count 310 --rebuilt work/rebuild/mapobj.exe --rebuilt-map work/rebuild/map_object_update.map --rebuilt-symbol map_object_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_object_update"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_object_update module at 0x2b9cc"
+    }
+  ],
+  "module": "map_object_update",
+  "name": "map_object_update",
   "notes": [],
   "object_offset": "0x1b9cc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 32,
+        "bytes_total": 1035,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 37,
+        "instructions_total": 310,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b9cc",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:3e0c2949fc8551f2465ec361e0d8b566046d755a2fc0b719cf0b5355bb613678",
+    "source_digest": "sha256:7cdfbde0a63c4d44683a333c99d74f3c9bfe142d12026a34a04accd480825592",
+    "tool": "run.py"
+  },
+  "role": "updates the map object records, interpolates the object position with the sway and wave offsets, and advances the object angles and timers",
+  "section": "race_frame callees",
   "size": 1224,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_object_update_"
 }
