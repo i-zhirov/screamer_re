@@ -886,7 +886,7 @@ def command_html(out: Path) -> int:
     digests = {module["name"]: store.source_digest(module) for module in modules}
     page = render_page(records, modules, digests)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page)
+    out.write_text(page, encoding="utf-8")
     count = len(records) + len(module_rows(records, modules))
     print(f"{out}: {count} rows")
     return 0

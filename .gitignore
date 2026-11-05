@@ -4,6 +4,9 @@
 # Extracted originals, generated inventories, and analysis output.
 work/
 
+# The generated GitHub Pages site.
+_site/
+
 # Python bytecode cache.
 __pycache__/
 

@@ -653,11 +653,17 @@ preflight, so the run reports 57 checks.  `--skip-runtime` skips stages 5, 6,
 report 42 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
-The check runs in three places:
+The checks and the status page run in these places:
 
 - the `.githooks/pre-commit` hook regenerates `work/rebuild/status.html` before
-  every commit, and the CI `status` job regenerates the page and publishes it as
-  the `rebuild-status` artifact,
+  every commit,
+- the CI `status` job regenerates the page into `_site/index.html` on every push
+  and pull request, publishes it as the `rebuild-status` artifact, and packages
+  the site for GitHub Pages on a push to `master`,
+- the CI `deploy` job publishes the packaged site to GitHub Pages after the
+  syntax gate passes on `master`.  The page is
+  <https://i-zhirov.github.io/screamer_re/>.  The Pages source is
+  `GitHub Actions`.
 - GitHub Actions runs the syntax gate and the unit suite on every push and pull
   request,
 - GitHub Actions runs the full check on a self-hosted runner that holds the

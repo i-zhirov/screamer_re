@@ -72,7 +72,7 @@ screamer_re/
 ├── .githooks/
 │   └── pre-commit             # update the status page before every commit
 ├── .github/workflows/
-│   └── pipeline.yml           # CI: the syntax gate, the status page, and the full check
+│   └── pipeline.yml           # CI: the syntax gate, the status page, the Pages deploy, and the full check
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
@@ -355,8 +355,10 @@ through the store.
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.
 - The pre-commit hook regenerates `work/rebuild/status.html`, and the CI
-  `status` job regenerates the page and publishes it as an artifact.  The page
-  is generated output, so it stays out of git.
+  `status` job regenerates the page into `_site/index.html` and publishes it as
+  an artifact.  On a push to `master`, the `deploy` job publishes the packaged
+  site to GitHub Pages after the syntax gate.  The page is generated output, so
+  it stays out of git.
 - Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
