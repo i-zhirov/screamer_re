@@ -10937,3 +10937,69 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
   --original-address 0x2a558 --rebuilt work/rebuild/rrscmod.exe --rebuilt-map
   work/rebuild/race_results_screen.map --rebuilt-symbol race_results_screen_`.
+
+## The championship_screen module at 0x2cf68
+
+- Observation: the original body at `0x2cf68` holds 370 instructions and 1357
+  bytes up to the `ret` at `0x2d4b4`.  The record keeps the 1360-byte extent
+  and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2cf68 --count 370` and
+  `tools/rebuild/functions/0x2cf68.json`.
+- Observation: the only caller is the call at `0x295f1` inside
+  `race_state_update` at `0x29564`, case 5.  The dispatcher is a callee of
+  `race_frame` at `0x2807c`, so the record takes the section
+  `race_frame callees`.
+  Evidence: the direct call sweep for `0x2cf68` and
+  `tools/rebuild/race_state_update.c`.
+- Observation: the selected index `DAT_001203dc` picks one 0x2c-byte record
+  from the table at object-3 offset `0x22bc`.  The records hold the background
+  names `champ0` through `champ7` at `+0x18`.  The loader at `0x2c7a8` builds
+  `%s%c.pcx` from that name and reads the background for the state 5 screen.
+  Evidence: the table at module linear `0x1022bc` and the block at `0x2c8b4`
+  through `0x2c8d0`.
+- Observation: the text list `DAT_00120030` is the `champ` list that
+  `menu_space_init` loads at `0x29d08`.  The function reads the group starts
+  from `DAT_001201c0` for the four heads, the two summary labels, and the
+  title.
+  Evidence: `tools/rebuild/menu_space_init.c` and `0x2c7f9` through `0x2c863`.
+- Observation: a record type of 3 selects the standings table.  The function
+  draws the two rectangles, the title, the four heads, and six rows.  Each row
+  holds the position `-%d-`, the car number `DAT_00120400[i]`, the time
+  `DAT_001203e8[i]` as minutes.seconds.hundredths, and the points
+  `DAT_00120418[i]`.  The function sums the points into `DAT_001203e4` and
+  draws the two summary lines.
+  Evidence: the blocks at `0x2cfa8` through `0x2d399` and the formats at module
+  linear `0x1011ff` through `0x101246`.
+- Observation: the flag `DAT_00120804` and the record field `+0x24` select a
+  placeholder row with the texts `10`, `00.00.00`, and `0`.  A car number of
+  -1 selects the empty row.
+  Evidence: the tests at `0x2d0ab`, `0x2d0c8`, and `0x2d263`.
+- Observation: a record type other than 3 selects the centred list.  The
+  record field `+0x0c` picks the group of the `champ` list, and the record
+  field `+0x28` picks the font.  The function calls `net_race_screen` at
+  `0x28ba4` when the frame timer `DAT_0011d24c` is above 10.0.
+  Evidence: the loop at `0x2d39e` through `0x2d46a` and the compare at
+  `0x2d46f`.
+- Observation: the footer panel at `0x2d485` appears only when the low seven
+  bits of `DAT_000007fd` are below 0x48.
+  Evidence: the test at `0x2d485` and the call at `0x2d4a3`.
+- Inference: the function is the championship screen for state 5.  The `champ`
+  text list, the `champ<N>` backgrounds, the standings table, and the point
+  sum support the name `championship_screen`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `3` and `D`.  The paths cover the standings table with a normal, an
+  empty, and a placeholder row, the point sum, the centred list, the
+  `net_race_screen` gate, the timer gate, and the footer gate.
+  Evidence: `python3 tools/rebuild/harness.py run --module championship_screen`,
+  `work/rebuild/cscr_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2cf68`.
+- Observation: the rebuilt module holds 321 instructions and 1122 bytes.  The
+  identity check stays open at 78 of 321 instructions and 77 of 1122 bytes.
+  The V2 toolchain uses a different frame and instruction order.  The store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2cf68 --rebuilt work/rebuild/champmod.exe
+  --rebuilt-map work/rebuild/championship_screen.map --rebuilt-symbol
+  championship_screen_`.
