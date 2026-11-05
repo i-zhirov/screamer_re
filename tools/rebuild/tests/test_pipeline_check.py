@@ -307,5 +307,57 @@ class StageEightTestCase(unittest.TestCase):
         self.assertIn("0xd4364", command)
 
 
+class ImageGateTestCase(unittest.TestCase):
+    """Stage 11 must skip the image gate until a whole image exists."""
+
+    def test_missing_image_is_a_skip(self) -> None:
+        checks = pipeline_check.Checks()
+        with contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_image(
+                checks,
+                Path("/game"),
+                "STARTH.EXE",
+                Path("/missing/STARTH.EXE"),
+            )
+        self.assertEqual(checks.results, [])
+
+    def test_present_image_runs_the_comparison(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            rebuilt = Path(temporary) / "STARTH.EXE"
+            rebuilt.write_bytes(b"rebuilt")
+            checks = pipeline_check.Checks()
+            result = subprocess.CompletedProcess(
+                [], 0, "verdict: the images are byte-identical\n", ""
+            )
+            with mock.patch.object(
+                pipeline_check, "run", return_value=result
+            ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+                pipeline_check.check_image(
+                    checks, Path("/game"), "STARTH.EXE", rebuilt
+                )
+        self.assertEqual(len(checks.results), 1)
+        self.assertTrue(checks.results[0][1])
+        self.assertTrue(
+            any("image_compare.py" in part for part in run_mock.call_args.args[0])
+        )
+
+    def test_a_differing_image_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            rebuilt = Path(temporary) / "STARTH.EXE"
+            rebuilt.write_bytes(b"rebuilt")
+            checks = pipeline_check.Checks()
+            result = subprocess.CompletedProcess(
+                [], 1, "verdict: the images differ\n", ""
+            )
+            with mock.patch.object(
+                pipeline_check, "run", return_value=result
+            ), contextlib.redirect_stdout(io.StringIO()):
+                pipeline_check.check_image(
+                    checks, Path("/game"), "STARTH.EXE", rebuilt
+                )
+        self.assertEqual(len(checks.results), 1)
+        self.assertFalse(checks.results[0][1])
+
+
 if __name__ == "__main__":
     unittest.main()

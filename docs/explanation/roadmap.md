@@ -57,13 +57,14 @@ current host.
   `0x300d6`, `printf` at `0x3009b`, `memcpy` at `0x8c150`, and
   `engine_shutdown` at `0x128ac`, `error_report` at `0x10978`, `bios_video` at
   `0x108e4`, `list_destroy` at `0x2ed77`, `memory_available` at `0x2f8ca`, and
-  `frame_step` at `0x2aa84`; the four run-time modules match the original, the
-  six game modules hold the recorded difference, and the driver module matches
-  by behavior).
+  `frame_step` at `0x2aa84`; the four run-time modules match the original,
+  `list_destroy` matches with the call relocation, the five other game modules
+  hold the recorded difference, and the driver module matches by behavior).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
-  code).
+  code, `run.py --strict` accepts only an exact or relocation-only function
+  match, and `tools/rebuild/image_compare.py` is the whole-image gate).
 
 ### M4: Modern platform
 
@@ -117,3 +118,12 @@ current host.
     at `0x2aa84` is the latest: 7 instructions and 20 bytes, the call order
     `default_data_copy`, `joystick_update`, `frame_timer`, and the same extra
     `mov esp,ebp` restore as `engine_shutdown`).
+13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
+    exact-bytes verdict and the relocation-only verdict, `store.py check`
+    validates every record against the JSON Schema contracts, and stage 11
+    compares the rebuilt whole image with `tools/rebuild/image_compare.py` when
+    the image exists).
+14. Compare function bodies with the relocation-aware oracle (done:
+    `tools/rebuild/oracle.py` masks the fixup slots and the direct branch
+    targets, `free` and `exit` pass `--strict`, and a reordered or shape-only
+    sequence fails).

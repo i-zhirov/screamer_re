@@ -12,6 +12,7 @@
       "text": "releases the block when the pointer is set; counterpart of `list_create`"
     }
   ],
+  "implementation": "assembly",
   "module": "list_destroy",
   "name": "list_destroy",
   "notes": [],
@@ -26,22 +27,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
+        "bytes_equal": 51,
         "bytes_total": 54,
-        "detail": "the instruction counts differ, 25 and 26",
-        "instructions_equal": 19,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 25,
         "instructions_total": 25,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ed77",
-    "date": "2026-10-30",
-    "source_digest": "sha256:1965e1bbfbddc85bc15f105987dfbda1eccb5424a77c48aa97fb56f0c430b223",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:f354ac51687dc4a6ad39fd223b08ca28291fd11c6aefe538196720f7ce35d71c",
+    "source_digest": "sha256:95a51f4c155070cde92bad8e9aeadbc0577a24bd33d2e7447b11a44335d2ce5e",
     "tool": "run.py"
   },
   "role": "releases the block when the pointer is set; counterpart of `list_create`",
   "section": "Program functions",
   "size": 54,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "list_destroy_"
 }

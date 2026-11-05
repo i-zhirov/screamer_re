@@ -155,6 +155,35 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn("67%", rows[1])
         self.assertIn("33%", rows[1])
 
+    def test_page_shows_assembly_implementation(self) -> None:
+        records = [
+            self.record(
+                "0x2ed77",
+                name="list_destroy",
+                status="verified",
+                section="Program functions",
+                module="list_destroy",
+                implementation="assembly",
+                result=self.result(),
+            ),
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                result=self.result(),
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn("<th>lang</th>", page)
+        rows = self.rows(page)
+        self.assertIn('<td class="cell-lang">asm</td>', rows[0])
+        self.assertIn('<td class="cell-lang">—</td>', rows[1])
+        detail = self.detail(page, "0x2ed77")
+        self.assertIn("language: <code>asm</code>", detail)
+        self.assertTrue(any("asm" in chip for chip in self.chips(page)))
+
     def test_page_excludes_not_a_function_from_the_total(self) -> None:
         records = [
             self.record(

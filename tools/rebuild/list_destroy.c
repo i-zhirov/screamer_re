@@ -1,4 +1,9 @@
-/* The rebuilt `list_destroy` module.
+/* The C reference version of the `list_destroy` module.
+ *
+ * The module builds the hand-written `list_destroy.asm` source, not this file.
+ * This file stays alongside for reference.  Every tested C compiler (9.01d,
+ * 9.5, 10.0, and 10.0a) puts the return temporary in the highest local slot,
+ * so the C build does not reproduce the original local slot order.
  *
  * The original sits at linear 0x2ed77 in STARTH.EXE and holds 25 instructions and 54
  * bytes: the register saves `push ebx`, `push ecx`, `push esi`, `push edi`, and
