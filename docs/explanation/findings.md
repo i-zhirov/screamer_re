@@ -5252,6 +5252,24 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   publishes it as the `rebuild-status` artifact.  The job needs the standard
   library only, because the page reads the committed store.
   Evidence: `.github/workflows/pipeline.yml` and the `rebuild-status` artifact.
+- On a push to `master`, the CI `status` job renders the page to
+  `_site/index.html` and packages the site for GitHub Pages.  The `deploy` job
+  runs only after the `syntax` job passes and publishes the site with
+  `actions/deploy-pages`.  A pull request uploads the artifact but does not
+  deploy.  The page is <https://i-zhirov.github.io/screamer_re/>.
+  Evidence: `.github/workflows/pipeline.yml` and
+  `python3 tools/rebuild/view.py html --out _site/index.html`.
+- The page has no external asset, no `<base>` element, and no absolute path, so
+  the `/screamer_re/` project subpath needs no change.
+  Evidence: `python3 tools/rebuild/view.py html --out _site/index.html` and a
+  search of the output for `<link`, `<img`, `src=`, and `href=`.
+- GitHub Free publishes Pages only for a public repository.  The deploy therefore
+  needs three repository settings: the repository visibility is public, the
+  Pages source is `GitHub Actions`, and the `github-pages` environment allows a
+  deployment from `master`.  At the time of this finding the repository is
+  private and Pages is not enabled, so these settings are still to apply.
+  Evidence: the repository settings and the `deploy` job in
+  `.github/workflows/pipeline.yml`.
 - The hook skips with a clear line when the view tool or `python3` is missing,
   and it fails the commit when the page cannot render.
   Evidence: `sh .githooks/pre-commit`.

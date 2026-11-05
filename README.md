@@ -17,7 +17,8 @@ Initial reconnaissance is complete.  The project has:
   (`tools/rebuild/store.py`),
 - a check runner that builds and tests the declared checks
   (`tools/rebuild/run.py`),
-- a self-contained status page of the store (`tools/rebuild/view.py`),
+- a self-contained status page of the store (`tools/rebuild/view.py`), published
+  to GitHub Pages at <https://i-zhirov.github.io/screamer_re/>,
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
@@ -137,6 +138,12 @@ The pre-commit hook regenerates the status page; enable the hooks once per clone
 ```sh
 git config core.hooksPath .githooks
 ```
+
+On a push to `master`, the `status` job packages the page for GitHub Pages, and
+the `deploy` job runs after the syntax gate.  Pull requests upload the
+`rebuild-status` artifact but do not deploy.  The published page is
+<https://i-zhirov.github.io/screamer_re/>.  Set the Pages source to
+`GitHub Actions` in the repository settings.
 
 The full check needs the game directory, DOSBox-X, and the installed Ghidra
 loader.  Set `SCREAMER_GAME_DIR` to use another game directory.

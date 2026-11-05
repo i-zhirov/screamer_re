@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   syntax:
     name: syntax gate
@@ -44,12 +47,39 @@ jobs:
         with:
           python-version: "3.14"
       - name: regenerate the status page
-        run: python3 tools/rebuild/view.py html
-      - name: publish the status page
+        run: python3 tools/rebuild/view.py html --out _site/index.html
+      - name: publish the status page artifact
         uses: actions/upload-artifact@v4
         with:
           name: rebuild-status
-          path: work/rebuild/status.html
+          path: _site/index.html
+      - name: configure the pages site
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/configure-pages@v6
+      - name: package the pages site
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: deploy status page
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [syntax, status]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v5
 
   pipeline:
     name: full pipeline
