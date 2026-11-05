@@ -8,6 +8,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -565,6 +566,112 @@ class RunTestCase(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("is missing", errors.getvalue())
         self.assertNotIn("FAIL", output.getvalue())
+
+    def test_identity_accepted_default_and_strict(self) -> None:
+        identical = "the modules are byte-identical"
+        link_time = (
+            "the instruction sequences match; the differing operands are the "
+            "link-time addresses"
+        )
+        reordered = "the modules hold the same instructions in a different order"
+        for verdict in (identical, link_time):
+            self.assertTrue(run.identity_accepted(verdict, True))
+            self.assertTrue(run.identity_accepted(verdict, False))
+        self.assertTrue(run.identity_accepted(reordered, False))
+        self.assertFalse(run.identity_accepted(reordered, True))
+
+    def identity_stdout(self, verdict: str) -> str:
+        return (
+            "byte compare: 6 of 9 bytes equal, 3 different\n"
+            "instruction compare: 3 of 3 instructions equal, "
+            "0 opcodes different, 0 operands different\n"
+            f"verdict: {verdict}\n"
+        )
+
+    def test_strict_identity_rejects_a_reordered_sequence(self) -> None:
+        reordered = "the modules hold the same instructions in a different order"
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout(reordered), ""
+        )
+        record = {"address": "0x300ec", "symbol": "free_"}
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(run.subprocess, "run", return_value=completed):
+            default_verdict, _ = run.run_identity(
+                record, module, self.original
+            )
+            strict_verdict, strict_check = run.run_identity(
+                record, module, self.original, strict=True
+            )
+        self.assertEqual(default_verdict, "pass")
+        self.assertEqual(strict_verdict, "fail")
+        self.assertEqual(strict_check["verdict"], "fail")
+
+    def test_strict_identity_accepts_link_time_operands(self) -> None:
+        link_time = (
+            "the instruction sequences match; the differing operands are the "
+            "link-time addresses"
+        )
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout(link_time), ""
+        )
+        record = {"address": "0x300ec", "symbol": "free_"}
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(run.subprocess, "run", return_value=completed):
+            verdict, _ = run.run_identity(
+                record, module, self.original, strict=True
+            )
+        self.assertEqual(verdict, "pass")
+
+    def test_recheck_record_forces_a_fresh_run(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="verified",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": store.source_digest(module),
+            "fingerprint": store.compute_fingerprint(
+                record, module, original=self.original
+            ),
+            "checks": {
+                "identity": {
+                    "verdict": "pass",
+                    "detail": "the modules are byte-identical",
+                }
+            },
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        passing = (
+            "pass",
+            {"verdict": "pass", "detail": "the modules are byte-identical"},
+        )
+        arguments = [
+            "run.py",
+            "run",
+            "--recheck-record",
+            "0x300ec",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_identity", return_value=passing
+        ) as identity:
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        identity.assert_called_once()
+        self.assertIn("[1/1] 0x300ec free: PASS", output.getvalue())
 
     def test_behavior_only_record_needs_no_original(self) -> None:
         self.write_module(

@@ -208,6 +208,8 @@ h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem; }
 .status-table tbody tr:last-child td { border-bottom: none; }
 .record-row { cursor: pointer; }
 .cell-address { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.cell-lang { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-secondary); }
+.chip-lang { color: var(--text-secondary); font-size: 0.72rem; letter-spacing: 0.04em; }
 .detail-pane {
   flex: 1;
   min-width: 0;
@@ -456,10 +458,12 @@ def _chip(
     module: str,
     status: str,
     stale: bool,
+    lang: str = "",
 ) -> str:
     classes = f"chip status-{status}" + (" stale" if stale else "")
     mark = _mark(status, stale)
     mark_html = f' <span class="chip-mark">{mark}</span>' if mark else ""
+    lang_html = f' <span class="chip-lang">{_escaped(lang)}</span>' if lang else ""
     return (
         f'<button class="{classes}" type="button"'
         f' data-key="{_escaped(key)}" data-address="{_escaped(address)}"'
@@ -467,7 +471,8 @@ def _chip(
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}">'
         f'<span class="chip-label">{_escaped(label)}</span>'
-        f' <span class="chip-status">{_escaped(status)}</span>{mark_html}</button>'
+        f' <span class="chip-status">{_escaped(status)}</span>{mark_html}'
+        f"{lang_html}</button>"
     )
 
 
@@ -483,6 +488,7 @@ def _function_chip(record: dict, stale: bool) -> str:
         module=record.get("module", ""),
         status=record.get("status", "unknown"),
         stale=stale,
+        lang=_language_label(record),
     )
 
 
@@ -551,11 +557,22 @@ def _board(records: list[dict], rows: list[dict], digests: dict[str, str]) -> st
     return "\n".join(groups)
 
 
+def _language_label(record: dict) -> str:
+    """The short language label of a record, or an empty string."""
+    implementation = record.get("implementation")
+    if implementation == "assembly":
+        return "asm"
+    if implementation == "c":
+        return "C"
+    return ""
+
+
 def _table_row(record: dict, stale: bool) -> str:
     address = record["address"]
     name = record.get("name")
     module = record.get("module", "")
     status = record.get("status", "unknown")
+    lang = _language_label(record)
     classes = f"record-row status-{status}" + (" stale" if stale else "")
     mark = f" {_stale_mark()}" if stale else ""
     return (
@@ -565,6 +582,7 @@ def _table_row(record: dict, stale: bool) -> str:
         f' data-stale="{str(stale).lower()}">'
         f'<td class="cell-address">{_escaped(address)}</td>'
         f'<td class="cell-name">{_escaped(name) if name else MISSING_NAME}</td>'
+        f'<td class="cell-lang">{_escaped(lang) if lang else UNDEFINED}</td>'
         f'<td class="cell-module">{_escaped(module)}</td>'
         f'<td class="cell-status">{_status_word(status)}{mark}</td>'
         f'<td class="cell-instructions">{instruction_percent(record)}</td>'
@@ -583,6 +601,7 @@ def _module_table_row(module: dict, stale: bool) -> str:
         f' data-status="{_escaped(status)}" data-stale="{str(stale).lower()}">'
         f'<td class="cell-address">{UNDEFINED}</td>'
         f'<td class="cell-name">{_escaped(name)}</td>'
+        f'<td class="cell-lang">{UNDEFINED}</td>'
         f'<td class="cell-module">{_escaped(name)}</td>'
         f'<td class="cell-status">{_status_word(status)}{mark}</td>'
         f'<td class="cell-instructions">{UNDEFINED}</td>'
@@ -598,7 +617,7 @@ def _table(records: list[dict], rows: list[dict], digests: dict[str, str]) -> st
         _module_table_row(module, _is_stale(module, digests)) for module in rows
     )
     head = (
-        "<tr><th>address</th><th>name</th><th>module</th>"
+        "<tr><th>address</th><th>name</th><th>lang</th><th>module</th>"
         "<th>status</th><th>instructions</th><th>bytes</th></tr>"
     )
     return (
@@ -696,6 +715,11 @@ def _function_detail(record: dict, stale: bool) -> str:
     if stale:
         line += f" · {_stale_mark()}"
     lines.append(f'<p class="detail-line">{line}</p>')
+    language = _language_label(record)
+    if language:
+        lines.append(
+            f'<p class="detail-line">language: <code>{_escaped(language)}</code></p>'
+        )
     lines.append(f'<p class="detail-percent">{_count_line(record)}</p>')
     lines.append(f'<p class="detail-meta">{_meta_line(record)}</p>')
     evidence = _evidence_block(record)

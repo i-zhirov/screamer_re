@@ -32,6 +32,7 @@ module linear address, so a recovered name never renames a file.
 | `module` | string | no | The name of a module record. |
 | `symbol` | string | no | The linker map symbol, for example `free_`. |
 | `count` | int | no | The instruction count of the identity check, passed to `diff_module.py --count`. Set when the body sweep runs past the end of the function, for example `exit_flush` at `0x300d6`, which ends in a tail jump. |
+| `implementation` | string | no | `c` or `assembly`. The source language of the rebuilt function. Absent when the record does not mark a language. The status page shows `asm` for `assembly` and `C` for `c`. |
 | `checks` | list[string] | yes | A subset of `build`, `identity`, `behavior`. |
 | `evidence` | list[object] | yes | See the evidence entry. |
 | `notes` | list[object] | yes | See the note entry. |
@@ -140,6 +141,7 @@ of `store.py`, not fields of a module record.
 13. A function record that declares `identity` requires a `module`, and
     that module record requires a `map`.
 14. A module record with a `status` above `named` requires a `result`.
+15. `implementation`, when present, is `c` or `assembly`.
 
 `test_store.py` also compares the property names and the required set of
 every record with `tools/rebuild/contracts/record.schema.json`, so the contract
@@ -158,13 +160,25 @@ the address order.
 | --- | --- |
 | `byte-identical` | `pass` |
 | `the instruction sequences match; the differing operands are the link-time addresses` | `pass` |
-| `the same instructions in a different order` | `pass` |
+| `the instruction shapes match; the differing bytes are not relocations` | `pass` |
+| `the modules hold the same instructions in a different order` | `pass` |
 | `the instruction sequences differ` | `fail` |
 | `the rebuilt module holds one instruction the original does not` | `fail` |
 | `the original holds one instruction the rebuilt module does not` | `fail` |
 | `the instruction counts differ` | `fail` |
 
 The check result holds the verdict line in `detail`.
+
+The table is the default gate.  With `--strict`, the reordered verdict is a
+fail.  The strict gate accepts only the byte-identical verdict and the verdict
+whose differences are the link-time addresses.  The record result does not store
+the gate mode, so a record can pass the default gate and fail the strict gate
+with the same bytes.
+
+`store.py check` validates every record against `contracts/record.schema.json`
+and every module against `contracts/module.schema.json`, in addition to the
+semantic rules below.  The whole-image oracle `image_compare.py` is the final
+gate and runs in pipeline stage 11 when a rebuilt image exists.
 
 ## Module-Level Checks
 

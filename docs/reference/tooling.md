@@ -313,26 +313,46 @@ The files:
 | `error_report_main.c` | the `error_report` test harness: the message table and the variadic printer stub |
 | `bios_video.c` | the rebuilt `bios_video` module: the register sets and the interrupt 10h call |
 | `bios_video_main.c` | the `bios_video` test harness: the fill and call markers |
-| `list_destroy.c` | the rebuilt `list_destroy` module: the guard, the `free` call, and the return |
+| `list_destroy.asm` | the hand-written `list_destroy` module: the guard, the `free` call, the original local slots, and the return; the source pins the original encodings |
+| `list_destroy.c` | the C reference version of the `list_destroy` module, kept alongside the assembly; the module builds the assembly because every tested C compiler changes the local slot order |
 | `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
-| `modules/*.json` | the ten module records: the sources, the compiler, the flags, the `period_flags`, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the extent guard |
+| `modules/*.json` | the eleven module records: the sources, the compiler, the flags, the `period_flags`, the link, and the run expectations |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the optional implementation marker, and the extent guard |
+| `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
-| `view.py` | render the self-contained status page of the store |
+| `oracle.py` | compare two function bodies with the fixup slots and the direct branch targets normalized |
+| `image_compare.py` | compare a rebuilt whole image with the original by region and by byte |
+| `view.py` | render the self-contained status page of the store, including the language column, the chip marker, and the detail line |
 | `docs.py` | render the `program-map.md` tables and check the drift |
-| `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
+| `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
 
 ```sh
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
+python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
 ```
+
+`run.py --strict` accepts an identity verdict only when the bytes are exact or
+the only differences are the link-time addresses.  `--recheck-record ADDR`
+forces one fresh run and prints the full check output.  `store.py check`
+validates every record and module against the JSON Schema contracts, in addition
+to the semantic checks.  `store.py set --function 0x2ed77 --implementation
+assembly` marks the source language of one record.  The value is `c` or
+`assembly`.  The status page shows `asm` for `assembly` and `C` for `c`.
+
+`image_compare.py` is the whole-image gate.  It reports the equal byte count,
+one score per region (stub, header, loader tables, fixup section, object pages,
+and non-resident names), the differing header and table fields, and the whole
+file verdict.  The whole file is exact only when every byte is equal.
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
@@ -378,10 +398,22 @@ harness.  The harness copies each source to an indexed 8.3 name (`S0.C`, `S1.C`,
 module source and its test harness would otherwise share one name.  A source
 may hold a `period_flags` list, which replaces its `flags` for the period
 harness; the V2 harness keeps `flags`.  No record needs it now:
-`list_destroy` and `memory_available` use `-od` for both harnesses, and both
-harnesses match the original instruction sequence.  `error_report` uses `-of+ -ot`
-for both harnesses, because the original keeps an EBP frame and expands every case body.  The `frame_step`
-`-of+` epilogue (`mov esp,ebp`) stays a limit; see the last findings section.
+`memory_available` uses `-od` for both harnesses, and both harnesses match the
+original instruction sequence.  The `list_destroy` module uses the hand-written
+`list_destroy.asm` with `wasm` instead of the C source, because every tested
+compiler (9.01d, 9.5, 10.0, and 10.0a) puts the return temporary in the highest
+local slot.  The assembly pins `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and
+the return temporary at `[ebp-0xc]`, and it reaches 25 of 25 instructions and 51
+of 54 bytes; the three differing bytes are the `free` call displacement, a
+link-time address that the oracle normalizes.  The C source stays alongside as
+the reference version.  See the findings sections "The list_destroy local slot
+order under the period 10.0a compiler", "The initial 10.0 compiler and the
+list_destroy slot order", "The Watcom 9.5 compiler and the list_destroy slot
+order", "The Watcom 9.01d compiler and the list_destroy slot order", and "The
+hand-written list_destroy assembly matches the original".  `error_report` uses
+`-of+ -ot` for both harnesses, because the original keeps an EBP frame and
+expands every case body.  The `frame_step` `-of+` epilogue (`mov esp,ebp`) stays
+a limit; see the last findings section.
 
 The module rebuild:
 
@@ -416,17 +448,26 @@ python3 tools/rebuild/diff_module.py \
 ```
 
 The diff reads the original address from the command line and the rebuilt address
-from the linker map.  It exits with code 0 when the instruction sequences match.
-The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
-`85 c0`, `0f 85 14 1f 0a 00`, and `c3`, so the instruction sequences match and
-the tail-jump address differs.  The `exit` function and its helper match in the same
-way: 8 of 8 instructions and 6 of 6 instructions, and the differing operands are the
-addresses of the three hook slots and of the two calls.
+from the linker map.  It exits with code 0 when the default gate passes.
+`oracle.py` masks every byte that an LE fixup slot controls and every byte that
+encodes a direct branch target.  It compares the remaining bytes in instruction
+order.  An internal target compares by kind and width, because the object number
+and the object offset are link-time values.  An imported target compares by
+module and ordinal or name offset.  A relocation-only difference passes
+`--strict`.  A reordered, inserted, or non-relocation difference does not.
 
-The rebuilt `printf` holds 34 bytes and 13 instructions, the same as the original, and
-no EBP frame.  Three instructions come in a different order, because the V2 register
-allocator spills the argument list before it loads the arguments, so the verdict is
-`the modules hold the same instructions in a different order`.
+The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
+`85 c0`, `0f 85 14 1f 0a 00`, and `c3`.  The direct branch target is masked, so
+the verdict is `the instruction sequences match; the differing operands are the
+link-time addresses`, and the strict gate passes.  The `exit` function and its
+helper match in the same way: 8 of 8 instructions and 6 of 6 instructions, and
+the two hook slots are relocation slots.
+
+The rebuilt `printf` holds 34 bytes and 13 instructions, the same as the original,
+and no EBP frame.  Three instructions come in a different order, because the V2
+register allocator spills the argument list before it loads the arguments.  The
+oracle reports `the instruction shapes match; the differing bytes are not
+relocations`.  The default gate passes the record, and the strict gate fails it.
 
 The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
 `exit` as its own command and leaves the session.  The `printf` test program carries
@@ -588,9 +629,11 @@ decode, the record run, and the store check.  Stage 8 compares the entry, the
 page-0 mapping, the main function, and the main caller from `le.py`, radare2,
 and Ghidra.  It adds exactly four checks.  The check pins the reference values
 from the reference pages.  The tool exits with code 0 when every check passes.
-The record run is skipped when Docker is missing.  The tool checks the debugger
-control port before the run-time stages: when another process holds the port,
-it prints a clear error and exits with code 2 before any stage.  Before any
+The record run is skipped when Docker is missing.  After the record run, stage
+11 compares the rebuilt whole image with the original when `--rebuilt-image`
+exists, and reports a skip when no whole image is built.  The tool checks the
+debugger control port before the run-time stages: when another process holds the
+port, it prints a clear error and exits with code 2 before any stage.  Before any
 stage it also refuses a missing game directory, a missing reference executable,
 a reference executable that does not parse as an LE image, and a work root it
 cannot create, with the same exit code.  Use `--port` to pick another port.  It
@@ -607,7 +650,8 @@ A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
 import and reports 61 checks.  `--skip-cross` skips stage 8 and the tool
 preflight, so the run reports 57 checks.  `--skip-runtime` skips stages 5, 6,
 7, and 9 and still runs stage 8, so the run reports 46 checks.  Both flags
-report 42 checks and take about 16 seconds.
+report 42 checks and take about 16 seconds.  The whole-image check is a skip
+until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:
 
@@ -618,7 +662,7 @@ The checks and the status page run in these places:
   the site for GitHub Pages on a push to `master`,
 - the CI `deploy` job publishes the packaged site to GitHub Pages after the
   syntax gate passes on `master`.  The page is
-  <https://i-zhirov.github.io/screamer_re/>.  Set the Pages source to
+  <https://i-zhirov.github.io/screamer_re/>.  The Pages source is
   `GitHub Actions`.
 - GitHub Actions runs the syntax gate and the unit suite on every push and pull
   request,
@@ -786,5 +830,7 @@ targets.
   library cannot disassemble.
 - `tools/le.py` covers LE images only.  It rejects LX images and does not
   decode the embedded HMI drivers.
-- The tool does not apply fixups.  It reads the fixup section offsets only.
+- The tool does not apply fixups.  It decodes the fixup records into
+  `Relocation` slots through `relocations()` and exposes the raw fixup section
+  through `fixup_section()`.
 - The tool does not decompress iterated pages.

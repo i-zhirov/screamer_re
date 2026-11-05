@@ -26,8 +26,9 @@ jobs:
             tools/entry_probe.py \
             tools/gfx_container.py tools/export_assets.py tools/sound_bank.py \
             tools/member_probe.py tools/rebuild/diff_module.py \
-            tools/rebuild/store.py \
-            tools/rebuild/harness.py \
+            tools/rebuild/oracle.py \
+            tools/rebuild/store.py tools/rebuild/schema.py \
+            tools/rebuild/image_compare.py tools/rebuild/harness.py \
             tools/rebuild/harness_dos.py \
             tools/rebuild/watcom10_setup.py \
             tools/rebuild/run.py \

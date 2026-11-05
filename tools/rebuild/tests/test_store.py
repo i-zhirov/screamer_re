@@ -20,6 +20,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import schema  # noqa: E402
 import store  # noqa: E402
 
 
@@ -94,6 +95,7 @@ class StoreTestCase(unittest.TestCase):
             module="free",
             symbol="free_",
             count=3,
+            implementation="assembly",
         )
         record["result"] = self.result({"build": ("pass", "the module builds")})
         return record
@@ -378,6 +380,7 @@ class StoreTestCase(unittest.TestCase):
             "section": "Program functions",
             "evidence": [{"kind": "note", "text": "a note"}],
             "notes": [{"date": "2026-10-26", "text": "a note"}],
+            "implementation": "assembly",
         }
         self.assertEqual(
             before,
@@ -398,6 +401,16 @@ class StoreTestCase(unittest.TestCase):
         violations = store.validate_record(path)
         self.assertEqual(len(violations), 1)
         self.assertIn("status", violations[0])
+
+    def test_schema_rejects_unknown_implementation(self) -> None:
+        record = self.record(implementation="pascal")
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("implementation", violations[0])
 
     def test_validate_record_named_without_name(self) -> None:
         path = self.write_record(0x300EC, self.record(status="named"))

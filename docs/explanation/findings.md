@@ -5263,11 +5263,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the `/screamer_re/` project subpath needs no change.
   Evidence: `python3 tools/rebuild/view.py html --out _site/index.html` and a
   search of the output for `<link`, `<img`, `src=`, and `href=`.
-- GitHub Free publishes Pages only for a public repository.  The deploy therefore
-  needs three repository settings: the repository visibility is public, the
-  Pages source is `GitHub Actions`, and the `github-pages` environment allows a
-  deployment from `master`.  At the time of this finding the repository is
-  private and Pages is not enabled, so these settings are still to apply.
+- GitHub Free publishes Pages only for a public repository.  The repository is
+  public, the Pages source is `GitHub Actions`, and the `github-pages`
+  environment allows a deployment from `master`.
   Evidence: the repository settings and the `deploy` job in
   `.github/workflows/pipeline.yml`.
 - The hook skips with a clear line when the view tool or `python3` is missing,
@@ -5681,3 +5679,293 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   re-verifies every record once.  The record files stay unchanged.
   Evidence: `tools/rebuild/store.py` and the unchanged records under
   `tools/rebuild/functions/`.
+
+## The strict byte gate and the whole-image oracle
+
+- The default identity gate accepts three verdicts.  Only one of them, the
+  byte-identical verdict, is an exact match.  The verdict with the link-time
+  operands is exact after relocation, and the reordered verdict is a shape
+  match.  `run.py --strict` accepts the first two verdicts only.
+  Evidence: `tools/rebuild/run.py` and
+  `python3 -m unittest tools/rebuild/tests/test_run.py`.
+- `store.py check` now validates every function record against
+  `contracts/record.schema.json` and every module record against
+  `contracts/module.schema.json`.  The validator is the standard-library
+  module `tools/rebuild/schema.py`.  The check found three legacy results
+  without `result.fingerprint`: `0x10978`, `0x2ed77`, and `0x2f8ca`.  The
+  records now carry a fingerprint.
+  Evidence: `python3 tools/rebuild/store.py check` prints
+  `683 records, 0 violations`.
+- `tools/le.py` reads the fixup section size, checksum, page-table offset, and
+  record-table offset from the LE header.  The accessor `fixup_section()`
+  returns the raw fixup section.  The tool does not decode the individual
+  fixup records and does not apply fixups.
+  Evidence: `tools/le.py` and
+  `python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- `tools/rebuild/image_compare.py` is the whole-image oracle.  It compares the
+  stub, the LE header, the resident tables, the fixup section, every object's
+  pages, the non-resident name table, and the whole file.  The tool compared
+  the original image with itself and reported 1034923 of 1034923 bytes equal.
+  The region scores are stub 10832, header 196, loader 990, fixups 96278,
+  object 1 901120, and object 3 25259.  The object 2 region is absent because
+  the object has no pages.
+  Evidence: `python3 tools/rebuild/image_compare.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- Pipeline stage 11 runs the whole-image oracle when `--rebuilt-image` exists.
+  The stage reports a skip when no whole image is built, so the documented
+  check counts do not change.
+  Evidence: `tools/pipeline_check.py`.
+
+## The relocation-aware function oracle
+
+- `tools/le.py` decodes the LE fixup page table and the LE fixup record table.
+  It returns one `Relocation` per fixup slot with the slot address, the width,
+  and the target.  The shipped `STARTH.EXE` holds 11259 slots, and every slot is
+  an internal 4-byte reference.
+  Evidence: `python3 tools/le.py info
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` and
+  `python3 -m unittest tools/rebuild/tests/test_oracle.py`.
+- `tools/rebuild/oracle.py` masks every byte that a fixup slot controls and
+  every byte that encodes a direct branch target.  It compares the remaining
+  bytes in instruction order.  The instruction order is significant, so a
+  reordered sequence does not pass.
+- The oracle shows the split between the default gate and the strict gate:
+
+  | Function | Match | Strict gate | Default gate |
+  | --- | --- | --- | --- |
+  | `memcpy` `0x8c150` | `exact-bytes` | pass | pass |
+  | `free` `0x300ec` | `exact-relocations` | pass | pass |
+  | `exit` `0x300be` | `exact-relocations` | pass | pass |
+  | `list_destroy` `0x2ed77` | `exact-relocations` | pass | pass |
+  | `printf` `0x3009b` | `same-shape` | fail | pass |
+  | `memory_available` `0x2f8ca` | `same-shape` | fail | pass |
+  | `error_report` `0x10978` | `same-shape` | fail | pass |
+  | `frame_step` `0x2aa84` | `different` | fail | fail |
+  | `engine_shutdown` `0x128ac` | `different` | fail | fail |
+  | `bios_video` `0x108e4` | `different` | fail | fail |
+
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+  work/rebuild/free.map --rebuilt-symbol free_` and the same command for the
+  other addresses; `run.run_identity(..., strict=True)` returns the strict
+  verdict.
+- A direct relative branch needs no fixup, because the relative distance inside
+  one object does not change when the loader relocates the object.  The oracle
+  therefore identifies a direct branch target from the instruction encoding, not
+  from the fixup table.  An absolute data reference has a fixup slot, because
+  the absolute address does change at load time.
+  Evidence: the `free` jump at `0x300ee` has no fixup slot, and the two `exit`
+  hook-slot references at `0x300c3` and `0x300c9` each have one.
+- The earlier `printf` finding records the previous verdict `the modules hold the
+  same instructions in a different order`.  The oracle now classifies the same
+  bytes as `same-shape`: the mnemonic order matches, and the differing bytes are
+  the stack offsets and the register moves, not the link-time addresses.
+  Evidence: the `printf` row in the table above.
+
+## The first mismatch in the three open modules
+
+The relocation-aware oracle compares the three open modules with the V2 build.
+The first mismatch is a code byte, a mask, or an operand, in this order of
+address:
+
+| Function | First mismatch | Original | Rebuilt | Cause |
+| --- | --- | --- | --- | --- |
+| `frame_step` `0x2aa84` | instruction 5 | `0x2aa96 5d` `pop ebp` | `0x10012 89 ec` `mov esp,ebp` | the V2 epilogue adds `mov esp,ebp` |
+| `engine_shutdown` `0x128ac` | instruction 6 | `0x128c0 b8 b0 62 00 00` `mov eax,0x62b0` with a fixup at `0x128c1` | `0x10014 b8 b0 62 00 00` `mov eax,0x62b0` without a fixup | the source passes the literal `0x62b0`; the original operand is a relocatable object-3 address |
+| `bios_video` `0x108e4` | instruction 0 | `0x108e4 53` `push ebx` | `0x10000 55` `push ebp` | the recipe `-of+` puts the frame before the register saves |
+
+- `list_destroy`: the V2 build first differed at the local slot order.  The
+  hand-written assembly now matches (see "The hand-written list_destroy assembly
+  matches the original").
+- `frame_step`: the prologue and the three calls match.  The only difference is
+  the extra `mov esp,ebp` before `pop ebp`.  The earlier compiler sweep shows
+  the same epilogue in 8.5a through 11.0b, and no option removes it.
+- `engine_shutdown`: the instruction bytes at the first mismatch are equal.  The
+  original has a 4-byte internal fixup to object 3, offset `0x62b0`, so the
+  operand is a link-time address in object 3.  The offset `0x62b0` is past the
+  `0x62ab` bytes of initialized object-3 data, so it points into the zero-filled
+  part.  The rebuilt source passes the literal `0x62b0`, so the operand is a
+  constant.  The first code-shape mismatch is instruction 12: the original
+  `pop ebp` against the rebuilt `mov esp,ebp`.
+- `bios_video`: the original saves the used registers first (`ebx`, `ecx`,
+  `edx`, `ebp`), then sets the frame.  The `-of+` recipe sets the frame first
+  (`push ebp`, `mov ebp,esp`, then `push ebx`, `push ecx`, `push edx`).  A
+  temporary `-od` recipe moved the frame but pushed `esi` and `edi` too, and it
+  held 26 instructions and 60 bytes, so `-od` alone is not the fix.  The source
+  also stores `regs.w.ax` as a 16-bit value, while the original stores the full
+  32-bit mode to the register set.
+
+Evidence: `python3 tools/rebuild/diff_module.py --original
+~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address
+<address> --rebuilt work/rebuild/<module>.exe --rebuilt-map
+work/rebuild/<module>.map --rebuilt-symbol <symbol>` for the four addresses,
+and `python3 tools/rebuild/harness.py build --module bios_video_od` for the
+temporary `-od` recipe.
+
+## The list_destroy local slot order under the period 10.0a compiler
+
+- The period 10.0a `-od` build reaches the original instruction count and byte
+  count: 25 of 25 instructions and 54 of 54 bytes.  The first difference is the
+  local slot order.  The original stores the first parameter (`list`) at
+  `[ebp-8]`, the second parameter (`unused`) at `[ebp-4]`, and the return
+  temporary at `[ebp-0xc]`.  The 10.0a build stores them at `[ebp-0xc]`,
+  `[ebp-8]`, and `[ebp-4]`.
+  Evidence: a temporary module record with the current `list_destroy.c` and
+  `period_flags: ["-od"]`, `python3 tools/rebuild/harness_dos.py build --module
+  list_destroy10`, and `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ed77 --rebuilt work/rebuild/ldmod10.exe --rebuilt-map
+  work/rebuild/list_destroy10.map --rebuilt-symbol list_destroy_`.
+- The source-form search did not change the order.  These forms kept the
+  instruction count and the slot order: the current form, a `goto` to the end, an
+  `if`/`else` with an empty else, and a `(void)unused` statement.  These forms
+  added instructions and still kept the return temporary in the highest slot: an
+  explicit local declared at the top, a nested block, and a declaration after the
+  `if`.  A `return (void *)list` cast changed nothing.
+  Evidence: the temporary `list_destroy_exp.c` with each form and the same
+  build and diff commands.
+- The cause is the compiler's local allocator.  The 10.0a compiler allocates the
+  compiler-generated return temporary in the highest local slot, then places the
+  two parameter spills below it.  The original compiler places the return
+  temporary in the lowest slot, then the two parameter spills above it.  The
+  source form does not control this order.
+- The current source form stays the closest one.  The initial 10.0 compiler
+  was tested next; it gives the same slot order (see "The initial 10.0 compiler
+  and the list_destroy slot order").  The remaining candidates are a pre-10.0
+  compiler or a hand-written assembly function that assigns the three slots
+  directly.
+- The period harness needs a clean artifact set.  An old `ldmod10.exe` and
+  `list_destroy10.map` make `wait_for_artifacts` return before the new link, and
+  a DOSBox-X process can stay alive after the link, so the harness can hang.
+  Remove the old artifacts before a rebuild, and confirm the process exits.
+
+## The initial 10.0 compiler and the list_destroy slot order
+
+- The initial Watcom 10.0 Limited Availability compiler was extracted from the
+  Internet Archive item `watcom-c-cpp-compilers-collection`, file
+  `watcom-10.0-la/watcom10la.iso` (SHA-256
+  `91d3a2698c9f907994cecfae7e571edb904d31f38651aaf996c296c0e2badd5a`).  The
+  `PACK0022` archive holds `WCC386.EXE` (517764 bytes).  `WPACK` unpacks it.  The
+  compiler banner is `WATCOM C32 Optimizing Compiler  Version 10.0 Limited
+  Availability`.
+  Evidence: `WPACK -l PACK0022` and `C:\WCC386.EXE` under DOSBox-X with the
+  10.0a `W32RUN.EXE` in the PATH.
+- The initial 10.0 `-od` build of `list_destroy.c` gives the same result as the
+  10.0a build: 25 of 25 instructions, 54 bytes, and 44 of 54 bytes equal.  Its
+  local slot order is `list` at `[ebp-0xc]`, `unused` at `[ebp-8]`, and the
+  return temporary at `[ebp-4]`.  It does not match the original order, which is
+  `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and the return temporary at
+  `[ebp-0xc]`.
+  Evidence: `C:\WCC386.EXE -bt=dos -s -zq -od -fo=LD.OBJ LD.C`, the 10.0a
+  `WLINK` with `system dos4g`, and `python3 tools/rebuild/diff_module.py
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ed77 --rebuilt work/watcom10la/build/EXP.EXE
+  --rebuilt-map work/watcom10la/build/EXP.MAP --rebuilt-symbol list_destroy_`.
+- The initial 10.0 compiler is therefore not the cause of the local slot order.
+  The remaining candidates are a pre-10.0 compiler or a hand-written assembly
+  function that assigns the three slots directly.
+
+## The Watcom 9.5 compiler and the list_destroy slot order
+
+- The Watcom C/C++ 9.5 compiler was extracted from the Internet Archive item
+  `watcom-c-cpp-compilers-collection`, file
+  `watcom-9.5/discmaster/Sybase - Watcom C++ 9.5b.zip`.  The `32/06/WCC386.DOS`
+  file is a WPACK archive.  It holds `wcc386.exe` (627702 bytes).  The compiler
+  banner is `WATCOM C32 Optimizing Compiler  Version 9.5`.
+  Evidence: `WPACK -l 32/06/WCC386.DOS` and `WPACK 32/06/WCC386.DOS wcc386.exe`.
+- The 9.5 `-od` build of `list_destroy.c` gives 25 of 25 instructions, 54 bytes,
+  and 44 of 54 bytes equal.  Its local slot order is `list` at `[ebp-0xc]`,
+  `unused` at `[ebp-8]`, and the return temporary at `[ebp-4]`.  This is the same
+  order as the 10.0 and 10.0a builds, and it does not match the original order:
+  `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and the return temporary at
+  `[ebp-0xc]`.
+  Evidence: `WCC386 -bt=dos -s -zq -od -fo=LD.OBJ LD.C`, the 10.0a `WLINK`
+  with `system dos4g`, and `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ed77 --rebuilt work/watcom95b/build95/EXP.EXE
+  --rebuilt-map work/watcom95b/build95/EXP.MAP --rebuilt-symbol list_destroy_`.
+- The 9.5 compiler is therefore not the cause of the local slot order.  The
+  remaining candidates are an earlier compiler (8.5a or 9.01d) or a hand-written
+  assembly function.  The earlier finding records that the 8.5a `-od` build is
+  frameless, so it cannot reproduce the original `-od` prologue; the 9.01d slot
+  order stays untested.
+
+## The Watcom 9.01d compiler and the list_destroy slot order
+
+- The Watcom C/C++ 9.01d compiler was extracted from the Internet Archive item
+  `watcom-c-cpp-compilers-collection`, file
+  `watcom-9.01d/Watcom - C++ 9.01d.zip`.  The `01/WCC386.DOS` file is a WPACK
+  archive.  It holds `wcc386.exe` (200632 bytes).  The compiler needs the code
+  generator `386WCGL.EXE` from `01/386WCGL.WPK` and the preprocessor
+  `WCC386P.EXE` from `01/WCC386P.WPK`.  The banner is `WATCOM C 386 Optimizing
+  Compiler  Version 9.01`.
+  Evidence: `WPACK -l 01/WCC386.DOS`, `WPACK 01/WCC386.DOS wcc386.exe`,
+  `WPACK 01/386WCGL.WPK 386wcgl.exe`, and `WPACK 01/WCC386P.WPK wcc386p.exe`.
+- The 9.01d `-od` build of `list_destroy.c` gives 25 of 25 instructions, 54
+  bytes, and 44 of 54 bytes equal.  Its local slot order is `list` at
+  `[ebp-0xc]`, `unused` at `[ebp-8]`, and the return temporary at `[ebp-4]`.
+  This is the same order as the 9.5, 10.0, and 10.0a builds, and it does not
+  match the original order: `list` at `[ebp-8]`, `unused` at `[ebp-4]`, and the
+  return temporary at `[ebp-0xc]`.
+  Evidence: `WCC386 -bt=dos -s -zq -od -fo=LD.OBJ LD.C`, the 10.0a `WLINK`
+  with `system dos4g`, and `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ed77 --rebuilt work/watcom901d/build/EXP.EXE
+  --rebuilt-map work/watcom901d/build/EXP.MAP --rebuilt-symbol list_destroy_`.
+- The 9.01d compiler is therefore not the cause of the local slot order.  The
+  remaining compiler candidate is 8.5a, but the earlier finding records that its
+  `-od` build is frameless, so it cannot reproduce the original `-od` prologue.
+  A hand-written assembly function is the remaining option; the next section
+  records it.
+
+## The hand-written list_destroy assembly matches the original
+
+- The `list_destroy` module now uses the hand-written
+  `tools/rebuild/list_destroy.asm` source with the `wasm` assembler.  The C
+  source `list_destroy.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/list_destroy.json` lists the assembly
+  source and the unchanged `list_destroy_main.c` harness.
+  Evidence: `tools/rebuild/modules/list_destroy.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2ed77 --count
+  25` prints 25 instructions and 54 bytes, from `push ebx` to `ret`.  The
+  assembly follows that sequence instruction by instruction.
+  Evidence: `work/rebuild/list_destroy_original.disasm`.
+- The assembler chooses the load encoding for `mov ebp,esp` and `mov esp,ebp`,
+  and the short form for `sub esp,0ch`.  The original uses the store encoding
+  (`89 e5`, `89 ec`) and the long immediate form (`81 ec 0c 00 00 00`).  The
+  source pins those three encodings with `db`.
+  Evidence: the first assembly build held `8b ec`, `83 ec 0c`, and `8b e5`;
+  the pinned source holds the original bytes.
+- The rebuilt body holds 25 of 25 instructions and 54 bytes.  51 of 54 bytes
+  are equal.  The three differing bytes are the `call free_` displacement at
+  offsets 33 through 35.  The opcode byte at offset 32 is equal, and the fourth
+  displacement byte at offset 36 is zero in both bodies.  The `je` branch keeps
+  the same `74 0a` bytes, because the relative distance does not change.  The
+  only differing instruction operands are the two direct branch targets, which
+  are link-time addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ed77 --rebuilt work/rebuild/ldmod.exe --rebuilt-map
+  work/rebuild/list_destroy.map --rebuilt-symbol list_destroy_`.
+- The oracle verdict is `exact-relocations`: "the instruction sequences match;
+  the differing operands are the link-time addresses".  The strict gate passes.
+  The behavior check prints the four markers `F`, `R`, `Z`, and `N`.  The
+  record `0x2ed77` is `verified` with 25 of 25 instructions, 51 of 54 bytes, and
+  a behavior pass.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2ed77` and
+  `work/rebuild/ld_out.txt`.
+- The local slot order is the original order: `list` at `[ebp-8]`, `unused` at
+  `[ebp-4]`, and the return temporary at `[ebp-0xc]`.  The C compilers (9.01d,
+  9.5, 10.0, and 10.0a) give a different order, so the assembly removes the
+  local slot limit for this function.
+  Evidence: the rebuilt disassembly in
+  `work/rebuild/list_destroy_rebuilt.disasm` and the C compiler sections above.
+- The record marks the source language with `implementation: assembly`.  The
+  status page shows `asm` in the table language column, on the function chip,
+  and in the detail pane.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x2ed77
+  --implementation assembly` and `python3 tools/rebuild/view.py html`.
