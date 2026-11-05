@@ -11198,3 +11198,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --rebuilt-map work/rebuild/car_camera.map --rebuilt-symbol car_camera_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The menu_objects_init module at 0x2aab8
+
+- Observation: the plan row records a 1420-byte body of 395 instructions, 32
+  calls, and 0 FPU instructions.  The body starts at `0x2aab8` and ends at the
+  `ret` at `0x2b043`.  The store record keeps the 1420-byte extent and sets no
+  function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2aab8 --count 395` and
+  `tools/rebuild/functions/0x2aab8.json`.
+- Observation: the only caller is `menu_space_init` at `0x29d08`, which calls
+  this function at `0x29f0c`.  The nearest prologue below the call site is
+  `0x29d08`.  The `menu_space_init` module already names the callee
+  `menu_objects_init`.
+  Evidence: the call at `0x29f0c`, the nearest prologue at `0x29d08`, and
+  `tools/rebuild/menu_space_init.c`.
+- Observation: the data at object-3 offset `0x3f0` holds `OBJ_LIST`, at
+  `0x3ca` `3D_BLKOBJ`, at `0x108f` `ALETTER`, at `0x2edc` `AAUTO00`, and at
+  `0x2ef0` `AMAP1`.
+  Evidence: the data dump at the object-3 offsets and the immediate operands
+  `0x3f0`, `0x3ca`, `0x108f`, `0x2edc`, and `0x2ef0`.
+- Observation: the function copies the two names to local buffers and loads
+  the `OBJ_LIST` resource through `0x119cc`.  It looks `ALETTER` up in the
+  object list at `0x6530` through `0x11060`.  Each failure runs
+  `bios_video(3)`, `error_report`, and `exit`.
+  Evidence: the block at `0x2aabf` through `0x2ab17`.
+- Observation: the loop at `0x2ab18` loads 79 objects into the 8-byte slots at
+  `DAT_001d2d0` through `0x10ed4`.  The loop at `0x2ab4a` fills the 0xe slots
+  at `DAT_001d550` with the names `AAUTO00` through `AAUTO06`.  The byte at
+  offset 6 of the local name comes from the counter, so each pair of slots
+  takes the next car name.  The first load sets the object field `+0x20` to
+  0x6000 and `+0x3c` to 0.  The second load sets `+0x20` to 0xe000 and `+0x3c`
+  to 0.
+  Evidence: the loops at `0x2ab18` through `0x2ac95`.
+- Observation: the loops at `0x2ac96`, `0x2ad62`, and `0x2ad6f` fill the 0xc
+  slots at `DAT_001d908` with `AMAP1` through `AMAP6` twice and set the same
+  object fields.  The cardat list at `DAT_001fd10` supplies 14 names and five
+  numbers each.  The trackdat list at `DAT_001fea0` supplies 12 names and one
+  number each.  The 26 slots bind through `0x11850`, the list links through
+  `0x11568`, and the last call at `0x2b037` runs the init at `0x2dff4`.
+  Evidence: the blocks at `0x2ac96` through `0x2b043`.
+- Inference: the call graph, the menu object names, and the cardat and trackdat
+  tables identify the function as the menu object setup.  The caller already
+  names it `menu_objects_init`, so the module records that name with the
+  confidence `derived`.
+  Evidence: the call graph, the data flow above, and
+  `tools/rebuild/menu_space_init.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover the normal path, the `ALETTER` failure,
+  and the first car name failure.  Each failure path continues after the
+  `exit` stub, because the stub returns.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_objects_init`,
+  `work/rebuild/mo_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2aab8`.
+- Observation: the rebuilt module holds 395 decoded instructions and 1244
+  bytes.  The identity check stays open at 67 of 395 instructions and 53 of
+  1244 bytes.  The V2 toolchain uses a different register order, local layout,
+  and helper form.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2aab8 --count 395 --rebuilt work/rebuild/menuobj.exe
+  --rebuilt-map work/rebuild/menu_objects_init.map --rebuilt-symbol
+  menu_objects_init_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
