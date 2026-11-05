@@ -101,10 +101,10 @@ current host.
   `0x1db94`, `player_steering_update` at `0x1629c`, `race_record_save` at
   `0x2e82c`, `player_car_view_update` at `0x16f34`, `race_results_screen`
   at `0x2a558`, and `championship_screen` at `0x2cf68`, the Phase G module
-  `engine_rpm_update` at `0x18db0`, and the Phase H module `options_screen` at
-  `0x21338`;
+  `engine_rpm_update` at `0x18db0`, and the Phase H modules `options_screen`
+  at `0x21338`, and `car_camera` at `0x1a930`;
   twenty-two modules are verified, one is matching, and one hundred and
-  twenty rebuilds hold the recorded difference; the
+  twenty-one rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -212,7 +212,7 @@ The plan follows the size order, starting with the smallest functions.
     `player_steering_update` at `0x1629c`, `race_record_save` at
     `0x2e82c`, `player_car_view_update` at `0x16f34`, `race_results_screen`
     at `0x2a558`, and `championship_screen` at `0x2cf68`, the Phase G module
-    `engine_rpm_update` at `0x18db0`, and the Phase H module `options_screen`
-    at `0x21338` are done;
+    `engine_rpm_update` at `0x18db0`, and the Phase H modules `options_screen`
+    at `0x21338`, and `car_camera` at `0x1a930` are done;
     the result is twenty-two verified modules, one matching module, and one
-    hundred and twenty open rebuilds).
+    hundred and twenty-one open rebuilds).

@@ -1,0 +1,39 @@
+{
+  "exe": "carcam.exe",
+  "map": "car_camera.map",
+  "name": "car_camera",
+  "run": {
+    "command": "carcam.exe > ccam_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "ccam_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_camera.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_camera_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_camera_main.c"
+    }
+  ]
+}

@@ -225,7 +225,7 @@ a name from the call graph and the data flow, as in Phase F.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x21338` | `options_screen` (done) | 1715 | 464 | 38 | 47 |
-| `0x1a930` | unnamed | 1425 | 396 | 18 | 126 |
+| `0x1a930` | `car_camera` (done) | 1425 | 396 | 18 | 126 |
 | `0x2aab8` | unnamed | 1420 | 395 | 32 | 0 |
 | `0x15c1c` | unnamed | 1160 | 306 | 8 | 37 |
 | `0x2b9cc` | unnamed | 1121 | 310 | 15 | 110 |
@@ -239,7 +239,7 @@ a name from the call graph and the data flow, as in Phase F.
 
 ## Position
 
-One hundred forty-three modules carry a recipe and a result: the twelve Phase A modules,
+One hundred forty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -287,6 +287,6 @@ at `0x136cc`, `net_race_lobby` at `0x2d7c4`, `player_view_setup` at
 `0x1db94`, `player_steering_update` at `0x1629c`, `race_record_save` at
 `0x2e82c`, `player_car_view_update` at `0x16f34`, `race_results_screen`
 at `0x2a558`, and `championship_screen` at `0x2cf68`, the Phase G module
-`engine_rpm_update` at `0x18db0`, and the Phase H module `options_screen` at
-`0x21338`.
-The next unnamed function is `0x1a930`.
+`engine_rpm_update` at `0x18db0`, and the Phase H modules `options_screen` at
+`0x21338`, and `car_camera` at `0x1a930`.
+The next unnamed function is `0x2aab8`.

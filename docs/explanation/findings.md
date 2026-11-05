@@ -11131,3 +11131,70 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   options_screen_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The car_camera module at 0x1a930
+
+- Observation: the plan row records a 1425-byte body of 396 instructions, 18
+  calls, and 126 FPU instructions.  The body starts at `0x1a930` and ends at
+  the `ret` at `0x1aec0`.  The store record keeps the 1428-byte extent and
+  sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1a930 --count 396` and
+  `tools/rebuild/functions/0x1a930.json`.
+- Observation: the direct callers are `player_view_setup` at `0x19ae8`, which
+  calls this function at `0x19c76` and `0x19e3f`, and the camera group at
+  `0x1aec4`, which calls it at `0x1aefc` on every 0x590-byte car record at
+  `DAT_00110ab8` and then copies the selected view block at `+0x4f8`.
+  Evidence: the three call sites, the loop at `0x1aed2` through `0x1af01`,
+  and the copy at `0x1af45` through `0x1af57`.
+- Observation: the function walks the 0x38-byte route records below the
+  pointer `DAT_0010f90c`.  The count is at `+0x1c`, and each record holds the
+  position at `+0x04` (x), `+0x08` (z), and `+0x0c` (y).  The loop picks the
+  nearest record by the horizontal distance from the car position at `+0x498`
+  and `+0x4a0`.  A zero distance does not take part.
+  Evidence: the loop at `0x1a961` through `0x1aa05`.
+- Observation: the function forms the yaw at `+0x52c` and the pitch at
+  `+0x528`.  The float constants are 2pi at object-3 offset `0x92c`, -pi/2 at
+  `0x930`, and -1500.0 at `0x934`.  The original calls the routine at
+  `0xc5e42`, which computes pi/2 minus `acos(x)`, so the routine is `asin`.
+  Evidence: the reads at `0x1aabe`, `0x1aad0`, `0x1ab0c`, and `0x1ad71`, the
+  disassembly of `0xc5e42`, and the data at object-3 offsets `0x92c`, `0x930`,
+  and `0x934`.
+- Observation: the function copies the chosen record position into the view at
+  `+0x4f8`, `+0x4fc`, and `+0x500`.  When the chosen record changes, it counts
+  the distance from the saved target at `+0x16c` and `+0x174` into `+0x55c`.
+  It sets the view flag at `+0x568` from the absolute height modulo 10 and the
+  saved distance.  When the flag changes while the view is idle, it holds the
+  old flag and runs the setup path once.  When the total distance exceeds 1500
+  units, it moves the view along the yaw and the pitch.
+  Evidence: the blocks at `0x1ab2b` through `0x1ae53`.
+- Inference: the call graph, the per-car loop, and the view position, angle,
+  and movement data identify the function as the car camera.  The existing
+  `player_view_setup` module already names the callee `car_camera`, so the
+  module records the name `car_camera` with the confidence `inferred`.
+  Evidence: the call graph, the data flow above, and
+  `tools/rebuild/player_view_setup.c`.
+- Observation: the harness sets the three float constants and the far limit
+  from their bit patterns, because the minimal image does not load the constant
+  segment.  The local FPU stub supplies `asin`, `sqrt`, `sin`, and `cos` from
+  the hardware, because this harness links no math library.  The stub also
+  makes `__CHP` truncate toward zero, because the original uses the helper at
+  `0x4d9f4`.
+  Evidence: `tools/rebuild/car_camera.c`,
+  `tools/rebuild/car_camera_main.c`, and
+  `tools/rebuild/car_camera_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the nearest nonzero node, the zero
+  distance skip, the move above and below the 1500-unit threshold, the
+  unchanged record, and the four height modulo 10 flag cases.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_camera`,
+  `work/rebuild/ccam_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1a930`.
+- Observation: the rebuilt module holds 396 decoded instructions and 1383
+  bytes.  The identity check stays open at 67 of 396 instructions and 71 of
+  1383 bytes.  The V2 toolchain uses a different register order, local layout,
+  and helper form.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1a930 --count 396 --rebuilt work/rebuild/carcam.exe
+  --rebuilt-map work/rebuild/car_camera.map --rebuilt-symbol car_camera_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
