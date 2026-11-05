@@ -16,7 +16,8 @@ Stages:
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
 11. check_run: run every recorded check of the changed records, verify the
     unchanged records against their stored fingerprint, and compare the
-    printed verdicts with the recorded results.
+    printed verdicts with the recorded results.  Then compare the rebuilt
+    whole image with the original, when `--rebuilt-image` exists.
 12. check_store: prove the store, the seed, the generated tables, and the
     status page.
 
@@ -69,9 +70,12 @@ TOOLS = (
     "member_probe.py",
     "cross_check.py",
     "rebuild/diff_module.py",
+    "rebuild/oracle.py",
     "rebuild/store.py",
+    "rebuild/schema.py",
     "rebuild/harness.py",
     "rebuild/run.py",
+    "rebuild/image_compare.py",
     "rebuild/view.py",
     "rebuild/docs.py",
 )
@@ -796,6 +800,40 @@ def check_run(
     )
 
 
+def check_image(
+    checks: Checks, game_dir: Path, exe: str, rebuilt_image: Path
+) -> None:
+    """Compare the rebuilt whole image with the original, when it exists.
+
+    The record checks compare one function or one module.  This stage is the
+    whole-image gate: the rebuilt `STARTH.EXE` must equal the original byte for
+    byte, including the stub, the header, the objects, the pages, and the fixup
+    section.  The stage reports a skip until a whole image is built, because the
+    module recipes build separate executables.
+    """
+    if not rebuilt_image.is_file():
+        checks.skip(
+            "stage 11: the whole image matches",
+            f"no rebuilt image at {rebuilt_image}",
+        )
+        return
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/image_compare.py",
+            "--original",
+            str(game_dir / exe),
+            "--rebuilt",
+            str(rebuilt_image),
+        ]
+    )
+    checks.check(
+        "stage 11: the whole image matches",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+
+
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     """Prove the store, the seed, the generated tables, and the page.
 
@@ -901,6 +939,12 @@ def main() -> int:
         help="the seconds the record run of stage 11 may take",
     )
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
+    parser.add_argument(
+        "--rebuilt-image",
+        type=Path,
+        default=Path("work/rebuild/STARTH.EXE"),
+        help="the rebuilt whole image for the image gate",
+    )
     parser.add_argument("--skip-runtime", action="store_true")
     parser.add_argument("--skip-cross", action="store_true")
     args = parser.parse_args()
@@ -969,6 +1013,7 @@ def main() -> int:
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
     check_run(checks, game_dir, args.skip_runtime, args.record_timeout)
+    check_image(checks, game_dir, args.exe, args.rebuilt_image)
     check_store(checks, game_dir, work_root)
 
     print()

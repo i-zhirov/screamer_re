@@ -28,15 +28,15 @@
       "identity": {
         "bytes_equal": 32,
         "bytes_total": 48,
-        "detail": "the modules hold the same instructions in a different order",
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 18,
         "instructions_total": 18,
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d32c",
-    "date": "2026-11-03",
-    "fingerprint": "sha256:3724ffd37e66bc91dfb21f93813ebe4c549780311558ece9ee8a0eee3c2107dd",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:54d3780d756d6fecd245a5b96bd7be005c04736ee630c97ea6ae7e8abca51334",
     "source_digest": "sha256:05d98feb2cc3c1fdf4aadfddf7faa32c07b76c81fdd22f85102357d282624449",
     "tool": "run.py"
   },

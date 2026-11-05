@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred forty-one named modules are rebuilt with the harness and the
+  progress: one hundred fifty-four named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -117,7 +117,8 @@ current host.
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
-  code).
+  code, `run.py --strict` accepts only an exact or relocation-only function
+  match, and `tools/rebuild/image_compare.py` is the whole-image gate).
 
 ### M4: Modern platform
 
@@ -228,3 +229,12 @@ The plan follows the size order, starting with the smallest functions.
     `0x2d4b8` are done;
     the result is twenty-two verified modules, one matching module, and one
     hundred and thirty-one open rebuilds).
+13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
+    exact-bytes verdict and the relocation-only verdict, `store.py check`
+    validates every record against the JSON Schema contracts, and stage 11
+    compares the rebuilt whole image with `tools/rebuild/image_compare.py` when
+    the image exists).
+14. Compare function bodies with the relocation-aware oracle (done:
+    `tools/rebuild/oracle.py` masks the fixup slots and the direct branch
+    targets, `free` and `exit` pass `--strict`, and a reordered or shape-only
+    sequence fails).

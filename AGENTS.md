@@ -72,7 +72,7 @@ screamer_re/
 ├── .githooks/
 │   └── pre-commit             # update the status page before every commit
 ├── .github/workflows/
-│   └── pipeline.yml           # CI: the syntax gate, the status page, and the full check
+│   └── pipeline.yml           # CI: the syntax gate, the status page, the Pages deploy, and the full check
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
@@ -106,6 +106,10 @@ screamer_re/
 │   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
 │   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
 │   │   ├── run.py             # run the declared checks and print progress
+│   │   ├── oracle.py          # compare function bodies with relocations normalized
+│   │   ├── diff_module.py     # diff one rebuilt module against the original
+│   │   ├── image_compare.py   # compare a rebuilt whole image with the original
+│   │   ├── schema.py          # validate a record against the contract subset
 │   │   ├── view.py            # render the self-contained status page
 │   │   ├── docs.py            # render the program-map tables
 │   │   ├── contracts/         # the JSON Schema contracts of the records
@@ -126,7 +130,10 @@ python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
+python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
+python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
 ```
@@ -142,7 +149,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -158,7 +165,9 @@ about 8 minutes plus the Ghidra import and reports 205 checks.  `--skip-cross`
 skips stage 8 and the tool preflight, so the run reports 201 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
 run reports 190 checks.  Both flags report 186 checks and take about 16
-seconds:
+seconds.  Stage 11 also compares the rebuilt whole image when
+`--rebuilt-image` exists.  The image check is a skip until a whole image is
+built, so it does not change these counts:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
@@ -203,7 +212,9 @@ open ~/Documents/Screamer.app
       tools/gfx_container.py tools/export_assets.py tools/sound_bank.py
       tools/member_probe.py tools/cross_check.py
       tools/rebuild/diff_module.py
-      tools/rebuild/store.py tools/rebuild/harness.py
+      tools/rebuild/oracle.py
+      tools/rebuild/store.py tools/rebuild/schema.py
+      tools/rebuild/image_compare.py tools/rebuild/harness.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
       tools/pipeline_check.py` to check the syntax
@@ -218,6 +229,10 @@ open ~/Documents/Screamer.app
       --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
       work/rebuild/free.map --rebuilt-symbol free_` to check the module diffs; the
       Build And Test Commands section holds the exit module commands
+    - `python3 tools/rebuild/image_compare.py --original
+      ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+      ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
+      whole-image oracle against itself
     - `python3 tools/pipeline_check.py --game-dir
       ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
 
@@ -319,12 +334,32 @@ through the store.
   gives 201 checks, `--skip-runtime` gives 190 checks, and both flags give 186
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
+- The identity gate has two modes.  The default gate accepts the three
+  historical verdicts.  `--strict` accepts only the byte-identical verdict and
+  the verdict whose differences are the link-time addresses.  A reordered
+  instruction sequence and a shape match are diagnostic, not exact.
+- `oracle.py` masks every byte that an LE fixup slot controls and every byte
+  that encodes a direct branch target.  It compares the remaining bytes in
+  instruction order.  An internal target compares by kind and width, because
+  the object number and the object offset are link-time values.  An imported
+  target compares by module and ordinal or name offset.  A relocation-only
+  difference passes `--strict`, and a reordered, inserted, or non-relocation
+  difference does not.
+- `store.py check` validates every record against `contracts/record.schema.json`
+  and every module against `contracts/module.schema.json`, in addition to the
+  semantic checks.  The validator uses the standard library only.
+- The whole-image oracle `image_compare.py` is the final gate.  It compares the
+  stub, the header, the resident tables, the fixup section, every object, the
+  non-resident name table, and the whole file.  Stage 11 runs it when
+  `--rebuilt-image` exists and reports a skip when no whole image is built.
 - `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.
 - The pre-commit hook regenerates `work/rebuild/status.html`, and the CI
-  `status` job regenerates the page and publishes it as an artifact.  The page
-  is generated output, so it stays out of git.
+  `status` job regenerates the page into `_site/index.html` and publishes it as
+  an artifact.  On a push to `master`, the `deploy` job publishes the packaged
+  site to GitHub Pages after the syntax gate.  The page is generated output, so
+  it stays out of git.
 - Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
@@ -345,8 +380,10 @@ through the store.
   the record, `store.compute_fingerprint` computes it, and `run.py
   --skip-unchanged` uses it.  `pipeline_check.py` verifies the stored
   fingerprint of an unchanged record itself.  A documentation-only change to a
-  record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`) must
-  not invalidate a result.
+  record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`,
+  `implementation`) must not invalidate a result.  The optional `implementation`
+  field is `c` or `assembly`; the status page shows `asm` for `assembly` and
+  `C` for `c`.
 - A mutation that changes the record addresses must call `sync_extents()`.
   `save_record` marks a new address and `remove_record` marks a deletion, and
   the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,

@@ -29,15 +29,15 @@
       "identity": {
         "bytes_equal": 28,
         "bytes_total": 52,
-        "detail": "the rebuilt module holds one instruction the original does not: mov esp, ebp",
+        "detail": "the instruction sequences differ",
         "instructions_equal": 12,
         "instructions_total": 14,
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128ac",
-    "date": "2026-11-03",
-    "fingerprint": "sha256:5b93d0a17e5959cd305814ad648188ef1286ca1b33571e1191581bdb2daa2b2f",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:a3fd269c3f6d0fe2f675d95553ad436e24a8de8f062dbf0ddc287b15dc015cd6",
     "source_digest": "sha256:4fc8fc60b3c78deb49242e4d7b4deb1a3e716aff1fa0bf05462103304f7d4dad",
     "tool": "run.py"
   },

@@ -41,15 +41,15 @@
       "identity": {
         "bytes_equal": 9,
         "bytes_total": 223,
-        "detail": "the instruction counts differ, 87 and 70",
+        "detail": "the instruction sequences differ",
         "instructions_equal": 12,
         "instructions_total": 70,
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x136cc",
-    "date": "2026-11-04",
-    "fingerprint": "sha256:bf4290b9a0f29f5a0610e7f53f0ace29c32836d5b27df5a404652af4c0951f8b",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:4fd42423ce109b1bcff447c8e0f24fe059b6f952902a05e0c5a42adaa9051a3d",
     "source_digest": "sha256:f24c281a9ff8267182a4240860348d4ed537ba14725505733f23aaf46a2ac2f5",
     "tool": "run.py"
   },

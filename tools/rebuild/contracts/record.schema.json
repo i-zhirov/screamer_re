@@ -58,6 +58,10 @@
       "minimum": 1,
       "description": "The instruction count of the identity check, passed to diff_module.py --count. Set when the body sweep runs past the end of the function."
     },
+    "implementation": {
+      "enum": ["c", "assembly"],
+      "description": "The source language of the rebuilt function. Absent when the record does not mark a language."
+    },
     "checks": {
       "type": "array",
       "uniqueItems": true,

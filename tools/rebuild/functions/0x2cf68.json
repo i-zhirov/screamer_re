@@ -53,7 +53,7 @@
       "identity": {
         "bytes_equal": 77,
         "bytes_total": 1122,
-        "detail": "the instruction counts differ, 370 and 321",
+        "detail": "the instruction sequences differ",
         "instructions_equal": 78,
         "instructions_total": 321,
         "verdict": "fail"
@@ -61,7 +61,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cf68",
     "date": "2026-11-05",
-    "fingerprint": "sha256:8fb7c7b753ef1c63a3566926cbca9cb6ad59502271f9a06d0034de81b48be11e",
+    "fingerprint": "sha256:da4854b7f51602c9f57518f07e3323cc54fe3bdebd90bb2d389f38eefe370cdc",
     "source_digest": "sha256:599117727b29db7cf032fce9280a97a3964bc0d8dfb8833bc23bd594ab483cb3",
     "tool": "run.py"
   },

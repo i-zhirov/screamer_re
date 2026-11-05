@@ -28,15 +28,15 @@
       "identity": {
         "bytes_equal": 38,
         "bytes_total": 79,
-        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 26,
         "instructions_total": 26,
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd4324",
-    "date": "2026-11-03",
-    "fingerprint": "sha256:f139663f3ab8f7ad5afe9f34101a646e9f478056217f617bb41d9cbb04e273d3",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:35a92bbdf0afbcaa7d49f95924beebb2d55620ebc13ef477dc19de4bbc1ea296",
     "source_digest": "sha256:d3cd722f06046b6e0ac25080cf5dbcfea940382dd906c37256926b2fb1dee1ed",
     "tool": "run.py"
   },
