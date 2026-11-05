@@ -900,10 +900,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 193 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 189 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 178 checks.  Both flags
-report 174 checks and take about 16 seconds.
+import and reports 205 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 201 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 190 checks.  Both flags
+report 186 checks and take about 16 seconds.
 
 The check runs in three places:
 

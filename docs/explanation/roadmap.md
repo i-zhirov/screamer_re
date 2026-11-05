@@ -106,7 +106,9 @@ current host.
   `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
   `0x2b9cc`, `spline_interpolate` at `0x22744`,
   `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
-  `race_radar` at `0x23a94`, and `car_sound_update` at `0x242bc`;
+  `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
+  `name_entry_letter_update` at `0x2b660`, and `race_records_screen` at
+  `0x2d4b8`;
   twenty-two modules are verified, one is matching, and one hundred and
   thirty-one rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
@@ -221,6 +223,8 @@ The plan follows the size order, starting with the smallest functions.
     `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
     `0x2b9cc`, `spline_interpolate` at `0x22744`,
     `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
-    `race_radar` at `0x23a94`, and `car_sound_update` at `0x242bc` are done;
+    `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
+    `name_entry_letter_update` at `0x2b660`, and `race_records_screen` at
+    `0x2d4b8` are done;
     the result is twenty-two verified modules, one matching module, and one
-    hundred and twenty-nine open rebuilds).
+    hundred and thirty-one open rebuilds).
