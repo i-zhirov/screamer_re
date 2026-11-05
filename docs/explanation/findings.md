@@ -11427,3 +11427,74 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   map_object_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The spline_interpolate module at 0x22744
+
+- Observation: the original body at `0x22744` holds 360 instructions and 1081
+  bytes up to the `ret 4` at `0x22b7a`.  The store record keeps the 1084-byte
+  extent and sets no function size.  The identity check uses the first 360
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22744 --count 360` and
+  `tools/rebuild/functions/0x22744.json`.
+- Observation: the direct call sweep finds one caller at `0x231e0`.  The caller
+  sits in the path playback at `0x23038`.  That function walks the 0x28-byte
+  keyframe records of the table that `0x231f0` appends.  The keyframe append
+  copies the view position, the view angles, and the other view fields of the
+  player object at object-3 offset `0xf91c`.  The frame update at `0x1ff70`
+  selects the view group at `0x202c0`, and that group calls both `0x231f0` and
+  `0x23038`.
+  Evidence: the direct call sweep for `0x22744`, the disassembly of `0x23038`
+  and `0x231f0`, and the calls at `0x20306` and `0x20317`.
+- Observation: the caller passes four point pointers and the fraction between
+  the two keyframe timestamps.  The function reads the previous point `D` from
+  `+0x00`, the first point `A` from `+0x04`, the second point `B` from `+0x08`,
+  and the next point `C` from `+0x0c`.  The output pointer receives the three
+  interpolated integers.  The caller copies the angles and the other fields of
+  the current keyframe without interpolation.
+  Evidence: the pointer loads at `0x22754` through `0x227bb` and the output
+  stores at `0x22a43`, `0x22ad9`, and `0x22b70`.
+- Observation: the function measures the chords `AB`, `BD`, and `AC` with the
+  square root wrapper at `0x22bec`.  The chord `AB` divides by the double
+  constant 3.0 at object-3 offset `0xda4`.  The tangents are
+  `A' = A + (B - D) * (|AB| / (3 * |BD|))` and
+  `B' = B + (A - C) * (|AB| / (3 * |AC|))`.  A zero `|BD|` or `|AC|` keeps the
+  tangent at `A` or `B`.  The two tangents truncate to integers through the
+  helper at `0x4d9f4`.
+  Evidence: the chord blocks at `0x227be` through `0x2299b` and the constant at
+  `0x100da4`.
+- Observation: the result is the cubic Hermite form
+  `A + t * 3(A' - A) + t^2 * (3B' - 6A' + 3A)
+  + t^3 * (3A' + B - 3B' - A)`.  The fraction `t`, its square, and its cube
+  stay in single precision.  The polynomial evaluates in double precision and
+  truncates to an integer for each axis.
+  Evidence: the polynomial blocks at `0x2299e` through `0x22b70`.
+- Inference: the function interpolates a position along a recorded path from
+  four keyframes.  The caller, the keyframe append, and the cubic form support
+  the name `spline_interpolate`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the square-root wrapper at `0x22bec` and the
+  truncate helper at `0x4d9f4`.  The harness links no math library, so the local
+  FPU stub supplies `sqrt` from the hardware, returns 0.0 for a negative
+  argument as `0x22bec` does, and makes `__CHP` truncate toward zero.  The chord
+  scale 3.0 arrives through a global.
+  Evidence: `tools/rebuild/spline_interpolate_fpu.asm` and
+  `tools/rebuild/spline_interpolate_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the collinear fraction 0.5, the two
+  endpoints, the zero `|BD|`, the zero `|AC|`, the three-dimensional point, the
+  two three-dimensional endpoints, and the negative coordinates.
+  Evidence: `python3 tools/rebuild/harness.py run --module spline_interpolate`,
+  `work/rebuild/spln_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x22744`.
+- Observation: the rebuilt module holds 360 decoded instructions and 1030
+  bytes.  The identity check stays open at 82 of 360 instructions and 55 of
+  1030 bytes.  The V2 toolchain uses a different prologue, a different
+  instruction order, and a different local layout.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22744 --count 360 --rebuilt work/rebuild/spline.exe
+  --rebuilt-map work/rebuild/spline_interpolate.map --rebuilt-symbol
+  spline_interpolate_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee name in the harness stay inferred.

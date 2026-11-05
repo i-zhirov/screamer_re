@@ -229,7 +229,7 @@ a name from the call graph and the data flow, as in Phase F.
 | `0x2aab8` | `menu_objects_init` (done) | 1420 | 395 | 32 | 0 |
 | `0x15c1c` | `player_car_link` (done) | 1160 | 306 | 8 | 37 |
 | `0x2b9cc` | `map_object_update` (done) | 1121 | 310 | 15 | 110 |
-| `0x22744` | unnamed | 1081 | 360 | 12 | 85 |
+| `0x22744` | `spline_interpolate` (done) | 1081 | 360 | 12 | 85 |
 | `0x17d14` | unnamed | 1078 | 290 | 10 | 106 |
 | `0x2c430` | unnamed | 885 | 230 | 19 | 60 |
 | `0x23a94` | unnamed | 870 | 208 | 16 | 37 |
@@ -239,7 +239,7 @@ a name from the call graph and the data flow, as in Phase F.
 
 ## Position
 
-One hundred forty-seven modules carry a recipe and a result: the twelve Phase A modules,
+One hundred forty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -289,5 +289,6 @@ at `0x136cc`, `net_race_lobby` at `0x2d7c4`, `player_view_setup` at
 at `0x2a558`, and `championship_screen` at `0x2cf68`, the Phase G module
 `engine_rpm_update` at `0x18db0`, and the Phase H modules `options_screen` at
 `0x21338`, `car_camera` at `0x1a930`, `menu_objects_init` at `0x2aab8`,
-and `player_car_link` at `0x15c1c`, and `map_object_update` at `0x2b9cc`.
-The next unnamed function is `0x22744`.
+and `player_car_link` at `0x15c1c`, and `map_object_update` at `0x2b9cc`, and
+`spline_interpolate` at `0x22744`.
+The next unnamed function is `0x17d14`.
