@@ -1527,9 +1527,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 205 checks and 0 failures in the `cross-check` shell.  It
-reports 201 checks with `--skip-cross`, 190 checks with `--skip-runtime`, and
-186 checks with both flags.  Evidence: the tool output.
+The check reports 206 checks and 0 failures in the `cross-check` shell.  It
+reports 202 checks with `--skip-cross`, 191 checks with `--skip-runtime`, and
+187 checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -9432,7 +9432,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/entry_probe.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game` reports the entry
   `0150:1F20F8` and the candidate `entry jump over the Watcom banner`.
-- Observation: the full pipeline then reports 205 checks and 0 failures.
+- Observation: the full pipeline then reports 206 checks and 0 failures.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
 ## The rebuild checks use le.py, not Ghidra or radare2
@@ -9525,8 +9525,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
   `0xd4364` to `0x10020`.
   Evidence: the four `agree` lines above.
-- The check counts are 205 checks for the full run, 201 checks with
-  `--skip-cross`, 190 checks with `--skip-runtime`, and 186 checks with both
+- The check counts are 206 checks for the full run, 202 checks with
+  `--skip-cross`, 191 checks with `--skip-runtime`, and 187 checks with both
   flags.  `--skip-cross` skips stage 8 and the tool preflight.
   `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
   Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
