@@ -11713,3 +11713,67 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --rebuilt-map work/rebuild/race_radar.map --rebuilt-symbol race_radar_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The car_sound_update module at 0x242bc
+
+- Observation: the original body at `0x242bc` holds 215 instructions and 829
+  bytes up to the `ret` at `0x245f8`.  The store record keeps the 836-byte
+  extent and sets no function size.  The identity check uses the first 215
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x242bc --count 215` and
+  `tools/rebuild/functions/0x242bc.json`.
+- Observation: the direct call sweep finds one caller at `0x15bf1`.  The call
+  is the last step of the effect group at `0x15bac`.  The group runs the player
+  car steps on the player object and calls this function only when the byte
+  `DAT_00118e1c` bit 0 is set.  The five view groups call the group on the
+  player object at object-3 offset `0xf91c`, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the call sweep for `0x242bc`, the group at `0x15bac`, and the call
+  at `0x15bf1`.
+- Observation: the callees at `0x24c4c`, `0x24cc8`, and `0x24d30` are
+  sound-effect timers.  They enqueue an entry through `0x247fc` into the queue
+  at `0x19080`, and the queue resolves the table entry at `0x1f718`.  The
+  helper at `0x22664` returns the angle test.
+  Evidence: the enqueue at `0x247fc`, the queue at `0x19080`, and the
+  `table_lookup` call at `0x24a61`.
+- Observation: the angle test compares `+0x13c` plus the constant with the
+  heading `+0x4cc` within pi/4.  The speed `+0x50c`, the engine speed `+0x688`,
+  the latch `DAT_00119060`, the mode byte `DAT_0011d260`, the pitch term
+  `+0x4f4`, the progress `+0x684`, the base height `+0x680`, and the value
+  `+0x790` drive the timers `0x10`, `0x11`, `0x15`, `0x18`, `0x14`, `0x0a`,
+  `0x0d`, and `0x0f` and the triggers `0x16`, `0x1a`, and `0x13`.
+  Evidence: the blocks at `0x242c9` through `0x245ec`.
+- Observation: the mode bits 0 and 1 scan the 0x590-byte car records at
+  `DAT_00110ab8` up to `DAT_00110ab8 + DAT_0010f8ec * 0x590`.  A record near
+  the player progress `+0x684` is found through the float compare at `+0x408`
+  and `+0x40c` or through the progress difference, and the result goes to the
+  timer `0x17`.
+  Evidence: the loop at `0x244c4` through `0x245a5`.
+- Inference: the sound-effect timers, the player car fields, the race-mode
+  branches, and the car-record scan support the name `car_sound_update`.  The
+  module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original converts the pitch term through the truncate
+  helper at `0x4d9f4`.  The module uses a local truncating FPU stub.  The
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.
+  Evidence: `tools/rebuild/car_sound_update_fpu.asm` and
+  `tools/rebuild/car_sound_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `a`, `b`, `c`, and `D`.  The paths cover the gate, the near and
+  far angle, the mode bits `0x10`, `0x20`, and `0x40`, the latch set and clear,
+  the two record-scan hits, the record-scan miss, the timer threshold, and the
+  fourteen callee arguments.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_sound_update`,
+  `work/rebuild/csnd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x242bc`.
+- Observation: the rebuilt module holds 215 decoded instructions.  The
+  identity check stays open at 19 of 215 instructions and 75 of 785 compared
+  bytes.  The V2 toolchain uses a different epilogue, a different local layout,
+  and a different call order for the float arguments.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x242bc --count 215 --rebuilt work/rebuild/csndupd.exe
+  --rebuilt-map work/rebuild/car_sound_update.map --rebuilt-symbol
+  car_sound_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

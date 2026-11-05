@@ -106,9 +106,9 @@ current host.
   `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
   `0x2b9cc`, `spline_interpolate` at `0x22744`,
   `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
-  and `race_radar` at `0x23a94`;
+  `race_radar` at `0x23a94`, and `car_sound_update` at `0x242bc`;
   twenty-two modules are verified, one is matching, and one hundred and
-  twenty-eight rebuilds hold the recorded difference; the
+  twenty-nine rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -221,6 +221,6 @@ The plan follows the size order, starting with the smallest functions.
     `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
     `0x2b9cc`, `spline_interpolate` at `0x22744`,
     `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
-    and `race_radar` at `0x23a94` are done;
+    `race_radar` at `0x23a94`, and `car_sound_update` at `0x242bc` are done;
     the result is twenty-two verified modules, one matching module, and one
-    hundred and twenty-eight open rebuilds).
+    hundred and twenty-nine open rebuilds).
