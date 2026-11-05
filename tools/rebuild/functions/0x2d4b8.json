@@ -1,9 +1,78 @@
 {
   "address": "0x2d4b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 224,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x2d4b8 holds 224 instructions and 779 bytes up to the ret at 0x2d7c2; the record keeps the 780-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x295fb is case 6 of the state dispatcher race_state_update at 0x29564; the dispatcher is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the screen area twice, draws the selected track title from the six-entry pointer table DAT_0011fbfc, and draws the two headers DAT_0011fc28 and DAT_0011fc2c; it formats the five best race times at DAT_00120610 + index * 0x50 with the replay suffix R when the flag +0x28 is not zero, and the five best lap times at DAT_00120430 + index * 0x50, so the module names the function race_records_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the selected track DAT_0012098c scales the record offset by 0x50 and the row that matches DAT_00120990 uses the color 1; the minutes and the seconds come from the truncated time divided by 60 and the hundredths from the fractional part times the float 100.0 at DAT_001012a2"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the title table, the two headers, the selected track and entry, the six lap records, and the six race records; it covers the replay suffix, the highlight row, the track offset, the two trailing spaces, and the minute above 59; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2d4b8 --count 224 --rebuilt work/rebuild/rcrec.exe --rebuilt-map work/rebuild/race_records_screen.map --rebuilt-symbol race_records_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_records_screen"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_records_screen module at 0x2d4b8"
+    }
+  ],
+  "module": "race_records_screen",
+  "name": "race_records_screen",
   "notes": [],
   "object_offset": "0x1d4b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 44,
+        "bytes_total": 631,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 34,
+        "instructions_total": 224,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2d4b8",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:19278eb1494210b111a3828e0bf39e3c4a6f2c41285fc9211e4efbc0e28706b4",
+    "source_digest": "sha256:cc829d5ad2105bce3da94480923b367409cfd31ed9025c98ff38553a40ab7afd",
+    "tool": "run.py"
+  },
+  "role": "draws the race and lap records screen for the selected track: the title, the two headers, the five race times with the replay suffix, and the five lap times",
+  "section": "race_frame callees",
   "size": 780,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_records_screen_"
 }

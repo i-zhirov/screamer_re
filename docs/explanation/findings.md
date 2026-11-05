@@ -11847,3 +11847,67 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   name_entry_letter_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_records_screen module at 0x2d4b8
+
+- Observation: the original body at `0x2d4b8` holds 224 instructions and 779
+  bytes up to the `ret` at `0x2d7c2`.  The store record keeps the 780-byte
+  extent and sets no function size.  The identity check uses 224 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2d4b8 --count 224` and
+  `tools/rebuild/functions/0x2d4b8.json`.
+- Observation: the direct call sweep finds one caller at `0x295fb`.  The call
+  is case 6 of the state dispatcher `race_state_update` at `0x29564`.  The
+  dispatcher is a `race_frame` callee at `0x2807c`, so the record takes the
+  section `race_frame callees`.
+  Evidence: the call at `0x295fb`, the jump table at `0x29579`, and the call
+  at `0x2807c`.
+- Observation: the function clears the screen area twice through `0x25d28`
+  with the rectangle (0x60, 0x48, 0x1c4, 0x140).  It draws the selected track
+  title from the six-entry pointer table `DAT_0011fbfc`, indexed by the
+  selected track `DAT_0012098c`, and it draws the two headers
+  `DAT_0011fc28` and `DAT_0011fc2c` at y 0x28 and y 0x78.
+  Evidence: the blocks at `0x2d4cc` through `0x2d53c`.
+- Observation: the first list holds five race records at
+  `DAT_00120610 + index * 0x50`.  Each record holds five floats at +0x00, five
+  4-byte names at +0x14, and five flags at +0x28.  A flag that is not zero
+  selects the format `\001%d. %3s %02d.%02d.%02d R` at object-3 offset 0x1254.
+  A zero flag selects the format `\001%d. %3s %02d.%02d.%02d  ` at offset
+  0x126e.  The row that matches `DAT_00120990` uses the color 1, and the other
+  rows use the color 0.  The rows start at y 0x3c and step by 0xa.
+  Evidence: the blocks at `0x2d555` through `0x2d64e`, the formats at object-3
+  offsets 0x1254 and 0x126e, and the flag test at `0x2d64c`.
+- Observation: the second list holds five lap records at
+  `DAT_00120430 + index * 0x50`.  The rows use the format at object-3 offset
+  0x1288 and the color 0.  The rows start at y 0x8c and step by 0xa.
+  Evidence: the blocks at `0x2d6d2` through `0x2d7b1` and the format at
+  object-3 offset 0x1288.
+- Observation: the minutes and the seconds come from the truncated time
+  divided by 60.  The hundredths come from the fractional part times the float
+  100.0 at object-3 offset 0x12a2.  The original truncates through the Watcom
+  helper at `0x4d9f4`, so the module uses a local truncating `__CHP` stub.
+  Evidence: the calls at `0x2d55b`, `0x2d570`, and `0x2d5a7`, the float
+  100.0 at object-3 offset 0x12a2, and
+  `tools/rebuild/race_records_screen_fpu.asm`.
+- Inference: the only caller is the race state 6 update.  The two record
+  tables at `DAT_00120430` and `DAT_00120610` are the tables that
+  `race_record_save` at `0x2e82c` fills.  The function draws the best lap
+  times and the best race times of the selected track.  These facts support
+  the name `race_records_screen`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph, the two tables, and the formats above.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover the replay suffix, the highlight row,
+  the track offset, the two trailing spaces, and a lap time above 59 minutes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  race_records_screen`, `work/rebuild/rcrec.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2d4b8`.
+- Observation: the rebuilt module holds 224 decoded instructions and 631
+  bytes.  The identity check stays open at 34 of 224 instructions and 44 of
+  631 compared bytes.  The V2 toolchain uses a different prologue, a different
+  local layout, and a different instruction order.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2d4b8 --count 224 --rebuilt work/rebuild/rcrec.exe
+  --rebuilt-map work/rebuild/race_records_screen.map --rebuilt-symbol
+  race_records_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
