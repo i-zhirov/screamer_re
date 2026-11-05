@@ -11565,3 +11565,75 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   player_car_skid_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The name_entry_screen module at 0x2c430
+
+- Observation: the original body at `0x2c430` holds 230 instructions and 885
+  bytes up to the `ret` at `0x2c7a4`.  The store record keeps the 888-byte
+  extent and sets no function size.  The identity check uses the first 230
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2c430 --count 230` and
+  `tools/rebuild/functions/0x2c430.json`.
+- Observation: the direct call sweep finds one caller at `0x2bebe`.  The call
+  is case 4 of the state init dispatcher at `0x2be94`.  The update case 4 at
+  `0x295e7` calls `0x2ce84`.  The update dispatcher `race_state_update` at
+  `0x29564` is a `race_frame` callee at `0x2807c`, so the record takes the
+  section `race_frame callees`.
+  Evidence: the call sweep for `0x2c430`, the jump tables at linear `0x2be70`
+  and `0x29540`, and the calls at `0x295c9` and `0x2807c`.
+- Observation: the init loads `menu2h.pcx` from `gfx\graf.dat` with the
+  palette at object-3 offset `0xcf5c`.  It presents the buffer, copies
+  `0x3e800` bytes to `DAT_00121528`, fills the screen, and presents it again.
+  It clears `DAT_0011d240` and `DAT_0011d244`, sets `DAT_00120378` at 1.5,
+  `DAT_00120380` at 8.0, and `DAT_0011fac8` at 1.
+  Evidence: the calls at `0x2c48e` through `0x2c4c3` and the stores at
+  `0x2c453` through `0x2c488`.
+- Observation: the letter index is the first byte of the player name
+  `DAT_001203cc` minus 0x41.  A non-zero index places the menu marker from the
+  cosine and the sine of `index * -0.24166098` at the scale 4500.0 and stores
+  the heading `index * 0.24166098` at `DAT_00120388` and `DAT_00120394`.  A
+  zero index stores the default 0x1194 at `DAT_001203b0` and `DAT_001203a4`.
+  Evidence: the reads and the FPU blocks at `0x2c4c8` through `0x2c586`.
+- Observation: the input block at `0x2893a` increases `DAT_0011d23c`, wraps
+  it above 0x19, and writes the letter `index + 0x41` into the name buffer at
+  `DAT_001203cc` at the position `DAT_0011d244`.  The other users of
+  `DAT_001203cc` are `net_player_add` at `0x2dddc` and `race_panel_4` at
+  `0x2e724`, and both treat the buffer as the player name.
+  Evidence: the block at `0x288f0` through `0x28976`, the wrap test at
+  `0x28945`, and the copies at `0x2de49` and the format at `0x2e74c`.
+- Observation: the loop builds 26 records at `DAT_001db78`, stride 0x64.  Each
+  record holds the letters `0x41 + i` and `0x21 + i`, the ring position at the
+  radius 3500.0, the delay `i * 0.04`, and the angle `i * 0.24166098`.  The
+  `map_object_update` module at `0x2b9cc` reads the same record fields.
+  Evidence: the loop at `0x2c610` through `0x2c77c` and
+  `tools/rebuild/map_object_update.c`.
+- Inference: the function is the state 4 player name entry screen.  The car
+  selection at state 2 and the track selection at state 3 precede it.  The 26
+  A to Z entries, the player name buffer, and the input that writes the chosen
+  letter support the name `name_entry_screen`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the init table, the update table, the A to Z records, and the
+  input block above.
+- Observation: the original calls the cosine at `0x4da66`, the sine at
+  `0x4da72`, and the truncate helper at `0x4d9f4`.  The harness links no math
+  library, so the local FPU stub supplies `cos` and `sin` and makes `__CHP`
+  truncate toward zero.  The constants arrive through globals.
+  Evidence: `tools/rebuild/name_entry_screen_fpu.asm` and
+  `tools/rebuild/name_entry_screen_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the letters C, Z, A, and B, the failed
+  load, and the record bound.
+  Evidence: `python3 tools/rebuild/harness.py run --module name_entry_screen`,
+  `work/rebuild/nameent.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2c430`.
+- Observation: the rebuilt module holds 230 decoded instructions and 870
+  bytes.  The identity check stays open at 45 of 230 instructions and 31 of
+  870 bytes.  The V2 toolchain uses a different prologue, a different
+  instruction order, and a different local layout.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2c430 --count 230 --rebuilt work/rebuild/nameent.exe
+  --rebuilt-map work/rebuild/name_entry_screen.map --rebuilt-symbol
+  name_entry_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
