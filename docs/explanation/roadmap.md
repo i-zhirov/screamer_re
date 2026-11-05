@@ -203,7 +203,7 @@ The plan follows the size order, starting with the smallest functions.
     `object_gear_step` at `0x1d834`, `object_collision` at `0x1e00c`,
     `object_car_link` at `0x1c84c`, `race_panel_2` at `0x2e21c`,
     `ai_update` at `0x205c4`, `sound_bank_load` at `0x1f2e0`, and the first
-    eleven Phase F modules `car_setup` at `0x142ec`, `file_error_report` at
+    twelve Phase F modules `car_setup` at `0x142ec`, `file_error_report` at
     `0x4bf88`, `player_car_init` at `0x136cc`, `net_race_lobby` at
     `0x2d7c4`, `player_view_setup` at `0x19ae8`, `race_data_load` at
     `0x131a8`, `track_progress_update` at `0x1db94`,
