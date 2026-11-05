@@ -108,7 +108,7 @@ current host.
   `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
   `race_radar` at `0x23a94`, and `car_sound_update` at `0x242bc`;
   twenty-two modules are verified, one is matching, and one hundred and
-  twenty-nine rebuilds hold the recorded difference; the
+  thirty rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).

@@ -234,12 +234,12 @@ a name from the call graph and the data flow, as in Phase F.
 | `0x2c430` | `name_entry_screen` (done) | 885 | 230 | 19 | 60 |
 | `0x23a94` | `race_radar` (done) | 870 | 208 | 16 | 37 |
 | `0x242bc` | `car_sound_update` (done) | 829 | 215 | 14 | 23 |
-| `0x2b660` | unnamed | 803 | 219 | 8 | 55 |
+| `0x2b660` | `name_entry_letter_update` (done) | 803 | 219 | 8 | 55 |
 | `0x2d4b8` | unnamed | 779 | 224 | 21 | 24 |
 
 ## Position
 
-One hundred fifty-two modules carry a recipe and a result: the twelve Phase A modules,
+One hundred fifty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -292,5 +292,5 @@ at `0x2a558`, and `championship_screen` at `0x2cf68`, the Phase G module
 and `player_car_link` at `0x15c1c`, `map_object_update` at `0x2b9cc`,
 `spline_interpolate` at `0x22744`, `player_car_skid_update` at `0x17d14`,
 `name_entry_screen` at `0x2c430`, `race_radar` at `0x23a94`, and
-`car_sound_update` at `0x242bc`.
-The next unnamed function is `0x2b660`.
+`car_sound_update` at `0x242bc`, and `name_entry_letter_update` at `0x2b660`.
+The next unnamed function is `0x2d4b8`.

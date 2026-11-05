@@ -11777,3 +11777,73 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   car_sound_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The name_entry_letter_update module at 0x2b660
+
+- Observation: the original body at `0x2b660` holds 219 instructions and 803
+  bytes up to the first `ret` at `0x2b982`.  The second return block continues
+  to the shared epilogue at `0x2b9cb`.  The store record keeps the 876-byte
+  extent and sets no function size.  The identity check uses the first 219
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b660 --count 219` and
+  `tools/rebuild/functions/0x2b660.json`.
+- Observation: the direct call sweep finds one caller at `0x2cec5`.  The call
+  is inside the state 4 update at `0x2ce84`, which runs on each of the 0x50
+  records at `DAT_001db78`.  The state init at `0x2c430` builds the 26 A to Z
+  records, and the input at `0x2893a` selects the letter.  The update
+  dispatcher `race_state_update` at `0x29564` calls the state 4 update at
+  `0x295e7`.  The record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2b660`, the loop at `0x2ceac` through
+  `0x2cec5`, and the calls at `0x295e7` and `0x2807c`.
+- Observation: the function binds the list name at `0x6350` through `0x11850`
+  when the record field `+0x08` is -1.  Otherwise it fells the timer `+0x60`
+  by the frame delta `DAT_0018e08` and returns while the timer stays at or
+  above zero.  After the timer reaches zero it clears the timer, refreshes the
+  list through `0x117fc`, looks the object up in the slot table
+  `DAT_001d2d0` and the 0x1c-byte entry table `DAT_0010653c`, and sets the
+  object frame `+0x20` from `DAT_001fab8`.
+  Evidence: the blocks at `0x2b670` through `0x2b714`.
+- Observation: the object position `+0x08` and `+0x10` take the record fields
+  `+0x40` and `+0x48`.  The height `+0x0c` interpolates from `+0x44` toward
+  `+0x38` with the square of the progress `+0x58` through the Watcom pow
+  helper at `0xc21e2`.  The record angles `+0x10`, `+0x14`, and `+0x18` scale
+  by 1024.0 / pi into the object angles `+0x14`, `+0x18`, and `+0x1c` with
+  the mask `0x7ff`.
+  Evidence: the blocks at `0x2b717` through `0x2b850` and the call at
+  `0x2b75b`.
+- Observation: the progress `+0x58` oscillates between zero and one with the
+  direction `+0x5c`.  Above one it clamps at one, clears the direction, scales
+  the start `+0x44`, and turns to -1 when the scaled start falls below the
+  target `+0x38`.  At zero it clamps at zero and turns to +1.  The angle
+  `+0x10` rises when the flag `+0x0c` is set and resets at `0x400cbe4d` above
+  the bound, or falls and resets at `0xbf20d97c` below the bound.
+  Evidence: the blocks at `0x2b853` through `0x2b97a`.
+- Inference: the only caller is the name entry update, the records hold the A
+  to Z letters, and the fields match the letter record.  These facts support
+  the name `name_entry_letter_update`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the pow helper at `0xc21e2` and the truncate
+  helper at `0x4d9f4`.  The module calls pow only with the exponent 2.0.  The
+  local assembly stub squares the base and states that limit.  The constants
+  arrive through globals, because the minimal image does not load the constant
+  segment.
+  Evidence: `tools/rebuild/name_entry_letter_update_fpu.asm` and
+  `tools/rebuild/name_entry_letter_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `a`, `b`, and `D`.  The paths cover the unused record, the
+  timer gate, the full path, the interpolation, both completion clamps, both
+  zero-direction clamps, and both angle resets.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  name_entry_letter_update`, `work/rebuild/nelt.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2b660`.
+- Observation: the rebuilt module holds 219 decoded instructions and 764
+  bytes.  The identity check stays open at 42 of 219 instructions and 29 of
+  764 compared bytes.  The V2 toolchain uses a different prologue, a different
+  local layout, and a different instruction order.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b660 --count 219 --rebuilt work/rebuild/neltupd.exe
+  --rebuilt-map work/rebuild/name_entry_letter_update.map --rebuilt-symbol
+  name_entry_letter_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
