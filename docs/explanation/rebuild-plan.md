@@ -211,9 +211,15 @@ The size is the function body, not the store extent.
 | `0x2a558` | `race_results_screen` (done) | 1323 | 343 | 38 | 13 |
 | `0x2cf68` | `championship_screen` (done) | 1357 | 370 | 33 | 11 |
 
+### Phase G: next candidates
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x18db0` | `engine_rpm_update` (done) | 1734 | 448 | 10 | 162 |
+
 ## Position
 
-One hundred forty-one modules carry a recipe and a result: the twelve Phase A modules,
+One hundred forty-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -260,5 +266,6 @@ at `0x136cc`, `net_race_lobby` at `0x2d7c4`, `player_view_setup` at
 `0x19ae8`, `race_data_load` at `0x131a8`, `track_progress_update` at
 `0x1db94`, `player_steering_update` at `0x1629c`, `race_record_save` at
 `0x2e82c`, `player_car_view_update` at `0x16f34`, `race_results_screen`
-at `0x2a558`, and `championship_screen` at `0x2cf68`.
-The next unnamed function is `0x18db0`.
+at `0x2a558`, and `championship_screen` at `0x2cf68`, and the Phase G module
+`engine_rpm_update` at `0x18db0`.
+The next unnamed function is `0x21338`.

@@ -11003,3 +11003,72 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x2cf68 --rebuilt work/rebuild/champmod.exe
   --rebuilt-map work/rebuild/championship_screen.map --rebuilt-symbol
   championship_screen_`.
+
+## The engine_rpm_update module at 0x18db0
+
+- Observation: the original body at `0x18db0` holds 448 instructions and 1734
+  bytes up to the `ret` at `0x19475`.  The record keeps the 1736-byte extent and
+  sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x18db0 --count 448` and
+  `tools/rebuild/functions/0x18db0.json`.
+- Observation: the only direct caller is the player update group at `0x15a80`,
+  which runs this function at `0x15a94` after the player input step at
+  `0x18a14` and before `0x160a4`, `0x16150`, and `player_steering_update` at
+  `0x1629c`.  The group runs on the player object, so the record takes the
+  section `The vehicle state chain`.
+  Evidence: the direct call sweep for `0x18db0`; the block at `0x15a80`
+  through `0x15ab4`; and the `player_steering_update` finding above.
+- Observation: the function reads the input flags `0x18e1c` and `0x18e1d` and
+  the six joystick axes `0x19880` through `0x19894`.  The flag bit `0x40`
+  selects the axis store at `0x19884` and the filter index `0x3d`.  The input
+  bit `0` gates the main path.  The manual path compares the axes 4 and 5 with
+  `0x1985c` and `0x19878`.
+  Evidence: the blocks at `0x18dca` through `0x18efb`.
+- Observation: the function stores the gear at `+0x7ac` and the shift flag at
+  `+0x140`.  The manual path increments or decrements the gear when the shift
+  flag is zero.  The automatic path uses the thresholds `0x2134` and `0xfa0`
+  against the engine speed at `+0x7a8`, the gear count at `+0x494`, and the
+  state `+0x148`.
+  Evidence: the blocks at `0x18e09` through `0x18f92`.
+- Observation: the function forms the speed limit at `+0x510` as
+  `+0x480 - (sin(+0x4c8) * 4.0 + 1.0) * 1000.0`.  It forms the engine-speed
+  target from the throttle `+0x144`, the maximum engine speed `+0x484`, the
+  wheel factor `+0x174`, and the gear ratio at `+0x494 + gear * 4`.  The gear
+  count `1` selects the square-root torque path, and a larger count selects the
+  sine torque path.  The function updates the road speed at `+0x50c`, sets
+  `+0x110` on a strong deceleration, and calls `0x19478`, `filter_update` at
+  `0x22b80`, `sin` at `0x4da72`, `sqrt` at `0x22bec`, and `0x1f7e4` with the
+  value `14 * +0x7a8 + 32768`.
+  Evidence: the blocks at `0x18f92` through `0x19468`; the constants at
+  object-3 offsets 0x858 through 0x8a8; and the gear table at object-3 offset
+  0x1d88.
+- Inference: the function updates the player engine speed and the selected
+  gear from the throttle, the road speed, and the pitch.  The engine-speed
+  store at `+0x7a8`, the gear store at `+0x7ac`, the two shift thresholds, the
+  gear-ratio table, and the sound value support the name `engine_rpm_update`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness links no math library.  The local FPU stub provides
+  `sin` and `sqrt` through `fsin` and `fsqrt`, and it makes `__CHP` truncate
+  toward zero, because the original uses the helper at `0x4d9f4`.  The harness
+  holds the constants in globals, because it does not load the constant
+  segment.
+  Evidence: `tools/rebuild/engine_rpm_update_fpu.asm` and
+  `tools/rebuild/engine_rpm_update_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `a`, and `D`.  The paths cover the manual upshift, the manual
+  downshift, the manual neutral path, the automatic upshift, the automatic
+  downshift, the state 5 reset, the input bit `0x40`, the clear input bit `0`,
+  the neutral speed decay, the one-gear square-root path, and the over-speed
+  clamp.
+  Evidence: `python3 tools/rebuild/harness.py run --module engine_rpm_update`,
+  `work/rebuild/eru_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x18db0`.
+- Observation: the rebuilt module holds 339 instructions and 1117 bytes.  The
+  identity check stays open at 44 of 339 instructions and 64 of 1117 bytes.
+  The V2 toolchain uses a different instruction order and local layout.  The
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x18db0 --count 448 --rebuilt work/rebuild/erumod.exe
+  --rebuilt-map work/rebuild/engine_rpm_update.map --rebuilt-symbol
+  engine_rpm_update_`.

@@ -1,9 +1,73 @@
 {
   "address": "0x18db0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x18db0` holds 448 instructions and 1734 bytes up to the `ret` at `0x19475`; the record keeps the 1736-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the player update group at `0x15a80`, which runs this function at `0x15a94` after the player input step at `0x18a14` and before `0x160a4`, `0x16150`, and `player_steering_update` at `0x1629c`; the group runs on the player object, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the input flags `0x18e1c` and `0x18e1d` and the joystick axes `0x19880` through `0x19894`; the flag bit `0x40` selects the automatic axis store and the filter index `0x3d`, the flag bit `0` gates the manual and automatic paths, and the manual path compares the axes 4 and 5 against `0x1985c` and `0x19878`"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the gear at `+0x7ac` and the shift flag at `+0x140`; the automatic path uses the thresholds `0x2134` and `0xfa0` against the engine speed at `+0x7a8`, the gear count at `+0x494`, and the state `+0x148`"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the speed limit `+0x510` as `+0x480 - (sin(+0x4c8) * 4.0 + 1.0) * 1000.0`; it forms the engine-speed target from the throttle `+0x144`, the maximum `+0x484`, the wheel factor `+0x174`, and the gear ratio at `+0x494 + gear * 4`; it updates the road speed `+0x50c`, sets `+0x110` on a strong deceleration, and calls `0x19478`, `filter_update` at `0x22b80`, `sin` at `0x4da72`, `sqrt` at `0x22bec`, and `0x1f7e4` with `+0x7cc` and `14 * +0x7a8 + 32768`"
+    },
+    {
+      "kind": "note",
+      "text": "the engine-speed store at `+0x7a8`, the gear store at `+0x7ac`, the two shift thresholds, the gear-ratio table, and the sound value support the name `engine_rpm_update`; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "finding",
+      "text": "The engine_rpm_update module at 0x18db0"
+    }
+  ],
+  "module": "engine_rpm_update",
+  "name": "engine_rpm_update",
   "notes": [],
   "object_offset": "0x8db0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 64,
+        "bytes_total": 1117,
+        "detail": "the instruction counts differ, 448 and 339",
+        "instructions_equal": 44,
+        "instructions_total": 339,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18db0",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:0a6353f019df30917d605e708b0ff8d6573c4ba46131fd6164300aa0caeac146",
+    "source_digest": "sha256:fc5355d43b19bef410297289a3d44ddb851766213a7b66acf22cb8fd4aaa7415",
+    "tool": "run.py"
+  },
+  "role": "updates the engine speed and the selected gear from the throttle, the road speed, and the pitch, limits the road speed, flags a strong deceleration, and publishes the engine sound",
+  "section": "The vehicle state chain",
   "size": 1736,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "engine_rpm_update_"
 }
