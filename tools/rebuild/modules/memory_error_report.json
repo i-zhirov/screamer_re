@@ -1,0 +1,33 @@
+{
+  "exe": "mermod.exe",
+  "map": "memory_error_report.map",
+  "name": "memory_error_report",
+  "run": {
+    "command": "mermod.exe > mer_out.txt",
+    "expect": [
+      "1",
+      "2",
+      "3",
+      "7",
+      "9",
+      "0",
+      "4",
+      "D"
+    ],
+    "output": "mer_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_error_report.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_error_report_main.c"
+    }
+  ]
+}

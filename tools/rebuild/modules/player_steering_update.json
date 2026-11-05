@@ -1,0 +1,39 @@
+{
+  "exe": "psumod.exe",
+  "map": "player_steering_update.map",
+  "name": "player_steering_update",
+  "run": {
+    "command": "psumod.exe > psu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "psu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_steering_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_steering_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_steering_update_main.c"
+    }
+  ]
+}

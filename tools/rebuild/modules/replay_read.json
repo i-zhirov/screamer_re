@@ -1,0 +1,30 @@
+{
+  "exe": "rprdmod.exe",
+  "map": "replay_read.map",
+  "name": "replay_read",
+  "run": {
+    "command": "rprdmod.exe > rprd_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rprd_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_read.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_read_main.c"
+    }
+  ]
+}

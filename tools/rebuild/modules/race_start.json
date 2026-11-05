@@ -1,0 +1,28 @@
+{
+  "exe": "rstmod.exe",
+  "map": "race_start.map",
+  "name": "race_start",
+  "run": {
+    "command": "rstmod.exe > rst_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "rst_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_start.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_start_main.c"
+    }
+  ]
+}

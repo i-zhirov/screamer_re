@@ -1,17 +1,48 @@
 {
   "address": "0x294c8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1"
+      "text": "the original at `0x294c8` holds 35 instructions and 117 bytes: it stores the constants 2.0, 0.6, 1.0, 20000, and -12.566371 at `DAT_00120378`, `DAT_00120380`, `DAT_0012037c`, `DAT_001203b0`, and `DAT_0012038c`, sets `DAT_0011fac8` to -1, copies the old state into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1"
     }
   ],
+  "module": "race_state_begin",
   "name": "race_state_begin",
   "notes": [],
-  "role": "sets the constants 2.0, 0.6, 1.0, 20000, and -12.566, sets `DAT_0011fac8` to -1, copies `DAT_0011fac4` into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 97,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 17,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x294c8",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:86f38d8e3deea8a2b97b1c620d21850bbb675e9b01576488c933b5fd1275c801",
+    "source_digest": "sha256:4c774425f257d1ab8d17913dcedcdb348de73ae9e1e89ecef43b264b52314196",
+    "tool": "run.py"
+  },
+  "role": "sets the race constants, saves the old state, stores the parameter, and sets the state to 1",
   "section": "overlay_dispatch callees",
   "size": 156,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_state_begin_"
 }

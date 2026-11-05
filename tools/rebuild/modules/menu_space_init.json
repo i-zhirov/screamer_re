@@ -1,0 +1,30 @@
+{
+  "exe": "msimenu.exe",
+  "map": "menu_space_init.map",
+  "name": "menu_space_init",
+  "run": {
+    "command": "msimenu.exe > msimenu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "msimenu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_space_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_space_init_main.c"
+    }
+  ]
+}

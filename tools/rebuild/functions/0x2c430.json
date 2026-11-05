@@ -1,9 +1,82 @@
 {
   "address": "0x2c430",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 230,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The name_entry_screen module at 0x2c430"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2c430 holds 230 instructions and 885 bytes up to the ret at 0x2c7a4, so the record keeps the 888-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x2bebe is case 4 of the state init dispatcher at 0x2be94; the matching update at 0x295e7 calls 0x2ce84, and race_state_update at 0x29564 is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the init loads menu2h.pcx from gfx\\graf.dat, clears DAT_0011d240 and DAT_0011d244, and sets DAT_00120378 at 1.5, DAT_00120380 at 8.0, and DAT_0011fac8 at 1"
+    },
+    {
+      "kind": "note",
+      "text": "the index is the first byte of the player name DAT_001203cc minus 0x41; the input at 0x2893a increments DAT_0011d23c, wraps above 0x19, and writes the letter into the name at DAT_0011d244, so the module names the function name_entry_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds 26 records at DAT_001db78 with the letters A to Z, the ring position at radius 3500.0, the delay i * 0.04, and the angle i * 0.24166098; the fields match the map_object_update reader at 0x2b9cc"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the letters C, Z, A, and B, the failed load, and the record bound; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2c430 --count 230 --rebuilt work/rebuild/nameent.exe --rebuilt-map work/rebuild/name_entry_screen.map --rebuilt-symbol name_entry_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module name_entry_screen"
+    }
+  ],
+  "module": "name_entry_screen",
+  "name": "name_entry_screen",
   "notes": [],
   "object_offset": "0x1c430",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 870,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 45,
+        "instructions_total": 230,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2c430",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:c811c8b12bbc3b4e6ee101d79da3fbb133b358724fba74b259bf7feadd9f140c",
+    "source_digest": "sha256:9fe69d6ddb5189570c99b53629f465f8f43ec62ee6ef925a31f9c234dc890995",
+    "tool": "run.py"
+  },
+  "role": "builds the player name entry screen, places the 26 letter objects, and sets the menu heading",
+  "section": "race_frame callees",
   "size": 888,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "name_entry_screen_"
 }

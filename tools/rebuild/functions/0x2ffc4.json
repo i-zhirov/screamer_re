@@ -1,18 +1,53 @@
 {
   "address": "0x2ffc4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "starts the music from the bank"
+      "text": "the original at `0x2ffc4` holds 41 instructions and 140 bytes: it reads the status word at `+0x10` of the music bank struct, sends the statuses 1 to 6 through the jump table at object offset `0x1ffac` to the messages `0x1577`, `0x1596`, `0x15b6`, `0x15ca`, `0x15e2`, and `0x15f5`, prints the message through `0x3009b`, and calls `exit(-1)` at `0x300be` for a non-zero status; a zero status returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller is `engine_init` at `0x1284d`, after `music_bank_load` at `0x1283f`; `music_bank_load` writes the status at `0x2f9e0` and `music_bank_reset` clears it at `0x2f9b0`"
     }
   ],
+  "module": "music_start",
   "name": "music_start",
   "notes": [],
   "object_offset": "0x1ffc4",
-  "role": "starts the music from the bank",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 134,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 41,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2ffc4",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:c180a49d2f015ef687933424c6b4c1e0485423e608785321bef05e5bf05ae679",
+    "source_digest": "sha256:223d890d6c8b9dca2cc40c79994064e23e9fb9cc85c1328469ce0c46bf4f2b64",
+    "tool": "run.py"
+  },
+  "role": "reports the music bank status and exits with -1 on a non-zero status",
   "section": "The sound loaders",
   "size": 140,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "music_start_"
 }

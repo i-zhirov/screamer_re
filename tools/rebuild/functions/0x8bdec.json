@@ -1,17 +1,48 @@
 {
   "address": "0x8bdec",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call"
+      "text": "allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h"
     }
   ],
+  "module": "vesa_set_mode",
   "name": "vesa_set_mode",
   "notes": [],
-  "role": "calls the real-mode interrupt dispatcher with `0x4f01`, the VBE mode info call",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 22,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 8,
+        "instructions_total": 8,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8bdec",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:2e130aa38654df93a04033a2a828cfbd1933a012b02004cff374d05e35cdaf2d",
+    "source_digest": "sha256:df25b5b808d4d659b672a9c62ba1704db8946175a0c17cd37c7b81cf7b1b409c",
+    "tool": "run.py"
+  },
+  "role": "allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h",
   "section": "Subsystem initialisation",
   "size": 868,
-  "status": "named"
+  "status": "verified",
+  "symbol": "vesa_set_mode_"
 }

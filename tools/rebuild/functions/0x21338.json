@@ -1,9 +1,62 @@
 {
   "address": "0x21338",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 464,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the only caller is input_map at 0x2124f: it calls this function when the flag 0x1b is set and the mode 0x1d260 is not 0x10, so the function is the escape menu; the label table at 0x1f74 holds CD, FX, and MU, the pointer table at 0x1f80 selects the audio slots 0x1d2c0, 0x1d2bc, and 0x1d2c4, and the state table at 0x1f20 holds the seven positions, so the module names the function options_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x21338 holds 464 instructions and 1715 bytes up to the ret at 0x219ea; the record keeps the 1716-byte extent and sets no function size; the body clears the screen twice, fades the three volume locals by the frame delta, draws the menu rows with the format 03 25 64 00, draws the CD, FX, and MU bars through 0x23dfc, and leaves the loop when the key byte 0x03 is set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x21338 --count 464 --rebuilt work/rebuild/optsmod.exe --rebuilt-map work/rebuild/options_screen.map --rebuilt-symbol options_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module options_screen"
+    }
+  ],
+  "module": "options_screen",
+  "name": "options_screen",
   "notes": [],
   "object_offset": "0x11338",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 88,
+        "bytes_total": 1629,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 69,
+        "instructions_total": 464,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x21338",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:2ee1c60a4505fcc72949a3561f4807fd04aa29b60e508a82424318fd146fd75f",
+    "source_digest": "sha256:1a7fa480b5f8c55f22a05ebdc54844d8de1b50df822ac62b8c364916000e5956",
+    "tool": "run.py"
+  },
+  "role": "drives the options screen: fades the three volume slots, handles the menu selection and the keys, draws the menu rows and the volume bars, and leaves on the escape key",
+  "section": "race_loop callees",
   "size": 1716,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "options_screen_"
 }

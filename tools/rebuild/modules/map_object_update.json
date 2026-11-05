@@ -1,0 +1,38 @@
+{
+  "exe": "mapobj.exe",
+  "map": "map_object_update.map",
+  "name": "map_object_update",
+  "run": {
+    "command": "mapobj.exe > moupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "moupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "map_object_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_update_main.c"
+    }
+  ]
+}

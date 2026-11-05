@@ -1,17 +1,52 @@
 {
   "address": "0x1f2e0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "builds `%s\\data\\sound.dat`, walks the 36-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a missing member calls the exit"
+      "text": "builds `%s\\data\\sound.dat`, walks the 0x24-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a failed open reports the file error and runs the exit 0"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuild copies the 0x74-byte record template, reads every member through the `SOUND_FX` resource at `0x2eed0`, and maps the high nibble of `+0x20` to the type 0, 2, 1, and 3; the five behavior paths cover the setup gate, the two records, the four status values, the two failed opens, and the zero resource"
     }
   ],
+  "module": "sound_bank_load",
   "name": "sound_bank_load",
   "notes": [],
-  "role": "builds `%s\\data\\sound.dat`, walks the 36-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a missing member calls the exit",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 726,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 35,
+        "instructions_total": 223,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f2e0",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:e00913f618715087fe96fb6e280e86522b1bba519f79eac673cdc3eb2a0c9335",
+    "source_digest": "sha256:0b9889bbb9358ca5ddae074fb09a0a191105e24f314ca7d495a5ee43edc8bf5a",
+    "tool": "run.py"
+  },
+  "role": "loads `DATA/SOUND.DAT` into the 0x74-byte sample records at `DAT_0016034`: builds the member names, opens each member, reads it through the `SOUND_FX` resource, and sets the type and the flags",
   "section": "The sound loaders",
   "size": 1048,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "sound_bank_load_"
 }

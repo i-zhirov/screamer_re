@@ -1,0 +1,29 @@
+{
+  "exe": "malmod.exe",
+  "map": "memory_alloc.map",
+  "name": "memory_alloc",
+  "run": {
+    "command": "malmod.exe > mal_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mal_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_alloc.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_alloc_main.c"
+    }
+  ]
+}

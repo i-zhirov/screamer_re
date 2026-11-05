@@ -1,0 +1,30 @@
+{
+  "exe": "ogsmod.exe",
+  "map": "object_gear_state.map",
+  "name": "object_gear_state",
+  "run": {
+    "command": "ogsmod.exe > ogs_out.txt",
+    "expect": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "D"
+    ],
+    "output": "ogs_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_gear_state.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_gear_state_main.c"
+    }
+  ]
+}

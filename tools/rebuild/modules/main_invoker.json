@@ -1,0 +1,25 @@
+{
+  "exe": "minvmod.exe",
+  "map": "main_invoker.map",
+  "name": "main_invoker",
+  "run": {
+    "command": "minvmod.exe > minv_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "minv_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "main_invoker.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "main_invoker_main.c"
+    }
+  ]
+}

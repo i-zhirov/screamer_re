@@ -1,0 +1,30 @@
+{
+  "exe": "rlmod.exe",
+  "map": "race_loop.map",
+  "name": "race_loop",
+  "run": {
+    "command": "rlmod.exe > rl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_loop.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_loop_main.c"
+    }
+  ]
+}

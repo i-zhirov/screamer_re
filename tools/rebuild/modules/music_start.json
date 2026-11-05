@@ -1,0 +1,36 @@
+{
+  "exe": "msmod.exe",
+  "map": "music_start.map",
+  "name": "music_start",
+  "run": {
+    "command": "msmod.exe > ms_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "ms_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_start.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_start_main.c"
+    }
+  ]
+}

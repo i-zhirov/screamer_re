@@ -1,0 +1,31 @@
+{
+  "exe": "fupmod.exe",
+  "map": "filter_update.map",
+  "name": "filter_update",
+  "run": {
+    "command": "fupmod.exe > fup_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "fup_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "filter_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "filter_update_main.c"
+    }
+  ]
+}

@@ -1,17 +1,48 @@
 {
   "address": "0x4bf23",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS"
+      "text": "fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs"
     }
   ],
+  "module": "dpmi_fill_regs",
   "name": "dpmi_fill_regs",
   "notes": [],
-  "role": "fills a 12-byte real-mode block with ES, CS, SS, DS, FS, and GS",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 40,
+        "bytes_total": 40,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 16,
+        "instructions_total": 16,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf23",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:2555a2205ddaed911bb18f30c7ab15d9dd3634ea4416443ef7d698f0d129f5ed",
+    "source_digest": "sha256:9849138b85472f59ed7e0aadf2590962f79a3431cdf78de98d1c7ed80abb83dd",
+    "tool": "run.py"
+  },
+  "role": "fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs",
   "section": "The resource layer",
   "size": 40,
-  "status": "named"
+  "status": "verified",
+  "symbol": "dpmi_fill_regs_"
 }

@@ -1,0 +1,24 @@
+{
+  "exe": "dprmod.exe",
+  "map": "dpmi_fill_regs.map",
+  "name": "dpmi_fill_regs",
+  "run": {
+    "command": "dprmod.exe > dpr_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "dpr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "dpmi_fill_regs.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_fill_regs_main.c"
+    }
+  ]
+}

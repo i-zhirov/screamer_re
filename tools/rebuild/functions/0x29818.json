@@ -1,17 +1,52 @@
 {
   "address": "0x29818",
-  "checks": [],
-  "confidence": "derived",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present`"
+      "text": "ramps the fade value toward 1.0 or down to 0.0 by the frame delta and calls `video_present`"
+    },
+    {
+      "kind": "note",
+      "text": "the body at `0x29818` holds 48 instructions and 154 bytes: the five register saves, the frame, the state read from `DAT_0011fac8`, the fade-in path, the fade-out path, the `video_present` call at `0x27ec8`, and the `ret 4` epilogue. State 0 does nothing. State 1 adds `DAT_0018e08 * delta` and clamps at 1.0. The other states subtract the same product and clamp at 0.0. A clamp clears the state. The active paths call `video_present(fade, 0)`."
     }
   ],
+  "module": "fade_update",
   "name": "fade_update",
   "notes": [],
-  "role": "ramps `DAT_0011d224` toward 1.0 or down to 0.0 by the frame delta and calls `video_present`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 142,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29818",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:e012a0b511c52bbb2900f09117b42da939a46ae849a8ba61c08550f852ccb5e8",
+    "source_digest": "sha256:5e155706f8840480aedfa520bdc363d52794c2de230a53bc81591afa04816381",
+    "tool": "run.py"
+  },
+  "role": "ramps the fade value toward 1.0 or down to 0.0 by the frame delta and passes it to video_present",
   "section": "race_frame callees",
   "size": 156,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "fade_update_"
 }

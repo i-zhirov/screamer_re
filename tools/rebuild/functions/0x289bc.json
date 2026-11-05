@@ -1,17 +1,48 @@
 {
   "address": "0x289bc",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4"
+      "text": "the original at 0x289bc holds 117 instructions and 415 bytes up to the ret at 0x28b5a. The first loop walks the signed source DAT_00102108 and stops at the first negative entry. A source entry with the value 0 or with a clear byte at DAT_00100002[i] clears the flag DAT_00120884[i] and moves the value into the queue DAT_0012082c through the count DAT_0012087c. The queue write also clears the next slot. A source entry above 0 with a set byte at DAT_00100002[i] sets the flag to 1 and waits. The count stops at 4, so the queue holds five entries. The second loop walks the nine 0x18-byte records at DAT_00102e04 with the five-byte key at +0, the value pointer at +0xc, the value at +0x10, and the xor flag at +0x14. It compares the low byte of each of the five queue entries and stops at a zero queue entry without a mismatch. It runs the record on a full match with a store or an xor through the pointer. It calls table_lookup at 0x1f718 with 8 and clears the count and the first queue entry. It clears the queue when all nine records mismatch."
     }
   ],
+  "module": "overlay_queue_update",
   "name": "overlay_queue_update",
   "notes": [],
-  "role": "walks `DAT_00102108`, moves the entries into `DAT_0012082c` and `DAT_00120830` with the index `DAT_0012087c` bounded at 4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 272,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 86,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x289bc",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:deb8aaa4969897377148499cfaa6f44cd4b5dd6f793f2bf1ef20d301554c0288",
+    "source_digest": "sha256:b7c69f701e0abc8857814a710dc330e83c72fdef9a861930a81f0c2a8db573b1",
+    "tool": "run.py"
+  },
+  "role": "moves the gated source entries into the five-slot overlay queue and runs the matching table record",
   "section": "overlay_dispatch callees",
   "size": 416,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "overlay_queue_update_"
 }

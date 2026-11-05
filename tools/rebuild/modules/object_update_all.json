@@ -1,0 +1,29 @@
+{
+  "exe": "oupdmod.exe",
+  "map": "object_update_all.map",
+  "name": "object_update_all",
+  "run": {
+    "command": "oupdmod.exe > oupd_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "oupd_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_update_all.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_update_all_main.c"
+    }
+  ]
+}

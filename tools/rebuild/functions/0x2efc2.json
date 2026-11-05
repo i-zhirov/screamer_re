@@ -1,17 +1,52 @@
 {
   "address": "0x2efc2",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "reads the current record and caches it through `0x2f062`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x2efc2` holds 56 instructions and 160 bytes: it compares the count at resource + 0x04 with the limit at resource + 0x08, sets the status at + 0x0c to 2 and copies the name to resource + 0x10 through `sprintf` at `0x4d32c` when the count equals the limit, selects the record at `*resource + count * 0x1c`, calls `memory_alloc_small` at `0x2f172` with the size and the record cell at + 0x10, clears the flag at + 0x18, and calls the cache routine at `0x2f062` with the resource, the record, the allocation result, the name, and the size"
     }
   ],
+  "module": "resource_read",
   "name": "resource_read",
   "notes": [],
-  "role": "reads the current record and caches it through `0x2f062`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 104,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 41,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2efc2",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:afc2c0e2ff4baaa0067416922fcdb6ca6dc590f40c0c1fea06ed361dfd6c4eb6",
+    "source_digest": "sha256:f9bf1cd1b3b342afead043781dd28eb8d4da700b4b1e5e051445d4b4c3f35415",
+    "tool": "run.py"
+  },
+  "role": "selects the next 28-byte record, allocates the requested block, and caches the record through 0x2f062; returns 0 when the table is full",
   "section": "The resource layer",
   "size": 160,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "resource_read_"
 }

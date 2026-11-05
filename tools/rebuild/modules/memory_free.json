@@ -1,0 +1,28 @@
+{
+  "exe": "mfmod.exe",
+  "map": "memory_free.map",
+  "name": "memory_free",
+  "run": {
+    "command": "mfmod.exe > mf_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "mf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_free.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_free_main.c"
+    }
+  ]
+}

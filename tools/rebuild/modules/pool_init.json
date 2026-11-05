@@ -1,0 +1,29 @@
+{
+  "exe": "pimod.exe",
+  "map": "pool_init.map",
+  "name": "pool_init",
+  "run": {
+    "command": "pimod.exe > pi_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "pi_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "pool_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "pool_init_main.c"
+    }
+  ]
+}

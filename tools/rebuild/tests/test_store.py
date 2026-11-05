@@ -612,6 +612,58 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(set(self.full_module()), set(schema["properties"]))
         self.assertEqual(set(schema["required"]), set(self.module_record()))
 
+    def test_is_dos_83_name(self) -> None:
+        self.assertTrue(store.is_dos_83("fp_out.txt"))
+        self.assertTrue(store.is_dos_83("out"))
+        self.assertFalse(store.is_dos_83("dpiex_out.txt"))
+        self.assertFalse(store.is_dos_83("a.b.c"))
+        self.assertFalse(store.is_dos_83("bad name.txt"))
+
+    def test_validate_module_rejects_long_output(self) -> None:
+        module = self.full_module()
+        module["run"]["output"] = "dpiex_out.txt"
+        module["run"]["command"] = "free.exe > dpiex_out.txt"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("8.3" in violation for violation in violations))
+
+    def test_validate_module_rejects_mismatched_redirect(self) -> None:
+        module = self.full_module()
+        module["run"]["command"] = "free.exe > other.txt"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("writes" in violation for violation in violations))
+
+    def test_validate_module_rejects_missing_redirect(self) -> None:
+        module = self.full_module()
+        module["run"]["command"] = "free.exe"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("redirect" in violation for violation in violations))
+
+    def test_module_name_collisions(self) -> None:
+        first = self.full_module()
+        first["name"] = "first"
+        first["exe"] = "same.exe"
+        first["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("first", first)
+        second = self.full_module()
+        second["name"] = "second"
+        second["exe"] = "same.exe"
+        second["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("second", second)
+        violations = store.module_name_violations()
+        self.assertTrue(any("executable" in violation for violation in violations))
+        self.assertTrue(any("output" in violation for violation in violations))
+
     def test_seed_diff_added_and_lost(self) -> None:
         candidates = [0x300EC]
         records = {
@@ -933,6 +985,21 @@ class ExtentTestCase(unittest.TestCase):
         self.assertEqual(store.load_record(0x100)["size"], 16)
         self.assertEqual(store.load_record(0x110)["size"], 16)
         self.assertNotIn("size", store.load_record(0x120))
+
+
+class ShippedModuleTestCase(unittest.TestCase):
+    """Check the shipped recipes against the DOS 8.3 output rule."""
+
+    def test_every_shipped_module_has_an_8_3_output(self) -> None:
+        modules = store.REBUILD_DIR / "modules"
+        for path in sorted(modules.glob("*.json")):
+            record = json.loads(path.read_text())
+            run = record.get("run")
+            if run is None:
+                continue
+            self.assertTrue(store.is_dos_83(run["output"]), path.name)
+            target = run["command"].split(">", 1)[1].strip().split()[0]
+            self.assertEqual(target.lower(), run["output"].lower(), path.name)
 
 
 if __name__ == "__main__":

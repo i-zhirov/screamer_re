@@ -1,9 +1,70 @@
 {
   "address": "0x17d14",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 290,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_car_skid_update module at 0x17d14"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x17d14 holds 290 instructions and 1078 bytes up to the ret at 0x18149, so the record keeps the 1080-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller is the effect group at 0x15bac, and the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call that group on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the slip from the speed +0x50c, the yaw step +0x2f4, the frame delta DAT_00118e04, and the table indices +0x1c0, +0x268, +0x214, and +0x2bc; it stores the shake terms +0x4f0, +0x4f4, +0x500, and +0x508, which player_car_view_update applies to the view"
+    },
+    {
+      "kind": "note",
+      "text": "the filtered slip +0x128 gates the effect: above 0.23 it allocates through table_lookup at 0x1f718 and starts the four slots through 0x19828; at or below 0.23 it releases through 0x1f880 when the state +0x148 is below 3; the shake terms and the effect gate support the name player_car_skid_update"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the deceleration path, the large and small slip, the two amplitude clamps, the gate above the limit, the two early flags, and the input bit 0x40; the behavior check passes"
+    }
+  ],
+  "module": "player_car_skid_update",
+  "name": "player_car_skid_update",
   "notes": [],
   "object_offset": "0x7d14",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 63,
+        "bytes_total": 1075,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 40,
+        "instructions_total": 290,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x17d14",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:20e12795eeee3def2e24e5ec2e4ca92996e6dd49531174139cee36fe0e041890",
+    "source_digest": "sha256:1e41763b614e788253078b06d2c8e53204c0d0df0b04010b565e68fd994b8de9",
+    "tool": "run.py"
+  },
+  "role": "forms the slip, the shake terms, and the effect gate of the player car, and starts or releases the effect objects",
+  "section": "The vehicle state chain",
   "size": 1080,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_skid_update_"
 }

@@ -1,9 +1,74 @@
 {
   "address": "0x1a930",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 396,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x1a930 holds 396 instructions and 1425 bytes up to the ret at 0x1aec0, so the record keeps the 1428-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct callers are player_view_setup at 0x19ae8, which calls this function at 0x19c76 and 0x19e3f, and the camera group at 0x1aec4, which calls it at 0x1aefc on every 0x590-byte car record at DAT_00110ab8 and then copies the selected view block at +0x4f8; the function moves the view along the route toward the nearest node, so the module names it car_camera"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x38-byte route records below the pointer DAT_0010f90c, with the count at +0x1c and the node position at +0x04 (x), +0x08 (z), and +0x0c (y); it picks the nearest nonzero horizontal distance, forms the yaw at +0x52c and the pitch at +0x528 with the constants 2pi at DAT_0010092c, -pi/2 at DAT_00100930, and -1500.0 at DAT_00100934, and sets the view flag at +0x568 from the absolute height modulo 10 and the saved distance at +0x55c"
+    },
+    {
+      "kind": "note",
+      "text": "the calls are asin at 0xc5e42, sqrt at 0x22bec, sin at 0x4da72, cos at 0x4da66, player_view_setup at 0x19ae8, and the render path at 0x19f00"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1a930 --count 396 --rebuilt work/rebuild/carcam.exe --rebuilt-map work/rebuild/car_camera.map --rebuilt-symbol car_camera_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module car_camera"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_camera module at 0x1a930"
+    }
+  ],
+  "module": "car_camera",
+  "name": "car_camera",
   "notes": [],
   "object_offset": "0xa930",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 71,
+        "bytes_total": 1383,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 67,
+        "instructions_total": 396,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1a930",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:57880b60218bba258c1831a3a44657e54fad8db420d84a9b60f050d39106bfe2",
+    "source_digest": "sha256:44bf187cb42d5f8ee338d24730f88bcfc9739152f37b9782347156554312dd79",
+    "tool": "run.py"
+  },
+  "role": "computes the yaw and the pitch from the nearest route node, selects the view distance flag from the height, moves the view along the route, and starts the view setup or the render path",
+  "section": "player_view_setup callees",
   "size": 1428,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_camera_"
 }

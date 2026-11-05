@@ -1,0 +1,33 @@
+{
+  "exe": "vpmod.exe",
+  "map": "video_present.map",
+  "name": "video_present",
+  "run": {
+    "command": "vpmod.exe > vp_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "vp_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_present.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_present_main.c"
+    }
+  ]
+}

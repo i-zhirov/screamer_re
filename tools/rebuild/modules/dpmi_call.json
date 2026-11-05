@@ -1,0 +1,24 @@
+{
+  "exe": "dpcmodex.exe",
+  "map": "dpmi_call.map",
+  "name": "dpmi_call",
+  "run": {
+    "command": "dpcmodex.exe > dpc_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "dpc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "dpmi_call.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_call_main.c"
+    }
+  ]
+}

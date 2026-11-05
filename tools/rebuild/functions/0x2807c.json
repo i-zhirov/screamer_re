@@ -1,17 +1,64 @@
 {
   "address": "0x2807c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2807c holds 48 instructions and 189 bytes: it copies 0x3e800 bytes from DAT_0011fad0 to DAT_00121528 through memcpy at 0x8c150, runs video_block_swap_a at 0x1075f and video_block_swap_b at 0x107a1 behind the flags 0x10 and 0x20 of DAT_0011d274, calls overlay_dispatch at 0x28160, race_heading_update at 0x29610, race_state_update at 0x29564, camera_update at 0x8ac78 with 0x109a0, and sound_update at 0x81a70 with 0x6350, selects the overlay for the state DAT_001203b8 (0 -> 0x2e0b4, 1 -> none, 2 -> 0x2e21c, 3 -> 0x2e58c, 4 -> 0x2e724), calls fade_update at 0x29818 with the float DAT_00120378, and sets DAT_0011d234 to 1 when DAT_0011d24c is above the constant at 0xee0 and DAT_0011fac4 is 0"
+    },
+    {
+      "kind": "note",
+      "text": "the case targets come from the compiler jump table at cs:[eax*4 + 0x18068]: entry 0 is 0x180ea, entry 1 is 0x18104, entry 2 is 0x180f1, entry 3 is 0x180f8, and entry 4 is 0x180ff"
+    },
+    {
+      "kind": "note",
+      "text": "the behavior check passes: the harness covers the state 5 skip path, the state 0 path with the swap A, the state 2 path with the swap B, the state 3 path with both swaps, the state 4 path, the fade argument, and the frame-flag conditions"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check stays open: the rebuilt module uses an if chain instead of the compiler jump table and saves the registers in another order, so 10 of 48 instructions and 23 of 189 bytes match"
     }
   ],
+  "module": "race_frame",
   "name": "race_frame",
   "notes": [],
-  "role": "blits the video buffer, reads the input bits, and dispatches on the game state `DAT_001203b8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 23,
+        "bytes_total": 189,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 48,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2807c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:f33e7e95c1e5a95400b64552dc2dbef819d52f38fb00f4a9b67a2fd44c82e35b",
+    "source_digest": "sha256:3ff9172ce78423a8f44fef82789c1bc6ccd54b9133c466faab2e232f960373b3",
+    "tool": "run.py"
+  },
+  "role": "copies the back buffer to the screen buffer, runs the frame updates, selects the race overlay, advances the fade, and sets the frame flag",
   "section": "frame_update callees",
   "size": 228,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_frame_"
 }

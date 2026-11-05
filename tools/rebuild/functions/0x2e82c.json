@@ -1,9 +1,69 @@
 {
   "address": "0x2e82c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The race_record_save module at 0x2e82c"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2e82c holds 347 instructions and 1185 bytes; the record keeps the 1228-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the three callers at 0x1fecf, 0x29022, and 0x2a2a8 pass the selected track index from DAT_001203bc; the callers sit in the loading-screen, net-race-screen, and race-menu paths, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function inserts the lap time at DAT_0011d26c into the five slots of the 0x50-byte lap records at DAT_00120430 and, when DAT_0011d2b0 is 2, the race time at DAT_0011d268 into the race records at DAT_00120610; both tables keep the entries in ascending time order, and the screen at 0x2d4b8 reads the same two tables"
+    },
+    {
+      "kind": "note",
+      "text": "a successful race insert builds %s\\replays\\temp.rpl, checks that the file exists, selects the first free replay number from the +0x28 flags, builds %s\\replays\\REPLAY%d%d.RPL from the track index and the number, deletes the target, and renames the temporary file, so the module names the function race_record_save"
+    },
+    {
+      "kind": "note",
+      "text": "the input word DAT_00118e1c gates the save: the bits 0x1020 return before any table write"
+    }
+  ],
+  "module": "race_record_save",
+  "name": "race_record_save",
   "notes": [],
   "object_offset": "0x1e82c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 494,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 33,
+        "instructions_total": 159,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e82c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:ee10e9d0e7b0738e379cfe550957cb96bc15cd7dc472574e5cec38d5a227b8fd",
+    "source_digest": "sha256:26f5db813b670b30a691a6e50bcae9b999e581b13790427d4e34c0ea832026e1",
+    "tool": "run.py"
+  },
+  "role": "saves the current lap and race times into the two best-time tables and renames the replay file into the next free slot",
+  "section": "race_frame callees",
   "size": 1228,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_record_save_"
 }

@@ -1,17 +1,48 @@
 {
   "address": "0x4c38d",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "frees the buffers and closes the handle; the counterpart of `fopen`"
+      "text": "the original at `0x4c38d` holds 34 instructions and 89 bytes: it frees the buffer at `stream + 0x1c` through the run-time `free` at `0xd2008`, frees the buffer at `stream + 0xb0` through the wrapper `free` at `0x300ec` when the flag at `stream + 0x10` is set, closes the handle at `stream + 0x00` through `0xc6245`, and returns 0"
     }
   ],
+  "module": "stream_close",
   "name": "stream_close",
   "notes": [],
-  "role": "frees the buffers and closes the handle; the counterpart of `fopen`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 50,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 19,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c38d",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:dad44179642948973334c2cd813e798c60bc816179158209a1a9239115081c4c",
+    "source_digest": "sha256:51f8b4b64921490a5098bb1dec4fbcb7b48c91234c22dc0eb56f7ab6620f53aa",
+    "tool": "run.py"
+  },
+  "role": "releases the two stream buffers, closes the stream handle, and returns 0",
   "section": "Resource loader",
   "size": 89,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "stream_close_"
 }

@@ -1,9 +1,73 @@
 {
   "address": "0x2cf68",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x2cf68 holds 370 instructions and 1357 bytes up to the ret at 0x2d4b4, so the record keeps the 1360-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x295f1 is the state dispatcher race_state_update at 0x29564 case 5; the dispatcher is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the selected record DAT_001203dc picks one 0x2c-byte record from the table at object-3 offset 0x22bc; the table holds the background names champ0 through champ7 at +0x18, and the loader at 0x2c7a8 reads champ<N>H.pcx for the state 5 screen"
+    },
+    {
+      "kind": "note",
+      "text": "the text list DAT_00120030 is the champ list that menu_space_init loads at 0x29d08; the record type 3 branch draws the four headers, six rows with the car number, the race time, and the points, sums the points, and draws the two summary lines, so the module names the function championship_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the record type 0 branch draws the centred champ list group and calls net_race_screen when the frame timer DAT_0011d24c exceeds 10.0; the footer panel appears when the low seven bits of DAT_000007fd are below 0x48"
+    },
+    {
+      "kind": "finding",
+      "text": "The championship_screen module at 0x2cf68"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2cf68 --count 370"
+    }
+  ],
+  "module": "championship_screen",
+  "name": "championship_screen",
   "notes": [],
   "object_offset": "0x1cf68",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 77,
+        "bytes_total": 1122,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 78,
+        "instructions_total": 321,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2cf68",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:da4854b7f51602c9f57518f07e3323cc54fe3bdebd90bb2d389f38eefe370cdc",
+    "source_digest": "sha256:599117727b29db7cf032fce9280a97a3964bc0d8dfb8833bc23bd594ab483cb3",
+    "tool": "run.py"
+  },
+  "role": "draws the championship standings table or the centred champ list, sums the points, and shows the footer panel",
+  "section": "race_frame callees",
   "size": 1360,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "championship_screen_"
 }

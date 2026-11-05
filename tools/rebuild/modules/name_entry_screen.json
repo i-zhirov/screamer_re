@@ -1,0 +1,35 @@
+{
+  "exe": "nameent.exe",
+  "map": "name_entry_screen.map",
+  "name": "name_entry_screen",
+  "run": {
+    "command": "nameent.exe > nameent.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "nameent.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "name_entry_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_screen_main.c"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "exe": "rdlmod.exe",
+  "map": "race_data_load.map",
+  "name": "race_data_load",
+  "run": {
+    "command": "rdlmod.exe > rdl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rdl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_data_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_data_load_main.c"
+    }
+  ]
+}

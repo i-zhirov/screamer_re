@@ -1,0 +1,42 @@
+{
+  "exe": "neltupd.exe",
+  "map": "name_entry_letter_update.map",
+  "name": "name_entry_letter_update",
+  "run": {
+    "command": "neltupd.exe > nelt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "b",
+      "D"
+    ],
+    "output": "nelt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_letter_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "name_entry_letter_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_letter_update_main.c"
+    }
+  ]
+}

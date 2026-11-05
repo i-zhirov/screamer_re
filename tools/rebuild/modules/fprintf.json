@@ -1,0 +1,24 @@
+{
+  "exe": "fprfmod.exe",
+  "map": "fprintf.map",
+  "name": "fprintf",
+  "run": {
+    "command": "fprfmod.exe > fprf_out.txt",
+    "expect": [
+      "F",
+      "4"
+    ],
+    "output": "fprf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "fprintf.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "fprintf_main.c"
+    }
+  ]
+}

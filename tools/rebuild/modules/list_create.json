@@ -1,0 +1,28 @@
+{
+  "exe": "lcrmod.exe",
+  "map": "list_create.map",
+  "name": "list_create",
+  "run": {
+    "command": "lcrmod.exe > lcr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "lcr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "list_create.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "list_create_main.c"
+    }
+  ]
+}

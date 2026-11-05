@@ -1,0 +1,28 @@
+{
+  "exe": "stsmod.exe",
+  "map": "stream_status.map",
+  "name": "stream_status",
+  "run": {
+    "command": "stsmod.exe > sts_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "sts_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_status.c",
+      "flags": [
+        "-of+",
+        "-od"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_status_main.c"
+    }
+  ]
+}

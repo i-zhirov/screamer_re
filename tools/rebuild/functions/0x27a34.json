@@ -1,18 +1,49 @@
 {
   "address": "0x27a34",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "gated on the session state `DAT_0011ce44`"
+      "text": "gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set"
     }
   ],
+  "module": "hud_update",
   "name": "hud_update",
   "notes": [],
   "object_offset": "0x17a34",
-  "role": "gated on the session state `DAT_0011ce44`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 38,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27a34",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:c18aac045b4043a840aa40d4bf2f8fdcc6669b7c6e64da414071cdac1328bbc8",
+    "source_digest": "sha256:069e78120e10d0bffad327b762e1d4643167fdcee2b00f9779cf4547aeacc404",
+    "tool": "run.py"
+  },
+  "role": "gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set",
   "section": "object_update_all callees",
   "size": 40,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "hud_update_"
 }

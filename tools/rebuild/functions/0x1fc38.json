@@ -1,17 +1,64 @@
 {
   "address": "0x1fc38",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1fc38 holds 76 instructions and 299 bytes: the two register saves, the frame with the 0xc-byte local area, the wait on the counter DAT_000007f9, the raw delta from the counter and the double 0.01 at 0x100c58, the smooth step with the float constants 9.0 at 0x100c60 and 10.0 at 0x100c64, the clamps at the doubles 0.2 at 0x100c68 and 0.02 at 0x100c70, the frame rate from the double 0.3 at 0x100c78 and the float 65535.0 at 0x100c84, the two truncating calls at 0x4d9f4, the filter table pointer DAT_0010cf08, and the phase word DAT_0002153c"
+    },
+    {
+      "kind": "note",
+      "text": "the module waits until the counter reaches 2, clears it, stores the old delta in DAT_00118e14, forms the raw delta counter * 0.01 in DAT_00118e08 and the smooth delta (old * 9.0 + raw) / 10.0 in DAT_00118e04, accumulates the raw delta in DAT_00118e10, clamps the smooth delta between 0.02 and 0.2, sets the filter table pointer to 0x80e8 + 400 * rate where rate is the truncated 1 / delta, advances the phase DAT_00118e0c by delta * 0.3 with a wrap at 1.0, and stores the phase scaled by 65535 in DAT_0002153c"
+    },
+    {
+      "kind": "note",
+      "text": "the harness prints the markers 0 through 5 and D for the plain delta, the upper clamp with the truncated frame rate 4, the lower clamp with the frame rate 50, the phase wrap from 1.0, a phase step below 1.0, and a phase step across 1.0; the behavior check passes, the rebuild holds 62 instructions and 278 bytes, and the identity check stays open at 27 of 62 instructions and 24 of 278 bytes because the V2 toolchain saves the frame pointer first and uses another instruction order"
+    },
+    {
+      "kind": "note",
+      "text": "the two integer conversions use the local truncating __CHP stub in frame_timer_fpu.asm, because the shared fpu_stub.asm leaves round-to-nearest and the original helper at 0x4d9f4 truncates toward zero"
     }
   ],
+  "module": "frame_timer",
   "name": "frame_timer",
   "notes": [],
-  "role": "waits for the frame counter, computes the frame delta, and clamps it between 0.2 and 0.02",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 278,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 62,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1fc38",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:b516bd9653f75efbf2b5f355fc6a8cdce49558090fd8eb437118c90f029bd134",
+    "source_digest": "sha256:e0771ecdba02cea8672501da3d37d76573262c1d71cdfa945cf2ac6f32e8d9ae",
+    "tool": "run.py"
+  },
+  "role": "waits for the frame counter, smooths and clamps the frame delta, selects the filter table block, and advances the phase word",
   "section": "race_loop callees",
   "size": 312,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "frame_timer_"
 }

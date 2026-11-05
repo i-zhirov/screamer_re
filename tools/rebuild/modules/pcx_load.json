@@ -1,0 +1,30 @@
+{
+  "exe": "pcxmod.exe",
+  "map": "pcx_load.map",
+  "name": "pcx_load",
+  "run": {
+    "command": "pcxmod.exe > pcx_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "pcx_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "pcx_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "pcx_load_main.c"
+    }
+  ]
+}

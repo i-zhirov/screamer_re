@@ -1,0 +1,27 @@
+{
+  "exe": "vfmod.exe",
+  "map": "video_fill.map",
+  "name": "video_fill",
+  "run": {
+    "command": "vfmod.exe > vf_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "vf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_fill.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_fill_main.c"
+    }
+  ]
+}

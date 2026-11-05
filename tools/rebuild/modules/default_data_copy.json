@@ -1,0 +1,24 @@
+{
+  "exe": "ddcmod.exe",
+  "map": "default_data_copy.map",
+  "name": "default_data_copy",
+  "run": {
+    "command": "ddcmod.exe > ddc_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "ddc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "default_data_copy.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "default_data_copy_main.c"
+    }
+  ]
+}

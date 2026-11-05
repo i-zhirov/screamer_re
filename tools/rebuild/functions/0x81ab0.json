@@ -1,17 +1,48 @@
 {
   "address": "0x81ab0",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "a sound library update in the `0x8xxxx` region"
+      "text": "the original at 0x81ab0 holds 51 instructions and 235 bytes up to the ret at 0x81b9a: it saves all registers and the four segment registers, stores the driver pointer 0x6350 in the global 0x7451c, calls the two setup helpers at 0x83ca8 and 0x83354, joins the shared body at 0x81ac6, calls the source update at 0x8a958, returns when the active count 0x72488 is zero or negative, calls the mix prepare at 0x8aa60, returns when the voice count 0x7aa9c is zero or negative, mixes the voices through 0x83500, sets the song pointer 0x7251c and the frame repeat 0x72c10, and runs the per-frame loop with 0x8af08, 0x8a8d8, 0x835c0, 0x836ac, and 0x843a8 until the frame repeat reaches zero; the neighbour sound_update at 0x81a70 joins the same body at 0x81ac6"
     }
   ],
+  "module": "sound_effects_update",
   "name": "sound_effects_update",
   "notes": [],
-  "role": "a sound library update in the `0x8xxxx` region",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 198,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 47,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81ab0",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:1fb999017491609796a373cbe2e40d3012d3cb5f15bf39f0465be6557e2d700e",
+    "source_digest": "sha256:c4ef3ad89916386a603e934ce9ee9be42e02845c6bab1d4b710354c2a125293b",
+    "tool": "run.py"
+  },
+  "role": "runs the sound service and the per-frame voice and event loop when the active count and the voice count are above zero",
   "section": "object_update_all callees",
   "size": 37320,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "sound_effects_update_"
 }

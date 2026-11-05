@@ -1,17 +1,48 @@
 {
   "address": "0x262a8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "fills an HMI request block and calls the sound driver"
+      "text": "builds the HMI request block at `DAT_001166a4` from the argument and the state words, and calls the sound driver when the driver state is set"
     }
   ],
+  "module": "sound_driver_set",
   "name": "sound_driver_set",
   "notes": [],
-  "role": "fills an HMI request block and calls the sound driver",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 60,
+        "bytes_total": 79,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 24,
+        "instructions_total": 24,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x262a8",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:5887ad28c9bb757f0726f6162c8776a3499ab7ad70c8796892d8150880808483",
+    "source_digest": "sha256:5bc55e46b469b814c35bd483495cc90f2510f221f348894be9c22572421118ae",
+    "tool": "run.py"
+  },
+  "role": "builds the HMI request block at `DAT_001166a4` from the argument and the state words, and calls the sound driver when the driver state is set",
   "section": "Subsystem initialisation",
   "size": 416,
-  "status": "named"
+  "status": "verified",
+  "symbol": "sound_driver_set_"
 }

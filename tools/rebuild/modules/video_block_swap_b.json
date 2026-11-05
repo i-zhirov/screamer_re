@@ -1,0 +1,24 @@
+{
+  "exe": "vbsbmod.exe",
+  "map": "video_block_swap_b.map",
+  "name": "video_block_swap_b",
+  "run": {
+    "command": "vbsbmod.exe > vbsb_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "vbsb_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "video_block_swap_b.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_block_swap_b_main.c"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "exe": "rradmod.exe",
+  "map": "race_radar.map",
+  "name": "race_radar",
+  "run": {
+    "command": "rradmod.exe > rrad_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "rrad_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_radar.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_radar_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_radar_main.c"
+    }
+  ]
+}

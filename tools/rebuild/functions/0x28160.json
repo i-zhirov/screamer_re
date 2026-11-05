@@ -1,17 +1,52 @@
 {
   "address": "0x28160",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "reads the option flags in `DAT_000f0002` and calls the overlay for the set flag"
+    },
+    {
+      "kind": "note",
+      "text": "the first-return body at `0x28160` holds 42 instructions and 152 bytes: the option-flag test at `DAT_000f0002`, the mode check against `0x20`, the state switch through the compiler table at `cs:[eax*4 + 0x1813c]`, the case 0 stack pop, and the epilogue; the case targets are `0x281ab`, `0x281f8`, `0x282a2`, `0x282e6`, `0x28358`, `0x2837d`, and `0x283da`, and the full function extends to `0x289bc` (2140 bytes). The rebuild keeps the dispatcher, implements case 0, and represents the other case bodies as step functions"
     }
   ],
+  "module": "overlay_dispatch",
   "name": "overlay_dispatch",
   "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 152,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 42,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x28160",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:92284c9c8ae9ff8e227878a050cabb3a0a1e1a7cecf718c85a7b0e159a82b01e",
+    "source_digest": "sha256:bc26adb41a3e771b07d5704c300be9d61dc42c76458c071b91372889bb5dad47",
+    "tool": "run.py"
+  },
   "role": "reads the option flags in `DAT_000f0002` and calls the overlay for the set flag",
   "section": "race_frame callees",
   "size": 2140,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "overlay_dispatch_"
 }

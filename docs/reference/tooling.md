@@ -228,6 +228,23 @@ menu space init loads the menu data first.  The sample loads are the `SFXSBASE`
 records and the two `MAP1` records, 14 members from `skidfx.RAW` to `airplane.RAW`.
 The five unlisted members `CRY.RAW`, `TOUR0.RAW`, `TOUR1.RAW`, `TOUR2.RAW`, and
 `TRAIN.RAW` do not appear, so the run-time trace confirms the static conclusion.
+
+The DOSBox-X control connection can close or time out when the game exits, after the
+member list is complete.  The tool ends the run with the collected names when the
+close or timeout follows the first member open; either before the first member open
+is an error.  A close during the frame or game-copy restore keeps the collected
+names, and the game copy is restored even when the child close raises.  A
+non-connection exception from the restore still propagates; only the
+control-connection errors are swallowed.  A generic `OSError` from the child
+close propagates after the game copy is restored, and an `OSError` from the
+game-copy restore propagates and leaves the copy patched.  A patch-write
+failure restores the full backup before the error propagates, and a backup read
+failure leaves the copy untouched.  The backup restore and the final restore
+retry once after a partial write, so a transient partial failure still ends with
+the original bytes.  The pipeline caps the probe at the 55-open demo window, and
+it repeats the probe once when the connection closes or times out before the
+first member.
+
 The module base varies between runs, so the hook recognizes the stop by the patched
 bytes and not by the module address.  The tool restores the game copy at the end of
 every run.
@@ -318,8 +335,268 @@ The files:
 | `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
-| `modules/*.json` | the eleven module records: the sources, the compiler, the flags, the `period_flags`, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the optional implementation marker, and the extent guard |
+| `frame_step.c` | the rebuilt `frame_step` module: the three calls in call order |
+| `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
+| `video_fill.c` | the rebuilt `video_fill` module, the active C build with `-of+`: the size pair 480 and 400 and the video buffer pointer |
+| `video_fill.asm` | the alternative assembly build of `video_fill`, kept alongside for the later Watcom 10.x build; it matches the original with only the link-time addresses |
+| `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
+| `memset.asm` | the rebuilt `memset` module, byte-identical to the original: the dword filler |
+| `memset_main.c` | the `memset` test harness: the filled buffer check |
+| `dpmi_fill_regs.asm` | the rebuilt `dpmi_fill_regs` module, byte-identical: the six segment words |
+| `dpmi_fill_regs_main.c` | the `dpmi_fill_regs` test harness: the segment set check |
+| `memmove.asm` | the rebuilt `memmove` module, byte-identical: the dword and byte copy |
+| `memmove_main.c` | the `memmove` test harness: the copied buffer check |
+| `fp_helper.asm` | the rebuilt `fp_helper` module, byte-identical: the FPU rounding helper |
+| `fp_helper_main.c` | the `fp_helper` test harness: the run marker |
+| `vesa_set_mode.asm` | the rebuilt `vesa_set_mode` module: the VBE mode set through the real-mode interrupt path |
+| `vesa_set_mode_main.c` | the `vesa_set_mode` test harness: the data area and the run marker |
+| `vesa_alloc.asm` | the `vesa_set_mode` harness allocator stub: the info block in `edi` |
+| `memset_runtime.asm` | the rebuilt run-time `memset` module: the value replication and the core call |
+| `memset_runtime_main.c` | the `memset_runtime` test harness: the core stub and the buffer check |
+| `dpmi_call.asm` | the rebuilt `dpmi_call` module: the four arguments and the DPMI entry call |
+| `dpmi_call_main.c` | the `dpmi_call` test harness: the DPMI entry stub and the result check |
+| `fprintf.c` | the rebuilt `fprintf` module, after the run-time file `bld/clib/streamio/c/fprintf.c` |
+| `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
+| `fprtf.c` | the rebuilt `__fprtf` run-time stream formatter: the file flags, the buffer allocation, the format call, and the restore |
+| `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
+| `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
+| `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
+| `hud_update.c` | the rebuilt `hud_update` module: the three overlay calls, gated on the session state |
+| `hud_update_main.c` | the `hud_update` test harness: the session state and the overlay stubs |
+| `stream_status.c` | the rebuilt `stream_status` module: the word at `stream + 0x70` |
+| `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
+| `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
+| `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
+| `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
+| `music_bank_reset.c` | the rebuilt `music_bank_reset` module: the three field stores of the music bank record |
+| `music_bank_reset_main.c` | the `music_bank_reset` test harness: the bank record check |
+| `object_gear_state.c` | the rebuilt `object_gear_state` module: the gear state mapping through an if-else chain |
+| `object_gear_state_main.c` | the `object_gear_state` test harness: the gear state and the field check |
+| `sprintf.c` | the rebuilt `sprintf` module, after the run-time file `bld/clib/streamio/c/sprintf.c` |
+| `sprintf_main.c` | the `sprintf` test harness: the `__iob` table and the format engine stub |
+| `object_prepare.c` | the rebuilt `object_prepare` module: the three preparation calls |
+| `object_prepare_main.c` | the `object_prepare` test harness: the step stubs and the state gate |
+| `filter_update.c` | the rebuilt `filter_update` module: the one-pole filter with the table pointer |
+| `filter_update_main.c` | the `filter_update` test harness: the stack-local filter table and the value check |
+| `video_block_swap_b.asm` | the rebuilt `video_block_swap_b` module: the 200 by 160 dword swap |
+| `video_block_swap_b_main.c` | the `video_block_swap_b` test harness: the video buffer and the swap check |
+| `video_buf_load.c` | the rebuilt `video_buf_load` module: the `VIDEO_BUF` lookup and the two pointer stores |
+| `video_buf_load_main.c` | the `video_buf_load` test harness: the lookup and release stubs |
+| `menu_enter.c` | the rebuilt `menu_enter` module: the saved value and the two state stores |
+| `menu_enter_main.c` | the `menu_enter` test harness: the state words and the frame stub |
+| `player_update.c` | the rebuilt `player_update` module: the five step calls in call order |
+| `player_update_main.c` | the `player_update` test harness: the five step stubs |
+| `race_timeout.c` | the rebuilt `race_timeout` module: the frame delta and the timeout flag |
+| `race_timeout_main.c` | the `race_timeout` test harness: the frame delta stub and the state check |
+| `dpmi_int31_entry.asm` | the rebuilt `dpmi_int31_entry` module: the run-time DPMI INT 31h entry |
+| `dpmi_int31_stub.asm` | the `dpmi_int31_entry` harness dispatcher stub: the register return path |
+| `dpmi_int31_entry_main.c` | the `dpmi_int31_entry` test harness: the register blocks |
+| `object_physics.c` | the rebuilt `object_physics` module: the gated and unconditional physics steps |
+| `object_physics_main.c` | the `object_physics` test harness: the four step stubs and the state gate |
+| `dpmi_real_int.asm` | the rebuilt `dpmi_real_int` module: the real-mode interrupt setup |
+| `dpmi_real_int_main.c` | the `dpmi_real_int` test harness: the state words and the error path stubs |
+| `object_player_input.c` | the rebuilt `object_player_input` module: the gated drive step and the revolution step |
+| `object_player_input_main.c` | the `object_player_input` test harness: the input bits and the step stubs |
+| `stream_layer_init.c` | the rebuilt `stream_layer_init` module: the stream layer setup calls |
+| `stream_layer_init_main.c` | the `stream_layer_init` test harness: the six setup stubs |
+| `sound_update.c` | the rebuilt `sound_update` module: the driver store, the reset call, the active-count clear, and the shared service body entry |
+| `sound_update_main.c` | the `sound_update` test harness: the two globals, the two stubs, the call sequence, and the three paths |
+| `view_move.c` | the rebuilt `view_move` module: the view helper and the position setters |
+| `view_move_main.c` | the `view_move` test harness: the three view stubs |
+| `video_block_swap_a.asm` | the rebuilt `video_block_swap_a` module: the byte-swap and dword swap |
+| `video_block_swap_a_main.c` | the `video_block_swap_a` test harness: the video buffer and the swap check |
+| `timing_update.c` | the rebuilt `timing_update` module: the timing advance and the filter entry |
+| `timing_update_main.c` | the `timing_update` test harness: the replay stubs and the float check |
+| `panel_show.c` | the rebuilt `panel_show` module: the panel state stores |
+| `panel_show_main.c` | the `panel_show` test harness: the panel state and the update stub |
+| `table_lookup.c` | the rebuilt `table_lookup` module: the table entry lookup |
+| `table_lookup_main.c` | the `table_lookup` test harness: the lookup stub and the flag gate |
+| `memory_alloc.c` | the rebuilt `memory_alloc` module: the allocator and the out-of-memory handlers |
+| `memory_alloc_main.c` | the `memory_alloc` test harness: the allocator and the handler stubs |
+| `sound_driver_set.asm` | the rebuilt `sound_driver_set` module: the HMI request block and the driver call |
+| `sound_driver_set_main.c` | the `sound_driver_set` test harness: the request block and the driver stub |
+| `main_invoker.asm` | the rebuilt `main invoker` module: the stack alignment and the startup calls |
+| `main_invoker_main.c` | the `main invoker` test harness: the startup stubs |
+| `graphics_load.c` | the rebuilt `graphics_load` module: the two name copies into the static name buffers |
+| `graphics_load_main.c` | the `graphics_load` test harness: the two name buffers and the two copy checks |
+| `stream_close.c` | the rebuilt `stream_close` module: the two buffer releases and the handle close |
+| `stream_close_main.c` | the `stream_close` test harness: the stream record and the three tracking stubs |
+| `memory_free.c` | the rebuilt `memory_free` module: the DPMI 0x0502 request block and the status |
+| `memory_free_main.c` | the `memory_free` test harness: the two DPMI stubs and the request checks |
+| `panel_draw_centered.c` | the rebuilt `panel_draw_centered` module: the measure, the centering, and the draw |
+| `panel_draw_centered_main.c` | the `panel_draw_centered` test harness: the measure and draw stubs and the three width cases |
+| `runtime_free.asm` | the rebuilt run-time `free` module: the free-list walk and the heap release call |
+| `runtime_free_main.c` | the run-time `free` test harness: the free list and the heap stub with the `[eax] [ebx]` convention |
+| `race_cleanup.c` | the rebuilt `race_cleanup` module: the twelve cleanup calls and the data addresses |
+| `race_cleanup_main.c` | the `race_cleanup` test harness: the twelve stubs and the call-order check |
+| `vis_tab_load.c` | the rebuilt `vis_tab_load` module: the `VIS.TAB` read and the error path |
+| `vis_tab_load_main.c` | the `vis_tab_load` test harness: the file stubs and the two paths |
+| `object_state_save.c` | the rebuilt `object_state_save` module: the four dword copies and the float copy |
+| `object_state_save_main.c` | the `object_state_save` test harness: the object record and the five field checks |
+| `input_poll.c` | the rebuilt `input_poll` module: the three gates, the counter, the read, and the apply |
+| `input_poll_main.c` | the `input_poll` test harness: the five gate cases and the two stubs |
+| `race_loop.c` | the rebuilt `race_loop` module: the race start, the frame loop, and the race end |
+| `race_loop_main.c` | the `race_loop` test harness: the ten stubs and the explicit order checks |
+| `setup_load.c` | the rebuilt `setup_load` module: the `setup.cfg` path, the read, and the error path |
+| `setup_load_main.c` | the `setup_load` test harness: the format stub and the file stubs |
+| `music_play.c` | the rebuilt `music_play` module: the request state machine and the three calls |
+| `music_play_main.c` | the `music_play` test harness: the four state paths and the three stubs |
+| `race_state_begin.c` | the rebuilt `race_state_begin` module: the five constants and the state copies |
+| `race_state_begin_main.c` | the `race_state_begin` test harness: the nine state words and the bit-pattern checks |
+| `net_race_screen.c` | the rebuilt `net_race_screen` dispatcher: the menu tables and the case switch |
+| `net_race_screen_main.c` | the `net_race_screen` test harness: the menu record and the eighteen step stubs |
+| `dos_memory_alloc.c` | the rebuilt `dos_memory_alloc` module: the DPMI 0x0100 request and the selector store |
+| `dos_memory_alloc_main.c` | the `dos_memory_alloc` test harness: the two DPMI stubs and the request capture |
+| `video_present.c` | the rebuilt `video_present` module: the palette scale and offset mapping |
+| `video_present_main.c` | the `video_present` test harness: the palette stub and the three scale cases |
+| `resource_free.c` | the rebuilt `resource_free` module: the record address and the two free paths |
+| `resource_free_main.c` | the `resource_free` test harness: the record table and the two free stubs |
+| `list_create.c` | the rebuilt `list_create` module: the allocation and the list stores |
+| `list_create_main.c` | the `list_create` test harness: the list record and the three stubs |
+| `pool_init.c` | the rebuilt `pool_init` module: the DPMI 0x0500 query and the page conversions |
+| `pool_init_main.c` | the `pool_init` test harness: the pool record and the two DPMI stubs |
+| `race_session_start.c` | the rebuilt `race_session_start` module: the two loads, the mode switch, and the frame setup |
+| `race_session_start_main.c` | the `race_session_start` test harness: the state words and the twenty-four stubs |
+| `music_start.c` | the rebuilt `music_start` module: the status chain, the six messages, and the exit |
+| `music_start_main.c` | the `music_start` test harness: the nine status paths and the two stubs |
+| `race_end.c` | the rebuilt `race_end` module: the thirteen teardown calls, the gated call, and the two copies |
+| `race_end_main.c` | the `race_end` test harness: the thirteen stubs and the two flag paths |
+| `controls_load.c` | the rebuilt `controls_load` module: the controls path, the open, and the three reads |
+| `controls_load_main.c` | the `controls_load` test harness: the format stub, the file stubs, and the two handle paths |
+| `memory_alloc_small.c` | the rebuilt `memory_alloc` module at `0x2f172`: the DPMI 0x0501 request and the address reassembly |
+| `memory_alloc_small_main.c` | the `memory_alloc` test harness at `0x2f172`: the two DPMI stubs and the request checks |
+| `overlay_dispatch.c` | the rebuilt `overlay_dispatch` module: the option flag, the mode, and the state dispatcher |
+| `overlay_dispatch_main.c` | the `overlay_dispatch` test harness: the seven step stubs and the two stack paths |
+| `palette_build.c` | the rebuilt `palette_build` module: the two loops and the power ramp table |
+| `palette_build_main.c` | the `palette_build` test harness: the table, the three constants, and the power stub |
+| `fade_update.c` | the rebuilt `fade_update` module: the state read, the two fade paths, the two clamps, and the `video_present` call |
+| `fade_update_main.c` | the `fade_update` test harness: the state word, the rate, the fade value, and the seven paths |
+| `persptab_load.c` | the rebuilt `persptab_load` module: the open, the resource read, the read, and the cell advance |
+| `persptab_load_main.c` | the `persptab_load` test harness: the file stubs, the resource stub, and the three paths |
+| `config_load.c` | the rebuilt `config_load` module: the `screamer.cfg` open, the three string reads, the two character reads, and the flag store |
+| `config_load_main.c` | the `config_load` test harness: the file stubs and the three paths |
+| `fopen.c` | the rebuilt `fopen` module: the container open, the two string copies, and the member search |
+| `fopen_main.c` | the `fopen` test harness: the stream record, the three stubs, and the three paths |
+| `resource_read.c` | the rebuilt `resource_read` module: the full-table test, the record select, the allocation, and the cache call |
+| `resource_read_main.c` | the `resource_read` test harness: the resource record, the three stubs, and the four paths |
+| `resource_find.c` | the rebuilt `resource_find` module: the record walk, the key test, the free call, and the array shift |
+| `resource_find_main.c` | the `resource_find` test harness: the resource record, the four records, the two stubs, and the four paths |
+| `resource_get.c` | the rebuilt `resource_get` module: the full-table test, the DOS allocation, the small fallback, and the cache call |
+| `resource_get_main.c` | the `resource_get` test harness: the resource record, the four stubs, and the five paths |
+| `motion_update.c` | the rebuilt `motion_update` module: the time guard, the three scaled values, the view move, the palette present, the advance, and the wrap |
+| `motion_update_main.c` | the `motion_update` test harness: the time base, the frame value, the three position values, and the three paths |
+| `race_panel_4.c` | the rebuilt `race_panel_4` module: the centered title, the name format, and the two draws |
+| `race_panel_4_main.c` | the `race_panel_4` test harness: the title, the count, the name, and the three paths |
+| `engine_interface_init.c` | the rebuilt `engine_interface_init` module: the object allocation, the list creation, the record clear loop, and the two state clears |
+| `engine_interface_init_main.c` | the `engine_interface_init` test harness: the allocation and list stubs, the record table, and the two paths |
+| `race_frame.c` | the rebuilt `race_frame` module: the buffer copy, the two swap flags, the frame updates, the overlay switch, the fade call, and the frame flag |
+| `race_frame_main.c` | the `race_frame` test harness: the two buffers, the twelve stubs, and the five paths |
+| `replay_read.c` | the rebuilt `replay_read` module: the record address, the two dword copies, the six 16-bit copies, the index advance, and the two end-marker tests |
+| `replay_read_main.c` | the `replay_read` test harness: the three records, the replay globals, and the four paths |
+| `game_main.c` | the rebuilt `main` module as `game_main`: the allocation, the list, the memory check, the two messages, the engine loop, the error path, and the cleanup |
+| `game_main_main.c` | the `game_main` test harness: the two globals, the thirteen stubs, and the four paths |
+| `frame_update.c` | the rebuilt `frame_update` module: the key-state clear, the memory probe, the menu calls, the frame loop, the input and music calls, and the exit path |
+| `frame_update_main.c` | the `frame_update` test harness: the key state, the race context, the ten stubs, and the four paths |
+| `object_slide_step.c` | the rebuilt `object_slide_step` module: the guard, the squared slide, the clamp, and the three filter calls |
+| `object_slide_step_main.c` | the `object_slide_step` test harness: the object record, the four constants, the two stubs, and the four paths |
+| `music_bank_load.c` | the rebuilt `music_bank_load` module: the bank field stores, the sound-system call, the driver open, the two member reads, the two installs, and the status stores |
+| `music_bank_load_main.c` | the `music_bank_load` test harness: the bank record, the four globals, the state buffer, the eleven stubs, and the seven paths |
+| `camera_update.c` | the rebuilt `camera_update` module: the transform and projection calls, the saved position, the two clears, and the nine scaled basis values |
+| `camera_update_main.c` | the `camera_update` test harness: the camera record, the three globals, the two stubs, and the three paths |
+| `stream_read.c` | the rebuilt `stream_read` module: the flag test, the expander call, the raw `fread` call, the position advance, and the two clamps |
+| `stream_read_main.c` | the `stream_read` test harness: the stream record, the two buffers, the two stubs, and the five paths |
+| `malloc_rt.c` | the rebuilt `malloc` module as `malloc_rt`: the size checks, the round-up, the free-list walk, the cursor and largest-free update, the three helper calls, and the heap-flag clear |
+| `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
+| `replay_write.c` | the rebuilt `replay_write` module: the enable guard, the record address, the two float copies, the six 16-bit copies, the index advance, the wrap, and the second-marker update |
+| `replay_write_main.c` | the `replay_write` test harness: the five records, the replay globals, and the four paths |
+| `object_load.c` | the rebuilt `object_load` module: the free-slot walk, the record walk, the `%s.3DX` name build, the member open, the `3D_HEADER` read, the `3D_BLKOBJ` look-up, the six block-word clears, the handle store, the block bind, and the chunk link |
+| `object_load_main.c` | the `object_load` test harness: the four object records, the eight-slot handle table, the two name buffers, the seven stubs, and the six paths |
+| `mouse_init.c` | the rebuilt `mouse_init` module: the timer rate, the two timer installs, the mouse system start, the mouse handler install, the two exit paths, and the epilogue |
+| `mouse_init_main.c` | the `mouse_init` test harness: the setup word, the two state areas, the three timer ids, the far timer callback, the seven stubs, and the five paths |
+| `sound_effects_update.c` | the rebuilt `sound_effects_update` module: the driver store, the setup calls, the two guards, the voice mix, the song and frame stores, the per-frame event loop, and the event stores |
+| `sound_effects_update_main.c` | the `sound_effects_update` test harness: the ten globals, the ten stubs, the call sequence, and the five paths |
+| `input_map.c` | the rebuilt `input_map` module: the exit request, the input mask, the overlay update, the gear counter, and the reset gate |
+| `input_map_main.c` | the `input_map` test harness: the input word, the exit byte, the overlay state, the two stubs, and the eight paths |
+| `object_proximity_check.c` | the rebuilt `object_proximity_check` module: the two distance guards, the truncated deltas, the squared sum, the `sqrt` call, and the gate store |
+| `object_proximity_check_main.c` | the `object_proximity_check` test harness: the object record, the two references, the three constants, the `sqrt` stub, and the six paths |
+| `object_proximity_check_fpu.asm` | the `object_proximity_check` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `object_transform.c` | the rebuilt `object_transform` module: the two callee calls, the two position sums, the conditional height copy, the three float sums, the height minus two store, and the vertical sum |
+| `object_transform_main.c` | the `object_transform` test harness: the object record, the two callee stubs, the float bit patterns, and the three paths |
+| `race_start.c` | the rebuilt `race_start` module: the screen rectangle, the choice load, the five state copies, the context reads, the `MAP%d` build, the mode stores, and the `race_session_start` call |
+| `race_start_main.c` | the `race_start` test harness: the screen and state globals, the race context, the car table, the three stubs, and the two paths |
+| `engine_init.c` | the rebuilt `engine_init` module: the configuration and list load, the setup, controls, and mouse calls, the DPMI flag, the music bank block, the palette, keyboard, engine interface, stream, video, and VESA calls, and the rectangle stores |
+| `engine_init_main.c` | the `engine_init` test harness: the flag word, the two setup words, the engine list, the rectangle words, the sixteen stubs, and the four paths |
+| `memory_error_report.c` | the rebuilt `memory_error_report` module: the status read, the six message bodies, the comparison tree, and the `exit(-1)` call |
+| `memory_error_report_main.c` | the `memory_error_report` test harness: the record stub, the printer stub, the exit stub, and the seven paths |
+| `object_drive_step.c` | the rebuilt `object_drive_step` module: the mode guard, the target and the bound, the accelerate branch, the brake branch, and the two clamps |
+| `object_drive_step_main.c` | the `object_drive_step` test harness: the object record, the two globals, the float bit patterns, and the eight paths |
+| `frame_timer.c` | the rebuilt `frame_timer` module: the frame counter wait, the raw and smooth deltas, the two clamps, the filter table pointer, and the phase word |
+| `frame_timer_fpu.asm` | the `frame_timer` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `frame_timer_main.c` | the `frame_timer` test harness: the counter, the five timing floats, the eight constants, and the six paths |
+| `object_update_all.c` | the rebuilt `object_update_all` module: the five record passes, the 0x590-byte stride, the shared counter, and the seven subsystem calls |
+| `object_update_all_main.c` | the `object_update_all` test harness: the record count, the counter, the record storage, the twelve stubs, the sequence check, and the three paths |
+| `keyboard_hook.c` | the rebuilt `keyboard_hook` module: the controller command and acknowledge loop, the LED data, the BIOS keyboard flag clear, the get-vector call, and the install and restore set-vector calls |
+| `keyboard_hook_main.c` | the `keyboard_hook` test harness: the register block, the segment set, the saved vector, the controller stub, the DPMI stub, and the five paths |
+| `object_integrate.c` | the rebuilt `object_integrate` module: the two truncated position sums, the factor damping, the factor threshold, the target compare, the dwell timer, and the two snap stores |
+| `object_integrate_main.c` | the `object_integrate` test harness: the object record, the frame delta, the damping table, the two constants, and the eight paths |
+| `object_integrate_fpu.asm` | the `object_integrate` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `race_panel_0.c` | the rebuilt `race_panel_0` module: the two centered axis targets, the two smoothed positions, the x offset, the two truncating conversions, the two panel calls, and the state title |
+| `race_panel_0_main.c` | the `race_panel_0` test harness: the race object, the two axis positions, the three constants, the two title pointers, the two stubs, and the five paths |
+| `race_panel_0_fpu.asm` | the `race_panel_0` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `net_player_add.c` | the rebuilt `net_player_add` module: the slot call, the 0x38-byte record stores, the name copy, the context and lookup reads, the two cell stores, the default block copy, and the register call |
+| `net_player_add_main.c` | the `net_player_add` test harness: the record array, the context pointer, the lookup table, the three stubs, and the three paths |
+| `object_init_from_file.c` | the rebuilt `object_init_from_file` module: the index bound, the message call, the handle table read, the object field stores, the 0x20-byte chunk records, and the end marker |
+| `object_init_from_file_main.c` | the `object_init_from_file` test harness: the file record, the object record, the 1002-slot handle table, the message stub, and the four paths |
+| `pcx_load.c` | the rebuilt `pcx_load` module: the path build, the open, the two seeks, the palette read and the 6-bit shift, the header read, the size arithmetic, and the RLE decode |
+| `pcx_load_main.c` | the `pcx_load` test harness: the base path, the simulated PCX member, the stream stubs, the open and error stubs, and the four paths |
+| `race_panel_3.c` | the rebuilt `race_panel_3` module: the two title calls, the measured row text, the signed halving, the centered doubled position, the second title, and the two status panels |
+| `race_panel_3_main.c` | the `race_panel_3` test harness: the 0x34-byte record table, the row cells, the 0.6 threshold, the four stubs, and the six paths |
+| `overlay_queue_update.c` | the rebuilt `overlay_queue_update` module: the gated source loop, the five-slot queue with the next-slot clear, the nine-record key compare, the store or xor through the value pointer, and the mismatch clear |
+| `overlay_queue_update_main.c` | the `overlay_queue_update` test harness: the source list, the enable bytes, the pending flags, the queue, the nine records, the table stub, and the seven paths |
+| `opponent_update.c` | the rebuilt `opponent_update` module: the flag gate, the 0xbc-byte record loop, the range test, the three callee calls, the motion copy, the target pointer table, and the three scaled angles |
+| `opponent_update_main.c` | the `opponent_update` test harness: the record list, the camera position, the two constants, the pointer table, the three stubs, and the ten paths |
+| `opponent_update_fpu.asm` | the `opponent_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `loading_screen.c` | the rebuilt `loading_screen` module: the screen selector, the resource call, the pixel load, the palette, the message, the two swaps, the centered title, the map name, the published fields, the record table, and the error report |
+| `loading_screen_main.c` | the `loading_screen` test harness: the context, the record table, the two buffers, the resource record, the nineteen stubs, and the ten paths |
+| `race_heading_update.c` | the rebuilt `race_heading_update` module: the four scaled angles, the two heading wraps, the power flag, the four interpolations, the frame-step advance, and the base-angle reset |
+| `race_heading_update_main.c` | the `race_heading_update` test harness: the four angles, the three integer pairs, the six outputs, the four constants, the `pow` stub, and the ten paths |
+| `race_heading_update_fpu.asm` | the `race_heading_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `menu_frame.c` | the rebuilt `menu_frame` module: the menu background load, the two draws, the copy, the two swaps, the menu constants, the two screen offsets, the longest string, the run init, and the table lookup |
+| `menu_frame_main.c` | the `menu_frame` test harness: the race object, the pixel and video buffers, the three strings, the menu globals, the nine stubs, and the six paths |
+| `list_file_load.c` | the rebuilt `list_file_load` module: the two name builds, the member open, the line and token search, the `*` skip, the `d`, `f`, `x`, and `s` fields, the record stride, and the stream close |
+| `list_file_load_main.c` | the `list_file_load` test harness: the base path, the destination table, the text script, the ten stubs, and the three paths |
+| `object_revolution_step.c` | the rebuilt `object_revolution_step` module: the fraction accumulation, the 1.0 wrap, the gear toggle, the two table index updates, the two truncations, the position shift, and the angle call |
+| `object_revolution_step_main.c` | the `object_revolution_step` test harness: the object record, the two globals, the gear table, the four stubs, and the six paths |
+| `object_revolution_step_fpu.asm` | the `object_revolution_step` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `startup.c` | the rebuilt `startup` module: the DOS version check, the four extender paths, the command-line copy, the `no87=` scan, the program-name copy, the BSS clear, and the exit chain |
+| `startup_main.c` | the `startup` test harness: the DOS and DPMI service stubs, the extender record, the command line, the environment, and the seven paths |
+| `joystick_update.c` | the rebuilt `joystick_update` module: the control record walk, the duplicate search, the axis scaling, the two raw button paths, and the button state path |
+| `joystick_update_main.c` | the `joystick_update` test harness: the six control records, the axis table, the port table, the two stubs, and the twelve paths |
+| `joystick_update_fpu.asm` | the `joystick_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `object_gear_step.c` | the rebuilt `object_gear_step` module: the state branches, the two initialization blocks, the two integration blocks, the position compare, the counter, and the two vector clears |
+| `object_gear_step_main.c` | the `object_gear_step` test harness: the object record, the two globals, the damping table, the four constants, and the eight paths |
+| `object_gear_step_fpu.asm` | the `object_gear_step` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `object_collision.c` | the rebuilt `object_collision` module: the gate, the target scan over the 0x590-byte records, the two default ids, the rotation, the three formed values, the truncated distance store, and the release |
+| `object_collision_main.c` | the `object_collision` test harness: the object record, the record array, the six constants, the two default ids, the seven stubs, and the ten paths |
+| `object_collision_fpu.asm` | the `object_collision` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `object_car_link.c` | the rebuilt `object_car_link` module: the two table pointers, the position copy, the five scaled and truncated values, the render array stores, and the flags |
+| `object_car_link_main.c` | the `object_car_link` test harness: the object record, the three table entries, the render arrays, the four constants, and the seven paths |
+| `object_car_link_fpu.asm` | the `object_car_link` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `race_panel_2.c` | the rebuilt `race_panel_2` module: the two measured table texts, the `A` buffer, the three title texts, the `%d KMH` value, the two text panels, and the two state panels |
+| `race_panel_2_main.c` | the `race_panel_2` test harness: the 0x44-byte record table, the indirect text table, the row cells, the five stubs, and the four paths |
+| `ai_update.c` | the rebuilt `ai_update` module: the record loop, the motion advance, the three angle turns, the speed fall, the collision branch, the vertical clamp, the stopped branch, and the publish block |
+| `ai_update_main.c` | the `ai_update` test harness: the four records, the target table, the collision outputs, the constants, the two stubs, and the eleven paths |
+| `ai_update_fpu.asm` | the `ai_update` FPU run-time stubs: the no-op init and the truncating `__CHP` |
+| `sound_bank_load.c` | the rebuilt `sound_bank_load` module: the setup gate, the path build, the sample record loop, the 0x74-byte template copy, the resource read, the type map, and the flags |
+| `sound_bank_load_main.c` | the `sound_bank_load` test harness: the setup word, the sample count, the base path, the eight input records, the eight result records, the six stubs, and the five paths |
+| `car_setup.c` | the rebuilt `car_setup` module: the index store, the load-flag gate, the slot counter clamp, the SHADOW load, the model index choice, and the model load |
+| `car_setup_main.c` | the `car_setup` test harness: the four globals, the 0x590-byte car record, the load stub, and the seven paths |
+| `file_error_report.c` | the rebuilt `file_error_report` module: the status read at `+0xac`, the six engine file messages, the interface name at `+0x78`, and the `exit(-2)` call; the if-chain avoids the compiler jump table that the link does not relocate |
+| `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
+| `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
+| `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
+| `modules/*.json` | the one hundred and fifty-six module records: the sources, the compiler, the link, and the run expectations |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
@@ -472,7 +749,10 @@ relocations`.  The default gate passes the record, and the strict gate fails it.
 The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
 `exit` as its own command and leaves the session.  The `printf` test program carries
 the name `prtfmod.exe`, and its output file carries the name `prtf_out.txt`, because
-DOS keeps only the first eight characters of a file name.
+DOS keeps only the first eight characters of a file name.  The store rejects a
+module whose `run.output` does not fit 8.3, and it rejects a `run.command` whose
+redirect target differs from the output.  The unit suite checks every shipped
+recipe.
 
 ## The compiler options
 
@@ -596,9 +876,11 @@ python3 tools/dosboxx_control.py script \
 sets an interrupt breakpoint on the game stub's DOS4GW exec call
 (`BPINT 21 "4B"`), and starts a CPU instruction log.  The tool reads the
 growing log, reports the first game instruction, and then stops the emulation.
-The tool needs a terminal for the DOSBox-X debugger, so it runs the emulator
-under a pseudo terminal.  It writes only under `work/`.  It exits with code 0
-when it finds the entry and code 1 when it does not.
+The log scan skips each run of equal lines, because the debugger repeats an
+instruction a varying number of times.  The tool needs a terminal for the
+DOSBox-X debugger, so it runs the emulator under a pseudo terminal.  It writes
+only under `work/`.  It exits with code 0 when it finds the entry and code 1
+when it does not.
 
 ```sh
 python3 tools/entry_probe.py \
@@ -631,14 +913,18 @@ and Ghidra.  It adds exactly four checks.  The check pins the reference values
 from the reference pages.  The tool exits with code 0 when every check passes.
 The record run is skipped when Docker is missing.  After the record run, stage
 11 compares the rebuilt whole image with the original when `--rebuilt-image`
-exists, and reports a skip when no whole image is built.  The tool checks the
-debugger control port before the run-time stages: when another process holds the
-port, it prints a clear error and exits with code 2 before any stage.  Before any
-stage it also refuses a missing game directory, a missing reference executable,
-a reference executable that does not parse as an LE image, and a work root it
-cannot create, with the same exit code.  Use `--port` to pick another port.  It
-also refuses a missing capstone library, radare2, or Ghidra setup, unless
-`--skip-cross` is set.
+exists, and reports a skip when no whole image is built.  The member probe stage
+caps the probe at the 55-open demo window and repeats it once when the control
+connection closes or times out before the first member, because that failure is
+transient.  It also repeats the probe once when a mid-run timeout ends the run
+before the sample loads, because the fallback then makes the run look
+successful.  The tool checks the debugger control port before the run-time
+stages: when another process holds the port, it prints a clear error and exits
+with code 2 before any stage.  Before any stage it also refuses a missing game
+directory, a missing reference executable, a reference executable that does not
+parse as an LE image, and a work root it cannot create, with the same exit
+code.  Use `--port` to pick another port.  It also refuses a missing capstone
+library, radare2, or Ghidra setup, unless `--skip-cross` is set.
 
 ```sh
 python3 tools/rebuild/harness.py build --module driver
@@ -646,11 +932,21 @@ nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game
 ```
 
+The record run of stage 11 builds and runs every module record, so it needs
+more time as the module count grows.  Use `--record-timeout` to raise the
+budget of that one subprocess; the default is 3000 seconds:
+
+```sh
+python3 tools/pipeline_check.py \
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
+  --record-timeout 3600
+```
+
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 61 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 57 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 46 checks.  Both flags
-report 42 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 205 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 201 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 190 checks.  Both flags
+report 186 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

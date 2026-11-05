@@ -1,9 +1,78 @@
 {
   "address": "0x15c1c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "count": 306,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x15c1c holds 306 instructions and 1160 bytes up to the ret at 0x160a3, so the record keeps the 1160-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the five callers at 0x20195, 0x20279, 0x2034e, 0x203bb, and 0x2041f pass the player object at object-3 offset 0xf91c in eax; they are the five view groups that run player_car_view_update at 0x16f34 and the player physics group at 0x15a80 on the same object, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the 28-byte entries at DAT_0010653c; the object fields +0x460 and +0x468 select the link, render, and target pointers; the function writes the screen positions, the three 11-bit angles, the render values from +0x4e0 and +0x4e8, the pitch ratio from +0x108 and +0x10c, the speed difference from +0x50c, the target copy, and the link flags from +0x7b0 and +0x7b4"
+    },
+    {
+      "kind": "note",
+      "text": "the call at 0x15c7e to 0x18ccc projects the world position DAT_00110a20 and DAT_00110a28 with the screen limit 20.0 into +0x118, +0x11c, and +0x120; the object, the five callers, and the link role of the sibling object_car_link at 0x1c84c support the name player_car_link"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the four entry pairs, the render arrays, the constants, and the screen projection stub; it covers the full path, the state skip, the second target, the pitch divisor, the speed mask, the angle mask, the second axis, and the second link pair; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15c1c --count 306 --rebuilt work/rebuild/pclink.exe --rebuilt-map work/rebuild/player_car_link.map --rebuilt-symbol player_car_link_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_link"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_link module at 0x15c1c"
+    }
+  ],
+  "module": "player_car_link",
+  "name": "player_car_link",
   "notes": [],
   "object_offset": "0x5c1c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 67,
+        "bytes_total": 1133,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 76,
+        "instructions_total": 306,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15c1c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:12e21af4da0c73bd46ed67a28b9906c94d60b1f1f7d7171b491af86f72aed1f2",
+    "source_digest": "sha256:7eb02db69b2314ae04fef00eb73147c247bcb1c80a3d9c4705e93f9919c55af4",
+    "tool": "run.py"
+  },
+  "role": "links the player car object to the render arrays, copies the screen positions and the scaled angles, and sets the link flags",
+  "section": "The vehicle state chain",
   "size": 1160,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_link_"
 }

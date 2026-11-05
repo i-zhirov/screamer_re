@@ -1,0 +1,38 @@
+{
+  "exe": "pclink.exe",
+  "map": "player_car_link.map",
+  "name": "player_car_link",
+  "run": {
+    "command": "pclink.exe > pcl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "pcl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_link.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_car_link_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_link_main.c"
+    }
+  ]
+}

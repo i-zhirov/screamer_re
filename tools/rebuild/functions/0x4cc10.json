@@ -1,17 +1,52 @@
 {
   "address": "0x4cc10",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "bounds the file index, initializes the object record, and copies the chunk table from the file record"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x4cc10 holds 120 instructions and 396 bytes: the index bound at 0x3e8, the message call at 0xc656e, the handle table read at 0x21540, the object field stores at +0x00 through +0x38, the 0x20-byte chunk records at object + 0x40 from the file count at +0x14 and the offset table at +0x18, and the end marker -1"
     }
   ],
+  "module": "object_init_from_file",
   "name": "object_init_from_file",
   "notes": [],
-  "role": "bounds the file index, initializes the object record, and copies the chunk table from the file record",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 218,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 46,
+        "instructions_total": 64,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cc10",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:a25791766eaf4f1cc4c8a2dbb0d70b881eed1b9b2678b3b8b0f7eaf9d52870aa",
+    "source_digest": "sha256:cbee48feaabb6f77f38444351b932510ca910eb6d8e81d1a302d0312ae70ad8a",
+    "tool": "run.py"
+  },
+  "role": "reads the file record from the handle table, initializes the object record, and copies the chunk table from the file record",
   "section": "Resource loader",
   "size": 396,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_init_from_file_"
 }

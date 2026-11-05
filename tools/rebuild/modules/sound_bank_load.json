@@ -1,0 +1,32 @@
+{
+  "exe": "sblmod.exe",
+  "map": "sound_bank_load.map",
+  "name": "sound_bank_load",
+  "run": {
+    "command": "sblmod.exe > sbl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "sbl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_bank_load.c",
+      "flags": [
+        "-of+",
+        "-dSOUND_BANK_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_bank_load_main.c"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "exe": "pnshmod.exe",
+  "map": "panel_show.map",
+  "name": "panel_show",
+  "run": {
+    "command": "pnshmod.exe > pnsh_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "pnsh_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "panel_show.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "panel_show_main.c"
+    }
+  ]
+}

@@ -114,7 +114,7 @@ screamer_re/
 │   │   ├── docs.py            # render the program-map tables
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the eleven module recipes
+│   │   ├── modules/           # the one hundred and fifty-six module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -161,12 +161,13 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 61 checks.  `--skip-cross` skips stage 8 and the
-tool preflight, so the run reports 57 checks.  `--skip-runtime` skips stages
-5, 6, 7, and 9 and still runs stage 8, so the run reports 46 checks.  Both
-flags report 42 checks and take about 16 seconds.  Stage 11 also compares the
-rebuilt whole image when `--rebuilt-image` exists.  The image check is a skip
-until a whole image is built, so it does not change these counts:
+about 8 minutes plus the Ghidra import and reports 205 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 201 checks.
+`--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
+run reports 190 checks.  Both flags report 186 checks and take about 16
+seconds.  Stage 11 also compares the rebuilt whole image when
+`--rebuilt-image` exists.  The image check is a skip until a whole image is
+built, so it does not change these counts:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
@@ -329,8 +330,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 61 checks in the `cross-check` shell.  `--skip-cross`
-  gives 57 checks, `--skip-runtime` gives 46 checks, and both flags give 42
+- The full check reports 205 checks in the `cross-check` shell.  `--skip-cross`
+  gives 201 checks, `--skip-runtime` gives 190 checks, and both flags give 186
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - The identity gate has two modes.  The default gate accepts the three
@@ -362,6 +363,10 @@ through the store.
 - Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
+- A harness output file name stays within the 8.3 limit (`name.ext`), because
+  DOS truncates a longer name and the run check misses the file.  The store's
+  module validation rejects a longer name and a redirect target that differs
+  from the output.
 - Compare a regenerated table with the table in
   `docs/reference/inventory.md` before a commit.
 - Confirm every documented command runs before a commit.

@@ -1,17 +1,52 @@
 {
   "address": "0x2786c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record"
+      "text": "the original at 0x2786c holds 84 instructions and 309 bytes up to the ret at 0x279a0: the six register saves, the frame, the five loops over the DAT_0010f8ec records at DAT_00110ab8 with the 0x590-byte stride and the shared counter DAT_0010634c, the seven calls at 0x27f44, 0x19ab0, 0x205c4, 0x20954, 0x8ac78, 0x81ab0, and 0x27a34, and the epilogue"
+    },
+    {
+      "kind": "note",
+      "text": "the five passes call object_transform at 0x1cd44, object_player_input at 0x1c760, object_physics at 0x1c810, object_prepare at 0x1c79c, and object_car_link at 0x1c84c on each record; the seven calls pass 1 to opponent_update, 0x109a0 to camera_update, and 0x6350 to sound_effects_update"
     }
   ],
+  "module": "object_update_all",
   "name": "object_update_all",
   "notes": [],
-  "role": "walks `DAT_0010f8ec` records of 0x164 bytes at `DAT_00110ab8` and runs four steps per record",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 285,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 69,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2786c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:34bf14fc38eb27b7068c6e53368d91d041257d3ee3132163ae16ce364f6e1a3f",
+    "source_digest": "sha256:5cab9d7fbcce1d6e362ab92af80691995773b24b49466ccb97b5728caf43b84e",
+    "tool": "run.py"
+  },
+  "role": "walks the five record passes and then runs the seven subsystem calls",
   "section": "race_loop callees",
   "size": 312,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_update_all_"
 }

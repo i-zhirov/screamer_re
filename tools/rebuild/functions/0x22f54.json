@@ -1,17 +1,52 @@
 {
   "address": "0x22f54",
-  "checks": [],
-  "confidence": "derived",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "writes the 20-byte record and advances the index with a wrap"
+      "text": "writes the 20-byte record at `DAT_00118e5c + index * 0x14` and advances the index with a wrap at the end marker"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x22f54 holds 64 instructions and 228 bytes: the five register saves, the frame, the four-byte local area, the two float copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08 through +0x12, the index advance at DAT_00118e64, the wrap test against DAT_00118e68, and the second-marker update at DAT_00118e70; the behavior check passes; the identity check stays open because the register saves and the record address differ"
     }
   ],
+  "module": "replay_write",
   "name": "replay_write",
   "notes": [],
-  "role": "writes the 20-byte record and advances the index with a wrap",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 219,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22f54",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:1dd0a5d363602b648079f3b780b91bba4a8c490460f09b8b6201b160a99c9f3e",
+    "source_digest": "sha256:9262e232b6a3c5517f7c5856ff6de9cbdead3493c6eec3fc94ba0b85ffdeb9c3",
+    "tool": "run.py"
+  },
+  "role": "writes the replay globals into the 20-byte record, advances the index with a wrap, and tracks the second end marker",
   "section": "The replay records",
   "size": 228,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "replay_write_"
 }

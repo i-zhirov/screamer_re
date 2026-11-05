@@ -1,0 +1,30 @@
+{
+  "exe": "engmod.exe",
+  "map": "engine_init.map",
+  "name": "engine_init",
+  "run": {
+    "command": "engmod.exe > eng_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "eng_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "engine_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "engine_init_main.c"
+    }
+  ]
+}

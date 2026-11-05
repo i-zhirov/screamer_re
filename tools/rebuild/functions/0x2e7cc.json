@@ -1,18 +1,49 @@
 {
   "address": "0x2e7cc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads the size through `0x254a8`, centers it on 0x140, and draws through `0x25020`"
+      "text": "the original at `0x2e7cc` holds 34 instructions and 93 bytes: it measures the text through `0x254a8`, halves the measured width with a signed division, centers the half width on the `0x140` screen width, and draws through `0x25020` with the doubled position"
     }
   ],
+  "module": "panel_draw_centered",
   "name": "panel_draw_centered",
   "notes": [],
   "object_offset": "0x1e7cc",
-  "role": "reads the size through `0x254a8`, centers it on 0x140, and draws through `0x25020`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 84,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 34,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e7cc",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:83060fc0b2363df49e9e457ce1958d58b390262f50e74d07f3f63789ace9b4b7",
+    "source_digest": "sha256:fadd95934a27fb36d8bb72cc214aa03a1e8dcb967de54c29c8e7123ddc969705",
+    "tool": "run.py"
+  },
+  "role": "measures the text, centers the halved width on 0x140, and draws the text",
   "section": "race_frame callees",
   "size": 96,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "panel_draw_centered_"
 }

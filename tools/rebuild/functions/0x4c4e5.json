@@ -1,17 +1,52 @@
 {
   "address": "0x4c4e5",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "buffered read; advances the position and clamps it to the stream size"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x4c4e5` holds 80 instructions and 226 bytes: the register saves, the frame, the three argument slots, the flag test at `stream + 0x10`, the two clamp branches, the expander call at `0x4d3fc`, the raw `fread` call at `0xc607b`, and the return"
     }
   ],
+  "module": "stream_read",
   "name": "stream_read",
   "notes": [],
-  "role": "buffered read; advances the position and clamps it to the stream size",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 119,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 51,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c4e5",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:3cf6978f5e6c322cc2b11d83c0a8590258b0a8d68f8e37b09f148642383788b9",
+    "source_digest": "sha256:03dc129260b1cd36cda461ac27fcf7581ea0cb6d5f16c229a3d288747233eb5a",
+    "tool": "run.py"
+  },
+  "role": "reads the requested bytes from the stream, advances the position, clamps it to the size, and returns the byte count",
   "section": "Resource loader",
   "size": 226,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "stream_read_"
 }

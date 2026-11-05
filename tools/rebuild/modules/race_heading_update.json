@@ -1,0 +1,39 @@
+{
+  "exe": "rhupd.exe",
+  "map": "race_heading_update.map",
+  "name": "race_heading_update",
+  "run": {
+    "command": "rhupd.exe > rhu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "rhu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_heading_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_heading_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_heading_update_main.c"
+    }
+  ]
+}

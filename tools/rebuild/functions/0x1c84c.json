@@ -1,17 +1,52 @@
 {
   "address": "0x1c84c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position"
+      "text": "the original at 0x1c84c holds 238 instructions and 863 bytes up to the first ret: the frame, the 20-byte local area, the two pointers from the 28-byte entry at DAT_0010653c for the index at +0x4dc, the target pointer from the entry at +4, the position copy, the five scaled and truncated values, the render array stores, the flags at DAT_0010d268, and the epilogue"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the object record, the three entry pairs of the 28-byte table, the render arrays, and the six constant globals; it covers the state copy, the two flag bits, the angle threshold, the negative truncation, the 11-bit mask, and the table selection; the behavior check passes"
     }
   ],
+  "module": "object_car_link",
   "name": "object_car_link",
   "notes": [],
-  "role": "indexes the 28-byte record table `DAT_0010653c` and `DAT_00106540` with `+0x4dc` and writes the position",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 578,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 51,
+        "instructions_total": 152,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1c84c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:943d602d0b241ef31f41abbf9a0be390283ca6e656ced92d6cfa4000a287561f",
+    "source_digest": "sha256:f54a7918da61b3e9656782f870df792f58dca6c554f57187168280d935198b81",
+    "tool": "run.py"
+  },
+  "role": "links the car record to the render arrays, copies the position and the scaled values, and sets the link flags",
   "section": "object_update_all callees",
   "size": 864,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_car_link_"
 }
