@@ -237,9 +237,18 @@ a name from the call graph and the data flow, as in Phase F.
 | `0x2b660` | `name_entry_letter_update` (done) | 803 | 219 | 8 | 55 |
 | `0x2d4b8` | `race_records_screen` (done) | 779 | 224 | 21 | 24 |
 
+### Phase I: next unnamed functions
+
+These are the next unnamed game functions in the object.  The rebuild infers a
+name from the call graph and the data flow, as in Phase F.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x18528` | `player_car_reset_update` (done) | 776 | 168 | 5 | 44 |
+
 ## Position
 
-One hundred fifty-four modules carry a recipe and a result: the twelve Phase A modules,
+One hundred fifty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -293,5 +302,6 @@ and `player_car_link` at `0x15c1c`, `map_object_update` at `0x2b9cc`,
 `spline_interpolate` at `0x22744`, `player_car_skid_update` at `0x17d14`,
 `name_entry_screen` at `0x2c430`, `race_radar` at `0x23a94`, and
 `car_sound_update` at `0x242bc`, `name_entry_letter_update` at `0x2b660`,
-and `race_records_screen` at `0x2d4b8`.
-The next unnamed function is `0x18528`.
+and `race_records_screen` at `0x2d4b8`, and the Phase I module
+`player_car_reset_update` at `0x18528`.
+The next unnamed function is `0x1a630`.

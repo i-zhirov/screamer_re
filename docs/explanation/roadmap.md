@@ -107,10 +107,10 @@ current host.
   `0x2b9cc`, `spline_interpolate` at `0x22744`,
   `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
   `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
-  `name_entry_letter_update` at `0x2b660`, and `race_records_screen` at
-  `0x2d4b8`;
+  `name_entry_letter_update` at `0x2b660`, `race_records_screen` at
+  `0x2d4b8`, and the Phase I module `player_car_reset_update` at `0x18528`;
   twenty-three modules are verified, one is matching, and one hundred and
-  thirty rebuilds hold the recorded difference; the
+  thirty-one rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -225,10 +225,11 @@ The plan follows the size order, starting with the smallest functions.
     `0x2b9cc`, `spline_interpolate` at `0x22744`,
     `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
     `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
-    `name_entry_letter_update` at `0x2b660`, and `race_records_screen` at
-    `0x2d4b8` are done;
+    `name_entry_letter_update` at `0x2b660`, `race_records_screen` at
+    `0x2d4b8`, and the Phase I module `player_car_reset_update` at `0x18528`
+    are done;
     the result is twenty-three verified modules, one matching module, and one
-    hundred and thirty open rebuilds).
+    hundred and thirty-one open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

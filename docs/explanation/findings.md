@@ -12216,3 +12216,78 @@ temporary `-od` recipe.
   and in the detail pane.
   Evidence: `python3 tools/rebuild/store.py set --function 0x2ed77
   --implementation assembly` and `python3 tools/rebuild/view.py html`.
+
+## The player_car_reset_update module at 0x18528
+
+- Observation: the original body at `0x18528` holds 168 instructions and 776
+  bytes up to the first `ret` at `0x1882f`.  The state 5 block at `0x18830` and
+  the state 6 block at `0x18896` continue to the shared `ret` at `0x188b7`, so
+  the record keeps the 912-byte extent and sets no function size.  The identity
+  check uses 168 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x18528 --count
+  168` and `tools/rebuild/functions/0x18528.json`.
+- Observation: the only direct caller is the effect group at `0x15bac`, which
+  calls the function at `0x15bd0`.  The player physics group at `0x15a80` sets
+  the state at `+0x148` to 2 at `0x16da4` when the heading error times the
+  speed passes the threshold at `+0x180`.  The five view groups at `0x2003c`,
+  `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the effect group on the
+  player object at object-3 offset `0xf91c`.
+  Evidence: the direct call sweep for `0x18528`; the blocks at `0x15a80` through
+  `0x15ab4`, `0x15bac` through `0x15bf9`, and `0x16d80` through `0x16dae`.
+- Observation: the state 2 init block looks the sound entry 8 up through
+  `table_lookup` at `0x1f718`, enqueues the effect 9 with the value 3 and 0.5
+  through `0x247fc`, sets the state to 1, copies the slot index
+  `DAT_00110aa4` to `+0x160`, and sets `DAT_00001e18` when the replay flag
+  `DAT_00118e6c` is zero.  It scales the speed `+0x50c` by 0.6, publishes the
+  position `+0x4b0` and `+0x4b8` through `DAT_00108038` and `DAT_00108040`,
+  calls `0x120c0` with 0, and copies the direction `DAT_00108048` to the
+  heading `+0x4cc`.  It sets the timer `+0x14c` to 3000.0, clears the counter
+  `+0x150`, sets the velocities `+0x154` and `+0x15c` to 12.0, clears the
+  offsets `+0x124`, `+0x128`, and `+0x12c`, and clears `+0x134` and `+0x170`.
+  Evidence: the blocks at `0x18550` through `0x1866f`.
+- Observation: the state 1 update block adds the scaled timer to `+0x134`,
+  subtracts 6000.0 times the frame delta `DAT_00118e04` from `+0x14c`, damps
+  `+0x154` and `+0x15c` with the coefficient at `DAT_0010cf08 + 0x184`, and
+  integrates them into `+0x124` and `+0x12c`.  A non-positive `+0x134` starts
+  the four effect slots through `0x19828`, increments the counter, reflects the
+  timer by 0.4, clears `+0x124` and `+0x12c`, selects -0.6 on an odd counter or
+  0.6 on an even counter at `+0x15c`, and sets `+0x154` to -1.0.  When the
+  counter passes 3, the state clears and, with `DAT_00118e1c` bit 0 set and the
+  replay flag clear, the slot record at `DAT_00101db4 + 5 * +0x160` sets.
+  Evidence: the blocks at `0x18670` through `0x1882f`.
+- Observation: the state 5 block runs only with a non-zero gear `+0x7ac`.  It
+  allocates `+0x7d0` through `table_lookup` when the handle is -1, toggles the
+  low five bits of `+0x4bc`, advances the heading `+0x4cc` by 0.3 times
+  `+0x108`, and starts the four effect slots.  The state 6 block clears
+  `+0x4bc` and the state.
+  Evidence: the blocks at `0x18830` through `0x188b7`.
+- Observation: the jump table at `0x18510` maps the states 1 to 6 to `0x18670`,
+  `0x18550`, `0x188b0`, `0x188b0`, `0x18830`, and `0x18896`.  The constants at
+  object-3 offsets 0x820, 0x828, 0x82c, and 0x834 hold the double 0.6, the
+  float 6000.0, the double 0.4, and the double 0.3.
+  Evidence: the table bytes at `0x18510` through `0x18527` and the constants at
+  object-3 offsets 0x820 through 0x837.
+- Inference: the heading and speed test, the direction snap, the speed scale
+  0.6, and the three-step timer support the name `player_car_reset_update`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the trigger at `0x16da4`, the init block at `0x18550`, and the
+  update block at `0x18670`.
+- Observation: the harness holds one player object, the frame delta, the filter
+  table, the slot index, the two flags, the position globals, the direction
+  result, the slot record array, and the constants.  It covers the state 2
+  init, the positive and negative accumulator, the odd and even counter, the
+  slot mark, the flag gates, the state 5 gear gate, the state 5 handle and
+  heading, the state 6 clear, and the default state.  The behavior check prints
+  every marker.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_reset_update` and `work/rebuild/pcr_out.txt`.
+- Observation: the identity check stays open at 31 of 168 instructions and 86
+  of 776 bytes, because V2 uses the EBP frame after the register saves and
+  keeps the object in EBX.  The build and behavior checks pass, so the record
+  status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x18528 --count 168 --rebuilt work/rebuild/pcrsmod.exe
+  --rebuilt-map work/rebuild/player_car_reset_update.map --rebuilt-symbol
+  player_car_reset_update_`.
