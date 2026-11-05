@@ -11261,3 +11261,83 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   menu_objects_init_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_car_link module at 0x15c1c
+
+- Observation: the original body at `0x15c1c` holds 306 instructions and 1160
+  bytes up to the `ret` at `0x160a3`.  The plan row holds the same counts.  The
+  store record keeps the 1160-byte extent and sets no function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15c1c --count 306` and
+  `tools/rebuild/functions/0x15c1c.json`.
+- Observation: the five callers at `0x20195`, `0x20279`, `0x2034e`, `0x203bb`,
+  and `0x2041f` pass the player object at object-3 offset `0xf91c` in `eax`.
+  The callers are the five view groups.  Each group calls
+  `player_car_view_update` at `0x16f34` and the player physics group at
+  `0x15a80` first.  The function therefore runs on the player object after the
+  vehicle state chain, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the direct call sweep for the target `0x15c1c`, the call sites at
+  `0x20195`, `0x20279`, `0x2034e`, `0x203bb`, and `0x2041f`, and the records
+  of `0x16f34` and `0x15a80`.
+- Observation: the 28-byte entries at `DAT_0010653c` hold the link pointer at
+  field 0 and the render pointer at field 4.  The object field `+0x460` selects
+  the link entry.  The object field `+0x468` selects the target entry, and its
+  field 0 is the target pointer.
+  Evidence: the blocks at `0x15c27` through `0x15c78`.
+- Observation: the call at `0x15c7e` targets `0x18ccc`.  That function forms
+  the horizontal distance from the world position `DAT_00110a20` and
+  `DAT_00110a28` to the object position `+0x4b0` and `+0x4b8`.  It writes the
+  screen offsets `+0x118`, `+0x11c`, and `+0x120` with the limit 20.0 at
+  object-3 offset 0x854.
+  Evidence: the disassembly of `0x18ccc` through `0x18dad`.
+- Observation: the link pointer receives the position sum from `+0x4b0`,
+  `+0x4b4`, and `+0x4b8` with the offsets `+0x130`, `+0x134`, and `+0x138`.
+  It also receives the angle sum from `+0x4c8`, `+0x4cc`, and `+0x4d0` with
+  the offsets `+0x124`, `+0x128`, and `+0x12c`.  The scale 1024.0 at
+  object-3 offset 0x6ec and the pi at 0x6f0 give the three 11-bit values.
+  Evidence: the blocks at `0x15c83` through `0x15d30` and the data at
+  object-3 offsets 0x6ec and 0x6f0.
+- Observation: the render arrays take the value from `+0x4e0` times 1024.0
+  times 2.0 at offset 8.  They take the value from `+0x4e8` times 1024.0 times
+  4.0 at offset 0x10.  The constants 2.0 and 4.0 sit at object-3 offsets 0x6f4
+  and 0x6f8.  The first masked pitch is `+0x108` divided by `+0x10c` times
+  1.5 and by the double pi at 0x704.  The speed `+0x50c` divided by 15.0 at
+  0x70c minus the stored value masks with 0x7fe.
+  Evidence: the blocks at `0x15d91` through `0x15fc1` and the data at
+  object-3 offsets 0x6f4, 0x6f8, 0x704, and 0x70c.
+- Observation: the target pointer receives the screen offset `+0x118` at 8,
+  the screen offset `+0x120` at 0x10, the link angle at 0x18, and `+0x4ec - 2`
+  at 0xc.  When the state at `+0x148` is not 1, it also receives the two link
+  angles at 0x14 and 0x1c.  The link pointer receives `+0x7b0` at 0x3c and
+  `+0x7b4` at 0x20.
+  Evidence: the blocks at `0x15d33` through `0x1609b`.
+- Inference: the function links the player car object to the render arrays.
+  It copies the screen positions, scales the three angles, writes the render
+  values, and sets the link flags.  The player object, the five callers, and
+  the sibling `object_car_link` at `0x1c84c` support the name
+  `player_car_link`.  The module records the name with the confidence
+  `derived`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original truncates through the Watcom helper at `0x4d9f4`.
+  The local FPU stub makes `__CHP` truncate toward zero.  The stub also holds
+  `sqrt`, because the harness links no math library and the screen projection
+  stub uses the routine at `0x22bec`.
+  Evidence: `tools/rebuild/player_car_link_fpu.asm` and
+  `tools/rebuild/player_car_link_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the full path, the state skip, the
+  second target, the pitch divisor, the speed mask, the angle mask, the second
+  axis, and the second link pair.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_car_link`,
+  `work/rebuild/pcl_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15c1c`.
+- Observation: the rebuilt module holds 306 decoded instructions and 1133
+  bytes.  The identity check stays open at 76 of 306 instructions and 67 of
+  1133 bytes.  The V2 toolchain uses a different instruction order and local
+  layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15c1c --count 306 --rebuilt work/rebuild/pclink.exe
+  --rebuilt-map work/rebuild/player_car_link.map --rebuilt-symbol
+  player_car_link_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee name in the harness stay inferred.
