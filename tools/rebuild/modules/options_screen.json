@@ -1,0 +1,41 @@
+{
+  "exe": "optsmod.exe",
+  "map": "options_screen.map",
+  "name": "options_screen",
+  "run": {
+    "command": "optsmod.exe > opts_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "D"
+    ],
+    "output": "opts_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "options_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "options_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "options_screen_main.c"
+    }
+  ]
+}

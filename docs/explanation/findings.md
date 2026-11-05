@@ -11072,3 +11072,62 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   --original-address 0x18db0 --count 448 --rebuilt work/rebuild/erumod.exe
   --rebuilt-map work/rebuild/engine_rpm_update.map --rebuilt-symbol
   engine_rpm_update_`.
+
+## The options_screen module at 0x21338
+
+- Observation: the plan row records a 1715-byte body of 464 instructions, 38
+  calls, and 47 FPU instructions.  The body starts at `0x21338` and ends at the
+  `ret` at `0x219ea`.  The store record keeps the 1716-byte extent and sets no
+  function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21338 --count 464` and
+  `tools/rebuild/functions/0x21338.json`.
+- Observation: the only direct caller is `input_map` at `0x2124f`.  It calls
+  the function when the input flag `0x1b` is set and the mode `0x1d260` is not
+  `0x10`, and it clears the dword `0x7f9` after the call.
+  Evidence: the call site at `0x2124f` and the earlier input_map section.
+- Observation: the label table at object-3 offset `0x1f74` holds the three
+  five-byte strings `CD`, `FX`, and `MU`.  The pointer table at `0x1f80` holds
+  the three data offsets `0x1d2c0`, `0x1d2bc`, and `0x1d2c4`.  The table at
+  `0x1f20` holds seven records of three dwords: the title x, the static y, and
+  the moving y.
+  Evidence: the byte dump at object-3 offsets `0x1f20`, `0x1f74`, and `0x1f80`,
+  and the reads at `0x217f5` through `0x21959`.
+- Observation: the function clears the screen twice through `0x25d28` with the
+  size pair `0x280` and `0x190`, fades the three volume locals by the frame
+  delta times `16384.0`, draws the list rows with the format `03 25 64 00`, and
+  draws the selected `CD`, `FX`, or `MU` bar through `0x23dfc`.  State 5 rises
+  the selected volume by the frame delta times `48000.0` and clips it at
+  `0x7fff`.  State 6 advances the volume index from 0 through 2.  The loop
+  leaves when the key byte `0x03` is set.
+  Evidence: the blocks at `0x2134c` through `0x2199a`.
+- Inference: the caller, the three audio labels, the three audio slots, and the
+  seven menu positions identify the function as the options screen.  The
+  module records the name `options_screen` with the confidence `inferred`.
+  Evidence: the call graph and the data references above.
+- Observation: the harness sets the fade rate, the rise rate, the minimum
+  delta, and the time scale from their bit patterns, because the minimal image
+  does not load the constant segment.  The three labels are extern in the
+  module and defined in the harness, so the harness can check the selected
+  label.  The local FPU stub makes `__CHP` truncate toward zero, because the
+  original uses the helper at `0x4d9f4`.
+  Evidence: `tools/rebuild/options_screen.c`,
+  `tools/rebuild/options_screen_main.c`, and
+  `tools/rebuild/options_screen_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `a`, and `D`.  The paths cover the first frame, the volume fade,
+  the state 4 fall, the state 5 rise and clip, the state 6 index cycle, the
+  state 3 and state 2 selection, the left and right keys, the list rows, and
+  the empty list.
+  Evidence: `python3 tools/rebuild/harness.py run --module options_screen`,
+  `work/rebuild/opts_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x21338`.
+- Observation: the rebuilt module holds 464 decoded instructions and 1629
+  bytes.  The identity check stays open at 69 of 464 instructions and 88 of
+  1629 bytes.  The V2 toolchain uses a different instruction order, local
+  layout, and helper form.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21338 --count 464 --rebuilt work/rebuild/optsmod.exe
+  --rebuilt-map work/rebuild/options_screen.map --rebuilt-symbol
+  options_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
