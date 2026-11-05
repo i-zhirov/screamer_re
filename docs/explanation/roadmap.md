@@ -105,10 +105,10 @@ current host.
   at `0x21338`, `car_camera` at `0x1a930`, `menu_objects_init` at
   `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
   `0x2b9cc`, `spline_interpolate` at `0x22744`,
-  `player_car_skid_update` at `0x17d14`, and `name_entry_screen` at
-  `0x2c430`;
+  `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
+  and `race_radar` at `0x23a94`;
   twenty-two modules are verified, one is matching, and one hundred and
-  twenty-seven rebuilds hold the recorded difference; the
+  twenty-eight rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -220,7 +220,7 @@ The plan follows the size order, starting with the smallest functions.
     at `0x21338`, `car_camera` at `0x1a930`, `menu_objects_init` at
     `0x2aab8`, `player_car_link` at `0x15c1c`, `map_object_update` at
     `0x2b9cc`, `spline_interpolate` at `0x22744`,
-    `player_car_skid_update` at `0x17d14`, and `name_entry_screen` at
-    `0x2c430` are done;
+    `player_car_skid_update` at `0x17d14`, `name_entry_screen` at `0x2c430`,
+    and `race_radar` at `0x23a94` are done;
     the result is twenty-two verified modules, one matching module, and one
-    hundred and twenty-seven open rebuilds).
+    hundred and twenty-eight open rebuilds).

@@ -11637,3 +11637,79 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   name_entry_screen_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_radar module at 0x23a94
+
+- Observation: the original body at `0x23a94` holds 208 instructions and 870
+  bytes up to the `ret` at `0x23df9`.  The store record keeps the 872-byte
+  extent and sets no function size.  The identity check uses the first 208
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23a94 --count 208` and
+  `tools/rebuild/functions/0x23a94.json`.
+- Observation: the direct call sweep finds one caller at `0x2368c`.  The call
+  is the last step of the HUD draw at `0x23420`.  The frame update at
+  `0x1ff70` calls the HUD draw at `0x2001a` after the five view groups.  No
+  named function sits between the frame update and the target, so the record
+  takes the section `Program functions`.
+  Evidence: the call sweep for `0x23a94`, the call at `0x2001a`, and the
+  dispatch at `0x1ff70`.
+- Observation: the zoom counter `DAT_0011d2a4` selects the scale.  The value 0
+  returns at once.  The values 1, 2, and 3 set the scale factor 0x30, 0x60, and
+  0x90.  The input map at `0x2126d` advances the counter from 0 through 3.
+  Evidence: the jump table at `0x23a84`, the blocks at `0x23aa9` through
+  `0x23ac9`, and the input block at `0x2125a` through `0x2127f`.
+- Observation: the function sets the 144x144 panel at (8, 248) in
+  `DAT_00115ce4` through `DAT_00115cf0`, clears the panel through `0x25d28`
+  with the size 0x90 and 0x90, and renders the world from the player position
+  `DAT_0011fdcc` and `DAT_0011fdd4` and the heading `DAT_0011fde8` through
+  `0x1057c`.  The panel bounds are x 8 through 0x98 and y 0xf8 through 0x188.
+  Evidence: the stores at `0x23aca` through `0x23b25`, the call at `0x23b5b`,
+  and the clear call at `0x25d28`.
+- Observation: the mode byte `DAT_0011d260` selects the record source.  Bit
+  0x10 scans the 0x2a8-byte traffic records at `DAT_00113cd8` while the
+  counter stays below `DAT_00115218`, and a record with the first field -1 is
+  skipped.  Otherwise bits 0 and 1 scan the 0x590-byte car records at
+  `DAT_00110ab8` while the record stays below
+  `DAT_00110ab8 + DAT_0010f8ec * 0x590`.  Otherwise bit 4 plots the single
+  record at `DAT_00118ee8` and `DAT_00118ef0` when `DAT_0011d264` is set and
+  the table entry at `DAT_00118e98` for the index `DAT_00118ed4 ^ 1` is
+  non-zero.
+  Evidence: the blocks at `0x23b7c` through `0x23da4`, and the mode 0x10
+  handler at `0x12d0c` that fills the traffic table.
+- Observation: a marker position is the rotated record delta times the zoom
+  scale around the panel centre (39, 159), doubled and truncated.  The
+  rotation goes through `0x2218c` with the heading `DAT_0011fde8`.  The
+  function stores the position in `DAT_0011cb18` and `DAT_0011cb1c` and
+  flushes the sprite list through `0x25af0`.  The final marker sits at
+  (0x4c, 0x13c) with the mode 4, and the function restores the full-screen
+  clip.
+  Evidence: the FPU block at `0x23b60` through `0x23c28`, the calls at
+  `0x23bdf`, `0x23c28`, and `0x23dcf`, and the stores at `0x23da9` through
+  `0x23df0`.
+- Inference: the 144x144 panel, the rotation around the player position, the
+  three zoom levels, and the traffic, car, and ghost records support the name
+  `race_radar`.  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original converts four marker values and the heading
+  through the truncate helper at `0x4d9f4`.  The module uses a local truncating
+  FPU stub.  The constants arrive through globals, because the minimal image
+  does not load the constant segment.
+  Evidence: `tools/rebuild/race_radar_fpu.asm` and
+  `tools/rebuild/race_radar_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the zoom 0 return, the traffic path,
+  the car path, the ghost path, the two ghost guards, the empty mode, the
+  traffic precedence, and the empty traffic list.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_radar`,
+  `work/rebuild/rrad_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x23a94`.
+- Observation: the rebuilt module holds 208 decoded instructions and 874
+  bytes.  The identity check stays open at 52 of 208 instructions and 69 of
+  870 bytes.  The V2 toolchain uses a different prologue, an if chain instead
+  of the compiler jump table, and a different local layout.  The store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23a94 --count 208 --rebuilt work/rebuild/rradmod.exe
+  --rebuilt-map work/rebuild/race_radar.map --rebuilt-symbol race_radar_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
