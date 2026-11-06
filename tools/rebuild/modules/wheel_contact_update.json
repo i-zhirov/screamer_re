@@ -1,0 +1,36 @@
+{
+  "exe": "wcu.exe",
+  "map": "wheel_contact_update.map",
+  "name": "wheel_contact_update",
+  "run": {
+    "command": "wcu.exe > wcu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "wcu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "wheel_contact_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "wheel_contact_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "wheel_contact_update_main.c"
+    }
+  ]
+}

@@ -1,9 +1,95 @@
 {
   "address": "0x11a30",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 141,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11a30 holds 141 instructions and 461 bytes up to the ret at 0x11bfc; the next function starts at 0x11c00, so the store record keeps the 464-byte extent and sets no function size; the identity check uses 141 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are the second player step group at 0x15ab8 through the call at 0x15aec and the cornering body at 0x16b98 through the call at 0x16c92; the step group runs on the player object at object-3 offset 0xf91c after the physics group at 0x15a80 and before player_car_cornering_update at 0x16ca0 and player_car_contact_update at 0x166a8, and the five view groups call the step group, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function starts with the absolute cosine at +0x4d0 and the absolute cosine at +0x4c8, clears the wheel flag at +0x2f0, and walks the four 0x54-byte wheel units at +0x194; a unit holds the two local offsets at +0x18 and +0x20, the two contact pairs at +0x00, +0x08, +0x0c, and +0x14, the two ground heights at +0x24 and +0x28, and the surface flag at +0x2c"
+    },
+    {
+      "kind": "note",
+      "text": "for each unit the function scales the two offsets by the two cosines, truncates them through the helper at 0x4d9f4, and rotates the pair through 0x2218c by the negative yaw +0x4cc plus the delta +0x128; it adds +0x4b0 and +0x4b8 and stores the first contact pair at +0x00 and +0x08 through the globals 0x8038 and 0x8040"
+    },
+    {
+      "kind": "note",
+      "text": "on a hit from the map collision check at 0x11c00 the first ground height +0x24 takes the global 0xc72c, the surface flag +0x2c takes the compare of the global 0x8024 with 0x65, and the wheel flag +0x2f0 takes the even-unit surface bit; the function then rotates the same pair by the negative yaw alone and stores the second contact pair at +0x0c and +0x14 through the same two globals, and a hit sets the second ground height +0x28"
+    },
+    {
+      "kind": "note",
+      "text": "the four wheel units, the two contact pairs, the two ground heights, the surface flag, and the two callers support the name wheel_contact_update; the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the conversions to an integer use the Watcom helper at 0x4d9f4, which truncates toward zero, and the cosine uses the routine at 0x4da66; the harness links no math library, so the local wheel_contact_update_fpu.asm supplies cos and fabs and makes __CHP truncate toward zero; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the four wheel units, the two contact globals, the ground height, the surface value, and the two callee stubs; it covers the no-collision path, the collision with the surface value 0x65, the collision with another surface value, the clear of a preset wheel flag, the two rotation angles, and the absolute cosine of pi; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 455 bytes and 141 decoded instructions; the identity check stays open at 31 of 141 instructions and 15 of 455 bytes because V2 saves the frame first, keeps the object in ebx and the unit in ecx, and uses other local offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11a30 --count 141 --rebuilt work/rebuild/wcu.exe --rebuilt-map work/rebuild/wheel_contact_update.map --rebuilt-symbol wheel_contact_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11a30"
+    },
+    {
+      "kind": "finding",
+      "text": "The wheel_contact_update module at 0x11a30"
+    }
+  ],
+  "implementation": "c",
+  "module": "wheel_contact_update",
+  "name": "wheel_contact_update",
   "notes": [],
   "object_offset": "0x1a30",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 455,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 31,
+        "instructions_total": 141,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11a30",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:12e93f0547c4a834b20463491fa33e6783493cd9e36d26e05f3fee81fc150591",
+    "source_digest": "sha256:d1bc9ee035f9709c7ff4ceef6fab21cfa2560fe5e780b82240c58b2a1218ce3a",
+    "tool": "run.py"
+  },
+  "role": "updates the four wheel contact points and the two ground heights from the body yaw and the two cosines before the cornering and contact steps",
+  "section": "The vehicle state chain",
   "size": 464,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "wheel_contact_update_"
 }

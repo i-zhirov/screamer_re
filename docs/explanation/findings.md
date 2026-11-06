@@ -14740,3 +14740,79 @@ temporary `-od` recipe.
   player_state_snapshot_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The wheel_contact_update module at 0x11a30
+
+- Observation: the original body at `0x11a30` holds 141 instructions and 461
+  bytes up to the `ret` at `0x11bfc`.  The next function starts at `0x11c00`, so
+  the store record keeps the 464-byte extent and sets no function size.  The
+  record sets the instruction count 141.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11a30 --count 141` and
+  `tools/rebuild/functions/0x11a30.json`.
+- Observation: the two direct callers are the second player step group at
+  `0x15ab8` through the call at `0x15aec` and the cornering body at `0x16b98`
+  through the call at `0x16c92`.  The step group runs on the player object at
+  object-3 offset `0xf91c` after the physics group at `0x15a80` and before
+  `player_car_cornering_update` at `0x16ca0` and `player_car_contact_update` at
+  `0x166a8`.  The five view groups call the step group, so the record takes the
+  section `The vehicle state chain`.
+  Evidence: the direct call sweep for `0x11a30`, the call at `0x15aec` in the
+  group at `0x15ab8`, and the call at `0x16c92` in the body at `0x16b98`.
+- Observation: the function forms the absolute cosine of `+0x4d0` and the
+  absolute cosine of `+0x4c8` through `0x4da66`.  It clears the wheel flag
+  `+0x2f0` and walks the four 0x54-byte wheel units at `+0x194`.
+  Evidence: the block at `0x11a3d` through `0x11a8f` and the loop at `0x11a92`
+  through `0x11bf0`.
+- Observation: a unit holds the two local offsets at `+0x18` and `+0x20`, the
+  two contact pairs at `+0x00`, `+0x08`, `+0x0c`, and `+0x14`, the two ground
+  heights at `+0x24` and `+0x28`, and the surface flag at `+0x2c`.
+  Evidence: the reads at `0x11aaf` and `0x11ac0` and the stores at `0x11b02`,
+  `0x11b1d`, `0x11b3f`, `0x11b61`, `0x11ba8`, `0x11bc5`, and `0x11be7`.
+- Observation: for each unit the function scales the two offsets by the two
+  cosines, truncates them through `0x4d9f4`, and rotates the pair through
+  `0x2218c` by the negative yaw `+0x4cc` plus the delta `+0x128`.  It adds
+  `+0x4b0` and `+0x4b8` and stores the first contact pair through the globals
+  `0x8038` and `0x8040`.
+  Evidence: the block at `0x11aac` through `0x11b26`.
+- Observation: on a hit from the map collision check at `0x11c00` the first
+  ground height `+0x24` takes the global `0xc72c`, the surface flag `+0x2c`
+  takes the compare of the global `0x8024` with `0x65`, and the wheel flag
+  `+0x2f0` takes the even-unit surface bit.  The function then rotates the same
+  pair by the negative yaw alone and stores the second contact pair through the
+  same two globals, and a hit sets the second ground height `+0x28`.
+  Evidence: the block at `0x11b2b` through `0x11bea`.
+- Inference: the four wheel units, the two contact pairs, the two ground
+  heights, the surface flag, and the two callers support the name
+  `wheel_contact_update`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the conversions to an integer use the Watcom helper at
+  `0x4d9f4`, which truncates toward zero.  The cosine uses the routine at
+  `0x4da66`.  The harness links no math library, so the local
+  `wheel_contact_update_fpu.asm` supplies `cos` and `fabs` and makes `__CHP`
+  truncate toward zero.  The original has the EBP frame, so the module builds
+  with `-of+`.
+  Evidence: `tools/rebuild/wheel_contact_update_fpu.asm` and the block at
+  `0x11aac` through `0x11acb`.
+- Observation: the harness holds the player object, the four wheel units, the
+  two contact globals, the ground height, the surface value, and the two callee
+  stubs.  The six paths cover the no-collision path, the collision with the
+  surface value `0x65`, the collision with another surface value, the clear of
+  a preset wheel flag, the two rotation angles, and the absolute cosine of pi.
+  The output holds the markers `0` through `5` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/wheel_contact_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module wheel_contact_update`,
+  `work/rebuild/wcu.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11a30`.
+- Observation: the rebuilt module holds 455 bytes and 141 decoded instructions.
+  The identity check stays open at 31 of 141 instructions and 15 of 455 bytes
+  because V2 saves the frame first, keeps the object in `ebx` and the unit in
+  `ecx`, and uses other local offsets.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11a30 --count 141 --rebuilt work/rebuild/wcu.exe
+  --rebuilt-map work/rebuild/wheel_contact_update.map --rebuilt-symbol
+  wheel_contact_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

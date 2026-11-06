@@ -300,7 +300,7 @@ reproduce the original bytes.
 | `0x27c34` | `credits_scroll` (done) | 466 | 133 | 3 | 7 |
 | `0x17408` | `car_proximity_pass` (done) | 466 | 133 | 4 | 5 |
 | `0x1ed04` | `player_state_snapshot` (done) | 465 | 115 | 0 | 17 |
-| `0x11a30` | unnamed | 461 | 141 | 8 | 21 |
+| `0x11a30` | `wheel_contact_update` (done) | 461 | 141 | 8 | 21 |
 | `0x2b494` | unnamed | 457 | 118 | 5 | 14 |
 | `0x1e914` | unnamed | 452 | 160 | 1 | 123 |
 | `0x23038` | unnamed | 437 | 148 | 1 | 19 |
@@ -308,7 +308,7 @@ reproduce the original bytes.
 
 ## Position
 
-One hundred eighty-six modules carry a recipe and a result: the twelve Phase A modules,
+One hundred eighty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -379,5 +379,6 @@ and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`,
 and the Phase L modules `car_collision_pass` at `0x1d00c`,
 `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
 `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
-`car_proximity_pass` at `0x17408`, and `player_state_snapshot` at `0x1ed04`.
-The next unnamed function is `0x11a30`.
+`car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+and `wheel_contact_update` at `0x11a30`.
+The next unnamed function is `0x2b494`.

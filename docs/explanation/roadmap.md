@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred eighty-six named modules are rebuilt with the harness and the
+  progress: one hundred eighty-seven named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -129,9 +129,10 @@ current host.
   `0x1517c`, and the Phase L modules `car_collision_pass` at `0x1d00c`,
   `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
   `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
-  `car_proximity_pass` at `0x17408`, and `player_state_snapshot` at `0x1ed04`;
+  `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+  and `wheel_contact_update` at `0x11a30`;
   twenty-nine modules are verified, one is matching, and one hundred and
-  fifty-six rebuilds hold the recorded difference; the `video_fill`,
+  fifty-seven rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -273,10 +274,11 @@ The plan follows the size order, starting with the smallest functions.
     and the Phase L modules `car_collision_pass` at `0x1d00c`,
     `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
     `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
-    `car_proximity_pass` at `0x17408`, and `player_state_snapshot` at `0x1ed04`
+    `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+    and `wheel_contact_update` at `0x11a30`
     are done;
     the result is twenty-nine verified modules, one matching module, and one
-    hundred and fifty-six open rebuilds).
+    hundred and fifty-seven open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11
