@@ -1,0 +1,38 @@
+{
+  "exe": "pccrn.exe",
+  "map": "player_car_cornering_update.map",
+  "name": "player_car_cornering_update",
+  "run": {
+    "command": "pccrn.exe > pccrn.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "pccrn.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_cornering_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_car_cornering_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_cornering_update_main.c"
+    }
+  ]
+}

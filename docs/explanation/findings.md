@@ -12921,6 +12921,74 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The player_car_cornering_update module at 0x16ca0
+
+- Observation: the original body at `0x16ca0` holds 182 instructions and 657
+  bytes up to the `ret` at `0x16f30`.  The next function starts at `0x16f34`,
+  so the store record keeps the 660-byte extent and sets no function size.  The
+  identity check uses 182 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16ca0 --count 182` and
+  `tools/rebuild/functions/0x16ca0.json`.
+- Observation: the only direct caller is at `0x15af4`.  The call sits in the
+  player physics group at `0x15ab8`.  The group runs on the player object at
+  object-3 offset `0xf91c`, and the five view groups at `0x2003c`, `0x201d0`,
+  `0x202c0`, `0x20360`, and `0x203c4` call the group.  The module therefore
+  takes the section `The vehicle state chain`.
+  Evidence: the direct call sweep for `0x16ca0`, the disassembly at `0x15ab8`
+  through `0x15b04`, and the call sites at `0x200e0`, `0x20209`, `0x2032b`,
+  `0x20398`, and `0x203fc`.
+- Observation: the function publishes `+0x4b0` and `+0x4b8`, calls the nearest
+  node search at `0x120c0`, and copies the track heading `DAT_00108048` to
+  `+0x13c`.  It forms the heading error between the car heading `+0x4cc` and the
+  track heading, folds the error into 0 through pi/2, and scales it to 0
+  through 1.  The constants pi, -pi, and pi/2 sit at object-3 offsets `0x768`,
+  `0x76c`, and `0x770`.
+  Evidence: the blocks at `0x16caa` through `0x16d6e` and the nearest node
+  store at `0x1234c`.
+- Observation: a speed `+0x50c` times the error above `+0x180` sets the effect
+  state `+0x148` to 2 through `0x19478` when the flag `+0x7b0` is clear.  The
+  function normalizes the velocity `+0x44` and `+0x4c` into `+0x550` and
+  `+0x558`.  It stores the lateral rate `+0x54c` from the sine at `0x4da72`,
+  the speed, the arc tangent at `0xc21e2` with 4.0, and 2000.0, and it clamps
+  the rate at 5000.0.  It removes the speed loss from `+0x50c` with the double
+  0.9 at object-3 offset `0x784` and stores the heading rate `+0x548` from
+  `+0xc4` minus `+0x6c` with 5.0 at offset `0x78c`.
+  Evidence: the blocks at `0x16d71` through `0x16ec0`.
+- Observation: the function clears `+0x110`, `+0x4f0`, and `+0x4f4`.  It clears
+  the filtered slip `+0x128` when `+0x170` is clear.  It keeps the type-4 table
+  entry `+0x7d4` through the acquire at `0x1f7ac` when the state did not change.
+  Evidence: the blocks at `0x16ec0` through `0x16f30`.
+- Inference: the caller position in the physics group, the heading error
+  against the nearest track node, the lateral rate and the heading rate that
+  `player_car_view_update` at `0x16f34` applies, the speed loss, the skid
+  state, and the table entry support the name `player_car_cornering_update`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the sine at `0x4da72`, the arc tangent at
+  `0xc21e2`, and the square root at `0x22bec`.  The harness links no math
+  library, so the local FPU stub supplies `sin`, `atan2`, and `sqrt`.  The
+  module converts no value to an integer, so `__CHP` stays a bare return.  The
+  original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_car_cornering_update_fpu.asm` and
+  `tools/rebuild/modules/player_car_cornering_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the two early flags, the normal path,
+  the skid trigger, the blocked trigger, the heading wrap, the lateral clamp,
+  the kept slip, and the speed clamp.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_cornering_update`, `work/rebuild/pccrn.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x16ca0`.
+- Observation: the identity check stays open at 29 of 182 instructions and 38
+  of 649 bytes.  The V2 toolchain saves the registers in another order and uses
+  another local layout.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x16ca0 --count 182 --rebuilt work/rebuild/pccrn.exe
+  --rebuilt-map work/rebuild/player_car_cornering_update.map --rebuilt-symbol
+  player_car_cornering_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The menu_text_update module at 0x29918
 
 - Observation: the original body at `0x29918` holds 174 instructions and 657

@@ -262,12 +262,12 @@ These are the next unnamed game functions in the object, in size order.
 | `0x2c188` | `track_select_screen` (done) | 679 | 164 | 12 | 12 |
 | `0x1bbc8` | `choice_load` (done) | 673 | 189 | 4 | 0 |
 | `0x29918` | `menu_text_update` (done) | 657 | 174 | 5 | 6 |
-| `0x16ca0` | unnamed | 657 | 182 | 6 | 66 |
+| `0x16ca0` | `player_car_cornering_update` (done) | 657 | 182 | 6 | 66 |
 | `0x23420` | unnamed | 633 | 173 | 22 | 14 |
 
 ## Position
 
-One hundred sixty-five modules carry a recipe and a result: the twelve Phase A modules,
+One hundred sixty-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -327,5 +327,6 @@ and `race_records_screen` at `0x2d4b8`, and the Phase I module
 `player_car_suspension_update` at `0x168b4`, `map_object_place` at `0x2b044`,
 and `car_collision_response` at `0x17828`, and `track_nearest_node` at
 `0x120c0`, and `car_select_screen` at `0x2bedc`, and `track_select_screen` at
-`0x2c188`, and `choice_load` at `0x1bbc8`, and `menu_text_update` at `0x29918`.
-The next unnamed function is `0x16ca0`.
+`0x2c188`, and `choice_load` at `0x1bbc8`, and `menu_text_update` at `0x29918`,
+and `player_car_cornering_update` at `0x16ca0`.
+The next unnamed function is `0x23420`.
