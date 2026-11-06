@@ -13424,3 +13424,78 @@ temporary `-od` recipe.
   view_transition_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The opponent_start module at 0x124c0
+
+- Observation: the original body at `0x124c0` holds 164 instructions and 545
+  bytes up to the `ret` at `0x126e0`.  The next function starts at `0x126e4`, so
+  the store record keeps the 548-byte extent and sets no function size.  The
+  body sweep stops earlier, so the record also sets the instruction count 164.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x124c0 --count 164` and
+  `tools/rebuild/functions/0x124c0.json`.
+- Observation: the three direct callers at `0x15b38`, `0x15b74`, and `0x15ba0`
+  are the vehicle groups at `0x15b0c`, `0x15b44`, and `0x15b80`.  The car path
+  runs the car proximity pass at `0x17408` first.  The traffic path runs the
+  nearby marker at `0x12424` and the traffic collision pass at `0x175dc` first.
+  All three groups run this function on the player object at object-3 offset
+  `0xf91c`, so the record takes the section `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x124c0`, the block at `0x15b25` through `0x15b38`, the block at `0x15b61`
+  through `0x15b74`, and the block at `0x15b9d` through `0x15ba0`.
+- Observation: the function walks the `DAT_0010d6f8` opponent records of 0x40
+  bytes at `DAT_0010d700`.  A record with a set run flag `+0x38` is skipped.
+  Otherwise the record position at `+0`, `+4`, and `+8` must stay within 1500
+  units of the player position at `+0x4b0`, `+0x4b4`, and `+0x4b8` on every
+  axis.  The setup at `0x1517c` writes the same record array from the route
+  table `DAT_0010d6f4`, so the records are the opponent cars.
+  Evidence: the block at `0x124ca` through `0x12551` and the setup at
+  `0x1517c` through `0x152b0`.
+- Observation: for a record in range the function sets the contact distance at
+  `+0x560` to the player radius `+0x544` plus 100.  It then tests the two
+  12-byte player body points at `+0x52c` and `+0x538` against the record
+  position and stores the truncated distance at `+0x55c`.  A distance below the
+  contact distance by less than 100 units starts the record.
+  Evidence: the block at `0x12553` through `0x12641`, the square root at
+  `0x22bec`, and the truncating helper at `0x4d9f4`.
+- Observation: a started record takes the sine and the negated cosine of the
+  player heading `+0x4cc` into `+0x24` and `+0x2c`.  The vertical speed `+0x34`
+  takes the player speed `+0x50c` times the double 0.02 at object-3 offset
+  `0x418`.  The speed `+0x30` takes the player speed times the double 1.4 at
+  object-3 offset `0x420`.  The first start increments the player counter
+  `+0x7b8`, sets the flags `+0x3c` and `+0x38`, and calls `table_lookup` at
+  `0x1f718` with 5.
+  Evidence: the block at `0x12641` through `0x126d4` and the doubles at
+  object-3 offsets `0x418` and `0x420`.
+- Inference: the caller chain, the opponent record array, the player body
+  points, and the start of the nearby record support the name `opponent_start`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` at `0x4da72`, `cos` at `0x4da66`,
+  `sqrt` at `0x22bec`, and the truncating helper at `0x4d9f4`.  This harness
+  links no math library, so `opponent_start_fpu.asm` supplies `sin`, `cos`, and
+  `sqrt` from the hardware and makes `__CHP` truncate toward zero.  The two
+  scales arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/opponent_start_fpu.asm` and
+  `tools/rebuild/modules/opponent_start.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the empty list, the three range guards,
+  the contact-distance boundary, the first and the second body point, an
+  already running record, a record that started before, and the truncation of
+  the two distances sqrt(2) and sqrt(13) to 1 and 3.
+  Evidence: `python3 tools/rebuild/harness.py run --module opponent_start`,
+  `work/rebuild/ostart.txt`, and `python3 tools/rebuild/run.py run --function
+  0x124c0`.
+- Observation: the rebuilt module holds 509 bytes.  The identity check stays
+  open at 18 of 164 instructions and 18 of 509 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `ecx` and the end pointer in
+  `edi`, and forms the absolute values with `neg` instead of the original `cdq`
+  sequence.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x124c0 --count 164 --rebuilt work/rebuild/ostart.exe
+  --rebuilt-map work/rebuild/opponent_start.map --rebuilt-symbol
+  opponent_start_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
