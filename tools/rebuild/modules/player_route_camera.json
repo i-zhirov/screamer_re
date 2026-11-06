@@ -1,0 +1,37 @@
+{
+  "exe": "prcam.exe",
+  "map": "player_route_camera.map",
+  "name": "player_route_camera",
+  "run": {
+    "command": "prcam.exe > prc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "prc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_route_camera.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_route_camera_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_route_camera_main.c"
+    }
+  ]
+}

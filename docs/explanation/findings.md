@@ -12291,3 +12291,64 @@ temporary `-od` recipe.
   --original-address 0x18528 --count 168 --rebuilt work/rebuild/pcrsmod.exe
   --rebuilt-map work/rebuild/player_car_reset_update.map --rebuilt-symbol
   player_car_reset_update_`.
+
+## The player_route_camera module at 0x1a630
+
+- Observation: the original body at `0x1a630` holds 243 instructions and 768
+  bytes up to the `ret` at `0x1a92f`.  The record keeps the 768-byte extent,
+  which ends at the next function `car_camera` at `0x1a930`, and sets no
+  function size.  The identity check uses 243 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1a630 --count
+  243` and `tools/rebuild/functions/0x1a630.json`.
+- Observation: the only direct caller at `0x19ec4` is the view mode dispatch at
+  `0x19e78`.  The dispatch selects this function for the render mode 3 and
+  passes the player object at object-3 offset `0xf91c` in `eax` and the player
+  view object at `DAT_00110a20` in `edx`.  The player update at `0x19ab0` and
+  `player_view_setup` at `0x19ae8` both call the dispatch.
+  Evidence: the direct call sweep for `0x1a630`, the dispatch table at
+  `0x19e50`, and the calls at `0x19ac2` and `0x19c80`.
+- Observation: the function refreshes the two list slots at `+0x460` and
+  `+0x468` through the helper at `0x117fc`.  It then walks the 0x38-byte route
+  records below the pointer `DAT_0010f910`, the RPL route.  The count is at
+  `+0x1c`, and each record holds the position at `+0x04` (x), `+0x08` (z), and
+  `+0x0c` (y).  The loop picks the nearest record by the horizontal distance
+  from the car position at `+0x4b0` and `+0x4b8`, and a zero distance does not
+  take part.
+  Evidence: the calls at `0x1a653` and `0x1a66b`, and the loop at `0x1a67c`
+  through `0x1a71c`.
+- Observation: the function forms the yaw at `+0x34` and the pitch at `+0x30`
+  of the view from the chosen record.  It copies the record position into the
+  view at `+0x00`, `+0x04`, and `+0x08` and the two saved copies at `+0x0c` and
+  `+0x14`.  When the total distance exceeds 1500 units, it moves the view point
+  along the yaw and the pitch by the excess.  The constants are 2pi at
+  object-3 offset `0x91c`, -pi/2 at `0x920`, and -1500.0 at `0x924`.
+  Evidence: the blocks at `0x1a71c` through `0x1a92f` and the data at
+  object-3 offsets `0x91c`, `0x920`, and `0x924`.
+- Observation: the route table is the `MAP1RPL.SPL` member.  The loader at
+  `0x14fb8` builds the name with the suffix `%srpl` at object-3 offset `0x900`
+  and stores the pointer at `DAT_0010f910`.  The loader also stores the
+  `%scam` route at `DAT_0010f90c`, and the sibling `car_camera` at `0x1a930`
+  walks that CAM route in the same way.
+  Evidence: the format strings at object-3 offsets `0x60f` and `0x615`, the
+  loader calls at `0x150b6` and `0x150cd`, and the `MAP1I.DAT` member list.
+- Inference: the view mode dispatch, the `%srpl` route walk, and the view block
+  write support the name `player_route_camera`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the route table, the node array, the car
+  object, the view object, the three constants, and the list refresh stub.  It
+  covers the move, the reflected yaw, the distance below the limit, the exact
+  limit, the zero-distance skip, the nearest of two nodes, and the car offset.
+  The behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_route_camera` and `work/rebuild/prc_out.txt`.
+- Observation: the identity check stays open at 46 of 243 instructions and 27
+  of 768 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another FPU stub form.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x1a630 --count 243 --rebuilt work/rebuild/prcam.exe
+  --rebuilt-map work/rebuild/player_route_camera.map --rebuilt-symbol
+  player_route_camera_`.
