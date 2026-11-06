@@ -1,0 +1,35 @@
+{
+  "exe": "moplace.exe",
+  "map": "map_object_place.map",
+  "name": "map_object_place",
+  "run": {
+    "command": "moplace.exe > mop_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mop_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_place.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "map_object_place_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_place_main.c"
+    }
+  ]
+}

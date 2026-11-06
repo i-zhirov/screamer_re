@@ -255,7 +255,7 @@ These are the next unnamed game functions in the object, in size order.
 | `0x1a630` | `player_route_camera` (done) | 768 | 243 | 17 | 104 |
 | `0x1821c` | `player_track_node_update` (done) | 756 | 220 | 6 | 27 |
 | `0x168b4` | `player_car_suspension_update` (done) | 740 | 219 | 5 | 80 |
-| `0x2b044` | unnamed | 708 | 222 | 4 | 25 |
+| `0x2b044` | `map_object_place` (done) | 708 | 222 | 4 | 25 |
 | `0x17828` | unnamed | 708 | 183 | 8 | 71 |
 | `0x120c0` | unnamed | 695 | 201 | 0 | 9 |
 | `0x2bedc` | unnamed | 682 | 171 | 12 | 12 |
@@ -267,7 +267,7 @@ These are the next unnamed game functions in the object, in size order.
 
 ## Position
 
-One hundred fifty-eight modules carry a recipe and a result: the twelve Phase A modules,
+One hundred fifty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -324,5 +324,5 @@ and `player_car_link` at `0x15c1c`, `map_object_update` at `0x2b9cc`,
 and `race_records_screen` at `0x2d4b8`, and the Phase I module
 `player_car_reset_update` at `0x18528`, and the Phase J modules
 `player_route_camera` at `0x1a630`, `player_track_node_update` at `0x1821c`,
-and `player_car_suspension_update` at `0x168b4`.
-The next unnamed function is `0x2b044`.
+`player_car_suspension_update` at `0x168b4`, and `map_object_place` at `0x2b044`.
+The next unnamed function is `0x17828`.

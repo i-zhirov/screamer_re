@@ -11358,6 +11358,76 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee name in the harness stay inferred.
 
+## The map_object_place module at 0x2b044
+
+- Observation: the original body at `0x2b044` holds 222 instructions and 708
+  bytes up to the `ret` at `0x2b307`.  The next function starts at `0x2b308`, so
+  the store record keeps the 708-byte extent and sets no function size.  The
+  identity check uses 222 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b044 --count 222` and
+  `tools/rebuild/functions/0x2b044.json`.
+- Observation: the direct call sweep finds one caller at `0x29a88` in the race
+  state update at `0x29918`.  The caller walks the selected menu lines, reads
+  the line descriptor at `DAT_0011fad4`, and takes the string from the pointer
+  arrays at `DAT_0011fb80`.
+  Evidence: the direct call sweep for `0x2b044`, the loop at `0x29a27` through
+  `0x29ab4`, and the call at `0x29a88`.
+- Observation: the `map_object_update` module at `0x2b9cc` reads the records
+  that this function writes.  The update runs in the same caller, and the
+  records hold the fields `+0x08`, `+0x34` through `+0x60` in the layout that
+  the update reads.  The function fills the records from a menu string.
+  Evidence: `tools/rebuild/map_object_update.c` and the disassembly of
+  `0x2b109` through `0x2b27b`.
+- Observation: the function computes the line start.  A centered line starts at
+  `(length - 1) * 320`, and another line starts at `0x1200 - (+0x08) * 640`.
+  The vertical position is `0x820 - (+0x04) * 384`.
+  Evidence: the blocks at `0x2b053` through `0x2b0c0`.
+- Observation: the function walks the string until the first code outside
+  `0x20` through `0x7f`.  For each code it takes the first free record of the
+  0x50 records at `DAT_001db78`, each 0x64 bytes long.  It stores the code minus
+  0x20 at `+0x08`, the line id at `+0x04`, the target x and y at `+0x40` and
+  `+0x44`, the start x and y at `+0x34` and `+0x38` or the target x and y, the
+  start z at `+0x3c`, the state flag at `+0x0c`, the angle pi or 0 at `+0x10`,
+  the amplitudes at `+0x4c` and `+0x50`, the progress 1.0 at `+0x58`, the
+  direction 1.0 at `+0x5c`, the angle rate 1.0 at `+0x1c`, the zero fields, and
+  the timer at `+0x60`.
+  Evidence: the blocks at `0x2b0cd` through `0x2b27b`.
+- Observation: the timer rises by 0.01 for each placed code.  The function then
+  rotates the line origin by the angle at `+0x28` for the next code.  The new x
+  is `y * sin + x * cos`, and the new y is `y * cos - x * sin`, truncated
+  toward zero.
+  Evidence: the blocks at `0x2b27b` through `0x2b2fc`.
+- Inference: the function places one menu line into the map object records.  The
+  caller, the record layout, and the update reader support the name
+  `map_object_place`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the cosine helper at `0x4da66`, the sine
+  helper at `0x4da72`, and the truncate helper at `0x4d9f4`.  The harness links
+  no math library, so the local FPU stub supplies `cos` and `sin` from the
+  hardware and makes `__CHP` truncate toward zero.  The timer step arrives
+  through a global, because an FPU memory operand of a literal reads the
+  constant pool at a low address in this toolchain.
+  Evidence: `tools/rebuild/map_object_place_fpu.asm` and
+  `tools/rebuild/map_object_place_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the centered line, the left line with
+  the start override and the pi/2 rotation, the occupied record, the low code
+  stop, and the high code stop.
+  Evidence: `python3 tools/rebuild/harness.py run --module map_object_place`,
+  `work/rebuild/mop_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2b044`.
+- Observation: the rebuilt module holds 222 decoded instructions and 671 bytes.
+  The identity check stays open at 47 of 222 instructions and 15 of 671 bytes.
+  The V2 toolchain uses a different prologue, a different instruction order, and
+  a different local layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b044 --count 222 --rebuilt work/rebuild/moplace.exe
+  --rebuilt-map work/rebuild/map_object_place.map --rebuilt-symbol
+  map_object_place_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The map_object_update module at 0x2b9cc
 
 - Observation: the original body at `0x2b9cc` holds 310 instructions and 1121
