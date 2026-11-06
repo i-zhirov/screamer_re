@@ -13561,3 +13561,68 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x1af70`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The sound_emitter_update module at 0x21b9c
+
+- Observation: the original body at `0x21b9c` holds 153 instructions and 524
+  bytes up to the `ret` at `0x21da7`.  The next function starts at `0x21da8`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 153.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21b9c --count 153` and
+  `tools/rebuild/functions/0x21b9c.json`.
+- Observation: the only direct caller at `0x20b0a` sits in the opponent update
+  at `0x20954`.  The caller passes the record and 1 when its own argument is
+  zero, so the sound update runs only on that path.
+  Evidence: the sweep of every call site for `0x21b9c` and the block at
+  `0x20afc` through `0x20b0f`.
+- Observation: the function forms the distance from the camera position
+  `DAT_0013ccc` and `DAT_0013cd0` and the record position at `+0x20` and
+  `+0x28`.  It shifts each axis delta by 3, squares the two values, and scales
+  the square root from `0x22bec` by the double 8.0 at object-3 offset `0xd21`.
+  Evidence: the block at `0x21bc3` through `0x21c10`.
+- Observation: a clear sound at `+0x38` starts below the float 40000.0 at
+  object-3 offset `0xd29`.  It stores the truncated distance at `+0x3c` and
+  gets the id from the table through `0x1f718` with `DAT_0018d88` plus the
+  index at `+0x14`.  A set sound stops through `0x1f880` above 40000.0.
+  Evidence: the block at `0x21c13` through `0x21c68`.
+- Observation: a running sound copies the float at `+0xc` to `+0x40`, rotates
+  the camera delta by `DAT_0013cd4` through `0x2218c`, forms the pitch with the
+  float 9.0 at `0xd2d` and 65536.0 at `0xd31`, the squared volume with 32767.0
+  at `0xd35`, and the pan with the double 32767.0 at `0xd39`, and sets the
+  three values through `0x1f7e4`, `0xc667d`, and `0xc6920`.
+  Evidence: the block at `0x21c6b` through `0x21d9b`.
+- Observation: the low bit of `DAT_0011d261` and the flag `DAT_0010a8c`
+  suppress the three set calls.  The function still rotates and stores the new
+  distance.
+  Evidence: the test at `0x21d5a` through `0x21d6a`.
+- Inference: the caller, the distance gate, the sound id, the pitch, the
+  volume, and the pan support the name `sound_emitter_update`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the conversions to an integer use the Watcom helper at
+  `0x4d9f4`, which truncates toward zero.  The shared `fpu_stub.asm` leaves
+  round-to-nearest, so the module uses the local truncating `__CHP` stub in
+  `sound_emitter_update_fpu.asm`.
+  Evidence: the five helper calls in the body and
+  `tools/rebuild/sound_emitter_update_fpu.asm`.
+- Observation: the harness holds the record, the camera position and angle, the
+  table base and owner, the two flags, the six constants, and the seven callee
+  stubs.  The twelve paths cover the two returns, the start, the stop, the far
+  clear sound, the running sound, the store gate, the 40000.0 boundary on both
+  sound states, the clear mute flag, and the negative pitch.  The output holds
+  the markers `0` through `9`, `a`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_emitter_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_emitter_update`, and
+  `work/rebuild/sndemit.txt`.
+- Observation: the rebuilt module holds 514 bytes.  The identity check stays
+  open at 22 of 153 instructions and 17 of 514 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `ecx`, folds the two axis squares
+  into `imul`, and uses other local offsets.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21b9c --count 153 --rebuilt work/rebuild/sndemit.exe
+  --rebuilt-map work/rebuild/sound_emitter_update.map --rebuilt-symbol
+  sound_emitter_update_` and `python3 tools/rebuild/run.py run --function
+  0x21b9c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
