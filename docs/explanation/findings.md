@@ -12920,3 +12920,76 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/choice_load.map --rebuilt-symbol choice_load_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The menu_text_update module at 0x29918
+
+- Observation: the original body at `0x29918` holds 174 instructions and 657
+  bytes up to the `ret` at `0x29ba8`.  The next function starts at `0x29bac`,
+  so the store record keeps the 660-byte extent and sets no function size.  The
+  identity check uses 174 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29918 --count 174` and
+  `tools/rebuild/functions/0x29918.json`.
+- Observation: the only direct caller is at `0x29581`.  The call sits in case 0
+  of the dispatcher `race_state_update` at `0x29564`, and `race_frame` at
+  `0x2807c` calls the dispatcher every frame.  The jump table at linear
+  `0x19540` maps the state 0 to `0x29918`.
+  Evidence: the direct call sweep for `0x29918`, the disassembly at `0x29564`
+  through `0x2958a`, and the jump table at `0x19540`.
+- Observation: when the key `DAT_0011fb64` differs from the menu index
+  `DAT_0011fb60`, the function resets the 0x50 records at `DAT_001db78` through
+  0x2b450 and counts the active lines of the table `DAT_002de8[DAT_0011fb60]`
+  into `DAT_0011fb6c`.  Each 16-byte line record holds an offset at `+0x00` and
+  an offset at `+0x08`, and their sum indexes the string pointer table at
+  `DAT_001fb80`.
+  Evidence: the blocks at `0x29935` through `0x2999c` and the loop at `0x29a27`
+  through `0x29aaf`.
+- Observation: the line descriptor at `DAT_0011fad4` holds the line at `+0x00`,
+  the row at `+0x04`, the centered flag 1 at `+0x0c`, the selection flag at
+  `+0x10`, the five values of the 8-entry table at `0x221c` at `+0x14` through
+  `+0x24`, the angle 0.09 at `+0x28`, and the timer 0 at `+0x2c`.  The row
+  starts at `8 - DAT_0011fb6c`, the line rises by one per line, and the row
+  rises by two per line.  The table index `DAT_0011fabc` wraps above 7.
+  Evidence: the blocks at `0x2999e` through `0x29ac8` and the table at
+  `0x221c`.
+- Observation: the function marks the selected line through 0x2b308 and
+  advances the phase `DAT_0011d248` by the frame delta `DAT_0018e08` times the
+  constant at `0xf3b`.  The constant is 3 pi.  A phase above the constant at
+  `0xf3f` resets to zero.  The constant is 8 pi.
+  Evidence: the call at `0x29ada`, the FPU block at `0x29adf` through
+  `0x29b04`, and the float values `0x4116cbe4` and `0x41c90fdb` at object-3
+  offsets `0xf3b` and `0xf3f`.
+- Observation: when the key `DAT_0011fb64` is -2, the function runs 0x2b494 on
+  every record, restores the key to `DAT_0011fb60`, and clears the overlay word
+  `DAT_0011fac0`.  Otherwise it runs `map_object_update` at `0x2b9cc` on every
+  record and stores the current key when the update leaves the key unchanged.
+  Evidence: the blocks at `0x29b0a` through `0x29b9b`.
+- Inference: the function places and animates the text lines of the selected
+  menu as map objects.  The caller, the string table, the line descriptor, and
+  the two map object modules support the name `menu_text_update`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the constants at `0xf3b` and `0xf3f` arrive through globals,
+  because the minimal image does not load the constant segment.  The module uses
+  the shared `fpu_stub.asm`, because it performs no float-to-integer
+  truncation.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/menu_text_update.c` and
+  `tools/rebuild/modules/menu_text_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the page change, the unchanged key, the
+  finish path, the phase wrap, the counter wrap, the empty menu, and the kept
+  -2 key.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_text_update`,
+  `work/rebuild/mtu_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x29918`.
+- Observation: the rebuilt module holds 174 decoded instructions and 605
+  bytes.  The identity check stays open at 36 of 174 instructions and 27 of 605
+  bytes.  V2 saves the registers after the frame, folds the record stride into
+  an immediate, and loads the table values in another order.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29918 --count 174 --rebuilt work/rebuild/menutxt.exe
+  --rebuilt-map work/rebuild/menu_text_update.map --rebuilt-symbol
+  menu_text_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
