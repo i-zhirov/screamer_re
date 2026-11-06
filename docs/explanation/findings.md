@@ -5335,9 +5335,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module hud_update` and
   `work/rebuild/hud_out.txt`.
 - `stream_status` at `0x4c7e0` holds 21 instructions and 38 bytes: the six register saves, the
-  frame, the two local slots, the word read at `stream + 0x70`, and the epilogue.  The rebuild
-  with `-of+ -od` holds 21 instructions and 39 bytes, and the `bios_video` difference set recurs:
+  frame, the two local slots, the word read at `stream + 0x70`, and the epilogue.  The C rebuild
+  with `-of+ -od` held 21 instructions and 39 bytes, and the `bios_video` difference set recurred:
   the prologue order, the local offsets, and the `lea` epilogue against the original `mov esp,ebp`.
+  The hand-written assembly source below holds the original shape exactly.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c7e0 --count 21` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x4c7e0
   --rebuilt work/rebuild/stsmod.exe --rebuilt-map work/rebuild/stream_status.map --rebuilt-symbol
@@ -5358,10 +5359,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   stub cannot provide them; the stub source `fpu_stub.asm` stands in for the FPU control init and
   the 387 emulator init.
   Evidence: `tools/rebuild/fpu_stub.asm` and the link errors.
-- The identity check stays open for `stream_status` and `race_state_update`, so the store records
-  the status `rebuilt` for both.
-  Evidence: `python3 tools/rebuild/run.py run --function 0x4c7e0` and
-  `python3 tools/rebuild/run.py run --function 0x29564`.
+- The identity check stays open for `race_state_update`, so the store records the status
+  `rebuilt` for it.  The `stream_status` record is `verified`; see the finding "The hand-written
+  stream_status assembly matches the original".
+  Evidence: `python3 tools/rebuild/run.py run --function 0x29564`.
 
 ## The record-run budget of the pipeline
 
@@ -6430,6 +6431,41 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   and a behavior pass.  The record holds the instruction count 14 and marks the
   source language with `implementation: assembly`.
   Evidence: `python3 tools/rebuild/store.py set --function 0x2f9b0
+  --implementation assembly`.
+
+## The hand-written stream_status assembly matches the original
+
+- The `stream_status` module now uses the hand-written
+  `tools/rebuild/stream_status.asm` source with the `wasm` assembler.  The C
+  source `stream_status.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/stream_status.json` lists the assembly
+  source and the unchanged `stream_status_main.c` harness.
+  Evidence: `tools/rebuild/modules/stream_status.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x4c7e0 --count 21` prints 21
+  instructions and 38 bytes, from `push ebx` to `ret`.  The assembly follows
+  that sequence instruction by instruction.  The parameter arrives in `EAX`
+  and the function keeps it in the local slot `[ebp-4]`.
+- The assembler can choose another encoding for `mov ebp,esp`, `mov esp,ebp`,
+  and `sub esp,8`.  The original uses the store encodings (`89 e5` and `89 ec`)
+  and the 32-bit immediate form `81 ec 08 00 00 00`, so the source pins them
+  with `db` directives.
+  Evidence: `tools/rebuild/stream_status.asm`.
+- The rebuilt body holds 21 of 21 instructions and 38 bytes.  All 38 bytes are
+  equal.  The oracle verdict is `the modules are byte-identical`.  The strict
+  gate passes.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address
+  0x4c7e0 --count 21 --rebuilt work/rebuild/stsmod.exe --rebuilt-map
+  work/rebuild/stream_status.map --rebuilt-symbol stream_status_`.
+- The behavior check prints the two markers `V` and `D`: the module returns the
+  status word and the program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x4c7e0` and
+  `work/rebuild/sts_out.txt`.
+- The record `0x4c7e0` is `verified` with 21 of 21 instructions, 38 of 38 bytes,
+  and a behavior pass.  The record holds the instruction count 21 and marks the
+  source language with `implementation: assembly`.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x4c7e0
   --implementation assembly`.
 
 ## The rebuild framework

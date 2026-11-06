@@ -6,12 +6,14 @@
     "behavior"
   ],
   "confidence": "inferred",
+  "count": 21,
   "evidence": [
     {
       "kind": "note",
       "text": "returns the word at `stream + 0x70`"
     }
   ],
+  "implementation": "assembly",
   "module": "stream_status",
   "name": "stream_status",
   "notes": [],
@@ -26,23 +28,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
+        "bytes_equal": 38,
         "bytes_total": 38,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 18,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 21,
         "instructions_total": 21,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c7e0",
     "date": "2026-11-06",
-    "fingerprint": "sha256:5a6bff77b9accf1a14f5e4a5e41d6023bbdb53b73067d0d9c391f317e75258e2",
-    "source_digest": "sha256:014a1e90ae84ef03bcdc1b55fc6f15a5d18573c565a1b94ba058d2703fcf7c2c",
+    "fingerprint": "sha256:9060cdede56f52bb5dcc35d5fab213cda8fc9eaf19809389a65efdbe35a99866",
+    "source_digest": "sha256:6f59efd4f7445a93b225cb6be39c38cc3feb69ceab524b0c93b9b4ed0bb416af",
     "tool": "run.py"
   },
   "role": "returns the word at `stream + 0x70`",
   "section": "Resource loader",
   "size": 48,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "stream_status_"
 }

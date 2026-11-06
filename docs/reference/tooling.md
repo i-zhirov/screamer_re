@@ -370,7 +370,8 @@ The files:
 | `hud_update.asm` | the hand-written `hud_update` module: the two guards on the session state and the three overlay calls; the source pins the original `mov ebp,esp` encoding |
 | `hud_update.c` | the C reference version of the `hud_update` module, kept alongside the assembly; the V2 `-of+` build adds `mov esp,ebp` |
 | `hud_update_main.c` | the `hud_update` test harness: the session state and the overlay stubs |
-| `stream_status.c` | the rebuilt `stream_status` module: the word at `stream + 0x70` |
+| `stream_status.asm` | the hand-written `stream_status` module: the word at `stream + 0x70`; the source pins the original `mov ebp,esp`, `mov esp,ebp`, and `sub esp,8` encodings |
+| `stream_status.c` | the C reference version of the `stream_status` module, kept alongside the assembly; the V2 `-of+ -od` build changes the prologue order, the local offsets, and the epilogue |
 | `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
 | `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
 | `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
@@ -712,7 +713,10 @@ hand-written assembly for the same reason, because the V2 `-of+` epilogue adds
 `mov esp,ebp`; see the finding "The hand-written hud_update assembly matches
 the original".  The `music_bank_reset` module uses the hand-written assembly
 because the V2 `-of+` build drops the argument slot and its reloads; see the
-finding "The hand-written music_bank_reset assembly matches the original".
+finding "The hand-written music_bank_reset assembly matches the original".  The
+`stream_status` module uses the hand-written assembly because the V2 `-of+ -od`
+build changes the prologue order, the local offsets, and the epilogue; see the
+finding "The hand-written stream_status assembly matches the original".
 
 The module rebuild:
 
