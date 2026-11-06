@@ -13746,3 +13746,74 @@ temporary `-od` recipe.
   0x166a8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The opponent_path_update module at 0x20b1c
+
+- Observation: the original body at `0x20b1c` holds 166 instructions and 516
+  bytes up to the `ret 4` at `0x20d1d`.  The next function starts at `0x20d20`,
+  so the record keeps the 516-byte extent and sets no function size.  The
+  identity check uses 166 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20b1c --count 166` and
+  `tools/rebuild/functions/0x20b1c.json`.
+- Observation: the only direct caller at `0x20a12` is `opponent_update` at
+  `0x20954`.  It passes the state base `DAT_0010f174`, the path record at
+  `+0x44`, and the float at `+0xc` scaled by `DAT_00118e04`.  The caller is in
+  the object_update_all group, so the module takes the section
+  object_update_all callees.
+  Evidence: the call at `0x20a12` and `tools/rebuild/functions/0x20954.json`.
+- Observation: the path record holds the track index at `+0`, the node index at
+  `+4`, the segment phase at `+8`, and the direction flag at `+0xc`.  The callee
+  at `0x222e0` returns the curve speed from the control block at `+0x3c` and the
+  phase.  The phase advances by the frame step divided by the speed.
+  Evidence: the speed call at `0x20b35`, the divide at `0x20b3a`, and the add at
+  `0x20b40`.
+- Observation: when the phase reaches one, the function clears the phase.  A
+  clear direction flag sets the flag and holds the node.  A set direction flag
+  clears the flag and moves the node index through the next field at `+0x10` of
+  the 56-byte node.
+  Evidence: the gate at `0x20b49` through `0x20b51`, the flag block at
+  `0x20b64` through `0x20b71`, and the node block at `0x20b73` through
+  `0x20bab`.
+- Observation: the callee at `0x22378` evaluates the spline segment and writes
+  the target position and angle at `+0x60`, `+0x64`, and `+0x68`, and the next
+  control values at `+0x6c` and `+0x70`.  The function subtracts the distance
+  from the integer position `+0x10` and `+0x18` to the target from the frame
+  step, and it truncates the target into `+0x10`, `+0x14`, and `+0x18` through
+  the helper at `0x4d9f4`.
+  Evidence: the evaluation calls at `0x20bb6` and `0x20c19`, the distance block
+  at `0x20bbe` through `0x20be7`, and the truncation blocks at `0x20bea`
+  through `0x20c0c` and `0x20c1e` through `0x20c4e`.
+- Observation: the segment path copies the history values, takes the arc sine
+  from `0xc5e42` of the new lateral value at `+0x1c`, and forms the heading at
+  `+0x34` with pi/2 at object-3 offset `0xce1` or 2.5 pi at `0xce5`.  It wraps
+  the heading into one turn with 2 pi at `0xce9` and -2 pi at `0xced`.
+  Evidence: the copy block at `0x20c51` through `0x20c8a`, the arc sine at
+  `0x20c99`, the two heading branches at `0x20cb1` through `0x20cca`, and the
+  two wrap loops at `0x20cd9` through `0x20d17`.
+- Inference: the phase advance, the node walk, the spline evaluation, and the
+  heading form a path follower for the opponent records.  The caller and the
+  data flow support the name `opponent_path_update`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the path record, the state base, the node
+  block, the four constants, and the two curve stubs.  The five paths cover the
+  in-segment phase, the segment end with a clear direction flag, the segment
+  end with a set direction flag, the negative lateral branch, and the exact
+  phase one.  The output holds the markers `0` through `4` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/opponent_path_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_path_update`, and
+  `work/rebuild/opppath.txt`.
+- Observation: the rebuilt module holds 483 bytes and 166 instructions.  The
+  identity check stays open at 17 of 166 instructions and 18 of 483 bytes.  V2
+  puts the frame before the register saves, keeps the state in `ebx` and the
+  path in `ecx`, folds the node strides into `imul`, keeps the distance parts in
+  local floats, and calls the absolute value as a helper.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20b1c --count 166 --rebuilt work/rebuild/opppath.exe
+  --rebuilt-map work/rebuild/opponent_path_update.map --rebuilt-symbol
+  opponent_path_update_` and `python3 tools/rebuild/run.py run --function
+  0x20b1c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

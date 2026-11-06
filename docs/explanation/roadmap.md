@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred seventy-six named modules are rebuilt with the harness and the
+  progress: one hundred seventy-seven named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -122,9 +122,10 @@ current host.
   `0x175dc`, and `view_transition_update` at `0x19f00`, and `opponent_start` at
   `0x124c0`, and `spline_load` at `0x1af70`, and `sound_emitter_update` at
   `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`, and
-  `player_car_contact_update` at `0x166a8`;
+  `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
+  `0x20b1c`;
   twenty-three modules are verified, one is matching, and one hundred and
-  fifty-two rebuilds hold the recorded difference; the
+  fifty-three rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -254,10 +255,11 @@ The plan follows the size order, starting with the smallest functions.
     `0x175dc`, and `view_transition_update` at `0x19f00`, and
     `opponent_start` at `0x124c0`, and `spline_load` at `0x1af70`, and
     `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
-    and `player_car_contact_update` at `0x166a8`
+    and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
+    `0x20b1c`
     are done;
     the result is twenty-three verified modules, one matching module, and one
-    hundred and fifty-two open rebuilds).
+    hundred and fifty-three open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

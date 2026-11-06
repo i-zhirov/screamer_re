@@ -1,0 +1,35 @@
+{
+  "exe": "opppath.exe",
+  "map": "opponent_path_update.map",
+  "name": "opponent_path_update",
+  "run": {
+    "command": "opppath.exe > opppath.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "opppath.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_path_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "opponent_path_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_path_update_main.c"
+    }
+  ]
+}
