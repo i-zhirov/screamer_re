@@ -265,6 +265,25 @@ These are the next unnamed game functions in the object, in size order.
 | `0x16ca0` | `player_car_cornering_update` (done) | 657 | 182 | 6 | 66 |
 | `0x23420` | `race_hud_draw` (done) | 633 | 173 | 22 | 14 |
 
+### Phase K: next unnamed functions
+
+These are the next unnamed game functions in the object, in size order.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1a3b8` | unnamed | 631 | 179 | 14 | 58 |
+| `0x1e414` | unnamed | 590 | 162 | 8 | 44 |
+| `0x175dc` | unnamed | 587 | 165 | 5 | 11 |
+| `0x19f00` | unnamed | 577 | 178 | 11 | 54 |
+| `0x124c0` | unnamed | 545 | 164 | 5 | 16 |
+| `0x1af70` | unnamed | 527 | 148 | 14 | 0 |
+| `0x21b9c` | unnamed | 524 | 153 | 13 | 39 |
+| `0x1fa2c` | unnamed | 524 | 166 | 11 | 0 |
+| `0x166a8` | unnamed | 524 | 159 | 4 | 26 |
+| `0x20b1c` | unnamed | 516 | 166 | 10 | 60 |
+| `0x1b394` | unnamed | 502 | 166 | 10 | 0 |
+| `0x1517c` | unnamed | 499 | 137 | 4 | 13 |
+
 ## Position
 
 One hundred sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
