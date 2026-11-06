@@ -1,0 +1,37 @@
+{
+  "exe": "credits.exe",
+  "map": "credits.map",
+  "name": "credits_scroll",
+  "run": {
+    "command": "credits.exe > credits.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "credits.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "credits_scroll.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "credits_scroll_main.c"
+    }
+  ]
+}

@@ -14540,3 +14540,69 @@ temporary `-od` recipe.
   hud_panel_show_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The credits_scroll module at 0x27c34
+
+- Observation: the original body at `0x27c34` holds 133 instructions and 466
+  bytes up to the `ret` at `0x27e05`.  The next function starts at `0x27e08`,
+  so the store record keeps the 468-byte extent and sets no function size.  The
+  identity check uses 133 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27c34 --count 133` and
+  `tools/rebuild/functions/0x27c34.json`.
+- Observation: the only direct caller at `0x27a45` is `hud_update` at
+  `0x27a34`.  The `object_update_all` frame step at `0x2786c` calls
+  `hud_update` at the end of the object pass, so the record takes the section
+  `object_update_all callees`.
+  Evidence: the byte sweep for a relative call to `0x27c34` and the block at
+  `0x27a34`.
+- Observation: the pointer table `DAT_0011cef8` holds the pages of the credits
+  text.  `engine_init` calls `member_list_load` at `0x1b394` with the member
+  name `attr` at object-3 offset `0x47b`, and `member_list_load` reads that
+  member from `data\local.dat`.  The index `DAT_0011ce3c` holds the first line
+  of the page.  A line that starts with `#` ends the page.  The function walks
+  up to 0x14 lines from the index.
+  Evidence: the call at `0x1302e`, the string at object-3 offset `0x47b`, and
+  `python3 tools/gfx_container.py lzw DATA/LOCAL.DAT`.
+- Observation: the integer filter at `0x22bb4` moves the position
+  `DAT_0011ce58[i]` toward `-(DAT_0011ce40 * 0x190)` at the coefficient
+  `DAT_0010cf08[0x5a]`, unless the position sits at or below -0x168, which sets
+  the timer `DAT_0011ce48` to 4.0.  The function measures each line through
+  `text_measure` at `0x254a8`, centers it on the 0x140 width, and draws it
+  through `text_draw` at `0x25020` at the doubled position and the row
+  `i * 0x28` with the font 0 and the color 2.
+  Evidence: the calls at `0x27c95`, `0x27cb8`, and `0x27d0f`, and the filter
+  body at `0x22bb4`.
+- Observation: after the page the timer grows by the frame delta
+  `DAT_00118e04`.  A timer below 4.0 returns.  Otherwise the timer clears and
+  the toggle `DAT_0011ce40` flips.  The flip from 1 to 0 advances
+  `DAT_0011ce3c` past the `#` line, increments the page state
+  `DAT_0011ce54`, and resets the 0x14 positions to 0x15e.  The -1 sentinel sets
+  the session state `DAT_0011ce44` to 3, clears the page state and the index,
+  and resets the positions to 0x15e and the cells `DAT_0011cea8` to 0x64.
+  Evidence: the block at `0x27d2f` through `0x27dfd`.
+- Inference: the caller `hud_update`, the credits text from `local.dat`, and
+  the page walk support the name `credits_scroll`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the target DOS/4G build leaves the initialized data pages zero
+  under DOSBox-X, so the harness fills the line table in the BSS at run time.
+  The seven paths cover the first page below the timer, the low line on the
+  second page, the toggle 1 to 0 advance, the toggle 0 to 1 hold, the -1
+  sentinel, the width 40 center, the coefficient 0.5 filter with the timer
+  boundary, and the timer 2.0 below the bound.  The output holds the markers
+  `0` through `6` and `D`.
+  Evidence: `tools/rebuild/credits_scroll_main.c` and
+  `work/rebuild/credits.txt`.
+- Observation: the behavior check passes.  The rebuilt function body holds 98
+  instructions and 370 bytes.  The identity
+  window uses the 133 original instructions, so the check stays open at 30 of
+  133 instructions and 22 of 466 bytes because V2 saves the frame pointer
+  first, uses another prologue order, and uses integer immediates for the
+  float constants.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27c34 --count 133 --rebuilt work/rebuild/credits.exe
+  --rebuilt-map work/rebuild/credits.map --rebuilt-symbol credits_scroll_`
+  and `python3 tools/rebuild/run.py run --function 0x27c34`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

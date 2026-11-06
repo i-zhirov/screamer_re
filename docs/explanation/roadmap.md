@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred eighty-three named modules are rebuilt with the harness and the
+  progress: one hundred eighty-four named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -127,10 +127,10 @@ current host.
   `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
   `0x20b1c`, and `member_list_load` at `0x1b394`, and `opponent_route_setup` at
   `0x1517c`, and the Phase L modules `car_collision_pass` at `0x1d00c`,
-  `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`, and
-  `hud_panel_show` at `0x27a5c`;
+  `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
+  `hud_panel_show` at `0x27a5c`, and `credits_scroll` at `0x27c34`;
   twenty-nine modules are verified, one is matching, and one hundred and
-  fifty-three rebuilds hold the recorded difference; the `video_fill`,
+  fifty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -270,11 +270,11 @@ The plan follows the size order, starting with the smallest functions.
     `0x20b1c`
     and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`,
     and the Phase L modules `car_collision_pass` at `0x1d00c`,
-    `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`, and
-    `hud_panel_show` at `0x27a5c`
+    `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
+    `hud_panel_show` at `0x27a5c`, and `credits_scroll` at `0x27c34`
     are done;
     the result is twenty-nine verified modules, one matching module, and one
-    hundred and fifty-three open rebuilds).
+    hundred and fifty-four open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11
