@@ -274,7 +274,7 @@ These are the next unnamed game functions in the object, in size order.
 | `0x1a3b8` | `player_view_orbit` (done) | 631 | 179 | 14 | 58 |
 | `0x1e414` | `opponent_avoid_player` (done) | 590 | 162 | 8 | 44 |
 | `0x175dc` | `traffic_collision_pass` (done) | 587 | 165 | 5 | 11 |
-| `0x19f00` | unnamed | 577 | 178 | 11 | 54 |
+| `0x19f00` | `view_transition_update` (done) | 577 | 178 | 11 | 54 |
 | `0x124c0` | unnamed | 545 | 164 | 5 | 16 |
 | `0x1af70` | unnamed | 527 | 148 | 14 | 0 |
 | `0x21b9c` | unnamed | 524 | 153 | 13 | 39 |
@@ -286,7 +286,7 @@ These are the next unnamed game functions in the object, in size order.
 
 ## Position
 
-One hundred seventy modules carry a recipe and a result: the twelve Phase A modules,
+One hundred seventy-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -349,5 +349,6 @@ and `car_collision_response` at `0x17828`, and `track_nearest_node` at
 `0x2c188`, and `choice_load` at `0x1bbc8`, and `menu_text_update` at `0x29918`,
 and `player_car_cornering_update` at `0x16ca0`, and `race_hud_draw` at
 `0x23420`, and `player_view_orbit` at `0x1a3b8`, and `opponent_avoid_player` at `0x1e414`,
-and `traffic_collision_pass` at `0x175dc`.
-The next unnamed function is `0x19f00`.
+and `traffic_collision_pass` at `0x175dc`, and `view_transition_update` at
+`0x19f00`.
+The next unnamed function is `0x124c0`.

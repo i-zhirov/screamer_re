@@ -13356,3 +13356,71 @@ temporary `-od` recipe.
   traffic_collision_pass_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The view_transition_update module at 0x19f00
+
+- Observation: the original body at `0x19f00` holds 178 instructions and 577
+  bytes up to the `ret` at `0x1a140`.  The next function starts at `0x1a144`, so
+  the store record keeps the 580-byte extent and sets no function size.  The
+  identity check uses 178 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19f00 --count 178` and
+  `tools/rebuild/functions/0x19f00.json`.
+- Observation: the two direct callers are the player update at `0x19acc` and
+  the car camera at `0x1aeb3`.  The player update runs this function as its
+  third view step on the player view object `DAT_00110a20`.  The car camera
+  runs it on the view block at `+0x4f8` of a 0x590-byte car record.  The view
+  setup at `0x19ae8` sets the two transition flags `+0x54` and `+0x58`, so the
+  record takes the section `player_update callees`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x19f00`, the call at `0x19acc`, the call at `0x1aeb3`, and the setup block
+  at `0x19c40` through `0x19c50`.
+- Observation: a set flag `+0x54` makes the function form the position deltas
+  `+0x24`, `+0x28`, and `+0x2c` from the copy at `+0x18` minus the base at
+  `+0x00`, and the angle deltas `+0x3c`, `+0x40`, and `+0x44` from the saved
+  angles at `+0x48` minus the base angles at `+0x30`.  It then clears the flag.
+  Evidence: the block at `0x19f08` through `0x19f86`.
+- Observation: a set flag `+0x58` makes the function move the three angle
+  deltas toward zero through the approach helper at `0x22018` with the step
+  index `0x19`.  It scales the three position deltas by the frame factor at
+  `DAT_0010cf08 + 0x168` and truncates toward zero.
+  Evidence: the block at `0x19f89` through `0x1a023` and the helper at
+  `0x22018`.
+- Observation: the function then tests the cosine of each angle delta against
+  0.99995 and the absolute value of each scaled delta against
+  `DAT_00118e04 * 200.0`.  When every test passes, the view has settled.  The
+  function sets the screen mode 320 by the view distance `+0x90` with the
+  horizon at 65 percent, copies the view video mode `+0x8c` to
+  `DAT_001100c0`, and clears the flag `+0x58`.
+  Evidence: the blocks at `0x1a026` through `0x1a134`, the double at object-3
+  offset `0x8e4`, and the float at object-3 offset `0x8ec`.
+- Inference: the caller chain, the two transition flags, and the settle test
+  support the name `view_transition_update`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `cos` at `0x4da66` and the truncating helper
+  at `0x4d9f4`.  This harness links no math library, so
+  `view_transition_update_fpu.asm` supplies `cos` from the hardware and makes
+  `__CHP` truncate toward zero.  The three constants arrive through globals,
+  because the minimal image does not load the constant segment.  The original
+  has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/view_transition_update_fpu.asm` and
+  `tools/rebuild/modules/view_transition_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the idle path, the delta formation, the
+  settled view, the first and third large angle delta, the position limit
+  boundary, the negative truncation, the frame factor limit, and the combined
+  flags.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  view_transition_update`, `work/rebuild/vtran.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x19f00`.
+- Observation: the rebuilt module holds 579 bytes.  The identity check stays
+  open at 22 of 178 instructions and 23 of 577 bytes.  V2 saves the registers
+  after the frame, keeps the view pointer in `ecx`, and forms the absolute
+  values with branches instead of the original `cdq` sequence.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19f00 --count 178 --rebuilt work/rebuild/vtran.exe
+  --rebuilt-map work/rebuild/view_transition_update.map --rebuilt-symbol
+  view_transition_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
