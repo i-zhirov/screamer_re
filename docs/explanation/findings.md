@@ -14675,3 +14675,68 @@ temporary `-od` recipe.
   car_proximity_pass_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_state_snapshot module at 0x1ed04
+
+- Observation: the original body at `0x1ed04` holds 115 instructions and 465
+  bytes up to the `ret` at `0x1eed4`.  The next function starts at `0x1eed8`, so
+  the store record keeps the 468-byte extent and sets no function size.  The
+  identity check uses 115 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ed04 --count 115` and
+  `tools/rebuild/functions/0x1ed04.json`.
+- Observation: the only direct caller at `0x1ec88` is the mode-10 step body at
+  `0x1ec7c`.  That body loads the player object at object-3 offset `0xf91c` in
+  `eax` and then calls this function.  The mode-10 step at `0x1eae0` calls the
+  body at `0x1eb27` and `0x1eb64`, and the race session start at `0x12d0c`
+  calls the step.
+  Evidence: the direct call sweep for `0x1ed04`, the body at `0x1ec7c` through
+  `0x1ed01`, and the calls at `0x1eb27` and `0x1eb64`.
+- Observation: the function copies the current player fields to the snapshot
+  block.  The dword at `+0x7e8` takes the global at `0x11521c`, `+0x7ec` takes
+  the global at `0x11d250`, `+0x7f4` takes the field at `+0x7b0`, `+0x7f8`
+  takes the global at `0x11d2a0`, `+0x7fc` takes the field at `+0x684`, `+0x800`
+  takes the field at `+0x688`, `+0x804` takes the field at `+0x680`, and
+  `+0x808` takes the field at `+0x78c`.
+  Evidence: the block at `0x1ed0f` through `0x1ede2`.
+- Observation: the three view-offset sums store `+0x4b0 + +0x130`,
+  `+0x4b4 + +0x134`, and `+0x4b8 + +0x138` at `+0x818`, `+0x81c`, and `+0x820`.
+  The three angle sums store `+0x4c8 + +0x124`, `+0x4cc + +0x128`, and
+  `+0x4d0 + +0x12c` at `+0x824`, `+0x828`, and `+0x82c`.  The height at `+0x4ec`
+  minus 2 lands at `+0x830`.
+  Evidence: the block at `0x1ede8` through `0x1ee99`.
+- Observation: the state flag at `+0x148` adds `0x10000` when it is not zero.
+  The input byte at `0x118e1c` bit 4 adds `0x20000` unless the input byte at
+  `0x118e1d` bit 4 is also set.  The combined value of `+0x2fc`, `+0x7b4`, and
+  the extra bits lands at `+0x7f0`.  When the state is not 1, the function also
+  copies `+0x824` and `+0x82c` to `+0x834` and `+0x838`.
+  Evidence: the block at `0x1ed2c` through `0x1ed79` and the block at
+  `0x1ee9f` through `0x1eeca`.
+- Inference: the player object, the caller mode-10 step, the snapshot block, and
+  the conditional copies support the name `player_state_snapshot`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses the FPU loads, stores, and adds, and the local
+  `fpu_stub.asm` supplies the FPU run-time symbols.
+  Evidence: `tools/rebuild/modules/player_state_snapshot.json`.
+- Observation: the harness holds the player object, the five globals, and the
+  two input bytes.  It covers the four simple copies, the reordered field
+  copies, the float copies, the three view-offset sums, the three angle sums,
+  the height minus 2, the two conditional copies, the state flag, the input
+  flag, the state 1 copy skip, the control bit, and the clear input bit.  The
+  output holds the markers `0` through `8` and `D`, and the behavior check
+  passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_state_snapshot`, `work/rebuild/pssnap.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1ed04`.
+- Observation: the rebuilt module holds 474 bytes and 115 decoded instructions.
+  The identity check stays open at 34 of 115 instructions and 20 of 465 bytes
+  because V2 saves the frame pointer first, keeps the object in a register, and
+  uses near data offsets.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ed04 --count 115 --rebuilt work/rebuild/pssnap.exe
+  --rebuilt-map work/rebuild/player_state_snapshot.map --rebuilt-symbol
+  player_state_snapshot_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
