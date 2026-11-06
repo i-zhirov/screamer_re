@@ -1,9 +1,87 @@
 {
   "address": "0x2bedc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 171,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2bedc holds 171 instructions and 682 bytes up to the ret at 0x2c185; the record keeps the 684-byte extent, which ends at the next function at 0x2c188, and sets no function size; the identity check uses 171 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2beb0 is case 2 of the state init dispatcher at 0x2be94; the matching state update is case 2 of race_state_update at 0x29564, which calls 0x2cb20; race_state_update is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the init loads menu4h.pcx from gfx\\graf.dat with the palette at object-3 offset 0xcf5c through pcx_load at 0x1b5a4; it presents the buffer, copies 0x3e800 bytes to DAT_0021528 through memcpy at 0x8c150, fills the screen through 0x2aa98, and presents it again"
+    },
+    {
+      "kind": "note",
+      "text": "the loop builds 14 records at DAT_0011d550, stride 0x44, and sets each object from the table DAT_0010653c at x = -4000 * i, y = 0, and z = 0xb54; the object angles +0x14, +0x18, and +0x1c take the record angles +0x08, +0x0c, and +0x10 scaled by 1024.0 / pi and masked with 0x7ff"
+    },
+    {
+      "kind": "note",
+      "text": "the update 0x2cb20 walks the same 14 records, and race_panel_2 at 0x2e21c draws the car name, the speed in km/h, and the car statistics from the table DAT_0011d550 with the index DAT_001203c4; the table, the selection index, and the menu4h.pcx member support the name car_select_screen; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the module uses the local car_select_screen_fpu.asm, because the original calls the truncate helper at 0x4d9f4 and the shared fpu_stub.asm __CHP rounds instead of truncating; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 14 car records, the object pointer table, the display objects, the two buffers, the palette, and the float constants; it covers the index 0 path, the index 3 path, the index 7 path, the failed load, and the permuted table order with the record 14 sentinel; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2bedc --count 171 --rebuilt work/rebuild/csel.exe --rebuilt-map work/rebuild/car_select_screen.map --rebuilt-symbol car_select_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2bedc"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_select_screen module at 0x2bedc"
+    }
+  ],
+  "implementation": "c",
+  "module": "car_select_screen",
+  "name": "car_select_screen",
   "notes": [],
   "object_offset": "0x1bedc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 43,
+        "bytes_total": 682,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 53,
+        "instructions_total": 171,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2bedc",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:62347974f5d39cfed5467bc091793b731463152e852e99cf55dd3a0d52fcb6b1",
+    "source_digest": "sha256:de10ba671a125c6903ba9467ea1a10abfe5c3e74a28338e1d068de82f99b7928",
+    "tool": "run.py"
+  },
+  "role": "initializes the state 2 car selection screen: loads menu4h.pcx, builds the 14-entry car display list at DAT_0011d550, and starts the heading update",
+  "section": "race_frame callees",
   "size": 684,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_select_screen_"
 }

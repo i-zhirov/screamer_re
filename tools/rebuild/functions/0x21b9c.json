@@ -1,9 +1,95 @@
 {
   "address": "0x21b9c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 153,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x21b9c holds 153 instructions and 524 bytes up to the ret at 0x21da7. The next function starts at 0x21da8, so the store record keeps the 524-byte extent and sets no function size. The identity check uses 153 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20b0a sits in the opponent update at 0x20954. The caller passes the record and 1 when its own argument is zero, so the sound update runs only on that path"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the distance from the camera position DAT_0013ccc and DAT_0013cd0 and the record position at +0x20 and +0x28. It shifts each axis delta by 3, squares the two values, and scales the square root from 0x22bec by the double 8.0 at object-3 offset 0xd21"
+    },
+    {
+      "kind": "note",
+      "text": "a clear sound at +0x38 starts below the float 40000.0 at object-3 offset 0xd29. It stores the truncated distance at +0x3c and gets the id from the table through 0x1f718 with DAT_0018d88 plus the index at +0x14. A set sound stops through 0x1f880 above 40000.0"
+    },
+    {
+      "kind": "note",
+      "text": "a running sound copies the float at +0xc to +0x40, rotates the camera delta by DAT_0013cd4 through 0x2218c, forms the pitch with the float 9.0 at 0xd2d and 65536.0 at 0xd31, the squared volume with 32767.0 at 0xd35, and the pan with the double 32767.0 at 0xd39, and sets the three values through 0x1f7e4, 0xc667d, and 0xc6920"
+    },
+    {
+      "kind": "note",
+      "text": "the low bit of DAT_0011d261 and the flag DAT_0010a8c suppress the three set calls. The function still rotates and stores the new distance"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the distance gate, the sound id, the pitch, the volume, and the pan support the name sound_emitter_update. The module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the conversions to an integer use the Watcom helper at 0x4d9f4, which truncates toward zero. The shared fpu_stub.asm leaves round-to-nearest, so the module uses the local truncating __CHP stub in sound_emitter_update_fpu.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the record, the camera position and angle, the table base and owner, the two flags, the six constants, and the seven callee stubs. The twelve paths cover the two returns, the start, the stop, the far clear sound, the running sound, the store gate, the 40000.0 boundary on both sound states, the clear mute flag, and the negative pitch. The output holds the markers 0 through 9, a, and D. The behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x21b9c --count 153 --rebuilt work/rebuild/sndemit.exe --rebuilt-map work/rebuild/sound_emitter_update.map --rebuilt-symbol sound_emitter_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x21b9c"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_emitter_update module at 0x21b9c"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_emitter_update",
+  "name": "sound_emitter_update",
   "notes": [],
   "object_offset": "0x11b9c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 514,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 153,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x21b9c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:686cf63b548f8137fcf6632d1dbb527fbef60cb2228f414c115a545916db169a",
+    "source_digest": "sha256:3ce9bcb915cab0c53bf8c379268ce49d894ad169c0126f406b946f68c0038571",
+    "tool": "run.py"
+  },
+  "role": "updates the positional sound of an object record from its distance to the camera and sets the pitch, the volume, and the stereo pan",
+  "section": "object_update_all callees",
   "size": 524,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_emitter_update_"
 }

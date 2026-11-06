@@ -246,9 +246,48 @@ name from the call graph and the data flow, as in Phase F.
 | --- | --- | --- | --- | --- | --- |
 | `0x18528` | `player_car_reset_update` (done) | 776 | 168 | 5 | 44 |
 
+### Phase J: next unnamed functions
+
+These are the next unnamed game functions in the object, in size order.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1a630` | `player_route_camera` (done) | 768 | 243 | 17 | 104 |
+| `0x1821c` | `player_track_node_update` (done) | 756 | 220 | 6 | 27 |
+| `0x168b4` | `player_car_suspension_update` (done) | 740 | 219 | 5 | 80 |
+| `0x2b044` | `map_object_place` (done) | 708 | 222 | 4 | 25 |
+| `0x17828` | `car_collision_response` (done) | 708 | 183 | 8 | 71 |
+| `0x120c0` | `track_nearest_node` (done) | 695 | 201 | 0 | 9 |
+| `0x2bedc` | `car_select_screen` (done) | 682 | 171 | 12 | 12 |
+| `0x2c188` | `track_select_screen` (done) | 679 | 164 | 12 | 12 |
+| `0x1bbc8` | `choice_load` (done) | 673 | 189 | 4 | 0 |
+| `0x29918` | `menu_text_update` (done) | 657 | 174 | 5 | 6 |
+| `0x16ca0` | `player_car_cornering_update` (done) | 657 | 182 | 6 | 66 |
+| `0x23420` | `race_hud_draw` (done) | 633 | 173 | 22 | 14 |
+
+### Phase K: next unnamed functions
+
+These are the next unnamed game functions in the object, in size order.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1a3b8` | `player_view_orbit` (done) | 631 | 179 | 14 | 58 |
+| `0x1e414` | `opponent_avoid_player` (done) | 590 | 162 | 8 | 44 |
+| `0x175dc` | `traffic_collision_pass` (done) | 587 | 165 | 5 | 11 |
+| `0x19f00` | `view_transition_update` (done) | 577 | 178 | 11 | 54 |
+| `0x124c0` | `opponent_start` (done) | 545 | 164 | 5 | 16 |
+| `0x1af70` | `spline_load` (done) | 527 | 148 | 14 | 0 |
+| `0x21b9c` | `sound_emitter_update` (done) | 524 | 153 | 13 | 39 |
+| `0x1fa2c` | `dos_datetime_set` (done) | 524 | 166 | 11 | 0 |
+| `0x166a8` | `player_car_contact_update` (done) | 524 | 159 | 4 | 26 |
+| `0x20b1c` | `opponent_path_update` (done) | 516 | 166 | 10 | 60 |
+| `0x1b394` | `member_list_load` (done) | 502 | 166 | 10 | 0 |
+| `0x1517c` | `opponent_route_setup` (done) | 499 | 137 | 4 | 13 |
+| `0x1d00c` | unnamed | 497 | 144 | 3 | 7 |
+
 ## Position
 
-One hundred fifty-five modules carry a recipe and a result: the twelve Phase A modules,
+One hundred seventy-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -303,5 +342,17 @@ and `player_car_link` at `0x15c1c`, `map_object_update` at `0x2b9cc`,
 `name_entry_screen` at `0x2c430`, `race_radar` at `0x23a94`, and
 `car_sound_update` at `0x242bc`, `name_entry_letter_update` at `0x2b660`,
 and `race_records_screen` at `0x2d4b8`, and the Phase I module
-`player_car_reset_update` at `0x18528`.
-The next unnamed function is `0x1a630`.
+`player_car_reset_update` at `0x18528`, and the Phase J modules
+`player_route_camera` at `0x1a630`, `player_track_node_update` at `0x1821c`,
+`player_car_suspension_update` at `0x168b4`, `map_object_place` at `0x2b044`,
+and `car_collision_response` at `0x17828`, and `track_nearest_node` at
+`0x120c0`, and `car_select_screen` at `0x2bedc`, and `track_select_screen` at
+`0x2c188`, and `choice_load` at `0x1bbc8`, and `menu_text_update` at `0x29918`,
+and `player_car_cornering_update` at `0x16ca0`, and `race_hud_draw` at
+`0x23420`, and `player_view_orbit` at `0x1a3b8`, and `opponent_avoid_player` at `0x1e414`,
+and `traffic_collision_pass` at `0x175dc`, and `view_transition_update` at
+`0x19f00`, and `opponent_start` at `0x124c0`, and `spline_load` at `0x1af70`,
+and `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
+and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at `0x20b1c`,
+and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`.
+The next unnamed function is `0x1d00c`.

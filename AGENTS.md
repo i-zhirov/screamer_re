@@ -114,7 +114,7 @@ screamer_re/
 │   │   ├── docs.py            # render the program-map tables
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the one hundred and fifty-six module recipes
+│   │   ├── modules/           # the one hundred and eighty module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -161,10 +161,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 205 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 201 checks.
+about 8 minutes plus the Ghidra import and reports 231 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 227 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 190 checks.  Both flags report 186 checks and take about 16
+run reports 216 checks.  Both flags report 212 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -330,8 +330,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 205 checks in the `cross-check` shell.  `--skip-cross`
-  gives 201 checks, `--skip-runtime` gives 190 checks, and both flags give 186
+- The full check reports 231 checks in the `cross-check` shell.  `--skip-cross`
+  gives 227 checks, `--skip-runtime` gives 216 checks, and both flags give 212
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - The identity gate has two modes.  The default gate accepts the three

@@ -1,9 +1,83 @@
 {
   "address": "0x20b1c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 166,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The opponent_path_update module at 0x20b1c"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x20b1c holds 166 instructions and 516 bytes up to the ret 4 at 0x20d1d; the next function starts at 0x20d20, so the record keeps the 516-byte extent and sets no function size; the identity check uses 166 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20a12 is opponent_update at 0x20954; it passes DAT_0010f174, the path record at +0x44, and the +0xc float scaled by DAT_00118e04; the caller is in the object_update_all group, so the module takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the path record holds the track index at +0, the node index at +4, the phase at +8, and the direction flag at +0xc; the callee at 0x222e0 returns the curve speed from +0x3c and the phase; a phase of one clears the phase; a clear flag sets the flag and holds the node, and a set flag clears the flag and moves the node through the next field at +0x10 of the 56-byte node"
+    },
+    {
+      "kind": "note",
+      "text": "the callee at 0x22378 evaluates the spline and writes +0x60, +0x64, +0x68, +0x6c, and +0x70; the function subtracts the distance from +0x10 and +0x18 to the target, truncates the target into +0x10, +0x14, and +0x18 through 0x4d9f4, copies the history values, takes the arc sine at 0xc5e42, and wraps the heading with the constants at 0xce1, 0xce5, 0xce9, and 0xced"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the phase advance, the node walk, the spline evaluation, and the heading support the name opponent_path_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the path record, the state base, the node block, the four constants, and the two curve stubs; it covers the in-segment phase, the two segment-end directions, the negative lateral branch, and the exact phase one; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x20b1c --count 166 --rebuilt work/rebuild/opppath.exe --rebuilt-map work/rebuild/opponent_path_update.map --rebuilt-symbol opponent_path_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x20b1c"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_path_update",
+  "name": "opponent_path_update",
   "notes": [],
   "object_offset": "0x10b1c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 483,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 166,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x20b1c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:b87515f73ba0a853206ff43357da7b7a65e743d40701bceb819e8bb9647bf792",
+    "source_digest": "sha256:eda5e5744c2257533369548d3e28ee8a74be0c77a8d7a152114306e3b74781e6",
+    "tool": "run.py"
+  },
+  "role": "advances the opponent path record along the spline segment and forms its position and heading",
+  "section": "object_update_all callees",
   "size": 516,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_path_update_"
 }

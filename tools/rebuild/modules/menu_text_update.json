@@ -1,0 +1,37 @@
+{
+  "exe": "menutxt.exe",
+  "map": "menu_text_update.map",
+  "name": "menu_text_update",
+  "run": {
+    "command": "menutxt.exe > mtu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "mtu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_text_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_text_update_main.c"
+    }
+  ]
+}

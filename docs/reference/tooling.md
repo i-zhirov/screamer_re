@@ -600,7 +600,7 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the one hundred and fifty-six module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the one hundred and eighty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -953,10 +953,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 205 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 201 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 190 checks.  Both flags
-report 186 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 231 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 227 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 216 checks.  Both flags
+report 212 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

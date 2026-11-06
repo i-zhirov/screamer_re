@@ -1,0 +1,39 @@
+{
+  "exe": "vtran.exe",
+  "map": "view_transition_update.map",
+  "name": "view_transition_update",
+  "run": {
+    "command": "vtran.exe > vtran.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "vtran.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "view_transition_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "view_transition_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "view_transition_update_main.c"
+    }
+  ]
+}

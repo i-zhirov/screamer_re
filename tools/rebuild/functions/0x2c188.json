@@ -1,9 +1,87 @@
 {
   "address": "0x2c188",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 164,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2c188 holds 164 instructions and 679 bytes up to the ret at 0x2c42e; the next function starts at 0x2c430, so the store record keeps the 680-byte extent and sets no function size; the identity check uses 164 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2beb7 is case 3 of the state init dispatcher at 0x2be94; the jump table at linear 0x2be70 maps the state 2 to 0x2beb0, the state 3 to 0x2beb7, and the state 4 to 0x2bebe; the matching state update is case 3 of race_state_update at 0x29564, which calls 0x2cc98; race_state_update is a race_frame callee at 0x2807c, so the record takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the init loads menu3h.pcx from gfx\\graf.dat with the palette at object-3 offset 0xcf5c through pcx_load at 0x1b5a4; it presents the buffer, copies 0x3e800 bytes to DAT_0021528 through memcpy at 0x8c150, fills the screen through 0x2aa98, and presents it again"
+    },
+    {
+      "kind": "note",
+      "text": "the loop builds 12 records at DAT_0011d908, stride 0x34, and sets each object from the table DAT_0010653c at x = -40000 * i, y = 0, and z = 0xb54; the object angles +0x14, +0x18, and +0x1c take the record angles +0x08, +0x0c, and +0x10 scaled by 1024.0 / pi and masked with 0x7ff"
+    },
+    {
+      "kind": "note",
+      "text": "the update 0x2cc98 walks the same 12 records, and race_panel_3 at 0x2e58c draws the text from the table DAT_0011d908 with the index DAT_001203c8; the table holds AMAP1 through AMAP6 twice, the state 3 selection follows the state 2 car selection, and the menu3h.pcx member supports the name track_select_screen; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the module uses the local track_select_screen_fpu.asm, because the original calls the truncate helper at 0x4d9f4 and the shared fpu_stub.asm __CHP rounds instead of truncating; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 12 map records, the object pointer table, the display objects, the two buffers, the palette, and the float constants; it covers the index 0 path, the index 3 path, the index 7 path, the failed load, and the permuted table order with the record 12 sentinel; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2c188 --count 164 --rebuilt work/rebuild/tracksel.exe --rebuilt-map work/rebuild/track_select_screen.map --rebuilt-symbol track_select_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2c188"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_select_screen module at 0x2c188"
+    }
+  ],
+  "implementation": "c",
+  "module": "track_select_screen",
+  "name": "track_select_screen",
   "notes": [],
   "object_offset": "0x1c188",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 40,
+        "bytes_total": 671,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 50,
+        "instructions_total": 164,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2c188",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:0665e9426e983bbb91dccb3b98242bac034f4688975a7e0e4f931da991016d28",
+    "source_digest": "sha256:3ca780714c803cd1ff4dd65bf0696c6e8aec79486a5971a4698061e07a71a6a8",
+    "tool": "run.py"
+  },
+  "role": "initializes the state 3 track selection screen: loads menu3h.pcx, builds the 12-entry map display list at DAT_0011d908, and starts the heading update",
+  "section": "race_frame callees",
   "size": 680,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_select_screen_"
 }

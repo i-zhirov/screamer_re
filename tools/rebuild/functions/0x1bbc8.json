@@ -1,9 +1,83 @@
 {
   "address": "0x1bbc8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 189,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x1bbc8` holds 189 instructions and 673 bytes up to the `ret` at `0x1be68`; the next function starts at `0x1be6c`, so the store record keeps the 676-byte extent and sets no function size; the identity check uses 189 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds `%s\\config\\choice.dat` from the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the file with the mode `rb` through `fopen` at `0xc5fe5`, reads 0x460 bytes into the record at `0x203c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "note",
+      "text": "on a successful open it copies the fields at `0x203d0`, `0x203d4`, `0x203d8`, `0x207fc`, `0x20800`, and `0x20820` to the race context at `DAT_00002dec` offsets `+0x08`, `+0x18`, `+0x28`, `+0x38`, `+0x48`, and `+0x1c`; `race_start` at `0x27770` calls it at `0x2779e`, and `menu_space_init` at `0x29d08` calls it at `0x29d3d`"
+    },
+    {
+      "kind": "note",
+      "text": "on a failed open it writes the default record: the 0x6000 limits at `0x20808`, `0x2080c`, and `0x20810`, the 1 flags at `0x207fc`, `0x20800`, and `0x20814`, the two 2 fields at `0x207f4` and `0x20820`, the global `0x1d2a8` at 2, the six -1 index slots at `0x20400`, the tag `GRA` at `0x203cc`, and the six lap and six race records at `0x20430` and `0x20610`; each record holds five time slots at `+0x00`, five tags at `+0x14`, and five flags at `+0x28`, with the bit patterns `0x43340000` and `0x44610000`"
+    },
+    {
+      "kind": "note",
+      "text": "`race_record_save` at `0x2e82c` reads the same two tables and `race_records_screen` at `0x2d4b8` formats them; the two callers sit in the setup path, so the module names the function `choice_load` and records the confidence `inferred`"
+    },
+    {
+      "kind": "note",
+      "text": "the time slots have the type `int`, because the original stores the immediate bit patterns and the rebuild links no FPU run-time library; the harness covers the success copy, the default record, and a second success handle; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1bbc8 --count 189 --rebuilt work/rebuild/chcload.exe --rebuilt-map work/rebuild/choice_load.map --rebuilt-symbol choice_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1bbc8"
+    },
+    {
+      "kind": "finding",
+      "text": "The choice_load module at 0x1bbc8"
+    }
+  ],
+  "implementation": "c",
+  "module": "choice_load",
+  "name": "choice_load",
   "notes": [],
   "object_offset": "0xbbc8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 628,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 73,
+        "instructions_total": 189,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1bbc8",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:4981263741e48f81bd077a6aecb74e552c79cc555e8e430246c3e23e7e5fe941",
+    "source_digest": "sha256:e9dfca660e1a9c5a2012ec920a609fef5f427319cd049d2af8b2c45610856af3",
+    "tool": "run.py"
+  },
+  "role": "loads the choice.dat record or writes the default choice record and copies six fields into the race context",
+  "section": "Subsystem initialisation",
   "size": 676,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "choice_load_"
 }

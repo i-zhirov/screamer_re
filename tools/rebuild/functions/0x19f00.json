@@ -1,9 +1,87 @@
 {
   "address": "0x19f00",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 178,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x19f00 holds 178 instructions and 577 bytes up to the ret at 0x1a140; the next function starts at 0x1a144, so the store record keeps the 580-byte extent and sets no function size; the identity check uses 178 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are the player update at 0x19acc and the car camera at 0x1aeb3; the player update runs this function as its third view step on the player view object DAT_00110a20, and the car camera runs it on the view block at +0x4f8 of a 0x590-byte car record; the view setup at 0x19ae8 starts the transition, so the record takes the section player_update callees"
+    },
+    {
+      "kind": "note",
+      "text": "a set flag +0x54 makes the function form the position deltas +0x24, +0x28, and +0x2c from the copy at +0x18 minus the base at +0x00 and the angle deltas +0x3c, +0x40, and +0x44 from the saved angles at +0x48 minus the base angles at +0x30, and then clear the flag"
+    },
+    {
+      "kind": "note",
+      "text": "a set flag +0x58 makes the function move the three angle deltas toward zero through the approach helper at 0x22018 with the step index 0x19 and scale the three position deltas by the frame factor at DAT_0010cf08 + 0x168; when the angle cosines stay above 0.99995 and the deltas stay below DAT_00118e04 * 200.0 in absolute value, it sets the screen mode 320 by the view distance with the horizon at 65 percent, copies the view video mode to DAT_001100c0, and clears the flag +0x58"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain, the transition flags, and the settle test support the name view_transition_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls cos at 0x4da66 and the truncating helper at 0x4d9f4; this harness links no math library, so the local view_transition_update_fpu.asm supplies cos from the hardware and makes __CHP truncate toward zero; the three constants arrive through globals, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the idle path, the delta formation, the settled view, the first and third large angle delta, the position limit boundary, the negative truncation, the frame factor limit, and the combined flags; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x19f00 --count 178 --rebuilt work/rebuild/vtran.exe --rebuilt-map work/rebuild/view_transition_update.map --rebuilt-symbol view_transition_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x19f00"
+    },
+    {
+      "kind": "finding",
+      "text": "The view_transition_update module at 0x19f00"
+    }
+  ],
+  "implementation": "c",
+  "module": "view_transition_update",
+  "name": "view_transition_update",
   "notes": [],
   "object_offset": "0x9f00",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 23,
+        "bytes_total": 577,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 178,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19f00",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:cf4802da1434f55d32bab0bc0d87a28830937e24985a82bfc8c0896a6ccd5712",
+    "source_digest": "sha256:fb9fe32e3917c0c323b564953d5dfa196ba90f79e1f62c535f9e81e78a9076c6",
+    "tool": "run.py"
+  },
+  "role": "settles the view transition by forming and decaying the position and angle deltas, then applies the new screen mode when the view has settled",
+  "section": "player_update callees",
   "size": 580,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "view_transition_update_"
 }

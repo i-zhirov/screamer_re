@@ -1,9 +1,91 @@
 {
   "address": "0x175dc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 165,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x175dc holds 165 instructions and 587 bytes up to the ret at 0x17826; the next function starts at 0x17828, so the store record keeps the 588-byte extent and sets no function size; the identity check uses 165 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15b6c is the traffic effect group at 0x15b44, which the traffic view group at 0x201d0 calls at 0x20268; the frame update at 0x1ff70 selects that group through the mode byte DAT_0011d260 bit 0x10; the car path has the same shape at 0x15b08 with the car proximity pass at 0x17408, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the contact mask at +0x2fc and returns at once when the state field +0x148 is not zero; otherwise it walks the 0x2a8-byte traffic records at DAT_00113cd8 while the index stays below the count DAT_00115218, and it skips a record whose first field is negative"
+    },
+    {
+      "kind": "note",
+      "text": "a record whose flag field +0x14 holds the bit of the player index DAT_0011d250 takes the velocity branch: the function calls the push helper at 0x17b54 with the zero flag and copies the negated record velocity +0x30 and +0x38 to +0x550 and +0x558"
+    },
+    {
+      "kind": "note",
+      "text": "otherwise the function acts only on a record in the nearby set +0x104 and not flagged at +0x16 bit 0; it sets the contact distance at +0x560 to the player radius +0x544 plus the traffic radius +0x2a4, tests the two player body points at +0x52c and +0x534 against the two traffic points at +0x28c and +0x294 in 12-byte steps, stores the deltas at +0x564 and +0x56c and the truncated distance at +0x55c, and on a hit calls the push helper with the set flag and marks the record bit in +0x2fc; the last step filters +0x7c4 toward the contact flag through filter_update at 0x22b80 with the rate 50"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain, the traffic table, the two body-point pairs, and the push helper support the name traffic_collision_pass; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls sqrt at 0x22bec and the truncating helper at 0x4d9f4; this harness links no math library, so the local traffic_collision_pass_fpu.asm supplies sqrt from the hardware and makes __CHP truncate toward zero"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the state gate, the empty traffic list, the negative first field, the velocity branch, the nearby set, the record flag, the equal distance, the four body-pair pushes, the truncation of 2.828 to 2, and the two-record mask; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x175dc --count 165 --rebuilt work/rebuild/tpass.exe --rebuilt-map work/rebuild/traffic_collision_pass.map --rebuilt-symbol traffic_collision_pass_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x175dc"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_collision_pass module at 0x175dc"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_collision_pass",
+  "name": "traffic_collision_pass",
   "notes": [],
   "object_offset": "0x75dc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 560,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 33,
+        "instructions_total": 165,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x175dc",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:8f862f94fb46eb21c22098bd7386429b4e80da81566be08e3a55819e6f62d10c",
+    "source_digest": "sha256:7a335e71936437c6a3471c235d83fa6e5df941e31778e83ce0e56be380bd5d20",
+    "tool": "run.py"
+  },
+  "role": "walks the traffic records, pushes the player car away from an overlapping traffic car, and applies the negated traffic velocity when a record marks a contact",
+  "section": "The vehicle state chain",
   "size": 588,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_collision_pass_"
 }

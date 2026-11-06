@@ -1,0 +1,38 @@
+{
+  "exe": "orset.exe",
+  "map": "opponent_route_setup.map",
+  "name": "opponent_route_setup",
+  "run": {
+    "command": "orset.exe > orset.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "orset.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_route_setup.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_route_setup_main.c"
+    }
+  ]
+}

@@ -1528,9 +1528,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 205 checks and 0 failures in the `cross-check` shell.  It
-reports 201 checks with `--skip-cross`, 190 checks with `--skip-runtime`, and
-186 checks with both flags.  Evidence: the tool output.
+The check reports 231 checks and 0 failures in the `cross-check` shell.  It
+reports 227 checks with `--skip-cross`, 216 checks with `--skip-runtime`, and
+212 checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -9433,7 +9433,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/entry_probe.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game` reports the entry
   `0150:1F20F8` and the candidate `entry jump over the Watcom banner`.
-- Observation: the full pipeline then reports 205 checks and 0 failures.
+- Observation: the full pipeline then reports 231 checks and 0 failures.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
 ## The rebuild checks use le.py, not Ghidra or radare2
@@ -9526,8 +9526,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
   `0xd4364` to `0x10020`.
   Evidence: the four `agree` lines above.
-- The check counts are 205 checks for the full run, 201 checks with
-  `--skip-cross`, 190 checks with `--skip-runtime`, and 186 checks with both
+- The check counts are 231 checks for the full run, 227 checks with
+  `--skip-cross`, 216 checks with `--skip-runtime`, and 212 checks with both
   flags.  `--skip-cross` skips stage 8 and the tool preflight.
   `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
   Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
@@ -11470,6 +11470,76 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee name in the harness stay inferred.
 
+## The map_object_place module at 0x2b044
+
+- Observation: the original body at `0x2b044` holds 222 instructions and 708
+  bytes up to the `ret` at `0x2b307`.  The next function starts at `0x2b308`, so
+  the store record keeps the 708-byte extent and sets no function size.  The
+  identity check uses 222 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b044 --count 222` and
+  `tools/rebuild/functions/0x2b044.json`.
+- Observation: the direct call sweep finds one caller at `0x29a88` in the race
+  state update at `0x29918`.  The caller walks the selected menu lines, reads
+  the line descriptor at `DAT_0011fad4`, and takes the string from the pointer
+  arrays at `DAT_0011fb80`.
+  Evidence: the direct call sweep for `0x2b044`, the loop at `0x29a27` through
+  `0x29ab4`, and the call at `0x29a88`.
+- Observation: the `map_object_update` module at `0x2b9cc` reads the records
+  that this function writes.  The update runs in the same caller, and the
+  records hold the fields `+0x08`, `+0x34` through `+0x60` in the layout that
+  the update reads.  The function fills the records from a menu string.
+  Evidence: `tools/rebuild/map_object_update.c` and the disassembly of
+  `0x2b109` through `0x2b27b`.
+- Observation: the function computes the line start.  A centered line starts at
+  `(length - 1) * 320`, and another line starts at `0x1200 - (+0x08) * 640`.
+  The vertical position is `0x820 - (+0x04) * 384`.
+  Evidence: the blocks at `0x2b053` through `0x2b0c0`.
+- Observation: the function walks the string until the first code outside
+  `0x20` through `0x7f`.  For each code it takes the first free record of the
+  0x50 records at `DAT_001db78`, each 0x64 bytes long.  It stores the code minus
+  0x20 at `+0x08`, the line id at `+0x04`, the target x and y at `+0x40` and
+  `+0x44`, the start x and y at `+0x34` and `+0x38` or the target x and y, the
+  start z at `+0x3c`, the state flag at `+0x0c`, the angle pi or 0 at `+0x10`,
+  the amplitudes at `+0x4c` and `+0x50`, the progress 1.0 at `+0x58`, the
+  direction 1.0 at `+0x5c`, the angle rate 1.0 at `+0x1c`, the zero fields, and
+  the timer at `+0x60`.
+  Evidence: the blocks at `0x2b0cd` through `0x2b27b`.
+- Observation: the timer rises by 0.01 for each placed code.  The function then
+  rotates the line origin by the angle at `+0x28` for the next code.  The new x
+  is `y * sin + x * cos`, and the new y is `y * cos - x * sin`, truncated
+  toward zero.
+  Evidence: the blocks at `0x2b27b` through `0x2b2fc`.
+- Inference: the function places one menu line into the map object records.  The
+  caller, the record layout, and the update reader support the name
+  `map_object_place`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the cosine helper at `0x4da66`, the sine
+  helper at `0x4da72`, and the truncate helper at `0x4d9f4`.  The harness links
+  no math library, so the local FPU stub supplies `cos` and `sin` from the
+  hardware and makes `__CHP` truncate toward zero.  The timer step arrives
+  through a global, because an FPU memory operand of a literal reads the
+  constant pool at a low address in this toolchain.
+  Evidence: `tools/rebuild/map_object_place_fpu.asm` and
+  `tools/rebuild/map_object_place_main.c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the centered line, the left line with
+  the start override and the pi/2 rotation, the occupied record, the low code
+  stop, and the high code stop.
+  Evidence: `python3 tools/rebuild/harness.py run --module map_object_place`,
+  `work/rebuild/mop_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2b044`.
+- Observation: the rebuilt module holds 222 decoded instructions and 671 bytes.
+  The identity check stays open at 47 of 222 instructions and 15 of 671 bytes.
+  The V2 toolchain uses a different prologue, a different instruction order, and
+  a different local layout.  The store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b044 --count 222 --rebuilt work/rebuild/moplace.exe
+  --rebuilt-map work/rebuild/map_object_place.map --rebuilt-symbol
+  map_object_place_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The map_object_update module at 0x2b9cc
 
 - Observation: the original body at `0x2b9cc` holds 310 instructions and 1121
@@ -12403,3 +12473,1595 @@ temporary `-od` recipe.
   --original-address 0x18528 --count 168 --rebuilt work/rebuild/pcrsmod.exe
   --rebuilt-map work/rebuild/player_car_reset_update.map --rebuilt-symbol
   player_car_reset_update_`.
+
+## The player_route_camera module at 0x1a630
+
+- Observation: the original body at `0x1a630` holds 243 instructions and 768
+  bytes up to the `ret` at `0x1a92f`.  The record keeps the 768-byte extent,
+  which ends at the next function `car_camera` at `0x1a930`, and sets no
+  function size.  The identity check uses 243 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1a630 --count
+  243` and `tools/rebuild/functions/0x1a630.json`.
+- Observation: the only direct caller at `0x19ec4` is the view mode dispatch at
+  `0x19e78`.  The dispatch selects this function for the render mode 3 and
+  passes the player object at object-3 offset `0xf91c` in `eax` and the player
+  view object at `DAT_00110a20` in `edx`.  The player update at `0x19ab0` and
+  `player_view_setup` at `0x19ae8` both call the dispatch.
+  Evidence: the direct call sweep for `0x1a630`, the dispatch table at
+  `0x19e50`, and the calls at `0x19ac2` and `0x19c80`.
+- Observation: the function refreshes the two list slots at `+0x460` and
+  `+0x468` through the helper at `0x117fc`.  It then walks the 0x38-byte route
+  records below the pointer `DAT_0010f910`, the RPL route.  The count is at
+  `+0x1c`, and each record holds the position at `+0x04` (x), `+0x08` (z), and
+  `+0x0c` (y).  The loop picks the nearest record by the horizontal distance
+  from the car position at `+0x4b0` and `+0x4b8`, and a zero distance does not
+  take part.
+  Evidence: the calls at `0x1a653` and `0x1a66b`, and the loop at `0x1a67c`
+  through `0x1a71c`.
+- Observation: the function forms the yaw at `+0x34` and the pitch at `+0x30`
+  of the view from the chosen record.  It copies the record position into the
+  view at `+0x00`, `+0x04`, and `+0x08` and the two saved copies at `+0x0c` and
+  `+0x14`.  When the total distance exceeds 1500 units, it moves the view point
+  along the yaw and the pitch by the excess.  The constants are 2pi at
+  object-3 offset `0x91c`, -pi/2 at `0x920`, and -1500.0 at `0x924`.
+  Evidence: the blocks at `0x1a71c` through `0x1a92f` and the data at
+  object-3 offsets `0x91c`, `0x920`, and `0x924`.
+- Observation: the route table is the `MAP1RPL.SPL` member.  The loader at
+  `0x14fb8` builds the name with the suffix `%srpl` at object-3 offset `0x900`
+  and stores the pointer at `DAT_0010f910`.  The loader also stores the
+  `%scam` route at `DAT_0010f90c`, and the sibling `car_camera` at `0x1a930`
+  walks that CAM route in the same way.
+  Evidence: the format strings at object-3 offsets `0x60f` and `0x615`, the
+  loader calls at `0x150b6` and `0x150cd`, and the `MAP1I.DAT` member list.
+- Inference: the view mode dispatch, the `%srpl` route walk, and the view block
+  write support the name `player_route_camera`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the route table, the node array, the car
+  object, the view object, the three constants, and the list refresh stub.  It
+  covers the move, the reflected yaw, the distance below the limit, the exact
+  limit, the zero-distance skip, the nearest of two nodes, and the car offset.
+  The behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_route_camera` and `work/rebuild/prc_out.txt`.
+- Observation: the identity check stays open at 46 of 243 instructions and 27
+  of 768 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another FPU stub form.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x1a630 --count 243 --rebuilt work/rebuild/prcam.exe
+  --rebuilt-map work/rebuild/player_route_camera.map --rebuilt-symbol
+  player_route_camera_`.
+
+## The player_track_node_update module at 0x1821c
+
+- Observation: the original body at `0x1821c` holds 220 instructions and 756
+  bytes up to the `ret` at `0x1850f`.  The record keeps the 780-byte extent,
+  which ends at the next function `player_car_reset_update` at `0x18528`, and
+  sets no function size.  The identity check uses 220 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1821c --count
+  220` and `tools/rebuild/functions/0x1821c.json`.
+- Observation: the only direct caller at `0x15ac4` is the second player step
+  group at `0x15ab8`.  The group runs on the player object at object-3 offset
+  `0xf91c` after the physics group at `0x15a80`.  The five view groups at
+  `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call both groups.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1821c` and the calls at `0x200a5` and `0x2011b`.
+- Observation: the function reads the 0x20-byte track node table at the global
+  `0x7250` and the count at `0x7ed0`.  The loader at `0x150f4` calls `0x1b198`
+  with the destination `0x7250`, so the table holds the track nodes.  A node
+  holds the radius at `+0x00`, the value at `+0x04`, the surface grip at
+  `+0x0c`, the flags at `+0x10`, the x position at `+0x14`, and the y position
+  at `+0x1c`.
+  Evidence: the node reads at `0x18285` through `0x183a4` and the loader at
+  `0x150f4`.
+- Observation: the function examines the node before the current index at
+  `+0x598`, the current node, and the next node.  It accepts a node when each
+  absolute axis delta stays below the node radius and the truncated distance
+  does not exceed the radius.  It then sets the current index and the target
+  index at `+0x668`, saves the old target value and flags to `+0x58c` and
+  `+0x590`, and copies the node value, the surface grip, and the flags to
+  `+0x66c`, `+0x670`, and `+0x678`.
+  Evidence: the blocks at `0x18256` through `0x183a4`.
+- Observation: the visited chain at `+0x59c` and the second chain at `+0x5a0`
+  select the status `+0x780`.  A hit on a visited node after the first, or on a
+  node in the second chain, sets 2, and any other hit sets 1.  A call with no
+  hit sets the target index to -1.  The next callee at `0x194a0` consumes the
+  status, the chains, and the ratio to advance the lap `+0x684` and the
+  progress `+0x680`.
+  Evidence: the blocks at `0x183ad` through `0x18413` and the block at
+  `0x194b0` through `0x195f0`.
+- Observation: the function forms the segment from the current node to the
+  next node and the distance from the object position at `+0x4b0` and `+0x4b8`
+  to the current node.  Both values scale by the double 0.05 at object-3 offset
+  `0x818` and truncate through the helper at `0x4d9f4`.  The function stores the
+  ratio at `+0x67c`.
+  Evidence: the blocks at `0x18413` through `0x18501` and the data at
+  object-3 offset `0x818`.
+- Inference: the track table, the node fields, the visited chains, and the lap
+  consumer support the name `player_track_node_update`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the object record, four track nodes, the node
+  count, and the scale 0.05.  It covers the current hit, the two status-2
+  gates, the previous and next scan passes, the no-hit target -1, the
+  next-index wrap, the ratio 1, and the truncated ratio 0.4.  The behavior check
+  passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_track_node_update` and `work/rebuild/ptnu_out.txt`.
+- Observation: the identity check stays open at 47 of 220 instructions and 52
+  of 756 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another local slot order.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x1821c --count 220 --rebuilt work/rebuild/ptnu.exe
+  --rebuilt-map work/rebuild/player_track_node_update.map --rebuilt-symbol
+  player_track_node_update_`.
+
+## The player_car_suspension_update module at 0x168b4
+
+- Observation: the original body at `0x168b4` holds 219 instructions and 740
+  bytes up to the `ret` at `0x16b97`.  The next function starts at `0x16b98`,
+  so the record keeps the 740-byte extent and sets no function size.  The
+  identity check uses 219 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x168b4 --count
+  219` and `tools/rebuild/functions/0x168b4.json`.
+- Observation: the only direct caller at `0x15bb8` is the effect group at
+  `0x15bac`.  The group runs on the player object at object-3 offset `0xf91c`
+  after the player physics group at `0x15a80`.  The five view groups at
+  `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the group.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x168b4` and the call at `0x200e0`.
+- Observation: the function walks the four 0x54-byte suspension units at
+  `+0x194`.  A unit holds the phase at `+0x30`, the travel at `+0x34`, the
+  lateral force at `+0x38`, and the longitudinal force at `+0x40`.  The
+  distances `+0x2e4` and `+0x2ec` separate the wheels.
+  Evidence: the loop at `0x16a96` through `0x16a8d` and the reads at
+  `0x16948`, `0x1697f`, and `0x169c4`.
+- Observation: the constants live in object 3.  The double at offset `0x744`
+  is 0.00175, the double at `0x74c` is 1.5e-09, the float at `0x754` is 3.0,
+  the float at `0x758` is 4 pi, the float at `0x75c` is pi, and the double at
+  `0x760` is 2.0.  The pointer at `0xcf08` selects the filter table.
+  Evidence: the fixups at `0x168d6`, `0x168ea`, `0x16acb`, `0x169cc`,
+  `0x169d2`, `0x16a37`, and `0x16a1a`, and the values at `0x100744`,
+  `0x10074c`, `0x100754`, `0x100758`, `0x10075c`, and `0x100760`.
+- Observation: the function forms the speed change from `+0x50c` minus
+  `+0x588` and the lateral load from the square of `+0x50c`, the constant at
+  `0x74c`, and `+0x2f4` divided by the frame delta.  The odd units scale the
+  speed change by 3.0, and the bit-2 units take the lateral load.
+  Evidence: the blocks at `0x168c2` through `0x16934`.
+- Observation: a new magnitude resets the phase and stores the lateral force,
+  or filters the longitudinal force through `filter_update` at `0x22b80` with
+  the index `0x3d`.  The function forms the travel from `cos` at `0x4da66` of
+  the phase times 4 pi plus pi.  It clamps the travel to -18 through 18, damps
+  both forces through the filter table, and clears a force below 2.0.
+  Evidence: the blocks at `0x1693a` through `0x16a8a` and the `fcomp` against
+  the double at `0x760`.
+- Observation: the function writes the body height `+0x4c0` as the average of
+  the four travel values.  It writes the body angles `+0x4e8` and `+0x4e0`
+  from the travel differences and the distances `+0x2e4` and `+0x2ec` through
+  `atan` at `0xc2254`.  The sibling function at `0x166a8` reads the same units
+  and distances, and `player_car_link` at `0x15c1c` applies `+0x4e0` and
+  `+0x4e8` to the render objects.
+  Evidence: the blocks at `0x16ad4` through `0x16b97`, the function at
+  `0x166a8`, and the reads at `0x15d94` and `0x15e11`.
+- Inference: the four suspension units, the body height, and the two body
+  angles support the name `player_car_suspension_update`.  The module records
+  the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the player object, four suspension units, the
+  filter table, the frame delta, and the constants.  It covers the opposite
+  left and right forces, both travel clamps, the no-reset path, the dead zone,
+  the filtered longitudinal force, the negative average -7, and the two body
+  angles.  The behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_suspension_update` and `work/rebuild/pcsu_out.txt`.
+- Observation: the identity check stays open at 23 of 219 instructions and 32
+  of 719 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another local slot order.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x168b4 --count 219 --rebuilt work/rebuild/pcsu.exe
+  --rebuilt-map work/rebuild/player_car_suspension_update.map --rebuilt-symbol
+  player_car_suspension_update_`.
+
+## The car_collision_response module at 0x17828
+
+- Observation: the original body at `0x17828` holds 183 instructions and 708
+  bytes up to the `ret` at `0x17aeb`.  The branch at `0x178ee` jumps over that
+  `ret` to the second block at `0x17aec`, which ends at the `ret` at `0x17b52`.
+  The next function starts at `0x17b54`, so the store record keeps the 812-byte
+  extent and sets no function size.  The identity check uses 183 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x17828 --count 183`,
+  `python3 tools/le.py disasm STARTH.EXE 0x17aec --count 40`, and
+  `tools/rebuild/functions/0x17828.json`.
+- Observation: the direct call sweep finds one caller at `0x17523` in the car
+  proximity pass at `0x17408`.  The player effect group at `0x15b08` calls that
+  pass at `0x15b30`.  The pass walks the 0x590-byte car records at
+  `DAT_00110ab8` and calls this function when the distance falls below
+  `self + 0x544 + record + 0x44c`, the record physics gate at `+0x414` is set,
+  and the record radius at `+0x2f8` is zero.
+  Evidence: the byte sweep for a relative call to `0x17828`, the loop at
+  `0x17408` through `0x1755a`, and the call at `0x17523`.
+- Observation: the caller passes the player object in `eax` and the nearby car
+  record in `edx`.  It stores the two axis deltas at `self + 0x564` and
+  `self + 0x56c` and the truncated distance at `self + 0x55c`.  This function
+  forms the unit vector from those fields and projects the overlap through
+  `record + 0x498` and `record + 0x4a0` into `DAT_00108038` and
+  `DAT_00108040`.  The map collision check at `0x11c00` reads the two globals.
+  Evidence: the blocks at `0x1745d` through `0x17523` and `0x17841` through
+  `0x178e7`.
+- Observation: when the map cell is clear, the function moves the record.  It
+  scales the record rotation `+0x418` by the double 0.7 at object-3 offset
+  `0x7ac`, or it sets the speed factor `+0x450` from the double 0.5 at `0x7b4`,
+  the turn rate `+0x54c` from the double 0.21 at `0x7c8`, the yaw response
+  `+0x4c8`, and the rate `+0x548` from the double 0.0002.  It reads the record
+  heading `+0x4a8` and moves the record positions `+0x454` and `+0x45c`.
+  When the map cell is blocked, it moves the player positions `+0x4b0` and
+  `+0x4b8` instead.
+  Evidence: the blocks at `0x178f4` through `0x17b52`.
+- Inference: the car record scan, the overlap projection, and the two corrective
+  moves support the name `car_collision_response`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original truncates through the helper at `0x4d9f4`, so the
+  module uses the local `car_collision_response_fpu.asm` truncating `__CHP`
+  stub.  The constants arrive through globals, because the minimal image does
+  not load the constant segment.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/car_collision_response.c`,
+  `tools/rebuild/car_collision_response_fpu.asm`, and the calls at `0x178aa`,
+  `0x178dc`, `0x17aaa`, `0x17ada`, `0x17b11`, and `0x17b41`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the clear cell with positive and
+  negative deltas, the zero distance count, the first flag bit 1, the three
+  second-flag combinations, and the pi/2 angle clamp.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  car_collision_response` and `work/rebuild/ccr_out.txt`.
+- Observation: the rebuilt module holds 183 decoded instructions and 700 bytes.
+  The identity check stays open at 18 of 183 instructions and 36 of 700 bytes,
+  because V2 uses another prologue, another instruction order, and another local
+  layout.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17828 --count 183 --rebuilt work/rebuild/ccr.exe
+  --rebuilt-map work/rebuild/car_collision_response.map --rebuilt-symbol
+  car_collision_response_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the three callee names in the harness stay inferred.
+
+## The track_nearest_node module at 0x120c0
+
+- Observation: the original body at `0x120c0` holds 201 instructions and 695
+  bytes up to the `ret` at `0x12376`.  The next function starts at `0x12378`,
+  so the store record keeps the 696-byte extent and sets no function size.  The
+  identity check uses 201 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x120c0 --count 201` and
+  `tools/rebuild/functions/0x120c0.json`.
+- Observation: the direct call sweep finds five call sites: `0x12048` in the
+  player segment helper at `0x11f98`, `0x13ea5` in `player_car_init`,
+  `0x1522b` in the AI route setup at `0x1517c`, `0x16ccb` in
+  `player_track_node_update`, and `0x185d8` in `player_car_reset_update`.
+  Each caller writes the position to `DAT_00108038` and `DAT_00108040` and
+  reads the heading `DAT_00108048` back.  `player_car_init` and
+  `player_car_reset_update` copy that heading to the car field `+0x4cc`.
+  Evidence: the byte sweep for a relative call to `0x120c0`, the calls at
+  `0x12048`, `0x13ea5`, `0x1522b`, `0x16ccb`, and `0x185d8`, and the heading
+  stores at `0x13eb3` and `0x185e6`.
+- Observation: the function scans the three-by-three cell neighborhood of the
+  spatial grid at `DAT_00102fa4`.  The row index is
+  `((y + 0x100000) >> 13) - 1` and the cell index is
+  `((x + 0x100000) >> 13) - 1`.  A row pointer or a cell pointer of -1 is
+  skipped.  The map collision check at `0x11c00` uses the same grid, the same
+  0x100000 bias, the same 0x2000 cell size, and the same nine-entry offset
+  table at `DAT_00101cf0` and `DAT_00101cf8`.
+  Evidence: the loops at `0x12116` through `0x12239`, the grid reads at
+  `0x12101` and `0x12120`, and the offsets at `0x101cf0` through `0x101d17`.
+- Observation: a cell record holds the 12-byte node entries below the pointer
+  at `+0x08` with the count at `+0x1c`, and the 28-byte segment entries below
+  the pointer at `+0x0c` with the count at `+0x20`.  Each entry holds the angle
+  at `+0x00`, the x position at `+0x04`, and the y position at `+0x08`.  The
+  zero mode stores the nearest node at `DAT_00108054`, and the non-zero mode
+  stores the nearest segment at `DAT_00108044`.
+  Evidence: the mode branch at `0x12168`, the node loop at `0x1223e` through
+  `0x12307`, the segment loop at `0x12170` through `0x12239`, and the grid
+  relocation at `0x4cb4c`.
+- Observation: the nearest test compares the squared distance with
+  `DAT_00108020`, which starts at `0x7ffffff8`.  The zero mode copies the node
+  x and y to `DAT_0010804c` and `DAT_00108050` and forms the heading at
+  `DAT_00108048`.  The flag bit 3 of `DAT_0011d274` adds pi at
+  `DAT_0010040c`, and a heading that reaches two pi at `DAT_00100410` receives
+  minus two pi at `DAT_00100414`.
+  Evidence: the blocks at `0x1230c` through `0x12376` and the constants at
+  `0x10040c`, `0x100410`, and `0x100414`.
+- Inference: the grid data, the node and segment entries, the heading output,
+  and the five callers support the name `track_nearest_node`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the module reuses the shared `fpu_stub.asm`, because it adds
+  and compares floats and does not convert a float to an integer.  The
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/track_nearest_node.c` and the float reads at
+  `0x12334`, `0x12351`, and `0x1235c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, and `D`.  The paths cover the nearest node, the cross-row
+  scan, the pi add, the two-pi wrap, the no-hit return 0, the last-cell hit,
+  the nearest segment, the segment no-hit, and the exact two-pi boundary.
+  Evidence: `python3 tools/rebuild/harness.py run --module track_nearest_node`
+  and `work/rebuild/tnn_out.txt`.
+- Observation: the rebuilt module holds 201 decoded instructions and 687
+  bytes.  The identity check stays open at 39 of 201 instructions and 36 of 687
+  bytes, because V2 saves the frame pointer first, uses another register and
+  local layout, and uses `imul` for the entry stride.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x120c0 --count 201 --rebuilt work/rebuild/tnn.exe
+  --rebuilt-map work/rebuild/track_nearest_node.map --rebuilt-symbol
+  track_nearest_node_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two entry names in the harness stay inferred.
+
+## The car_select_screen module at 0x2bedc
+
+- Observation: the original body at `0x2bedc` holds 171 instructions and 682
+  bytes up to the `ret` at `0x2c185`.  The next function starts at `0x2c188`,
+  so the store record keeps the 684-byte extent and sets no function size.  The
+  identity check uses 171 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2bedc --count 171` and
+  `tools/rebuild/functions/0x2bedc.json`.
+- Observation: the only direct caller at `0x2beb0` is case 2 of the state init
+  dispatcher at `0x2be94`.  The jump table at linear `0x2be70` maps the state 2
+  to `0x2beb0`, the state 3 to `0x2beb7`, and the state 4 to `0x2bebe`.  The
+  matching state update is case 2 of `race_state_update` at `0x29564`, which
+  calls `0x2cb20` at `0x295d3`.  `race_state_update` is a `race_frame` callee at
+  `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2bedc`, the jump table at linear `0x2be70`,
+  and the calls at `0x29564` and `0x2807c`.
+- Observation: the init loads `menu4h.pcx` from `gfx\graf.dat` with the palette
+  at object-3 offset `0xcf5c`.  The file string sits at object-3 offset `0x111f`
+  and the member string at `0x1114`.  The function presents the buffer, copies
+  `0x3e800` bytes to `DAT_0021528`, fills the screen, and presents it again.  It
+  sets `DAT_0011d240` at 1, `DAT_00120378` at 1.5, `DAT_00120380` at 0.95, and
+  `DAT_0011fac8` at 1.
+  Evidence: the calls at `0x2bf23` through `0x2bf58` and the bytes at linear
+  `0x101114` and `0x10111f`.
+- Observation: the loop builds 14 records at `DAT_0011d550`, stride 0x44.  Each
+  record holds an object index at `+0x00`.  The object table at `0x653c` uses
+  the index with stride 0x1c.  The function sets the record angles `+0x08`,
+  `+0x0c`, and `+0x10` to 0, pi/2, and 0, and sets the object position `+0x08`,
+  `+0x0c`, and `+0x10` to `x = -4000 * i`, `y = 0`, and `z = 0xb54`.  It
+  converts the record angles to the object angles `+0x14`, `+0x18`, and `+0x1c`
+  with the factor 1024.0 / pi and the mask 0x7ff, and it refreshes the object
+  list at `0x6530` with the name `0x6350`.
+  Evidence: the loop at `0x2c00d` through `0x2c15d` and the constants at
+  object-3 offsets `0x112c` and `0x1130`.
+- Observation: the selection index `DAT_001203c4` scales to
+  `-4000 * index` at `DAT_00203a8` and `DAT_002039c`.  `race_panel_2` at
+  `0x2e21c` reads the same table and index and draws the car name, the speed in
+  km/h, and the car statistics.  `race_results_screen` at `0x2a558` also reads
+  the table at `0x1d550`, and the state 2 update at `0x2cb20` walks the same 14
+  records.
+  Evidence: the scaling at `0x2bf5d` through `0x2bfa4`, the reads in
+  `tools/rebuild/race_panel_2.c`, and the loop at `0x2cb36`.
+- Inference: the state 2 init builds the car selection table, and the state 2
+  overlay draws the selected car.  The table, the selection index, the
+  `menu4h.pcx` member, and the `race_panel_2` reader support the name
+  `car_select_screen`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4`.  The shared
+  `fpu_stub.asm` defines `__CHP` as a bare return, which keeps the
+  round-to-nearest mode, so a negative value rounds away from zero.  The module
+  uses the local `car_select_screen_fpu.asm`, which makes `__CHP` truncate
+  toward zero.  The float constants arrive through globals, because the minimal
+  image does not load the constant segment.  The original has the EBP frame, so
+  the module builds with `-of+`.
+  Evidence: `tools/rebuild/car_select_screen_fpu.asm`,
+  `tools/rebuild/car_select_screen.c`, and the FPU blocks at `0x2c096`,
+  `0x2c0d1`, and `0x2c10c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the index 0, 3, and 7 offsets, the
+  failed load, and the permuted object table with the record 14 sentinel.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_select_screen`,
+  `work/rebuild/csel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2bedc`.
+- Observation: the rebuilt module holds 171 decoded instructions and 705
+  bytes.  The identity check stays open at 53 of 171 instructions and 43 of 682
+  bytes, because V2 saves the frame pointer first, uses another register and
+  local layout, and uses `imul` for the record stride.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2bedc --count 171 --rebuilt work/rebuild/csel.exe
+  --rebuilt-map work/rebuild/car_select_screen.map --rebuilt-symbol
+  car_select_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The track_select_screen module at 0x2c188
+
+- Observation: the original body at `0x2c188` holds 164 instructions and 679
+  bytes up to the `ret` at `0x2c42e`.  The next function starts at `0x2c430`,
+  so the store record keeps the 680-byte extent and sets no function size.  The
+  identity check uses 164 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2c188 --count 164` and
+  `tools/rebuild/functions/0x2c188.json`.
+- Observation: the only direct caller at `0x2beb7` is case 3 of the state init
+  dispatcher at `0x2be94`.  The jump table at linear `0x2be70` maps the state 2
+  to `0x2beb0`, the state 3 to `0x2beb7`, and the state 4 to `0x2bebe`.  The
+  matching state update is case 3 of `race_state_update` at `0x29564`, which
+  calls `0x2cc98` at `0x295dd`.  `race_state_update` is a `race_frame` callee at
+  `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2c188`, the jump table at linear `0x2be70`,
+  and the calls at `0x29564` and `0x2807c`.
+- Observation: the init loads `menu3h.pcx` from `gfx\graf.dat` with the palette
+  at object-3 offset `0xcf5c`.  The file string sits at object-3 offset `0x113f`
+  and the member string at `0x1134`.  The function presents the buffer, copies
+  `0x3e800` bytes to `DAT_0021528`, fills the screen, and presents it again.  It
+  sets `DAT_0011d240` at 1, `DAT_00120378` at 1.5, `DAT_00120380` at 0.95, and
+  `DAT_0011fac8` at 1.
+  Evidence: the calls at `0x2c1cf` through `0x2c204` and the bytes at linear
+  `0x101134` and `0x10113f`.
+- Observation: the loop builds 12 records at `DAT_0011d908`, stride 0x34.  Each
+  record holds an object index at `+0x00`.  The object table at `0x653c` uses
+  the index with stride 0x1c.  The function sets the record angles `+0x08`,
+  `+0x0c`, and `+0x10` to 0, pi/2, and 0, and sets the object position `+0x08`,
+  `+0x0c`, and `+0x10` to `x = -40000 * i`, `y = 0`, and `z = 0xb54`.  It
+  converts the record angles to the object angles `+0x14`, `+0x18`, and `+0x1c`
+  with the factor 1024.0 / pi and the mask 0x7ff, and it refreshes the object
+  list at `0x6530` with the name `0x6350`.
+  Evidence: the loop at `0x2c29d` through `0x2c406` and the constants at
+  object-3 offsets `0x114c` and `0x1150`.
+- Observation: the selection index `DAT_001203c8` scales to
+  `-40000 * index` at `DAT_00203a8` and `DAT_002039c`.  The state 3 update at
+  `0x2cc98` walks the same 12 records, and `race_panel_3` at `0x2e58c` reads
+  the same table and index and draws the row text.  The table holds `AMAP1`
+  through `AMAP6` twice.
+  Evidence: the scaling at `0x2c209` through `0x2c26c`, the reads in
+  `tools/rebuild/race_panel_3.c`, and the loop at `0x2ccef`.
+- Inference: the state 3 init builds the track selection table, and the state 3
+  overlay draws the selected track.  The map names, the `menu3h.pcx` member, the
+  `race_panel_3` reader, and the state 3 position after the state 2 car
+  selection support the name `track_select_screen`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4`.  The shared
+  `fpu_stub.asm` defines `__CHP` as a bare return, which keeps the
+  round-to-nearest mode, so a negative value rounds away from zero.  The module
+  uses the local `track_select_screen_fpu.asm`, which makes `__CHP` truncate
+  toward zero.  The float constants arrive through globals, because the minimal
+  image does not load the constant segment.  The original has the EBP frame, so
+  the module builds with `-of+`.
+  Evidence: `tools/rebuild/track_select_screen_fpu.asm`,
+  `tools/rebuild/track_select_screen.c`, and the FPU blocks at `0x2c33f`,
+  `0x2c37a`, and `0x2c3b5`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the index 0, 3, and 7 offsets, the
+  failed load, and the permuted object table with the record 12 sentinel.
+  Evidence: `python3 tools/rebuild/harness.py run --module track_select_screen`,
+  `work/rebuild/tsel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2c188`.
+- Observation: the rebuilt module holds 164 decoded instructions and 671
+  bytes.  The identity check stays open at 50 of 164 instructions and 40 of 671
+  bytes, because V2 saves the frame pointer first, uses another register and
+  local layout, and uses `imul` for the record stride.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2c188 --count 164 --rebuilt work/rebuild/tracksel.exe
+  --rebuilt-map work/rebuild/track_select_screen.map --rebuilt-symbol
+  track_select_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The choice_load module at 0x1bbc8
+
+- Observation: the original body at `0x1bbc8` holds 189 instructions and 673
+  bytes up to the `ret` at `0x1be68`.  The next function starts at `0x1be6c`,
+  so the store record keeps the 676-byte extent and sets no function size.  The
+  identity check uses 189 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1bbc8 --count 189` and
+  `tools/rebuild/functions/0x1bbc8.json`.
+- Observation: the function builds `%s\config\choice.dat` from the base path at
+  `DAT_00007edc` through the `sprintf` call at `0x1bbe1`, opens the path with
+  the mode `rb` through the `fopen` call at `0x1bbf1`, and tests the handle at
+  `0x1bbfc`.  The format string sits at object-3 offset `0xa75` and the mode
+  string at `0xa8a`.
+  Evidence: the calls at `0x1bbe1` and `0x1bbf1`, the test at `0x1bbfc`, and
+  the bytes at linear `0x100a75` and `0x100a8a`.
+- Observation: on a successful open the function reads 0x460 bytes into the
+  record at `0x203c4` through the `fread` call at `0x1bdff`, copies the fields
+  at `0x203d0`, `0x203d4`, `0x203d8`, `0x207fc`, `0x20800`, and `0x20820` to
+  the race context at `DAT_00002dec` offsets `+0x08`, `+0x18`, `+0x28`,
+  `+0x38`, `+0x48`, and `+0x1c`, and closes the handle through the `fclose`
+  call at `0x1be5b`.
+  Evidence: the block at `0x1bded` through `0x1be5f`.
+- Observation: on a failed open the function writes the default record.  It
+  clears the version fields at `0x203c4`, `0x203c8`, `0x203dc`, `0x203e0`, and
+  `0x203e4`.  It sets the three 0x6000 limits at `0x20808`, `0x2080c`, and
+  `0x20810`, the three 1 flags at `0x207fc`, `0x20800`, and `0x20814`, and the
+  two 2 flags at `0x207f4` and `0x20820`.  It sets the global `0x1d2a8` to 2
+  and clears `0x20818` and `0x2081c`.  It marks the six index slots at
+  `0x20400` with -1 and copies the tag `GRA` from object-3 offset `0xa8d` to
+  `0x203cc`.
+  Evidence: the block at `0x1bc04` through `0x1bcc2` and the bytes at linear
+  `0x100a8d`.
+- Observation: the function fills six lap records at `0x20430` and six race
+  records at `0x20610`.  Each record is 0x50 bytes and holds five time slots at
+  `+0x00`, five 4-byte tags at `+0x14`, and five flags at `+0x28`.  The lap time
+  slots take the bit pattern 0x43340000 (180.0) and the race time slots take
+  0x44610000 (900.0).  The tags take `GRA` from the object-3 offsets `0xa91`
+  and `0xa95`, and the flags take zero.
+  Evidence: the loop at `0x1bcc3` through `0x1be60` and the constants at
+  `0x1bd0e` and `0x1bd84`.
+- Observation: the direct callers are `race_start` at `0x2779e` and
+  `menu_space_init` at `0x29d3d`.  Both call the function in the setup path.
+  Three callers read the same record: `loading_screen` at `0x2a364` reads the
+  0x50-byte entry at `0x20430`, `race_record_save` at `0x2e82c` reads the lap
+  and race tables, and `race_records_screen` at `0x2d4b8` formats them.
+  Evidence: the calls at `0x2779e`, `0x29d3d`, and the record reads in
+  `tools/rebuild/loading_screen.c` and `tools/rebuild/race_record_save.c`.
+- Inference: the function loads the choice file.  The `%s\config\choice.dat`
+  path, the open, the read, the close, and the default record support the name
+  `choice_load`.  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the time slots have the type `int`, because the original stores
+  the immediate bit patterns and the rebuild links no FPU run-time library.  A
+  `float` assignment would reference the undefined `_fltused_` and the emulator
+  symbols.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/choice_load.c` and the failed build without the
+  `int` slots.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `2` and `D`.  The paths cover the success copy, the default record,
+  and a second success handle.  The float checks compare the bit patterns.
+  Evidence: `python3 tools/rebuild/harness.py run --module choice_load`,
+  `work/rebuild/chl_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1bbc8`.
+- Observation: the rebuilt module holds 189 decoded instructions and 628
+  bytes.  The identity check stays open at 73 of 189 instructions and 34 of 628
+  bytes.  V2 saves the registers after the frame, places the success block
+  first, uses other local offsets, and calls a helper for the tag copy.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1bbc8 --count 189 --rebuilt work/rebuild/chcload.exe
+  --rebuilt-map work/rebuild/choice_load.map --rebuilt-symbol choice_load_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The player_car_cornering_update module at 0x16ca0
+
+- Observation: the original body at `0x16ca0` holds 182 instructions and 657
+  bytes up to the `ret` at `0x16f30`.  The next function starts at `0x16f34`,
+  so the store record keeps the 660-byte extent and sets no function size.  The
+  identity check uses 182 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16ca0 --count 182` and
+  `tools/rebuild/functions/0x16ca0.json`.
+- Observation: the only direct caller is at `0x15af4`.  The call sits in the
+  player physics group at `0x15ab8`.  The group runs on the player object at
+  object-3 offset `0xf91c`, and the five view groups at `0x2003c`, `0x201d0`,
+  `0x202c0`, `0x20360`, and `0x203c4` call the group.  The module therefore
+  takes the section `The vehicle state chain`.
+  Evidence: the direct call sweep for `0x16ca0`, the disassembly at `0x15ab8`
+  through `0x15b04`, and the call sites at `0x200e0`, `0x20209`, `0x2032b`,
+  `0x20398`, and `0x203fc`.
+- Observation: the function publishes `+0x4b0` and `+0x4b8`, calls the nearest
+  node search at `0x120c0`, and copies the track heading `DAT_00108048` to
+  `+0x13c`.  It forms the heading error between the car heading `+0x4cc` and the
+  track heading, folds the error into 0 through pi/2, and scales it to 0
+  through 1.  The constants pi, -pi, and pi/2 sit at object-3 offsets `0x768`,
+  `0x76c`, and `0x770`.
+  Evidence: the blocks at `0x16caa` through `0x16d6e` and the nearest node
+  store at `0x1234c`.
+- Observation: a speed `+0x50c` times the error above `+0x180` sets the effect
+  state `+0x148` to 2 through `0x19478` when the flag `+0x7b0` is clear.  The
+  function normalizes the velocity `+0x44` and `+0x4c` into `+0x550` and
+  `+0x558`.  It stores the lateral rate `+0x54c` from the sine at `0x4da72`,
+  the speed, the arc tangent at `0xc21e2` with 4.0, and 2000.0, and it clamps
+  the rate at 5000.0.  It removes the speed loss from `+0x50c` with the double
+  0.9 at object-3 offset `0x784` and stores the heading rate `+0x548` from
+  `+0xc4` minus `+0x6c` with 5.0 at offset `0x78c`.
+  Evidence: the blocks at `0x16d71` through `0x16ec0`.
+- Observation: the function clears `+0x110`, `+0x4f0`, and `+0x4f4`.  It clears
+  the filtered slip `+0x128` when `+0x170` is clear.  It keeps the type-4 table
+  entry `+0x7d4` through the acquire at `0x1f7ac` when the state did not change.
+  Evidence: the blocks at `0x16ec0` through `0x16f30`.
+- Inference: the caller position in the physics group, the heading error
+  against the nearest track node, the lateral rate and the heading rate that
+  `player_car_view_update` at `0x16f34` applies, the speed loss, the skid
+  state, and the table entry support the name `player_car_cornering_update`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the sine at `0x4da72`, the arc tangent at
+  `0xc21e2`, and the square root at `0x22bec`.  The harness links no math
+  library, so the local FPU stub supplies `sin`, `atan2`, and `sqrt`.  The
+  module converts no value to an integer, so `__CHP` stays a bare return.  The
+  original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_car_cornering_update_fpu.asm` and
+  `tools/rebuild/modules/player_car_cornering_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the two early flags, the normal path,
+  the skid trigger, the blocked trigger, the heading wrap, the lateral clamp,
+  the kept slip, and the speed clamp.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_cornering_update`, `work/rebuild/pccrn.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x16ca0`.
+- Observation: the identity check stays open at 29 of 182 instructions and 38
+  of 649 bytes.  The V2 toolchain saves the registers in another order and uses
+  another local layout.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x16ca0 --count 182 --rebuilt work/rebuild/pccrn.exe
+  --rebuilt-map work/rebuild/player_car_cornering_update.map --rebuilt-symbol
+  player_car_cornering_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The menu_text_update module at 0x29918
+
+- Observation: the original body at `0x29918` holds 174 instructions and 657
+  bytes up to the `ret` at `0x29ba8`.  The next function starts at `0x29bac`,
+  so the store record keeps the 660-byte extent and sets no function size.  The
+  identity check uses 174 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29918 --count 174` and
+  `tools/rebuild/functions/0x29918.json`.
+- Observation: the only direct caller is at `0x29581`.  The call sits in case 0
+  of the dispatcher `race_state_update` at `0x29564`, and `race_frame` at
+  `0x2807c` calls the dispatcher every frame.  The jump table at linear
+  `0x19540` maps the state 0 to `0x29918`.
+  Evidence: the direct call sweep for `0x29918`, the disassembly at `0x29564`
+  through `0x2958a`, and the jump table at `0x19540`.
+- Observation: when the key `DAT_0011fb64` differs from the menu index
+  `DAT_0011fb60`, the function resets the 0x50 records at `DAT_001db78` through
+  0x2b450 and counts the active lines of the table `DAT_002de8[DAT_0011fb60]`
+  into `DAT_0011fb6c`.  Each 16-byte line record holds an offset at `+0x00` and
+  an offset at `+0x08`, and their sum indexes the string pointer table at
+  `DAT_001fb80`.
+  Evidence: the blocks at `0x29935` through `0x2999c` and the loop at `0x29a27`
+  through `0x29aaf`.
+- Observation: the line descriptor at `DAT_0011fad4` holds the line at `+0x00`,
+  the row at `+0x04`, the centered flag 1 at `+0x0c`, the selection flag at
+  `+0x10`, the five values of the 8-entry table at `0x221c` at `+0x14` through
+  `+0x24`, the angle 0.09 at `+0x28`, and the timer 0 at `+0x2c`.  The row
+  starts at `8 - DAT_0011fb6c`, the line rises by one per line, and the row
+  rises by two per line.  The table index `DAT_0011fabc` wraps above 7.
+  Evidence: the blocks at `0x2999e` through `0x29ac8` and the table at
+  `0x221c`.
+- Observation: the function marks the selected line through 0x2b308 and
+  advances the phase `DAT_0011d248` by the frame delta `DAT_0018e08` times the
+  constant at `0xf3b`.  The constant is 3 pi.  A phase above the constant at
+  `0xf3f` resets to zero.  The constant is 8 pi.
+  Evidence: the call at `0x29ada`, the FPU block at `0x29adf` through
+  `0x29b04`, and the float values `0x4116cbe4` and `0x41c90fdb` at object-3
+  offsets `0xf3b` and `0xf3f`.
+- Observation: when the key `DAT_0011fb64` is -2, the function runs 0x2b494 on
+  every record, restores the key to `DAT_0011fb60`, and clears the overlay word
+  `DAT_0011fac0`.  Otherwise it runs `map_object_update` at `0x2b9cc` on every
+  record and stores the current key when the update leaves the key unchanged.
+  Evidence: the blocks at `0x29b0a` through `0x29b9b`.
+- Inference: the function places and animates the text lines of the selected
+  menu as map objects.  The caller, the string table, the line descriptor, and
+  the two map object modules support the name `menu_text_update`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the constants at `0xf3b` and `0xf3f` arrive through globals,
+  because the minimal image does not load the constant segment.  The module uses
+  the shared `fpu_stub.asm`, because it performs no float-to-integer
+  truncation.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/menu_text_update.c` and
+  `tools/rebuild/modules/menu_text_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The paths cover the page change, the unchanged key, the
+  finish path, the phase wrap, the counter wrap, the empty menu, and the kept
+  -2 key.
+  Evidence: `python3 tools/rebuild/harness.py run --module menu_text_update`,
+  `work/rebuild/mtu_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x29918`.
+- Observation: the rebuilt module holds 174 decoded instructions and 605
+  bytes.  The identity check stays open at 36 of 174 instructions and 27 of 605
+  bytes.  V2 saves the registers after the frame, folds the record stride into
+  an immediate, and loads the table values in another order.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29918 --count 174 --rebuilt work/rebuild/menutxt.exe
+  --rebuilt-map work/rebuild/menu_text_update.map --rebuilt-symbol
+  menu_text_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The race_hud_draw module at 0x23420
+
+- Observation: the original body at `0x23420` holds 173 instructions and 633
+  bytes up to the `ret` at `0x23698`.  The next function starts at `0x2369c`,
+  so the store record keeps the 636-byte extent and sets no function size.  The
+  identity check uses 173 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23420 --count 173` and
+  `tools/rebuild/functions/0x23420.json`.
+- Observation: the only direct caller at `0x2001a` is the frame update at
+  `0x1ff70`, which calls this function after the five view groups at `0x2003c`,
+  `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4`.  No named function sits
+  between the frame update and the target, so the record takes the section
+  Program functions.
+  Evidence: the direct call sweep for `0x23420`, the disassembly of `0x1ff70`,
+  and the call at `0x2001a`.
+- Observation: the first block formats the race clock `DAT_001100a8` into the
+  global text at `0x101f98`.  The format at object-3 offset `0xdd0` is
+  `%02d:%02d:%02d`.  The minutes are `t / 60`, the seconds are `t % 60`, and
+  the centiseconds are `(clock - t) * 100.0`, where `t` is the truncated clock
+  and the scale is the float at object-3 offset `0xdfe`.
+  Evidence: the block at `0x2342d` through `0x23487` and the bytes at linear
+  `0x100dd0` and `0x100dfe`.
+- Observation: a set replay flag `DAT_00118e6c` stops the draw after the clock
+  format.  The frame counter `DAT_000007fd` bit 0x80 then draws the label `R`
+  at (0x10, 0x154) with the font 0 and the color 6.
+  Evidence: the block at `0x2348c` through `0x234c0` and the string at
+  object-3 offset `0xddf`.
+- Observation: otherwise the function draws the gauge panel at `0x2369c`.  It
+  formats the lap value `DAT_001100ac` through the format `%d` at offset
+  `0xde1` and centers it at y 0x10 with the font 6 and the color 2.  The value
+  from `DAT_0010ffa0` rises by one when it is at or below `DAT_0011d2b0` and
+  draws through the format `%d%c` at offset `0xde4` with the character `:`.
+  The counter `DAT_0011d2b0` plus one follows at the measured width plus 0xa,
+  and the offset `DAT_0010ffa4` draws at (0x228, 0x16).
+  Evidence: the block at `0x234c5` through `0x235d1` and the strings at linear
+  `0x100de1`, `0x100de4`, `0x100de9`, and `0x100dec`.
+- Observation: the second time block formats the lap clock `DAT_001100b0`
+  through the format at offset `0xdef`.  The function draws the first clock at
+  (0x10, 0x70), the lap clock at (0x10, 0x90), and the static clock label at
+  `0x101f8c` at (0x10, 0xb0), each with the font 3 and the color 2.  The last
+  call draws the race radar at `0x23a94`.
+  Evidence: the block at `0x235d6` through `0x2368c`, the string at linear
+  `0x100def`, and the label at linear `0x101f8c`.
+- Inference: the frame update caller, the race clock, the lap value, the two
+  counters, the gauge panel, and the radar support the name `race_hud_draw`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original truncates each float through the helper at
+  `0x4d9f4`.  The shared `fpu_stub.asm` leaves round-to-nearest, so the module
+  uses the local `__CHP` stub in `race_hud_draw_fpu.asm`.  The 100.0 scale
+  arrives through a global, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/race_hud_draw_fpu.asm` and
+  `tools/rebuild/modules/race_hud_draw.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the normal draw, the replay label, the
+  replay return, the display value above the position, and the equal display
+  and position.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_hud_draw`,
+  `work/rebuild/racehud.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x23420`.
+- Observation: the rebuilt module holds 173 decoded instructions and 593
+  bytes.  The identity check stays open at 27 of 173 instructions and 41 of 593
+  bytes.  V2 saves the registers after the frame, moves the time arithmetic to
+  a helper, and uses another local layout.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23420 --count 173 --rebuilt work/rebuild/racehud.exe
+  --rebuilt-map work/rebuild/race_hud_draw.map --rebuilt-symbol
+  race_hud_draw_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The player_view_orbit module at 0x1a3b8
+
+- Observation: the original body at `0x1a3b8` holds 179 instructions and 631
+  bytes up to the `ret` at `0x1a62e`.  The next function starts at `0x1a630`,
+  so the store record keeps the 632-byte extent and sets no function size.  The
+  identity check uses 179 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1a3b8 --count 179` and
+  `tools/rebuild/functions/0x1a3b8.json`.
+- Observation: the three direct callers at `0x19eb5`, `0x19ed8`, and `0x19ef3`
+  are the view mode dispatch at `0x19e78`.  The dispatch selects this function
+  for the view modes 1, 2, and 0.  It passes the player object at object-3
+  offset `0xf91c` in `eax`, the player view object at `DAT_00110a20` in `edx`,
+  and the mode in `ebx`.  The player update at `0x19ab0` and
+  `player_view_setup` at `0x19ae8` both call the dispatch, so the record takes
+  the section `player_view_setup callees`.
+  Evidence: the direct call sweep for `0x1a3b8`, the disassembly of `0x19e78`,
+  and the call at `0x19ab0`.
+- Observation: the function refreshes the two list slots at `+0x460` and
+  `+0x468` through `0x117fc`.  It wraps the player yaw at `+0x4cc` into the
+  range zero to 2 pi with the floats at object-3 offsets `0x904` and `0x908`,
+  which hold 2 pi and -2 pi.
+  Evidence: the block at `0x1a3c7` through `0x1a43b` and the bytes at linear
+  `0x100904` and `0x100908`.
+- Observation: the mode selects the height offsets `0x12c`, `0x12c`, and
+  `0x64`, the orbit radii `0x6a4`, `0x514`, and `0x578`, and the pitch
+  offsets at `+0x4d4` plus the double at `0x90c` or `0x914`.  The doubles hold
+  `6.157521772384643` and `6.094689917564392`.
+  Evidence: the blocks at `0x1a441` through `0x1a4b3` and the bytes at linear
+  `0x10090c` and `0x100914`.
+- Observation: the function forms the height at `+0x04` from the player height
+  `+0x4b4` and the mode offset minus the radius times the sine of the old pitch
+  at `+0x30`.  A set flag `+0x7c` writes the height, the yaw at `+0x34`, the
+  second angle at `+0x38`, and the pitch at `+0x30`.  A clear flag approaches
+  the values through `0x22bb4` and `0x22018` with the step index `0x51`.
+  Evidence: the blocks at `0x1a4ba` through `0x1a58a`.
+- Observation: the function places the view on the orbit.  `+0x00` is
+  `+0x4b0` minus the radius times the sine of the yaw times the cosine of the
+  pitch.  `+0x08` is `+0x4b8` plus the radius times the cosine of the yaw times
+  the cosine of the pitch.  The two saved copies sit at `+0x0c` and `+0x14`.
+  Evidence: the blocks at `0x1a58f` through `0x1a628`.
+- Inference: the view mode dispatch, the player view object, the three orbit
+  presets, and the sibling `player_route_camera` and `car_camera` support the
+  name `player_view_orbit`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` through `0x4da72`, `cos` through
+  `0x4da66`, and the truncation helper at `0x4d9f4`.  This harness links no
+  math library, so `player_view_orbit_fpu.asm` supplies `sin`, `cos`, and the
+  truncating `__CHP`.  The four constants arrive through globals, because the
+  minimal image does not load the constant segment.  The original has the EBP
+  frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_view_orbit_fpu.asm` and
+  `tools/rebuild/modules/player_view_orbit.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the three modes, the pitch below zero,
+  the high and low yaw wrap, the approach branch, and the long mode-1 offset.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_view_orbit`,
+  `work/rebuild/pvorbit.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1a3b8`.
+- Observation: the rebuilt module holds 179 decoded instructions and 566
+  bytes.  The identity check stays open at 31 of 179 instructions and 34 of 566
+  bytes.  V2 saves the registers after the frame, reorders the mode switch, and
+  uses another local layout.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1a3b8 --count 179 --rebuilt work/rebuild/pvorbit.exe
+  --rebuilt-map work/rebuild/player_view_orbit.map --rebuilt-symbol
+  player_view_orbit_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The opponent_avoid_player module at 0x1e414
+
+- Observation: the original body at `0x1e414` holds 162 instructions and 590
+  bytes up to the `ret` at `0x1e661`.  The next function starts at `0x1e670`,
+  so the store record keeps the 604-byte extent and sets no function size.  The
+  identity check uses 162 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e414 --count 162` and
+  `tools/rebuild/functions/0x1e414.json`.
+- Observation: the only direct caller at `0x1c804` is the per-object step at
+  `0x1c7d0`.  That step first marks the nearby objects at `0x126e4` and
+  resolves the nearest opponent at `0x1d00c`.  The object update at `0x2003c`
+  runs the step on each 0x590-byte car record at `0x10ab8` after
+  `object_prepare`.  The record therefore takes the section
+  `object update callees`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1e414`, the block at `0x1c7d0` through `0x1c80d`, and the loop at
+  `0x20168` through `0x20187`.
+- Observation: the function forms the look-ahead point three car radii ahead of
+  the opponent.  It uses the world position at `+0x498` and `+0x4a0`, the
+  heading at `+0x4a8`, and the radius at `+0x44c`.  It returns when the point
+  stays 5000 units or more from the player position.
+  Evidence: the block at `0x1e421` through `0x1e4d7` and the immediate
+  `0x1388`.
+- Observation: the player position is the fixed player object at `0xf91c`.
+  The field `+0x4b0` sits at `0xfdcc` and the field `+0x4b8` sits at `0xfdd4`.
+  The race radar reads the same two fields as the player position, and the
+  reference copy at `0x212d0` passes them to the proximity check.
+  Evidence: the fixups at `0x1e4b0` and `0x1e4c9` to object 3 offsets `0xfdcc`
+  and `0xfdd4`, the `race_radar` finding, and the block at `0x212ea` through
+  `0x21305`.
+- Observation: near the player, the function sets the avoidance radius at
+  `+0x488` to twice the opponent radius `+0x44c` plus the player radius at
+  `+0x544`.  It then checks the two player body points at `+0x52c` and `+0x534`,
+  and at `+0x538` and `+0x540`.  The player update at `0x17c6c` rotates the body
+  offsets `+0x514` and `+0x520` by the negative heading and adds the player
+  position, so the four fields are the two body points in the world.
+  Evidence: the block at `0x1e4dd` through `0x1e53f` and the block at `0x17c6c`
+  through `0x17d10`.
+- Observation: when a body point stays inside the avoidance radius and the
+  opponent speed `+0x418` is above the player speed `+0x50c`, the function
+  pushes the opponent local position `+0x454` and `+0x45c` to the avoidance
+  radius along the offset from that point.  It forms the distance through the
+  square-root helper at `0x22bec`.  The fields `+0x484`, `+0x48c`, and `+0x494`
+  hold the distance, the offset x, and the offset z.
+  Evidence: the block at `0x1e551` through `0x1e655`.
+- Inference: the caller step, the player body points, the player speed gate, and
+  the local position push support the name `opponent_avoid_player`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` at `0x4da72`, `cos` at `0x4da66`,
+  `sqrt` at `0x22bec`, and the truncating helper at `0x4d9f4`.  This harness
+  links no math library, so `opponent_avoid_player_fpu.asm` supplies `sin`,
+  `cos`, and `sqrt` from the hardware and makes `__CHP` truncate toward zero.
+  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/opponent_avoid_player_fpu.asm` and
+  `tools/rebuild/modules/opponent_avoid_player.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the two far guards, the two far body
+  points, the speed gate, the first point, the second point, both points, the
+  radius scaling, the 4999-unit guard boundary, and the distance equal to the
+  avoidance radius.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  opponent_avoid_player`, `work/rebuild/oavoid.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1e414`.
+- Observation: the rebuilt module holds 513 bytes.  The identity check stays
+  open at 20 of 162 instructions and 19 of 513 bytes.  V2 saves the registers
+  after the frame and uses another instruction order and local layout.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e414 --count 162 --rebuilt work/rebuild/oavoid.exe
+  --rebuilt-map work/rebuild/opponent_avoid_player.map --rebuilt-symbol
+  opponent_avoid_player_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The traffic_collision_pass module at 0x175dc
+
+- Observation: the original body at `0x175dc` holds 165 instructions and 587
+  bytes up to the `ret` at `0x17826`.  The next function starts at `0x17828`,
+  so the store record keeps the 588-byte extent and sets no function size.  The
+  identity check uses 165 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x175dc --count 165` and
+  `tools/rebuild/functions/0x175dc.json`.
+- Observation: the only direct caller at `0x15b6c` is the traffic effect group
+  at `0x15b44`.  That group first calls the nearby-record marker at `0x12424`
+  and then this function, and it calls the clear step at `0x124c0` afterwards.
+  The traffic view group at `0x201d0` calls the group at `0x20268`, and the
+  frame update at `0x1ff70` selects the group through the mode byte
+  `DAT_0011d260` bit 0x10.  The car path has the same shape at `0x15b08` with
+  the car proximity pass at `0x17408`.  The record therefore takes the section
+  `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x175dc`, the block at `0x15b44` through `0x15b7c`, the block at `0x201d0`
+  through `0x202bc`, and the `car_collision_response` finding.
+- Observation: the function clears the contact mask at `+0x2fc`.  It returns at
+  once when the state field `+0x148` is not zero.  Otherwise it walks the
+  0x2a8-byte traffic records at `DAT_00113cd8` while the index stays below the
+  count `DAT_00115218`, and it skips a record whose first field is negative.
+  Evidence: the block at `0x175e6` through `0x17615` and the loop at `0x177aa`
+  through `0x177bc`.
+- Observation: a record whose flag field `+0x14` holds the bit of the player
+  index `DAT_0011d250` takes the velocity branch.  The function calls the push
+  helper at `0x17b54` with the zero flag and copies the negated record velocity
+  `+0x30` and `+0x38` to `+0x550` and `+0x558`.
+  Evidence: the block at `0x177d9` through `0x17805`.
+- Observation: otherwise the function acts only on a record in the nearby set
+  `+0x104` and not flagged at `+0x16` bit 0.  The marker at `0x12424` fills the
+  nearby set with every traffic record within 1500 units of the player position
+  on each axis.  The function sets the contact distance at `+0x560` to the
+  player radius `+0x544` plus the traffic radius `+0x2a4`.
+  Evidence: the block at `0x12424` through `0x124be` and the block at
+  `0x1761a` through `0x17657`.
+- Observation: the function tests the two player body points at `+0x52c` and
+  `+0x534` against the two traffic points at `+0x28c` and `+0x294` in 12-byte
+  steps.  Each pair stores its deltas at `+0x564` and `+0x56c` and its
+  truncated distance at `+0x55c`.  On a hit it calls the push helper with the
+  set flag and marks the record bit in `+0x2fc`.  The last step filters
+  `+0x7c4` toward the contact flag through `filter_update` at `0x22b80` with
+  the rate 50.
+  Evidence: the block at `0x1765d` through `0x17781` and the call at `0x1781a`.
+- Inference: the caller chain, the traffic table, the two body-point pairs, and
+  the push helper support the name `traffic_collision_pass`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sqrt` at `0x22bec` and the truncating helper
+  at `0x4d9f4`.  This harness links no math library, so
+  `traffic_collision_pass_fpu.asm` supplies `sqrt` from the hardware and makes
+  `__CHP` truncate toward zero.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/traffic_collision_pass_fpu.asm` and
+  `tools/rebuild/modules/traffic_collision_pass.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the state gate, the empty traffic list,
+  the negative first field, the velocity branch, the nearby set, the record
+  flag, the equal distance, the four body-pair pushes, the truncation of 2.828
+  to 2, and the two-record mask.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  traffic_collision_pass`, `work/rebuild/tpass.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x175dc`.
+- Observation: the rebuilt module holds 560 bytes.  The identity check stays
+  open at 33 of 165 instructions and 35 of 560 bytes.  V2 saves the registers
+  after the frame and uses another instruction order and local layout.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x175dc --count 165 --rebuilt work/rebuild/tpass.exe
+  --rebuilt-map work/rebuild/traffic_collision_pass.map --rebuilt-symbol
+  traffic_collision_pass_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The view_transition_update module at 0x19f00
+
+- Observation: the original body at `0x19f00` holds 178 instructions and 577
+  bytes up to the `ret` at `0x1a140`.  The next function starts at `0x1a144`, so
+  the store record keeps the 580-byte extent and sets no function size.  The
+  identity check uses 178 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19f00 --count 178` and
+  `tools/rebuild/functions/0x19f00.json`.
+- Observation: the two direct callers are the player update at `0x19acc` and
+  the car camera at `0x1aeb3`.  The player update runs this function as its
+  third view step on the player view object `DAT_00110a20`.  The car camera
+  runs it on the view block at `+0x4f8` of a 0x590-byte car record.  The view
+  setup at `0x19ae8` sets the two transition flags `+0x54` and `+0x58`, so the
+  record takes the section `player_update callees`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x19f00`, the call at `0x19acc`, the call at `0x1aeb3`, and the setup block
+  at `0x19c40` through `0x19c50`.
+- Observation: a set flag `+0x54` makes the function form the position deltas
+  `+0x24`, `+0x28`, and `+0x2c` from the copy at `+0x18` minus the base at
+  `+0x00`, and the angle deltas `+0x3c`, `+0x40`, and `+0x44` from the saved
+  angles at `+0x48` minus the base angles at `+0x30`.  It then clears the flag.
+  Evidence: the block at `0x19f08` through `0x19f86`.
+- Observation: a set flag `+0x58` makes the function move the three angle
+  deltas toward zero through the approach helper at `0x22018` with the step
+  index `0x19`.  It scales the three position deltas by the frame factor at
+  `DAT_0010cf08 + 0x168` and truncates toward zero.
+  Evidence: the block at `0x19f89` through `0x1a023` and the helper at
+  `0x22018`.
+- Observation: the function then tests the cosine of each angle delta against
+  0.99995 and the absolute value of each scaled delta against
+  `DAT_00118e04 * 200.0`.  When every test passes, the view has settled.  The
+  function sets the screen mode 320 by the view distance `+0x90` with the
+  horizon at 65 percent, copies the view video mode `+0x8c` to
+  `DAT_001100c0`, and clears the flag `+0x58`.
+  Evidence: the blocks at `0x1a026` through `0x1a134`, the double at object-3
+  offset `0x8e4`, and the float at object-3 offset `0x8ec`.
+- Inference: the caller chain, the two transition flags, and the settle test
+  support the name `view_transition_update`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `cos` at `0x4da66` and the truncating helper
+  at `0x4d9f4`.  This harness links no math library, so
+  `view_transition_update_fpu.asm` supplies `cos` from the hardware and makes
+  `__CHP` truncate toward zero.  The three constants arrive through globals,
+  because the minimal image does not load the constant segment.  The original
+  has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/view_transition_update_fpu.asm` and
+  `tools/rebuild/modules/view_transition_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The paths cover the idle path, the delta formation, the
+  settled view, the first and third large angle delta, the position limit
+  boundary, the negative truncation, the frame factor limit, and the combined
+  flags.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  view_transition_update`, `work/rebuild/vtran.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x19f00`.
+- Observation: the rebuilt module holds 579 bytes.  The identity check stays
+  open at 22 of 178 instructions and 23 of 577 bytes.  V2 saves the registers
+  after the frame, keeps the view pointer in `ecx`, and forms the absolute
+  values with branches instead of the original `cdq` sequence.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19f00 --count 178 --rebuilt work/rebuild/vtran.exe
+  --rebuilt-map work/rebuild/view_transition_update.map --rebuilt-symbol
+  view_transition_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The opponent_start module at 0x124c0
+
+- Observation: the original body at `0x124c0` holds 164 instructions and 545
+  bytes up to the `ret` at `0x126e0`.  The next function starts at `0x126e4`, so
+  the store record keeps the 548-byte extent and sets no function size.  The
+  body sweep stops earlier, so the record also sets the instruction count 164.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x124c0 --count 164` and
+  `tools/rebuild/functions/0x124c0.json`.
+- Observation: the three direct callers at `0x15b38`, `0x15b74`, and `0x15ba0`
+  are the vehicle groups at `0x15b0c`, `0x15b44`, and `0x15b80`.  The car path
+  runs the car proximity pass at `0x17408` first.  The traffic path runs the
+  nearby marker at `0x12424` and the traffic collision pass at `0x175dc` first.
+  All three groups run this function on the player object at object-3 offset
+  `0xf91c`, so the record takes the section `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x124c0`, the block at `0x15b25` through `0x15b38`, the block at `0x15b61`
+  through `0x15b74`, and the block at `0x15b9d` through `0x15ba0`.
+- Observation: the function walks the `DAT_0010d6f8` opponent records of 0x40
+  bytes at `DAT_0010d700`.  A record with a set run flag `+0x38` is skipped.
+  Otherwise the record position at `+0`, `+4`, and `+8` must stay within 1500
+  units of the player position at `+0x4b0`, `+0x4b4`, and `+0x4b8` on every
+  axis.  The setup at `0x1517c` writes the same record array from the route
+  table `DAT_0010d6f4`, so the records are the opponent cars.
+  Evidence: the block at `0x124ca` through `0x12551` and the setup at
+  `0x1517c` through `0x152b0`.
+- Observation: for a record in range the function sets the contact distance at
+  `+0x560` to the player radius `+0x544` plus 100.  It then tests the two
+  12-byte player body points at `+0x52c` and `+0x538` against the record
+  position and stores the truncated distance at `+0x55c`.  A distance below the
+  contact distance by less than 100 units starts the record.
+  Evidence: the block at `0x12553` through `0x12641`, the square root at
+  `0x22bec`, and the truncating helper at `0x4d9f4`.
+- Observation: a started record takes the sine and the negated cosine of the
+  player heading `+0x4cc` into `+0x24` and `+0x2c`.  The vertical speed `+0x34`
+  takes the player speed `+0x50c` times the double 0.02 at object-3 offset
+  `0x418`.  The speed `+0x30` takes the player speed times the double 1.4 at
+  object-3 offset `0x420`.  The first start increments the player counter
+  `+0x7b8`, sets the flags `+0x3c` and `+0x38`, and calls `table_lookup` at
+  `0x1f718` with 5.
+  Evidence: the block at `0x12641` through `0x126d4` and the doubles at
+  object-3 offsets `0x418` and `0x420`.
+- Inference: the caller chain, the opponent record array, the player body
+  points, and the start of the nearby record support the name `opponent_start`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` at `0x4da72`, `cos` at `0x4da66`,
+  `sqrt` at `0x22bec`, and the truncating helper at `0x4d9f4`.  This harness
+  links no math library, so `opponent_start_fpu.asm` supplies `sin`, `cos`, and
+  `sqrt` from the hardware and makes `__CHP` truncate toward zero.  The two
+  scales arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/opponent_start_fpu.asm` and
+  `tools/rebuild/modules/opponent_start.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the empty list, the three range guards,
+  the contact-distance boundary, the first and the second body point, an
+  already running record, a record that started before, and the truncation of
+  the two distances sqrt(2) and sqrt(13) to 1 and 3.
+  Evidence: `python3 tools/rebuild/harness.py run --module opponent_start`,
+  `work/rebuild/ostart.txt`, and `python3 tools/rebuild/run.py run --function
+  0x124c0`.
+- Observation: the rebuilt module holds 509 bytes.  The identity check stays
+  open at 18 of 164 instructions and 18 of 509 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `ecx` and the end pointer in
+  `edi`, and forms the absolute values with `neg` instead of the original `cdq`
+  sequence.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x124c0 --count 164 --rebuilt work/rebuild/ostart.exe
+  --rebuilt-map work/rebuild/opponent_start.map --rebuilt-symbol
+  opponent_start_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The spline_load module at 0x1af70
+
+- Observation: the original body at `0x1af70` holds 148 instructions and 527
+  bytes up to the `ret` at `0x1b17e`.  The next function starts at `0x1b180`, so
+  the store record keeps the 528-byte extent and sets no function size.  The
+  record sets the instruction count 148.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1af70 --count 148` and
+  `tools/rebuild/functions/0x1af70.json`.
+- Observation: the five direct callers at `0x15088`, `0x1509f`, `0x150b6`,
+  `0x150cd`, and `0x150e4` sit in the setup at `0x14fb8`.  The setup builds the
+  data names `MAP1opp`, `MAP1anm`, `MAP1cam`, `MAP1rpl`, and `MAP1OST` from the
+  prefix `DAT_0011d294` through the formats at object-3 offsets `0x603` through
+  `0x627`.  It then calls this function once for each name.  The run-time member
+  trace names the five members `MAP1opp.spl`, `MAP1anm.spl`, `MAP1cam.spl`,
+  `MAP1rpl.spl`, and `MAP1OST.spl`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1af70`, the block at `0x14fb8` through `0x150f3`, and the member sequence in
+  this document.
+- Observation: the first `sprintf` at `0x4d32c` builds `%s\data\%s.dat` from the
+  base path `DAT_00007f44` and the first argument.  The second `sprintf` builds
+  `%s.spl` from the second argument.  The member open at `0x4c08d` opens the
+  path with the category `rb` at object-3 offset `0x94e`.  A failed open returns
+  0.
+  Evidence: the format strings at object-3 offsets `0x938` and `0x947`, the mode
+  at `0x94e`, and the block at `0x1af8a` through `0x1afd5`.
+- Observation: the first pass reads a four-byte point count, skips the four-byte
+  type and the `count * 0x38` data bytes through the seek at `0x4c5c7`, and
+  increments the spline count.  The pass ends at the first short read.
+  Evidence: the block at `0x1afdd` through `0x1b01c`.
+- Observation: the function gets the `GAMESPLINE` resource of `count * 0x24`
+  bytes through `0x2eed0` into the third argument.  A zero result runs the
+  memory error report at `0x2edad`.  It rewinds the stream and reads each
+  0x24-byte record: the count at `+0x1c`, the type at `+0x20`, and the
+  `count * 0x38` data bytes into the resource at `+0x00`.  A zero data resource
+  runs the memory error report.  The function closes the stream at `0x4c38d` and
+  returns the spline count.
+  Evidence: the block at `0x1b01e` through `0x1b17e` and the list names at
+  object-3 offsets `0x951` and `0x95c`.
+- Inference: the five callers, the `.spl` member names, the `GAMESPLINE`
+  resource, and the point records support the name `spline_load`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph, the member trace, and the data flow above.
+- Observation: the harness holds a simulated member, the resource handle, the
+  base path, the two name arguments, and the spline records.  The five paths
+  cover the two splines, the empty member, the failed open, the zero data
+  resource, and the counts 1, 0, and 7.  The output holds the markers `0`
+  through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/spline_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module spline_load`, and
+  `work/rebuild/spl_out.txt`.
+- Observation: the rebuilt module holds 504 bytes.  The identity check stays
+  open at 27 of 148 instructions and 29 of 504 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `esi`, uses `imul` for the record
+  stride, and uses other local offsets.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1af70 --count 148 --rebuilt work/rebuild/splmod.exe
+  --rebuilt-map work/rebuild/spline_load.map --rebuilt-symbol spline_load_`
+  and `python3 tools/rebuild/run.py run --function 0x1af70`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The sound_emitter_update module at 0x21b9c
+
+- Observation: the original body at `0x21b9c` holds 153 instructions and 524
+  bytes up to the `ret` at `0x21da7`.  The next function starts at `0x21da8`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 153.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21b9c --count 153` and
+  `tools/rebuild/functions/0x21b9c.json`.
+- Observation: the only direct caller at `0x20b0a` sits in the opponent update
+  at `0x20954`.  The caller passes the record and 1 when its own argument is
+  zero, so the sound update runs only on that path.
+  Evidence: the sweep of every call site for `0x21b9c` and the block at
+  `0x20afc` through `0x20b0f`.
+- Observation: the function forms the distance from the camera position
+  `DAT_0013ccc` and `DAT_0013cd0` and the record position at `+0x20` and
+  `+0x28`.  It shifts each axis delta by 3, squares the two values, and scales
+  the square root from `0x22bec` by the double 8.0 at object-3 offset `0xd21`.
+  Evidence: the block at `0x21bc3` through `0x21c10`.
+- Observation: a clear sound at `+0x38` starts below the float 40000.0 at
+  object-3 offset `0xd29`.  It stores the truncated distance at `+0x3c` and
+  gets the id from the table through `0x1f718` with `DAT_0018d88` plus the
+  index at `+0x14`.  A set sound stops through `0x1f880` above 40000.0.
+  Evidence: the block at `0x21c13` through `0x21c68`.
+- Observation: a running sound copies the float at `+0xc` to `+0x40`, rotates
+  the camera delta by `DAT_0013cd4` through `0x2218c`, forms the pitch with the
+  float 9.0 at `0xd2d` and 65536.0 at `0xd31`, the squared volume with 32767.0
+  at `0xd35`, and the pan with the double 32767.0 at `0xd39`, and sets the
+  three values through `0x1f7e4`, `0xc667d`, and `0xc6920`.
+  Evidence: the block at `0x21c6b` through `0x21d9b`.
+- Observation: the low bit of `DAT_0011d261` and the flag `DAT_0010a8c`
+  suppress the three set calls.  The function still rotates and stores the new
+  distance.
+  Evidence: the test at `0x21d5a` through `0x21d6a`.
+- Inference: the caller, the distance gate, the sound id, the pitch, the
+  volume, and the pan support the name `sound_emitter_update`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the conversions to an integer use the Watcom helper at
+  `0x4d9f4`, which truncates toward zero.  The shared `fpu_stub.asm` leaves
+  round-to-nearest, so the module uses the local truncating `__CHP` stub in
+  `sound_emitter_update_fpu.asm`.
+  Evidence: the five helper calls in the body and
+  `tools/rebuild/sound_emitter_update_fpu.asm`.
+- Observation: the harness holds the record, the camera position and angle, the
+  table base and owner, the two flags, the six constants, and the seven callee
+  stubs.  The twelve paths cover the two returns, the start, the stop, the far
+  clear sound, the running sound, the store gate, the 40000.0 boundary on both
+  sound states, the clear mute flag, and the negative pitch.  The output holds
+  the markers `0` through `9`, `a`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_emitter_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_emitter_update`, and
+  `work/rebuild/sndemit.txt`.
+- Observation: the rebuilt module holds 514 bytes.  The identity check stays
+  open at 22 of 153 instructions and 17 of 514 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `ecx`, folds the two axis squares
+  into `imul`, and uses other local offsets.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21b9c --count 153 --rebuilt work/rebuild/sndemit.exe
+  --rebuilt-map work/rebuild/sound_emitter_update.map --rebuilt-symbol
+  sound_emitter_update_` and `python3 tools/rebuild/run.py run --function
+  0x21b9c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The dos_datetime_set module at 0x1fa2c
+
+- Observation: the original body at `0x1fa2c` holds 166 instructions and 524
+  bytes up to the `ret` at `0x1fc37`.  The next function starts at `0x1fc38`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 166.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fa2c --count 166` and
+  `tools/rebuild/functions/0x1fa2c.json`.
+- Observation: the two direct callers at `0x128cf` and `0x15173` sit in
+  `engine_shutdown` at `0x128ac` and the menu cleanup at `0x15150`.  Both call
+  this function after `0x1f28c` in the teardown path.
+  Evidence: the sweep of every call site for `0x1fa2c` and the blocks at
+  `0x128ca` through `0x128d4` and `0x1516e` through `0x15178`.
+- Observation: the function sets the PIT channel 0 divisor to zero through
+  `0x101f6`.  It then reads the real-time clock date with INT 1A AX=0400 and the
+  time with INT 1A AX=0200 through `dpmi_call` at `0x4bf4b`.
+  Evidence: the blocks at `0x1fa35` through `0x1fb25`.
+- Observation: the function converts the BCD month, day, century, year, hour,
+  minute, and second to binary.  It forms the full year as `century * 100 +
+  year`.
+  Evidence: the conversion blocks at `0x1fa5f` through `0x1fb03` and
+  `0x1fb2a` through `0x1fb9e`.
+- Observation: the function sets the DOS date with INT 21 AH=2B from the year,
+  the month, and the day, and the DOS time with INT 21 AH=2D from the hour, the
+  minute, and the second.
+  Evidence: the blocks at `0x1fba1` through `0x1fbd3` and `0x1fbe8` through
+  `0x1fc1c`.
+- Observation: a non-zero `AL` from the date call reports the message at
+  object-3 offset `0xc08`, which reads `Invalid date specified. Check the
+  date!`.  A non-zero `AL` from the time call reports the message at object-3
+  offset `0xc30`, which reads `Invalid time specified. Check the time!`.  Both
+  go through `0xc656e`.
+  Evidence: the reads at `0x100c08` and `0x100c30`, and the tests at `0x1fbd8`
+  and `0x1fc21`.
+- Inference: the real-time clock read, the BCD conversion, the DOS date and time
+  set, and the two messages support the name `dos_datetime_set`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the real-time clock date and time, the two
+  invalid flags, and the DPMI helper stubs.  The six paths cover the dates 2024,
+  1999, and 2000, the zero time, the invalid date, the invalid time, and both
+  errors.  The output holds the markers `0` through `5` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/dos_datetime_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module dos_datetime_set`, and
+  `work/rebuild/ddt_out.txt`.
+- Observation: the identity check stays open at 30 of 166 instructions and 29 of
+  524 bytes.  V2 puts the frame first, saves `esi` and `edi`, uses `imul` for the
+  BCD scale, and uses other local offsets.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1fa2c --count 166 --rebuilt work/rebuild/ddtmod.exe
+  --rebuilt-map work/rebuild/dos_datetime_set.map --rebuilt-symbol
+  dos_datetime_set_` and `python3 tools/rebuild/run.py run --function 0x1fa2c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The player_car_contact_update module at 0x166a8
+
+- Observation: the original body at `0x166a8` holds 159 instructions and 524
+  bytes up to the `ret` at `0x168b3`.  The next function starts at `0x168b4`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 159.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x166a8 --count 159` and
+  `tools/rebuild/functions/0x166a8.json`.
+- Observation: the only direct caller at `0x15afc` is the second player step
+  group at `0x15ab8`.  The group runs on the player object at object-3 offset
+  `0xf91c` after `player_car_cornering_update` at `0x16ca0`, and the five view
+  groups at `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the
+  group.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x166a8`, the call at `0x15afc`, and the block at `0x15ab8` through
+  `0x15b04`.
+- Observation: the wheel contact step at `0x11a30` walks the same four
+  0x54-byte wheel units at `+0x194`.  It stores the first ground contact height
+  at `+0x24`, the second ground contact height at `+0x28`, the surface flag at
+  `+0x2c`, and the two contact points at `+0x00`, `+0x08`, `+0x0c`, and
+  `+0x14`.  The distances `+0x2e4` and `+0x2ec` separate the wheels on the two
+  axes.
+  Evidence: the loop at `0x11a92` through `0x11bf0`, the stores at `0x11b3f`,
+  `0x11b61`, `0x11be7`, `0x11b02`, `0x11b1d`, `0x11ba8`, and `0x11bc5`, and the
+  reads at `0x11aaf` and `0x11ac0`.
+- Observation: the function copies the two contact heights to `+0x04` and
+  `+0x10`.  When the surface flag is set, it adds the signed step from the low
+  bits of the two contact coordinates to the first height.  It then writes the
+  average raw height `+0x4ec`, the average adjusted height `+0x4b4`, and the
+  four body angles `+0x4c8`, `+0x4d0`, `+0x4d4`, and `+0x4dc` through `atan` at
+  `0xc2254`.
+  Evidence: the loop at `0x166cc` through `0x16734`, the averages at `0x16736`
+  through `0x167ad`, and the four angle blocks at `0x167b3` through `0x168b2`.
+- Observation: the body height and the four angles feed the view orbit at
+  `0x1a3b8` and the view update at `0x16f34`, and the wheel contact step reads
+  `+0x4c8` and `+0x4d0` back at `0x11a43` and `0x11a5c`.
+  Evidence: the reads at `0x1a459`, `0x1a4bd`, `0x1a517`, and `0x1a568`, and the
+  reads at `0x16f44`, `0x16f8e`, and `0x16f9c`.
+- Inference: the four wheel contact heights, the two adjusted body heights, the
+  four body angles, and the contact loop support the name
+  `player_car_contact_update`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the player object and the four wheel units.
+  The five paths cover the surface clear path, the positive dither, the
+  negative dither, the surface gate, and the negative averages.  The output
+  holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_car_contact_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_car_contact_update`, and
+  `work/rebuild/pccu_out.txt`.
+- Observation: the rebuilt module holds 506 bytes.  The identity check stays
+  open at 46 of 159 instructions and 12 of 506 bytes.  V2 puts the frame first,
+  keeps the object in `ecx`, builds a local helper for the unit pointer,
+  divides in extended precision, and uses another block order.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x166a8 --count 159 --rebuilt work/rebuild/pccu.exe
+  --rebuilt-map work/rebuild/player_car_contact_update.map --rebuilt-symbol
+  player_car_contact_update_` and `python3 tools/rebuild/run.py run --function
+  0x166a8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The opponent_path_update module at 0x20b1c
+
+- Observation: the original body at `0x20b1c` holds 166 instructions and 516
+  bytes up to the `ret 4` at `0x20d1d`.  The next function starts at `0x20d20`,
+  so the record keeps the 516-byte extent and sets no function size.  The
+  identity check uses 166 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20b1c --count 166` and
+  `tools/rebuild/functions/0x20b1c.json`.
+- Observation: the only direct caller at `0x20a12` is `opponent_update` at
+  `0x20954`.  It passes the state base `DAT_0010f174`, the path record at
+  `+0x44`, and the float at `+0xc` scaled by `DAT_00118e04`.  The caller is in
+  the object_update_all group, so the module takes the section
+  object_update_all callees.
+  Evidence: the call at `0x20a12` and `tools/rebuild/functions/0x20954.json`.
+- Observation: the path record holds the track index at `+0`, the node index at
+  `+4`, the segment phase at `+8`, and the direction flag at `+0xc`.  The callee
+  at `0x222e0` returns the curve speed from the control block at `+0x3c` and the
+  phase.  The phase advances by the frame step divided by the speed.
+  Evidence: the speed call at `0x20b35`, the divide at `0x20b3a`, and the add at
+  `0x20b40`.
+- Observation: when the phase reaches one, the function clears the phase.  A
+  clear direction flag sets the flag and holds the node.  A set direction flag
+  clears the flag and moves the node index through the next field at `+0x10` of
+  the 56-byte node.
+  Evidence: the gate at `0x20b49` through `0x20b51`, the flag block at
+  `0x20b64` through `0x20b71`, and the node block at `0x20b73` through
+  `0x20bab`.
+- Observation: the callee at `0x22378` evaluates the spline segment and writes
+  the target position and angle at `+0x60`, `+0x64`, and `+0x68`, and the next
+  control values at `+0x6c` and `+0x70`.  The function subtracts the distance
+  from the integer position `+0x10` and `+0x18` to the target from the frame
+  step, and it truncates the target into `+0x10`, `+0x14`, and `+0x18` through
+  the helper at `0x4d9f4`.
+  Evidence: the evaluation calls at `0x20bb6` and `0x20c19`, the distance block
+  at `0x20bbe` through `0x20be7`, and the truncation blocks at `0x20bea`
+  through `0x20c0c` and `0x20c1e` through `0x20c4e`.
+- Observation: the segment path copies the history values, takes the arc sine
+  from `0xc5e42` of the new lateral value at `+0x1c`, and forms the heading at
+  `+0x34` with pi/2 at object-3 offset `0xce1` or 2.5 pi at `0xce5`.  It wraps
+  the heading into one turn with 2 pi at `0xce9` and -2 pi at `0xced`.
+  Evidence: the copy block at `0x20c51` through `0x20c8a`, the arc sine at
+  `0x20c99`, the two heading branches at `0x20cb1` through `0x20cca`, and the
+  two wrap loops at `0x20cd9` through `0x20d17`.
+- Inference: the phase advance, the node walk, the spline evaluation, and the
+  heading form a path follower for the opponent records.  The caller and the
+  data flow support the name `opponent_path_update`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the path record, the state base, the node
+  block, the four constants, and the two curve stubs.  The five paths cover the
+  in-segment phase, the segment end with a clear direction flag, the segment
+  end with a set direction flag, the negative lateral branch, and the exact
+  phase one.  The output holds the markers `0` through `4` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/opponent_path_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_path_update`, and
+  `work/rebuild/opppath.txt`.
+- Observation: the rebuilt module holds 483 bytes and 166 instructions.  The
+  identity check stays open at 17 of 166 instructions and 18 of 483 bytes.  V2
+  puts the frame before the register saves, keeps the state in `ebx` and the
+  path in `ecx`, folds the node strides into `imul`, keeps the distance parts in
+  local floats, and calls the absolute value as a helper.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20b1c --count 166 --rebuilt work/rebuild/opppath.exe
+  --rebuilt-map work/rebuild/opponent_path_update.map --rebuilt-symbol
+  opponent_path_update_` and `python3 tools/rebuild/run.py run --function
+  0x20b1c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The member_list_load module at 0x1b394
+
+- Observation: the original body at `0x1b394` holds 166 instructions and 502
+  bytes up to the `ret` at `0x1b589`.  The next function starts at `0x1b58c`,
+  so the record keeps the 504-byte extent and sets no function size.  The
+  identity check uses 166 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b394 --count 166` and
+  `tools/rebuild/functions/0x1b394.json`.
+- Observation: the four direct callers at `0x29e6f`, `0x29e83`, `0x29e9c`, and
+  `0x29eb5` sit in `menu_space_init` at `0x29d08`.  They pass the names `menu`,
+  `cardat`, `trackdat`, and `champ` and the pointer arrays at `0x1fb80`,
+  `0x1fd10`, `0x1fea0`, and `0x20030`.  The two further callers at `0x13435`
+  and `0x134c5` in `race_data_load` at `0x131a8` pass the `game` list and the
+  array at `DAT_00118f94`.  `menu_space_init` is in the frame_update callees
+  group, so the module takes the section frame_update callees.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29e40 --count 45`, the
+  block at `0x13420`, and `work/ghidra/phaseF_131a8.txt`.
+- Observation: the function builds `%s\data\local.dat` from the base path at
+  `DAT_00007f44` and the member name `%s.txt` from the first argument.  It
+  opens the member with the category `rt` through `0x4c08d`.  A failed open
+  runs the file error report at `0x4bf88`.
+  Evidence: the `sprintf` calls at `0x1b3c3` and `0x1b3e0`, the `fopen` call at
+  `0x1b3f4`, and the strings at object-3 offsets `0x9c9`, `0x9db`, and `0x9e2`.
+- Observation: the first pass reads the text with the line mode 1 through
+  `0x4c695` and sums the byte size of every line that does not start with `*`.
+  It gets the `TEXT` resource of that size through `0x2eed0` into
+  `DAT_000062ac`.  A zero result runs the memory error report at `0x2edad`.
+  Evidence: the size loop at `0x1b408` through `0x1b446`, the `resource_get`
+  call at `0x1b455`, the string at object-3 offset `0x9e5`, and the null test
+  at `0x1b45d`.
+- Observation: the function rewinds the stream through `0x4c5c7`, copies every
+  line that does not start with `*` into the resource, and stores its pointer in
+  the second argument.  It terminates the pointer array with -1, closes the
+  stream through `0x4c38d`, and returns the resource pointer.
+  Evidence: the rewind call at `0x1b477`, the copy blocks at `0x1b4b7` through
+  `0x1b55c`, the sentinel store at `0x1b56a`, and the close call at `0x1b576`.
+- Inference: the five text lists, the `local.dat` member, and the `TEXT`
+  resource support the name `member_list_load`.  The function loads a named text
+  list from `local.dat` and fills a pointer array.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the base path, the resource handle, the
+  resource buffer, the simulated member text, and the pointer array.  The five
+  paths cover the normal path with a skipped `*` line and a copied `#` line,
+  the failed open, the zero resource, the single copied line with the `game`
+  name, and the empty member.  The output holds the markers `0` through `4` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/member_list_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module member_list_load`, and
+  `work/rebuild/mlist.txt`.
+- Observation: the rebuilt module holds 158 instructions and 535 bytes.  The
+  identity check stays open at 26 of 166 instructions and 24 of 502 bytes.  V2
+  saves the registers after the frame, keeps the name in `esi` and the array in
+  local memory, builds the constant text in local buffers for the harness, and
+  uses different local offsets.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b394 --count 166 --rebuilt work/rebuild/memlist.exe
+  --rebuilt-map work/rebuild/member_list_load.map --rebuilt-symbol
+  member_list_load_` and `python3 tools/rebuild/run.py run --function 0x1b394`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The opponent_route_setup module at 0x1517c
+
+- Observation: the original body at `0x1517c` holds 137 instructions and 499
+  bytes up to the `ret` at `0x1536e`.  The function continues through the `ret`
+  at `0x15377`, so the record keeps the 508-byte extent to the next function at
+  `0x15378` and sets no function size.  A branch at `0x152f8` jumps over the
+  first `ret` to the common block at `0x151ba`, so the identity check uses 137
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1517c --count 137` and
+  `tools/rebuild/functions/0x1517c.json`.
+- Observation: the only direct caller at `0x1354c` is `race_track_load` at
+  `0x13540`.  `race_session_start` at `0x128e0` calls `0x13540` at `0x1294e`
+  and drops a non-zero result.  The level loader at `0x14fb8` fills the spline
+  table `DAT_0010d6f4` through `spline_load` at `0x1af70` and stores the spline
+  count at `DAT_0010d6fc`.
+  Evidence: the byte sweep for a relative call to `0x1517c`, the call at
+  `0x1294e`, and the loader calls at `0x150e4` and `0x150e9`.
+- Observation: the first spline record holds the point count at `+0x1c`, the
+  first node index at `+0x20`, and the point array pointer at `+0x00`.  The
+  function copies the count to `DAT_0010d6f8` and clears it when
+  `DAT_0010d6fc` is zero.
+  Evidence: the loads at `0x15188`, `0x15190`, and `0x151a5`, and the store at
+  `0x1519f`.
+- Observation: the function walks the 0x38-byte point records from the first
+  node index.  A point holds x at `+0x04`, z at `+0x08`, the model index at
+  `+0x0c`, and the next node index at `+0x10`.
+  Evidence: the point loads at `0x151d4`, `0x15201`, `0x1531e`, and `0x152c7`.
+- Observation: a non-zero load flag forms the model name at
+  `0xf000 + model * 0x24 + (DAT_0011d274 & 3) * 0xc` and loads it from the
+  object table at `0x6530` through `0x11060`.  The load stores the object slot
+  at `+0x18` of the record.  A non-zero result returns at once.
+  Evidence: the block at `0x152fe` through `0x15365`.
+- Observation: the function fills one 0x40-byte record at
+  `DAT_0010d700 + index * 0x40`.  The record takes x at `+0x00` and z at
+  `+0x08` from the point, the ground height at `+0x04` from the map collision
+  check at `0x11c00` through `DAT_0010c72c`, the track heading at `+0x10` from
+  `track_nearest_node` at `0x120c0` through `DAT_00108048`, and the angles at
+  `+0x0c` and `+0x14` from the rotation of `DAT_0010c734` and `DAT_0010c73c`
+  through `0x2218c` by the heading minus pi/2, scaled by pi/46080.  The function
+  sets the flags `+0x20` and `+0x38` and clears `+0x3c`.
+  Evidence: the block at `0x151ba` through `0x152b0` and the constants at
+  object-3 offsets `0x633`, `0x637`, and `0x63b`.
+- Observation: the function converts an int to a float only.  It does not
+  convert a float to an int, so it needs no truncating `__CHP` stub.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: the `fild` and `fstp` instructions at `0x15269` through `0x15290`
+  and `tools/rebuild/fpu_stub.asm`.
+- Inference: the opponent record array, the route spline, and the object slot
+  support the name `opponent_route_setup`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the spline table, four point records, the
+  record array, the height and heading outputs, the rotation pair, and the four
+  callee stubs.  The nine paths cover the zero spline count, the no-load path,
+  the load success, the load error, the next chain order, the state mask 3, the
+  negative positions and angles, and the error on the second record.  The output
+  holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/opponent_route_setup_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_route_setup`, and
+  `work/rebuild/orset.txt`.
+- Observation: the rebuilt module holds 137 decoded instructions and 421 bytes.
+  The identity check stays open at 29 of 137 instructions and 24 of 421 bytes.
+  V2 puts the frame before the register saves, uses another local layout, and
+  forms the point and name offsets with another instruction order.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1517c --count 137 --rebuilt work/rebuild/orset.exe
+  --rebuilt-map work/rebuild/opponent_route_setup.map --rebuilt-symbol
+  opponent_route_setup_` and `python3 tools/rebuild/run.py run --function
+  0x1517c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

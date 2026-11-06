@@ -1,9 +1,95 @@
 {
   "address": "0x120c0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 201,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x120c0 holds 201 instructions and 695 bytes up to the ret at 0x12376; the record keeps the 696-byte extent to the next function at 0x12378 and sets no function size; the identity check uses 201 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five direct callers are player_car_init at 0x13ea5, the AI route setup at 0x1522b, player_track_node_update at 0x16ccb, the player segment helper at 0x12048, and player_car_reset_update at 0x185d8; each caller writes the position to DAT_00108038 and DAT_00108040 and reads the heading DAT_00108048 back, and player_car_init and player_car_reset_update copy that heading to the car field +0x4cc, so the function returns the track heading at the query position"
+    },
+    {
+      "kind": "note",
+      "text": "the function scans the three-by-three cell neighborhood of the spatial grid at DAT_00102fa4; the row index is ((y + 0x100000) >> 13) - 1 and the cell index is ((x + 0x100000) >> 13) - 1; a row pointer or a cell pointer of -1 is skipped; the map collision check at 0x11c00 uses the same grid and the same 0x100000 bias and 0x2000 cell size"
+    },
+    {
+      "kind": "note",
+      "text": "a cell record holds the 12-byte node entries below the pointer at +0x08 with the count at +0x1c and the 28-byte segment entries below the pointer at +0x0c with the count at +0x20; each entry holds the angle at +0x00, the x position at +0x04, and the y position at +0x08; the zero mode stores the nearest node at DAT_00108054 and the non-zero mode stores the nearest segment at DAT_00108044"
+    },
+    {
+      "kind": "note",
+      "text": "the nearest test compares the squared distance with DAT_00108020, which starts at 0x7ffffff8; the zero mode copies the node x and y to DAT_0010804c and DAT_00108050 and forms the heading at DAT_00108048; the flag bit 3 of DAT_0011d274 adds pi at DAT_0010040c, and a heading that reaches two pi at DAT_00100410 receives minus two pi at DAT_00100414"
+    },
+    {
+      "kind": "note",
+      "text": "the grid, the node and segment entries, the heading output, and the five callers support the name track_nearest_node; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the module uses the shared fpu_stub.asm, because it adds and compares floats and does not convert a float to an integer; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the grid, three rows, four cell records, the node and segment entries, the result globals, and the three angle constants; it covers the nearest node, the cross-row scan, the pi add, the two-pi wrap, the no-hit return 0, the last-cell hit, the nearest segment, the segment no-hit, and the exact two-pi boundary; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check stays open at 39 of 201 instructions and 36 of 687 bytes, because V2 saves the frame pointer first, uses another register and local layout, and uses imul for the entry stride; the build and behavior checks pass, so the record status is rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x120c0 --count 201 --rebuilt work/rebuild/tnn.exe --rebuilt-map work/rebuild/track_nearest_node.map --rebuilt-symbol track_nearest_node_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module track_nearest_node"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_nearest_node module at 0x120c0"
+    }
+  ],
+  "implementation": "c",
+  "module": "track_nearest_node",
+  "name": "track_nearest_node",
   "notes": [],
   "object_offset": "0x20c0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 36,
+        "bytes_total": 687,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 39,
+        "instructions_total": 201,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x120c0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:13d13ff57a2fc57e091bfe8aa43268822414e2de21bb2dbe8aefb82b1e39ada4",
+    "source_digest": "sha256:96a70dd209012b1a7a8bf87b83d7e48c96beab718bfb21c0dd6318fe35f19f83",
+    "tool": "run.py"
+  },
+  "role": "returns the heading of the nearest track node at a world position and the nearest track entry in the spatial grid",
+  "section": "The vehicle state chain",
   "size": 696,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_nearest_node_"
 }

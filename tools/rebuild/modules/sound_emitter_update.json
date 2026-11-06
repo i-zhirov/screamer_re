@@ -1,0 +1,41 @@
+{
+  "exe": "sndemit.exe",
+  "map": "sound_emitter_update.map",
+  "name": "sound_emitter_update",
+  "run": {
+    "command": "sndemit.exe > sndemit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "D"
+    ],
+    "output": "sndemit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_emitter_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "sound_emitter_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_emitter_update_main.c"
+    }
+  ]
+}
