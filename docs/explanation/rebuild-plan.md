@@ -285,7 +285,26 @@ These are the next unnamed game functions in the object, in size order.
 | `0x20b1c` | `opponent_path_update` (done) | 516 | 166 | 10 | 60 |
 | `0x1b394` | `member_list_load` (done) | 502 | 166 | 10 | 0 |
 | `0x1517c` | `opponent_route_setup` (done) | 499 | 137 | 4 | 13 |
+
+### Phase L: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
 | `0x1d00c` | unnamed | 497 | 144 | 3 | 7 |
+| `0x2cc98` | unnamed | 491 | 124 | 5 | 19 |
+| `0x258d0` | unnamed | 475 | 151 | 0 | 44 |
+| `0x27a5c` | unnamed | 471 | 135 | 8 | 15 |
+| `0x27c34` | unnamed | 466 | 133 | 3 | 7 |
+| `0x17408` | unnamed | 466 | 133 | 4 | 5 |
+| `0x1ed04` | unnamed | 465 | 115 | 0 | 17 |
+| `0x11a30` | unnamed | 461 | 141 | 8 | 21 |
+| `0x2b494` | unnamed | 457 | 118 | 5 | 14 |
+| `0x1e914` | unnamed | 452 | 160 | 1 | 123 |
+| `0x23038` | unnamed | 437 | 148 | 1 | 19 |
+| `0x219ec` | unnamed | 431 | 122 | 14 | 0 |
 
 ## Position
 
