@@ -12419,3 +12419,72 @@ temporary `-od` recipe.
   --original-address 0x1821c --count 220 --rebuilt work/rebuild/ptnu.exe
   --rebuilt-map work/rebuild/player_track_node_update.map --rebuilt-symbol
   player_track_node_update_`.
+
+## The player_car_suspension_update module at 0x168b4
+
+- Observation: the original body at `0x168b4` holds 219 instructions and 740
+  bytes up to the `ret` at `0x16b97`.  The next function starts at `0x16b98`,
+  so the record keeps the 740-byte extent and sets no function size.  The
+  identity check uses 219 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x168b4 --count
+  219` and `tools/rebuild/functions/0x168b4.json`.
+- Observation: the only direct caller at `0x15bb8` is the effect group at
+  `0x15bac`.  The group runs on the player object at object-3 offset `0xf91c`
+  after the player physics group at `0x15a80`.  The five view groups at
+  `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the group.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x168b4` and the call at `0x200e0`.
+- Observation: the function walks the four 0x54-byte suspension units at
+  `+0x194`.  A unit holds the phase at `+0x30`, the travel at `+0x34`, the
+  lateral force at `+0x38`, and the longitudinal force at `+0x40`.  The
+  distances `+0x2e4` and `+0x2ec` separate the wheels.
+  Evidence: the loop at `0x16a96` through `0x16a8d` and the reads at
+  `0x16948`, `0x1697f`, and `0x169c4`.
+- Observation: the constants live in object 3.  The double at offset `0x744`
+  is 0.00175, the double at `0x74c` is 1.5e-09, the float at `0x754` is 3.0,
+  the float at `0x758` is 4 pi, the float at `0x75c` is pi, and the double at
+  `0x760` is 2.0.  The pointer at `0xcf08` selects the filter table.
+  Evidence: the fixups at `0x168d6`, `0x168ea`, `0x16acb`, `0x169cc`,
+  `0x169d2`, `0x16a37`, and `0x16a1a`, and the values at `0x100744`,
+  `0x10074c`, `0x100754`, `0x100758`, `0x10075c`, and `0x100760`.
+- Observation: the function forms the speed change from `+0x50c` minus
+  `+0x588` and the lateral load from the square of `+0x50c`, the constant at
+  `0x74c`, and `+0x2f4` divided by the frame delta.  The odd units scale the
+  speed change by 3.0, and the bit-2 units take the lateral load.
+  Evidence: the blocks at `0x168c2` through `0x16934`.
+- Observation: a new magnitude resets the phase and stores the lateral force,
+  or filters the longitudinal force through `filter_update` at `0x22b80` with
+  the index `0x3d`.  The function forms the travel from `cos` at `0x4da66` of
+  the phase times 4 pi plus pi.  It clamps the travel to -18 through 18, damps
+  both forces through the filter table, and clears a force below 2.0.
+  Evidence: the blocks at `0x1693a` through `0x16a8a` and the `fcomp` against
+  the double at `0x760`.
+- Observation: the function writes the body height `+0x4c0` as the average of
+  the four travel values.  It writes the body angles `+0x4e8` and `+0x4e0`
+  from the travel differences and the distances `+0x2e4` and `+0x2ec` through
+  `atan` at `0xc2254`.  The sibling function at `0x166a8` reads the same units
+  and distances, and `player_car_link` at `0x15c1c` applies `+0x4e0` and
+  `+0x4e8` to the render objects.
+  Evidence: the blocks at `0x16ad4` through `0x16b97`, the function at
+  `0x166a8`, and the reads at `0x15d94` and `0x15e11`.
+- Inference: the four suspension units, the body height, and the two body
+  angles support the name `player_car_suspension_update`.  The module records
+  the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the player object, four suspension units, the
+  filter table, the frame delta, and the constants.  It covers the opposite
+  left and right forces, both travel clamps, the no-reset path, the dead zone,
+  the filtered longitudinal force, the negative average -7, and the two body
+  angles.  The behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_car_suspension_update` and `work/rebuild/pcsu_out.txt`.
+- Observation: the identity check stays open at 23 of 219 instructions and 32
+  of 719 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another local slot order.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x168b4 --count 219 --rebuilt work/rebuild/pcsu.exe
+  --rebuilt-map work/rebuild/player_car_suspension_update.map --rebuilt-symbol
+  player_car_suspension_update_`.

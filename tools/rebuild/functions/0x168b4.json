@@ -1,9 +1,86 @@
 {
   "address": "0x168b4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 219,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_car_suspension_update module at 0x168b4"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x168b4 holds 219 instructions and 740 bytes up to the ret at 0x16b97; the next function starts at 0x16b98, so the record keeps the 740-byte extent and sets no function size; the identity check uses 219 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15bb8 is the effect group at 0x15bac; the group runs on the player object at object-3 offset 0xf91c after the player physics group at 0x15a80, and the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call it, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the four 0x54-byte suspension units at +0x194; a unit holds the phase at +0x30, the travel at +0x34, the lateral force at +0x38, and the longitudinal force at +0x40; the distances +0x2e4 and +0x2ec separate the wheels"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the speed change (speed +0x50c minus +0x588) times 0.00175 at object-3 offset 0x744 and the lateral load from the square of the speed, 1.5e-09 at 0x74c, and +0x2f4 divided by the frame delta; the odd units scale the speed change by 3.0 at 0x754, and the bit 2 units take the lateral load"
+    },
+    {
+      "kind": "note",
+      "text": "a new magnitude resets the phase and stores the lateral force, or filters the longitudinal force through filter_update at 0x22b80 with the index 0x3d; the function forms the travel from cos at 0x4da66 of the phase times 4 pi at 0x758 plus pi at 0x75c, clamps it to -18 through 18, damps both forces through the filter table at 0xcf08, and clears a force below the dead zone 2.0 at 0x760"
+    },
+    {
+      "kind": "note",
+      "text": "the function writes the body height +0x4c0 as the average of the four travel values and the body angles +0x4e8 and +0x4e0 from the travel differences and the distances +0x2e4 and +0x2ec through atan at 0xc2254; the sibling function at 0x166a8 reads the same units and distances, and player_car_link at 0x15c1c applies +0x4e0 and +0x4e8 to the render objects, so the module names the function player_car_suspension_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, four suspension units, the filter table, the frame delta, and the constants; it covers the opposite left and right forces, both travel clamps, the no-reset path, the dead zone, the filtered longitudinal force, the negative average -7, and the two body angles; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x168b4 --count 219 --rebuilt work/rebuild/pcsu.exe --rebuilt-map work/rebuild/player_car_suspension_update.map --rebuilt-symbol player_car_suspension_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_suspension_update"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_suspension_update",
+  "name": "player_car_suspension_update",
   "notes": [],
   "object_offset": "0x68b4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 32,
+        "bytes_total": 719,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 23,
+        "instructions_total": 219,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x168b4",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:96a4d115aa27a017baa99dda8e0bdce82e83940300ad64cbacecdb5809bdbed5",
+    "source_digest": "sha256:86020a7008d0be7d184939c9c1db6251401b20f0de842d8bd8ccac817c7b4bfe",
+    "tool": "run.py"
+  },
+  "section": "The vehicle state chain",
   "size": 740,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_suspension_update_"
 }
