@@ -271,7 +271,7 @@ These are the next unnamed game functions in the object, in size order.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x1a3b8` | unnamed | 631 | 179 | 14 | 58 |
+| `0x1a3b8` | `player_view_orbit` (done) | 631 | 179 | 14 | 58 |
 | `0x1e414` | unnamed | 590 | 162 | 8 | 44 |
 | `0x175dc` | unnamed | 587 | 165 | 5 | 11 |
 | `0x19f00` | unnamed | 577 | 178 | 11 | 54 |
@@ -286,7 +286,7 @@ These are the next unnamed game functions in the object, in size order.
 
 ## Position
 
-One hundred sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
+One hundred sixty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -348,5 +348,5 @@ and `car_collision_response` at `0x17828`, and `track_nearest_node` at
 `0x120c0`, and `car_select_screen` at `0x2bedc`, and `track_select_screen` at
 `0x2c188`, and `choice_load` at `0x1bbc8`, and `menu_text_update` at `0x29918`,
 and `player_car_cornering_update` at `0x16ca0`, and `race_hud_draw` at
-`0x23420`.
-The next unnamed function is `0x1a3b8`.
+`0x23420`, and `player_view_orbit` at `0x1a3b8`.
+The next unnamed function is `0x1e414`.

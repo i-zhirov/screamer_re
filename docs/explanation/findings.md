@@ -13135,3 +13135,74 @@ temporary `-od` recipe.
   race_hud_draw_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_view_orbit module at 0x1a3b8
+
+- Observation: the original body at `0x1a3b8` holds 179 instructions and 631
+  bytes up to the `ret` at `0x1a62e`.  The next function starts at `0x1a630`,
+  so the store record keeps the 632-byte extent and sets no function size.  The
+  identity check uses 179 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1a3b8 --count 179` and
+  `tools/rebuild/functions/0x1a3b8.json`.
+- Observation: the three direct callers at `0x19eb5`, `0x19ed8`, and `0x19ef3`
+  are the view mode dispatch at `0x19e78`.  The dispatch selects this function
+  for the view modes 1, 2, and 0.  It passes the player object at object-3
+  offset `0xf91c` in `eax`, the player view object at `DAT_00110a20` in `edx`,
+  and the mode in `ebx`.  The player update at `0x19ab0` and
+  `player_view_setup` at `0x19ae8` both call the dispatch, so the record takes
+  the section `player_view_setup callees`.
+  Evidence: the direct call sweep for `0x1a3b8`, the disassembly of `0x19e78`,
+  and the call at `0x19ab0`.
+- Observation: the function refreshes the two list slots at `+0x460` and
+  `+0x468` through `0x117fc`.  It wraps the player yaw at `+0x4cc` into the
+  range zero to 2 pi with the floats at object-3 offsets `0x904` and `0x908`,
+  which hold 2 pi and -2 pi.
+  Evidence: the block at `0x1a3c7` through `0x1a43b` and the bytes at linear
+  `0x100904` and `0x100908`.
+- Observation: the mode selects the height offsets `0x12c`, `0x12c`, and
+  `0x64`, the orbit radii `0x6a4`, `0x514`, and `0x578`, and the pitch
+  offsets at `+0x4d4` plus the double at `0x90c` or `0x914`.  The doubles hold
+  `6.157521772384643` and `6.094689917564392`.
+  Evidence: the blocks at `0x1a441` through `0x1a4b3` and the bytes at linear
+  `0x10090c` and `0x100914`.
+- Observation: the function forms the height at `+0x04` from the player height
+  `+0x4b4` and the mode offset minus the radius times the sine of the old pitch
+  at `+0x30`.  A set flag `+0x7c` writes the height, the yaw at `+0x34`, the
+  second angle at `+0x38`, and the pitch at `+0x30`.  A clear flag approaches
+  the values through `0x22bb4` and `0x22018` with the step index `0x51`.
+  Evidence: the blocks at `0x1a4ba` through `0x1a58a`.
+- Observation: the function places the view on the orbit.  `+0x00` is
+  `+0x4b0` minus the radius times the sine of the yaw times the cosine of the
+  pitch.  `+0x08` is `+0x4b8` plus the radius times the cosine of the yaw times
+  the cosine of the pitch.  The two saved copies sit at `+0x0c` and `+0x14`.
+  Evidence: the blocks at `0x1a58f` through `0x1a628`.
+- Inference: the view mode dispatch, the player view object, the three orbit
+  presets, and the sibling `player_route_camera` and `car_camera` support the
+  name `player_view_orbit`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` through `0x4da72`, `cos` through
+  `0x4da66`, and the truncation helper at `0x4d9f4`.  This harness links no
+  math library, so `player_view_orbit_fpu.asm` supplies `sin`, `cos`, and the
+  truncating `__CHP`.  The four constants arrive through globals, because the
+  minimal image does not load the constant segment.  The original has the EBP
+  frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_view_orbit_fpu.asm` and
+  `tools/rebuild/modules/player_view_orbit.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the three modes, the pitch below zero,
+  the high and low yaw wrap, the approach branch, and the long mode-1 offset.
+  Evidence: `python3 tools/rebuild/harness.py run --module player_view_orbit`,
+  `work/rebuild/pvorbit.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1a3b8`.
+- Observation: the rebuilt module holds 179 decoded instructions and 566
+  bytes.  The identity check stays open at 31 of 179 instructions and 34 of 566
+  bytes.  V2 saves the registers after the frame, reorders the mode switch, and
+  uses another local layout.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1a3b8 --count 179 --rebuilt work/rebuild/pvorbit.exe
+  --rebuilt-map work/rebuild/player_view_orbit.map --rebuilt-symbol
+  player_view_orbit_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
