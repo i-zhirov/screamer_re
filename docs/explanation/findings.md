@@ -14816,3 +14816,71 @@ temporary `-od` recipe.
   wheel_contact_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The map_object_finish module at 0x2b494
+
+- Observation: the original body at `0x2b494` holds 118 instructions and 457
+  bytes up to the `ret` at `0x2b65c`.  The next function starts at `0x2b660`, so
+  the store record keeps the 460-byte extent and sets no function size.  The
+  record sets the instruction count 118.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b494 --count 118` and
+  `tools/rebuild/functions/0x2b494.json`.
+- Observation: the only direct caller at `0x29b86` is the key -2 branch of
+  `menu_text_update` at `0x29918`.  That branch runs this function on each of
+  the 0x50 map object records at `DAT_001db78` and then restores the menu key,
+  so the record takes the section `race_frame callees`.
+  Evidence: the call at `0x29b86` in the body at `0x29918` and the record loop
+  at `0x29b6a` through `0x29b9e`.
+- Observation: a record with the field `+0x08` equal to -1 holds no object.
+  The function binds the list name at `0x6350` to the slot
+  `DAT_001d2d0 + record->0x00 * 8` through the helper at `0x11850` and returns.
+  Evidence: the compare at `0x2b4a3` and the call at `0x2b4c1`.
+- Observation: the normal path reads the slot `DAT_001d2d0[index * 2]`, binds
+  the slot through the helper at `0x117fc`, and takes the object pointer from
+  the 0x1c-byte entry table `DAT_0010653c`.  It sets the object id at `+0x20`
+  from `DAT_001fab8 * record->0x08 + 0x226` and copies the record positions
+  `+0x40`, `+0x44`, and `+0x48` to the object fields `+0x08`, `+0x0c`, and
+  `+0x10`.
+  Evidence: the block at `0x2b4cb` through `0x2b571`.
+- Observation: when the record index `+0x04` equals the selected line
+  `DAT_001fb08[DAT_001fb60]`, the record angle `+0x10` takes pi/2.  The three
+  record angles `+0x10`, `+0x14`, and `+0x18` become the object angles `+0x14`,
+  `+0x18`, and `+0x1c`, scaled by 1024.0 / pi and masked with 0x7ff.  The
+  progress at `+0x58` and the timer at `+0x60` then reset to zero.
+  Evidence: the compare at `0x2b587`, the three scale blocks at `0x2b595`
+  through `0x2b63d`, and the reset at `0x2b640` through `0x2b653`.
+- Inference: the caller `menu_text_update`, the shared 0x64-byte map object
+  records, the slot table, and the matching `map_object_update` writer support
+  the name `map_object_finish`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the scale constants sit at object-3 offsets `0x109b` and
+  `0x109f` and hold 1024.0 and pi.  The original calls the truncate helper at
+  `0x4d9f4` before each `fistp`.  This harness links no math library, so the
+  local `map_object_finish_fpu.asm` makes `__CHP` truncate toward zero.  The
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: the fixup targets at `0x2b59d` and `0x2b5a3`, the float values at
+  object-3 offsets `0x109b` and `0x109f`, and
+  `tools/rebuild/map_object_finish_fpu.asm`.
+- Observation: the harness holds one 0x64-byte record, four objects, the entry
+  table, the slot table, the selected-line table, and the two float constants.
+  The six paths cover the full path, the selected line, the bind path, the
+  negative truncation, the large angle mask, and a different slot.  The output
+  holds the markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/map_object_finish_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_object_finish`,
+  `work/rebuild/mofin.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2b494`.
+- Observation: the rebuilt module holds 400 bytes and 118 decoded instructions.
+  The identity check stays open at 32 of 118 instructions and 21 of 400 bytes
+  because V2 saves a different register set, uses another prologue order, keeps
+  the record in `ecx`, and places the three float constants in the local data.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b494 --count 118 --rebuilt work/rebuild/mofin.exe
+  --rebuilt-map work/rebuild/map_object_finish.map --rebuilt-symbol
+  map_object_finish_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

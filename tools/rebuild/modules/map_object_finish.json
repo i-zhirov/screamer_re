@@ -1,0 +1,36 @@
+{
+  "exe": "mofin.exe",
+  "map": "map_object_finish.map",
+  "name": "map_object_finish",
+  "run": {
+    "command": "mofin.exe > mofin.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "mofin.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_finish.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "map_object_finish_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_finish_main.c"
+    }
+  ]
+}
