@@ -1,9 +1,95 @@
 {
   "address": "0x1517c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 137,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The opponent_route_setup module at 0x1517c"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x1517c holds 137 instructions and 499 bytes up to the ret at 0x1536e; the function continues through the ret at 0x15377, so the record keeps the 508-byte extent to the next function at 0x15378 and sets no function size; a branch at 0x152f8 jumps over the first ret to the common block at 0x151ba, so the identity check uses 137 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1354c is race_track_load at 0x13540, which race_session_start at 0x128e0 calls at 0x1294e; the caller passes the level value and drops a non-zero result; the level loader at 0x14fb8 fills the spline table DAT_0010d6f4 through spline_load at 0x1af70 and stores the spline count at DAT_0010d6fc"
+    },
+    {
+      "kind": "note",
+      "text": "the first spline record holds the point count at +0x1c, the first node index at +0x20, and the point array pointer at +0x00; the function copies the count to DAT_0010d6f8 and clears it when DAT_0010d6fc is zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x38-byte point records from the first node index; a point holds x at +0x04, z at +0x08, the model index at +0x0c, and the next node index at +0x10"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero load flag forms the model name at 0xf000 + model * 0x24 + (DAT_0011d274 & 3) * 0xc and loads it from the object table at 0x6530 through 0x11060; the load stores the object slot at +0x18 of the record, and a non-zero result returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "the function fills one 0x40-byte record at DAT_0010d700 + index * 0x40: x at +0x00 and z at +0x08 from the point, the ground height at +0x04 from the map collision check at 0x11c00 through DAT_0010c72c, the track heading at +0x10 from track_nearest_node at 0x120c0 through DAT_00108048, and the angles at +0x0c and +0x14 from the rotation of DAT_0010c734 and DAT_0010c73c through 0x2218c by the heading minus pi/2, scaled by pi/46080; the function sets the flags +0x20 and +0x38 and clears +0x3c"
+    },
+    {
+      "kind": "note",
+      "text": "the function converts an int to a float only, so it needs no truncating __CHP stub; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker"
+    },
+    {
+      "kind": "note",
+      "text": "the opponent record array, the route spline, and the object slot support the name opponent_route_setup; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the spline table, four point records, the record array, the height and heading outputs, the rotation pair, and the four callee stubs; it covers the zero spline count, the no-load path, the load success, the load error, the next chain order, the state mask 3, the negative positions and angles, and the error on the second record; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1517c --count 137 --rebuilt work/rebuild/orset.exe --rebuilt-map work/rebuild/opponent_route_setup.map --rebuilt-symbol opponent_route_setup_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1517c"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_route_setup",
+  "name": "opponent_route_setup",
   "notes": [],
   "object_offset": "0x517c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 421,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 29,
+        "instructions_total": 137,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1517c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:21ffe4d29a18dbb003a46617a3a0cf8735436029289efb56fa4f1dba0d30107e",
+    "source_digest": "sha256:2c9e517e9def404d8dcc1cd323ea1d8b6900b615288a69cab4cc90fc64011b4c",
+    "tool": "run.py"
+  },
+  "role": "loads the opponent records from the level route spline and fills their position, height, heading, angles, and object slot",
+  "section": "race_session_start callees",
   "size": 508,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_route_setup_"
 }

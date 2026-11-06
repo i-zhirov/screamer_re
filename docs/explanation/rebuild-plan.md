@@ -282,11 +282,12 @@ These are the next unnamed game functions in the object, in size order.
 | `0x166a8` | `player_car_contact_update` (done) | 524 | 159 | 4 | 26 |
 | `0x20b1c` | `opponent_path_update` (done) | 516 | 166 | 10 | 60 |
 | `0x1b394` | `member_list_load` (done) | 502 | 166 | 10 | 0 |
-| `0x1517c` | unnamed | 499 | 137 | 4 | 13 |
+| `0x1517c` | `opponent_route_setup` (done) | 499 | 137 | 4 | 13 |
+| `0x1d00c` | unnamed | 497 | 144 | 3 | 7 |
 
 ## Position
 
-One hundred seventy-eight modules carry a recipe and a result: the twelve Phase A modules,
+One hundred seventy-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -353,5 +354,5 @@ and `traffic_collision_pass` at `0x175dc`, and `view_transition_update` at
 `0x19f00`, and `opponent_start` at `0x124c0`, and `spline_load` at `0x1af70`,
 and `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
 and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at `0x20b1c`,
-and `member_list_load` at `0x1b394`.
-The next unnamed function is `0x1517c`.
+and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`.
+The next unnamed function is `0x1d00c`.

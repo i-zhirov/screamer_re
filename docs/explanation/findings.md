@@ -13880,3 +13880,76 @@ temporary `-od` recipe.
   member_list_load_` and `python3 tools/rebuild/run.py run --function 0x1b394`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The opponent_route_setup module at 0x1517c
+
+- Observation: the original body at `0x1517c` holds 137 instructions and 499
+  bytes up to the `ret` at `0x1536e`.  The function continues through the `ret`
+  at `0x15377`, so the record keeps the 508-byte extent to the next function at
+  `0x15378` and sets no function size.  A branch at `0x152f8` jumps over the
+  first `ret` to the common block at `0x151ba`, so the identity check uses 137
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1517c --count 137` and
+  `tools/rebuild/functions/0x1517c.json`.
+- Observation: the only direct caller at `0x1354c` is `race_track_load` at
+  `0x13540`.  `race_session_start` at `0x128e0` calls `0x13540` at `0x1294e`
+  and drops a non-zero result.  The level loader at `0x14fb8` fills the spline
+  table `DAT_0010d6f4` through `spline_load` at `0x1af70` and stores the spline
+  count at `DAT_0010d6fc`.
+  Evidence: the byte sweep for a relative call to `0x1517c`, the call at
+  `0x1294e`, and the loader calls at `0x150e4` and `0x150e9`.
+- Observation: the first spline record holds the point count at `+0x1c`, the
+  first node index at `+0x20`, and the point array pointer at `+0x00`.  The
+  function copies the count to `DAT_0010d6f8` and clears it when
+  `DAT_0010d6fc` is zero.
+  Evidence: the loads at `0x15188`, `0x15190`, and `0x151a5`, and the store at
+  `0x1519f`.
+- Observation: the function walks the 0x38-byte point records from the first
+  node index.  A point holds x at `+0x04`, z at `+0x08`, the model index at
+  `+0x0c`, and the next node index at `+0x10`.
+  Evidence: the point loads at `0x151d4`, `0x15201`, `0x1531e`, and `0x152c7`.
+- Observation: a non-zero load flag forms the model name at
+  `0xf000 + model * 0x24 + (DAT_0011d274 & 3) * 0xc` and loads it from the
+  object table at `0x6530` through `0x11060`.  The load stores the object slot
+  at `+0x18` of the record.  A non-zero result returns at once.
+  Evidence: the block at `0x152fe` through `0x15365`.
+- Observation: the function fills one 0x40-byte record at
+  `DAT_0010d700 + index * 0x40`.  The record takes x at `+0x00` and z at
+  `+0x08` from the point, the ground height at `+0x04` from the map collision
+  check at `0x11c00` through `DAT_0010c72c`, the track heading at `+0x10` from
+  `track_nearest_node` at `0x120c0` through `DAT_00108048`, and the angles at
+  `+0x0c` and `+0x14` from the rotation of `DAT_0010c734` and `DAT_0010c73c`
+  through `0x2218c` by the heading minus pi/2, scaled by pi/46080.  The function
+  sets the flags `+0x20` and `+0x38` and clears `+0x3c`.
+  Evidence: the block at `0x151ba` through `0x152b0` and the constants at
+  object-3 offsets `0x633`, `0x637`, and `0x63b`.
+- Observation: the function converts an int to a float only.  It does not
+  convert a float to an int, so it needs no truncating `__CHP` stub.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: the `fild` and `fstp` instructions at `0x15269` through `0x15290`
+  and `tools/rebuild/fpu_stub.asm`.
+- Inference: the opponent record array, the route spline, and the object slot
+  support the name `opponent_route_setup`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the spline table, four point records, the
+  record array, the height and heading outputs, the rotation pair, and the four
+  callee stubs.  The nine paths cover the zero spline count, the no-load path,
+  the load success, the load error, the next chain order, the state mask 3, the
+  negative positions and angles, and the error on the second record.  The output
+  holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/opponent_route_setup_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_route_setup`, and
+  `work/rebuild/orset.txt`.
+- Observation: the rebuilt module holds 137 decoded instructions and 421 bytes.
+  The identity check stays open at 29 of 137 instructions and 24 of 421 bytes.
+  V2 puts the frame before the register saves, uses another local layout, and
+  forms the point and name offsets with another instruction order.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1517c --count 137 --rebuilt work/rebuild/orset.exe
+  --rebuilt-map work/rebuild/opponent_route_setup.map --rebuilt-symbol
+  opponent_route_setup_` and `python3 tools/rebuild/run.py run --function
+  0x1517c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
