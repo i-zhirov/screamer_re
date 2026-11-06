@@ -12558,3 +12558,67 @@ temporary `-od` recipe.
   --original-address 0x168b4 --count 219 --rebuilt work/rebuild/pcsu.exe
   --rebuilt-map work/rebuild/player_car_suspension_update.map --rebuilt-symbol
   player_car_suspension_update_`.
+
+## The car_collision_response module at 0x17828
+
+- Observation: the original body at `0x17828` holds 183 instructions and 708
+  bytes up to the `ret` at `0x17aeb`.  The branch at `0x178ee` jumps over that
+  `ret` to the second block at `0x17aec`, which ends at the `ret` at `0x17b52`.
+  The next function starts at `0x17b54`, so the store record keeps the 812-byte
+  extent and sets no function size.  The identity check uses 183 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x17828 --count 183`,
+  `python3 tools/le.py disasm STARTH.EXE 0x17aec --count 40`, and
+  `tools/rebuild/functions/0x17828.json`.
+- Observation: the direct call sweep finds one caller at `0x17523` in the car
+  proximity pass at `0x17408`.  The player effect group at `0x15b08` calls that
+  pass at `0x15b30`.  The pass walks the 0x590-byte car records at
+  `DAT_00110ab8` and calls this function when the distance falls below
+  `self + 0x544 + record + 0x44c`, the record physics gate at `+0x414` is set,
+  and the record radius at `+0x2f8` is zero.
+  Evidence: the byte sweep for a relative call to `0x17828`, the loop at
+  `0x17408` through `0x1755a`, and the call at `0x17523`.
+- Observation: the caller passes the player object in `eax` and the nearby car
+  record in `edx`.  It stores the two axis deltas at `self + 0x564` and
+  `self + 0x56c` and the truncated distance at `self + 0x55c`.  This function
+  forms the unit vector from those fields and projects the overlap through
+  `record + 0x498` and `record + 0x4a0` into `DAT_00108038` and
+  `DAT_00108040`.  The map collision check at `0x11c00` reads the two globals.
+  Evidence: the blocks at `0x1745d` through `0x17523` and `0x17841` through
+  `0x178e7`.
+- Observation: when the map cell is clear, the function moves the record.  It
+  scales the record rotation `+0x418` by the double 0.7 at object-3 offset
+  `0x7ac`, or it sets the speed factor `+0x450` from the double 0.5 at `0x7b4`,
+  the turn rate `+0x54c` from the double 0.21 at `0x7c8`, the yaw response
+  `+0x4c8`, and the rate `+0x548` from the double 0.0002.  It reads the record
+  heading `+0x4a8` and moves the record positions `+0x454` and `+0x45c`.
+  When the map cell is blocked, it moves the player positions `+0x4b0` and
+  `+0x4b8` instead.
+  Evidence: the blocks at `0x178f4` through `0x17b52`.
+- Inference: the car record scan, the overlap projection, and the two corrective
+  moves support the name `car_collision_response`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original truncates through the helper at `0x4d9f4`, so the
+  module uses the local `car_collision_response_fpu.asm` truncating `__CHP`
+  stub.  The constants arrive through globals, because the minimal image does
+  not load the constant segment.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/car_collision_response.c`,
+  `tools/rebuild/car_collision_response_fpu.asm`, and the calls at `0x178aa`,
+  `0x178dc`, `0x17aaa`, `0x17ada`, `0x17b11`, and `0x17b41`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the clear cell with positive and
+  negative deltas, the zero distance count, the first flag bit 1, the three
+  second-flag combinations, and the pi/2 angle clamp.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  car_collision_response` and `work/rebuild/ccr_out.txt`.
+- Observation: the rebuilt module holds 183 decoded instructions and 700 bytes.
+  The identity check stays open at 18 of 183 instructions and 36 of 700 bytes,
+  because V2 uses another prologue, another instruction order, and another local
+  layout.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17828 --count 183 --rebuilt work/rebuild/ccr.exe
+  --rebuilt-map work/rebuild/car_collision_response.map --rebuilt-symbol
+  car_collision_response_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the three callee names in the harness stay inferred.

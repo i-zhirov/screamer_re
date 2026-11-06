@@ -1,9 +1,79 @@
 {
   "address": "0x17828",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 183,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x17828 holds 183 instructions and 708 bytes up to the ret at 0x17aeb; a branch at 0x178ee jumps over the ret to the second block at 0x17aec, so the record keeps the 812-byte extent to the next function at 0x17b54 and sets no function size; the identity check uses 183 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x17523 is the car proximity pass at 0x17408, which the player effect group at 0x15b08 calls at 0x15b30; the pass walks the 0x590-byte car records at DAT_00110ab8 and calls this function when the distance falls below self +0x544 + record +0x44c, with the player object in eax and the nearby record in edx, so the module names the function car_collision_response"
+    },
+    {
+      "kind": "note",
+      "text": "the caller stores the two axis deltas at self +0x564 and self +0x56c and the truncated distance at self +0x55c; the function forms the unit vector, projects the overlap through target +0x498 and +0x4a0 into DAT_00108038 and DAT_00108040, and calls the map collision check at 0x11c00"
+    },
+    {
+      "kind": "note",
+      "text": "when the map cell is clear the function scales the record rotation +0x418 by 0.7, sets the speed factor +0x450, the turn rate +0x54c, the yaw response +0x4c8, and the rate +0x548, reads the heading +0x4a8, and moves the record positions +0x454 and +0x45c; when the map cell is blocked it moves the player position +0x4b0 and +0x4b8"
+    },
+    {
+      "kind": "note",
+      "text": "the original truncates through the helper at 0x4d9f4, so the module uses a local truncating __CHP stub; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x17828 --count 183 --rebuilt work/rebuild/ccr.exe --rebuilt-map work/rebuild/car_collision_response.map --rebuilt-symbol car_collision_response_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module car_collision_response"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_collision_response module at 0x17828"
+    }
+  ],
+  "implementation": "c",
+  "module": "car_collision_response",
+  "name": "car_collision_response",
   "notes": [],
   "object_offset": "0x7828",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 36,
+        "bytes_total": 700,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 18,
+        "instructions_total": 183,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x17828",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:c38f9f4a2b13900fa582adfd600eff70f0facd1947433a64ca1c617abf1152f3",
+    "source_digest": "sha256:ab3267c4724f213b7c78e3eb86e10a17627425d5b8b33e06f186252e59f25952",
+    "tool": "run.py"
+  },
+  "role": "resolves the overlap between the player car and a nearby car record by moving the record or the player along the collision axis",
+  "section": "The vehicle state chain",
   "size": 812,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_collision_response_"
 }
