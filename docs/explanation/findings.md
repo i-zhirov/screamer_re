@@ -13206,3 +13206,78 @@ temporary `-od` recipe.
   player_view_orbit_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The opponent_avoid_player module at 0x1e414
+
+- Observation: the original body at `0x1e414` holds 162 instructions and 590
+  bytes up to the `ret` at `0x1e661`.  The next function starts at `0x1e670`,
+  so the store record keeps the 604-byte extent and sets no function size.  The
+  identity check uses 162 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e414 --count 162` and
+  `tools/rebuild/functions/0x1e414.json`.
+- Observation: the only direct caller at `0x1c804` is the per-object step at
+  `0x1c7d0`.  That step first marks the nearby objects at `0x126e4` and
+  resolves the nearest opponent at `0x1d00c`.  The object update at `0x2003c`
+  runs the step on each 0x590-byte car record at `0x10ab8` after
+  `object_prepare`.  The record therefore takes the section
+  `object update callees`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1e414`, the block at `0x1c7d0` through `0x1c80d`, and the loop at
+  `0x20168` through `0x20187`.
+- Observation: the function forms the look-ahead point three car radii ahead of
+  the opponent.  It uses the world position at `+0x498` and `+0x4a0`, the
+  heading at `+0x4a8`, and the radius at `+0x44c`.  It returns when the point
+  stays 5000 units or more from the player position.
+  Evidence: the block at `0x1e421` through `0x1e4d7` and the immediate
+  `0x1388`.
+- Observation: the player position is the fixed player object at `0xf91c`.
+  The field `+0x4b0` sits at `0xfdcc` and the field `+0x4b8` sits at `0xfdd4`.
+  The race radar reads the same two fields as the player position, and the
+  reference copy at `0x212d0` passes them to the proximity check.
+  Evidence: the fixups at `0x1e4b0` and `0x1e4c9` to object 3 offsets `0xfdcc`
+  and `0xfdd4`, the `race_radar` finding, and the block at `0x212ea` through
+  `0x21305`.
+- Observation: near the player, the function sets the avoidance radius at
+  `+0x488` to twice the opponent radius `+0x44c` plus the player radius at
+  `+0x544`.  It then checks the two player body points at `+0x52c` and `+0x534`,
+  and at `+0x538` and `+0x540`.  The player update at `0x17c6c` rotates the body
+  offsets `+0x514` and `+0x520` by the negative heading and adds the player
+  position, so the four fields are the two body points in the world.
+  Evidence: the block at `0x1e4dd` through `0x1e53f` and the block at `0x17c6c`
+  through `0x17d10`.
+- Observation: when a body point stays inside the avoidance radius and the
+  opponent speed `+0x418` is above the player speed `+0x50c`, the function
+  pushes the opponent local position `+0x454` and `+0x45c` to the avoidance
+  radius along the offset from that point.  It forms the distance through the
+  square-root helper at `0x22bec`.  The fields `+0x484`, `+0x48c`, and `+0x494`
+  hold the distance, the offset x, and the offset z.
+  Evidence: the block at `0x1e551` through `0x1e655`.
+- Inference: the caller step, the player body points, the player speed gate, and
+  the local position push support the name `opponent_avoid_player`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sin` at `0x4da72`, `cos` at `0x4da66`,
+  `sqrt` at `0x22bec`, and the truncating helper at `0x4d9f4`.  This harness
+  links no math library, so `opponent_avoid_player_fpu.asm` supplies `sin`,
+  `cos`, and `sqrt` from the hardware and makes `__CHP` truncate toward zero.
+  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/opponent_avoid_player_fpu.asm` and
+  `tools/rebuild/modules/opponent_avoid_player.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the two far guards, the two far body
+  points, the speed gate, the first point, the second point, both points, the
+  radius scaling, the 4999-unit guard boundary, and the distance equal to the
+  avoidance radius.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  opponent_avoid_player`, `work/rebuild/oavoid.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1e414`.
+- Observation: the rebuilt module holds 513 bytes.  The identity check stays
+  open at 20 of 162 instructions and 19 of 513 bytes.  V2 saves the registers
+  after the frame and uses another instruction order and local layout.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e414 --count 162 --rebuilt work/rebuild/oavoid.exe
+  --rebuilt-map work/rebuild/opponent_avoid_player.map --rebuilt-symbol
+  opponent_avoid_player_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
