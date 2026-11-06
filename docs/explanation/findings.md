@@ -5383,10 +5383,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 ## The first Phase B modules
 
 - `music_bank_reset` at `0x2f9b0` holds 14 instructions and 46 bytes: the frame, the argument
-  slot, the three field stores at `+0x04`, `+0x10`, and `+0x14`, and the epilogue.  The rebuild
-  with `-of+` holds 8 instructions, because the OpenWatcom V2 compiler keeps the argument in a
-  register and drops the argument slot and its reloads.  The identity check stays open and the
-  store records `rebuilt`.
+  slot, the three field stores at `+0x04`, `+0x10`, and `+0x14`, and the epilogue.  The C rebuild
+  with `-of+` held 8 instructions, because the OpenWatcom V2 compiler keeps the argument in a
+  register and drops the argument slot and its reloads.  The hand-written assembly source below
+  holds the original shape exactly.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f9b0 --count 14` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2f9b0
   --rebuilt work/rebuild/mbrmod.exe --rebuilt-map work/rebuild/music_bank_reset.map
@@ -5427,8 +5427,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   compiler's `-of+` style saves only `ebp` and the argument slot, so the `-od` builds hold 23, 38,
   and 27 instructions against the originals 14, 16, and 16.
   Evidence: the container compiles with the two option sets and the three diffs.
-- The run passes for all four modules.  The store records `rebuilt` for `music_bank_reset`,
-  `object_gear_state`, and `object_prepare`, and `verified` for `sprintf`.
+- The run passes for all four modules.  The store records `rebuilt` for
+  `object_gear_state` and `object_prepare`, and `verified` for `sprintf` and `music_bank_reset`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2f9b0`,
   `python3 tools/rebuild/run.py run --function 0x1db38`,
   `python3 tools/rebuild/run.py run --function 0x4d32c`, and
@@ -6397,6 +6397,40 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   The record holds the instruction count 11 and marks the source language with
   `implementation: assembly`.
   Evidence: `python3 tools/rebuild/store.py set --function 0x27a34 --implementation assembly`.
+
+## The hand-written music_bank_reset assembly matches the original
+
+- The `music_bank_reset` module now uses the hand-written
+  `tools/rebuild/music_bank_reset.asm` source with the `wasm` assembler.  The C
+  source `music_bank_reset.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/music_bank_reset.json` lists the assembly
+  source and the unchanged `music_bank_reset_main.c` harness.
+  Evidence: `tools/rebuild/modules/music_bank_reset.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x2f9b0 --count 14` prints 14
+  instructions and 46 bytes, from `push ebp` to `ret`.  The assembly follows
+  that sequence instruction by instruction.  The parameter arrives in `EAX`
+  and the function keeps it in the local slot `[ebp-4]`.
+- The assembler can choose another encoding for `mov ebp,esp` and
+  `mov esp,ebp`.  The original uses the store encodings (`89 e5` and `89 ec`),
+  so the source pins them with `db 89h, 0e5h` and `db 89h, 0ech`.
+  Evidence: `tools/rebuild/music_bank_reset.asm`.
+- The rebuilt body holds 14 of 14 instructions and 46 bytes.  All 46 bytes are
+  equal.  The oracle verdict is `the modules are byte-identical`.  The strict
+  gate passes.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address
+  0x2f9b0 --count 14 --rebuilt work/rebuild/mbrmod.exe --rebuilt-map
+  work/rebuild/music_bank_reset.map --rebuilt-symbol music_bank_reset_`.
+- The behavior check prints the two markers `V` and `D`: the three fields hold
+  the reset values and the program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2f9b0` and
+  `work/rebuild/mbr_out.txt`.
+- The record `0x2f9b0` is `verified` with 14 of 14 instructions, 46 of 46 bytes,
+  and a behavior pass.  The record holds the instruction count 14 and marks the
+  source language with `implementation: assembly`.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x2f9b0
+  --implementation assembly`.
 
 ## The rebuild framework
 

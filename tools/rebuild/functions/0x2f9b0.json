@@ -6,12 +6,14 @@
     "behavior"
   ],
   "confidence": "derived",
+  "count": 14,
   "evidence": [
     {
       "kind": "note",
       "text": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct"
     }
   ],
+  "implementation": "assembly",
   "module": "music_bank_reset",
   "name": "music_bank_reset",
   "notes": [],
@@ -27,23 +29,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 5,
-        "bytes_total": 28,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 5,
-        "instructions_total": 8,
-        "verdict": "fail"
+        "bytes_equal": 46,
+        "bytes_total": 46,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 14,
+        "instructions_total": 14,
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f9b0",
     "date": "2026-11-06",
-    "fingerprint": "sha256:f8a1b5deb33e5b9028d87b8d60becd653f05be480668a0b22ac7e1400c1edc6e",
-    "source_digest": "sha256:cc2274611e80da90dfe5677d69a63b7f008a628e0d21500e5e7eea06c4b60785",
+    "fingerprint": "sha256:43adc9c568e7b47002936f0c435484d9b0ab6495b0543a5ba1df880acd79031b",
+    "source_digest": "sha256:cdd6e1771254a1145bac05c03655f228fb873d7d6b012635c24707203e41461a",
     "tool": "run.py"
   },
   "role": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct",
   "section": "The sound loaders",
   "size": 48,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "music_bank_reset_"
 }

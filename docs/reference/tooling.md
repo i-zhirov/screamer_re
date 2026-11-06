@@ -375,7 +375,8 @@ The files:
 | `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
 | `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
 | `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
-| `music_bank_reset.c` | the rebuilt `music_bank_reset` module: the three field stores of the music bank record |
+| `music_bank_reset.asm` | the hand-written `music_bank_reset` module: the local argument slot, the three field stores of the music bank record, and the source pins the original `mov ebp,esp` and `mov esp,ebp` encodings |
+| `music_bank_reset.c` | the C reference version of the `music_bank_reset` module, kept alongside the assembly; the V2 `-of+` build drops the argument slot and its reloads |
 | `music_bank_reset_main.c` | the `music_bank_reset` test harness: the bank record check |
 | `object_gear_state.c` | the rebuilt `object_gear_state` module: the gear state mapping through an if-else chain |
 | `object_gear_state_main.c` | the `object_gear_state` test harness: the gear state and the field check |
@@ -709,7 +710,9 @@ module uses the hand-written assembly for the same reason, because the V2
 video_fill assembly matches the original".  The `hud_update` module uses the
 hand-written assembly for the same reason, because the V2 `-of+` epilogue adds
 `mov esp,ebp`; see the finding "The hand-written hud_update assembly matches
-the original".
+the original".  The `music_bank_reset` module uses the hand-written assembly
+because the V2 `-of+` build drops the argument slot and its reloads; see the
+finding "The hand-written music_bank_reset assembly matches the original".
 
 The module rebuild:
 
