@@ -6309,7 +6309,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the restore.
   Evidence: the container compiles of `video_fill.c` with the eight option sets and the `wdis`
   dumps of the objects.
-- The alternative assembly build at `tools/rebuild/video_fill.asm` holds the original shape exactly.
+- The hand-written assembly build at `tools/rebuild/video_fill.asm` holds the original shape exactly.
   The only differences are the two link-time address fields: the buffer pointer displacement and the
   call displacement.  The diff reports 12 of 12 instructions equal, 0 opcode differences, 2 operand
   differences, and 24 of 30 bytes equal, and the verdict is `the instruction sequences match; the
@@ -6319,19 +6319,50 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x2aa98
   --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map --rebuilt-symbol
   video_fill_`.
-- The C build stays the active module, and the assembly build stays alongside as the documented
-  alternative.  The project returns to the original Watcom 10.x compiler later; that compiler saves
-  the registers before the frame and omits the restore, so a Watcom 10.x build of the C source should
-  reproduce the original shape and make the C module the exact match.
+- The assembly build replaced the C build as the active module source.  The C source
+  `video_fill.c` stays alongside as the C reference.  The project returns to the original Watcom
+  10.x compiler later; that compiler saves the registers before the frame and omits the restore, so a
+  Watcom 10.x build of the C source should reproduce the original shape and make the C source the
+  exact match.
   Evidence: `tools/rebuild/video_fill.c`, `tools/rebuild/video_fill.asm`, and
   `tools/rebuild/modules/video_fill.json`.
 - The run passes.  The harness prints `V` and `D`: the copy stub runs with 480, 400, and
   `DAT_00121528`, and the program exits.  The segment guard stays silent.
   Evidence: `python3 tools/rebuild/harness.py run --module video_fill` and `work/rebuild/vf_out.txt`.
-- The store records the result of the active C build: build pass, identity fail, behavior pass, and
-  the status `rebuilt`.  The assembly build records build pass, identity pass, behavior pass, and the
-  status `verified` when it replaces the C source in the module recipe.
+- The store recorded the result of the C build: build pass, identity fail, behavior pass, and the
+  status `rebuilt`.  The assembly build replaces the C source in the module recipe and raises the
+  status to `verified`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2aa98`.
+
+## The hand-written video_fill assembly matches the original
+
+- The `video_fill` module now uses the hand-written `tools/rebuild/video_fill.asm` source with the
+  `wasm` assembler.  The C source `video_fill.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/video_fill.json` lists the assembly source and the unchanged
+  `video_fill_main.c` harness.
+  Evidence: `tools/rebuild/modules/video_fill.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x2aa98 --count 12` prints 12 instructions and 30 bytes,
+  from `push ebx` to `ret`.  The assembly follows that sequence instruction by instruction.
+- The assembler chooses the load encoding for `mov ebp,esp`.  The original uses the store encoding
+  (`89 e5`), so the source pins it with `db 89h, 0E5h`.
+  Evidence: `tools/rebuild/video_fill.asm`.
+- The rebuilt body holds 12 of 12 instructions and 30 bytes.  24 of 30 bytes are equal.  The 6
+  differing bytes are the buffer pointer displacement and the call displacement.  The opcode bytes
+  stay equal, and the only differing operands are the two direct addresses, which are link-time
+  addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2aa98
+  --count 12 --rebuilt work/rebuild/vfmod.exe --rebuilt-map work/rebuild/video_fill.map
+  --rebuilt-symbol video_fill_`.
+- The oracle verdict is `the instruction sequences match; the differing operands are the link-time
+  addresses`.  The strict gate passes.  The behavior check prints the two markers `V` and `D`: the
+  copy stub runs and the program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2aa98` and `work/rebuild/vf_out.txt`.
+- The record `0x2aa98` is `verified` with 12 of 12 instructions, 24 of 30 bytes, and a behavior pass.
+  The record holds the instruction count 12 and marks the source language with
+  `implementation: assembly`.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x2aa98 --implementation assembly`.
 
 ## The rebuild framework
 

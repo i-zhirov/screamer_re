@@ -343,8 +343,8 @@ The files:
 | `frame_step.asm` | the hand-written `frame_step` module: the frame, the three calls in call order, and the epilogue; the source pins the original `mov ebp,esp` encoding |
 | `frame_step.c` | the C reference version of the `frame_step` module, kept alongside the assembly; the module builds the assembly because the V2 `-of+` epilogue adds `mov esp,ebp` |
 | `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
-| `video_fill.c` | the rebuilt `video_fill` module, the active C build with `-of+`: the size pair 480 and 400 and the video buffer pointer |
-| `video_fill.asm` | the alternative assembly build of `video_fill`, kept alongside for the later Watcom 10.x build; it matches the original with only the link-time addresses |
+| `video_fill.asm` | the hand-written `video_fill` module: the size pair 480 and 400, the video buffer pointer, and the copy call; the source pins the original `mov ebp,esp` encoding |
+| `video_fill.c` | the C reference version of the `video_fill` module, kept alongside the assembly; the V2 `-of+` build adds `lea esp,[ebp-8]` |
 | `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
 | `memset.asm` | the rebuilt `memset` module, byte-identical to the original: the dword filler |
 | `memset_main.c` | the `memset` test harness: the filled buffer check |
@@ -702,7 +702,10 @@ hand-written list_destroy assembly matches the original".  `error_report` uses
 `-of+ -ot` for both harnesses, because the original keeps an EBP frame and
 expands every case body.  The `frame_step` module uses the hand-written
 assembly, because the V2 `-of+` epilogue adds `mov esp,ebp`; see the finding
-"The hand-written frame_step assembly matches the original".
+"The hand-written frame_step assembly matches the original".  The `video_fill`
+module uses the hand-written assembly for the same reason, because the V2
+`-of+` epilogue adds `lea esp,[ebp-8]`; see the finding "The hand-written
+video_fill assembly matches the original".
 
 The module rebuild:
 
