@@ -302,13 +302,13 @@ reproduce the original bytes.
 | `0x1ed04` | `player_state_snapshot` (done) | 465 | 115 | 0 | 17 |
 | `0x11a30` | `wheel_contact_update` (done) | 461 | 141 | 8 | 21 |
 | `0x2b494` | `map_object_finish` (done) | 457 | 118 | 5 | 14 |
-| `0x1e914` | unnamed | 452 | 160 | 1 | 123 |
+| `0x1e914` | `func_1e914` (done) | 452 | 160 | 1 | 123 |
 | `0x23038` | unnamed | 437 | 148 | 1 | 19 |
 | `0x219ec` | unnamed | 431 | 122 | 14 | 0 |
 
 ## Position
 
-One hundred eighty-eight modules carry a recipe and a result: the twelve Phase A modules,
+One hundred eighty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -380,5 +380,6 @@ and the Phase L modules `car_collision_pass` at `0x1d00c`,
 `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
 `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
 `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
-and `wheel_contact_update` at `0x11a30`, and `map_object_finish` at `0x2b494`.
-The next unnamed function is `0x1e914`.
+and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
+`func_1e914` at `0x1e914`.
+The next unnamed function is `0x23038`.

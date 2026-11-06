@@ -14884,3 +14884,71 @@ temporary `-od` recipe.
   map_object_finish_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The func_1e914 module at 0x1e914
+
+- Observation: the original body at `0x1e914` holds 160 instructions and 452
+  bytes up to the `ret 4` at `0x1ead5`.  The next function starts at `0x1eae0`,
+  so the store record keeps the 460-byte extent and sets no function size.  The
+  record sets the instruction count 160.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e914 --count 160` and
+  `tools/rebuild/functions/0x1e914.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x1e914`.  The function has no known caller.
+  Evidence: the scan of every `E8` call in object 1, the scan of the literal
+  `0x1e914` and `0xe914` in the image, and the scan of the fixup targets.
+- Observation: the sibling at `0x1e7b4` evaluates the same uniform quadratic
+  basis in two dimensions.  The opponent path update at `0x20b1c` calls the
+  body at `0x22378`, which calls the sibling at `0x22499`.  This function is the
+  three-dimensional variant of the same curve sampler.
+  Evidence: the constant pairs `0xbac`/`0xbb4` and `0xbb8`/`0xbc0`, the call at
+  `0x22499`, and the callers at `0x20954` and `0x20b1c`.
+- Observation: the function takes the output pointer in `eax`, the three
+  control points in `edx`, and the fraction on the stack.  It computes the
+  basis weights `w0 = 0.5 * (1 - t)^2`, `w2 = 0.5 * t^2`, and
+  `w1 = 1 - (w0 + w2)` over the points at offsets 0, `0xc`, and `0x18`.
+  Evidence: the block at `0x1e920` through `0x1e951`.
+- Observation: the output at `+0x00`, `+0x04`, and `+0x08` holds the sampled
+  position.  The function then samples the same basis at `t + 0.002`, subtracts
+  the first sample, divides the difference by its length through the
+  square-root helper at `0xc6cbe`, and writes the three tangent components to
+  `+0x0c`, `+0x10`, and `+0x14`.
+  Evidence: the blocks at `0x1e954` through `0x1e9be` and `0x1ea66` through
+  `0x1eacf`.
+- Observation: the double 0.5 sits at object-3 offset `0xbb8` and the float
+  0.002 sits at object-3 offset `0xbc0`.  The original calls the Watcom
+  square-root helper at `0xc6cbe`.  This harness links no math library, so the
+  local `func_1e914_fpu.asm` supplies `sqrt_` from the hardware and the FPU
+  run-time symbols.  The constants arrive through globals, because the minimal
+  image does not load the constant segment.  The original has the EBP frame, so
+  the module builds with `-of+`.
+  Evidence: the fixup targets at `0x1e930`, `0x1e93e`, `0x1e9c4`, and
+  `0x1e9dd`, the values at object-3 offsets `0xbb8` and `0xbc0`, and
+  `tools/rebuild/func_1e914_fpu.asm`.
+- Inference: the name stays `func_1e914`, because no caller and no data
+  reference support a stronger name.  The sibling 2D sampler and the
+  three-dimensional tangent output are the only evidence, so the relation is
+  weak.  The record takes the section `The vehicle state chain` with the spline
+  family, because the sibling sampler serves the opponent path update and the
+  function holds the same curve role.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the three control points, the six-float
+  output, and the two basis constants.  The seven paths cover the x, y, and z
+  control axes, the mid fraction, the end fraction, and the two negative
+  tangent signs.  The output holds the markers `0` through `6` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/func_1e914_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_1e914`, and
+  `work/rebuild/func1e9.txt`.
+- Observation: the rebuilt module holds 431 bytes and 160 decoded instructions.
+  The identity check stays open at 24 of 160 instructions and 21 of 431 bytes
+  because V2 keeps the output pointer in `ecx` and the input pointer in `edx`,
+  uses a shorter frame, fuses the two `(1 - t)` factors into one `fmul st(0)`,
+  and places the two basis constants in the local data.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e914 --count 160 --rebuilt work/rebuild/func1e9.exe
+  --rebuilt-map work/rebuild/func_1e914.map --rebuilt-symbol func_1e914_` and
+  `python3 tools/rebuild/run.py run --function 0x1e914`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
