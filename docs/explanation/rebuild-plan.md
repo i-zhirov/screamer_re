@@ -246,6 +246,25 @@ name from the call graph and the data flow, as in Phase F.
 | --- | --- | --- | --- | --- | --- |
 | `0x18528` | `player_car_reset_update` (done) | 776 | 168 | 5 | 44 |
 
+### Phase J: next unnamed functions
+
+These are the next unnamed game functions in the object, in size order.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1a630` | unnamed | 768 | 243 | 17 | 104 |
+| `0x1821c` | unnamed | 756 | 220 | 6 | 27 |
+| `0x168b4` | unnamed | 740 | 219 | 5 | 80 |
+| `0x2b044` | unnamed | 708 | 222 | 4 | 25 |
+| `0x17828` | unnamed | 708 | 183 | 8 | 71 |
+| `0x120c0` | unnamed | 695 | 201 | 0 | 9 |
+| `0x2bedc` | unnamed | 682 | 171 | 12 | 12 |
+| `0x2c188` | unnamed | 679 | 164 | 12 | 12 |
+| `0x1bbc8` | unnamed | 673 | 189 | 4 | 0 |
+| `0x29918` | unnamed | 657 | 174 | 5 | 6 |
+| `0x16ca0` | unnamed | 657 | 182 | 6 | 66 |
+| `0x23420` | unnamed | 633 | 173 | 22 | 14 |
+
 ## Position
 
 One hundred fifty-five modules carry a recipe and a result: the twelve Phase A modules,
