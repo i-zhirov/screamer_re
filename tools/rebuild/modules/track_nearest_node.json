@@ -1,0 +1,41 @@
+{
+  "exe": "tnn.exe",
+  "map": "track_nearest_node.map",
+  "name": "track_nearest_node",
+  "run": {
+    "command": "tnn.exe > tnn_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "A",
+      "D"
+    ],
+    "output": "tnn_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_nearest_node.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_nearest_node_main.c"
+    }
+  ]
+}

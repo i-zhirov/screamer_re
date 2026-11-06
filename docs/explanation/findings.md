@@ -12622,3 +12622,76 @@ temporary `-od` recipe.
   car_collision_response_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the three callee names in the harness stay inferred.
+
+## The track_nearest_node module at 0x120c0
+
+- Observation: the original body at `0x120c0` holds 201 instructions and 695
+  bytes up to the `ret` at `0x12376`.  The next function starts at `0x12378`,
+  so the store record keeps the 696-byte extent and sets no function size.  The
+  identity check uses 201 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x120c0 --count 201` and
+  `tools/rebuild/functions/0x120c0.json`.
+- Observation: the direct call sweep finds five call sites: `0x12048` in the
+  player segment helper at `0x11f98`, `0x13ea5` in `player_car_init`,
+  `0x1522b` in the AI route setup at `0x1517c`, `0x16ccb` in
+  `player_track_node_update`, and `0x185d8` in `player_car_reset_update`.
+  Each caller writes the position to `DAT_00108038` and `DAT_00108040` and
+  reads the heading `DAT_00108048` back.  `player_car_init` and
+  `player_car_reset_update` copy that heading to the car field `+0x4cc`.
+  Evidence: the byte sweep for a relative call to `0x120c0`, the calls at
+  `0x12048`, `0x13ea5`, `0x1522b`, `0x16ccb`, and `0x185d8`, and the heading
+  stores at `0x13eb3` and `0x185e6`.
+- Observation: the function scans the three-by-three cell neighborhood of the
+  spatial grid at `DAT_00102fa4`.  The row index is
+  `((y + 0x100000) >> 13) - 1` and the cell index is
+  `((x + 0x100000) >> 13) - 1`.  A row pointer or a cell pointer of -1 is
+  skipped.  The map collision check at `0x11c00` uses the same grid, the same
+  0x100000 bias, the same 0x2000 cell size, and the same nine-entry offset
+  table at `DAT_00101cf0` and `DAT_00101cf8`.
+  Evidence: the loops at `0x12116` through `0x12239`, the grid reads at
+  `0x12101` and `0x12120`, and the offsets at `0x101cf0` through `0x101d17`.
+- Observation: a cell record holds the 12-byte node entries below the pointer
+  at `+0x08` with the count at `+0x1c`, and the 28-byte segment entries below
+  the pointer at `+0x0c` with the count at `+0x20`.  Each entry holds the angle
+  at `+0x00`, the x position at `+0x04`, and the y position at `+0x08`.  The
+  zero mode stores the nearest node at `DAT_00108054`, and the non-zero mode
+  stores the nearest segment at `DAT_00108044`.
+  Evidence: the mode branch at `0x12168`, the node loop at `0x1223e` through
+  `0x12307`, the segment loop at `0x12170` through `0x12239`, and the grid
+  relocation at `0x4cb4c`.
+- Observation: the nearest test compares the squared distance with
+  `DAT_00108020`, which starts at `0x7ffffff8`.  The zero mode copies the node
+  x and y to `DAT_0010804c` and `DAT_00108050` and forms the heading at
+  `DAT_00108048`.  The flag bit 3 of `DAT_0011d274` adds pi at
+  `DAT_0010040c`, and a heading that reaches two pi at `DAT_00100410` receives
+  minus two pi at `DAT_00100414`.
+  Evidence: the blocks at `0x1230c` through `0x12376` and the constants at
+  `0x10040c`, `0x100410`, and `0x100414`.
+- Inference: the grid data, the node and segment entries, the heading output,
+  and the five callers support the name `track_nearest_node`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the module reuses the shared `fpu_stub.asm`, because it adds
+  and compares floats and does not convert a float to an integer.  The
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/track_nearest_node.c` and the float reads at
+  `0x12334`, `0x12351`, and `0x1235c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, and `D`.  The paths cover the nearest node, the cross-row
+  scan, the pi add, the two-pi wrap, the no-hit return 0, the last-cell hit,
+  the nearest segment, the segment no-hit, and the exact two-pi boundary.
+  Evidence: `python3 tools/rebuild/harness.py run --module track_nearest_node`
+  and `work/rebuild/tnn_out.txt`.
+- Observation: the rebuilt module holds 201 decoded instructions and 687
+  bytes.  The identity check stays open at 39 of 201 instructions and 36 of 687
+  bytes, because V2 saves the frame pointer first, uses another register and
+  local layout, and uses `imul` for the entry stride.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x120c0 --count 201 --rebuilt work/rebuild/tnn.exe
+  --rebuilt-map work/rebuild/track_nearest_node.map --rebuilt-symbol
+  track_nearest_node_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two entry names in the harness stay inferred.
