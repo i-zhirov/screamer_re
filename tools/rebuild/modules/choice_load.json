@@ -1,0 +1,29 @@
+{
+  "exe": "chcload.exe",
+  "map": "choice_load.map",
+  "name": "choice_load",
+  "run": {
+    "command": "chcload.exe > chl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "chl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "choice_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "choice_load_main.c"
+    }
+  ]
+}

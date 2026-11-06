@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred sixty-three named modules are rebuilt with the harness and the
+  progress: one hundred sixty-four named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -238,10 +238,11 @@ The plan follows the size order, starting with the smallest functions.
     `player_car_suspension_update` at `0x168b4`,
     `map_object_place` at `0x2b044`, and `car_collision_response` at `0x17828`,
     and `track_nearest_node` at `0x120c0`, and `car_select_screen` at
-    `0x2bedc`, and `track_select_screen` at `0x2c188`
+    `0x2bedc`, and `track_select_screen` at `0x2c188`, and `choice_load` at
+    `0x1bbc8`
     are done;
     the result is twenty-three verified modules, one matching module, and one
-    hundred and thirty-nine open rebuilds).
+    hundred and forty open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

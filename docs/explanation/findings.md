@@ -12846,3 +12846,77 @@ temporary `-od` recipe.
   track_select_screen_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The choice_load module at 0x1bbc8
+
+- Observation: the original body at `0x1bbc8` holds 189 instructions and 673
+  bytes up to the `ret` at `0x1be68`.  The next function starts at `0x1be6c`,
+  so the store record keeps the 676-byte extent and sets no function size.  The
+  identity check uses 189 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1bbc8 --count 189` and
+  `tools/rebuild/functions/0x1bbc8.json`.
+- Observation: the function builds `%s\config\choice.dat` from the base path at
+  `DAT_00007edc` through the `sprintf` call at `0x1bbe1`, opens the path with
+  the mode `rb` through the `fopen` call at `0x1bbf1`, and tests the handle at
+  `0x1bbfc`.  The format string sits at object-3 offset `0xa75` and the mode
+  string at `0xa8a`.
+  Evidence: the calls at `0x1bbe1` and `0x1bbf1`, the test at `0x1bbfc`, and
+  the bytes at linear `0x100a75` and `0x100a8a`.
+- Observation: on a successful open the function reads 0x460 bytes into the
+  record at `0x203c4` through the `fread` call at `0x1bdff`, copies the fields
+  at `0x203d0`, `0x203d4`, `0x203d8`, `0x207fc`, `0x20800`, and `0x20820` to
+  the race context at `DAT_00002dec` offsets `+0x08`, `+0x18`, `+0x28`,
+  `+0x38`, `+0x48`, and `+0x1c`, and closes the handle through the `fclose`
+  call at `0x1be5b`.
+  Evidence: the block at `0x1bded` through `0x1be5f`.
+- Observation: on a failed open the function writes the default record.  It
+  clears the version fields at `0x203c4`, `0x203c8`, `0x203dc`, `0x203e0`, and
+  `0x203e4`.  It sets the three 0x6000 limits at `0x20808`, `0x2080c`, and
+  `0x20810`, the three 1 flags at `0x207fc`, `0x20800`, and `0x20814`, and the
+  two 2 flags at `0x207f4` and `0x20820`.  It sets the global `0x1d2a8` to 2
+  and clears `0x20818` and `0x2081c`.  It marks the six index slots at
+  `0x20400` with -1 and copies the tag `GRA` from object-3 offset `0xa8d` to
+  `0x203cc`.
+  Evidence: the block at `0x1bc04` through `0x1bcc2` and the bytes at linear
+  `0x100a8d`.
+- Observation: the function fills six lap records at `0x20430` and six race
+  records at `0x20610`.  Each record is 0x50 bytes and holds five time slots at
+  `+0x00`, five 4-byte tags at `+0x14`, and five flags at `+0x28`.  The lap time
+  slots take the bit pattern 0x43340000 (180.0) and the race time slots take
+  0x44610000 (900.0).  The tags take `GRA` from the object-3 offsets `0xa91`
+  and `0xa95`, and the flags take zero.
+  Evidence: the loop at `0x1bcc3` through `0x1be60` and the constants at
+  `0x1bd0e` and `0x1bd84`.
+- Observation: the direct callers are `race_start` at `0x2779e` and
+  `menu_space_init` at `0x29d3d`.  Both call the function in the setup path.
+  Three callers read the same record: `loading_screen` at `0x2a364` reads the
+  0x50-byte entry at `0x20430`, `race_record_save` at `0x2e82c` reads the lap
+  and race tables, and `race_records_screen` at `0x2d4b8` formats them.
+  Evidence: the calls at `0x2779e`, `0x29d3d`, and the record reads in
+  `tools/rebuild/loading_screen.c` and `tools/rebuild/race_record_save.c`.
+- Inference: the function loads the choice file.  The `%s\config\choice.dat`
+  path, the open, the read, the close, and the default record support the name
+  `choice_load`.  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the time slots have the type `int`, because the original stores
+  the immediate bit patterns and the rebuild links no FPU run-time library.  A
+  `float` assignment would reference the undefined `_fltused_` and the emulator
+  symbols.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/choice_load.c` and the failed build without the
+  `int` slots.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `2` and `D`.  The paths cover the success copy, the default record,
+  and a second success handle.  The float checks compare the bit patterns.
+  Evidence: `python3 tools/rebuild/harness.py run --module choice_load`,
+  `work/rebuild/chl_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1bbc8`.
+- Observation: the rebuilt module holds 189 decoded instructions and 628
+  bytes.  The identity check stays open at 73 of 189 instructions and 34 of 628
+  bytes.  V2 saves the registers after the frame, places the success block
+  first, uses other local offsets, and calls a helper for the tag copy.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1bbc8 --count 189 --rebuilt work/rebuild/chcload.exe
+  --rebuilt-map work/rebuild/choice_load.map --rebuilt-symbol choice_load_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
