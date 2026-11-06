@@ -14952,3 +14952,80 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x1e914`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The path_playback_update module at 0x23038
+
+- Observation: the original body at `0x23038` holds 148 instructions and 437
+  bytes up to the `ret` at `0x231ec`.  The next function starts at `0x231f0`, so
+  the store record keeps the 440-byte extent and sets no function size.  The
+  identity check uses 148 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23038 --count 148` and
+  `tools/rebuild/functions/0x23038.json`.
+- Observation: the only direct caller at `0x20317` is the view group at
+  `0x202c0`.  That group appends a keyframe through `0x231f0` and then calls
+  this function with the playback block at object-3 offset `0x18ed8` in `eax`
+  and zero in `edx`.  The frame update at `0x1ff70` selects the view group
+  through the mode byte `DAT_0011d260`.
+  Evidence: the calls at `0x2030b` and `0x20317`, the relocation targets at
+  `0x20311`, and the disassembly of `0x202c0` and `0x231f0`.
+- Observation: the first argument points to a playback block.  The field at
+  `+0x08` points to a state record.  The state holds the index at `+0x04`, the
+  count at `+0x08`, the active flag at `+0x0c`, and the keyframe array at
+  `+0x20`.  A keyframe holds 0x28 bytes.  The position is at `+0x00`, `+0x04`,
+  and `+0x08`.  The three angles are at `+0x0c`, `+0x10`, and `+0x14`.  The two
+  integer fields are at `+0x18` and `+0x1c`.  The float field is at `+0x20`.
+  The timestamp is at `+0x24`.
+  Evidence: the loads at `0x23055` through `0x2317d` and the append at
+  `0x231f0`.
+- Observation: the function returns at once when the global `DAT_0011d264` is
+  zero or when the state is not active.  With a zero second argument it
+  advances the state index while the playback time `DAT_00118e10` is above the
+  timestamp of the current keyframe.  It sets the active flag to -1 when the
+  index reaches the count.  It then copies the head keyframe (the keyframe
+  before the index) to the playback block at `+0x10` through `+0x30`.  A set
+  second argument keeps the head at zero and stops after the copy.
+  Evidence: the blocks at `0x23048` through `0x23151`.
+- Observation: on the normal path the function forms the fraction between the
+  head stamp and the next stamp.  It takes the keyframes before, at, after, and
+  two after the head.  It calls `spline_interpolate` at `0x22744` with the
+  fraction.  It calls the spline only when the head index is above one and the
+  count minus the head index is above two, because the cubic form needs the two
+  neighbours.
+  Evidence: the fraction block at `0x23199` through `0x231aa`, the pointer
+  frame at `0x231ad` through `0x231cb`, and the call at `0x231e0`.
+- Observation: the playback time sits at object-3 offset `0x18e10` and the
+  enable flag at object-3 offset `0x1d264`.  The frame timer at `0x1fc38` adds
+  the frame delta to the playback time and the init at `0x12bc0` clears it, so
+  the first is a global clock and not a constant.  The two globals arrive from
+  the harness, because the minimal image does not load that part of the segment.
+  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: the fixup targets at `0x2304a`, `0x23083`, and `0x2319b`, the
+  disassembly of `0x1fc38` and `0x12bc0`, and
+  `tools/rebuild/path_playback_update.c`.
+- Inference: the name `path_playback_update` follows from the caller position
+  in the view group, the keyframe append at `0x231f0`, the playback block at
+  `0x18ed8`, the index advance, and the spline call.  The original has no
+  symbol name, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the playback block, the playback state, and
+  ten keyframes.  It covers the zero enable flag, the inactive state, the set
+  second argument, the interpolation with the fraction 0.5, the index advance
+  over five stamps, the run past the last stamp, the two head guards, and the
+  zero index with an equal time.  The output holds the markers `0` through `8`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/path_playback_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module path_playback_update`, and
+  `work/rebuild/pplay.txt`.
+- Observation: the rebuilt module holds 428 bytes and 148 decoded instructions.
+  The identity check stays open at 46 of 148 instructions and 21 of 428 bytes.
+  V2 saves the frame pointer first, keeps the playback block in `ebx`, uses a
+  shorter frame, multiplies the index by 40, and reads the enable flag through
+  a near data address.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23038 --count 148 --rebuilt work/rebuild/pplay.exe
+  --rebuilt-map work/rebuild/path_playback_update.map --rebuilt-symbol
+  path_playback_update_` and `python3 tools/rebuild/run.py run --function
+  0x23038`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
