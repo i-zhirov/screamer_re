@@ -15,11 +15,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "list_destroy.c",
-      "flags": [
-        "-od"
-      ]
+      "compiler": "wasm",
+      "file": "list_destroy.asm"
     },
     {
       "compiler": "wcc386",

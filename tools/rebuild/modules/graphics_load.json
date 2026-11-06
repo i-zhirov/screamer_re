@@ -1,0 +1,29 @@
+{
+  "exe": "glmod.exe",
+  "map": "graphics_load.map",
+  "name": "graphics_load",
+  "run": {
+    "command": "glmod.exe > gl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "gl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "graphics_load.c",
+      "flags": [
+        "-of+",
+        "-oi"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "graphics_load_main.c"
+    }
+  ]
+}

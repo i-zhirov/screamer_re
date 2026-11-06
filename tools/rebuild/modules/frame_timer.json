@@ -1,0 +1,36 @@
+{
+  "exe": "ftmmod.exe",
+  "map": "frame_timer.map",
+  "name": "frame_timer",
+  "run": {
+    "command": "ftmmod.exe > ftm_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "ftm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "frame_timer.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "frame_timer_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "frame_timer_main.c"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "exe": "dpiexmod.exe",
+  "map": "dpmi_int31_entry.map",
+  "name": "dpmi_int31_entry",
+  "run": {
+    "command": "dpiexmod.exe > dpi_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "dpi_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "dpmi_int31_entry.asm"
+    },
+    {
+      "compiler": "wasm",
+      "file": "dpmi_int31_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_int31_entry_main.c"
+    }
+  ]
+}

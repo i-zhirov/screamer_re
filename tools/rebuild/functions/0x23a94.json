@@ -1,9 +1,86 @@
 {
   "address": "0x23a94",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 208,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The race_radar module at 0x23a94"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x23a94 holds 208 instructions and 870 bytes up to the ret at 0x23df9, so the record keeps the 872-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x2368c is the end of the HUD draw at 0x23420; the frame update at 0x1ff70 calls 0x23420 at 0x2001a after the view groups, so the function draws a race HUD element"
+    },
+    {
+      "kind": "note",
+      "text": "the zoom counter DAT_0011d2a4 selects the scale: 0 returns, 1 uses 0x30, 2 uses 0x60, and 3 uses 0x90, and the input map at 0x2126d advances the counter from 0 through 3"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the 144x144 panel at (8, 248) in DAT_00115ce4 through DAT_00115cf0, clears it through 0x25d28, and renders the world from DAT_0011fdcc, DAT_0011fdd4, and DAT_0011fde8 through 0x1057c"
+    },
+    {
+      "kind": "note",
+      "text": "the mode byte DAT_0011d260 selects the record source: bit 0x10 scans the 0x2a8-byte traffic records at DAT_00113cd8 up to DAT_00115218, bits 0 and 1 scan the 0x590-byte car records at DAT_00110ab8 up to DAT_00110ab8 + DAT_0010f8ec * 0x590, and bit 4 plots the ghost record at DAT_00118ee8 and DAT_00118ef0 for the index DAT_00118ed4 ^ 1"
+    },
+    {
+      "kind": "note",
+      "text": "a marker is the rotated record delta times the zoom scale around the panel centre (39, 159), doubled and truncated; the function stores the position in DAT_0011cb18 and DAT_0011cb1c and flushes the sprite list, and the final marker sits at (0x4c, 0x13c) with the mode 4, so the module names the function race_radar"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the zoom 0 return, the traffic path, the car path, the ghost path, the two ghost guards, the empty mode, the traffic precedence, and the empty traffic list; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23a94 --count 208 --rebuilt work/rebuild/rradmod.exe --rebuilt-map work/rebuild/race_radar.map --rebuilt-symbol race_radar_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_radar"
+    }
+  ],
+  "module": "race_radar",
+  "name": "race_radar",
   "notes": [],
   "object_offset": "0x13a94",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 69,
+        "bytes_total": 870,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 52,
+        "instructions_total": 208,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23a94",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:d6e03a1bf257f7c19b9ae8f7c8c0e6a13477e6f9e2c570d0c0cd3400920780d3",
+    "source_digest": "sha256:ec4a2dda488185979ce1453c61d225cfb7c4001fc51dc474267622382f4ddccc",
+    "tool": "run.py"
+  },
+  "role": "draws the 144x144 race radar panel from the player position and heading, plots the traffic, car, and ghost records at the selected zoom, and restores the screen clip",
+  "section": "Program functions",
   "size": 872,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_radar_"
 }

@@ -1,17 +1,48 @@
 {
   "address": "0x1bf38",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads `screamer.cfg` and sets a flag from a character"
+      "text": "the original at `0x1bf38` holds 46 instructions and 155 bytes: it opens `screamer.cfg` with the mode `rt` through `fopen` at `0xc5fe5`, reports `Files damaged. Re-install Screamer.` through `0xc656e` and exits with -1 on failure, reads `%s%s%s` into `DAT_00007edc`, `DAT_00007f10`, and `DAT_00007f44` and two `%c` values through `fscanf` at `0xc6618`, sets `DAT_00007f78` to 1 when the second character is `n`, and closes the handle through `0xc6245`"
     }
   ],
+  "module": "config_load",
   "name": "config_load",
   "notes": [],
-  "role": "reads `screamer.cfg` and sets a flag from a character",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 141,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 18,
+        "instructions_total": 43,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1bf38",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:f4e03eeaea0e75005fc9a0b69abd31edd0b644fc6a9cf4a55f5f5d0eecf23a82",
+    "source_digest": "sha256:85b82b82870aa978183be88bfe0656f426a40005b6a892afa9817a683517bc68",
+    "tool": "run.py"
+  },
+  "role": "opens `screamer.cfg` with the mode `rt`, reads three strings and two characters, and sets the flag `DAT_00007f78` from the second character",
   "section": "Subsystem initialisation",
-  "size": 2088,
-  "status": "named"
+  "size": 156,
+  "status": "rebuilt",
+  "symbol": "config_load_"
 }

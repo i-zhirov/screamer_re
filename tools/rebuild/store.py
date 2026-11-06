@@ -36,6 +36,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import le  # noqa: E402
+import schema  # noqa: E402
 
 REBUILD_DIR = Path(__file__).resolve().parent
 FUNCTIONS_DIR = REBUILD_DIR / "functions"
@@ -49,6 +50,7 @@ TOOL_FILES = (
     "rebuild/run.py",
     "rebuild/harness.py",
     "rebuild/diff_module.py",
+    "rebuild/oracle.py",
     "rebuild/store.py",
     "le.py",
 )
@@ -75,6 +77,9 @@ DEFAULT_ORIGINAL = (
 LE_TOOL = Path(__file__).resolve().parent.parent / "le.py"
 FINDINGS_DOCUMENT = Path("docs/explanation/findings.md")
 ADDRESS_PATTERN = re.compile(r"^0x[0-9a-f]+$")
+DOS_NAME_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$#@!%&'()-~^`{}"
+)
 _extents_dirty = False
 
 
@@ -460,6 +465,24 @@ def _status_violations(
     return violations
 
 
+def _schema_violations(path: Path, record: dict, name: str) -> list[str]:
+    """Return the JSON Schema violations of one record, or no messages.
+
+    The contracts stay under `contracts/`.  A test store without the contracts
+    has no schema to validate, so the semantic checks alone apply.
+    """
+    schema_path = REBUILD_DIR / "contracts" / name
+    if not schema_path.is_file():
+        return []
+    document = json.loads(schema_path.read_text())
+    return [
+        f"{path}: schema: {message}"
+        for message in schema.validate(
+            record, document, base_dir=schema_path.parent
+        )
+    ]
+
+
 def validate_record(
     path: Path, record: dict | None = None, root: Path | None = None
 ) -> list[str]:
@@ -514,6 +537,79 @@ def validate_record(
     return violations
 
 
+def is_dos_83(name: str) -> bool:
+    """Return true when the name fits the DOS 8.3 limit."""
+    if not name or "/" in name or "\\" in name:
+        return False
+    base, dot, extension = name.rpartition(".")
+    if not dot:
+        base, extension = name, ""
+    if not 1 <= len(base) <= 8 or len(extension) > 3:
+        return False
+    if dot and not extension:
+        return False
+    return all(character in DOS_NAME_CHARS for character in base + extension)
+
+
+def _run_violations(path: Path, record: dict) -> list[str]:
+    """Return one message per broken invariant of a module run block."""
+    run = record.get("run")
+    if run is None:
+        return []
+    if not isinstance(run, dict):
+        return [f"{path}: the run field is not an object"]
+    violations: list[str] = []
+    output = run.get("output")
+    if not isinstance(output, str) or not output:
+        violations.append(f"{path}: the run block has no output")
+        output = None
+    elif not is_dos_83(output):
+        violations.append(f"{path}: the output {output!r} is not an 8.3 name")
+    command = run.get("command")
+    if not isinstance(command, str) or ">" not in command:
+        violations.append(f"{path}: the run command does not redirect the output")
+    else:
+        tokens = command.split(">", 1)[1].strip().split()
+        if not tokens:
+            violations.append(f"{path}: the run command has no redirect target")
+        elif output is not None and tokens[0].lower() != output.lower():
+            violations.append(
+                f"{path}: the run command writes {tokens[0]!r}, not {output!r}"
+            )
+    return violations
+
+
+def module_name_violations() -> list[str]:
+    """Return one message per duplicate executable or output name."""
+    seen: dict[tuple[str, str], str] = {}
+    violations: list[str] = []
+    if not MODULES_DIR.is_dir():
+        return violations
+    for path in sorted(MODULES_DIR.glob("*.json")):
+        try:
+            record = _read_json(path)
+        except ValueError as error:
+            violations.append(str(error))
+            continue
+        run = record.get("run") or {}
+        names = (
+            ("executable", record.get("exe")),
+            ("map", record.get("map")),
+            ("output", run.get("output")),
+        )
+        for kind, value in names:
+            if not isinstance(value, str) or not value:
+                continue
+            key = (kind, value.lower())
+            if key in seen:
+                violations.append(
+                    f"{path}: the {kind} {value!r} is also used by {seen[key]}"
+                )
+            else:
+                seen[key] = path.name
+    return violations
+
+
 def validate_module(
     path: Path, record: dict | None = None, root: Path | None = None
 ) -> list[str]:
@@ -543,6 +639,7 @@ def validate_module(
     for check in record.get("checks", []):
         if check not in CHECKS:
             violations.append(f"{path}: the check {check!r} is not a check name")
+    violations.extend(_run_violations(path, record))
     return violations
 
 
@@ -679,6 +776,8 @@ def command_set(arguments: argparse.Namespace) -> int:
         record["section"] = arguments.section
     if arguments.confidence is not None:
         record["confidence"] = arguments.confidence
+    if arguments.implementation is not None:
+        record["implementation"] = arguments.implementation
     for check in arguments.check:
         checks = record.setdefault("checks", [])
         if check not in checks:
@@ -789,8 +888,13 @@ def command_check(original: Path | None) -> int:
     records: list[dict] = []
     for address in candidate_addresses():
         count += 1
-        violations.extend(validate_record(record_path(address)))
-        records.append(load_record(address))
+        path = record_path(address)
+        violations.extend(validate_record(path))
+        record = load_record(address)
+        records.append(record)
+        violations.extend(
+            _schema_violations(path, record, "record.schema.json")
+        )
     for address, extra in overlap_addresses(records):
         violations.append(
             f"{record_path(address)}: the size reaches {extra} bytes past the next entry"
@@ -799,6 +903,14 @@ def command_check(original: Path | None) -> int:
         for path in sorted(MODULES_DIR.glob("*.json")):
             count += 1
             violations.extend(validate_module(path))
+            try:
+                module_record = load_module(path.stem)
+            except ValueError:
+                continue
+            violations.extend(
+                _schema_violations(path, module_record, "module.schema.json")
+            )
+        violations.extend(module_name_violations())
     if original is not None:
         if not original.is_file():
             print(f"error: the original image {original} is missing", file=sys.stderr)
@@ -860,6 +972,11 @@ def parse_arguments() -> argparse.Namespace:
         "--confidence",
         choices=("observed", "derived", "inferred"),
         help="the confidence label",
+    )
+    set_parser.add_argument(
+        "--implementation",
+        choices=("c", "assembly"),
+        help="the source language of the rebuilt function",
     )
     set_parser.add_argument(
         "--check",

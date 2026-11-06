@@ -1,9 +1,61 @@
 {
   "address": "0x19ae8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_view_setup module at 0x19ae8"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x19ae8 holds 223 instructions and 869 bytes up to the ret at 0x19e4c, so the record keeps the 912-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the player update at 0x19ab0 calls this function as its first step on DAT_00110a20, and the car camera at 0x1a930 calls it at 0x1ae8b on the view block at +0x4f8 of the 0x590-byte car records at DAT_00110ab8"
+    },
+    {
+      "kind": "note",
+      "text": "the function selects a slot from the seven 0x14-byte slots at DAT_00101da4 by the kind flag byte DAT_000f003d, the input bytes DAT_00118e1c and DAT_00118e1d, and the chosen flag, sets the screen mode through 0x4c850, starts the renderer at 0x19e78 or the car camera at 0x1a930, and copies the car position and angle into the view, so the module names the function player_view_setup"
+    }
+  ],
+  "module": "player_view_setup",
+  "name": "player_view_setup",
   "notes": [],
   "object_offset": "0x9ae8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 571,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 43,
+        "instructions_total": 149,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19ae8",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:01db40eeeed338f754ed0b447c0620a3dbec2beb469798321203865b9260abce",
+    "source_digest": "sha256:c9333a697b7aa7e884342734dffdcbe32a041b0bfbed79dc2574e5e4ae71e2e4",
+    "tool": "run.py"
+  },
+  "role": "selects the active view slot from the seven-slot table, sets the screen mode, copies the car position and angle into the view, and starts the renderer or the car camera",
+  "section": "player_update callees",
   "size": 912,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_view_setup_"
 }

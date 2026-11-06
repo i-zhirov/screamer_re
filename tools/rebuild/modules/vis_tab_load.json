@@ -1,0 +1,28 @@
+{
+  "exe": "vtlmod.exe",
+  "map": "vis_tab_load.map",
+  "name": "vis_tab_load",
+  "run": {
+    "command": "vtlmod.exe > vtl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "vtl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "vis_tab_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "vis_tab_load_main.c"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "exe": "rtofmod.exe",
+  "map": "race_timeout.map",
+  "name": "race_timeout",
+  "run": {
+    "command": "rtofmod.exe > rtof_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "rtof_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_timeout.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_timeout_main.c"
+    }
+  ]
+}

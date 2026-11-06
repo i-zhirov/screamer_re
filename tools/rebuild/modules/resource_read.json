@@ -1,0 +1,30 @@
+{
+  "exe": "rrout.exe",
+  "map": "resource_read.map",
+  "name": "resource_read",
+  "run": {
+    "command": "rrout.exe > rr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "resource_read.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "resource_read_main.c"
+    }
+  ]
+}

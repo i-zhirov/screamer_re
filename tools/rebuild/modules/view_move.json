@@ -1,0 +1,29 @@
+{
+  "exe": "vwmmov.exe",
+  "map": "view_move.map",
+  "name": "view_move",
+  "run": {
+    "command": "vwmmov.exe > vwm_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "vwm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "view_move.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "view_move_main.c"
+    }
+  ]
+}

@@ -1,17 +1,48 @@
 {
   "address": "0x28ba4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `menu_space_init`, `0x2e82c`, and `0x29bac`"
+      "text": "the first-return body at `0x28ba4` holds 34 instructions and 118 bytes: the state guard, the menu index and the two table reads, the menu-id switch, and the epilogue; the case bodies extend to `0x293a7` (646 instructions and 2052 bytes), and the state 2 overlay body starts at `0x28fd6`.  The rebuild keeps the dispatcher and represents the case bodies and the overlay body as step functions"
     }
   ],
+  "module": "net_race_screen",
   "name": "net_race_screen",
   "notes": [],
-  "role": "the state 2 overlay: calls `0x2a364` with the 0x2c-byte record table `DAT_001022c4` indexed by `DAT_001203dc`, then `menu_space_init`, `0x2e82c`, and `0x29bac`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 118,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 34,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x28ba4",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:9cfd8223a0237acdf6e8413cfd09c3171a3105368c18f0223eaeb98d4279084b",
+    "source_digest": "sha256:434d1e62c8eb34b62dd3a0da00c066b89bc950b57881822afa71d0f3930589f3",
+    "tool": "run.py"
+  },
+  "role": "dispatches the menu id from the two tables and the state 2 overlay",
   "section": "overlay_dispatch callees",
   "size": 2052,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "net_race_screen_"
 }

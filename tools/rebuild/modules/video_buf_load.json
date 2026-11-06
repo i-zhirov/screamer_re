@@ -1,0 +1,28 @@
+{
+  "exe": "vblmod.exe",
+  "map": "video_buf_load.map",
+  "name": "video_buf_load",
+  "run": {
+    "command": "vblmod.exe > vbl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "vbl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_buf_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_buf_load_main.c"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "exe": "rp4mod.exe",
+  "map": "race_panel_4.map",
+  "name": "race_panel_4",
+  "run": {
+    "command": "rp4mod.exe > rp4_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rp4_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_4.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_4_main.c"
+    }
+  ]
+}

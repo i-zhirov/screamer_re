@@ -1,6 +1,10 @@
 {
   "address": "0x28b5c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
@@ -8,10 +12,37 @@
       "text": "saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value"
     }
   ],
+  "module": "menu_enter",
   "name": "menu_enter",
   "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 47,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 15,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x28b5c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:554c527f5b00b40228fd42a1e06edd1e3fec80ae0f4148face5d615554277c15",
+    "source_digest": "sha256:d4fd7a647adb6ab81068a84cc975764f0255af3df83afa4bffd229b66c2be86d",
+    "tool": "run.py"
+  },
   "role": "saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value",
   "section": "overlay_dispatch callees",
   "size": 72,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "menu_enter_"
 }

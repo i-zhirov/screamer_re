@@ -1,17 +1,52 @@
 {
   "address": "0xd1f25",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0xd1f25` holds 84 instructions and 227 bytes: the nine register saves, the frame, the four-byte local area, the size checks at `0xd1f35` and `0xd1f39`, the round-up at `0xd1f4a`, the free-list walk from `0x31d0`, the helper calls at `0xe09dc`, `0xe0f73`, and `0xe112e`, the largest-free update in `0x31d8`, the cursor in `0x31d4`, the heap flag clear at `0x27de5`, and the epilogue"
     }
   ],
+  "module": "malloc_rt",
   "name": "malloc",
   "notes": [],
-  "role": "rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 195,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 70,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd1f25",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:2df9bab9380f40df35846db023566c7cac206c2699ecc55523c89770860517ab",
+    "source_digest": "sha256:f2d6e7b7f5e7f97c87071ec865f7eeeec79490a8b58185eaeb70212f1e0de9c0",
+    "tool": "run.py"
+  },
+  "role": "walks the free list, allocates a rounded block, grows the heap once, and returns the block or 0",
   "section": "The runtime memory manager",
   "size": 227,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "malloc_rt_"
 }

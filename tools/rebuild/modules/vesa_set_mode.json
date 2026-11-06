@@ -1,0 +1,28 @@
+{
+  "exe": "vsmmod.exe",
+  "map": "vesa_set_mode.map",
+  "name": "vesa_set_mode",
+  "run": {
+    "command": "vsmmod.exe > vsm_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "vsm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "vesa_set_mode.asm"
+    },
+    {
+      "compiler": "wasm",
+      "file": "vesa_alloc.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "vesa_set_mode_main.c"
+    }
+  ]
+}

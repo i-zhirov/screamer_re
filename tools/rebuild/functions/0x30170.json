@@ -1,17 +1,54 @@
 {
   "address": "0x30170",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "count": 196,
   "evidence": [
     {
       "kind": "note",
-      "text": "`sti`, stack setup, DOS version check"
+      "text": "the original at `0x30170` holds 196 instructions and 605 bytes: the interrupt enable, the stack alignment to 4, the stack top and break stores, the DOS version call, the Phar Lap, CauseWay, Rational DOS/4G, and unknown extender paths, the PSP words, the command-line copy, the `no87=` environment scan, the program-name copy, the BSS clear with the 0x1000 limit for the Rational extender, the initializer call at `0xd4374`, the main invoker call at `0xd4324`, the message writer at `0x30389`, the finalizer call at `0xd43bf`, the DOS exit, and the DS restore; the shape follows `bld/clib/startup/a/cstrt386.asm`"
+    },
+    {
+      "kind": "note",
+      "text": "the record keeps the 114032-byte extent to the next entry at `0x4bee0`, so the identity check uses `--count 196`; the C rebuild moves the DOS and DPMI services, the extender records, the command line, the environment, and the runtime calls behind harness helpers, and the harness runs the Phar Lap, Rational zero-base, Rational non-zero-base, CauseWay, unknown, and message paths"
     }
   ],
+  "module": "startup",
   "name": "startup",
   "notes": [],
   "object_offset": "0x20170",
-  "role": "`sti`, stack setup, DOS version check",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 605,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 40,
+        "instructions_total": 196,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x30170",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:d39eb2d21c4cddd798e12754ae0c6d78be7a831db7ef4b9798888b1b7685e610",
+    "source_digest": "sha256:3afa982d948fbfaf3ad56e75ad327295efec26aa9e900e98a55513bfbe8e4168",
+    "tool": "run.py"
+  },
+  "role": "reads the DOS version, selects the extender path, copies the command line and the program name, scans the environment, clears the BSS, and runs the initializer, the main invoker, and the exit chain",
   "section": "Startup path",
-  "size": 114032,
-  "status": "named"
+  "size": 537,
+  "status": "rebuilt",
+  "symbol": "startup_"
 }

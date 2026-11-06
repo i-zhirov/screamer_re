@@ -1,17 +1,48 @@
 {
   "address": "0x2f205",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls INT 31h AX=0x0502 with the address in EBX:ECX"
+      "text": "the original at `0x2f205` holds 33 instructions and 90 bytes: it builds the local register block with `0x0502` at offset 0 and the address words at offsets `0x10` and `0x14`, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, and returns the status at block offset `0x18`"
     }
   ],
+  "module": "memory_free",
   "name": "memory_free",
   "notes": [],
-  "role": "calls INT 31h AX=0x0502 with the address in EBX:ECX",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 69,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 24,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f205",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:70d8c87599754ee57c2176fed2ca98c9394ad244b6bca647e87d09f8872e443c",
+    "source_digest": "sha256:5a7b8fce9b5e2377f90087a4e2202f5ffa3bd29db6068589637bee62e3f2ec68",
+    "tool": "run.py"
+  },
+  "role": "calls the DPMI free memory block function 0x0502 and returns its status",
   "section": "The resource layer",
   "size": 90,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "memory_free_"
 }

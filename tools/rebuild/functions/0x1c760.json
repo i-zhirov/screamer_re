@@ -1,18 +1,49 @@
 {
   "address": "0x1c760",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads the input bits `DAT_00118e1c` and the state at `+0x2f8`"
+      "text": "runs the proximity check, the drive step gated on the state at `+0x2f8` and the input bits `DAT_00118e1c`, and the revolution step"
     }
   ],
+  "module": "object_player_input",
   "name": "object_player_input",
   "notes": [],
   "object_offset": "0xc760",
-  "role": "reads the input bits `DAT_00118e1c` and the state at `+0x2f8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 49,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 17,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1c760",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:136c03e25401812a52be6602201f3503b4d60e42bbc17bc76c59de0f8c369311",
+    "source_digest": "sha256:8113edf17bde271deffab59243df02f89de509203d87caa2138e403596e2ed98",
+    "tool": "run.py"
+  },
+  "role": "runs the proximity check, the drive step gated on the state at `+0x2f8` and the input bits `DAT_00118e1c`, and the revolution step",
   "section": "object_update_all callees",
   "size": 60,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_player_input_"
 }

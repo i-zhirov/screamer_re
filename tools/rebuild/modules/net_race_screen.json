@@ -1,0 +1,32 @@
+{
+  "exe": "nrsmod.exe",
+  "map": "net_race_screen.map",
+  "name": "net_race_screen",
+  "run": {
+    "command": "nrsmod.exe > nrs_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "nrs_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "net_race_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "net_race_screen_main.c"
+    }
+  ]
+}

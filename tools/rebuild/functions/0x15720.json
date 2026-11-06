@@ -1,17 +1,52 @@
 {
   "address": "0x15720",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "fills a 50-entry table with floating-point ramp values"
+    },
+    {
+      "kind": "note",
+      "text": "the body at `0x15720` holds 55 instructions and 152 bytes: the frame, the outer loop over 50 rows, the inner loop over 100 columns, the row base `0x80e8 + 400 * i`, the ramp value `j * 0.005f + 0.5`, the exponent `50.0 / (i + 1)`, the call at `0xc21e2`, the float store, and the epilogue. The `fadd qword ptr [0x66e]` reads the double 0.5 and the `fdivr qword ptr [0x676]` reads the double 50.0. The call at `0xc21e2` reaches the power routine at `0xc20a6`, which uses `fyl2x` and the `f2xm1` loop at `0xc21bf`; the rebuild calls `pow` and keeps the identity open because the shared toolchain differs"
     }
   ],
+  "module": "palette_build",
   "name": "palette_build",
   "notes": [],
-  "role": "fills a 50-entry table with floating-point ramp values",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 106,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15720",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:30ef1df343bfece52f384ac28a66bca72d1d249428eda886fe84c5d1b78d12e4",
+    "source_digest": "sha256:080ac19ccf386b69772c55e5dd39616aa13e456099031760909e8a3067e7f8ac",
+    "tool": "run.py"
+  },
+  "role": "fills the 50-row by 100-column palette table with the power ramp `pow(j * 0.005f + 0.5, 50.0 / (i + 1))`",
   "section": "Subsystem initialisation",
   "size": 152,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "palette_build_"
 }

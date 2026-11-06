@@ -1,0 +1,32 @@
+{
+  "exe": "rsbmod.exe",
+  "map": "race_state_begin.map",
+  "name": "race_state_begin",
+  "run": {
+    "command": "rsbmod.exe > rsb_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "rsb_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_state_begin.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_state_begin_main.c"
+    }
+  ]
+}

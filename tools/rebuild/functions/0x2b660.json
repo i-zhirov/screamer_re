@@ -1,9 +1,82 @@
 {
   "address": "0x2b660",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 219,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The name_entry_letter_update module at 0x2b660"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x2b660 holds 219 instructions and 803 bytes up to the first ret at 0x2b982; the second return block continues to the shared epilogue at 0x2b9cb, so the record keeps the 876-byte extent and sets no function size; the identity check uses 219 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2cec5 sits in the state 4 update at 0x2ce84; the init at 0x2c430 builds the 26 A to Z records at DAT_001db78, the input at 0x2893a selects the letter, and race_state_update at 0x29564 dispatches state 4, so the function updates one name-entry letter and the module names it name_entry_letter_update"
+    },
+    {
+      "kind": "note",
+      "text": "the function fells the timer +0x60 by the frame delta DAT_0018e08 and returns while the timer stays at or above zero; it binds the list name 0x6350 through 0x11850 when the record field +0x08 is -1, otherwise it refreshes the list through 0x117fc, looks the object up in DAT_001d2d0 and the 0x1c-byte entry table DAT_0010653c, and sets the object frame +0x20 from DAT_001fab8"
+    },
+    {
+      "kind": "note",
+      "text": "the object position +0x08 and +0x10 take the record fields +0x40 and +0x48, and the height +0x0c interpolates from +0x44 toward +0x38 with the square of the progress +0x58 through the Watcom pow helper at 0xc21e2; the three record angles +0x10, +0x14, and +0x18 scale by 1024.0 / pi into the object angles +0x14, +0x18, and +0x1c with the mask 0x7ff"
+    },
+    {
+      "kind": "note",
+      "text": "the progress +0x58 oscillates between zero and one with the direction +0x5c: above one it clamps at one, clears the direction, scales the start +0x44, and turns to -1 when the start falls below the target +0x38; at zero it clamps at zero and turns to +1; the angle +0x10 rises with the flag +0x0c and resets at 0x400cbe4d above the bound, or falls and resets at 0xbf20d97c below the bound"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one record, one object block, the slot and entry tables, the frame delta, and the eight constants; it covers the unused record, the timer gate, the full path, the interpolation, both completion clamps, both zero-direction clamps, and both angle resets; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b660 --count 219 --rebuilt work/rebuild/neltupd.exe --rebuilt-map work/rebuild/name_entry_letter_update.map --rebuilt-symbol name_entry_letter_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module name_entry_letter_update"
+    }
+  ],
+  "module": "name_entry_letter_update",
+  "name": "name_entry_letter_update",
   "notes": [],
   "object_offset": "0x1b660",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 764,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 42,
+        "instructions_total": 219,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b660",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:8695217481cea7dcddc298c3c02307afef70d78645b4eff36555a398279ab582",
+    "source_digest": "sha256:9b98031af27840f9a257712bb9fd9f6dac484ab9b1c610ae4f3854b9b451b4ad",
+    "tool": "run.py"
+  },
+  "role": "updates one name-entry letter record: applies the start delay, interpolates the height, sets the object frame and angles, and steps the progress and the angle",
+  "section": "race_frame callees",
   "size": 876,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "name_entry_letter_update_"
 }

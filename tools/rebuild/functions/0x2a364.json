@@ -1,17 +1,48 @@
 {
   "address": "0x2a364",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\\graf.dat`"
+      "text": "the original at 0x2a364 holds 127 instructions and 498 bytes up to the ret at 0x2a555; the first call at 0x2f326 receives the pointer DAT_000062ac and the name NET_SPACE; a second argument above 6 drops by 6 and sets the bit 0x08 of DAT_0001d274, and the function restores the saved dword at the end; the function sets DAT_000203bc to the argument minus 1, calls 0x8bd54 with the table value DAT_000021d8[context word +8], copies that word to DAT_0001d2b8, clears 0x3e800 bytes at DAT_00021528 through memset at 0x8c160, and fills the screen through 0x2aa98; it builds load%d%c.pcx with the letter H through sprintf at 0x4d32c, loads gfx\\graf.dat into DAT_0001fad0 with the palette at DAT_0000cf5c through pcx_load at 0x1b5a4, runs the cleanup at 0x15150 on a non-zero result, sets the palette through 0x81a05, shows the message through 0x258d0, copies the pixels through memcpy at 0x8c150, runs the swaps at 0x1075f and 0x107a1 behind the flags 0x10 and 0x20, draws DAT_0001fc3c at y 0x50 with font 3 and color 0 through 0x2e7cc, fills the screen again, builds map%d at DAT_0001d294, publishes the arguments at DAT_0001d2b0 and DAT_0001d2b4 and the context words at +0x38 and +0x48, reads the 0x50-byte record from DAT_00020430 at the argument minus 1 when the low byte of DAT_0001d260 holds none of 0x64 and stores 0 otherwise, runs race_cleanup at 0x2a1b0, runs 0x1fd70, and on a non-zero result calls 0x108e4 with 3, 0x10978, and 0x300be; the tail calls 0x1be6c"
     }
   ],
+  "module": "loading_screen",
   "name": "loading_screen",
   "notes": [],
-  "role": "clears the screen, sets the palette, builds `load%d%c.pcx` with the letter H, and loads it from `gfx\\graf.dat`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 36,
+        "bytes_total": 459,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 40,
+        "instructions_total": 118,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2a364",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:447d91f498a2d12436c3eba070e6ff932322b0f5ad62520d998ebb3c9e7574d3",
+    "source_digest": "sha256:48d811c5c60af4bb5d000594df3e7acda2aa1a0c4f0dabc897ac86205c419e02",
+    "tool": "run.py"
+  },
+  "role": "clears the screen, loads the load<N>H.pcx member from gfx\\graf.dat, sets the palette, draws the centered title, builds the map<N> name, publishes the race fields, and reports a failed race start",
   "section": "The graphics decoders",
   "size": 500,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "loading_screen_"
 }

@@ -1,9 +1,53 @@
 {
   "address": "0x142ec",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the two callers at `0x12c0c` and `0x12f50` walk the car count `DAT_0000f8ec` and call the function for each 0x590-byte record at `0x10ab8 + index * 0x590`; the call target `0x11060` searches the 0x78-record table at `0x6530` by name through `stricmp` at `0x4d9ba` and loads the object through `0x10bfc`; the data at object-3 offset 0x5dc holds `SHADOW` and the records at 0x1d5c hold the wheel names `flx`, `fli`, `blx`, `rli`, `frx`, `fri`, `brx`, and `rri`, so the module names the function `car_setup`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x142ec` holds 226 bytes and 65 instructions up to the early `ret` at `0x143cd`: the frame, the index store at `+0`, the load-flag gate, the three signed compares on `DAT_0000f8f0`, `DAT_0000d6dc`, and `DAT_0011d2a0`, the two `0x11060` calls with the names at 0x5dc and `0xd25c + index * 0x40`, the model index store at `+0x2e0`, and the two error returns; the full body continues to the `ret` at `0x1496c`, so the store keeps the 1668-byte extent and sets no size"
+    }
+  ],
+  "module": "car_setup",
+  "name": "car_setup",
   "notes": [],
   "object_offset": "0x42ec",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 171,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 51,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x142ec",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:8f8f14a571916769879207bc193f32495e442158e866f93dcf40dbb623b7a280",
+    "source_digest": "sha256:093514ae0979f0e68830ec68edcbf64db8dc2c9cecf21352cd1ad1610a12eca9",
+    "tool": "run.py"
+  },
+  "role": "sets up one car record: clamps the slot counter, loads the SHADOW object and the selected car model, and stores the two indices",
+  "section": "The vehicle state chain",
   "size": 1668,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_setup_"
 }

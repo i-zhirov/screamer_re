@@ -1,0 +1,30 @@
+{
+  "exe": "gmmod.exe",
+  "map": "game_main.map",
+  "name": "game_main",
+  "run": {
+    "command": "gmmod.exe > gm_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "gm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "game_main.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "game_main_main.c"
+    }
+  ]
+}

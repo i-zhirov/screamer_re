@@ -1,0 +1,27 @@
+{
+  "exe": "mbrmod.exe",
+  "map": "music_bank_reset.map",
+  "name": "music_bank_reset",
+  "run": {
+    "command": "mbrmod.exe > mbr_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "mbr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_bank_reset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_bank_reset_main.c"
+    }
+  ]
+}

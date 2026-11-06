@@ -1,0 +1,43 @@
+{
+  "exe": "csndupd.exe",
+  "map": "car_sound_update.map",
+  "name": "car_sound_update",
+  "run": {
+    "command": "csndupd.exe > csnd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "b",
+      "c",
+      "D"
+    ],
+    "output": "csnd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_sound_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_sound_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_sound_update_main.c"
+    }
+  ]
+}

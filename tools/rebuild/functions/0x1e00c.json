@@ -1,17 +1,60 @@
 {
   "address": "0x1e00c",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec`"
+      "text": "the original at `0x1e00c` holds 193 instructions and 765 bytes up to the first `ret`: the gate `DAT_00108058`, the target scan over the 0x590-byte records at object-3 offset 0x10ab8 with the counter `DAT_00113cc8`, the two default ids at object-3 offset 0x1e30, the rotation of the deltas at `+0x498` and `+0x4a0`, the three formed values from `+0x4f0`, `+0x4e4`, and `+0x4f4`, the release at 0x1f880, and the epilogue; the record keeps the 768-byte extent"
+    },
+    {
+      "kind": "note",
+      "text": "the constants live in object 3: the float at offset 0xb64 is 9.0, the double at 0xb68 is 2.4, the double at 0xb70 is 13568.0, the float at 0xb78 is 35000.0, the float at 0xb7c is 23552.0, and the double at 0xb80 is 32767.0; the two-entry table at offset 0x1e30 holds 2 and 10 for the type at `+0x2e0` against 0xc"
+    },
+    {
+      "kind": "note",
+      "text": "the original truncates with the Watcom helper at 0x4d9f4, so the module uses a local truncating FPU stub; the harness supplies the stubs for `table_lookup` at 0x1f718, `0x1f7e4`, `0x1f880`, `0x2218c`, `0x22bec`, `0xc667d`, and `0xc6920`"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the disabled gate, the release path, the scan hit and miss, both default ids, the distance and type compares, the four state flags, the copy at `+0x418`, the negative angle, and the three collision value stores; the behavior check passes"
     }
   ],
+  "module": "object_collision",
   "name": "object_collision",
   "notes": [],
-  "role": "calls `0xc667d` and `0xc6920` in object 3 plus `0x1f718`, `0x1f7e4`, `0x1f880`, `0x2218c`, and `0x22bec`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 45,
+        "bytes_total": 635,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 31,
+        "instructions_total": 160,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1e00c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:536f8404ffc3e8541c236ce5fbb6fddd814ffb3ab5062186e1d4c6ac14cbcbc6",
+    "source_digest": "sha256:6e61af52a22e4a420c496e74f7e994b4a709d63285991ed38ff1f22ec359deec",
+    "tool": "run.py"
+  },
+  "role": "scans the object records for a free target, rotates the position delta, forms the three collision values, stores the truncated distance, and releases the target when the state clears",
   "section": "object_physics callees",
   "size": 768,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_collision_"
 }

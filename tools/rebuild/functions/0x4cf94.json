@@ -1,17 +1,52 @@
 {
   "address": "0x4cf94",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "opens `TABS\\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x4cf94` holds 43 instructions and 155 bytes: it opens `TABS\\persp01.tab` with the mode `rb` through `fopen` at `0xc5fe5`, runs the BIOS video call with 3, the error report with `0x16`, and the exit with `0x16` on failure, calls `resource_read` at `0x2efc2` with the second argument `0x1747` and the size `0x40740`, stores the result in `DAT_000214ec`, reports a null result through `0x2edad`, reads `0x40740` bytes through `fread` at `0xc607b`, advances the cell by `0x40000`, and closes the handle through `0xc6245`"
     }
   ],
+  "module": "persptab_load",
   "name": "persptab_load",
   "notes": [],
-  "role": "opens `TABS\\persp01.tab` with the mode `rb`, reads `fread(buffer, 1, 0x40740, stream)` into the `PERSPTAB` cell, and advances the cell by `0x40000`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 150,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 37,
+        "instructions_total": 43,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cf94",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:b92222cb9b7b497b439063ad2c59632f656d0a3eb1f7df4c28c440e9a6d5ae45",
+    "source_digest": "sha256:7085bb41e39e9b560b0a29c9891bf71177d87dfa6ab64e396ec03d3fb4d3c9dc",
+    "tool": "run.py"
+  },
+  "role": "opens `TABS\\persp01.tab` with the mode `rb`, reads the `PERSPTAB` resource of `0x40740` bytes into the cell, advances the cell by `0x40000`, and closes the handle",
   "section": "The TABS table loaders",
   "size": 156,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "persptab_load_"
 }

@@ -1,0 +1,30 @@
+{
+  "exe": "fprtfmod.exe",
+  "map": "fprtf.map",
+  "name": "fprtf",
+  "run": {
+    "command": "fprtfmod.exe > fp_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "fp_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "fprtf.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "fprtf_main.c"
+    }
+  ]
+}

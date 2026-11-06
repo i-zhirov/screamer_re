@@ -1,0 +1,32 @@
+{
+  "exe": "objlmod.exe",
+  "map": "object_load.map",
+  "name": "object_load",
+  "run": {
+    "command": "objlmod.exe > objl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "objl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_load_main.c"
+    }
+  ]
+}

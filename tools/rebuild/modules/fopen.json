@@ -1,0 +1,29 @@
+{
+  "exe": "fopmod.exe",
+  "map": "fopen.map",
+  "name": "fopen",
+  "run": {
+    "command": "fopmod.exe > fop_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "fop_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "fopen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "fopen_main.c"
+    }
+  ]
+}

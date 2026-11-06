@@ -1,0 +1,28 @@
+{
+  "exe": "mntrmod.exe",
+  "map": "menu_enter.map",
+  "name": "menu_enter",
+  "run": {
+    "command": "mntrmod.exe > mntr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "mntr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_enter.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_enter_main.c"
+    }
+  ]
+}

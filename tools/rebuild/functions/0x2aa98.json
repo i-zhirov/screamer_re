@@ -1,17 +1,48 @@
 {
   "address": "0x2aa98",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "fills 480 by 400"
+      "text": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer"
     }
   ],
+  "module": "video_fill",
   "name": "video_fill",
   "notes": [],
-  "role": "fills 480 by 400",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 30,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 12,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2aa98",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:4099edbbdb81bf111254ce420d4f1177db1bcf3a13823fbd07319d4ab8634743",
+    "source_digest": "sha256:120593ca32f32d6d682c615381642c29cd286658bb81f9070c71757298c2c217",
+    "tool": "run.py"
+  },
+  "role": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer",
   "section": "race_loop callees",
   "size": 32,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "video_fill_"
 }

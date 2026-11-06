@@ -1,0 +1,33 @@
+{
+  "exe": "carmod.exe",
+  "map": "car_setup.map",
+  "name": "car_setup",
+  "run": {
+    "command": "carmod.exe > car_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "car_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_setup.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_setup_main.c"
+    }
+  ]
+}

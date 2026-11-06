@@ -1,17 +1,48 @@
 {
   "address": "0x4c810",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e`"
+      "text": "stores the stream pointer, clears the state word, and runs the six stream layer setup calls"
     }
   ],
+  "module": "stream_layer_init",
   "name": "stream_layer_init",
   "notes": [],
-  "role": "calls the `PERSPTAB` loader at `0x4c839` and the `VIS.TAB` loader at `0x4c83e`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 53,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c810",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:c9d825d74d748d13575b0b4eff44b9f663df9b5c0c4128dd824914c6e6549ef4",
+    "source_digest": "sha256:957d7f0c4d37bba819a2fe7bdf568ed21299c114fdbdfdb4bcb8e711f0f870ff",
+    "tool": "run.py"
+  },
+  "role": "stores the stream pointer, clears the state word, and runs the six stream layer setup calls",
   "section": "The TABS table loaders",
   "size": 64,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "stream_layer_init_"
 }

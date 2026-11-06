@@ -1,17 +1,60 @@
 {
   "address": "0x14e20",
-  "checks": [],
-  "confidence": "observed",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "hooks interrupt 9 and drives the keyboard LEDs"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x14e20 holds 100 instructions and 334 bytes up to the early-exit block at 0x14f6e: the register saves, the EBP frame, the keyboard controller command 0xed and the 0xfa acknowledge with the 0xffff timeout and the three retries, the BIOS keyboard flag clear at 0040:0017, the INT 21h AX=3509h get-vector call, the INT 21h AX=2509h set-vector call with CS:0xe4, and the second set-vector call that restores the saved vector at 0x14f6e"
+    },
+    {
+      "kind": "note",
+      "text": "the register block at 0xcf18 holds the seven dwords eax, ebx, ecx, edx, esi, edi, and flags, and the segment set at 0xcf34 holds es, cs, ss, ds, fs, and gs; the old vector is saved at the word 0xcf0c and the dword 0xcf10"
+    },
+    {
+      "kind": "note",
+      "text": "the harness simulates the keyboard controller and the two DPMI calls; it prints the markers 0 through 4 and D for the first-acknowledge install, the one-retry install, the four-attempt install, the uninstall, and the BIOS flag mask"
     }
   ],
+  "module": "keyboard_hook",
   "name": "keyboard_hook",
   "notes": [],
-  "role": "hooks interrupt 9 and drives the keyboard LEDs",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 302,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 79,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x14e20",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:a7df8ef5de6e41e7aea0065ad2ae9ebd27b6f4426afab2fa105a5ef4ef211f9a",
+    "source_digest": "sha256:1a7e53ecae20d37a42471b87c9247997e47f2f3f93300fda3cecf5929b40ed9d",
+    "tool": "run.py"
+  },
+  "role": "installs or removes the real-mode interrupt 9 handler and drives the keyboard LEDs",
   "section": "Subsystem initialisation",
   "size": 408,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "keyboard_hook_"
 }

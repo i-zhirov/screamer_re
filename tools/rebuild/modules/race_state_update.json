@@ -1,0 +1,33 @@
+{
+  "exe": "rsumod.exe",
+  "map": "race_state_update.map",
+  "name": "race_state_update",
+  "run": {
+    "command": "rsumod.exe > rsu_out.txt",
+    "expect": [
+      "0",
+      "2",
+      "7",
+      "D"
+    ],
+    "output": "rsu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_state_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_state_update_main.c"
+    }
+  ]
+}

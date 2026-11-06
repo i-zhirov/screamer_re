@@ -1,0 +1,29 @@
+{
+  "exe": "ptlmod.exe",
+  "map": "persptab_load.map",
+  "name": "persptab_load",
+  "run": {
+    "command": "ptlmod.exe > ptl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ptl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "persptab_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "persptab_load_main.c"
+    }
+  ]
+}

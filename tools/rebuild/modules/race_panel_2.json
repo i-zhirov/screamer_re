@@ -1,0 +1,34 @@
+{
+  "exe": "rp2mod.exe",
+  "map": "race_panel_2.map",
+  "name": "race_panel_2",
+  "run": {
+    "command": "rp2mod.exe > rp2_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rp2_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_2.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_panel_2_main.c"
+    }
+  ]
+}

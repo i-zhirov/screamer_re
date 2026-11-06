@@ -1,0 +1,29 @@
+{
+  "exe": "menuobj.exe",
+  "map": "menu_objects_init.map",
+  "name": "menu_objects_init",
+  "run": {
+    "command": "menuobj.exe > mo_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mo_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_objects_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_objects_init_main.c"
+    }
+  ]
+}

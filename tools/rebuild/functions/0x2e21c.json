@@ -1,17 +1,52 @@
 {
   "address": "0x2e21c",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "the overlay for the race state 2"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2e21c holds 265 instructions and 879 bytes: it draws the title pointer DAT_0011fc30 at y 2 with the font 3 and the color 2 through panel_draw_centered at 0x2e7cc, measures the inline text at +0x14 of the 0x44-byte record that the index DAT_001203c4 selects from the table at 0x1d550 through text_measure at 0x254a8, halves the measured width and height with a signed division, centers the half width on the 0x140 screen width, draws the doubled position with the font 0 and the color 2 through text_draw at 0x25020, selects a second text pointer through the field at +0x30 and the table at 0x1fc14 and draws it the same way at y 0xc8 minus five half heights, builds a string of DAT_001203b4 letters A, measures it with the font 1, centers the half width plus 0x40, draws the title pointer DAT_0011fc1c at y 0xd2 minus five half heights, formats the field at +0x34 with the format %d KMH through sprintf at 0x4d32c and draws it at (x + saved) * 2, draws the title pointers DAT_0011fc20 and DAT_0011fc24 one half height apart with the font 1 and the color 2 through text_draw, and draws the panels at (x + saved, y + 1) with the sizes field + 4 and field + 9 through panel_show at 0x2dfac, draws the panel at (8, 0x64) with the size 2 when the index is not zero and DAT_0012039c stays below DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 0 otherwise, and draws the panel at (0xee, 0x64) with the size 3 when DAT_001207f0 plus 11 differs from the index and DAT_0012039c stays above DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 1 otherwise; the threshold 0.6 is the double constant at object-3 offset 0x12e7"
     }
   ],
+  "module": "race_panel_2",
   "name": "race_panel_2",
   "notes": [],
-  "role": "the overlay for the race state 2",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 30,
+        "bytes_total": 696,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 58,
+        "instructions_total": 220,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e21c",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:7030a0c2c7cd8fc0d3b3782d569826b6b886808732f065d5897ed0ce75478067",
+    "source_digest": "sha256:9b612e0e09f4e57b9daa685d9a593c0dd73f35e953a5deeba14dd69475e56703",
+    "tool": "run.py"
+  },
+  "role": "draws the race state 2 title, the two measured table texts, the three title texts, the formatted speed, and the four status panels",
   "section": "race_frame callees",
   "size": 880,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_panel_2_"
 }

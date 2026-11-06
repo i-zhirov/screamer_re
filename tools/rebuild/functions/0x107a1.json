@@ -1,17 +1,48 @@
 {
   "address": "0x107a1",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "byte-swaps and swaps dwords between the front and the region at 0xf960, 200 by 160 dwords; gated on the flag 0x20"
+      "text": "swaps 200 rows of 160 dwords between the front of the video buffer and the region `0xf960` dwords ahead"
     }
   ],
+  "module": "video_block_swap_b",
   "name": "video_block_swap_b",
   "notes": [],
-  "role": "byte-swaps and swaps dwords between the front and the region at 0xf960, 200 by 160 dwords; gated on the flag 0x20",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 49,
+        "bytes_total": 52,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x107a1",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:efd7b2c8fe4e0f148df3810edf034debfcc1886c02501023f6f065e6142106ea",
+    "source_digest": "sha256:d81dc1620e1be9d856f7c1a57730aab1504de60936eddddc5a374311d2cf9f35",
+    "tool": "run.py"
+  },
+  "role": "swaps 200 rows of 160 dwords between the front of the video buffer and the region `0xf960` dwords ahead",
   "section": "race_frame callees",
   "size": 111,
-  "status": "named"
+  "status": "verified",
+  "symbol": "video_block_swap_b_"
 }

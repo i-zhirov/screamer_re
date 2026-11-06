@@ -1,18 +1,53 @@
 {
   "address": "0x1b5a4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "seeks 0x300 bytes before the end, reads the palette, shifts every palette byte right by 2, reads the 128-byte PCX header, and decodes the RLE runs"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1b5a4 holds 108 instructions and 401 bytes: the sprintf call at 0x4d32c, the fopen call at 0x4c08d, the two seek calls at 0x4c5c7, the palette read and the 0x300-byte shift loop, the 0x80-byte header read, the size arithmetic, the RLE decode loop, and the stream_close call at 0x4c38d"
     }
   ],
+  "module": "pcx_load",
   "name": "pcx_load",
   "notes": [],
   "object_offset": "0xb5a4",
-  "role": "seeks 0x300 bytes before the end, reads the palette, shifts every palette byte right by 2, reads the 128-byte PCX header, and decodes the RLE runs",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 11,
+        "bytes_total": 340,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 102,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b5a4",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:619167bfa16a5777ee983c3c19bb70150cdaed4de1ec7bdcf0aeb60ac2b50e2c",
+    "source_digest": "sha256:9cb7094144e31dddf2bd1576a6d312542c21f6c22eb375c61e1ca411e7e62740",
+    "tool": "run.py"
+  },
+  "role": "builds the container path, opens the PCX member, converts the VGA palette, and decodes the RLE pixel runs",
   "section": "The graphics decoders",
   "size": 404,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "pcx_load_"
 }

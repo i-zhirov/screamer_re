@@ -1,17 +1,48 @@
 {
   "address": "0x2f470",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise"
+      "text": "the original at `0x2f470` holds 47 instructions and 126 bytes: it selects the 0x1c-byte record at `*resource + index * 0x1c`, reads the address at `+0x10`, calls `0x2f40b` when the flag bit 0 at `+0x18` is set and `memory_free` at `0x2f205` otherwise, and returns -1 on a non-zero free result and 0 on success"
     }
   ],
+  "module": "resource_free",
   "name": "resource_free",
   "notes": [],
-  "role": "frees the record through `memory_free` when the flag at `+0x18` bit 0 is clear and through `0x2f40b` otherwise",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 55,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 23,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f470",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:9071f949c786b992c44ad3ce6a9d21e84c74e0bd840b4baedc53ff51772a5a99",
+    "source_digest": "sha256:a6e644dad377e4b25d0f70cc79c7a53bdc20dfc59812338156de549fa2673cb0",
+    "tool": "run.py"
+  },
+  "role": "frees the record address through the DOS free or memory_free path selected by the flag bit 0",
   "section": "The resource layer",
   "size": 126,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "resource_free_"
 }

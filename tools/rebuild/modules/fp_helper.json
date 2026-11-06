@@ -1,0 +1,24 @@
+{
+  "exe": "fphmod.exe",
+  "map": "fp_helper.map",
+  "name": "fp_helper",
+  "run": {
+    "command": "fphmod.exe > fph_out.txt",
+    "expect": [
+      "F",
+      "D"
+    ],
+    "output": "fph_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "fp_helper.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "fp_helper_main.c"
+    }
+  ]
+}

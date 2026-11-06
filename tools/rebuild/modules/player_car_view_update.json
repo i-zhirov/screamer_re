@@ -1,0 +1,38 @@
+{
+  "exe": "pcvwmod.exe",
+  "map": "player_car_view_update.map",
+  "name": "player_car_view_update",
+  "run": {
+    "command": "pcvwmod.exe > pcvw_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "pcvw_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_view_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_car_view_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_view_update_main.c"
+    }
+  ]
+}

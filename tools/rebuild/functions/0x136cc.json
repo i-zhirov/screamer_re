@@ -1,9 +1,61 @@
 {
   "address": "0x136cc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The car record and its consumer"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x136cc holds 277 bytes and 87 instructions up to the early ret at 0x137e0; the full body continues to the ret at 0x142ea, so the store keeps the 3104-byte extent and sets no size"
+    },
+    {
+      "kind": "note",
+      "text": "the six callers at 0x12c83, 0x12d2c, 0x12e2e, 0x12f2a, 0x130fa, and 0x13181 pass the player object at object-3 offset 0xf91c and a load flag; the function copies the selected 0x40-byte CARS_DATA record from 0xd25c + DAT_0011d2a0 * 0x40 to +0x470, uses the string at +0x474, four bytes into the file name, so AUTO00 gives 00, reads the animation flag at +0x47c, builds COCK%s%c with A or B, loads the cockpit through 0x1b23c, reads the CARS list through 0x15460, and loads the SHADOW object at +0x468 and the animation object at +0x460 through 0x11060; the data at object-3 offset 0x5a5 holds the timer format %02d:%02d:%02d, so the module names the function player_car_init"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuild covers the 87-instruction prefix; the zero load flag returns 0 and the success path returns 0 after the two object loads; the state reset after 0x13dcf is not in the module"
+    }
+  ],
+  "module": "player_car_init",
+  "name": "player_car_init",
   "notes": [],
   "object_offset": "0x36cc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 223,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 70,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x136cc",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:4fd42423ce109b1bcff447c8e0f24fe059b6f952902a05e0c5a42adaa9051a3d",
+    "source_digest": "sha256:f24c281a9ff8267182a4240860348d4ed537ba14725505733f23aaf46a2ac2f5",
+    "tool": "run.py"
+  },
+  "role": "loads the selected car record into the player car object: copies the 0x40-byte record, builds the cockpit names, loads the cockpit resource and the cars list, and loads the shadow and animation objects",
+  "section": "The vehicle state chain",
   "size": 3104,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_init_"
 }

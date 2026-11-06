@@ -1,0 +1,36 @@
+{
+  "exe": "rrscmod.exe",
+  "map": "race_results_screen.map",
+  "name": "race_results_screen",
+  "run": {
+    "command": "rrscmod.exe > rrsc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "rrsc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_results_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_results_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_results_screen_main.c"
+    }
+  ]
+}

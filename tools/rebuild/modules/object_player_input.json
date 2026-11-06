@@ -1,0 +1,29 @@
+{
+  "exe": "opimod.exe",
+  "map": "object_player_input.map",
+  "name": "object_player_input",
+  "run": {
+    "command": "opimod.exe > opi_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "opi_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_player_input.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_player_input_main.c"
+    }
+  ]
+}

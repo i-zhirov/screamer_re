@@ -1,18 +1,57 @@
 {
   "address": "0x10810",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "allocates the engine object and creates its list"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x10810 holds 51 instructions and 183 bytes: it allocates 0x4c bytes through memory_alloc at 0x30050, creates the 0xb4-record list through list_create at 0x2ecf8, stores the list pointer at DAT_0000801c, clears the fields +0x0c, +0x10, and +0x14 and sets the field +0x18 to -1 of the 0x78 records of 0x1c bytes at the first argument, clears the name buffer DAT_00007fe8, and clears the state word at the second argument"
+    },
+    {
+      "kind": "note",
+      "text": "the caller at 0x1286b in engine_init passes the record table 0x6530 in eax and the state word 0x6350 in edx"
     }
   ],
+  "module": "engine_interface_init",
   "name": "engine_interface_init",
   "notes": [],
   "object_offset": "0x810",
-  "role": "allocates the engine object and creates its list",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 106,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 31,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10810",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:58eb83df56ed8e3e11c91568e39788e3f502f2fde3405bd05f3e1ec3fbd34ef1",
+    "source_digest": "sha256:29bb6cd0bdb26b009894bc03a80cb8b9115089520c2df2a5fba9403243949dc8",
+    "tool": "run.py"
+  },
+  "role": "allocates the engine interface object, creates its list, and clears the 0x78-record table, the name buffer, and the state word",
   "section": "Subsystem initialisation",
   "size": 184,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "engine_interface_init_"
 }

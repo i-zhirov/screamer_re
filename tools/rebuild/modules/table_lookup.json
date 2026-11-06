@@ -1,0 +1,28 @@
+{
+  "exe": "tblkmod.exe",
+  "map": "table_lookup.map",
+  "name": "table_lookup",
+  "run": {
+    "command": "tblkmod.exe > tblk_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "tblk_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "table_lookup.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "table_lookup_main.c"
+    }
+  ]
+}

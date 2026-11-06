@@ -1,17 +1,56 @@
 {
   "address": "0x10bfc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x10bfc holds 69 instructions and 232 bytes in the first block; the full 728-byte extent continues past the early return with the free-slot walk in the handle table at `DAT_00021540`, the 0x1c-byte record walk, the `%s.3DX` name build at `0x1003ac`, the name copy to `DAT_00007fe8`, the member open at `0x4c08d` with the base path `DAT_00007f80` and the mode `rb` at `0x1003b3`, the `3D_HEADER` look-up at `0x2eed0`, the stream read at `0x4c4e5`, the stream close at `0x4c38d`, the object count at `+0x14`, the `3D_BLKOBJ` look-up with the size `count * 0x20 + 0x60`, the six cleared block words at `+0x24` through `+0x38`, the handle store, the `object_init_from_file` call at `0x4cc10`, and the chunk link at `+0x40`; the behavior check passes; the identity check stays open because the early return and the frame differ"
+    },
+    {
+      "kind": "note",
+      "text": "the plan row records 232 bytes and 69 instructions for the first block; the merged record keeps the 728-byte extent"
     }
   ],
+  "module": "object_load",
   "name": "object_load",
   "notes": [],
-  "role": "reads `3D_HEADER` and `3D_BLKOBJ`; the flag at `+0x14` selects the records",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 11,
+        "bytes_total": 232,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 69,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10bfc",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:c14140325c391ed348ec344d0f3d76d12411c0c86482bc315b857ee6b9d47227",
+    "source_digest": "sha256:313026b6d334aec52614ed20267a7d1833c07df16d4efc4def3ecf86cc5ef2fa",
+    "tool": "run.py"
+  },
+  "role": "loads every selected `.3DX` object, binds its file and block object, and returns 0, 2, 3, or 5.",
   "section": "Resource loader",
   "size": 728,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_load_"
 }

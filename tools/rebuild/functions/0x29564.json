@@ -1,17 +1,48 @@
 {
   "address": "0x29564",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "switches on `DAT_0011fac4`; case 1 advances `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_001203b8`"
+      "text": "switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8`"
     }
   ],
+  "module": "race_state_update",
   "name": "race_state_update",
   "notes": [],
-  "role": "switches on `DAT_0011fac4`; case 1 advances `_DAT_0012038c` by the frame delta and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_001203b8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 21,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 9,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29564",
+    "date": "2026-11-05",
+    "fingerprint": "sha256:96b0751dcc28884010f17592494feeb13764883b165505f3aa1d36982ebae8e2",
+    "source_digest": "sha256:fc917e0a8f178158f6a7d416b662790f28cb42a25b8255a0dfc3714ecc430daa",
+    "tool": "run.py"
+  },
+  "role": "switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8`",
   "section": "race_frame callees",
   "size": 172,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_state_update_"
 }

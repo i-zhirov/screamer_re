@@ -1,0 +1,34 @@
+{
+  "exe": "pbmod.exe",
+  "map": "palette_build.map",
+  "name": "palette_build",
+  "run": {
+    "command": "pbmod.exe > pb_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "pb_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "palette_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "palette_build_main.c"
+    }
+  ]
+}

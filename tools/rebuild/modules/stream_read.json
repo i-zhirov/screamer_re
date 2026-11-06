@@ -1,0 +1,31 @@
+{
+  "exe": "srdmod.exe",
+  "map": "stream_read.map",
+  "name": "stream_read",
+  "run": {
+    "command": "srdmod.exe > srd_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "srd_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_read.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_read_main.c"
+    }
+  ]
+}

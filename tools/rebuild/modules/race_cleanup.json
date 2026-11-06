@@ -1,0 +1,28 @@
+{
+  "exe": "rcmod.exe",
+  "map": "race_cleanup.map",
+  "name": "race_cleanup",
+  "run": {
+    "command": "rcmod.exe > rc_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "rc_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_cleanup.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_cleanup_main.c"
+    }
+  ]
+}

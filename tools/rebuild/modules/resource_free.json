@@ -1,0 +1,30 @@
+{
+  "exe": "rsfmod.exe",
+  "map": "resource_free.map",
+  "name": "resource_free",
+  "run": {
+    "command": "rsfmod.exe > rsf_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rsf_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "resource_free.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "resource_free_main.c"
+    }
+  ]
+}

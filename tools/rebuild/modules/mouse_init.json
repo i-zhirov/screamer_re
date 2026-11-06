@@ -1,0 +1,31 @@
+{
+  "exe": "msimod.exe",
+  "map": "mouse_init.map",
+  "name": "mouse_init",
+  "run": {
+    "command": "msimod.exe > msi_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "msi_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "mouse_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "mouse_init_main.c"
+    }
+  ]
+}
