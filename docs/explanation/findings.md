@@ -13061,3 +13061,77 @@ temporary `-od` recipe.
   menu_text_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_hud_draw module at 0x23420
+
+- Observation: the original body at `0x23420` holds 173 instructions and 633
+  bytes up to the `ret` at `0x23698`.  The next function starts at `0x2369c`,
+  so the store record keeps the 636-byte extent and sets no function size.  The
+  identity check uses 173 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23420 --count 173` and
+  `tools/rebuild/functions/0x23420.json`.
+- Observation: the only direct caller at `0x2001a` is the frame update at
+  `0x1ff70`, which calls this function after the five view groups at `0x2003c`,
+  `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4`.  No named function sits
+  between the frame update and the target, so the record takes the section
+  Program functions.
+  Evidence: the direct call sweep for `0x23420`, the disassembly of `0x1ff70`,
+  and the call at `0x2001a`.
+- Observation: the first block formats the race clock `DAT_001100a8` into the
+  global text at `0x101f98`.  The format at object-3 offset `0xdd0` is
+  `%02d:%02d:%02d`.  The minutes are `t / 60`, the seconds are `t % 60`, and
+  the centiseconds are `(clock - t) * 100.0`, where `t` is the truncated clock
+  and the scale is the float at object-3 offset `0xdfe`.
+  Evidence: the block at `0x2342d` through `0x23487` and the bytes at linear
+  `0x100dd0` and `0x100dfe`.
+- Observation: a set replay flag `DAT_00118e6c` stops the draw after the clock
+  format.  The frame counter `DAT_000007fd` bit 0x80 then draws the label `R`
+  at (0x10, 0x154) with the font 0 and the color 6.
+  Evidence: the block at `0x2348c` through `0x234c0` and the string at
+  object-3 offset `0xddf`.
+- Observation: otherwise the function draws the gauge panel at `0x2369c`.  It
+  formats the lap value `DAT_001100ac` through the format `%d` at offset
+  `0xde1` and centers it at y 0x10 with the font 6 and the color 2.  The value
+  from `DAT_0010ffa0` rises by one when it is at or below `DAT_0011d2b0` and
+  draws through the format `%d%c` at offset `0xde4` with the character `:`.
+  The counter `DAT_0011d2b0` plus one follows at the measured width plus 0xa,
+  and the offset `DAT_0010ffa4` draws at (0x228, 0x16).
+  Evidence: the block at `0x234c5` through `0x235d1` and the strings at linear
+  `0x100de1`, `0x100de4`, `0x100de9`, and `0x100dec`.
+- Observation: the second time block formats the lap clock `DAT_001100b0`
+  through the format at offset `0xdef`.  The function draws the first clock at
+  (0x10, 0x70), the lap clock at (0x10, 0x90), and the static clock label at
+  `0x101f8c` at (0x10, 0xb0), each with the font 3 and the color 2.  The last
+  call draws the race radar at `0x23a94`.
+  Evidence: the block at `0x235d6` through `0x2368c`, the string at linear
+  `0x100def`, and the label at linear `0x101f8c`.
+- Inference: the frame update caller, the race clock, the lap value, the two
+  counters, the gauge panel, and the radar support the name `race_hud_draw`.
+  The module records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original truncates each float through the helper at
+  `0x4d9f4`.  The shared `fpu_stub.asm` leaves round-to-nearest, so the module
+  uses the local `__CHP` stub in `race_hud_draw_fpu.asm`.  The 100.0 scale
+  arrives through a global, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/race_hud_draw_fpu.asm` and
+  `tools/rebuild/modules/race_hud_draw.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the normal draw, the replay label, the
+  replay return, the display value above the position, and the equal display
+  and position.
+  Evidence: `python3 tools/rebuild/harness.py run --module race_hud_draw`,
+  `work/rebuild/racehud.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x23420`.
+- Observation: the rebuilt module holds 173 decoded instructions and 593
+  bytes.  The identity check stays open at 27 of 173 instructions and 41 of 593
+  bytes.  V2 saves the registers after the frame, moves the time arithmetic to
+  a helper, and uses another local layout.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23420 --count 173 --rebuilt work/rebuild/racehud.exe
+  --rebuilt-map work/rebuild/race_hud_draw.map --rebuilt-symbol
+  race_hud_draw_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

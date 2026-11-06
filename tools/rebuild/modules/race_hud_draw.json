@@ -1,0 +1,35 @@
+{
+  "exe": "racehud.exe",
+  "map": "race_hud_draw.map",
+  "name": "race_hud_draw",
+  "run": {
+    "command": "racehud.exe > racehud.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "racehud.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_hud_draw.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_hud_draw_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_hud_draw_main.c"
+    }
+  ]
+}
