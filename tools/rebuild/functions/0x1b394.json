@@ -1,9 +1,83 @@
 {
   "address": "0x1b394",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 166,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The member_list_load module at 0x1b394"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x1b394 holds 166 instructions and 502 bytes up to the ret at 0x1b589; the next function starts at 0x1b58c, so the record keeps the 504-byte extent and sets no function size; the identity check uses 166 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the four direct callers at 0x29e6f, 0x29e83, 0x29e9c, and 0x29eb5 sit in menu_space_init at 0x29d08; they pass the names menu, cardat, trackdat, and champ and the pointer arrays at 0x1fb80, 0x1fd10, 0x1fea0, and 0x20030; the two further callers at 0x13435 and 0x134c5 in race_data_load at 0x131a8 pass the game list and the array at DAT_00118f94; menu_space_init is in the frame_update callees group, so the module takes the section frame_update callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds %s\\data\\local.dat from the base path at DAT_00007f44 and the member name %s.txt from the first argument; it opens the member with the category rt through 0x4c08d, and a failed open runs the file error report at 0x4bf88"
+    },
+    {
+      "kind": "note",
+      "text": "the first pass reads the text with the line mode 1 through 0x4c695 and sums the byte size of every line that does not start with *; it gets the TEXT resource of that size through 0x2eed0, and a zero result runs the memory error report at 0x2edad"
+    },
+    {
+      "kind": "note",
+      "text": "the function rewinds through 0x4c5c7, copies every non-star line into the resource, stores its pointer in the second argument, writes the -1 sentinel, closes through 0x4c38d, and returns the resource pointer; the local.dat member, the TEXT resource, and the game, menu, cardat, trackdat, and champ lists support the name member_list_load; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the resource handle, the resource buffer, the simulated member text, and the pointer array; it covers the normal path with a skipped star line and a copied hash line, the failed open, the zero resource, the single line with the game name, and the empty member; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1b394 --count 166 --rebuilt work/rebuild/memlist.exe --rebuilt-map work/rebuild/member_list_load.map --rebuilt-symbol member_list_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1b394"
+    }
+  ],
+  "implementation": "c",
+  "module": "member_list_load",
+  "name": "member_list_load",
   "notes": [],
   "object_offset": "0xb394",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 502,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 26,
+        "instructions_total": 166,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b394",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:b687be1f3f83dff19085b9e55496a8370a473f635c09e20ab67a0fdb281785d1",
+    "source_digest": "sha256:91de0bd916fd73dcfd6073730d60f97dc71607d07046ba8bc1631f969c15e03a",
+    "tool": "run.py"
+  },
+  "role": "loads a named text list from local.dat into a TEXT resource and fills a pointer array",
+  "section": "frame_update callees",
   "size": 504,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "member_list_load_"
 }

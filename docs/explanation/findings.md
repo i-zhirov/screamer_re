@@ -13817,3 +13817,66 @@ temporary `-od` recipe.
   0x20b1c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The member_list_load module at 0x1b394
+
+- Observation: the original body at `0x1b394` holds 166 instructions and 502
+  bytes up to the `ret` at `0x1b589`.  The next function starts at `0x1b58c`,
+  so the record keeps the 504-byte extent and sets no function size.  The
+  identity check uses 166 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b394 --count 166` and
+  `tools/rebuild/functions/0x1b394.json`.
+- Observation: the four direct callers at `0x29e6f`, `0x29e83`, `0x29e9c`, and
+  `0x29eb5` sit in `menu_space_init` at `0x29d08`.  They pass the names `menu`,
+  `cardat`, `trackdat`, and `champ` and the pointer arrays at `0x1fb80`,
+  `0x1fd10`, `0x1fea0`, and `0x20030`.  The two further callers at `0x13435`
+  and `0x134c5` in `race_data_load` at `0x131a8` pass the `game` list and the
+  array at `DAT_00118f94`.  `menu_space_init` is in the frame_update callees
+  group, so the module takes the section frame_update callees.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29e40 --count 45`, the
+  block at `0x13420`, and `work/ghidra/phaseF_131a8.txt`.
+- Observation: the function builds `%s\data\local.dat` from the base path at
+  `DAT_00007f44` and the member name `%s.txt` from the first argument.  It
+  opens the member with the category `rt` through `0x4c08d`.  A failed open
+  runs the file error report at `0x4bf88`.
+  Evidence: the `sprintf` calls at `0x1b3c3` and `0x1b3e0`, the `fopen` call at
+  `0x1b3f4`, and the strings at object-3 offsets `0x9c9`, `0x9db`, and `0x9e2`.
+- Observation: the first pass reads the text with the line mode 1 through
+  `0x4c695` and sums the byte size of every line that does not start with `*`.
+  It gets the `TEXT` resource of that size through `0x2eed0` into
+  `DAT_000062ac`.  A zero result runs the memory error report at `0x2edad`.
+  Evidence: the size loop at `0x1b408` through `0x1b446`, the `resource_get`
+  call at `0x1b455`, the string at object-3 offset `0x9e5`, and the null test
+  at `0x1b45d`.
+- Observation: the function rewinds the stream through `0x4c5c7`, copies every
+  line that does not start with `*` into the resource, and stores its pointer in
+  the second argument.  It terminates the pointer array with -1, closes the
+  stream through `0x4c38d`, and returns the resource pointer.
+  Evidence: the rewind call at `0x1b477`, the copy blocks at `0x1b4b7` through
+  `0x1b55c`, the sentinel store at `0x1b56a`, and the close call at `0x1b576`.
+- Inference: the five text lists, the `local.dat` member, and the `TEXT`
+  resource support the name `member_list_load`.  The function loads a named text
+  list from `local.dat` and fills a pointer array.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the base path, the resource handle, the
+  resource buffer, the simulated member text, and the pointer array.  The five
+  paths cover the normal path with a skipped `*` line and a copied `#` line,
+  the failed open, the zero resource, the single copied line with the `game`
+  name, and the empty member.  The output holds the markers `0` through `4` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/member_list_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module member_list_load`, and
+  `work/rebuild/mlist.txt`.
+- Observation: the rebuilt module holds 158 instructions and 535 bytes.  The
+  identity check stays open at 26 of 166 instructions and 24 of 502 bytes.  V2
+  saves the registers after the frame, keeps the name in `esi` and the array in
+  local memory, builds the constant text in local buffers for the harness, and
+  uses different local offsets.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b394 --count 166 --rebuilt work/rebuild/memlist.exe
+  --rebuilt-map work/rebuild/member_list_load.map --rebuilt-symbol
+  member_list_load_` and `python3 tools/rebuild/run.py run --function 0x1b394`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
