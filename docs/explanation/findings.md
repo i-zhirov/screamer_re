@@ -12352,3 +12352,70 @@ temporary `-od` recipe.
   --original-address 0x1a630 --count 243 --rebuilt work/rebuild/prcam.exe
   --rebuilt-map work/rebuild/player_route_camera.map --rebuilt-symbol
   player_route_camera_`.
+
+## The player_track_node_update module at 0x1821c
+
+- Observation: the original body at `0x1821c` holds 220 instructions and 756
+  bytes up to the `ret` at `0x1850f`.  The record keeps the 780-byte extent,
+  which ends at the next function `player_car_reset_update` at `0x18528`, and
+  sets no function size.  The identity check uses 220 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1821c --count
+  220` and `tools/rebuild/functions/0x1821c.json`.
+- Observation: the only direct caller at `0x15ac4` is the second player step
+  group at `0x15ab8`.  The group runs on the player object at object-3 offset
+  `0xf91c` after the physics group at `0x15a80`.  The five view groups at
+  `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call both groups.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1821c` and the calls at `0x200a5` and `0x2011b`.
+- Observation: the function reads the 0x20-byte track node table at the global
+  `0x7250` and the count at `0x7ed0`.  The loader at `0x150f4` calls `0x1b198`
+  with the destination `0x7250`, so the table holds the track nodes.  A node
+  holds the radius at `+0x00`, the value at `+0x04`, the surface grip at
+  `+0x0c`, the flags at `+0x10`, the x position at `+0x14`, and the y position
+  at `+0x1c`.
+  Evidence: the node reads at `0x18285` through `0x183a4` and the loader at
+  `0x150f4`.
+- Observation: the function examines the node before the current index at
+  `+0x598`, the current node, and the next node.  It accepts a node when each
+  absolute axis delta stays below the node radius and the truncated distance
+  does not exceed the radius.  It then sets the current index and the target
+  index at `+0x668`, saves the old target value and flags to `+0x58c` and
+  `+0x590`, and copies the node value, the surface grip, and the flags to
+  `+0x66c`, `+0x670`, and `+0x678`.
+  Evidence: the blocks at `0x18256` through `0x183a4`.
+- Observation: the visited chain at `+0x59c` and the second chain at `+0x5a0`
+  select the status `+0x780`.  A hit on a visited node after the first, or on a
+  node in the second chain, sets 2, and any other hit sets 1.  A call with no
+  hit sets the target index to -1.  The next callee at `0x194a0` consumes the
+  status, the chains, and the ratio to advance the lap `+0x684` and the
+  progress `+0x680`.
+  Evidence: the blocks at `0x183ad` through `0x18413` and the block at
+  `0x194b0` through `0x195f0`.
+- Observation: the function forms the segment from the current node to the
+  next node and the distance from the object position at `+0x4b0` and `+0x4b8`
+  to the current node.  Both values scale by the double 0.05 at object-3 offset
+  `0x818` and truncate through the helper at `0x4d9f4`.  The function stores the
+  ratio at `+0x67c`.
+  Evidence: the blocks at `0x18413` through `0x18501` and the data at
+  object-3 offset `0x818`.
+- Inference: the track table, the node fields, the visited chains, and the lap
+  consumer support the name `player_track_node_update`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the object record, four track nodes, the node
+  count, and the scale 0.05.  It covers the current hit, the two status-2
+  gates, the previous and next scan passes, the no-hit target -1, the
+  next-index wrap, the ratio 1, and the truncated ratio 0.4.  The behavior check
+  passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_track_node_update` and `work/rebuild/ptnu_out.txt`.
+- Observation: the identity check stays open at 47 of 220 instructions and 52
+  of 756 bytes, because V2 saves the frame pointer first and uses another
+  register layout and another local slot order.  The build and behavior checks
+  pass, so the record status is `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x1821c --count 220 --rebuilt work/rebuild/ptnu.exe
+  --rebuilt-map work/rebuild/player_track_node_update.map --rebuilt-symbol
+  player_track_node_update_`.

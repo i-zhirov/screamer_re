@@ -1,0 +1,40 @@
+{
+  "exe": "ptnu.exe",
+  "map": "player_track_node_update.map",
+  "name": "player_track_node_update",
+  "run": {
+    "command": "ptnu.exe > ptnu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "ptnu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_track_node_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_track_node_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_track_node_update_main.c"
+    }
+  ]
+}

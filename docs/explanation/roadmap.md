@@ -52,7 +52,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred fifty-six named modules are rebuilt with the harness and the
+  progress: one hundred fifty-seven named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -109,9 +109,10 @@ current host.
   `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
   `name_entry_letter_update` at `0x2b660`, `race_records_screen` at
   `0x2d4b8`, the Phase I module `player_car_reset_update` at `0x18528`, and
-  the Phase J module `player_route_camera` at `0x1a630`;
+  the Phase J modules `player_route_camera` at `0x1a630` and
+  `player_track_node_update` at `0x1821c`;
   twenty-three modules are verified, one is matching, and one hundred and
-  thirty-two rebuilds hold the recorded difference; the
+  thirty-three rebuilds hold the recorded difference; the
   `video_fill` module holds an assembly
   alternative that matches exactly, for the later build with the original
   Watcom 10.x compiler).
@@ -228,9 +229,10 @@ The plan follows the size order, starting with the smallest functions.
     `race_radar` at `0x23a94`, `car_sound_update` at `0x242bc`,
     `name_entry_letter_update` at `0x2b660`, `race_records_screen` at
     `0x2d4b8`, the Phase I module `player_car_reset_update` at `0x18528`, and
-    the Phase J module `player_route_camera` at `0x1a630` are done;
+    the Phase J modules `player_route_camera` at `0x1a630` and
+    `player_track_node_update` at `0x1821c` are done;
     the result is twenty-three verified modules, one matching module, and one
-    hundred and thirty-two open rebuilds).
+    hundred and thirty-three open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

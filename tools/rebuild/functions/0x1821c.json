@@ -1,9 +1,91 @@
 {
   "address": "0x1821c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 220,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_track_node_update module at 0x1821c"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x1821c holds 220 instructions and 756 bytes up to the ret at 0x1850f; the record keeps the 780-byte extent, which ends at the next function player_car_reset_update at 0x18528, and sets no function size; the identity check uses 220 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15ac4 is the second player step group at 0x15ab8; that group runs on the player object at object-3 offset 0xf91c after the physics group at 0x15a80, and the five view groups call it, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the 0x20-byte track node table at the global 0x7250 with the count at 0x7ed0; 0x150f4 loads that table from the level list, so the table holds the track nodes; a node holds the radius at +0x00, the value at +0x04, the surface grip at +0x0c, the flags at +0x10, x at +0x14, and y at +0x1c"
+    },
+    {
+      "kind": "note",
+      "text": "the function examines the node before the current index at +0x598, the current node, and the next node; it accepts a node when each absolute axis delta stays below the node radius and the truncated distance does not exceed the radius; it then copies the node value, the surface grip, and the flags to +0x66c, +0x670, and +0x678 and saves the old value and flags to +0x58c and +0x590"
+    },
+    {
+      "kind": "note",
+      "text": "the visited chain at +0x59c and the second chain at +0x5a0 select the status +0x780; a hit on a visited node after the first, or on a node in the second chain, sets 2, and any other hit sets 1; a call with no hit sets the target index +0x668 to -1; the next callee at 0x194a0 consumes the status, the chain, and the ratio to advance the lap and the progress +0x680"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the segment from the current node to the next node and the distance from the object position at +0x4b0 and +0x4b8 to the current node, both scaled by the double 0.05 at object-3 offset 0x818 and truncated, and stores the ratio at +0x67c"
+    },
+    {
+      "kind": "note",
+      "text": "the track table, the node fields, the visited chains, and the lap consumer support the name player_track_node_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the object record, four track nodes, the node count, and the scale 0.05; it covers the current hit, the two status-2 gates, the previous and next scan passes, the no-hit target -1, the next-index wrap, the ratio 1, and the truncated ratio 0.4; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1821c --count 220 --rebuilt work/rebuild/ptnu.exe --rebuilt-map work/rebuild/player_track_node_update.map --rebuilt-symbol player_track_node_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_track_node_update"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_track_node_update",
+  "name": "player_track_node_update",
   "notes": [],
   "object_offset": "0x821c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 52,
+        "bytes_total": 756,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 47,
+        "instructions_total": 220,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1821c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:aa6a6deff1e03b0b28e84875d03a4d19c7e14d78dd2383a67ad23407a55837e2",
+    "source_digest": "sha256:156cfec346a1a52c57c4ef62eb0d92e86e31aaa8e89ecb3e7f12b8083ee1b975",
+    "tool": "run.py"
+  },
+  "role": "selects the current track node for the player car, copies the node value, surface grip, and flags, and stores the segment progress ratio",
+  "section": "The vehicle state chain",
   "size": 780,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_track_node_update_"
 }
