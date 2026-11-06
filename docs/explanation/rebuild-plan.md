@@ -258,7 +258,7 @@ These are the next unnamed game functions in the object, in size order.
 | `0x2b044` | `map_object_place` (done) | 708 | 222 | 4 | 25 |
 | `0x17828` | `car_collision_response` (done) | 708 | 183 | 8 | 71 |
 | `0x120c0` | `track_nearest_node` (done) | 695 | 201 | 0 | 9 |
-| `0x2bedc` | unnamed | 682 | 171 | 12 | 12 |
+| `0x2bedc` | `car_select_screen` (done) | 682 | 171 | 12 | 12 |
 | `0x2c188` | unnamed | 679 | 164 | 12 | 12 |
 | `0x1bbc8` | unnamed | 673 | 189 | 4 | 0 |
 | `0x29918` | unnamed | 657 | 174 | 5 | 6 |
@@ -267,7 +267,7 @@ These are the next unnamed game functions in the object, in size order.
 
 ## Position
 
-One hundred sixty-one modules carry a recipe and a result: the twelve Phase A modules,
+One hundred sixty-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -326,5 +326,5 @@ and `race_records_screen` at `0x2d4b8`, and the Phase I module
 `player_route_camera` at `0x1a630`, `player_track_node_update` at `0x1821c`,
 `player_car_suspension_update` at `0x168b4`, `map_object_place` at `0x2b044`,
 and `car_collision_response` at `0x17828`, and `track_nearest_node` at
-`0x120c0`.
-The next unnamed function is `0x2bedc`.
+`0x120c0`, and `car_select_screen` at `0x2bedc`.
+The next unnamed function is `0x2c188`.

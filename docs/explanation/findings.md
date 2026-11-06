@@ -12695,3 +12695,79 @@ temporary `-od` recipe.
   track_nearest_node_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the two entry names in the harness stay inferred.
+
+## The car_select_screen module at 0x2bedc
+
+- Observation: the original body at `0x2bedc` holds 171 instructions and 682
+  bytes up to the `ret` at `0x2c185`.  The next function starts at `0x2c188`,
+  so the store record keeps the 684-byte extent and sets no function size.  The
+  identity check uses 171 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2bedc --count 171` and
+  `tools/rebuild/functions/0x2bedc.json`.
+- Observation: the only direct caller at `0x2beb0` is case 2 of the state init
+  dispatcher at `0x2be94`.  The jump table at linear `0x2be70` maps the state 2
+  to `0x2beb0`, the state 3 to `0x2beb7`, and the state 4 to `0x2bebe`.  The
+  matching state update is case 2 of `race_state_update` at `0x29564`, which
+  calls `0x2cb20` at `0x295d3`.  `race_state_update` is a `race_frame` callee at
+  `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2bedc`, the jump table at linear `0x2be70`,
+  and the calls at `0x29564` and `0x2807c`.
+- Observation: the init loads `menu4h.pcx` from `gfx\graf.dat` with the palette
+  at object-3 offset `0xcf5c`.  The file string sits at object-3 offset `0x111f`
+  and the member string at `0x1114`.  The function presents the buffer, copies
+  `0x3e800` bytes to `DAT_0021528`, fills the screen, and presents it again.  It
+  sets `DAT_0011d240` at 1, `DAT_00120378` at 1.5, `DAT_00120380` at 0.95, and
+  `DAT_0011fac8` at 1.
+  Evidence: the calls at `0x2bf23` through `0x2bf58` and the bytes at linear
+  `0x101114` and `0x10111f`.
+- Observation: the loop builds 14 records at `DAT_0011d550`, stride 0x44.  Each
+  record holds an object index at `+0x00`.  The object table at `0x653c` uses
+  the index with stride 0x1c.  The function sets the record angles `+0x08`,
+  `+0x0c`, and `+0x10` to 0, pi/2, and 0, and sets the object position `+0x08`,
+  `+0x0c`, and `+0x10` to `x = -4000 * i`, `y = 0`, and `z = 0xb54`.  It
+  converts the record angles to the object angles `+0x14`, `+0x18`, and `+0x1c`
+  with the factor 1024.0 / pi and the mask 0x7ff, and it refreshes the object
+  list at `0x6530` with the name `0x6350`.
+  Evidence: the loop at `0x2c00d` through `0x2c15d` and the constants at
+  object-3 offsets `0x112c` and `0x1130`.
+- Observation: the selection index `DAT_001203c4` scales to
+  `-4000 * index` at `DAT_00203a8` and `DAT_002039c`.  `race_panel_2` at
+  `0x2e21c` reads the same table and index and draws the car name, the speed in
+  km/h, and the car statistics.  `race_results_screen` at `0x2a558` also reads
+  the table at `0x1d550`, and the state 2 update at `0x2cb20` walks the same 14
+  records.
+  Evidence: the scaling at `0x2bf5d` through `0x2bfa4`, the reads in
+  `tools/rebuild/race_panel_2.c`, and the loop at `0x2cb36`.
+- Inference: the state 2 init builds the car selection table, and the state 2
+  overlay draws the selected car.  The table, the selection index, the
+  `menu4h.pcx` member, and the `race_panel_2` reader support the name
+  `car_select_screen`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4`.  The shared
+  `fpu_stub.asm` defines `__CHP` as a bare return, which keeps the
+  round-to-nearest mode, so a negative value rounds away from zero.  The module
+  uses the local `car_select_screen_fpu.asm`, which makes `__CHP` truncate
+  toward zero.  The float constants arrive through globals, because the minimal
+  image does not load the constant segment.  The original has the EBP frame, so
+  the module builds with `-of+`.
+  Evidence: `tools/rebuild/car_select_screen_fpu.asm`,
+  `tools/rebuild/car_select_screen.c`, and the FPU blocks at `0x2c096`,
+  `0x2c0d1`, and `0x2c10c`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the index 0, 3, and 7 offsets, the
+  failed load, and the permuted object table with the record 14 sentinel.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_select_screen`,
+  `work/rebuild/csel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2bedc`.
+- Observation: the rebuilt module holds 171 decoded instructions and 705
+  bytes.  The identity check stays open at 53 of 171 instructions and 43 of 682
+  bytes, because V2 saves the frame pointer first, uses another register and
+  local layout, and uses `imul` for the record stride.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2bedc --count 171 --rebuilt work/rebuild/csel.exe
+  --rebuilt-map work/rebuild/car_select_screen.map --rebuilt-symbol
+  car_select_screen_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

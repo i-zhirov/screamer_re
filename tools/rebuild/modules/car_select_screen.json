@@ -1,0 +1,35 @@
+{
+  "exe": "csel.exe",
+  "map": "car_select_screen.map",
+  "name": "car_select_screen",
+  "run": {
+    "command": "csel.exe > csel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "csel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_select_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_select_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_select_screen_main.c"
+    }
+  ]
+}
