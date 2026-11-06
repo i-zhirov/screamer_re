@@ -15029,3 +15029,71 @@ temporary `-od` recipe.
   0x23038`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The quit_confirm_screen module at 0x219ec
+
+- Observation: the original body at `0x219ec` holds 122 instructions and 431
+  bytes up to the `ret` at `0x21b9a`.  The next function starts at `0x21b9c`,
+  so the store record keeps the 432-byte extent and sets no function size.  The
+  identity check uses 122 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x219ec --count 122` and
+  `tools/rebuild/functions/0x219ec.json`.
+- Observation: the only direct caller at `0x1feb3` is the race frame loop
+  `0x1fd70`.  The loop calls this function when the mode byte `DAT_001d260` bit
+  `0x10` is clear and the mode is not 2.  `loading_screen` at `0x2a514` and
+  `race_results_screen` at `0x2a753` call the loop, and the loading path exits
+  the game with the return value when it is not zero.
+  Evidence: the call at `0x1feb3`, the two loop calls, the branch at `0x1feaa`,
+  and the exit path at `0x2a51c`.
+- Observation: the function sets the screen mode `0x140` by `0x190` with the
+  depth `0x104` through `0x4c850`, starts the sound service with the driver at
+  object-3 offset `0x6350` through `0x81ab0`, runs the two video swaps that
+  `DAT_001d274` bits `0x10` and `0x20` gate, clears the screen through
+  `0x2aa98`, and fills the screen three times through `0x25d28`.
+  Evidence: the blocks at `0x21a08` through `0x21a6d`.
+- Observation: the three text pointers at object-3 offsets `0x18fe0`,
+  `0x18fe4`, and `0x18fe8` hold the title and the two choices.  The title draws
+  at y `0x34` with the color 2 and the choices draw at y `0x5c` and `0x7a`
+  through `0x2e7cc`.  The selected choice takes the color 2 and the other
+  choice takes `0xe`, and the exit flag selects the choice.  The highlight
+  phase is bit `0x10` of `DAT_000007f9`.
+  Evidence: the blocks at `0x21a6f` through `0x21b04`.
+- Observation: the loop polls the input through `0x26448` when `DAT_001d2c0`
+  and `DAT_001d2cc` are not zero and copies the default data through `0x10193`.
+  The up keys `DAT_0000004a` and `DAT_0000004d` clear the exit flag and the
+  down keys `DAT_00000052` and `DAT_0000004f` set it.  Each key group holds a
+  latch that clears on release, and a key change calls `0x1f718` with 6.  The
+  enter key `DAT_0000001e` returns the exit flag.  The escape key
+  `DAT_00000003` sets the exit flag to 1 and returns it.
+  Evidence: the blocks at `0x21a85` through `0x21b9a`.
+- Observation: the object-2 key bytes arrive from `default_data_copy`, which
+  copies 32 dwords from object 1 into object 2 at `0xf0002`.  The harness holds
+  the key bytes as globals, so the behavior check can set them.
+  Evidence: the copy at `0x10193`, the object table, and
+  `tools/rebuild/quit_confirm_screen_main.c`.
+- Inference: the two choices, the quit answer, and the exit in the loading path
+  support the name `quit_confirm_screen`.  The original holds no symbol for this
+  function, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the three text pointers, the mode flags, the
+  two input gates, the highlight phase, and the six key bytes.  It runs nine
+  paths: the enter key, the up key, the down key with a second poll, the escape
+  key, the two input gates, the two video swaps, a held up key latch, and an up
+  key release and press.  The output holds the markers `0` through `8` and `D`,
+  and the behavior check passes.
+  Evidence: `tools/rebuild/quit_confirm_screen_main.c`,
+  `python3 tools/rebuild/harness.py run --module quit_confirm_screen`, and
+  `work/rebuild/qconf.txt`.
+- Observation: the rebuilt module holds 436 bytes and 122 decoded instructions.
+  The identity check stays open at 25 of 122 instructions and 48 of 431 bytes,
+  and 0 of 35 relocation slots match.  V2 saves the frame pointer first, keeps
+  the exit flag in `esi` and the up latch in `edi`, uses a 12-byte frame, folds
+  the fill index into `ecx`, and reads the globals through near data operands.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x219ec --count 122 --rebuilt work/rebuild/qconf.exe
+  --rebuilt-map work/rebuild/quit_confirm_screen.map --rebuilt-symbol
+  quit_confirm_screen_` and `python3 tools/rebuild/run.py run --function
+  0x219ec`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

@@ -1,9 +1,99 @@
 {
   "address": "0x219ec",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 122,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x219ec holds 122 instructions and 431 bytes up to the ret at 0x21b9a; the next function starts at 0x21b9c, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 122 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1feb3 is the race frame loop 0x1fd70; the loop calls this function when the mode byte 0x1d260 bit 0x10 is clear and the mode is not 2; loading_screen at 0x2a514 and race_results_screen at 0x2a753 call the loop, and the loading path exits the game with a non-zero return"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the screen mode 0x140 by 0x190 with the depth 0x104 through 0x4c850, starts the sound service with the driver at object-3 offset 0x6350 through 0x81ab0, runs the two video swaps that 0x1d274 bits 0x10 and 0x20 gate, clears the screen through 0x2aa98, and fills the screen three times through 0x25d28"
+    },
+    {
+      "kind": "note",
+      "text": "the three text pointers at object-3 offsets 0x18fe0, 0x18fe4, and 0x18fe8 hold the title and the two choices; the title draws at y 0x34 with the color 2 and the choices draw at y 0x5c and 0x7a through 0x2e7cc; the exit flag and the highlight phase 0x7f9 bit 0x10 select the color 2 or 0xe"
+    },
+    {
+      "kind": "note",
+      "text": "the loop polls the input through 0x26448 when 0x1d2c0 and 0x1d2cc are not zero and copies the default data through 0x10193; the up keys 0x4a and 0x4d clear the exit flag and the down keys 0x52 and 0x4f set it; each key group holds a latch that clears on release, and a key change calls 0x1f718 with 6; enter 0x1e returns the exit flag and escape 0x3 sets it to 1 and returns it"
+    },
+    {
+      "kind": "note",
+      "text": "the object-2 key bytes arrive from default_data_copy, which copies 32 dwords from object 1 into object 2 at 0xf0002; the harness holds the key bytes as globals, so the behavior check can set them"
+    },
+    {
+      "kind": "note",
+      "text": "the two choices, the quit answer, and the exit in the loading path support the name quit_confirm_screen; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three text pointers, the mode flags, the two input gates, the highlight phase, and the six key bytes; the nine paths cover the enter key, the up key, the down key with a second poll, the escape key, the two input gates, the two video swaps, a held up key latch, and an up key release and press; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x219ec --count 122"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x219ec --count 122 --rebuilt work/rebuild/qconf.exe --rebuilt-map work/rebuild/quit_confirm_screen.map --rebuilt-symbol quit_confirm_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x219ec"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 436 bytes and 122 decoded instructions; the identity check stays open at 25 of 122 instructions and 48 of 431 bytes, and 0 of 35 relocation slots match, because V2 saves the frame pointer first, keeps the exit flag in esi and the up latch in edi, uses a 12-byte frame, folds the fill index into ecx, and reads the globals through near data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The quit_confirm_screen module at 0x219ec"
+    }
+  ],
+  "implementation": "c",
+  "module": "quit_confirm_screen",
+  "name": "quit_confirm_screen",
   "notes": [],
   "object_offset": "0x119ec",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 48,
+        "bytes_total": 431,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 122,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x219ec",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:3db6c5e1179a7e6bc4b09ad6f9d2e636191ade94822b9362abfbf0aa698ff043",
+    "source_digest": "sha256:fe979e4ee75ba8412377894fa83de3ebc6c16466a22065a88f3417907d16606f",
+    "tool": "run.py"
+  },
+  "role": "shows the two-choice quit confirmation over the race frame, handles the up, down, enter, and escape keys, and returns the quit answer",
+  "section": "race_frame callees",
   "size": 432,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "quit_confirm_screen_"
 }

@@ -304,11 +304,11 @@ reproduce the original bytes.
 | `0x2b494` | `map_object_finish` (done) | 457 | 118 | 5 | 14 |
 | `0x1e914` | `func_1e914` (done) | 452 | 160 | 1 | 123 |
 | `0x23038` | `path_playback_update` (done) | 437 | 148 | 1 | 19 |
-| `0x219ec` | unnamed | 431 | 122 | 14 | 0 |
+| `0x219ec` | `quit_confirm_screen` (done) | 431 | 122 | 14 | 0 |
 
 ## Position
 
-One hundred ninety modules carry a recipe and a result: the twelve Phase A modules,
+One hundred ninety-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -381,5 +381,6 @@ and the Phase L modules `car_collision_pass` at `0x1d00c`,
 `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
 `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
 and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
-`func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`.
-The next unnamed function is `0x219ec`.
+`func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`, and
+`quit_confirm_screen` at `0x219ec`.
+The next unnamed function is `0x19678`.
