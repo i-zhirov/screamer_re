@@ -20,8 +20,10 @@ One module is one function record.  For each function the method is:
 3. Write the rebuilt source under `tools/rebuild/`:
    - The C source is the primary build, with the stack-frame option `-of+`
      when the original game file uses a frame.
-   - The assembly source is the build for a library routine that the original
-     compiler produced as assembly, for example `memcpy`.
+   - An assembly source is the build only when C cannot reproduce the original
+     bytes, for example a library routine that the original compiler produced
+     as assembly.  Record the reason.  Do not use assembly only to raise the
+     verified count.
    - The harness source holds the callee stubs and prints the markers.
 4. Add the module record under `tools/rebuild/modules/`.
 5. Build the module with the harness and run it under DOSBox-X.

@@ -435,3 +435,8 @@ supply-chain, and maintenance costs.
 - The period Watcom 10.0a toolchain stays alongside the pinned OpenWatcom V2
   harness.  The two harnesses serve two goals: V2 runs the declared checks, and
   10.0a targets the byte-for-byte match.  Do not replace one with the other.
+- Prefer a C implementation.  Add an assembly implementation only when the C
+  build cannot reproduce the original bytes, and record the reason in the
+  finding and in the record.  Do not convert a module to assembly only to raise
+  the verified count; leave it `rebuilt` when C is insufficient.  The FPU and
+  math stubs are harness support, not module implementations.

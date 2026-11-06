@@ -132,6 +132,9 @@ current host.
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
+- Keep assembly implementations to the necessary minimum.  Use C first; add
+  assembly only when C cannot reproduce the original bytes, and record why.  Do
+  not convert a module to assembly only to raise the verified count.
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original

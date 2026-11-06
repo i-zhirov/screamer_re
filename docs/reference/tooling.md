@@ -304,6 +304,11 @@ rebuilt modules.  The build runs in a container, because the OpenWatcom V2
 release has no macOS asset.  The container holds the extracted toolchain, so
 no installer run is needed.
 
+C is the default module implementation.  An assembly implementation is used
+only when C cannot reproduce the original bytes; the finding records why.  Do
+not add an assembly oracle only to raise the verified count.  The FPU and math
+stubs are harness support, not module implementations.
+
 | Item | Value |
 | --- | --- |
 | Container | `arlaneenalra/watcom-docker@sha256:16e4845ddd0df7bc877b45d103aacf66bc48aaab6d1c61d6bcaa9c1274f06a65` |
