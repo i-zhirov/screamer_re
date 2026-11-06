@@ -14342,3 +14342,71 @@ temporary `-od` recipe.
   car_collision_pass_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The track_select_update module at 0x2cc98
+
+- Observation: the original body at `0x2cc98` holds 124 instructions and 491
+  bytes up to the `ret` at `0x2ce82`.  The next function starts at `0x2ce84`,
+  so the store record keeps the 492-byte extent and sets no function size.  The
+  identity check uses 124 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2cc98 --count 124` and
+  `tools/rebuild/functions/0x2cc98.json`.
+- Observation: the only direct caller at `0x295dd` is case 3 of
+  `race_state_update` at `0x29564`.  The jump table at linear `0x29540` maps
+  case 3 to `0x295dd`.  `race_state_update` is a `race_frame` callee at
+  `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2cc98`, the jump table at linear `0x29540`,
+  and the calls at `0x29564` and `0x2807c`.
+- Observation: the matching state 3 init is `track_select_screen` at `0x2c188`,
+  which builds the 12 map records at `DAT_0011d908` with stride 0x34.  The
+  update walks the same records, and `race_panel_3` at `0x2e58c` reads the
+  table.
+  Evidence: the loop at `0x2ccdf` through `0x2ce77` and the init in
+  `tools/rebuild/track_select_screen.c`.
+- Observation: the function adds `DAT_0018e08 * pi/4` at object-3 offset
+  `0x11e3` to the heading at `+0x0c` of each record.  It resets the heading to
+  0 at or above 2*pi at object-3 offset `0x11e7`.  It converts the record
+  angles at `+0x08`, `+0x0c`, and `+0x10` to the object angles at `+0x14`,
+  `+0x18`, and `+0x1c` with the factor 1024.0 / pi and the mask 0x7ff.  The
+  object pointer comes from `DAT_0010653c` with the record object index at
+  `+0x00` and the stride 0x1c.
+  Evidence: the loop at `0x2ccef` through `0x2ce77` and the constants at
+  object-3 offsets `0x11e3`, `0x11e7`, `0x11eb`, and `0x11ef`.
+- Observation: when the mode `DAT_0011d260` is 0x10, the function calls
+  `net_player_add` with 3, swaps `DAT_001203c8` with `DAT_00120b5c`, calls
+  `net_player_add` with 0x8844, and restores the cell.  `net_race_lobby` uses
+  the same 0x8844 event and the same two selection cells.
+  Evidence: the block at `0x2cca1` through `0x2ccd3`, the calls at `0x2ccaf`
+  and `0x2cccb`, and `tools/rebuild/net_race_lobby.c`.
+- Inference: the state 3 position after the state 2 car selection, the shared
+  record table, the object angle writes, and the network selection handshake
+  support the name `track_select_update`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4` before each
+  `fistp`.  The module uses the local `track_select_update_fpu.asm`, because
+  the shared `fpu_stub.asm` leaves the round-to-nearest mode.  The constants
+  arrive through globals, because the minimal image does not load the constant
+  segment.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/track_select_update_fpu.asm`,
+  `tools/rebuild/track_select_update.c`, and the FPU blocks at `0x2cd68`,
+  `0x2cdc8`, and `0x2ce28`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `7` and `D`.  The paths cover the normal path with the record 12
+  sentinel, the network handshake, the frame step, the 2*pi reset, the
+  below-2*pi case, the positive and negative truncation, and the object index
+  stride.
+  Evidence: `python3 tools/rebuild/harness.py run --module track_select_update`,
+  `work/rebuild/tsupd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2cc98`.
+- Observation: the rebuilt module holds 412 bytes and 124 instructions.  The
+  identity check stays open at 22 of 124 instructions and 38 of 412 bytes
+  because V2 saves the frame pointer first, uses another prologue order, and
+  uses a register loop counter.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2cc98 --count 124 --rebuilt work/rebuild/tsupd.exe
+  --rebuilt-map work/rebuild/track_select_update.map --rebuilt-symbol
+  track_select_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

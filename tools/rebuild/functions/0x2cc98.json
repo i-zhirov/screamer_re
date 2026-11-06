@@ -1,9 +1,95 @@
 {
   "address": "0x2cc98",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 124,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2cc98 holds 124 instructions and 491 bytes up to the ret at 0x2ce82; the next function starts at 0x2ce84, so the store record keeps the 492-byte extent and sets no function size; the identity check uses 124 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x295dd is case 3 of race_state_update at 0x29564; the jump table at linear 0x29540 maps case 3 to 0x295dd; race_state_update is a race_frame callee at 0x2807c, so the record takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the matching state 3 init is track_select_screen at 0x2c188, which builds the 12 map records at DAT_0011d908 with stride 0x34; the update walks the same records and race_panel_3 at 0x2e58c reads the table, so the state 3 update is the track selection update"
+    },
+    {
+      "kind": "note",
+      "text": "the function adds DAT_0018e08 * pi/4 to the heading at +0x0c of each record and resets the heading to 0 at or above 2*pi; it converts the record angles at +0x08, +0x0c, and +0x10 to the object angles at +0x14, +0x18, and +0x1c with the factor 1024.0 / pi and the mask 0x7ff; the object pointer comes from DAT_0010653c with the record object index at +0x00 and the stride 0x1c"
+    },
+    {
+      "kind": "note",
+      "text": "when the mode DAT_0011d260 is 0x10, the function calls net_player_add with 3, swaps DAT_001203c8 with the lobby cell DAT_00120b5c, calls net_player_add with 0x8844, and restores the cell; net_race_lobby uses the same 0x8844 event and the same two selection cells, so the call is the network track selection handshake"
+    },
+    {
+      "kind": "note",
+      "text": "the state 3 position after the state 2 car selection, the shared record table, the object angle writes, and the network selection handshake support the name track_select_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncate helper at 0x4d9f4 before each fistp; the module uses the local track_select_update_fpu.asm, because the shared fpu_stub.asm leaves the round-to-nearest mode; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 13 map records, the 13 display objects, the object pointer table, the frame step, the four float constants, the mode cell, the two selection cells, and the network stub; it covers the normal path, the network handshake, the frame step, the 2*pi reset, the below-2*pi case, the positive and negative truncation, and the object index stride; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2cc98 --count 124 --rebuilt work/rebuild/tsupd.exe --rebuilt-map work/rebuild/track_select_update.map --rebuilt-symbol track_select_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2cc98"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_select_update module at 0x2cc98"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 412 bytes and 124 decoded instructions; the identity check stays open at 22 of 124 instructions and 38 of 412 bytes because V2 saves the frame pointer first, uses another prologue order, and uses a register loop counter; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "track_select_update",
+  "name": "track_select_update",
   "notes": [],
   "object_offset": "0x1cc98",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 38,
+        "bytes_total": 412,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 124,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2cc98",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:3abdef4d05a2b31cb9d51a36a60bd91d2834aef8307a136a2d53c1cb2d4009a1",
+    "source_digest": "sha256:da00d61a8886805664dded0477a3431a20fae0a540fc062b1542e2525db9ab19",
+    "tool": "run.py"
+  },
+  "role": "rotates the 12 track selection map records, writes their object angles, and sends the network track selection events",
+  "section": "race_frame callees",
   "size": 492,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_select_update_"
 }
