@@ -13683,3 +13683,66 @@ temporary `-od` recipe.
   dos_datetime_set_` and `python3 tools/rebuild/run.py run --function 0x1fa2c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_car_contact_update module at 0x166a8
+
+- Observation: the original body at `0x166a8` holds 159 instructions and 524
+  bytes up to the `ret` at `0x168b3`.  The next function starts at `0x168b4`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 159.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x166a8 --count 159` and
+  `tools/rebuild/functions/0x166a8.json`.
+- Observation: the only direct caller at `0x15afc` is the second player step
+  group at `0x15ab8`.  The group runs on the player object at object-3 offset
+  `0xf91c` after `player_car_cornering_update` at `0x16ca0`, and the five view
+  groups at `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the
+  group.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x166a8`, the call at `0x15afc`, and the block at `0x15ab8` through
+  `0x15b04`.
+- Observation: the wheel contact step at `0x11a30` walks the same four
+  0x54-byte wheel units at `+0x194`.  It stores the first ground contact height
+  at `+0x24`, the second ground contact height at `+0x28`, the surface flag at
+  `+0x2c`, and the two contact points at `+0x00`, `+0x08`, `+0x0c`, and
+  `+0x14`.  The distances `+0x2e4` and `+0x2ec` separate the wheels on the two
+  axes.
+  Evidence: the loop at `0x11a92` through `0x11bf0`, the stores at `0x11b3f`,
+  `0x11b61`, `0x11be7`, `0x11b02`, `0x11b1d`, `0x11ba8`, and `0x11bc5`, and the
+  reads at `0x11aaf` and `0x11ac0`.
+- Observation: the function copies the two contact heights to `+0x04` and
+  `+0x10`.  When the surface flag is set, it adds the signed step from the low
+  bits of the two contact coordinates to the first height.  It then writes the
+  average raw height `+0x4ec`, the average adjusted height `+0x4b4`, and the
+  four body angles `+0x4c8`, `+0x4d0`, `+0x4d4`, and `+0x4dc` through `atan` at
+  `0xc2254`.
+  Evidence: the loop at `0x166cc` through `0x16734`, the averages at `0x16736`
+  through `0x167ad`, and the four angle blocks at `0x167b3` through `0x168b2`.
+- Observation: the body height and the four angles feed the view orbit at
+  `0x1a3b8` and the view update at `0x16f34`, and the wheel contact step reads
+  `+0x4c8` and `+0x4d0` back at `0x11a43` and `0x11a5c`.
+  Evidence: the reads at `0x1a459`, `0x1a4bd`, `0x1a517`, and `0x1a568`, and the
+  reads at `0x16f44`, `0x16f8e`, and `0x16f9c`.
+- Inference: the four wheel contact heights, the two adjusted body heights, the
+  four body angles, and the contact loop support the name
+  `player_car_contact_update`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the player object and the four wheel units.
+  The five paths cover the surface clear path, the positive dither, the
+  negative dither, the surface gate, and the negative averages.  The output
+  holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_car_contact_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_car_contact_update`, and
+  `work/rebuild/pccu_out.txt`.
+- Observation: the rebuilt module holds 506 bytes.  The identity check stays
+  open at 46 of 159 instructions and 12 of 506 bytes.  V2 puts the frame first,
+  keeps the object in `ecx`, builds a local helper for the unit pointer,
+  divides in extended precision, and uses another block order.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x166a8 --count 159 --rebuilt work/rebuild/pccu.exe
+  --rebuilt-map work/rebuild/player_car_contact_update.map --rebuilt-symbol
+  player_car_contact_update_` and `python3 tools/rebuild/run.py run --function
+  0x166a8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

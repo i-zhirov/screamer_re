@@ -114,7 +114,7 @@ screamer_re/
 │   │   ├── docs.py            # render the program-map tables
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the one hundred and seventy-six module recipes
+│   │   ├── modules/           # the one hundred and seventy-seven module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)

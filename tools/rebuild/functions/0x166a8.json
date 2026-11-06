@@ -1,9 +1,83 @@
 {
   "address": "0x166a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 159,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_car_contact_update module at 0x166a8"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x166a8 holds 159 instructions and 524 bytes up to the ret at 0x168b3; the next function starts at 0x168b4, so the record keeps the 524-byte extent and sets no function size; the identity check uses 159 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15afc is the second player step group at 0x15ab8; the group runs on the player object at object-3 offset 0xf91c after player_car_cornering_update at 0x16ca0, and the five view groups call the group, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the wheel contact step at 0x11a30 walks the same four 0x54-byte wheel units at +0x194 and stores the two ground contact heights at +0x24 and +0x28, the surface flag at +0x2c, and the two contact points at +0x00, +0x08, +0x0c, and +0x14; the distances +0x2e4 and +0x2ec separate the wheels"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the two contact heights to +0x04 and +0x10; when the surface flag is set it adds the signed step from the low bits of the two contact coordinates to the first height; it writes the average raw height +0x4ec, the average adjusted height +0x4b4, and the four body angles +0x4c8, +0x4d0, +0x4d4, and +0x4dc through atan at 0xc2254"
+    },
+    {
+      "kind": "note",
+      "text": "the body height and the four angles feed the view orbit at 0x1a3b8 and the view update at 0x16f34, and the wheel contact step reads +0x4c8 and +0x4d0 back, so the module names the function player_car_contact_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object and the four wheel units; it covers the surface clear path, the positive and negative dither, the surface gate, and the negative averages; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x166a8 --count 159 --rebuilt work/rebuild/pccu.exe --rebuilt-map work/rebuild/player_car_contact_update.map --rebuilt-symbol player_car_contact_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x166a8"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_contact_update",
+  "name": "player_car_contact_update",
   "notes": [],
   "object_offset": "0x66a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 506,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 46,
+        "instructions_total": 159,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x166a8",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:d36f5992ea70b7bc47db087bd9dd9a4fd53839c5af9b848f20c3f19deb11c55c",
+    "source_digest": "sha256:d2515f564f002b820b258a4cebb21d93dcc3fbe3a50a25828ac7a294823aa175",
+    "tool": "run.py"
+  },
+  "role": "computes the car height and attitude from the four wheel ground contact heights",
+  "section": "The vehicle state chain",
   "size": 524,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_contact_update_"
 }
