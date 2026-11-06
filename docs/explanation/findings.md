@@ -13499,3 +13499,65 @@ temporary `-od` recipe.
   opponent_start_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The spline_load module at 0x1af70
+
+- Observation: the original body at `0x1af70` holds 148 instructions and 527
+  bytes up to the `ret` at `0x1b17e`.  The next function starts at `0x1b180`, so
+  the store record keeps the 528-byte extent and sets no function size.  The
+  record sets the instruction count 148.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1af70 --count 148` and
+  `tools/rebuild/functions/0x1af70.json`.
+- Observation: the five direct callers at `0x15088`, `0x1509f`, `0x150b6`,
+  `0x150cd`, and `0x150e4` sit in the setup at `0x14fb8`.  The setup builds the
+  data names `MAP1opp`, `MAP1anm`, `MAP1cam`, `MAP1rpl`, and `MAP1OST` from the
+  prefix `DAT_0011d294` through the formats at object-3 offsets `0x603` through
+  `0x627`.  It then calls this function once for each name.  The run-time member
+  trace names the five members `MAP1opp.spl`, `MAP1anm.spl`, `MAP1cam.spl`,
+  `MAP1rpl.spl`, and `MAP1OST.spl`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1af70`, the block at `0x14fb8` through `0x150f3`, and the member sequence in
+  this document.
+- Observation: the first `sprintf` at `0x4d32c` builds `%s\data\%s.dat` from the
+  base path `DAT_00007f44` and the first argument.  The second `sprintf` builds
+  `%s.spl` from the second argument.  The member open at `0x4c08d` opens the
+  path with the category `rb` at object-3 offset `0x94e`.  A failed open returns
+  0.
+  Evidence: the format strings at object-3 offsets `0x938` and `0x947`, the mode
+  at `0x94e`, and the block at `0x1af8a` through `0x1afd5`.
+- Observation: the first pass reads a four-byte point count, skips the four-byte
+  type and the `count * 0x38` data bytes through the seek at `0x4c5c7`, and
+  increments the spline count.  The pass ends at the first short read.
+  Evidence: the block at `0x1afdd` through `0x1b01c`.
+- Observation: the function gets the `GAMESPLINE` resource of `count * 0x24`
+  bytes through `0x2eed0` into the third argument.  A zero result runs the
+  memory error report at `0x2edad`.  It rewinds the stream and reads each
+  0x24-byte record: the count at `+0x1c`, the type at `+0x20`, and the
+  `count * 0x38` data bytes into the resource at `+0x00`.  A zero data resource
+  runs the memory error report.  The function closes the stream at `0x4c38d` and
+  returns the spline count.
+  Evidence: the block at `0x1b01e` through `0x1b17e` and the list names at
+  object-3 offsets `0x951` and `0x95c`.
+- Inference: the five callers, the `.spl` member names, the `GAMESPLINE`
+  resource, and the point records support the name `spline_load`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph, the member trace, and the data flow above.
+- Observation: the harness holds a simulated member, the resource handle, the
+  base path, the two name arguments, and the spline records.  The five paths
+  cover the two splines, the empty member, the failed open, the zero data
+  resource, and the counts 1, 0, and 7.  The output holds the markers `0`
+  through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/spline_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module spline_load`, and
+  `work/rebuild/spl_out.txt`.
+- Observation: the rebuilt module holds 504 bytes.  The identity check stays
+  open at 27 of 148 instructions and 29 of 504 bytes.  V2 saves the frame
+  pointer first, keeps the record pointer in `esi`, uses `imul` for the record
+  stride, and uses other local offsets.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1af70 --count 148 --rebuilt work/rebuild/splmod.exe
+  --rebuilt-map work/rebuild/spline_load.map --rebuilt-symbol spline_load_`
+  and `python3 tools/rebuild/run.py run --function 0x1af70`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

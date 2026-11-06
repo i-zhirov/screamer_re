@@ -1,9 +1,87 @@
 {
   "address": "0x1af70",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 148,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1af70 holds 148 instructions and 527 bytes up to the ret at 0x1b17e. The next function starts at 0x1b180, so the store record keeps the 528-byte extent and sets no function size. The identity check uses 148 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five direct callers at 0x15088, 0x1509f, 0x150b6, 0x150cd, and 0x150e4 sit in the setup at 0x14fb8. The setup builds the names MAP1opp, MAP1anm, MAP1cam, MAP1rpl, and MAP1OST or MAP1CNG, MAP1SLA, or MAP1OST from the prefix at 0x1d294, then calls this function for each name"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the container path %s\\data\\%s.dat from DAT_00007f44 and the first argument, builds the member name %s.spl from the second argument, and opens the member with the mode rb through 0x4c08d. A failed open returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the first pass reads a four-byte point count, skips the four-byte type and the count times 0x38 data bytes through the seek at 0x4c5c7, and increments the spline count. The pass ends at the first short read"
+    },
+    {
+      "kind": "note",
+      "text": "the function gets the GAMESPLINE resource of count times 0x24 bytes through 0x2eed0 into the third argument. A zero result runs the memory error report at 0x2edad. It rewinds the stream and reads each 0x24-byte record: the count at +0x1c, the type at +0x20, and the count times 0x38 data bytes into the resource at +0x00. A zero data resource runs the memory error report. The function closes the stream and returns the spline count"
+    },
+    {
+      "kind": "note",
+      "text": "the five callers, the .spl member names, the GAMESPLINE resource, and the point records support the name spline_load. The module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds a simulated member, the resource handle, the base path, the two name arguments, and the spline records. The five paths cover the two splines, the empty member, the failed open, the zero data resource, and the counts 1, 0, and 7. The output holds the markers 0 through 4 and D. The behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1af70 --count 148 --rebuilt work/rebuild/splmod.exe --rebuilt-map work/rebuild/spline_load.map --rebuilt-symbol spline_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1af70"
+    },
+    {
+      "kind": "finding",
+      "text": "The spline_load module at 0x1af70"
+    }
+  ],
+  "implementation": "c",
+  "module": "spline_load",
+  "name": "spline_load",
   "notes": [],
   "object_offset": "0xaf70",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 504,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 148,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1af70",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:557e490c4aceaf04f814490cf9b89fd961ca2ae29320bf8c5ab7b4eff4f5e52e",
+    "source_digest": "sha256:2a0c12086f751042bb39960add4c41b23fd37ec64c2f9ad032bd8223626c506f",
+    "tool": "run.py"
+  },
+  "role": "loads the spline members of a level data archive into the GAMESPLINE resource and returns the spline count",
+  "section": "Resource loader",
   "size": 528,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "spline_load_"
 }
