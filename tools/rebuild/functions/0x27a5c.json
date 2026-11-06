@@ -1,9 +1,91 @@
 {
   "address": "0x27a5c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 135,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x27a5c holds 135 instructions and 471 bytes up to the ret at 0x27c32; the next function starts at 0x27c34, so the store record keeps the 472-byte extent and sets no function size; the identity check uses 135 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x27a40 is hud_update at 0x27a34; object_update_all at 0x2786c calls hud_update at the end of the object pass, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the message state DAT_0011ce54 and the toggle DAT_0011ce40; a state below 2 centers the viewport record DAT_0015ccc + state * 0x14 on the width at +8, the state 0x12 with the toggle set centers the record 2 width at +0x30, and every other state centers the record 2 width at +0x30"
+    },
+    {
+      "kind": "note",
+      "text": "the center is (0x140 - width / 2) / 2; the filter at 0x22b80 moves DAT_0011ce4c toward -(DAT_0011ce40 * 0x140) at the index 0x50 for a state below 2, toward -340.0 at the index 0x50 for the state 0x12 with the toggle set, and toward 0.0 at the index 0x5a for the other states"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the doubled rounded center at DAT_0011cb18, the message row at DAT_0011cb1c, the state or 2 at DAT_0011cb20, sets DAT_0011cb14 to 1 and DAT_0011cb24 to 0, and calls panel_update at 0x25af0"
+    },
+    {
+      "kind": "note",
+      "text": "the caller hud_update, the panel fields DAT_0011cb14 through DAT_0011cb24, and the panel_update call support the name hud_panel_show; the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncate helper at 0x4d9f4 before each fistp, so the local hud_panel_show_fpu.asm makes __CHP truncate toward zero; the float constants arrive through globals; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the state 0, the state 1, the state 0x12 with the toggle, the state 5, the fractional truncation, and the state 0x12 with the toggle clear; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x27a5c --count 135 --rebuilt work/rebuild/hpshow.exe --rebuilt-map work/rebuild/hud_panel_show.map --rebuilt-symbol hud_panel_show_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x27a5c"
+    },
+    {
+      "kind": "finding",
+      "text": "The hud_panel_show module at 0x27a5c"
+    }
+  ],
+  "implementation": "c",
+  "module": "hud_panel_show",
+  "name": "hud_panel_show",
   "notes": [],
   "object_offset": "0x17a5c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 440,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 135,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27a5c",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:2e0d8b63ca8922c7e5474fa541331414e758dfe461b91968ccc6bced7e3b95e9",
+    "source_digest": "sha256:ceffd07e28076663d56ad738d77e86abb4b0bdc3406f6e6feee841a01a1a8d17",
+    "tool": "run.py"
+  },
+  "role": "centers the message panel from the viewport width and the message state, sets the panel sprite fields, and flushes the panel",
+  "section": "object_update_all callees",
   "size": 472,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "hud_panel_show_"
 }

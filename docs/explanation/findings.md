@@ -14473,3 +14473,70 @@ temporary `-od` recipe.
   palette_shade_build_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The hud_panel_show module at 0x27a5c
+
+- Observation: the original body at `0x27a5c` holds 135 instructions and 471
+  bytes up to the `ret` at `0x27c32`.  The next function starts at `0x27c34`,
+  so the store record keeps the 472-byte extent and sets no function size.  The
+  identity check uses 135 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27a5c --count 135` and
+  `tools/rebuild/functions/0x27a5c.json`.
+- Observation: the only direct caller at `0x27a40` is `hud_update` at `0x27a34`.
+  The `object_update_all` frame step at `0x2786c` calls `hud_update` at the end
+  of the object pass, so the record takes the section
+  `object_update_all callees`.
+  Evidence: the byte sweep for a relative call to `0x27a5c` and the block at
+  `0x27968` through `0x27995`.
+- Observation: the function reads the state `DAT_0011ce54` and the toggle
+  `DAT_0011ce40`.  A state below 2 centers the viewport record
+  `DAT_0015ccc + state * 0x14` on its width at `+8`.  The state 0x12 with the
+  toggle set centers the record 2 width at `+0x30`.  Every other state centers
+  the record 2 width at `+0x30`.  The center is
+  `(0x140 - width / 2) / 2`.
+  Evidence: the block at `0x27a67` through `0x27ac2` and the block at `0x27b1b`
+  through `0x27bc4`.
+- Observation: the filter at `0x22b80` moves `DAT_0011ce4c` toward the target at
+  the index 0x50 for a state below 2 and for the state 0x12 with the toggle set.
+  The target is `-(DAT_0011ce40 * 0x140)` for a state below 2 and -340.0 for
+  the state 0x12.  Every other state moves toward 0.0 at the index 0x5a.
+  Evidence: the calls at `0x27af1`, `0x27b64`, and `0x27bcf`, and the constants
+  at `0x27b4c` and `0x27b54`.
+- Observation: the function stores the doubled rounded center at
+  `DAT_0011cb18`, the message row at `DAT_0011cb1c`, and the state or 2 at
+  `DAT_0011cb20`.  It sets `DAT_0011cb14` to 1 and `DAT_0011cb24` to 0, and
+  calls `panel_update` at `0x25af0`.
+  Evidence: the stores at `0x27b0c` through `0x27c20` and the call at
+  `0x27c25`.
+- Inference: the caller `hud_update`, the panel fields `DAT_0011cb14` through
+  `DAT_0011cb24`, and the `panel_update` call support the name
+  `hud_panel_show`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4` before each
+  `fistp`.  This harness links no math library, so
+  `hud_panel_show_fpu.asm` makes `__CHP` truncate toward zero.  The float
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/hud_panel_show_fpu.asm` and
+  `tools/rebuild/modules/hud_panel_show.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The paths cover the state 0, the state 1, the state
+  0x12 with the toggle set, the state 5, the fractional truncation, and the
+  state 0x12 with the toggle clear.
+  Evidence: `python3 tools/rebuild/harness.py run --module hud_panel_show`,
+  `work/rebuild/hps_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x27a5c`.
+- Observation: the rebuilt function body holds 110 instructions and 376 bytes.
+  The identity window uses the 135 original instructions, so the check stays
+  open at 22 of 135 instructions and 14 of 440 bytes because V2 saves a
+  different register set, uses another prologue order, uses `cdq` for the sign
+  mask, and uses `imul` for the viewport record.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27a5c --count 135 --rebuilt work/rebuild/hpshow.exe
+  --rebuilt-map work/rebuild/hud_panel_show.map --rebuilt-symbol
+  hud_panel_show_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

@@ -296,7 +296,7 @@ reproduce the original bytes.
 | `0x1d00c` | `car_collision_pass` (done) | 497 | 144 | 3 | 7 |
 | `0x2cc98` | `track_select_update` (done) | 491 | 124 | 5 | 19 |
 | `0x258d0` | `palette_shade_build` (done) | 475 | 151 | 0 | 44 |
-| `0x27a5c` | unnamed | 471 | 135 | 8 | 15 |
+| `0x27a5c` | `hud_panel_show` (done) | 471 | 135 | 8 | 15 |
 | `0x27c34` | unnamed | 466 | 133 | 3 | 7 |
 | `0x17408` | unnamed | 466 | 133 | 4 | 5 |
 | `0x1ed04` | unnamed | 465 | 115 | 0 | 17 |
@@ -308,7 +308,7 @@ reproduce the original bytes.
 
 ## Position
 
-One hundred eighty-two modules carry a recipe and a result: the twelve Phase A modules,
+One hundred eighty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -377,5 +377,6 @@ and `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
 and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at `0x20b1c`,
 and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`,
 and the Phase L modules `car_collision_pass` at `0x1d00c`,
-`track_select_update` at `0x2cc98`, and `palette_shade_build` at `0x258d0`.
-The next unnamed function is `0x27a5c`.
+`track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`, and
+`hud_panel_show` at `0x27a5c`.
+The next unnamed function is `0x27c34`.

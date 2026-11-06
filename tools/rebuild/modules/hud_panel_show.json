@@ -1,0 +1,36 @@
+{
+  "exe": "hpshow.exe",
+  "map": "hud_panel_show.map",
+  "name": "hud_panel_show",
+  "run": {
+    "command": "hpshow.exe > hps_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "hps_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "hud_panel_show.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "hud_panel_show_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "hud_panel_show_main.c"
+    }
+  ]
+}
