@@ -42,7 +42,7 @@
   },
   "role": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2",
   "section": "race_loop callees",
-  "size": 1484,
+  "size": 33,
   "status": "verified",
   "symbol": "default_data_copy_"
 }

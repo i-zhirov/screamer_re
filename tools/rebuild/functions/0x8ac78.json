@@ -46,7 +46,7 @@
   },
   "role": "Commits the camera state: calls the transform and the projection, saves the position, clears the position and the velocity, and scales the second basis.",
   "section": "race_frame callees",
-  "size": 4468,
+  "size": 308,
   "status": "rebuilt",
   "symbol": "camera_update_"
 }

@@ -30,7 +30,9 @@ current host.
 - Find `main` and the subsystem entry points (done: `main` is at object
   offset `0x10020`).
 - Map the code object into functions with names and roles (in progress:
-  `main` and its 13 callees carry names).
+  `main` and its 13 callees carry names, the 32 `unknown` records reachable
+  from the ten verified and rebuilt roots carry names, and the new
+  candidates await mapping).
 - Map the data references: video, sound, input, file I/O, network.
 - Record the call graph for the main loop and the menu system.
 
@@ -137,7 +139,10 @@ The ordered list of the remaining module functions is in `rebuild-plan.md`.
 The plan follows the size order, starting with the smallest functions.
 
 1. Follow the calls from `main` into the game subsystems (done for the first
-   level: `engine_init`, `race_loop`, and `frame_update` carry names).
+   level: `engine_init`, `race_loop`, and `frame_update` carry names, and the
+   unknown records reachable from the verified and rebuilt roots are mapped,
+   and the scan now matches both prologue encodings and seeds the call targets
+   of those roots; the next step maps the new candidates).
 2. Decode the compression of `GAME.DAT` and `MENU.DAT` (done: the container
    and the LZW members have decoders).
 3. Decode the 3D object format.  The loader is `object_load` at `0x10bfc`, and

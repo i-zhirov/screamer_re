@@ -1,9 +1,18 @@
 {
   "address": "0xc98f9",
   "checks": [],
-  "evidence": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c98f9` tests `DAT_001275c8`, calls `FUN_000c9d0d` or `FUN_000deb82`, and clears the records at `DAT_001274f8` to `DAT_00127a78`"
+    }
+  ],
+  "name": "music_channel_stop",
   "notes": [],
   "object_offset": "0xb98f9",
+  "role": "stops the voices of one music channel, releases the driver voice, and clears the channel records",
+  "section": "The HMI sound driver",
   "size": 536,
-  "status": "unknown"
+  "status": "named"
 }

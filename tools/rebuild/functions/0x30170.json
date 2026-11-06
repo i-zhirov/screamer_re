@@ -48,7 +48,7 @@
   },
   "role": "reads the DOS version, selects the extender path, copies the command line and the program name, scans the environment, clears the BSS, and runs the initializer, the main invoker, and the exit chain",
   "section": "Startup path",
-  "size": 114032,
+  "size": 537,
   "status": "rebuilt",
   "symbol": "startup_"
 }

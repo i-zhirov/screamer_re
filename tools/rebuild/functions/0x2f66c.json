@@ -1,9 +1,18 @@
 {
   "address": "0x2f66c",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002f66c` halves the probe size and keeps the largest block that `FUN_0002f0fc` returns"
+    }
+  ],
+  "name": "dos_block_largest",
   "notes": [],
   "object_offset": "0x1f66c",
+  "role": "finds the largest single DOS memory block with a halving search over INT 31h AX=0x0100",
+  "section": "The runtime memory manager",
   "size": 157,
-  "status": "unknown"
+  "status": "named"
 }

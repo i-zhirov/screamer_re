@@ -47,12 +47,14 @@ TABLE_SECTIONS = (
     "The graphics decoders",
     "The TABS table loaders",
     "The sound loaders",
+    "The HMI sound driver",
     "The vehicle state chain",
     "The timing and filter layer",
     "The runtime memory manager",
     "object_gear_step and object_slide_step callees",
     "The resource layer",
     "Resource loader",
+    "Subsystem shutdown",
     "Subsystem initialisation",
 )
 FUNCTION_HEADER = "| Module address | Name | Evidence | Confidence |"

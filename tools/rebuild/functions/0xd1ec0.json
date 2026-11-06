@@ -42,7 +42,7 @@
   },
   "role": "replicates the value byte over the dword and calls the run-time core at `0xe0860`",
   "section": "The runtime memory manager",
-  "size": 101,
+  "size": 24,
   "status": "verified",
   "symbol": "memset_runtime_"
 }

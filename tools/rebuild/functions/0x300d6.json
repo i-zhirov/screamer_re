@@ -3,12 +3,21 @@
   "checks": [
     "identity"
   ],
+  "confidence": "observed",
   "count": 6,
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000300d6` calls the slots `PTR_FUN_00102f88` and `PTR_FUN_00102f8c` and ends in the interrupt 21h AH=0x4C terminator"
+    }
+  ],
   "module": "exit",
+  "name": "exit_flush",
   "notes": [],
   "object_offset": "0x200d6",
+  "role": "calls the flush and close handler slots and jumps to the run-time terminator; the helper of `exit`",
+  "section": "Program functions",
   "size": 22,
-  "status": "unknown",
+  "status": "named",
   "symbol": "exit_flush_"
 }

@@ -1,9 +1,18 @@
 {
   "address": "0xd380d",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000d380d` clears `DAT_001233c0` and returns 10 for an index of 8 or more"
+    }
+  ],
+  "name": "sound_channel_clear",
   "notes": [],
   "object_offset": "0xc380d",
+  "role": "clears the 6-byte channel record and returns 10 when the index is 8 or more",
+  "section": "The HMI sound driver",
   "size": 74,
-  "status": "unknown"
+  "status": "named"
 }

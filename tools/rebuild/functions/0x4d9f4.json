@@ -42,7 +42,7 @@
   },
   "role": "rounds the value on the FPU stack to an integer",
   "section": "motion_update callees",
-  "size": 70,
+  "size": 50,
   "status": "verified",
   "symbol": "fp_helper_"
 }

@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import le  # noqa: E402
 
 PROLOGUE_SAVE = b"\x53\x55\x89\xe5\x90\x55\x89\xe5"
+MIXED_PROLOGUES = b"\x53\x55\x89\xe5\x90\x53\x55\x8b\xec"
 BASE = 0x10000
 
 
@@ -62,6 +63,10 @@ class FunctionStartsTestCase(unittest.TestCase):
         image = StubImage(PROLOGUE_SAVE)
         self.assertEqual(le.function_starts(image), [0x10000, 0x10005])
 
+    def test_function_starts_accepts_both_prologue_encodings(self) -> None:
+        image = StubImage(MIXED_PROLOGUES)
+        self.assertEqual(le.function_starts(image), [0x10000, 0x10005])
+
     def test_function_starts_honors_the_limit(self) -> None:
         image = StubImage(PROLOGUE_SAVE)
         self.assertEqual(le.function_starts(image, limit=1), [0x10000])
@@ -84,6 +89,10 @@ class NearestFunctionStartTestCase(unittest.TestCase):
         image = StubImage(PROLOGUE_SAVE)
         self.assertEqual(le.nearest_function_start(image, 0x10004), 0x10000)
 
+    def test_nearest_function_start_accepts_both_prologue_encodings(self) -> None:
+        image = StubImage(MIXED_PROLOGUES)
+        self.assertEqual(le.nearest_function_start(image, 0x10008), 0x10005)
+
     def test_nearest_function_start_returns_none_without_a_prologue(self) -> None:
         image = StubImage(b"\x90" * 8)
         self.assertIsNone(le.nearest_function_start(image, 0x10004))
@@ -93,6 +102,28 @@ class NearestFunctionStartTestCase(unittest.TestCase):
         image.entry_linear = 0x20000
         with self.assertRaisesRegex(ValueError, "the address is unmapped"):
             le.nearest_function_start(image, 0x10004)
+
+
+class ReachableCallTargetsTestCase(unittest.TestCase):
+    def test_reachable_call_targets_walks_the_direct_calls(self) -> None:
+        image = StubImage(b"")
+        sites = {
+            0x100: [le.CallSite(0x101, 0x200, "call 0x200")],
+            0x200: [
+                le.CallSite(0x201, 0x300, "call 0x300"),
+                le.CallSite(0x202, None, "call eax"),
+            ],
+        }
+        with mock.patch.object(
+            le,
+            "function_body",
+            side_effect=lambda exe, address, max_instructions=4000: [address],
+        ), mock.patch.object(
+            le, "call_sites", side_effect=lambda body: sites.get(body[0], [])
+        ):
+            self.assertEqual(
+                le.reachable_call_targets(image, [0x100]), [0x200, 0x300]
+            )
 
 
 class CapstoneAvailableTestCase(unittest.TestCase):
@@ -129,6 +160,21 @@ class CommandOutputTestCase(unittest.TestCase):
         self.assertEqual(
             output.getvalue(),
             "nearest prologue: 0x10000 (0x4 bytes below 0x10004)\n",
+        )
+
+    def test_targets_output_lists_the_targets(self) -> None:
+        image = StubImage(b"")
+        with mock.patch.object(
+            le, "reachable_call_targets", return_value=[0x200, 0x300]
+        ):
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(le.print_targets(image, [0x100], 4000), 0)
+        self.assertEqual(
+            output.getvalue(),
+            "call targets: 2\n"
+            "  0x00000200\n"
+            "  0x00000300\n",
         )
 
 

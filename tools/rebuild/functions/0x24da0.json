@@ -47,7 +47,7 @@
   },
   "role": "walks the six 28-byte control records at `0x197d8`, scales the axis values with floating point, and resolves the duplicate and button controls",
   "section": "race_loop callees",
-  "size": 2176,
+  "size": 640,
   "status": "rebuilt",
   "symbol": "joystick_update_"
 }

@@ -42,7 +42,7 @@
   },
   "role": "fills `count >> 2` dwords with the value byte replicated",
   "section": "frame_update callees",
-  "size": 220998,
+  "size": 220829,
   "status": "verified",
   "symbol": "memset_"
 }

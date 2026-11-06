@@ -1,9 +1,18 @@
 {
   "address": "0x1fa2c",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0001fa2c` calls interrupt 1Ah, converts the BCD fields, and calls interrupt 21h AH=0x2B and AH=0x2D"
+    }
+  ],
+  "name": "dos_clock_sync",
   "notes": [],
   "object_offset": "0xfa2c",
+  "role": "reads the real-time clock through interrupt 1Ah and sets the DOS date and time through interrupt 21h; prints a message when a field is invalid",
+  "section": "Subsystem shutdown",
   "size": 524,
-  "status": "unknown"
+  "status": "named"
 }

@@ -37,7 +37,7 @@
   },
   "role": "writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt",
   "section": "The runtime memory manager",
-  "size": 108,
+  "size": 56,
   "status": "verified",
   "symbol": "dpmi_int31_entry_"
 }

@@ -42,7 +42,7 @@
   },
   "role": "builds the HMI request block at `DAT_001166a4` from the argument and the state words, and calls the sound driver when the driver state is set",
   "section": "Subsystem initialisation",
-  "size": 416,
+  "size": 84,
   "status": "verified",
   "symbol": "sound_driver_set_"
 }

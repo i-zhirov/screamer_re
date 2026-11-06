@@ -42,7 +42,7 @@
   },
   "role": "runs the sound service and the per-frame voice and event loop when the active count and the voice count are above zero",
   "section": "object_update_all callees",
-  "size": 37320,
+  "size": 1232,
   "status": "rebuilt",
   "symbol": "sound_effects_update_"
 }

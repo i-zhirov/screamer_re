@@ -1,9 +1,18 @@
 {
   "address": "0xc8321",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c8321` calls `FUN_000de7fd`, `FUN_000de855`, and `FUN_000de829` when `DAT_00105984` is set"
+    }
+  ],
+  "name": "music_timer_shutdown",
   "notes": [],
   "object_offset": "0xb8321",
+  "role": "masks the timer interrupt, restores the saved handler, and unmasks it when the driver flag at `DAT_00105984` is set",
+  "section": "The HMI sound driver",
   "size": 58,
-  "status": "unknown"
+  "status": "named"
 }

@@ -42,7 +42,7 @@
   },
   "role": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path",
   "section": "Subsystem initialisation",
-  "size": 1272,
+  "size": 356,
   "status": "verified",
   "symbol": "dpmi_real_int_"
 }

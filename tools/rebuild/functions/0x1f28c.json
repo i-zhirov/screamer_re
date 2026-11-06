@@ -1,9 +1,18 @@
 {
   "address": "0x1f28c",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0001f28c` calls `music_timer_update`, `music_channel_stop`, `music_driver_reset`, and `music_timer_shutdown`"
+    }
+  ],
+  "name": "sound_system_shutdown",
   "notes": [],
   "object_offset": "0xf28c",
+  "role": "stops the music timer, releases the active song, and restores the saved timer handler",
+  "section": "Subsystem shutdown",
   "size": 84,
-  "status": "unknown"
+  "status": "named"
 }

@@ -42,7 +42,7 @@
   },
   "role": "opens `screamer.cfg` with the mode `rt`, reads three strings and two characters, and sets the flag `DAT_00007f78` from the second character",
   "section": "Subsystem initialisation",
-  "size": 2088,
+  "size": 156,
   "status": "rebuilt",
   "symbol": "config_load_"
 }

@@ -42,7 +42,7 @@
   },
   "role": "allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h",
   "section": "Subsystem initialisation",
-  "size": 868,
+  "size": 167,
   "status": "verified",
   "symbol": "vesa_set_mode_"
 }

@@ -1,9 +1,18 @@
 {
   "address": "0xd2cab",
   "checks": [],
-  "evidence": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000d2cab` calls the table at `DAT_00123204`, calls `FUN_000e2723`, and clears the record at `DAT_001222a8`"
+    }
+  ],
+  "name": "sound_channel_close",
   "notes": [],
   "object_offset": "0xc2cab",
+  "role": "calls the driver function, releases the channel voice, and clears the channel record",
+  "section": "The HMI sound driver",
   "size": 293,
-  "status": "unknown"
+  "status": "named"
 }

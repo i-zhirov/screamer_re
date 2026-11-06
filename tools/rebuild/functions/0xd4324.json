@@ -42,7 +42,7 @@
   },
   "role": "aligns the stack, grows the stack, calls the game main with the argument pair, and calls the exit function",
   "section": "Startup path",
-  "size": 236,
+  "size": 80,
   "status": "verified",
   "symbol": "main_invoker_"
 }

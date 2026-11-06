@@ -61,6 +61,7 @@ python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH
 python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py tree  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py targets ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x10020 0x300be
 ```
 
 Run the strict byte gate and the whole-image oracle:

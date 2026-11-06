@@ -1,9 +1,18 @@
 {
   "address": "0x4c928",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0004c928` stores the word 3 and calls `FUN_000d4b70` with the interrupt 0x10"
+    }
+  ],
+  "name": "video_text_mode",
   "notes": [],
   "object_offset": "0x3c928",
+  "role": "sets the text mode 3 through the real-mode interrupt 10h dispatcher",
+  "section": "Subsystem shutdown",
   "size": 36,
-  "status": "unknown"
+  "status": "named"
 }
