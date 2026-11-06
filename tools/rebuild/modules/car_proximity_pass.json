@@ -1,0 +1,42 @@
+{
+  "exe": "cprox.exe",
+  "map": "car_proximity_pass.map",
+  "name": "car_proximity_pass",
+  "run": {
+    "command": "cprox.exe > cprox.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "A",
+      "B",
+      "D"
+    ],
+    "output": "cprox.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_proximity_pass.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_proximity_pass_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_proximity_pass_main.c"
+    }
+  ]
+}

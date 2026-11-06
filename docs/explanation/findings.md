@@ -14606,3 +14606,72 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x27c34`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The car_proximity_pass module at 0x17408
+
+- Observation: the original body at `0x17408` holds 133 instructions and 466
+  bytes up to the `ret` at `0x175d9`.  The next function starts at `0x175dc`, so
+  the store record keeps the 468-byte extent and sets no function size.  The
+  identity check uses 133 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x17408 --count 133` and
+  `tools/rebuild/functions/0x17408.json`.
+- Observation: the only direct caller at `0x15b30` is the player effect group
+  at `0x15b08`.  That group calls the nearby marker at `0x12378`, then this
+  function, and then the opponent start at `0x124c0`.  The traffic path has the
+  same shape at `0x15b44` with the traffic collision pass at `0x175dc`.
+  Evidence: the byte sweep for a relative call to `0x17408` and the block at
+  `0x15b08` through `0x15b40`.
+- Observation: the function returns at once when the state field `+0x148` is
+  not zero.  Otherwise it walks the 0x590-byte car records at `DAT_00110ab8`
+  while the index stays below the count `DAT_0010f8ec`.  For each record it
+  sets the contact distance at `+0x560` to the player radius `+0x544` plus the
+  record radius `+0x44c`.
+  Evidence: the block at `0x1741a` through `0x17571`.
+- Observation: the bit of the index in the nearby mask at `+0x104` selects the
+  record, the physics gate at `+0x414` must be set, and the record state at
+  `+0x2f8` must be zero.  The function then tests the two 12-byte player body
+  points at `+0x52c` and `+0x534` against the two record body points at
+  `+0x434` and `+0x43c`.
+  Evidence: the block at `0x17577` through `0x174ae`.
+- Observation: each pair stores its deltas at `+0x564` and `+0x56c`, squares
+  and adds them, takes the square root through `0x22bec`, truncates it through
+  `0x4d9f4`, and stores the distance at `+0x55c`.  A distance below the contact
+  distance sets the contact flag, calls the collision response at `0x17828`
+  with the player in `eax` and the record in `edx`, and ends the second-point
+  pass for that first point.
+  Evidence: the block at `0x174c3` through `0x17528`.
+- Observation: the last step filters `+0x7c4` toward the contact flag through
+  `filter_update` at `0x22b80` with the rate 50.
+  Evidence: the call at `0x175cd`.
+- Inference: the caller player effect group, the car record scan, the two
+  body-point pairs, and the collision response support the name
+  `car_proximity_pass`.  The module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sqrt` at `0x22bec` and the truncating helper
+  at `0x4d9f4`.  This harness links no math library, so
+  `car_proximity_pass_fpu.asm` supplies `sqrt` from the hardware and makes
+  `__CHP` truncate toward zero.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/car_proximity_pass_fpu.asm` and
+  `tools/rebuild/modules/car_proximity_pass.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, `B`, and `D`.  The paths cover the state gate, the empty
+  count, the mask skip, the clear physics gate, the set record state, the first
+  close pair, the response on each player point, the equal distance, the
+  truncation of 2.828 to 2, the second record, and the filter move to 100 and
+  100.5.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  car_proximity_pass`, `work/rebuild/cprox.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x17408`.
+- Observation: the rebuilt module holds 488 bytes and 133 decoded instructions.
+  The identity check stays open at 19 of 133 instructions and 29 of 466 bytes
+  because V2 saves the frame pointer first, uses another prologue order, and
+  keeps the loop counters in registers.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17408 --count 133 --rebuilt work/rebuild/cprox.exe
+  --rebuilt-map work/rebuild/car_proximity_pass.map --rebuilt-symbol
+  car_proximity_pass_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
