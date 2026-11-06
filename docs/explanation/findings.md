@@ -13281,3 +13281,78 @@ temporary `-od` recipe.
   opponent_avoid_player_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The traffic_collision_pass module at 0x175dc
+
+- Observation: the original body at `0x175dc` holds 165 instructions and 587
+  bytes up to the `ret` at `0x17826`.  The next function starts at `0x17828`,
+  so the store record keeps the 588-byte extent and sets no function size.  The
+  identity check uses 165 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x175dc --count 165` and
+  `tools/rebuild/functions/0x175dc.json`.
+- Observation: the only direct caller at `0x15b6c` is the traffic effect group
+  at `0x15b44`.  That group first calls the nearby-record marker at `0x12424`
+  and then this function, and it calls the clear step at `0x124c0` afterwards.
+  The traffic view group at `0x201d0` calls the group at `0x20268`, and the
+  frame update at `0x1ff70` selects the group through the mode byte
+  `DAT_0011d260` bit 0x10.  The car path has the same shape at `0x15b08` with
+  the car proximity pass at `0x17408`.  The record therefore takes the section
+  `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x175dc`, the block at `0x15b44` through `0x15b7c`, the block at `0x201d0`
+  through `0x202bc`, and the `car_collision_response` finding.
+- Observation: the function clears the contact mask at `+0x2fc`.  It returns at
+  once when the state field `+0x148` is not zero.  Otherwise it walks the
+  0x2a8-byte traffic records at `DAT_00113cd8` while the index stays below the
+  count `DAT_00115218`, and it skips a record whose first field is negative.
+  Evidence: the block at `0x175e6` through `0x17615` and the loop at `0x177aa`
+  through `0x177bc`.
+- Observation: a record whose flag field `+0x14` holds the bit of the player
+  index `DAT_0011d250` takes the velocity branch.  The function calls the push
+  helper at `0x17b54` with the zero flag and copies the negated record velocity
+  `+0x30` and `+0x38` to `+0x550` and `+0x558`.
+  Evidence: the block at `0x177d9` through `0x17805`.
+- Observation: otherwise the function acts only on a record in the nearby set
+  `+0x104` and not flagged at `+0x16` bit 0.  The marker at `0x12424` fills the
+  nearby set with every traffic record within 1500 units of the player position
+  on each axis.  The function sets the contact distance at `+0x560` to the
+  player radius `+0x544` plus the traffic radius `+0x2a4`.
+  Evidence: the block at `0x12424` through `0x124be` and the block at
+  `0x1761a` through `0x17657`.
+- Observation: the function tests the two player body points at `+0x52c` and
+  `+0x534` against the two traffic points at `+0x28c` and `+0x294` in 12-byte
+  steps.  Each pair stores its deltas at `+0x564` and `+0x56c` and its
+  truncated distance at `+0x55c`.  On a hit it calls the push helper with the
+  set flag and marks the record bit in `+0x2fc`.  The last step filters
+  `+0x7c4` toward the contact flag through `filter_update` at `0x22b80` with
+  the rate 50.
+  Evidence: the block at `0x1765d` through `0x17781` and the call at `0x1781a`.
+- Inference: the caller chain, the traffic table, the two body-point pairs, and
+  the push helper support the name `traffic_collision_pass`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls `sqrt` at `0x22bec` and the truncating helper
+  at `0x4d9f4`.  This harness links no math library, so
+  `traffic_collision_pass_fpu.asm` supplies `sqrt` from the hardware and makes
+  `__CHP` truncate toward zero.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/traffic_collision_pass_fpu.asm` and
+  `tools/rebuild/modules/traffic_collision_pass.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The paths cover the state gate, the empty traffic list,
+  the negative first field, the velocity branch, the nearby set, the record
+  flag, the equal distance, the four body-pair pushes, the truncation of 2.828
+  to 2, and the two-record mask.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  traffic_collision_pass`, `work/rebuild/tpass.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x175dc`.
+- Observation: the rebuilt module holds 560 bytes.  The identity check stays
+  open at 33 of 165 instructions and 35 of 560 bytes.  V2 saves the registers
+  after the frame and uses another instruction order and local layout.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x175dc --count 165 --rebuilt work/rebuild/tpass.exe
+  --rebuilt-map work/rebuild/traffic_collision_pass.map --rebuilt-symbol
+  traffic_collision_pass_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
