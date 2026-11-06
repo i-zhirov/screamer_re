@@ -625,6 +625,9 @@ class PrologueTestCase(unittest.TestCase):
         self.assertEqual(
             store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x89\xe5", 5), 0
         )
+        self.assertEqual(
+            store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x8b\xec", 5), 0
+        )
         self.assertEqual(store.le.prologue_start(b"\x55\x89\xe5", 0), 0)
         self.assertEqual(store.le.prologue_start(b"\x90\x55\x89\xe5", 1), 1)
         self.assertEqual(store.le.prologue_start(b"\x53\x55\x89\xe5", 1), 0)
@@ -659,6 +662,27 @@ class PrologueTestCase(unittest.TestCase):
                     (0x110, "sits in alignment padding"),
                     (0x120, "sits inside a jump"),
                 ],
+            )
+        finally:
+            store.candidate_addresses = saved
+
+    def test_non_entry_addresses_reports_the_second_prologue_form(self) -> None:
+        class Image:
+            def read(self, address: int, count: int) -> bytes:
+                return bytes(data[address : address + count])
+
+            def object_at(self, target: int) -> object | None:
+                return object() if target in range(0x100, 0x200) else None
+
+        data = bytearray(b"\x40" * 0x200)
+        data[0x104] = 0x53
+        data[0x105:0x108] = b"\x55\x8b\xec"
+        saved = store.candidate_addresses
+        try:
+            store.candidate_addresses = lambda: [0x105]
+            self.assertEqual(
+                store.non_entry_addresses(Image()),
+                [(0x105, "sits inside a prologue")],
             )
         finally:
             store.candidate_addresses = saved
@@ -780,6 +804,31 @@ class ExtentTestCase(unittest.TestCase):
             ),
             [],
         )
+
+    def test_scan_candidates_adds_the_call_targets_of_the_roots(self) -> None:
+        scan = mock.Mock(
+            returncode=0,
+            stdout="candidate function starts: 1\n  0x000300ec\n",
+            stderr="",
+        )
+        targets = mock.Mock(
+            returncode=0,
+            stdout="call targets: 2\n  0x000de7fd\n  0x000de9be\n",
+            stderr="",
+        )
+        with mock.patch.object(
+            store.subprocess, "run", side_effect=[scan, targets]
+        ) as run:
+            result = store.scan_candidates(Path("STARTH.EXE"), [0x300EC])
+
+        self.assertEqual(
+            result, [0x300D6, 0x300EC, 0x300F8, 0xDE7FD, 0xDE9BE]
+        )
+        self.assertEqual(run.call_count, 2)
+        target_command = run.call_args_list[1].args[0]
+        self.assertEqual(target_command[2], "targets")
+        self.assertEqual(target_command[3], "STARTH.EXE")
+        self.assertEqual(target_command[4], "0x300ec")
 
     def test_manual_candidate_addition_leaves_no_overlap(self) -> None:
         # The store before the two manual candidates.  The exit record reaches

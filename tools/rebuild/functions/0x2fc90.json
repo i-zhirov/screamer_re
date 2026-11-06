@@ -1,9 +1,18 @@
 {
   "address": "0x2fc90",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002fc90` tests the load flag at `+0x14`, calls `FUN_0002fe68`, `FUN_000d2cab`, `FUN_000d2743`, and `FUN_0002f326` with `MELODIC_BANK` and `DRUM_BANK`"
+    }
+  ],
+  "name": "music_bank_free",
   "notes": [],
   "object_offset": "0x1fc90",
+  "role": "stops the song, releases the driver channel, and removes the `MELODIC_BANK` and `DRUM_BANK` resources",
+  "section": "Subsystem shutdown",
   "size": 92,
-  "status": "unknown"
+  "status": "named"
 }

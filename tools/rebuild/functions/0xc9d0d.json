@@ -1,9 +1,18 @@
 {
   "address": "0xc9d0d",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c9d0d` calls `FUN_000df1d1`, `FUN_000df029`, `FUN_000e062c`, `FUN_000df104`, and `FUN_000df06a`"
+    }
+  ],
+  "name": "sound_driver_call",
   "notes": [],
   "object_offset": "0xb9d0d",
+  "role": "builds a real-mode parameter block, copies it to the driver buffer, invokes the driver, and frees the block",
+  "section": "The HMI sound driver",
   "size": 124,
-  "status": "unknown"
+  "status": "named"
 }

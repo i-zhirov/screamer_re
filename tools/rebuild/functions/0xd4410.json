@@ -12,6 +12,6 @@
   "notes": [],
   "role": "saves EDI, ESI, ECX, EDX, EBX, EBP, and CF into the block",
   "section": "The runtime memory manager",
-  "size": 108,
+  "size": 56,
   "status": "named"
 }

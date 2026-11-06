@@ -12,6 +12,6 @@
   "notes": [],
   "role": "calls the DOS/4GW real-mode interrupt dispatcher with `0x1500`",
   "section": "Subsystem initialisation",
-  "size": 1272,
+  "size": 356,
   "status": "named"
 }

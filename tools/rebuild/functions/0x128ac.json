@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down"
+      "text": "releases the engine interface, restores the text mode and the keyboard handler, stops the music bank and the sound system, and syncs the DOS clock"
     }
   ],
   "module": "shutdown",
@@ -41,7 +41,7 @@
     "source_digest": "sha256:4fc8fc60b3c78deb49242e4d7b4deb1a3e716aff1fa0bf05462103304f7d4dad",
     "tool": "run.py"
   },
-  "role": "counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down",
+  "role": "counterpart of `engine_init`: restores the keyboard interrupt handler with `FUN_00014e20(0)` and tears the subsystems down",
   "section": "Program functions",
   "size": 52,
   "status": "rebuilt",

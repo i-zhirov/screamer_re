@@ -226,7 +226,7 @@ def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
         data = image.read(address - 5, 12)
         if data is None or len(data) != 12:
             continue
-        if data[5:8] == b"\x55\x89\xe5" and le.prologue_start(data[:8], 5) != 5:
+        if data[5:8] in le.PROLOGUE_PATTERNS and le.prologue_start(data[:8], 5) != 5:
             offenders.append((address, "sits inside a prologue"))
             continue
         if data[5] in PADDING_BYTES and (
@@ -546,33 +546,49 @@ def validate_module(
     return violations
 
 
-def scan_candidates(original: Path) -> list[int]:
-    """Run the prologue scan of le.py and add the run-time starts.
-
-    The prologue scan misses a run-time function without an EBP frame: the entry
-    holds a jump, and the exit helper starts with a register save.
-    """
+def _tool_addresses(
+    command: list[str], original: Path, description: str
+) -> list[int]:
+    """Run a le.py address command and return its address lines."""
     completed = subprocess.run(
-        [
-            sys.executable,
-            str(LE_TOOL),
-            "funcs",
-            str(original),
-            "--limit",
-            str(SEED_LIMIT),
-        ],
+        [sys.executable, str(LE_TOOL), command[0], str(original), *command[1:]],
         capture_output=True,
         text=True,
     )
     if completed.returncode != 0:
         raise ValueError(
-            f"the scan of {original} failed: {completed.stderr.strip()}"
+            f"the {description} of {original} failed: {completed.stderr.strip()}"
         )
-    candidates = set()
+    addresses = []
     for line in completed.stdout.splitlines():
         line = line.strip()
         if line.startswith("0x"):
-            candidates.add(int(line, 16))
+            addresses.append(int(line, 16))
+    return addresses
+
+
+def scan_candidates(original: Path, roots: list[int] | None = None) -> list[int]:
+    """Run the prologue scan of le.py and add the run-time starts.
+
+    The prologue scan misses a run-time function without an EBP frame: the entry
+    holds a jump, and the exit helper starts with a register save.  The scan
+    matches both prologue encodings.  The direct call targets of the verified
+    and rebuilt roots are candidates too, because a call target is a function
+    entry even when the function has no frame.
+    """
+    candidates = set(
+        _tool_addresses(
+            ["funcs", "--limit", str(SEED_LIMIT)], original, "prologue scan"
+        )
+    )
+    if roots:
+        candidates.update(
+            _tool_addresses(
+                ["targets", *[f"{address:#x}" for address in roots]],
+                original,
+                "target scan",
+            )
+        )
     candidates.add(ENTRY_ADDRESS)
     candidates.add(EXIT_FLUSH_ADDRESS)
     return sorted(candidates)
@@ -599,9 +615,14 @@ def seed(check: bool, original: Path) -> int:
     if not original.is_file():
         print(f"error: the original image {original} is missing", file=sys.stderr)
         return 2
-    candidates = scan_candidates(original)
     addresses = candidate_addresses()
     records = {address: load_record(address) for address in addresses}
+    roots = sorted(
+        address
+        for address, record in records.items()
+        if record.get("status") in RUN_STATUSES
+    )
+    candidates = scan_candidates(original, roots)
     added, lost = seed_diff(candidates, records)
     overlaps = overlap_addresses(list(records.values()))
     print(f"added: {len(added)}")

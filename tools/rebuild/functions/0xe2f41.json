@@ -1,9 +1,18 @@
 {
   "address": "0xe2f41",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000e2f41` stores the segment and offset arguments and returns the pair"
+    }
+  ],
+  "name": "far_pointer_pack",
   "notes": [],
   "object_offset": "0xd2f41",
+  "role": "returns the far pointer built from the segment and offset arguments",
+  "section": "The HMI sound driver",
   "size": 45,
-  "status": "unknown"
+  "status": "named"
 }

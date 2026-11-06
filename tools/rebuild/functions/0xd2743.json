@@ -1,9 +1,18 @@
 {
   "address": "0xd2743",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000d2743` calls `FUN_000d233c` and clears `DAT_001233f0` when the lock succeeds"
+    }
+  ],
+  "name": "sound_driver_reset",
   "notes": [],
   "object_offset": "0xc2743",
+  "role": "locks the sound driver memory regions through `0xd233c` and clears the state at `DAT_001233f0`; returns 5 when a lock fails",
+  "section": "The HMI sound driver",
   "size": 64,
-  "status": "unknown"
+  "status": "named"
 }

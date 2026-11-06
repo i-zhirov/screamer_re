@@ -12,6 +12,6 @@
   "notes": [],
   "role": "counts to 8 and reads the mouse and keyboard state; the shared input poll",
   "section": "race_loop callees",
-  "size": 4792,
+  "size": 112,
   "status": "named"
 }

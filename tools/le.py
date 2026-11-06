@@ -12,8 +12,10 @@ Usage:
     python3 tools/le.py disasm <file> <linear-address> [--count N]
     python3 tools/le.py calls <file> <linear-address> [--max N]
     python3 tools/le.py tree <file> <linear-address> [--depth N]
-    python3 tools/le.py funcs <file> [--from ADDR] [--to ADDR]
+    python3 tools/le.py funcs <file> [--from ADDR] [--to ADDR] [--limit N]
     python3 tools/le.py near <file> <linear-address>
+    python3 tools/le.py targets <file> <linear-address> [<linear-address> ...]
+        [--max N]
 """
 
 from __future__ import annotations
@@ -544,16 +546,52 @@ def print_call_tree(
     return 0
 
 
+def reachable_call_targets(
+    exe: LinearExecutable, roots: list[int], max_instructions: int = 4000
+) -> list[int]:
+    """Return every direct call target reachable from the roots.
+
+    The walk follows the call sites of `function_body`, so it stops at the same
+    terminators.  An indirect call has no target and is not added.  The roots
+    themselves stay out of the result unless another call reaches them.
+    """
+    visited = set(roots)
+    pending = list(roots)
+    targets: set[int] = set()
+    while pending:
+        address = pending.pop()
+        body = function_body(exe, address, max_instructions)
+        for site in call_sites(body):
+            if site.target is None or site.target in targets:
+                continue
+            targets.add(site.target)
+            if site.target not in visited:
+                visited.add(site.target)
+                pending.append(site.target)
+    return sorted(targets)
+
+
+def print_targets(exe: LinearExecutable, roots: list[int], max_instructions: int) -> int:
+    targets = reachable_call_targets(exe, roots, max_instructions)
+    print(f"call targets: {len(targets)}")
+    for target in targets:
+        print(f"  {target:#010x}")
+    return 0
+
+
 SAVE_REGISTERS = {0x53: 0, 0x51: 1, 0x52: 2, 0x56: 3, 0x57: 4}
+PROLOGUE_PATTERNS = (b"\x55\x89\xe5", b"\x55\x8b\xec")
 
 
 def prologue_start(data: bytes, position: int) -> int:
     """Walk from a `push ebp; mov ebp,esp` match back over the register saves.
 
-    Watcom saves the used registers in the canonical order `ebx`, `ecx`, `edx`,
-    `esi`, `edi` and then `ebp`, so a function that uses registers starts before
-    the `push ebp` that the raw pattern matches.  The walk stops at the first
-    byte that is not a register save or that breaks the order.
+    The prologue has two encodings: `55 89 e5` and `55 8b ec`, both of which
+    encode `push ebp; mov ebp,esp`.  Watcom saves the used registers in the
+    canonical order `ebx`, `ecx`, `edx`, `esi`, `edi` and then `ebp`, so a
+    function that uses registers starts before the `push ebp` that the raw
+    pattern matches.  The walk stops at the first byte that is not a register
+    save or that breaks the order.
     """
     start = position
     previous = len(SAVE_REGISTERS)
@@ -564,6 +602,17 @@ def prologue_start(data: bytes, position: int) -> int:
         previous = index
         start -= 1
     return start
+
+
+def _prologue_positions(data: bytes) -> list[int]:
+    """The positions of both prologue encodings in the buffer."""
+    positions: list[int] = []
+    for pattern in PROLOGUE_PATTERNS:
+        position = data.find(pattern)
+        while position != -1:
+            positions.append(position)
+            position = data.find(pattern, position + 1)
+    return positions
 
 
 def function_starts(
@@ -581,13 +630,10 @@ def function_starts(
     data = exe.read(low, high - low)
     if data is None:
         raise ValueError("the range is not mapped to a file offset")
-    pattern = b"\x55\x89\xe5"
-    found: list[int] = []
-    position = data.find(pattern)
-    while position != -1 and len(found) < limit:
-        found.append(low + prologue_start(data, position))
-        position = data.find(pattern, position + 1)
-    return found
+    starts = sorted(
+        {low + prologue_start(data, position) for position in _prologue_positions(data)}
+    )
+    return starts[:limit]
 
 
 def nearest_function_start(exe: LinearExecutable, address: int) -> int | None:
@@ -599,8 +645,7 @@ def nearest_function_start(exe: LinearExecutable, address: int) -> int | None:
     data = exe.read(low, address - low + 1)
     if data is None:
         raise ValueError("the range is not mapped to a file offset")
-    pattern = b"\x55\x89\xe5"
-    position = data.rfind(pattern)
+    position = max(data.rfind(pattern) for pattern in PROLOGUE_PATTERNS)
     if position == -1:
         return None
     return low + prologue_start(data, position)
@@ -684,6 +729,17 @@ def main() -> int:
     near_parser.add_argument("file", type=Path)
     near_parser.add_argument("address", type=lambda value: int(value, 0))
 
+    targets_parser = subparsers.add_parser(
+        "targets", help="list the direct call targets reachable from the roots"
+    )
+    targets_parser.add_argument("file", type=Path)
+    targets_parser.add_argument(
+        "roots", nargs="+", type=lambda value: int(value, 0)
+    )
+    targets_parser.add_argument(
+        "--max", dest="max_instructions", type=int, default=4000
+    )
+
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
@@ -712,6 +768,8 @@ def main() -> int:
         return print_functions(exe, args.start, args.end, args.limit)
     elif args.command == "near":
         return print_nearest_function(exe, args.address)
+    elif args.command == "targets":
+        return print_targets(exe, args.roots, args.max_instructions)
     return 0
 
 
