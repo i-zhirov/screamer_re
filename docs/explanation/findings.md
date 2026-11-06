@@ -9520,8 +9520,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   result is not zero.
   Evidence: the formats at object-3 offsets `0x1014`, `0x1021`, and `0x102e`,
   and the calls at `0x2a415`, `0x2a428`, and `0x2a431`.
-- Observation: the function sets the palette through `0x81a05`, shows the
-  message buffer through `0x258d0`, copies the pixels through `0x8c150`, runs
+- Observation: the function sets the palette through `0x81a05`, builds the
+  palette shade tables through `0x258d0`, copies the pixels through `0x8c150`, runs
   the swaps at `0x1075f` and `0x107a1` behind the flags `0x10` and `0x20`, and
   draws `DAT_0001fc3c` at y `0x50` with font 3 and color 0 through `0x2e7cc`.
   Evidence: the calls at `0x2a43b` through `0x2a48c`.
@@ -11222,7 +11222,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the call sweep for the target `0x2a558` and the call sites at
   `0x2a335`, `0x2908b`, and `0x2dcf9`.
 - Observation: the function clears the video buffer, loads `load<N>H.pcx` from
-  `gfx\graf.dat`, sets the palette, shows the message, builds the `map<N>` name,
+  `gfx\graf.dat`, sets the palette, builds the palette shade tables, builds the `map<N>` name,
   and copies the pixels.  The screen index comes from the chosen player record
   at object-3 offset `0x2099c`, field `+0x14`.  A value above 5 drops by 6 and
   sets the flag 0x08 in the saved word at `0x1d274`.
@@ -14408,5 +14408,68 @@ temporary `-od` recipe.
   --original-address 0x2cc98 --count 124 --rebuilt work/rebuild/tsupd.exe
   --rebuilt-map work/rebuild/track_select_update.map --rebuilt-symbol
   track_select_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The palette_shade_build module at 0x258d0
+
+- Observation: the original body at `0x258d0` holds 151 instructions and 475
+  bytes up to the `ret` at `0x25aaa`.  The next function starts at `0x25aac`, so
+  the store record keeps the 476-byte extent and sets no function size.  The
+  identity check uses 151 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x258d0 --count 151` and
+  `tools/rebuild/functions/0x258d0.json`.
+- Observation: the five direct callers pass the palette at `0xcf5c` in `eax`
+  after a palette load.  The callers are `race_session_start` at `0x12a85`,
+  `loading_screen` at `0x2a44a` and `0x2a638`, and `name_entry_screen` at
+  `0x2c90b` and `0x2c9fe`.
+  Evidence: the call sweep for `0x258d0` and the `mov eax, 0xcf5c` at
+  `0x12a80`, `0x2a440`, `0x2a633`, `0x2c900`, and `0x2c9f3`.
+- Observation: the function builds two 256-byte lookup tables.  For each of the
+  two scales 0.75 and 0.6 and each of the 256 palette entries, it scales the red,
+  green, and blue bytes, clamps each value at 255.0, finds the nearest palette
+  entry by the squared distance, and stores the index at `0x1cc00 + plane *
+  0x100`.  The local scale array also holds 0.5 at `0x3f000000`, but the loop
+  bound 2 leaves the third value unused.  The best-distance sentinel is
+  22100000.0 at `0x4ba89c10`.
+  Evidence: the loops at `0x258d8` through `0x25aa0` and the constants at
+  `0x258db`, `0x258e2`, `0x258e9`, and `0x25a0d`.
+- Observation: the function sets the pointer cell `DAT_0015d1c` to `0x1cc00`
+  and the pointer cell `DAT_000bcddc` to `0x1cd00`.  The pixel remap at
+  `0xccd9a` reads the `DAT_000bcddc` table and the block at `0x25d53` reads the
+  `DAT_0015d1c` table, so the tables are the 0.6 and 0.75 shade maps of the
+  framebuffer.
+  Evidence: the stores at `0x258f7` and `0x25910`, the reads at `0xccd99` and
+  `0x25d53`, and the remap at `0xccda0` through `0xccda4`.
+- Inference: the callers, the palette argument, the two dim scales, and the two
+  shade maps support the name `palette_shade_build`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the function converts only an integer to a float, so it needs no
+  truncating `__CHP` stub.  The shared `fpu_stub.asm` supplies the FPU run-time
+  symbols and the float-used marker.  The clamp constant `255.0` compiles to the
+  constant pool at linear 0, which the minimal image does not load, so the
+  module reads the constant through the global `palette_clamp`.  The original
+  has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/palette_shade_build.c`,
+  `tools/rebuild/palette_shade_build_main.c`, and the `fcomp` operand at
+  `0x1008d` of `work/rebuild/psbmod.exe`.
+- Observation: the behavior check passes.  The harness holds the 0x300-byte
+  palette, the 0x200-byte table region, and the clamp 255.0.  The paths cover
+  the sampled 0.75 and 0.6 indices, the colored exact-match mapping, the
+  non-decreasing 0.75 table, and the 0.6 table at or below the 0.75 table.  The
+  output holds the markers `0` through `4` and `D`.
+  Evidence: `python3 tools/rebuild/harness.py run --module palette_shade_build`,
+  `work/rebuild/psb_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x258d0`.
+- Observation: the rebuilt function body holds 117 instructions and 360 bytes.
+  The identity window uses the 151 original instructions, so the check stays
+  open at 18 of 151 instructions and 19 of 462 bytes because V2 saves five
+  registers, uses another prologue order, and uses registers for the two loops.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x258d0 --count 151 --rebuilt work/rebuild/psbmod.exe
+  --rebuilt-map work/rebuild/palette_shade_build.map --rebuilt-symbol
+  palette_shade_build_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.

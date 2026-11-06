@@ -1,0 +1,35 @@
+{
+  "exe": "psbmod.exe",
+  "map": "palette_shade_build.map",
+  "name": "palette_shade_build",
+  "run": {
+    "command": "psbmod.exe > psb_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "psb_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "palette_shade_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "palette_shade_build_main.c"
+    }
+  ]
+}

@@ -1,9 +1,91 @@
 {
   "address": "0x258d0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 151,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x258d0 holds 151 instructions and 475 bytes up to the ret at 0x25aaa; the next function starts at 0x25aac, so the store record keeps the 476-byte extent and sets no function size; the identity check uses 151 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five direct callers pass the palette at 0xcf5c in eax after a palette load: race_session_start at 0x12a85, loading_screen at 0x2a44a and 0x2a638, and name_entry_screen at 0x2c90b and 0x2c9fe"
+    },
+    {
+      "kind": "note",
+      "text": "for each of the two scales 0.75 and 0.6 and each of the 256 palette entries, the function scales the red, green, and blue bytes, clamps each value at 255.0, finds the nearest palette entry by the squared distance, and stores the index at 0x1cc00 + plane * 0x100; the local array also holds 0.5 at 0x3f000000, but the loop bound 2 leaves it unused"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the pointer cell DAT_0015d1c to 0x1cc00 and the pointer cell DAT_000bcddc to 0x1cd00; the pixel remap at 0xccd9a reads the DAT_000bcddc table and the block at 0x25d53 reads the DAT_0015d1c table, so the tables are the 0.6 and 0.75 shade maps of the framebuffer"
+    },
+    {
+      "kind": "note",
+      "text": "the callers, the palette argument, the two dim scales, and the two shade maps support the name palette_shade_build; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function converts only an integer to a float, so it needs no truncating __CHP stub; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker; the clamp constant arrives through the global palette_clamp, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x300-byte palette, the 0x200-byte table region, and the clamp 255.0; it covers the sampled 0.75 and 0.6 indices, the colored exact-match mapping, the non-decreasing 0.75 table, and the 0.6 table at or below the 0.75 table; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x258d0 --count 151 --rebuilt work/rebuild/psbmod.exe --rebuilt-map work/rebuild/palette_shade_build.map --rebuilt-symbol palette_shade_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x258d0"
+    },
+    {
+      "kind": "finding",
+      "text": "The palette_shade_build module at 0x258d0"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function body holds 117 instructions and 360 bytes; the identity window uses the 151 original instructions, so the check stays open at 18 of 151 instructions and 19 of 462 bytes because V2 saves five registers, uses another prologue order, and uses registers for the two loops; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "palette_shade_build",
+  "name": "palette_shade_build",
   "notes": [],
   "object_offset": "0x158d0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 462,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 18,
+        "instructions_total": 151,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x258d0",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:7ff5ac6f57678bdfda953f08350990bb856cc7688791d95c4ff037ca0a9cbb6b",
+    "source_digest": "sha256:0ccbbc66821c4b599faccd1e3e3126e78eca1c94fde30e94265ea484969309c2",
+    "tool": "run.py"
+  },
+  "role": "builds the two darkened palette lookup tables that remap the 256 palette indices at the scales 0.75 and 0.6",
+  "section": "The graphics decoders",
   "size": 476,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "palette_shade_build_"
 }
