@@ -14272,3 +14272,73 @@ temporary `-od` recipe.
   0x1517c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The car_collision_pass module at 0x1d00c
+
+- Observation: the original body at `0x1d00c` holds 144 instructions and 497
+  bytes up to the `ret` at `0x1d1fc`.  The next function starts at `0x1d200`, so
+  the store record keeps the 500-byte extent and sets no function size.  The
+  identity check uses 144 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d00c --count 144` and
+  `tools/rebuild/functions/0x1d00c.json`.
+- Observation: the only direct caller at `0x1c7fc` is the per-object step at
+  `0x1c7d0`.  That step first marks the nearby objects at `0x126e4`, then runs
+  this function, and then runs `opponent_avoid_player` at `0x1e414`.  The object
+  update at `0x2003c` runs the step on each 0x590-byte car record at
+  `DAT_00110ab8` after `object_prepare`.  The record therefore takes the section
+  `object update callees`.
+  Evidence: the byte sweep for a relative call to `0x1d00c`, the block at
+  `0x1c7d0` through `0x1c80c`, and the loop at `0x20168` through `0x20187`.
+- Observation: the function reads the record number at `+0x00` and scans every
+  later car record up to the count `DAT_0010f8ec`.  For each candidate it stores
+  the contact distance at `+0x488` as the two radii at `+0x44c`.  The bit of the
+  candidate index in the mask at `+0x0c` selects the record, and the physics
+  gate at `+0x414` must be set.
+  Evidence: the block at `0x1d016` through `0x1d192`.
+- Observation: the function tests the two body points of the record against the
+  two body points of the candidate.  A point holds x at `+0x00`, y at `+0x04`,
+  and z at `+0x08`, and the point array starts at `+0x434`.  The function
+  stores the two deltas at `+0x48c` and `+0x494`, squares and adds them, takes
+  the square root through `0x22bec`, truncates it through `0x4d9f4`, and stores
+  the distance at `+0x484`.  A distance below the contact distance calls the
+  collision response at `0x1d200` with the record in `eax` and the candidate in
+  `edx`.
+  Evidence: the block at `0x1d05b` through `0x1d135`.
+- Observation: after the scan, a drop from the saved speed at `+0x178` to the
+  current speed at `+0x418` above 5000.0 sets the crash state at `+0x2f8` to 2
+  or 3 when the state is zero.  The low bit of the quarter of the x and z
+  positions at `+0x498` and `+0x4a0` selects the state.  The threshold is the
+  float 5000.0 at object-3 offset `0xb18`.
+  Evidence: the block at `0x1d1a5` through `0x1d1ef` and the constant at
+  object-3 offset `0xb18`.
+- Inference: the record scan, the body-point overlap test, the radius gate, and
+  the crash state support the name `car_collision_pass`.  The module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original takes the square root at `0x22bec` and truncates
+  through the helper at `0x4d9f4`.  This harness links no math library, so
+  `car_collision_pass_fpu.asm` supplies `sqrt` from the hardware and makes
+  `__CHP` truncate toward zero.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/car_collision_pass_fpu.asm` and
+  `tools/rebuild/modules/car_collision_pass.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, `B`, and `D`.  The paths cover the empty scan, the mask
+  skip, the clear physics gate, the first close pair, the truncation of 8 to 2,
+  the equal distance, the start at the record number plus one with an inactive
+  candidate, the crash state 2, the set state, the exact 5000.0 boundary, the
+  positive parity, and the negative parity.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_collision_pass`,
+  `work/rebuild/ccpass.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1d00c`.
+- Observation: the rebuilt module holds 144 decoded instructions and 502 bytes.
+  The identity check stays open at 25 of 144 instructions and 25 of 497 bytes.
+  V2 saves the frame pointer first, uses another prologue order, and uses
+  registers for the loops.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d00c --count 144 --rebuilt work/rebuild/ccpass.exe
+  --rebuilt-map work/rebuild/car_collision_pass.map --rebuilt-symbol
+  car_collision_pass_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
