@@ -6,12 +6,14 @@
     "behavior"
   ],
   "confidence": "derived",
+  "count": 7,
   "evidence": [
     {
       "kind": "note",
       "text": "calls `default_data_copy`, `joystick_update`, and `frame_timer`"
     }
   ],
+  "implementation": "assembly",
   "module": "frame_step",
   "name": "frame_step",
   "notes": [],
@@ -27,23 +29,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 6,
+        "bytes_equal": 8,
         "bytes_total": 20,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 5,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 7,
         "instructions_total": 7,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2aa84",
     "date": "2026-11-06",
-    "fingerprint": "sha256:68566077918a84bd2b7667e673bfee52bc5ec8729fcde08cd5ed2b8175e5e319",
-    "source_digest": "sha256:e919f5cfc0c957f2722339d3bfc0501064e1693805593cc1a35d9e93db8692cd",
+    "fingerprint": "sha256:0acdcedb97e999262d61c085152df820cde20c55698b6493f1d3753b0772b404",
+    "source_digest": "sha256:20ebf0df1e2e790c9d2d14180fdb3978883072c2c1549ea0aa057b082bdb4631",
     "tool": "run.py"
   },
   "role": "calls `default_data_copy`, `joystick_update`, and `frame_timer`",
   "section": "frame_update callees",
   "size": 20,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "frame_step_"
 }

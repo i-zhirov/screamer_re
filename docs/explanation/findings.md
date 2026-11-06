@@ -6239,8 +6239,42 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - The run passes.  The harness prints `D`, `J`, `F`, and `T`: the copy runs, the joystick update
   runs, the frame timer runs, and the program exits.  The segment guard stays silent.
   Evidence: `python3 tools/rebuild/harness.py run --module frame_step` and `work/rebuild/fs_out.txt`.
-- The store records the result: build pass, identity fail, behavior pass, and the status `rebuilt`.
+- The C build recorded the result: build pass, identity fail, behavior pass, and the status
+  `rebuilt`.  The hand-written assembly below replaces the C source in the module recipe and raises
+  the status to `verified`.
   Evidence: `python3 tools/rebuild/run.py run --function 0x2aa84`.
+
+## The hand-written frame_step assembly matches the original
+
+- The `frame_step` module now uses the hand-written `tools/rebuild/frame_step.asm` source with the
+  `wasm` assembler.  The C source `frame_step.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/frame_step.json` lists the assembly source and the unchanged
+  `frame_step_main.c` harness.
+  Evidence: `tools/rebuild/modules/frame_step.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x2aa84 --count 7` prints 7 instructions and 20 bytes,
+  from `push ebp` to `ret`.  The assembly follows that sequence instruction by instruction.
+- The assembler chooses the load encoding for `mov ebp,esp`.  The original uses the store encoding
+  (`89 e5`), so the source pins it with `db 89h, 0e5h`.
+  Evidence: `tools/rebuild/frame_step.asm`.
+- The rebuilt body holds 7 of 7 instructions and 20 bytes.  8 of 20 bytes are equal.  The 12
+  differing bytes are the three `call` displacements at offsets 4 through 17.  The three opcode
+  bytes stay equal, and the only differing operands are the three direct branch targets, which are
+  link-time addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2aa84
+  --count 7 --rebuilt work/rebuild/fsmod.exe --rebuilt-map work/rebuild/frame_step.map
+  --rebuilt-symbol frame_step_`.
+- The oracle verdict is `exact-relocations`: "the instruction sequences match; the differing
+  operands are the link-time addresses".  The strict gate passes.  The behavior check prints the
+  four markers `D`, `J`, `F`, and `T`: the copy runs, the joystick update runs, the frame timer
+  runs, and the program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x2aa84` and
+  `work/rebuild/fs_out.txt`.
+- The record `0x2aa84` is `verified` with 7 of 7 instructions, 8 of 20 bytes, and a behavior pass.
+  The record holds the instruction count 7 and marks the source language with
+  `implementation: assembly`.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x2aa84 --implementation assembly`.
 
 ## The video_fill module and the video buffer pointer
 

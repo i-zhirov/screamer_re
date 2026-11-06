@@ -340,7 +340,8 @@ The files:
 | `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
-| `frame_step.c` | the rebuilt `frame_step` module: the three calls in call order |
+| `frame_step.asm` | the hand-written `frame_step` module: the frame, the three calls in call order, and the epilogue; the source pins the original `mov ebp,esp` encoding |
+| `frame_step.c` | the C reference version of the `frame_step` module, kept alongside the assembly; the module builds the assembly because the V2 `-of+` epilogue adds `mov esp,ebp` |
 | `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
 | `video_fill.c` | the rebuilt `video_fill` module, the active C build with `-of+`: the size pair 480 and 400 and the video buffer pointer |
 | `video_fill.asm` | the alternative assembly build of `video_fill`, kept alongside for the later Watcom 10.x build; it matches the original with only the link-time addresses |
@@ -699,8 +700,9 @@ list_destroy slot order", "The Watcom 9.5 compiler and the list_destroy slot
 order", "The Watcom 9.01d compiler and the list_destroy slot order", and "The
 hand-written list_destroy assembly matches the original".  `error_report` uses
 `-of+ -ot` for both harnesses, because the original keeps an EBP frame and
-expands every case body.  The `frame_step` `-of+` epilogue (`mov esp,ebp`) stays
-a limit; see the last findings section.
+expands every case body.  The `frame_step` module uses the hand-written
+assembly, because the V2 `-of+` epilogue adds `mov esp,ebp`; see the finding
+"The hand-written frame_step assembly matches the original".
 
 The module rebuild:
 
