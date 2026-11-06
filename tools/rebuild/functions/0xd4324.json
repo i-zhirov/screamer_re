@@ -35,14 +35,14 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd4324",
-    "date": "2026-11-05",
-    "fingerprint": "sha256:35a92bbdf0afbcaa7d49f95924beebb2d55620ebc13ef477dc19de4bbc1ea296",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:4f513d243dcef2bcc6b8888f0ee316e0381ea8443710094940ca0fdbfdd9228d",
     "source_digest": "sha256:d3cd722f06046b6e0ac25080cf5dbcfea940382dd906c37256926b2fb1dee1ed",
     "tool": "run.py"
   },
   "role": "aligns the stack, grows the stack, calls the game main with the argument pair, and calls the exit function",
   "section": "Startup path",
-  "size": 236,
+  "size": 80,
   "status": "verified",
   "symbol": "main_invoker_"
 }

@@ -35,14 +35,14 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8bdec",
-    "date": "2026-11-05",
-    "fingerprint": "sha256:2e130aa38654df93a04033a2a828cfbd1933a012b02004cff374d05e35cdaf2d",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:53d62d7a4aa1fe87de886edecad4714ec30ff7f871317caad46d841b5702dbf3",
     "source_digest": "sha256:df25b5b808d4d659b672a9c62ba1704db8946175a0c17cd37c7b81cf7b1b409c",
     "tool": "run.py"
   },
   "role": "allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h",
   "section": "Subsystem initialisation",
-  "size": 868,
+  "size": 167,
   "status": "verified",
   "symbol": "vesa_set_mode_"
 }

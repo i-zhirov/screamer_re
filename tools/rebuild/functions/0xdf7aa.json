@@ -1,9 +1,18 @@
 {
   "address": "0xdf7aa",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000df7aa` calls `FUN_000de9be` and then `FUN_000dea89` twice"
+    }
+  ],
+  "name": "sound_voice_release_pair",
   "notes": [],
   "object_offset": "0xcf7aa",
+  "role": "releases the two driver voice buffers through the DPMI helpers",
+  "section": "The HMI sound driver",
   "size": 155,
-  "status": "unknown"
+  "status": "named"
 }

@@ -79,7 +79,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1821c",
     "date": "2026-11-06",
-    "fingerprint": "sha256:aa6a6deff1e03b0b28e84875d03a4d19c7e14d78dd2383a67ad23407a55837e2",
+    "fingerprint": "sha256:9ead28e1d317e8bad28d07a3cfb95b13d5f88201c9abf7d1a14a48d83d0848c1",
     "source_digest": "sha256:156cfec346a1a52c57c4ef62eb0d92e86e31aaa8e89ecb3e7f12b8083ee1b975",
     "tool": "run.py"
   },

@@ -1,9 +1,18 @@
 {
   "address": "0x2f326",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002f326` formats `%.11s`, compares each record name with `FUN_0004d9ba`, calls `FUN_0002f470`, and calls `FUN_000d2066`"
+    }
+  ],
+  "name": "resource_free_name",
   "notes": [],
   "object_offset": "0x1f326",
+  "role": "formats a name, frees each matching resource record, and shifts the list down",
+  "section": "The resource layer",
   "size": 229,
-  "status": "unknown"
+  "status": "named"
 }

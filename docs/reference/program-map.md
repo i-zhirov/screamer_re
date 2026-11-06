@@ -71,27 +71,28 @@ instructions and 15 call sites.
 
 | Call site | Target | Target size | Role |
 | --- | --- | ---: | --- |
-| `0x1002d` | `0x30050` | 31 | run-time stack check |
-| `0x1003b` | `0x2ecf8` | 46 | unknown |
-| `0x10045` | `0x2f8ca` | 27 | unknown |
-| `0x10056` | `0x3009b` | 13 | run-time helper |
-| `0x10068` | `0x2f8ca` | 27 | repeated call |
-| `0x10075` | `0x3009b` | 13 | repeated call |
-| `0x10084` | `0x127a0` | 71 | unknown |
-| `0x10092` | `0x27700` | 34 | unknown |
-| `0x100a6` | `0x108e4` | 22 | unknown |
-| `0x100ae` | `0x10978` | 16 | unknown |
-| `0x100b6` | `0x300be` | 8 | run-time helper |
-| `0x100bb` | `0x27f94` | 63 | unknown |
-| `0x100c2` | `0x128ac` | 14 | unknown |
-| `0x100d2` | `0x2ed77` | 25 | unknown |
-| `0x100d7` | `0x300ec` | 3 | run-time helper |
+| `0x1002d` | `0x30050` | 31 | memory allocation |
+| `0x1003b` | `0x2ecf8` | 46 | list create |
+| `0x10045` | `0x2f8ca` | 27 | memory probe |
+| `0x10056` | `0x3009b` | 13 | run-time printf |
+| `0x10068` | `0x2f8ca` | 27 | memory probe (again) |
+| `0x10075` | `0x3009b` | 13 | run-time printf (again) |
+| `0x10084` | `0x127a0` | 71 | engine init |
+| `0x10092` | `0x27700` | 34 | race loop |
+| `0x100a6` | `0x108e4` | 22 | video BIOS |
+| `0x100ae` | `0x10978` | 16 | error report |
+| `0x100b6` | `0x300be` | 8 | run-time exit |
+| `0x100bb` | `0x27f94` | 63 | frame update |
+| `0x100c2` | `0x128ac` | 14 | engine shutdown |
+| `0x100d2` | `0x2ed77` | 25 | list destroy |
+| `0x100d7` | `0x300ec` | 3 | run-time free |
 
 The body reads two globals: `[0x7ed8]` and `[0x62ac]`.  The loop at
 `0x10089` calls `0x27700`, and a non-zero result leads to `0x108e4`,
 `0x10978`, and the run-time free at `0x300be`.
 
-The roles of the program functions are unknown.  The next step maps them.
+The names come from the records in the next table and from the Ghidra
+decompilation of `main`.
 
 ## Program functions
 
@@ -106,7 +107,7 @@ original Watcom symbol names.
 | `0x108e4` | `bios_video` | builds a record with the argument and calls interrupt 10h through the run-time | inferred |
 | `0x10978` | `error_report` | dispatches on the code through a jump table to one message stub per code | observed |
 | `0x127a0` | `engine_init` | calls 17 setup functions, loads `MENU` from `%s\DATA\MUSIC.DAT`, and reads the video mode<br>the original at `0x127a0` holds 71 instructions and 266 bytes: it calls `config_load` at `0x1bf38`, `list_file_load` at `0x15460` with the `GEN`, `MENU`, and `CD_TRACKS` constants and the table at `0x1f00`, `setup_load` at `0x1bb58`, `controls_load` at `0x1b304`, `mouse_init` at `0x1f1a0`, `dpmi_real_int` at `0x25db0`, `sound_driver_set` at `0x262a8`, `sprintf` at `0x4d32c` with the format at `0x43b` and the config string at `0x7f44`, `music_bank_load` at `0x2f9e0` with the bank at `0x62b0` and the engine list `DAT_000062ac`, `music_start` at `0x2ffc4`, `palette_build` at `0x15720`, `keyboard_hook` at `0x14e20` with 1, `engine_interface_init` at `0x10810` with `0x6530` and `0x6350`, `stream_layer_init` at `0x4c810`, `video_buf_load` at `0x4c8f0`, and `vesa_set_mode` at `0x8bdec` with 1 | derived |
-| `0x128ac` | `engine_shutdown` | counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down | derived |
+| `0x128ac` | `engine_shutdown` | releases the engine interface, restores the text mode and the keyboard handler, stops the music bank and the sound system, and syncs the DOS clock | derived |
 | `0x23420` | `race_hud_draw` | the original body at `0x23420` holds 173 instructions and 633 bytes up to the `ret` at `0x23698`; the next function starts at `0x2369c`, so the store record keeps the 636-byte extent and sets no function size; the identity check uses 173 instructions<br>the only direct caller at `0x2001a` is the frame update at `0x1ff70`, which calls this function after the five view groups at `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4`; no named function sits between the frame update and the target, so the record takes the section Program functions<br>the function formats the race clock `DAT_001100a8` into the global text at `0x101f98` as `%02d:%02d:%02d`; a set replay flag `DAT_00118e6c` stops after the clock format, and the frame counter `DAT_000007fd` bit 0x80 adds the replay label `R` at object-3 offset 0xddf<br>otherwise the function draws the gauge panel at `0x2369c`, the lap value `DAT_001100ac` centered at the top, the lap number from `DAT_0010ffa0` against `DAT_0011d2b0`, the counter `DAT_0011d2b0` plus one, and the offset `DAT_0010ffa4`; it then formats the lap clock `DAT_001100b0`, draws the two clocks and the static clock label at `0x101f8c`, and draws the race radar at `0x23a94`<br>the strings and formats sit at object-3 offsets 0xdd0, 0xde1, 0xde4, 0xde9, 0xdec, 0xdef, 0x1f8c, and 0x1f98; the centisecond scale 100.0 is the float at object-3 offset 0xdfe<br>the frame update caller, the race clock, the lap counters, the gauge panel, and the radar support the name race_hud_draw; the module records the name with the confidence inferred<br>the original truncates each float through the helper at 0x4d9f4; the shared fpu_stub.asm leaves round-to-nearest, so the module uses the local truncating __CHP stub; the 100.0 scale arrives through a global, because the minimal image does not load the constant segment<br>the harness covers the normal path, the replay label, the replay return, the position above the display, and the equal position; the output holds the markers 0 through 4 and D; the behavior check passes | inferred |
 | `0x23a94` | `race_radar` | the original at 0x23a94 holds 208 instructions and 870 bytes up to the ret at 0x23df9, so the record keeps the 872-byte extent and sets no function size<br>the only caller at 0x2368c is the end of the HUD draw at 0x23420; the frame update at 0x1ff70 calls 0x23420 at 0x2001a after the view groups, so the function draws a race HUD element<br>the zoom counter DAT_0011d2a4 selects the scale: 0 returns, 1 uses 0x30, 2 uses 0x60, and 3 uses 0x90, and the input map at 0x2126d advances the counter from 0 through 3<br>the function sets the 144x144 panel at (8, 248) in DAT_00115ce4 through DAT_00115cf0, clears it through 0x25d28, and renders the world from DAT_0011fdcc, DAT_0011fdd4, and DAT_0011fde8 through 0x1057c<br>the mode byte DAT_0011d260 selects the record source: bit 0x10 scans the 0x2a8-byte traffic records at DAT_00113cd8 up to DAT_00115218, bits 0 and 1 scan the 0x590-byte car records at DAT_00110ab8 up to DAT_00110ab8 + DAT_0010f8ec * 0x590, and bit 4 plots the ghost record at DAT_00118ee8 and DAT_00118ef0 for the index DAT_00118ed4 ^ 1<br>a marker is the rotated record delta times the zoom scale around the panel centre (39, 159), doubled and truncated; the function stores the position in DAT_0011cb18 and DAT_0011cb1c and flushes the sprite list, and the final marker sits at (0x4c, 0x13c) with the mode 4, so the module names the function race_radar<br>the harness covers the zoom 0 return, the traffic path, the car path, the ghost path, the two ghost guards, the empty mode, the traffic precedence, and the empty traffic list; the behavior check passes | inferred |
 | `0x27700` | `race_loop` | the original at `0x27700` holds 34 instructions and 110 bytes: it calls `race_start` at `0x27770`, returns a non-zero start result, and otherwise runs the loop body `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`, `input_map`, `object_update_all`, and `video_fill` until `DAT_0011ce44` reaches 4, then calls `race_end` at `0x279a4` and returns 0 | derived |
@@ -117,6 +118,7 @@ original Watcom symbol names.
 | `0x30050` | `memory_alloc` | allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1 | derived |
 | `0x3009b` | `printf` | holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions | observed |
 | `0x300be` | `exit` | calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code | observed |
+| `0x300d6` | `exit_flush` | the decompiled `FUN_000300d6` calls the slots `PTR_FUN_00102f88` and `PTR_FUN_00102f8c` and ends in the interrupt 21h AH=0x4C terminator | observed |
 | `0x300ec` | `free` | forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions | observed |
 <!-- end generated: Program functions -->
 
@@ -398,6 +400,7 @@ loads the sample bank.
 | `0x1f2e0` | `sound_bank_load` | builds `%s\data\sound.dat`, walks the 0x24-byte sample records at `DAT_0015224`, builds `%s.RAW` for each name, and opens the member through the member open `0x4c08d`; a failed open reports the file error and runs the exit 0<br>the rebuild copies the 0x74-byte record template, reads every member through the `SOUND_FX` resource at `0x2eed0`, and maps the high nibble of `+0x20` to the type 0, 2, 1, and 3; the five behavior paths cover the setup gate, the two records, the four status values, the two failed opens, and the zero resource | derived |
 | `0x2f9b0` | `music_bank_reset` | clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct | derived |
 | `0x2f9e0` | `music_bank_load` | builds `%s\DATA\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d`<br>the body continues past the first 72-instruction block to the full 688-byte extent: it opens melodic.bnk and drum.bnk, reads both through resource_read, installs them for the driver values 0xa002 and 0xa009, and reports the statuses 1, 2, and 3 | derived |
+| `0x2fe68` | `music_bank_stop` | the decompiled `FUN_0002fe68` calls `FUN_000d38e6`, `FUN_000d380d`, and `FUN_0002f326` with `MIDI_MUSIC`, then clears the fields at `+0xc` and `+4` | observed |
 | `0x2ffc4` | `music_start` | the original at `0x2ffc4` holds 41 instructions and 140 bytes: it reads the status word at `+0x10` of the music bank struct, sends the statuses 1 to 6 through the jump table at object offset `0x1ffac` to the messages `0x1577`, `0x1596`, `0x15b6`, `0x15ca`, `0x15e2`, and `0x15f5`, prints the message through `0x3009b`, and calls `exit(-1)` at `0x300be` for a non-zero status; a zero status returns at once<br>the only caller is `engine_init` at `0x1284d`, after `music_bank_load` at `0x1283f`; `music_bank_load` writes the status at `0x2f9e0` and `music_bank_reset` clears it at `0x2f9b0` | derived |
 <!-- end generated: The sound loaders -->
 
@@ -407,6 +410,47 @@ and `music_start` at `0x1284d`.  `sound_bank_load` is called from the config
 load at `0x15a64` and from the menu space init at `0x29f07`.
 Evidence: the caller scan of `0x1f2e0`, `0x2f9b0`, `0x2f9e0`, and `0x2ffc4`
 and `python3 tools/le.py disasm STARTH.EXE 0x127a0` and `0x1f2e0`.
+
+### The HMI sound driver
+
+The music and sound effects run through the HMI driver.  The driver functions
+sit in the high part of object 1 and control the timer, the 16 music tracks,
+the voices, and the DPMI buffers.
+
+<!-- begin generated: The HMI sound driver -->
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0xc8321` | `music_timer_shutdown` | the decompiled `FUN_000c8321` calls `FUN_000de7fd`, `FUN_000de855`, and `FUN_000de829` when `DAT_00105984` is set | observed |
+| `0xc86dc` | `music_timer_update` | the decompiled `FUN_000c86dc` scans the 16 records at `DAT_00127c18`, calls `FUN_000c88b2`, and computes the values at `DAT_00127cb8` | derived |
+| `0xc88b2` | `music_timer_set` | the decompiled `FUN_000c88b2` stores the argument at `DAT_001045c8` and calls `FUN_000de6f5` | observed |
+| `0xc8cbb` | `music_driver_lock` | the decompiled `FUN_000c8cbb` calls `FUN_000de9be` 17 times and returns 5 on the first failure | observed |
+| `0xc8ffa` | `music_driver_reset` | the decompiled `FUN_000c8ffa` calls `FUN_000c8cbb` and clears `DAT_00127d84` when the lock succeeds | observed |
+| `0xc98f9` | `music_channel_stop` | the decompiled `FUN_000c98f9` tests `DAT_001275c8`, calls `FUN_000c9d0d` or `FUN_000deb82`, and clears the records at `DAT_001274f8` to `DAT_00127a78` | derived |
+| `0xc9d0d` | `sound_driver_call` | the decompiled `FUN_000c9d0d` calls `FUN_000df1d1`, `FUN_000df029`, `FUN_000e062c`, `FUN_000df104`, and `FUN_000df06a` | observed |
+| `0xd233c` | `sound_driver_lock` | the decompiled `FUN_000d233c` calls `FUN_000de9be` 17 times and returns 5 on the first failure | observed |
+| `0xd2743` | `sound_driver_reset` | the decompiled `FUN_000d2743` calls `FUN_000d233c` and clears `DAT_001233f0` when the lock succeeds | observed |
+| `0xd2cab` | `sound_channel_close` | the decompiled `FUN_000d2cab` calls the table at `DAT_00123204`, calls `FUN_000e2723`, and clears the record at `DAT_001222a8` | derived |
+| `0xd380d` | `sound_channel_clear` | the decompiled `FUN_000d380d` clears `DAT_001233c0` and returns 10 for an index of 8 or more | observed |
+| `0xd38e6` | `sound_channel_free` | the decompiled `FUN_000d38e6` calls `FUN_000c86dc`, `FUN_000e3adb`, and `FUN_000d39ec` and clears the channel record | derived |
+| `0xd39ec` | `sound_channel_setup` | the decompiled `FUN_000d39ec` calls `FUN_000e2f41` and `FUN_000d3c8a` and fills the tables at `DAT_00124e10` and `DAT_00122388` | derived |
+| `0xd3c8a` | `sound_varint_read` | the decompiled `FUN_000d3c8a` shifts each 7-bit group and stops on the high bit | observed |
+| `0xdf4f8` | `sound_voice_release` | the decompiled `FUN_000df4f8` tests `DAT_001275c8`, calls `FUN_000de9be` and `FUN_000dea89`, and returns 10 for an index of 6 or more | observed |
+| `0xdf7aa` | `sound_voice_release_pair` | the decompiled `FUN_000df7aa` calls `FUN_000de9be` and then `FUN_000dea89` twice | observed |
+| `0xe2723` | `sound_channel_release` | the decompiled `FUN_000e2723` tests `DAT_00122310`, calls `FUN_000de9be`, `FUN_000dea89` twice, and returns 10 for an index of 6 or more | observed |
+| `0xe2f41` | `far_pointer_pack` | the decompiled `FUN_000e2f41` stores the segment and offset arguments and returns the pair | observed |
+| `0xe3adb` | `sound_notes_apply` | the decompiled `FUN_000e3adb` calls the table at `DAT_001231f8` with the register values 0x7b, 0x79, 0x40, and 0x07 | observed |
+<!-- end generated: The HMI sound driver -->
+
+The timer path starts at `music_timer_update` at `0xc86dc`.  It reads the rate
+of every active track, sets the rate through `music_timer_set` at `0xc88b2`,
+and `music_timer_set` programs the PIT channel 0 through `0xde6f5`.  The
+`music_timer_shutdown` at `0xc8321` masks the timer interrupt, restores the
+saved handler, and unmasks the interrupt.
+
+The driver memory path locks the static buffers through DPMI AX=0x0601.
+`music_driver_lock` at `0xc8cbb` and `sound_driver_lock` at `0xd233c` lock the
+17 regions of the two drivers.  `music_driver_reset` at `0xc8ffa` and
+`sound_driver_reset` at `0xd2743` run the lock and clear the driver state.
 
 ## Fifth level: the vehicle states, the timing filter, and the runtime
 
@@ -470,6 +514,10 @@ Evidence: the Ghidra references to `0x118e04`.
 <!-- begin generated: The runtime memory manager -->
 | Module address | Name | Evidence | Confidence |
 | --- | --- | --- | --- |
+| `0x2f5ae` | `heap_block_largest` | the decompiled `FUN_0002f5ae` halves the probe size and keeps the largest block that `FUN_000d1f25` returns | observed |
+| `0x2f66c` | `dos_block_largest` | the decompiled `FUN_0002f66c` halves the probe size and keeps the largest block that `FUN_0002f0fc` returns | observed |
+| `0x2f758` | `heap_memory_available` | the decompiled `FUN_0002f758` loops on `FUN_0002f5ae`, allocates each block, frees the probes, and returns the sum | observed |
+| `0x2f82e` | `dos_memory_available` | the decompiled `FUN_0002f82e` loops on `FUN_0002f66c`, allocates each block, frees the probes, and returns the sum | observed |
 | `0xd1ec0` | `memset` | replicates the value byte over the dword and calls the run-time core at `0xe0860` | observed |
 | `0xd1f25` | `malloc` | rejects the size 0 and the sizes above 0xffffffd4, rounds the size up to 4 bytes, and walks the free list at `DAT_001031d0`<br>the original at `0xd1f25` holds 84 instructions and 227 bytes: the nine register saves, the frame, the four-byte local area, the size checks at `0xd1f35` and `0xd1f39`, the round-up at `0xd1f4a`, the free-list walk from `0x31d0`, the helper calls at `0xe09dc`, `0xe0f73`, and `0xe112e`, the largest-free update in `0x31d8`, the cursor in `0x31d4`, the heap flag clear at `0x27de5`, and the epilogue | observed |
 | `0xd2008` | `free` | the original at `0xd2008` holds 35 instructions and 94 bytes: it walks the free list from `DAT_001031d0`, stops before the next free block, releases the block through the heap routine at `0xe0a84`, keeps the largest free size in `DAT_001031d8`, and clears the heap flag at `0x27de5` | observed |
@@ -519,6 +567,8 @@ services.
 | `0x2f172` | `memory_alloc` | the original at `0x2f172` holds 49 instructions and 147 bytes: it sets `0x0501` at block offset 0, splits the size into the words at offsets 4 and 8, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status at block offset `0x18`, and otherwise stores the address from block offsets `0x10` and `0x14` at the third argument and returns the size words | derived |
 | `0x2f205` | `memory_free` | the original at `0x2f205` holds 33 instructions and 90 bytes: it builds the local register block with `0x0502` at offset 0 and the address words at offsets `0x10` and `0x14`, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, and returns the status at block offset `0x18` | derived |
 | `0x2f25f` | `resource_find` | the original at `0x2f25f` holds 69 instructions and 199 bytes: it walks the 0x1c-byte records up to the count at `+0x04`, matches the key at `+0xc`, calls `resource_free` at `0x2f470`, shifts the records after the match with the memmove at `0xd2066`, decrements the count, and sets the status at `+0x0c` to 3 on a failure and 0 on a success | derived |
+| `0x2f326` | `resource_free_name` | the decompiled `FUN_0002f326` formats `%.11s`, compares each record name with `FUN_0004d9ba`, calls `FUN_0002f470`, and calls `FUN_000d2066` | observed |
+| `0x2f40b` | `dos_memory_free` | the decompiled `FUN_0002f40b` calls interrupt 31h with the function 0x101 and the block address | observed |
 | `0x2f470` | `resource_free` | the original at `0x2f470` holds 47 instructions and 126 bytes: it selects the 0x1c-byte record at `*resource + index * 0x1c`, reads the address at `+0x10`, calls `0x2f40b` when the flag bit 0 at `+0x18` is set and `memory_free` at `0x2f205` otherwise, and returns -1 on a non-zero free result and 0 on success | derived |
 | `0x2f904` | `pool_init` | the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0 | inferred |
 | `0x4bf23` | `dpmi_fill_regs` | fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs | observed |
@@ -611,6 +661,25 @@ The init order is: the configuration, the list files, the setup, the controls,
 the mouse, the keyboard, the palette, the video buffer, the VESA mode, the sound
 banks, and the engine interface.
 
+## Subsystem shutdown
+
+`engine_shutdown` at `0x128ac` runs the teardown in order.  The callees:
+
+<!-- begin generated: Subsystem shutdown -->
+| Module address | Name | Evidence | Confidence |
+| --- | --- | --- | --- |
+| `0x108c8` | `engine_interface_free` | the decompiled `FUN_000108c8` tests `DAT_0010801c`, calls `list_destroy`, and calls `free` | observed |
+| `0x1f28c` | `sound_system_shutdown` | the decompiled `FUN_0001f28c` calls `music_timer_update`, `music_channel_stop`, `music_driver_reset`, and `music_timer_shutdown` | observed |
+| `0x2fc90` | `music_bank_free` | the decompiled `FUN_0002fc90` tests the load flag at `+0x14`, calls `FUN_0002fe68`, `FUN_000d2cab`, `FUN_000d2743`, and `FUN_0002f326` with `MELODIC_BANK` and `DRUM_BANK` | observed |
+| `0x4c928` | `video_text_mode` | the decompiled `FUN_0004c928` stores the word 3 and calls `FUN_000d4b70` with the interrupt 0x10 | observed |
+<!-- end generated: Subsystem shutdown -->
+
+The shutdown order is: the engine interface, the text mode, the keyboard hook,
+the music bank, the sound system, the DOS clock, and two more calls.  A second
+teardown at `0x15150` runs the text mode, the keyboard hook, the sound system,
+the DOS clock, and three more calls.  Evidence: the decompiled `FUN_000128ac`
+and `FUN_00015150`.
+
 ## Engine strings
 
 The decompiler shows the engine interface.  The strings sit in object 3:
@@ -635,9 +704,15 @@ Follow the call path with the `le.py` subcommands:
 ```sh
 python3 tools/le.py calls STARTH.EXE 0x300f8       # entry body and its calls
 python3 tools/le.py tree  STARTH.EXE 0x300f8       # call tree
-python3 tools/le.py funcs STARTH.EXE                # candidate function starts
+python3 tools/le.py funcs STARTH.EXE --limit 10000 # candidate function starts
 python3 tools/le.py near  STARTH.EXE 0x10020        # function below an address
+python3 tools/le.py targets STARTH.EXE 0x10020      # direct call targets
 ```
+
+The `funcs` command matches the two prologue encodings `55 89 e5` and
+`55 8b ec`.  The store seed adds the direct call targets of the verified and
+rebuilt roots as candidates, because a call target is a function entry even
+when the function has no frame.
 
 Confirm a run-time address in DOSBox-X:
 
@@ -654,7 +729,9 @@ python3 tools/dosboxx_control.py script \
   `iret`, `hlt`, or `int3`.  A function that ends with a tail call has no
   terminator, so the sweep continues into the next function.
 - The candidate function starts come from the Watcom prologue `push ebp; mov
-  ebp, esp`.  A function without that prologue is missing from the list.
+  ebp, esp` in both encodings.  A function without that prologue is missing
+  from the `funcs` list, but the store seed also adds the direct call targets
+  of the verified and rebuilt roots.
 - A call through a register or a memory operand has no static target.
 - The run-time addresses depend on the module load base.  The base is `0x1c2000`
   in the tested configuration.

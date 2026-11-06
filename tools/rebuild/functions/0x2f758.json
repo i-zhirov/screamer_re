@@ -1,9 +1,18 @@
 {
   "address": "0x2f758",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002f758` loops on `FUN_0002f5ae`, allocates each block, frees the probes, and returns the sum"
+    }
+  ],
+  "name": "heap_memory_available",
   "notes": [],
   "object_offset": "0x1f758",
+  "role": "allocates heap blocks until `heap_block_largest` falls to 0x100 and returns the total",
+  "section": "The runtime memory manager",
   "size": 214,
-  "status": "unknown"
+  "status": "named"
 }

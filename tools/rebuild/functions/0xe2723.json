@@ -1,9 +1,18 @@
 {
   "address": "0xe2723",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000e2723` tests `DAT_00122310`, calls `FUN_000de9be`, `FUN_000dea89` twice, and returns 10 for an index of 6 or more"
+    }
+  ],
+  "name": "sound_channel_release",
   "notes": [],
   "object_offset": "0xd2723",
+  "role": "clears the channel flag and releases the two driver voice buffers; returns 10 when the channel is not set",
+  "section": "The HMI sound driver",
   "size": 203,
-  "status": "unknown"
+  "status": "named"
 }

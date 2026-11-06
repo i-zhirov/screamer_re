@@ -1,9 +1,18 @@
 {
   "address": "0x2f82e",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002f82e` loops on `FUN_0002f66c`, allocates each block, frees the probes, and returns the sum"
+    }
+  ],
+  "name": "dos_memory_available",
   "notes": [],
   "object_offset": "0x1f82e",
+  "role": "allocates DOS blocks until `dos_block_largest` falls to 0x100 and returns the total",
+  "section": "The runtime memory manager",
   "size": 156,
-  "status": "unknown"
+  "status": "named"
 }

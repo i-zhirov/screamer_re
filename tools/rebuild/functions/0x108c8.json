@@ -1,9 +1,18 @@
 {
   "address": "0x108c8",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000108c8` tests `DAT_0010801c`, calls `list_destroy`, and calls `free`"
+    }
+  ],
+  "name": "engine_interface_free",
   "notes": [],
   "object_offset": "0x8c8",
+  "role": "releases the engine interface list through `list_destroy` and `free` when the pointer at `DAT_0010801c` is set",
+  "section": "Subsystem shutdown",
   "size": 28,
-  "status": "unknown"
+  "status": "named"
 }

@@ -30,14 +30,14 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd4410",
-    "date": "2026-11-05",
-    "fingerprint": "sha256:6ce582f3158e84b9425deb1759e6253ea7f1abe9d5c8104b6c253cac76e9167c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:8669e69093f05aab116872ac2135710c1271a5394107daef3533a73b287d0fd1",
     "source_digest": "sha256:c2edc390f20bf08a7f59f5dc6bdeb06ecda34dd1c151292344eb49bf3650db82",
     "tool": "run.py"
   },
   "role": "writes the returned registers, the flags, and the segment values back into the block after the dispatcher at 0xd4448 runs the interrupt",
   "section": "The runtime memory manager",
-  "size": 108,
+  "size": 56,
   "status": "verified",
   "symbol": "dpmi_int31_entry_"
 }

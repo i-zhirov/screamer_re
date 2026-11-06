@@ -41,14 +41,14 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x30170",
-    "date": "2026-11-05",
-    "fingerprint": "sha256:d39eb2d21c4cddd798e12754ae0c6d78be7a831db7ef4b9798888b1b7685e610",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:6c3557e249957d8cec08e1c18350843d3a40ffc4f8d75d85c84e561990035545",
     "source_digest": "sha256:3afa982d948fbfaf3ad56e75ad327295efec26aa9e900e98a55513bfbe8e4168",
     "tool": "run.py"
   },
   "role": "reads the DOS version, selects the extender path, copies the command line and the program name, scans the environment, clears the BSS, and runs the initializer, the main invoker, and the exit chain",
   "section": "Startup path",
-  "size": 114032,
+  "size": 537,
   "status": "rebuilt",
   "symbol": "startup_"
 }

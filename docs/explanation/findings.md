@@ -1488,8 +1488,9 @@ Authority.
   message
   stub per code.  Evidence: the decompiled `FUN_00010020` and `FUN_00010978`.
 - `main` calls `engine_shutdown` at `0x128ac` after the loop.  That function is
-  the counterpart of `engine_init`: it stops the music with `FUN_00014e20(0)`.
-  Evidence: the decompiled `FUN_000128ac`.
+  the counterpart of `engine_init`: it restores the keyboard interrupt handler
+  with `FUN_00014e20(0)`.  Evidence: the decompiled `FUN_000128ac` and
+  `FUN_00014e20`.
 - Four of the callees are Watcom run-time helpers: `memory_alloc` (`0x30050`),
   `printf` (`0x3009b`), `exit` (`0x300be`), and `free` (`0x300ec`).  They sit
   at the end of the object, after the program code.  Evidence: the decompiled
@@ -1527,9 +1528,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 230 checks and 0 failures in the `cross-check` shell.  It
-reports 226 checks with `--skip-cross`, 215 checks with `--skip-runtime`, and
-211 checks with both flags.  Evidence: the tool output.
+The check reports 231 checks and 0 failures in the `cross-check` shell.  It
+reports 227 checks with `--skip-cross`, 216 checks with `--skip-runtime`, and
+212 checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -9432,7 +9433,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/entry_probe.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game` reports the entry
   `0150:1F20F8` and the candidate `entry jump over the Watcom banner`.
-- Observation: the full pipeline then reports 230 checks and 0 failures.
+- Observation: the full pipeline then reports 231 checks and 0 failures.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
 ## The rebuild checks use le.py, not Ghidra or radare2
@@ -9525,8 +9526,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
   `0xd4364` to `0x10020`.
   Evidence: the four `agree` lines above.
-- The check counts are 230 checks for the full run, 226 checks with
-  `--skip-cross`, 215 checks with `--skip-runtime`, and 211 checks with both
+- The check counts are 231 checks for the full run, 227 checks with
+  `--skip-cross`, 216 checks with `--skip-runtime`, and 212 checks with both
   flags.  `--skip-cross` skips stage 8 and the tool preflight.
   `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
   Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
@@ -9543,6 +9544,117 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   re-verifies every record once.  The record files stay unchanged.
   Evidence: `tools/rebuild/store.py` and the unchanged records under
   `tools/rebuild/functions/`.
+
+## The reachable unknown candidates
+
+- The verified and rebuilt call graph starts at ten functions: the five
+  verified (`free`, `exit`, `printf`, `memory_available`, and `memcpy`), the
+  four rebuilt (`bios_video`, `engine_shutdown`, `frame_step`, and
+  `list_destroy`), and the matching `error_report`.  The graph holds 131 nodes.
+  Of these nodes, 32 were stored `unknown` records.
+  Evidence: the call graph from `python3 tools/le.py calls STARTH.EXE <root>`
+  for each root and the records under `tools/rebuild/functions/`.
+- The 32 records now carry a name, a role, a section, and a confidence.  The
+  new sections are `Subsystem shutdown` and `The HMI sound driver`.  The other
+  records join `The runtime memory manager`, `The resource layer`, `The sound
+  loaders`, and `Program functions`.
+  Evidence: `python3 tools/rebuild/docs.py render`,
+  `python3 tools/rebuild/docs.py check` (23 sections, no drift), and
+  `python3 tools/rebuild/store.py check` (683 records, 0 violations).
+- The shutdown path holds five mapped functions.  `engine_interface_free` at
+  `0x108c8` releases the engine interface list.  `video_text_mode` at `0x4c928`
+  sets the text mode 3.  `music_bank_free` at `0x2fc90` stops the song and
+  removes the two bank resources.  `sound_system_shutdown` at `0x1f28c` stops
+  the timer and releases the song.  `dos_clock_sync` at `0x1fa2c` copies the
+  real-time clock into the DOS date and time.
+  Evidence: the decompiled `FUN_000108c8`, `FUN_0004c928`, `FUN_0002fc90`,
+  `FUN_0001f28c`, and `FUN_0001fa2c`.
+- The memory probe path holds four mapped functions.  `heap_block_largest` at
+  `0x2f5ae` and `dos_block_largest` at `0x2f66c` find the largest single block.
+  `heap_memory_available` at `0x2f758` and `dos_memory_available` at `0x2f82e`
+  allocate blocks until the largest block falls to 0x100 and return the total.
+  `memory_available` at `0x2f8ca` sums the two totals.
+  Evidence: the decompiled `FUN_0002f5ae`, `FUN_0002f66c`, `FUN_0002f758`,
+  `FUN_0002f82e`, and `FUN_0002f8ca`.
+- The HMI sound driver path holds nineteen mapped functions.  The timer path is
+  `music_timer_update` at `0xc86dc`, `music_timer_set` at `0xc88b2`, and
+  `music_timer_shutdown` at `0xc8321`.  The DPMI path is `music_driver_lock` at
+  `0xc8cbb`, `sound_driver_lock` at `0xd233c`, and the two reset functions at
+  `0xc8ffa` and `0xd2743`.  The voice path is `sound_channel_setup`,
+  `sound_channel_free`, `sound_voice_release`, `sound_notes_apply`, and the
+  varint reader at `0xd3c8a`.
+  Evidence: the decompiled `FUN_000c86dc`, `FUN_000c88b2`, `FUN_000c8321`,
+  `FUN_000c8cbb`, `FUN_000d233c`, `FUN_000c8ffa`, `FUN_000d2743`,
+  `FUN_000d39ec`, `FUN_000d38e6`, `FUN_000df4f8`, `FUN_000e3adb`, and
+  `FUN_000d3c8a`.
+- The earlier note that `engine_shutdown` stops the music with
+  `FUN_00014e20(0)` is corrected.  The call `0x14e20(0)` restores the saved
+  interrupt 9 handler.  The music stop is `music_bank_free` at `0x2fc90` and
+  `sound_system_shutdown` at `0x1f28c`.
+  Evidence: the decompiled `FUN_00014e20`, `FUN_0002fc90`, and `FUN_0001f28c`.
+- 70 call targets of the graph were not store records.  Many start with
+  `push ebp; mov ebp,esp` encoded as `55 8b ec`, and some have no frame at all.
+  The scan now matches both prologue encodings, and the seed adds the direct
+  call targets of the verified and rebuilt roots.  All 70 are now candidates.
+  Evidence: `python3 tools/rebuild/store.py seed --original STARTH.EXE`
+  (added 105, lost 0, overlaps 0) and `python3 tools/rebuild/store.py seed
+  --check --original STARTH.EXE` (no difference).
+- The decompilation command for the batch:
+
+  ```sh
+  python3 tools/ghidra/decompile.sh 0x108c8 0x1f28c 0x1fa2c 0x2f758 \
+    0x2f82e 0x2fc90 0x300d6 0x4c928 0x2f326 0x2f40b 0x2f5ae 0x2f66c \
+    0x2fe68 0xc8321 0xc86dc 0xc8ffa 0xc98f9 0xd2743 0xd2cab 0xc88b2 \
+    0xc8cbb 0xc9d0d 0xd233c 0xd380d 0xd38e6 0xdf4f8 0xdf7aa 0xe2723 \
+    0xd39ec 0xe3adb 0xd3c8a 0xe2f41
+  ```
+
+## The second prologue encoding and the call-target candidates
+
+- The Watcom prologue has two encodings: `55 89 e5` and `55 8b ec`.  Both are
+  `push ebp; mov ebp,esp`.  The `function_starts`, `nearest_function_start`,
+  and the store entry check use both patterns.
+  Evidence: the byte dump at `0xde7fd`, `0xde9be`, and `0xdf00c` (`55 8b ec`),
+  `python3 tools/le.py funcs STARTH.EXE --limit 10000` (688 starts), and
+  `python3 tools/le.py near STARTH.EXE 0xde800`.
+- The `targets` command walks the direct call graph from the given roots.  It
+  uses the same `function_body` and `call_sites` as the `calls` command and
+  stops at the same terminators.  An indirect call has no target and is not
+  added.
+  Evidence: `python3 tools/le.py targets STARTH.EXE 0x108e4 0x10978 0x128ac
+  0x2aa84 0x2ed77 0x2f8ca 0x3009b 0x300be 0x300ec 0x8c150` (`call targets:
+  123`).
+- The store seed unions four sources: the prologue scan, the direct call
+  targets of the verified and rebuilt roots, the entry jump at `0x300f8`, and
+  the exit helper at `0x300d6`.  A call target is a function entry even when
+  the function has no frame, so the graph is the only source for the frameless
+  functions, for example `0x101f6`, `0x25f14`, `0x264ec`, and `0x4d9ba`.
+  Evidence: `store.scan_candidates` and the seed output.
+- The seed added 105 records: 46 new prologue starts and 59 call targets that
+  the prologue scan does not find.  11 of the 70 call targets are in the 46, so
+  all 70 are now records.  The store holds 788 records and every node of the
+  reachable graph is a record.
+  Evidence: `python3 tools/rebuild/store.py seed --original STARTH.EXE`
+  (added 105, lost 0, overlaps 0), `python3 tools/rebuild/store.py check
+  --original STARTH.EXE` (788 records, 0 violations), and
+  `python3 tools/rebuild/store.py seed --check --original STARTH.EXE` (no
+  difference).
+- The 105 new records have the status `unknown` and no section, so the
+  generated program-map tables do not change.  The `size` of 15 existing
+  records shrinks because a new entry divides their reach.
+  Evidence: `python3 tools/rebuild/docs.py check` (no drift) and the record
+  diff of the seed run.
+- The `le.py` change is a fingerprint input change.  Every stored result now
+  holds an old fingerprint, so the next verification run re-verifies the 11
+  records with a result once.  The records themselves stay unchanged.
+  Evidence: `store.TOOL_FILES` and `store.compute_fingerprint`.
+- The merge with master added 145 new records from the module rebuilds.  The
+  new rebuilt and verified roots add 158 further call-target candidates, and
+  the seed writes them.  The store holds 1091 records.
+  Evidence: `git merge origin/master`, `python3 tools/rebuild/store.py seed
+  --original STARTH.EXE` (added 158, lost 0, overlaps 0), and `python3
+  tools/rebuild/store.py check --original STARTH.EXE` (1091 records, 0
+  violations).
 
 ## The menu_frame module at 0x29f80
 

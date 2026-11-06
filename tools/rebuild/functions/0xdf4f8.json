@@ -1,9 +1,18 @@
 {
   "address": "0xdf4f8",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000df4f8` tests `DAT_001275c8`, calls `FUN_000de9be` and `FUN_000dea89`, and returns 10 for an index of 6 or more"
+    }
+  ],
+  "name": "sound_voice_release",
   "notes": [],
   "object_offset": "0xcf4f8",
+  "role": "clears the voice flag and releases the driver voice buffers; returns 10 when the voice is not set",
+  "section": "The HMI sound driver",
   "size": 216,
-  "status": "unknown"
+  "status": "named"
 }

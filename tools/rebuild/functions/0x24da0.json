@@ -40,14 +40,14 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x24da0",
-    "date": "2026-11-05",
-    "fingerprint": "sha256:fc3e14d93a4dcf4d8aaa56368673c5275bfe64aa6d72f9bf9bfd73f14d4dfff5",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:28b94c119ac6eeb50b940971e503e3c8a7fd2dc934bca82bb4e4fef50195da2e",
     "source_digest": "sha256:a08932c4307fc5b365f4672ef85cbf0f61c3e97b199706d34ffecad64abe2867",
     "tool": "run.py"
   },
   "role": "walks the six 28-byte control records at `0x197d8`, scales the axis values with floating point, and resolves the duplicate and button controls",
   "section": "race_loop callees",
-  "size": 2176,
+  "size": 640,
   "status": "rebuilt",
   "symbol": "joystick_update_"
 }

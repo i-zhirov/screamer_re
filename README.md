@@ -61,6 +61,7 @@ python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH
 python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py tree  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py targets ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x10020 0x300be
 ```
 
 Run the strict byte gate and the whole-image oracle:
@@ -141,9 +142,9 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-230 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 226 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 215 checks.  Both flags report 211 checks.
+231 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 227 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 216 checks.  Both flags report 212 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  `--strict` turns the identity check into a

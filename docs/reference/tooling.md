@@ -45,6 +45,7 @@ python3 tools/le.py calls  <file> <linear-address> [--max N]
 python3 tools/le.py tree   <file> <linear-address> [--depth N] [--max-nodes N]
 python3 tools/le.py funcs  <file> [--from ADDR] [--to ADDR] [--limit N]
 python3 tools/le.py near   <file> <linear-address>
+python3 tools/le.py targets <file> <linear-address> [<linear-address> ...] [--max N]
 ```
 
 The `calls` command decodes one function body from its start and lists the call
@@ -54,8 +55,12 @@ the run-time banner string at the entry point.  The `tree` command follows the
 call
 targets recursively.  The `funcs` command lists the candidate function starts
 from
-the Watcom prologue `push ebp; mov ebp, esp`.  The `near` command prints the
-candidate function start nearest below an address.
+the Watcom prologue `push ebp; mov ebp, esp`.  It matches both encodings,
+`55 89 e5` and `55 8b ec`.  The `near` command prints the candidate function
+start nearest below an address.  The `targets` command lists every direct call
+target reachable from the given roots.  A call target is a function entry even
+when the function has no frame, so the store seed adds the targets of the
+verified and rebuilt roots as candidates.
 
 The body sweep stops at the first `ret`, `retf`, `iret`, `hlt`, or `int3`, or
 after `--max` instructions.  A function that ends with a tail call has no
@@ -618,6 +623,11 @@ python3 tools/rebuild/docs.py render
 python3 tools/rebuild/view.py html
 ```
 
+The seed unions four candidate sources: the `funcs` prologue scan, the direct
+call targets of the verified and rebuilt roots, the entry jump at `0x300f8`,
+and the exit helper at `0x300d6`.  The target scan uses the capstone
+disassembly, so the seed needs the capstone library.
+
 `run.py --strict` accepts an identity verdict only when the bytes are exact or
 the only differences are the link-time addresses.  `--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`
@@ -943,10 +953,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 230 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 226 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 215 checks.  Both flags
-report 211 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 231 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 227 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 216 checks.  Both flags
+report 212 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:
