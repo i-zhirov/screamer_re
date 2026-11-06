@@ -5322,9 +5322,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: `python3 tools/rebuild/harness.py run --module default_data_copy` and
   `work/rebuild/ddc_out.txt`.
 - `hud_update` at `0x27a34` holds 11 instructions and 38 bytes: the frame, the two guards on the
-  session state `DAT_0011ce44`, and the three overlay calls.  The rebuild with `-of+` holds 12
+  session state `DAT_0011ce44`, and the three overlay calls.  The C rebuild with `-of+` held 12
   instructions and 40 bytes, with one extra `mov esp,ebp` in the epilogue, the same code-generator
-  difference as `frame_step` and `engine_shutdown`.
+  difference as `frame_step` and `engine_shutdown`.  The hand-written assembly source below holds
+  the original shape exactly.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27a34 --count 11` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x27a34
   --rebuilt work/rebuild/hudmod.exe --rebuilt-map work/rebuild/hud_update.map --rebuilt-symbol
@@ -5357,10 +5358,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   stub cannot provide them; the stub source `fpu_stub.asm` stands in for the FPU control init and
   the 387 emulator init.
   Evidence: `tools/rebuild/fpu_stub.asm` and the link errors.
-- The identity check stays open for `hud_update`, `stream_status`, and `race_state_update`, so the
-  store records the status `rebuilt` for all three.
-  Evidence: `python3 tools/rebuild/run.py run --function 0x27a34`,
-  `python3 tools/rebuild/run.py run --function 0x4c7e0`, and
+- The identity check stays open for `stream_status` and `race_state_update`, so the store records
+  the status `rebuilt` for both.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x4c7e0` and
   `python3 tools/rebuild/run.py run --function 0x29564`.
 
 ## The record-run budget of the pipeline
@@ -6363,6 +6363,40 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   The record holds the instruction count 12 and marks the source language with
   `implementation: assembly`.
   Evidence: `python3 tools/rebuild/store.py set --function 0x2aa98 --implementation assembly`.
+
+## The hand-written hud_update assembly matches the original
+
+- The `hud_update` module now uses the hand-written `tools/rebuild/hud_update.asm` source with the
+  `wasm` assembler.  The C source `hud_update.c` stays alongside as the C reference version.  The
+  module recipe `tools/rebuild/modules/hud_update.json` lists the assembly source and the unchanged
+  `hud_update_main.c` harness.
+  Evidence: `tools/rebuild/modules/hud_update.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x27a34 --count 11` prints 11 instructions and 38 bytes,
+  from `push ebp` to `ret`.  The assembly follows that sequence instruction by instruction, with the
+  two local labels `skip_calls` and `done` for the two branches.
+- The assembler chooses the load encoding for `mov ebp,esp`.  The original uses the store encoding
+  (`89 e5`), so the source pins it with `db 89h, 0e5h`.
+  Evidence: `tools/rebuild/hud_update.asm`.
+- The rebuilt body holds 11 of 11 instructions and 38 bytes.  27 of 38 bytes are equal.  The seven
+  differing operands are the two `DAT_0011ce44` displacements, the two branch targets, and the three
+  call targets; 11 of their bytes differ in value.  The opcode bytes stay equal, and the only
+  differing operands are the data address and the five direct branch targets, which are link-time
+  addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x27a34
+  --count 11 --rebuilt work/rebuild/hudmod.exe --rebuilt-map work/rebuild/hud_update.map
+  --rebuilt-symbol hud_update_`.
+- The oracle verdict is `the instruction sequences match; the differing operands are the link-time
+  addresses`.  The strict gate passes.  The behavior check prints the three markers `0`, `2`, and
+  `D`: the state 4 runs the first two overlays, the state 3 runs only the third overlay, and the
+  program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x27a34` and
+  `work/rebuild/hud_out.txt`.
+- The record `0x27a34` is `verified` with 11 of 11 instructions, 27 of 38 bytes, and a behavior pass.
+  The record holds the instruction count 11 and marks the source language with
+  `implementation: assembly`.
+  Evidence: `python3 tools/rebuild/store.py set --function 0x27a34 --implementation assembly`.
 
 ## The rebuild framework
 

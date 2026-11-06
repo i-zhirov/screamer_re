@@ -367,7 +367,8 @@ The files:
 | `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
 | `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
 | `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
-| `hud_update.c` | the rebuilt `hud_update` module: the three overlay calls, gated on the session state |
+| `hud_update.asm` | the hand-written `hud_update` module: the two guards on the session state and the three overlay calls; the source pins the original `mov ebp,esp` encoding |
+| `hud_update.c` | the C reference version of the `hud_update` module, kept alongside the assembly; the V2 `-of+` build adds `mov esp,ebp` |
 | `hud_update_main.c` | the `hud_update` test harness: the session state and the overlay stubs |
 | `stream_status.c` | the rebuilt `stream_status` module: the word at `stream + 0x70` |
 | `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
@@ -705,7 +706,10 @@ assembly, because the V2 `-of+` epilogue adds `mov esp,ebp`; see the finding
 "The hand-written frame_step assembly matches the original".  The `video_fill`
 module uses the hand-written assembly for the same reason, because the V2
 `-of+` epilogue adds `lea esp,[ebp-8]`; see the finding "The hand-written
-video_fill assembly matches the original".
+video_fill assembly matches the original".  The `hud_update` module uses the
+hand-written assembly for the same reason, because the V2 `-of+` epilogue adds
+`mov esp,ebp`; see the finding "The hand-written hud_update assembly matches
+the original".
 
 The module rebuild:
 
