@@ -6,12 +6,14 @@
     "behavior"
   ],
   "confidence": "derived",
+  "count": 14,
   "evidence": [
     {
       "kind": "note",
       "text": "releases the engine interface, restores the text mode and the keyboard handler, stops the music bank and the sound system, and syncs the DOS clock"
     }
   ],
+  "implementation": "assembly",
   "module": "shutdown",
   "name": "engine_shutdown",
   "notes": [],
@@ -29,21 +31,21 @@
       "identity": {
         "bytes_equal": 28,
         "bytes_total": 52,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 12,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 14,
         "instructions_total": 14,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128ac",
     "date": "2026-11-06",
-    "fingerprint": "sha256:891429d22bb7f6ac178f67cbd3d0389a35dda19fc2803b66f0e7fad9eebffe49",
-    "source_digest": "sha256:4fc8fc60b3c78deb49242e4d7b4deb1a3e716aff1fa0bf05462103304f7d4dad",
+    "fingerprint": "sha256:60f78fc687524656b7dab299bac29df2556c97beab8a0cd7537846bf5557d59e",
+    "source_digest": "sha256:2b0610cdb9f5868e66fe74dbab781c06ac51297023b441f6aa3064cdd1bc6d40",
     "tool": "run.py"
   },
   "role": "counterpart of `engine_init`: restores the keyboard interrupt handler with `FUN_00014e20(0)` and tears the subsystems down",
   "section": "Program functions",
   "size": 52,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "engine_shutdown_"
 }

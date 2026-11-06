@@ -127,10 +127,11 @@ current host.
   `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
   `0x20b1c`, and `member_list_load` at `0x1b394`, and `opponent_route_setup` at
   `0x1517c`;
-  twenty-eight modules are verified, one is matching, and one hundred and
-  fifty rebuilds hold the recorded difference; the `video_fill`,
-  `frame_step`, `hud_update`, `music_bank_reset`, and `stream_status` modules
-  use hand-written assembly oracles that match exactly).
+  twenty-nine modules are verified, one is matching, and one hundred and
+  forty-nine rebuilds hold the recorded difference; the `video_fill`,
+  `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
+  `engine_shutdown` modules use hand-written assembly oracles that match
+  exactly).
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -264,8 +265,8 @@ The plan follows the size order, starting with the smallest functions.
     `0x20b1c`
     and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`
     are done;
-    the result is twenty-eight verified modules, one matching module, and one
-    hundred and fifty open rebuilds).
+    the result is twenty-nine verified modules, one matching module, and one
+    hundred and forty-nine open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

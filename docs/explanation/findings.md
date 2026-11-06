@@ -4942,10 +4942,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   which are the link-time addresses of the eight calls, and the run writes the markers `1` to `8` in order, so
   the call chain matches the original.
   Evidence: the diff output and `sh tools/rebuild/run_shutdown.sh`.
-- The module stays open as a byte-level match.  The rebuild holds the original code shape with one extra
+- The C rebuild stays open as a byte-level match.  The C source holds the original code shape with one extra
   restore instruction, and the difference is a code generator change between the original compiler and OpenWatcom
-  V2 that no source form can remove.
-  Evidence: the section above.
+  V2 that no C source form can remove.  The hand-written assembly source below holds the original shape exactly.
+  Evidence: the section above and `tools/rebuild/shutdown.asm`.
 - The diff tool now names the case.  When the instruction counts differ and one sequence holds the other plus one
   instruction, the tool reports the extra instruction instead of only the counts.
   Evidence: `tools/rebuild/diff_module.py` and the five module diffs.
@@ -6467,6 +6467,44 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   source language with `implementation: assembly`.
   Evidence: `python3 tools/rebuild/store.py set --function 0x4c7e0
   --implementation assembly`.
+
+## The hand-written engine_shutdown assembly matches the original
+
+- The `engine_shutdown` module now uses the hand-written
+  `tools/rebuild/shutdown.asm` source with the `wasm` assembler.  The C source
+  `shutdown.c` stays alongside as the C reference version.  The module recipe
+  `tools/rebuild/modules/shutdown.json` lists the assembly source and the
+  unchanged `shutdown_main.c` harness.
+  Evidence: `tools/rebuild/modules/shutdown.json`.
+- The original disassembly is the reference.  The command
+  `python3 tools/le.py disasm STARTH.EXE 0x128ac --count 14` prints 14
+  instructions and 52 bytes, from `push ebp` to `ret`.  The assembly follows
+  that sequence instruction by instruction.
+- The assembler can choose another encoding for `mov ebp,esp` and
+  `xor eax,eax`.  The original uses the store encodings (`89 e5` and `31 c0`),
+  so the source pins them with `db` directives.
+  Evidence: `tools/rebuild/shutdown.asm`.
+- The original `mov eax,0x62b0` carries a 4-byte internal fixup to object 3 at
+  offset `0x62b0`.  The assembly takes the address of the harness symbol
+  `DAT_000062b0`, so the rebuilt instruction carries the same fixup.  The
+  harness holds that data symbol and the eight markers `f1` to `f8`.
+  Evidence: `tools/rebuild/shutdown_main.c`.
+- The rebuilt body holds 14 of 14 instructions and 52 bytes.  The oracle masks
+  the link-time operands and the verdict is `the instruction sequences match;
+  the differing operands are the link-time addresses`.  The strict gate passes.
+  Evidence: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address
+  0x128ac --count 14 --rebuilt work/rebuild/shutmod.exe --rebuilt-map
+  work/rebuild/shutdown.map --rebuilt-symbol engine_shutdown_`.
+- The behavior check prints the eight markers `1` to `8` in order: the module
+  calls the eight callees and the program exits.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x128ac` and
+  `work/rebuild/shut_out.txt`.
+- The record `0x128ac` is `verified` with 14 of 14 instructions, 52 of 52
+  bytes, and a behavior pass.  The record holds the instruction count 14 and
+  marks the source language with `implementation: assembly`.
+  Evidence: the store API sets the count 14 and the assembly implementation for
+  the record `0x128ac`.
 
 ## The rebuild framework
 

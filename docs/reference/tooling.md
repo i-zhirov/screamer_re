@@ -327,8 +327,9 @@ The files:
 | `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
 | `printf.c` | the rebuilt `printf` module, after the run-time file `bld/clib/streamio/c/printf.c` |
 | `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
-| `shutdown.c` | the rebuilt `engine_shutdown` module, built with the stack-frame option `-of+` |
-| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
+| `shutdown.asm` | the hand-written `engine_shutdown` module: the frame, the eight calls, and the data address; the source pins the original `mov ebp,esp` and `xor eax,eax` encodings |
+| `shutdown.c` | the C reference version of the `engine_shutdown` module, kept alongside the assembly; the V2 `-of+` build adds `mov esp,ebp` |
+| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs and the `DAT_000062b0` data symbol |
 | `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
 | `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
 | `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over the codes -1 through 22 that prints the format strings of the data segment through a compiler jump table that the link does not relocate; built with `-of+ -ot`, a volatile parameter, and the `modify exact` printer pragma |
@@ -716,7 +717,10 @@ because the V2 `-of+` build drops the argument slot and its reloads; see the
 finding "The hand-written music_bank_reset assembly matches the original".  The
 `stream_status` module uses the hand-written assembly because the V2 `-of+ -od`
 build changes the prologue order, the local offsets, and the epilogue; see the
-finding "The hand-written stream_status assembly matches the original".
+finding "The hand-written stream_status assembly matches the original".  The
+`engine_shutdown` module uses the hand-written assembly because the V2 `-of+`
+epilogue adds `mov esp,ebp`; see the finding "The hand-written engine_shutdown
+assembly matches the original".
 
 The module rebuild:
 
@@ -809,7 +813,10 @@ The rebuild holds 54 bytes and 15 instructions against the original 52 bytes and
 instructions, and the diff names the difference: `the rebuilt module holds one
 instruction the original does not: mov esp, ebp`.  The frame and the eight calls match,
 the run writes the markers `1` to `8` in order, and no compiler option removes the
-restore, so the module stays open as a byte-level match.
+restore, so the C rebuild stays open as a byte-level match.  The hand-written
+assembly source `shutdown.asm` holds the original body exactly, and the module is
+`verified`; see the finding "The hand-written engine_shutdown assembly matches the
+original".
 
 The `memcpy` module is the first exact match:
 

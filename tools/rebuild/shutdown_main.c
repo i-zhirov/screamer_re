@@ -15,6 +15,7 @@ void print(char *text);
 void quit(void);
 #pragma aux quit = "mov ax, 0x4C00" "int 0x21" parm [] modify exact [ax];
 
+char DAT_000062b0[16];
 static char text[8];
 
 static void put(char a)
