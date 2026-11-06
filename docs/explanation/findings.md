@@ -13626,3 +13626,60 @@ temporary `-od` recipe.
   0x21b9c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The dos_datetime_set module at 0x1fa2c
+
+- Observation: the original body at `0x1fa2c` holds 166 instructions and 524
+  bytes up to the `ret` at `0x1fc37`.  The next function starts at `0x1fc38`, so
+  the store record keeps the 524-byte extent and sets no function size.  The
+  record sets the instruction count 166.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fa2c --count 166` and
+  `tools/rebuild/functions/0x1fa2c.json`.
+- Observation: the two direct callers at `0x128cf` and `0x15173` sit in
+  `engine_shutdown` at `0x128ac` and the menu cleanup at `0x15150`.  Both call
+  this function after `0x1f28c` in the teardown path.
+  Evidence: the sweep of every call site for `0x1fa2c` and the blocks at
+  `0x128ca` through `0x128d4` and `0x1516e` through `0x15178`.
+- Observation: the function sets the PIT channel 0 divisor to zero through
+  `0x101f6`.  It then reads the real-time clock date with INT 1A AX=0400 and the
+  time with INT 1A AX=0200 through `dpmi_call` at `0x4bf4b`.
+  Evidence: the blocks at `0x1fa35` through `0x1fb25`.
+- Observation: the function converts the BCD month, day, century, year, hour,
+  minute, and second to binary.  It forms the full year as `century * 100 +
+  year`.
+  Evidence: the conversion blocks at `0x1fa5f` through `0x1fb03` and
+  `0x1fb2a` through `0x1fb9e`.
+- Observation: the function sets the DOS date with INT 21 AH=2B from the year,
+  the month, and the day, and the DOS time with INT 21 AH=2D from the hour, the
+  minute, and the second.
+  Evidence: the blocks at `0x1fba1` through `0x1fbd3` and `0x1fbe8` through
+  `0x1fc1c`.
+- Observation: a non-zero `AL` from the date call reports the message at
+  object-3 offset `0xc08`, which reads `Invalid date specified. Check the
+  date!`.  A non-zero `AL` from the time call reports the message at object-3
+  offset `0xc30`, which reads `Invalid time specified. Check the time!`.  Both
+  go through `0xc656e`.
+  Evidence: the reads at `0x100c08` and `0x100c30`, and the tests at `0x1fbd8`
+  and `0x1fc21`.
+- Inference: the real-time clock read, the BCD conversion, the DOS date and time
+  set, and the two messages support the name `dos_datetime_set`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the real-time clock date and time, the two
+  invalid flags, and the DPMI helper stubs.  The six paths cover the dates 2024,
+  1999, and 2000, the zero time, the invalid date, the invalid time, and both
+  errors.  The output holds the markers `0` through `5` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/dos_datetime_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module dos_datetime_set`, and
+  `work/rebuild/ddt_out.txt`.
+- Observation: the identity check stays open at 30 of 166 instructions and 29 of
+  524 bytes.  V2 puts the frame first, saves `esi` and `edi`, uses `imul` for the
+  BCD scale, and uses other local offsets.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1fa2c --count 166 --rebuilt work/rebuild/ddtmod.exe
+  --rebuilt-map work/rebuild/dos_datetime_set.map --rebuilt-symbol
+  dos_datetime_set_` and `python3 tools/rebuild/run.py run --function 0x1fa2c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

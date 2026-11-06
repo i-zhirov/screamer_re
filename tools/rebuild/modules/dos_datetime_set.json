@@ -1,0 +1,32 @@
+{
+  "exe": "ddtmod.exe",
+  "map": "dos_datetime_set.map",
+  "name": "dos_datetime_set",
+  "run": {
+    "command": "ddtmod.exe > ddt_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "ddt_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "dos_datetime_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dos_datetime_set_main.c"
+    }
+  ]
+}

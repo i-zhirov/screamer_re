@@ -1,9 +1,83 @@
 {
   "address": "0x1fa2c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 166,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1fa2c holds 166 instructions and 524 bytes up to the ret at 0x1fc37. The next function starts at 0x1fc38, so the store record keeps the 524-byte extent and sets no function size. The identity check uses 166 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x128cf in engine_shutdown and 0x15173 in the menu cleanup at 0x15150 call this function after 0x1f28c. The call sites sit in the subsystem teardown, so the record takes the section Subsystem initialisation"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the PIT channel 0 divisor to 0 through 0x101f6, reads the real-time clock date with INT 1A AX=0400 and the time with INT 1A AX=0200 through dpmi_call at 0x4bf4b, converts the BCD values, and sets the DOS date with INT 21 AH=2B and the DOS time with INT 21 AH=2D"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero AL from either DOS call reports Invalid date specified. Check the date! at object-3 offset 0xc08 or Invalid time specified. Check the time! at object-3 offset 0xc30 through 0xc656e"
+    },
+    {
+      "kind": "note",
+      "text": "the real-time clock to DOS conversion and the two messages support the name dos_datetime_set. The module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the real-time clock date and time, the two invalid flags, and the DPMI helper stubs. It covers the 2024, 1999, and 2000 dates, the zero time, the invalid date, the invalid time, and both errors. The output holds the markers 0 through 5 and D. The behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1fa2c --count 166 --rebuilt work/rebuild/ddtmod.exe --rebuilt-map work/rebuild/dos_datetime_set.map --rebuilt-symbol dos_datetime_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1fa2c"
+    },
+    {
+      "kind": "finding",
+      "text": "The dos_datetime_set module at 0x1fa2c"
+    }
+  ],
+  "implementation": "c",
+  "module": "dos_datetime_set",
+  "name": "dos_datetime_set",
   "notes": [],
   "object_offset": "0xfa2c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 524,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 30,
+        "instructions_total": 166,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1fa2c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:57e732fceff196cb728c12f389eced895e1bd7560af0b4b7efe2636825343aca",
+    "source_digest": "sha256:eca998c478a2f1230d9ccd9a7bc55ced1164278bc4cd1e7123900440c05c50a8",
+    "tool": "run.py"
+  },
+  "role": "sets the DOS date and time from the real-time clock and restores the timer rate",
+  "section": "Subsystem initialisation",
   "size": 524,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "dos_datetime_set_"
 }

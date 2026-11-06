@@ -278,7 +278,7 @@ These are the next unnamed game functions in the object, in size order.
 | `0x124c0` | `opponent_start` (done) | 545 | 164 | 5 | 16 |
 | `0x1af70` | `spline_load` (done) | 527 | 148 | 14 | 0 |
 | `0x21b9c` | `sound_emitter_update` (done) | 524 | 153 | 13 | 39 |
-| `0x1fa2c` | unnamed | 524 | 166 | 11 | 0 |
+| `0x1fa2c` | `dos_datetime_set` (done) | 524 | 166 | 11 | 0 |
 | `0x166a8` | unnamed | 524 | 159 | 4 | 26 |
 | `0x20b1c` | unnamed | 516 | 166 | 10 | 60 |
 | `0x1b394` | unnamed | 502 | 166 | 10 | 0 |
@@ -286,7 +286,7 @@ These are the next unnamed game functions in the object, in size order.
 
 ## Position
 
-One hundred seventy-four modules carry a recipe and a result: the twelve Phase A modules,
+One hundred seventy-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -351,5 +351,5 @@ and `player_car_cornering_update` at `0x16ca0`, and `race_hud_draw` at
 `0x23420`, and `player_view_orbit` at `0x1a3b8`, and `opponent_avoid_player` at `0x1e414`,
 and `traffic_collision_pass` at `0x175dc`, and `view_transition_update` at
 `0x19f00`, and `opponent_start` at `0x124c0`, and `spline_load` at `0x1af70`,
-and `sound_emitter_update` at `0x21b9c`.
-The next unnamed function is `0x1fa2c`.
+and `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`.
+The next unnamed function is `0x166a8`.
