@@ -13107,6 +13107,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The car_select_update module at 0x2cb20
+
+- Observation: the original body at `0x2cb20` holds 103 instructions and 373
+  bytes up to the `ret` at `0x2cc94`.  The next function starts at `0x2cc98`,
+  so the store record keeps the 376-byte extent and sets no function size.  The
+  identity check uses 103 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2cb20 --count 103` and
+  `tools/rebuild/functions/0x2cb20.json`.
+- Observation: the only direct caller is case 2 of `race_state_update` at
+  `0x29564`, with the call site `0x295d3`.  `race_state_update` is a
+  `race_frame` callee at `0x2807c`, so the record takes the section
+  `race_frame callees`.  The matching init `car_select_screen` at `0x2bedc`
+  builds the same 14 records.  The function advances the car selection angle
+  and writes the three object angles, so the module records the name
+  `car_select_update` with the confidence `inferred`.
+  Evidence: the call at `0x295d3` and the loop at `0x2cb36`.
+- Observation: the function walks the 14 records at `DAT_0011d550`, stride
+  `0x44`.  Each record holds an object index at `+0x00` and float angles at
+  `+0x08`, `+0x0c`, and `+0x10`.  The step is `DAT_0018e08 * pi/2` at
+  object-3 offset `0x11d3`.  The function adds the step to the angle `+0x0c`,
+  clears it to 0 at `2 * pi` at object-3 offset `0x11d7`, and writes the object
+  angles `+0x14`, `+0x18`, and `+0x1c` from the table `DAT_0010653c` with the
+  factor `1024.0 / pi` at object-3 offsets `0x11db` and `0x11df` and the mask
+  `0x7ff`.
+  Evidence: the loop at `0x2cb36` through `0x2cc89` and the constants at
+  object-3 offsets `0x11d3`, `0x11d7`, `0x11db`, and `0x11df`.
+- Observation: the original calls the truncate helper at `0x4d9f4` before each
+  `fistp`.  The module uses the local `car_select_update_fpu.asm`, which makes
+  `__CHP` truncate toward zero.  The float constants arrive through globals,
+  because the minimal image does not load the constant segment.  The original
+  has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/car_select_update_fpu.asm`,
+  `tools/rebuild/car_select_update.c`, and the FPU blocks at `0x2cbb0`,
+  `0x2cc02`, and `0x2cc54`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The paths cover the full step, the wrap at `2 * pi`,
+  the permuted table, the negative truncation, and the boundary `2 * pi`.
+  Evidence: `python3 tools/rebuild/harness.py run --module car_select_update`,
+  `work/rebuild/cselupd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2cb20`.
+- Observation: the rebuilt module holds 103 decoded instructions and 322
+  bytes.  The identity check stays open at 13 of 103 instructions and 10 of 322
+  bytes, because V2 saves the frame pointer first, hoists the object pointer
+  into a register, uses `imul` for the record stride, and builds the loop in
+  another shape.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2cb20 --count 103 --rebuilt work/rebuild/cselupd.exe
+  --rebuilt-map work/rebuild/car_select_update.map --rebuilt-symbol
+  car_select_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The track_select_screen module at 0x2c188
 
 - Observation: the original body at `0x2c188` holds 164 instructions and 679

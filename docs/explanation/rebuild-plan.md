@@ -323,12 +323,12 @@ reproduce the original bytes.
 | `0x21058` | `race_finish_update` (done) | 391 | 114 | 10 | 5 |
 | `0x2fcec` | `music_load` (done) | 379 | 99 | 13 | 0 |
 | `0x4d844` | `lzw_bit_read` (done) | 374 | 119 | 1 | 0 |
-| `0x2cb20` | unnamed | 373 | 103 | 3 | 19 |
+| `0x2cb20` | `car_select_update` (done) | 373 | 103 | 3 | 19 |
 | `0x82258` | unnamed | 365 | 127 | 0 | 0 |
 
 ## Position
 
-Two hundred one modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -407,5 +407,6 @@ and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
 and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
 and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 `0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
-`0x2fcec`, and `lzw_bit_read` at `0x4d844`.
-The next unnamed function is `0x2cb20`.
+`0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
+`0x2cb20`.
+The next unnamed function is `0x82258`.

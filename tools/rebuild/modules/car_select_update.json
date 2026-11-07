@@ -1,0 +1,35 @@
+{
+  "exe": "cselupd.exe",
+  "map": "car_select_update.map",
+  "name": "car_select_update",
+  "run": {
+    "command": "cselupd.exe > cselupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cselupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_select_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_select_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_select_update_main.c"
+    }
+  ]
+}
