@@ -1,0 +1,32 @@
+{
+  "exe": "lzrmod.exe",
+  "map": "lzw_bit_read.map",
+  "name": "lzw_bit_read",
+  "run": {
+    "command": "lzrmod.exe > lzr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "lzr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "lzw_bit_read.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "lzw_bit_read_main.c"
+    }
+  ]
+}

@@ -1149,6 +1149,22 @@ Authority.
   `+0x00` and `0xc0cb4af8` at `+0x04`, which are not plausible, so the sprite
   member is compressed and the count and the pixel size do not appear in the raw
   bytes.  Evidence: the `head` output of `tools/gfx_container.py`.
+- The C rebuild of the bit reader at `0x4d844` reproduces the field layout and
+  the refill path.  The context holds the bit position at `+0x406c`, the code
+  width at `+0x4068`, the mask table at `+0x8050`, the 0x400-byte buffer at
+  `+0x8086`, the stream position at `+0x4040`, the stream limit at `+0x4044`,
+  and the stream handle at `+0x848c`.  When fewer than five buffer bytes
+  remain, the function moves them to the front, reads more bytes through
+  `fread` at `0xc607b` with the size 1, advances the stream position, and keeps
+  only the sub-byte bit offset.  The read count is the smaller of the free
+  space and the bytes left in the stream.  The module builds and passes the
+  behavior check.  The identity check stays open at 27 of 119 instructions and
+  17 of 365 bytes, because V2 saves the frame pointer first, uses other
+  registers, and builds the loops in another shape.
+  Evidence: the record `tools/rebuild/functions/0x4d844.json`, the command
+  `python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d844 --count 119`,
+  and the command
+  `python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d844 --count 119 --rebuilt work/rebuild/lzrmod.exe --rebuilt-map work/rebuild/lzw_bit_read.map --rebuilt-symbol lzw_bit_read_`.
 
 ## The session start and the game modes
 
