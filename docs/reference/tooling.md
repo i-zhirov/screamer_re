@@ -526,6 +526,8 @@ The files:
 | `race_view_reset_main.c` | the `race_view_reset` test harness: the four car records, the shared counter, the five cells, the seven view slots, and the four paths |
 | `race_clock_update.c` | the rebuilt `race_clock_update` module: the two input gates, the total and lap clock advance, the traffic scan, the remaining-time countdown, and the throttle-cut control bit |
 | `race_clock_update_main.c` | the `race_clock_update` test harness: the player object, three traffic records, the input bytes, the mode word, the saved word, the count, the player index, the frame delta, and the ten paths |
+| `font_load.c` | the rebuilt `font_load` module: the member open, the font count, the descriptor table, the bitmap table, the `FONTS` tail, and the stream close |
+| `font_load_main.c` | the `font_load` test harness: the count, the two tables, the tail size, the tail pointer, the engine pointer, and the three paths |
 | `malloc_rt.c` | the rebuilt `malloc` module as `malloc_rt`: the size checks, the round-up, the free-list walk, the cursor and largest-free update, the three helper calls, and the heap-flag clear |
 | `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
 | `replay_write.c` | the rebuilt `replay_write` module: the enable guard, the record address, the two float copies, the six 16-bit copies, the index advance, the wrap, and the second-marker update |
@@ -616,7 +618,7 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the two hundred and twenty-six module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and twenty-seven module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |

@@ -1,0 +1,30 @@
+{
+  "exe": "font.exe",
+  "map": "font_load.map",
+  "name": "font_load",
+  "run": {
+    "command": "font.exe > font_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "font_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "font_load.c",
+      "flags": [
+        "-of+",
+        "-dFONT_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "font_load_main.c"
+    }
+  ]
+}

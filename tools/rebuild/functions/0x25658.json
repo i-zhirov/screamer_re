@@ -1,9 +1,103 @@
 {
   "address": "0x25658",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 93,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25658 holds 93 instructions and 324 bytes up to the ret at 0x2579b; the next function starts at 0x257a0 after four bytes of padding at 0x2579c, so the store record keeps the 328-byte extent and sets no separate function size; the identity check uses 93 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is menu_space_init at 0x29d08, which builds the member name menu%c.fnt and passes the graf.dat path; the sibling font_table_init at 0x25620 points DAT_00015438 at the descriptor table 0x1ca98 and DAT_00015434 at the bitmap table 0x19898, and text_measure at 0x254a8 reads both tables; the loader reads a font member, so the module takes the section The graphics decoders"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member with the path, the member name, and the category rb at 0x100eaa through 0x4c08d; a failed open runs the file error report at 0x4bf88 and then exit(0) at 0x300be"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads one byte into the font count DAT_00015440, then reads count + 1 records of 12 bytes into the 0x1ca98 table; each record holds the height at +0x00, the first character code at +0x04, and the character count at +0x08"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads count + 1 glyph rows into the 0x19898 table; row i starts at 0x19898 + i * 0x500 and holds the character count times 8 bytes from the descriptor at +0x08"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the four-byte tail size at 0x1cb10, gets the FONTS resource at 0x100ead of that size through 0x2eed0, and reads the tail into it; a zero result runs the memory error report at 0x2edad; the function closes the stream at 0x4c38d and increments the font count"
+    },
+    {
+      "kind": "note",
+      "text": "the font member, the descriptor table, the bitmap table, the FONTS resource, and the menu_space_init caller support the name font_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines FONT_LOAD_HARNESS and the function builds the two constant texts in local buffers; the harness holds the count, the two tables, the tail size, the tail pointer, and the engine pointer; the three paths cover the success load with two descriptors of 24 and 16 bitmap bytes, the open failure, and the zero resource; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25658 --count 93"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25658 --count 93 --rebuilt work/rebuild/font.exe --rebuilt-map work/rebuild/font_load.map --rebuilt-symbol font_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25658"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 93 decoded instructions and 337 bytes; the identity check stays open at 15 of 93 instructions, 37 of 324 bytes, and 0 of 27 relocation slots, because V2 saves the frame first, builds the two constant texts in local buffers, keeps the arguments in registers, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The font_load module at 0x25658"
+    }
+  ],
+  "implementation": "c",
+  "module": "font_load",
+  "name": "font_load",
   "notes": [],
   "object_offset": "0x15658",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 324,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 93,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25658",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:4b30072c9eaeb89010a87275231bf2da46f04155d5d2175f905e85db8428e966",
+    "source_digest": "sha256:c40720be8efe6cada3fae96d80830d109261ef7a0b4212171daf842cd01cc03a",
+    "tool": "run.py"
+  },
+  "role": "loads a font member from the graphics container into the descriptor table, the bitmap table, and the FONTS resource",
+  "section": "The graphics decoders",
   "size": 328,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "font_load_"
 }

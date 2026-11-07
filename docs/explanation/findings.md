@@ -17345,3 +17345,69 @@ temporary `-od` recipe.
   0x18a14`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The font_load module at 0x25658
+
+- Observation: the original body at `0x25658` holds 93 instructions and 324
+  bytes up to the `ret` at `0x2579b`.  The next function starts at `0x257a0`
+  after four bytes of padding at `0x2579c`, so the store record keeps the
+  328-byte extent and sets no separate function size.  The identity check uses
+  93 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25658 --count 93` and
+  `tools/rebuild/functions/0x25658.json`.
+- Observation: the only direct caller is `menu_space_init` at `0x29d08`, which
+  builds the member name `menu%c.fnt` and passes the `graf.dat` path.  The
+  sibling `font_table_init` at `0x25620` points `DAT_00015438` at the
+  descriptor table `0x1ca98` and `DAT_00015434` at the bitmap table `0x19898`,
+  and `text_measure` at `0x254a8` reads both tables.  The loader reads a font
+  member, so the record takes the section `The graphics decoders`.
+  Evidence: the caller at `0x29d08`, the init at `0x25620`, and the text
+  measure at `0x254a8`.
+- Observation: the function opens the member with the path, the member name,
+  and the category `rb` at `0x100eaa` through `0x4c08d`.  A failed open runs
+  the file error report at `0x4bf88` and then `exit(0)` at `0x300be`.
+  Evidence: the blocks at `0x25670` through `0x25691`.
+- Observation: the function reads one byte into the font count
+  `DAT_00015440`, then reads `count + 1` records of 12 bytes into the `0x1ca98`
+  table.  Each record holds the height at `+0x00`, the first character code at
+  `+0x04`, and the character count at `+0x08`.
+  Evidence: the first loop at `0x25696` through `0x256e3`.
+- Observation: the function reads `count + 1` glyph rows into the `0x19898`
+  table.  Row `i` starts at `0x19898 + i * 0x500` and holds the character
+  count times 8 bytes from the descriptor at `+0x08`.
+  Evidence: the second loop at `0x256e5` through `0x25731`.
+- Observation: the function reads the four-byte tail size at `0x1cb10`, gets
+  the `FONTS` resource at `0x100ead` of that size through `0x2eed0`, and reads
+  the tail into it.  A zero result runs the memory error report at `0x2edad`.
+  The function closes the stream at `0x4c38d` and increments the font count.
+  Evidence: the blocks at `0x25733` through `0x2579b`.
+- Inference: the font member, the descriptor table, the bitmap table, the
+  `FONTS` resource, and the `menu_space_init` caller support the name
+  `font_load`.  The original has no symbol, so the record keeps the name with
+  the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/font_load.c` and
+  `tools/rebuild/modules/font_load.json`.
+- Observation: the behavior check passes.  The harness holds the count, the
+  two tables, the tail size, the tail pointer, and the engine pointer.  The
+  three paths cover the success load with two descriptors of 24 and 16 bitmap
+  bytes, the open failure, and the zero resource.  The output holds the
+  markers `0`, `1`, `2`, and `D`.
+  Evidence: `tools/rebuild/font_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module font_load`, and
+  `work/rebuild/font_out.txt`.
+- Observation: the rebuilt module holds 93 decoded instructions and 337
+  bytes.  The identity check stays open at 15 of 93 instructions, 37 of 324
+  bytes, and 0 of 27 relocation slots, because V2 saves the frame first,
+  builds the two constant texts in local buffers, keeps the arguments in
+  registers, and uses another local layout.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25658 --count 93 --rebuilt work/rebuild/font.exe
+  --rebuilt-map work/rebuild/font_load.map --rebuilt-symbol font_load_` and
+  `python3 tools/rebuild/run.py run --function 0x25658`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

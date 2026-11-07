@@ -155,9 +155,10 @@ current host.
   `player_brake_update` at `0x16150`, and
   `stream_read_text` at `0x4c695`, and
   `race_view_reset` at `0x13580`, and
-  `race_clock_update` at `0x18a14`;
+  `race_clock_update` at `0x18a14`, and
+  `font_load` at `0x25658`;
   thirty modules are verified, one is matching, and one hundred and
-  ninety-five rebuilds hold the recorded difference; the `video_fill`,
+  ninety-six rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -326,10 +327,11 @@ The plan follows the size order, starting with the smallest functions.
     `player_brake_update` at `0x16150`, and
     `stream_read_text` at `0x4c695`, and
     `race_view_reset` at `0x13580`, and
-    `race_clock_update` at `0x18a14`
+    `race_clock_update` at `0x18a14`, and
+    `font_load` at `0x25658`
     are done;
     the result is thirty verified modules, one matching module, and one
-    hundred and ninety-five open rebuilds).
+    hundred and ninety-six open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11
