@@ -16740,3 +16740,66 @@ temporary `-od` recipe.
   quad_point_test_` and `python3 tools/rebuild/run.py run --function 0x1c13c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the field names in the harness stay inferred.
+
+## The player_car_spin_update module at 0x188b8
+
+- Observation: the original body at `0x188b8` holds 99 instructions and 347
+  bytes up to the `ret` at `0x18a12`.  The next function starts at `0x18a14`,
+  so the store record keeps the 348-byte extent and sets no function size.  The
+  identity check uses 99 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x188b8 --count 99` and
+  `tools/rebuild/functions/0x188b8.json`.
+- Observation: the direct call sweep finds one caller at `0x15bd8`.  The caller
+  sits in the effect group at `0x15bac`, after the call at `0x15bd0` to
+  `player_car_reset_update` at `0x18528`.  The five view groups at `0x2003c`,
+  `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4` call the effect group on the
+  player object at object-3 offset `0xf91c`, so the module takes the section
+  The vehicle state chain.
+  Evidence: the call sweep for `0x188b8` and the blocks at `0x15bac` through
+  `0x15bf9`.
+- Observation: the function is a state machine on the counter `+0x170`.  The
+  skid update at `0x17d14` sets the counter to 1.  `player_car_link` at
+  `0x15c1c` adds the offset `+0x128` to the render yaw `+0x4cc`.
+  Evidence: the write at `0x17f24`, the add at `0x15d0b`, and the block at
+  `0x188b8` through `0x18a12`.
+- Observation: state 1 selects the sign of the yaw step `+0x2f4`.  A negative
+  step sets the counter to 4 and adds one full turn `2*pi` at `+0x128`.  The
+  other case sets the counter to 2 and adds `-2*pi`.
+  Evidence: the blocks at `0x188d2` through `0x18923` and the constants at
+  object-3 offset `0x83c` (3.0) and `0x840` (2*pi).
+- Observation: state 2 adds the step to `+0x128`, and state 4 or above
+  subtracts it.  The step is the frame delta `DAT_00118e04` times
+  `(abs(+0x128) + 0.2) / pi` times 3.0.  A crossing of zero clears `+0x128`
+  and `+0x170`.  State 3 holds both values.  A state at or below 0 returns at
+  once.
+  Evidence: the blocks at `0x18928` through `0x18a12` and the constants at
+  object-3 offset `0x844` (0.2) and `0x84c` (pi).
+- Inference: the full turn, the render-yaw use, the effect group caller, and
+  the skid counter support the name `player_car_spin_update`.  The original
+  has no symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the function converts the sign and the counter to an integer
+  through the Watcom helper at `0x4d9f4`, which truncates toward zero.  The
+  local FPU stub makes `__CHP` truncate, because the shared stub rounds to
+  nearest.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_car_spin_update_fpu.asm` and
+  `tools/rebuild/modules/player_car_spin_update.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The nine paths cover the two start directions, the two
+  unwind directions with and without a zero crossing, the hold state, and the
+  two early returns.
+  Evidence: `tools/rebuild/player_car_spin_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_car_spin_update`, and
+  `work/rebuild/pcspin.txt`.
+- Observation: the rebuilt body holds 9 of 99 instructions, 25 of 336 bytes,
+  and 0 of 19 relocation slots equal.  V2 keeps the object in ecx and edx,
+  folds the sign into a local, and emits a shorter body.  The original keeps
+  the object on the frame and stores the sign in a second local.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x188b8 --count 99 --rebuilt work/rebuild/pcspin.exe
+  --rebuilt-map work/rebuild/player_car_spin_update.map --rebuilt-symbol
+  player_car_spin_update_` and
+  `python3 tools/rebuild/run.py run --function 0x188b8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
