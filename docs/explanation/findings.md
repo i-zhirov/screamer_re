@@ -16677,3 +16677,66 @@ temporary `-od` recipe.
   0x29bac`.
 - Limit: the original has no symbol name for this function.  The module name and
   the field names in the harness stay inferred.
+
+## The quad_point_test module at 0x1c13c
+
+- Observation: the plan row records a 338-byte body and 107 instructions up to
+  the first `ret` at `0x1c28d`.  The function continues through three more early
+  exits and ends at the `ret` at `0x1c389`.  The next function starts at
+  `0x1c38a`, so the store record keeps the 590-byte extent and sets no function
+  size.  The identity check uses 107 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c13c --count 107` and
+  `tools/rebuild/functions/0x1c13c.json`.
+- Observation: the two direct callers at `0x1c03c` and `0x1c114` sit in the two
+  unnamed point probes at `0x1bfd4` and `0x1c0ac`.  Both probes walk the polygon
+  entries of a collision shape and call this function when the vertex count word
+  at `+0x06` is 4.  The sibling at `0x1c38a` takes the three-vertex case.
+  `collision_cell_test` at `0x11ccc` reaches the probes.
+  Evidence: the call sweep for `0x1c13c`, the blocks at `0x1c019` through
+  `0x1c041` and `0x1c0f7` through `0x1c119`, and the record of `0x11ccc`.
+- Observation: the function takes the polygon entry in `ecx` and the object in
+  `esi`.  The entry holds four unsigned byte offsets at `+0x08`, `+0x0a`,
+  `+0x0c`, and `+0x0e`.  The global `DAT_000c71c` points to the vertex array, and
+  each offset selects a signed short triple.  The function adds the object
+  translation at `+0x08`, `+0x0c`, and `+0x10` and stores the four world points
+  in the scratch array `DAT_000c6d4` at the `0x0c` stride.
+  Evidence: the blocks at `0x1c13c` through `0x1c1e9`.
+- Observation: the function forms the bounding box of the four points at
+  `DAT_000c704` and `DAT_000c708` for the maximum and `DAT_000c70c` and
+  `DAT_000c710` for the minimum.  It tests the point `DAT_000c728` and
+  `DAT_000c730` against the box and returns 0 on each side.  Inside the box it
+  tests the four edges 0-1, 1-2, 2-3, and 3-0 with the side term
+  `(b.y - a.y) * (px - a.x) + (a.x - b.x) * (py - a.y)`.  A negative term
+  returns 0, and the function returns 1 when the point stays on one side of
+  every edge.
+  Evidence: the blocks at `0x1c1ec` through `0x1c389`.
+- Inference: the bbox, the edge side terms, and the two probes support the name
+  `quad_point_test`.  The original has no symbol, so the record keeps the name
+  with the confidence inferred.  The record takes the section
+  `The vehicle state chain` with `collision_cell_test`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the four-vertex palette, the polygon entry, the
+  object translation, the test point, the four scratch world points, and the
+  four bounding-box outputs.  The nine paths cover the inside square, the four
+  box sides, the diamond point inside the box but outside an edge, the
+  translated square, the negative square, and the z copy.  The output holds the
+  markers `0` through `8` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/quad_point_test_main.c`,
+  `python3 tools/rebuild/harness.py run --module quad_point_test`, and
+  `work/rebuild/quadtest.txt`.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction, so the module builds without `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/quad_point_test.c` and
+  `tools/rebuild/modules/quad_point_test.json`.
+- Observation: the rebuilt body holds 17 of 107 instructions and 13 of 338 bytes
+  equal and 0 of 54 relocation slots equal.  V2 emits a register prologue, a
+  loop for the four points, and a compact box update.  The original saves no
+  register, unrolls the four point builds, and sorts the four values with an
+  exchange network.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1c13c --count 107 --rebuilt work/rebuild/quadtest.exe
+  --rebuilt-map work/rebuild/quad_point_test.map --rebuilt-symbol
+  quad_point_test_` and `python3 tools/rebuild/run.py run --function 0x1c13c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the field names in the harness stay inferred.

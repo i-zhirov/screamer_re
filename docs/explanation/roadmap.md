@@ -145,9 +145,10 @@ current host.
   `0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
   at `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and
   `object_revolution_matrix` at `0x1d55c`, and
-  `championship_result_apply` at `0x29bac`;
+  `championship_result_apply` at `0x29bac`, and
+  `quad_point_test` at `0x1c13c`;
   thirty modules are verified, one is matching, and one hundred and
-  eighty-five rebuilds hold the recorded difference; the `video_fill`,
+  eighty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -306,10 +307,11 @@ The plan follows the size order, starting with the smallest functions.
     `opponent_curve_eval` at `0x22378`, and `sound_event_render` at
     `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and
     `object_revolution_matrix` at `0x1d55c`, and
-    `championship_result_apply` at `0x29bac`
+    `championship_result_apply` at `0x29bac`, and
+    `quad_point_test` at `0x1c13c`
     are done;
     the result is thirty verified modules, one matching module, and one
-    hundred and eighty-five open rebuilds).
+    hundred and eighty-four open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

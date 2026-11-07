@@ -353,7 +353,7 @@ reproduce the original bytes.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x1c13c` | unnamed | 338 | 107 | 0 | 0 |
+| `0x1c13c` | `quad_point_test` (done) | 338 | 107 | 0 | 0 |
 | `0x188b8` | unnamed | 347 | 99 | 1 | 41 |
 | `0x4c98c` | unnamed | 344 | 96 | 13 | 0 |
 | `0x2392c` | unnamed | 344 | 110 | 15 | 43 |
@@ -368,7 +368,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred fifteen modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixteen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -454,5 +454,6 @@ and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
 `0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
 at `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and `object_revolution_matrix`
-at `0x1d55c`, and `championship_result_apply` at `0x29bac`.
-The next unnamed function is `0x1c13c`.
+at `0x1d55c`, and `championship_result_apply` at `0x29bac`, and the Phase O
+module `quad_point_test` at `0x1c13c`.
+The next unnamed function is `0x188b8`.
