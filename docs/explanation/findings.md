@@ -16029,3 +16029,65 @@ temporary `-od` recipe.
   0x8aa60`.
 - Limit: the original has no symbol name for this function.  The module name,
   the object layout, and the projection table model stay inferred.
+
+## The radar_world_draw module at 0x1057c
+
+- Observation: the plan row records a 483-byte body of 154 instructions, one
+  call, and no floating-point instruction.  The body starts at `0x1057c` and
+  ends at the `ret` at `0x1075e`.  The next function starts at `0x1075f`, so
+  the store record keeps the 483-byte extent and sets no separate function
+  size.  The identity check uses 154 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1057c --count 154` and
+  `tools/rebuild/functions/0x1057c.json`.
+- Observation: the only direct caller is `race_radar` at `0x23b5b`.  The
+  caller passes the player position in eax and edx, the heading index in ebx,
+  and the zoom scale in ecx.  The scale is `0x30`, `0x60`, or `0x90` for the
+  three radar zoom steps.  The function draws the world line segments into the
+  144x144 radar panel, so the record takes the name `radar_world_draw` with
+  the confidence `inferred` and the section `Program functions`.
+  Evidence: the call at `0x23b5b`, the scale stores at `0x23ab1` through
+  `0x23ac3`, and the finding "The race_radar module at 0x23a94".
+- Observation: the entry stores the camera x, the camera y, and the scale in
+  the globals `0x7d5`, `0x7d9`, and `0x7ed`.  It forms the column byte offset
+  from x and the row byte offset from y, both with the `0x100000` world bias
+  and the `0x2000` cell size.  The row scan covers 17 rows and the cell scan
+  covers 17 cells.  The grid base is the global `0x2fa4`.
+  Evidence: the prologue at `0x1057c` through `0x105da`.
+- Observation: the angle index selects a signed 16-bit cosine at `0x203d0`
+  and a signed 16-bit sine at `0x203d4` with the stride 8.  A cell holds the
+  segment pointer at `+0x0c` and the count at `+0x20`.  A `0x1c`-byte segment
+  holds the angle at `+0x00`, the midpoint at `+0x04` and `+0x08`, and the two
+  endpoints at `+0x0c`, `+0x10`, `+0x14`, and `+0x18`.
+  Evidence: the reads at `0x105c0` through `0x105d5`, the cell reads at
+  `0x10602` and `0x10605`, and the segment reads at `0x10616` through
+  `0x106c2`.
+- Observation: each endpoint offset is divided by four.  The function rotates
+  the offset by the cosine and the sine, shifts each product by 14, and
+  decrements a negative shifted result once.  It then scales the two rotated
+  terms and places them around the panel centre `(0x50, 0x140)`.  The only
+  call at `0x102e4` clips and draws the line.
+  Evidence: the blocks at `0x10616` through `0x1072e` and the callee at
+  `0x102e4`.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction.  The module builds without `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/radar_world_draw.c`.
+- Observation: the harness holds the grid, the cell and segment records, the
+  angle table, and the line sink.  The eight paths cover the empty grid, the
+  two rotations, the negative endpoints, the two segments, the row guard, the
+  zero count, and the column offset.  The output holds the markers `0` through
+  `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/radar_world_draw_main.c`, `python3
+  tools/rebuild/harness.py run --module radar_world_draw`, and
+  `work/rebuild/rwd.txt`.
+- Observation: the rebuilt module holds 533 bytes and 154 decoded
+  instructions.  The identity check stays open at 27 of 154 instructions, 25
+  of 483 bytes, and 2 of 54 relocation slots.  V2 pushes esi, edi, and ebp and
+  makes a stack frame instead of `pushal`, keeps the loop cursors in stack
+  slots, computes the cell offset with `lea`, and uses another register order.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1057c --count 154 --rebuilt work/rebuild/rwdmod.exe
+  --rebuilt-map work/rebuild/radar_world_draw.map --rebuilt-symbol
+  radar_world_draw_` and `python3 tools/rebuild/run.py run --function 0x1057c`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the cell and segment field names, and the angle table model stay inferred.
