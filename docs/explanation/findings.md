@@ -15579,3 +15579,91 @@ temporary `-od` recipe.
   0x2003c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_finish_update module at 0x21058
+
+- Observation: the original body at `0x21058` holds 114 instructions and 391
+  bytes up to the `ret` at `0x211de`.  The next function starts at `0x211e0`,
+  so the store record keeps the 392-byte extent and sets no function size.  The
+  identity check uses the first 114 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21058 --count 114` and
+  `tools/rebuild/functions/0x21058.json`.
+- Observation: the only direct caller at `0x20033` is the frame update at
+  `0x1ff70`.  The frame update runs this function last, after the two
+  transition handlers at `0x20ec8` and `0x20f98`.  No named function sits
+  between the frame update and the target, so the record takes the section
+  `Program functions`.
+  Evidence: the call sweep for `0x21058`, the block at `0x1ff70` through
+  `0x2003b`, and the `race_intro_update` finding.
+- Observation: the gate is bit 2 of `DAT_00118e1c`.  The handler at `0x20ec8`
+  runs after the final lap sets bit 3, and the handler at `0x20f98` runs after
+  the finish sets bit 4.  Both handlers set bit 2 with the values `0x4004` and
+  `0x1004`, so the function runs the finish delay.
+  Evidence: the dispatch at `0x197fd`, the store at `0x18b45`, the block at
+  `0x20ec8` through `0x20f97`, and the block at `0x20f98` through `0x21057`.
+- Observation: when bit 4 of `DAT_00118e1d` is set, the function draws the text
+  pointer `DAT_00118fec` at y `0x5a` with the font 2 through
+  `panel_draw_centered` at `0x2e7cc`.  Otherwise the mode `DAT_0011d260`
+  selects the overlay at `0x240c4` for 1, `0x2414c` for 2, `0x241d4` for 4,
+  `0x240a0` for `0x10`, `0x24264` for `0x20`, and `0x2420c` for `0x40`.  The
+  overlays format the car table `DAT_00118f94` with `%s %s` at object-3 offset
+  `0xe50` and the clock text at object-3 offset `0x1f98`.
+  Evidence: the switch at `0x2106f` through `0x210eb`, the overlay bodies at
+  `0x240a0` through `0x242b6`, and the strings at `0x100e50` and `0x101f98`.
+- Observation: the function adds the frame delta `DAT_00118e08` to the timer
+  `DAT_00118e28`.  A timer below the float 5.0 at object-3 offset `0xd01` ends
+  the function.  A non-empty effect queue `DAT_00119080` also ends it, because
+  the helper at `0x247a0` returns the first queue entry and `-1` marks the empty
+  queue.
+  Evidence: the FPU block at `0x210ec` through `0x21115`, the constant at linear
+  `0x100d01`, and the enqueue at `0x247fc`.
+- Observation: past the limit and with an empty queue the function sets the
+  slot `DAT_0010ffa4` at 1 and, in the traffic mode, runs the step at `0x1eae0`
+  with the count 3.  It then walks the `0x2a8`-byte traffic records at
+  `DAT_00113cd8` up to the count `DAT_00115218`.  A record that is not finished
+  takes the value `-3` when the flag at `+0x16` bit 1 is set, or clears the
+  finished flag.  A set finished flag sets bits 1 and 2 of `DAT_00118e1d`.
+  Evidence: the block at `0x2111b` through `0x211b9` and the record loop at
+  `0x2118c` through `0x211b1`.
+- Observation: the function releases the race resource `DAT_001100ec` through
+  `0x1f880` when the handle is not `-1`.
+  Evidence: the block at `0x211c0` through `0x211d2`.
+- Inference: the finish delay, the mode overlays, the timer, the effect wait,
+  the traffic marks, and the finish bits support the name
+  `race_finish_update`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses the shared `fpu_stub.asm`, because it needs no
+  truncation and no math helper.
+  Evidence: `tools/rebuild/race_finish_update.c` and
+  `tools/rebuild/modules/race_finish_update.json`.
+- Observation: the harness holds the control bytes, the timer, the delta, the
+  mode, the slot, the traffic count, the records, the finish limit, the effect
+  queue, and the handle.  The seven overlay stubs, the panel stub, the queue
+  stub, the traffic stub, and the release stub cover the gate, the panel path,
+  the six mode overlays, the no-draw mode, the non-empty queue, the finish path
+  without traffic, the traffic mark and the open record, the high finish bit,
+  and the short-timer release.  The output holds the markers `0` through `9`,
+  `a` through `e`, and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_update_main.c`, `python3
+  tools/rebuild/harness.py run --module race_finish_update`, and
+  `work/rebuild/rfin.txt`.
+- Observation: the finish limit is the float 5.0 at object-3 offset `0xd01`.
+  The harness assigns it at run time, because the initialized data page does not
+  reach the DOS/4G image.
+  Evidence: the stores at `0x102e6` in the rebuilt image and the behavior path
+  `1`.
+- Observation: the rebuilt function holds 114 decoded instructions and 396
+  bytes.  The identity check stays open at 12 of 114 instructions, 15 of 391
+  bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer
+  first, keeps the finished flag in `ecx`, uses other local offsets, reads the
+  data globals through near operands, and emits an if chain for the mode
+  switch.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21058 --count 114 --rebuilt work/rebuild/rfin.exe
+  --rebuilt-map work/rebuild/race_finish_update.map --rebuilt-symbol
+  race_finish_update_` and `python3 tools/rebuild/run.py run --function
+  0x21058`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
