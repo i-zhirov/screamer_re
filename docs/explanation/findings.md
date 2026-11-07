@@ -16418,3 +16418,76 @@ temporary `-od` recipe.
   0x22378`.
 - Limit: the original has no symbol name for this function.  The module name
   and the sampler name in the harness stay inferred.
+
+## The sound_event_render module at 0x836ac
+
+- Observation: the plan row records a 351-byte body of 100 instructions.  The
+  100th instruction is the `ret` at `0x8380a`, so the identity check uses 100
+  instructions.  The store record keeps the 1532-byte extent, which reaches the
+  next record at `0x83ca8`, and it sets no separate function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x836ac --count 100` and
+  `tools/rebuild/functions/0x836ac.json`.
+- Observation: the only direct caller is `sound_effects_update` at `0x81ab0`.
+  It calls the function inside the per-frame event path at `0x81b60` and passes
+  no argument.  The caller sits in the object_update_all group, so the record
+  takes the section `object_update_all callees`.
+  Evidence: the call at `0x81b60`, `tools/rebuild/sound_effects_update.c`, and
+  `tools/rebuild/functions/0x81ab0.json`.
+- Observation: the function reads the view record P from the global `0x74460`.
+  It forms the axis values from `+0x13c`, `+0x140`, and `0x80 - +0x144`, takes
+  the square root of the sum of the squares, and stores the rounded distance at
+  `+0x1f0`.  It adds the signed short offsets at `Q+4`, `Q+6`, and `Q+8` to the
+  body position at `+0x16c`, `+0x170`, and `+0x174`, where Q is the pointer at
+  `P+0`.
+  Evidence: the block at `0x836ac` through `0x8373d`.
+- Observation: a set bit `0x2000` of the flag `0x74530` calls the prepare
+  helper at `0xc2270`.  The function scales each coordinate by `0x13333 >> 16`
+  with an arithmetic shift.  A signed 32-bit product overflow keeps all three
+  original values, because the original reloads the saved triple.  The function
+  then calls the frame selector at `0x8a848` with the scaled values.
+  Evidence: the flag test at `0x83740`, the scale block at `0x83752` through
+  `0x8377c`, and the call at `0x8378b`.
+- Observation: the two calls are `0xc2270` and `0x8a848`.  The three tail jumps
+  leave the 100-instruction window.  The near tail at `0x83880` runs when
+  `depth + bias` is at least -8.  The clipped tail at `0x83b48` runs when
+  `depth - bias` is at most the limit `0xc7cf0`.  The far tail at `0x83863`
+  patches its own coordinate immediates `0xaaaabbbb` with the scaled values and
+  walks the vertex list from the selector.
+  Evidence: the branches at `0x837c2`, `0x837d2`, and `0x837f6`, and the patch
+  stores at `0x837df` through `0x837f0`.
+- Inference: the caller, the per-frame event path, and the distance and
+  visibility work support the name `sound_event_render`.  The
+  `sound_effects_update` source already uses that name for the callee at
+  `0x836ac`.  The original has no symbol, so the record keeps the name with the
+  confidence `inferred`.
+  Evidence: the call graph, `tools/rebuild/sound_effects_update.c`, and the data
+  flow above.
+- Observation: the module records the selected tail in the global `render_path`
+  instead of a call into the tail code, because the tail code sits outside the
+  100-instruction window.  The module uses the local
+  `sound_event_render_fpu.asm` stub for the square root and the truncating
+  `__CHP` cast.  The module adds 0.5 before the cast to match the
+  round-to-nearest `fist` of the original.
+  Evidence: `tools/rebuild/sound_event_render.c` and
+  `tools/rebuild/sound_event_render_fpu.asm`.
+- Observation: the harness holds the view record, the pointer record Q, the two
+  helpers, and the recorded tail path.  The eight paths cover the near path,
+  the far path, the clipped path, the -8 boundary, the overflow fallback, the
+  prepare flag, the negative arithmetic shift, and the distance 26.  The output
+  holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_event_render_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_event_render`, and
+  `work/rebuild/sernd.txt`.
+- Observation: the rebuilt function holds 100 instructions and 334 bytes in the
+  identity window.  The identity check stays open at 14 of 100 instructions, 11
+  of 334 bytes, and 0 of 25 relocation slots, because V2 saves the registers
+  before the body, addresses the globals through other registers, and emits the
+  prepare and selector calls with another register order.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x836ac --count 100 --rebuilt work/rebuild/sernd.exe
+  --rebuilt-map work/rebuild/sound_event_render.map --rebuilt-symbol
+  sound_event_render_` and `python3 tools/rebuild/run.py run --function
+  0x836ac`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the helper names in the harness, and the tail model stay inferred.
