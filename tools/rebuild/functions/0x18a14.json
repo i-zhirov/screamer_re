@@ -1,9 +1,99 @@
 {
   "address": "0x18a14",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 92,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x18a14 holds 92 instructions and 329 bytes up to the ret at 0x18b5c; the next function starts at 0x18b60, so the store record keeps the 332-byte extent and sets no separate function size; the identity check uses 92 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the player update group at 0x15a80, which runs this function at 0x15a8c before engine_rpm_update at 0x18db0, the throttle step at 0x160a4, player_brake_update at 0x16150, and player_steering_update at 0x1629c; the group runs on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "input byte 0x118e1c bit 0 must be set and bit 2 must clear; when the field +0x784 is not zero, the function adds the frame delta 0x118e08 to the total time +0x78c and the lap time +0x794; the init at 0x140dc clears +0x784 and +0x794, copies +0x794 to +0x78c, sets the remaining time +0x790 to 15.0, and sets the best lap +0x798 to 10000.0"
+    },
+    {
+      "kind": "note",
+      "text": "when the mode 0x11d260 holds bit 0x10, the function scans the 0x2a8-byte traffic records at 0x113cd8 while the index stays below the count 0x115218, stops at the player index 0x11d250, skips a record with a negative first field, and copies the time at +0x2c of the first open record to the total time +0x78c"
+    },
+    {
+      "kind": "note",
+      "text": "unless the saved word 0x11d274 holds bit 4, the remaining time +0x790 counts down by the frame delta; below zero it clamps to zero and sets bit 0x40 of the control byte 0x118e1d, so the throttle step at 0x160a4 clears the throttle; a road speed +0x50c below 1.0 clears bit 0x40 and sets input byte 0x118e1c bit 0x10; at or above zero the control byte clears bit 0x40"
+    },
+    {
+      "kind": "note",
+      "text": "the traffic records, the remaining time, and the throttle-cut control bit support the name race_clock_update; the caller and the init support the section; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the shared fpu_stub.asm supplies the FPU run-time symbols, and the function converts no value to an integer, so __CHP stays a bare return"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, three traffic records, the input bytes, the mode word, the saved word, the count, the player index, and the frame delta; the ten paths cover the two early input gates, the clear and set clock gate, the pause bit, the traffic skip and player-index stop, the expired time with a road speed of 1.0 and 0.5, and the zero crossing; the output holds the markers 0 through 9 and D, and the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x18a14 --count 92"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x18a14 --count 92 --rebuilt work/rebuild/rcu.exe --rebuilt-map work/rebuild/race_clock_update.map --rebuilt-symbol race_clock_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x18a14"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 92 decoded instructions and 351 bytes; the identity check stays open at 12 of 92 instructions, 23 of 329 bytes, and 0 of 36 relocation slots, because V2 saves the frame first, keeps the object in ecx, folds the clock loads, and emits a compact scan loop; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_clock_update module at 0x18a14"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_clock_update",
+  "name": "race_clock_update",
   "notes": [],
   "object_offset": "0x8a14",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 23,
+        "bytes_total": 329,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 92,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18a14",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:8cbc58d703c4f6265a09b021102dc85e9b3ba8dc793900af19081fe6a3de41ce",
+    "source_digest": "sha256:560b8f2499b6462a0abdce955ce5c7f2a89195a248b62a92baf8af8c7e1d93dd",
+    "tool": "run.py"
+  },
+  "role": "advances the player total and lap clocks, counts down the remaining time, and sets the throttle-cut control bit when the time runs out",
+  "section": "The vehicle state chain",
   "size": 332,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_clock_update_"
 }

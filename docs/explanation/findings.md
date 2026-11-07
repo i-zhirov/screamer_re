@@ -17273,3 +17273,75 @@ temporary `-od` recipe.
   race_view_reset_` and `python3 tools/rebuild/run.py run --function 0x13580`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The race_clock_update module at 0x18a14
+
+- Observation: the original body at `0x18a14` holds 92 instructions and 329
+  bytes up to the `ret` at `0x18b5c`.  The next function starts at `0x18b60`,
+  so the store record keeps the 332-byte extent and sets no separate function
+  size.  The identity check uses 92 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x18a14 --count 92` and
+  `tools/rebuild/functions/0x18a14.json`.
+- Observation: the only direct caller at `0x15a8c` is the player update group
+  at `0x15a80`, which runs this function before `engine_rpm_update` at
+  `0x18db0`, the throttle step at `0x160a4`, `player_brake_update` at
+  `0x16150`, and `player_steering_update` at `0x1629c`.  The group runs on the
+  player object at object-3 offset `0xf91c`, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the block at `0x15a80` through `0x15ab4` and the caller records
+  above.
+- Observation: the gate is input byte `0x118e1c` bit 0 set and bit 2 clear.
+  When the field `+0x784` is not zero, the function adds the frame delta
+  `0x118e08` to the total time `+0x78c` and the lap time `+0x794`.  The init
+  at `0x140dc` clears `+0x784` and `+0x794`, copies `+0x794` to `+0x78c`,
+  sets the remaining time `+0x790` to 15.0, and sets the best lap `+0x798` to
+  10000.0.
+  Evidence: the blocks at `0x18a21` through `0x18a6a` and `0x140dc` through
+  `0x14265`.
+- Observation: when the mode `0x11d260` holds bit `0x10`, the function scans
+  the 0x2a8-byte traffic records at `0x113cd8` while the index stays below the
+  count `0x115218`.  It stops at the player index `0x11d250`, skips a record
+  with a negative first field, and copies the time at `+0x2c` of the first
+  open record to the total time `+0x78c`.
+  Evidence: the loop at `0x18a70` through `0x18ada` and the traffic record
+  findings for `0x1eae0`, `0x21058`, and `0x2a558`.
+- Observation: unless the saved word `0x11d274` holds bit 4, the remaining
+  time `+0x790` counts down by the frame delta.  Below zero it clamps to zero
+  and sets bit `0x40` of the control byte `0x118e1d`, so the throttle step at
+  `0x160a4` clears the throttle.  A road speed `+0x50c` below 1.0 also clears
+  bit `0x40` and sets input byte `0x118e1c` bit `0x10`.  At or above zero the
+  control byte clears bit `0x40`.
+  Evidence: the blocks at `0x18ae0` through `0x18b5c` and the throttle step at
+  `0x160f4` through `0x1611a`.
+- Inference: the traffic records, the remaining time, and the throttle-cut
+  control bit support the name `race_clock_update`.  The original has no
+  symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The shared `fpu_stub.asm` supplies the FPU run-time symbols, and
+  the function converts no value to an integer, so `__CHP` stays a bare
+  return.
+  Evidence: `tools/rebuild/race_clock_update.c` and
+  `tools/rebuild/modules/race_clock_update.json`.
+- Observation: the behavior check passes.  The harness holds the player
+  object, three traffic records, the input bytes, the mode word, the saved
+  word, the count, the player index, and the frame delta.  The ten paths cover
+  the two early input gates, the clear and set clock gate, the pause bit, the
+  traffic skip and player-index stop, the expired time with a road speed of
+  1.0 and 0.5, and the zero crossing.  The output holds the markers `0`
+  through `9` and `D`.
+  Evidence: `tools/rebuild/race_clock_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_clock_update`, and
+  `work/rebuild/rcu_out.txt`.
+- Observation: the rebuilt module holds 92 decoded instructions and 351
+  bytes.  The identity check stays open at 12 of 92 instructions, 23 of 329
+  bytes, and 0 of 36 relocation slots, because V2 saves the frame first, keeps
+  the object in `ecx`, folds the clock loads, and emits a compact scan loop.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x18a14 --count 92 --rebuilt work/rebuild/rcu.exe
+  --rebuilt-map work/rebuild/race_clock_update.map --rebuilt-symbol
+  race_clock_update_` and `python3 tools/rebuild/run.py run --function
+  0x18a14`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
