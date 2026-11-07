@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: two hundred twelve named modules are rebuilt with the harness and the
+  progress: two hundred thirteen named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -143,9 +143,9 @@ current host.
   `0x1057c`, and `video_copy` at `0x8beb8`, and `player_lap_progress_update`
   at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
   `0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
-  at `0x836ac`;
+  at `0x836ac`, and `func_1e7b4` at `0x1e7b4`;
   thirty modules are verified, one is matching, and one hundred and
-  eighty-two rebuilds hold the recorded difference; the `video_fill`,
+  eighty-three rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -302,10 +302,10 @@ The plan follows the size order, starting with the smallest functions.
     `0x8beb8`, and `player_lap_progress_update` at `0x194a0`, and
     `text_measure` at `0x254a8`, and `traffic_step` at `0x1eae0`, and
     `opponent_curve_eval` at `0x22378`, and `sound_event_render` at
-    `0x836ac`
+    `0x836ac`, and `func_1e7b4` at `0x1e7b4`
     are done;
     the result is thirty verified modules, one matching module, and one
-    hundred and eighty-two open rebuilds).
+    hundred and eighty-three open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

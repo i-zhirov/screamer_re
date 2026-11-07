@@ -342,13 +342,13 @@ reproduce the original bytes.
 | `0x1eae0` | `traffic_step` (done) | 358 | 112 | 6 | 0 |
 | `0x22378` | `opponent_curve_eval` (done) | 353 | 121 | 1 | 31 |
 | `0x836ac` | `sound_event_render` (done) | 351 | 100 | 2 | 13 |
-| `0x1e7b4` | unnamed | 350 | 124 | 1 | 96 |
+| `0x1e7b4` | `func_1e7b4` (done) | 350 | 124 | 1 | 96 |
 | `0x1d55c` | unnamed | 350 | 103 | 1 | 23 |
 | `0x29bac` | unnamed | 348 | 90 | 0 | 0 |
 
 ## Position
 
-Two hundred twelve modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred thirteen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -433,5 +433,5 @@ and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 `0x1057c`, and `video_copy` at `0x8beb8`, and `player_lap_progress_update`
 at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
 `0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
-at `0x836ac`.
-The next unnamed function is `0x1e7b4`.
+at `0x836ac`, and `func_1e7b4` at `0x1e7b4`.
+The next unnamed function is `0x1d55c`.

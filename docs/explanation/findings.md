@@ -16491,3 +16491,66 @@ temporary `-od` recipe.
   0x836ac`.
 - Limit: the original has no symbol name for this function.  The module name,
   the helper names in the harness, and the tail model stay inferred.
+
+## The func_1e7b4 module at 0x1e7b4
+
+- Observation: the original body at `0x1e7b4` holds 124 instructions and 350
+  bytes up to the `ret 4` at `0x1e90f`.  The next function starts at `0x1e914`,
+  so the store record keeps the 352-byte extent and sets no function size.  The
+  record sets the instruction count 124.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e7b4 --count 124` and
+  `tools/rebuild/functions/0x1e7b4.json`.
+- Observation: the two direct callers are the unnamed function at `0x1d55c`
+  and `opponent_curve_eval` at `0x22378`.  The call at `0x1d6ae` and the call
+  at `0x22499` both build three two-dimensional control points at a three-float
+  stride.  Both pass the output pointer in `eax` and the fraction on the stack.
+  Evidence: the blocks at `0x1d5e1` through `0x1d6b3` and `0x223f5` through
+  `0x2249e`, and the two call sites.
+- Observation: the function takes the output pointer in `eax`, the three
+  control points in `edx`, and the fraction on the stack.  It computes the
+  basis weights `w0 = 0.5 * (1 - t)^2`, `w2 = 0.5 * t^2`, and
+  `w1 = 1 - (w0 + w2)` over the points at offsets 0, `0xc`, and `0x18`.
+  Evidence: the block at `0x1e7ba` through `0x1e7f1`.
+- Observation: the output at `+0x00` and `+0x04` holds the sampled position.
+  The function then samples the same basis at `t + 0.002`, subtracts the first
+  sample, divides the difference by its length through the square-root helper
+  at `0xc6cbe`, and writes the two tangent components to `+0x0c` and `+0x10`.
+  Evidence: the blocks at `0x1e7f4` through `0x1e839` and `0x1e8bf` through
+  `0x1e909`.
+- Observation: the double 0.5 sits at object-3 offset `0xbac` and the float
+  0.002 sits at object-3 offset `0xbb4`.  The constants arrive through globals,
+  because the minimal image does not load the constant segment.  The original
+  calls the Watcom square-root helper at `0xc6cbe`.  This harness links no math
+  library, so the local `func_1e7b4_fpu.asm` supplies `sqrt_` from the hardware
+  and the FPU run-time symbols.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: the fixup targets at `0x1e7d2`, `0x1e7e0`, `0x1e841`, `0x1e85a`,
+  and `0x1e868`, the values at object-3 offsets `0xbac` and `0xbb4`, and
+  `tools/rebuild/func_1e7b4_fpu.asm`.
+- Inference: the name stays `func_1e7b4`, because the two callers and the
+  sibling three-dimensional sampler at `0x1e914` support no stronger name.  The
+  sibling keeps its own weak name.  The record takes the section
+  `The vehicle state chain` with the spline family, because the sampler serves
+  the opponent path update and holds the same curve role.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the three control points at the three-float
+  stride, the five-float output, and the two basis constants.  The six paths
+  cover the x and y axes, the mid fraction, the end fraction, and the two
+  negative tangent signs.  The output holds the markers `0` through `5` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_1e7b4_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_1e7b4`, and
+  `work/rebuild/func1e7.txt`.
+- Observation: the rebuilt function holds 124 instructions and 336 bytes.  The
+  identity check stays open at 14 of 124 instructions and 16 of 336 bytes,
+  because V2 keeps the output pointer in `ecx` and the input pointer in `edx`,
+  uses a shorter frame, fuses the two `(1 - t)` factors into one `fmul st(0)`,
+  uses `fst` for the second fraction, and places the two basis constants in the
+  local data.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e7b4 --count 124 --rebuilt work/rebuild/func1e7.exe
+  --rebuilt-map work/rebuild/func_1e7b4.map --rebuilt-symbol func_1e7b4_` and
+  `python3 tools/rebuild/run.py run --function 0x1e7b4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the helper names in the harness stay inferred.
