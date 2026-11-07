@@ -610,7 +610,7 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the one hundred and eighty-six module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and four module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -915,7 +915,9 @@ sets an interrupt breakpoint on the game stub's DOS4GW exec call
 (`BPINT 21 "4B"`), and starts a CPU instruction log.  The tool reads the
 growing log, reports the first game instruction, and then stops the emulation.
 The log scan skips each run of equal lines, because the debugger repeats an
-instruction a varying number of times.  The tool needs a terminal for the
+instruction a varying number of times.  The log budget is 0x400000
+instructions, because a smaller budget can stop in the DOS/4GW loader before
+the game entry.  The tool needs a terminal for the
 DOSBox-X debugger, so it runs the emulator under a pseudo terminal.  It writes
 only under `work/`.  It exits with code 0 when it finds the entry and code 1
 when it does not.
@@ -981,10 +983,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 243 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 239 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 228 checks.  Both flags
-report 224 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 255 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 251 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 240 checks.  Both flags
+report 236 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

@@ -1544,9 +1544,9 @@ and radare2 also recovers functions from call targets.
 ## Pipeline confirmation
 
 `tools/pipeline_check.py` runs every stage and checks the cross-stage links.
-The check reports 243 checks and 0 failures in the `cross-check` shell.  It
-reports 239 checks with `--skip-cross`, 228 checks with `--skip-runtime`, and
-224 checks with both flags.  Evidence: the tool output.
+The check reports 255 checks and 0 failures in the `cross-check` shell.  It
+reports 251 checks with `--skip-cross`, 240 checks with `--skip-runtime`, and
+236 checks with both flags.  Evidence: the tool output.
 
 - The file view and the run-time view agree.  The run-time entry `0150:1f20f8`
   matches the file entry at `0x3a8f8`, and the run-time jump target `0x1f2170`
@@ -9656,7 +9656,7 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   `python3 tools/entry_probe.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game` reports the entry
   `0150:1F20F8` and the candidate `entry jump over the Watcom banner`.
-- Observation: the full pipeline then reports 243 checks and 0 failures.
+- Observation: the full pipeline then reports 255 checks and 0 failures.
   Evidence: `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
 ## The rebuild checks use le.py, not Ghidra or radare2
@@ -9749,8 +9749,8 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   module `0x10000`, `main` at `0x10020`, and the caller `0xd4324` at call site
   `0xd4364` to `0x10020`.
   Evidence: the four `agree` lines above.
-- The check counts are 243 checks for the full run, 239 checks with
-  `--skip-cross`, 228 checks with `--skip-runtime`, and 224 checks with both
+- The check counts are 255 checks for the full run, 251 checks with
+  `--skip-cross`, 240 checks with `--skip-runtime`, and 236 checks with both
   flags.  `--skip-cross` skips stage 8 and the tool preflight.
   `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8.
   Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
@@ -15870,3 +15870,18 @@ temporary `-od` recipe.
   matrix_compose_` and `python3 tools/rebuild/run.py run --function 0x82258`.
 - Limit: the original has no symbol name for this function.  The module name
   and the caller names in the harness stay inferred.
+
+## The entry probe needs a larger log budget
+
+- Observation: the previous 0x100000-instruction budget sometimes ended in the
+  DOS/4GW loader before the game entry.  The log held 1,048,576 lines and no
+  matching entry line.  A 0x400000-instruction budget held 2,906,142 lines and
+  found the entry at `0150:1F20F8`.
+  Evidence: `python3 tools/entry_probe.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game --count 0x400000`.
+- Observation: the default in `tools/entry_probe.py` and the count in
+  `tools/pipeline_check.py` are now 0x400000.  The full pipeline reports 255
+  checks and 0 failures.
+  Evidence: `nix develop .#cross-check --command python3
+  tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game`.

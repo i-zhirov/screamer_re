@@ -10,7 +10,7 @@ reports the entry address.
 The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
-    python3 tools/entry_probe.py --game-dir DIR [--count 0x100000]
+    python3 tools/entry_probe.py --game-dir DIR [--count 0x400000]
 """
 
 from __future__ import annotations
@@ -285,7 +285,7 @@ def print_result(result: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--game-dir", type=Path, required=True)
-    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x100000)
+    parser.add_argument("--count", type=lambda value: int(value, 0), default=0x400000)
     parser.add_argument("--port", type=int, default=9876)
     parser.add_argument("--timeout", type=float, default=300.0)
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
