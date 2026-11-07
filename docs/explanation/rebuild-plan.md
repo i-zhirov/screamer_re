@@ -333,7 +333,7 @@ reproduce the original bytes.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x830c8` | unnamed | 649 | 207 | 0 | 0 |
+| `0x830c8` | `sound_range_update` (done) | 649 | 207 | 0 | 0 |
 | `0x8aa60` | unnamed | 535 | 155 | 1 | 5 |
 | `0x1057c` | unnamed | 483 | 154 | 1 | 0 |
 | `0x8beb8` | unnamed | 468 | 143 | 5 | 0 |
@@ -348,7 +348,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred three modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -428,5 +428,6 @@ and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
 and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 `0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
 `0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
-`0x2cb20`, and `matrix_compose` at `0x82258`.
-The next unnamed function is `0x830c8`.
+`0x2cb20`, and `matrix_compose` at `0x82258`, and `sound_range_update` at
+`0x830c8`.
+The next unnamed function is `0x8aa60`.

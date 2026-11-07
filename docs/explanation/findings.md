@@ -15885,3 +15885,70 @@ temporary `-od` recipe.
   Evidence: `nix develop .#cross-check --command python3
   tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game`.
+
+## The sound_range_update module at 0x830c8
+
+- Observation: the original body at `0x830c8` holds 207 instructions and 649
+  bytes up to the `ret` at `0x83350`.  The next function starts at `0x83354`,
+  so the store record keeps the 652-byte extent and sets no function size.
+  The identity check uses 207 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x830c8 --count 207` and
+  `tools/rebuild/functions/0x830c8.json`.
+- Observation: the only direct caller is `0x83354`.  It reads the returned row
+  count from `eax` and the returned row pointer from `esi`.  The function at
+  `0x83354` is called by `sound_effects_update` at `0x81ab0` with the call site
+  `0x81ac1`.
+  Evidence: the call at `0x83354` and the call at `0x81ac1`.
+- Observation: the source update at `0x8a958` reads the world rectangle at
+  `0x72d94` through `0x72da8`.  It compares the source position at object
+  `+0x08` and `+0x10` with the two x values and the two y values.  The
+  rectangle culls the sound sources, so the record takes the name
+  `sound_range_update` with the confidence `inferred` and the section
+  `Program functions`.
+  Evidence: the comparisons at `0x8a979` through `0x8a991`.
+- Observation: the function finds the spatial grid cell under the camera
+  pointer at `0x7a7ac`.  The row index is `(z + 0x100000) >> 13` and the cell
+  index is `(x + 0x100000) >> 13`.  A negative row or cell pointer is skipped.
+  A cell count above zero at `+0x24` selects the extent pointer at `+0x10`.
+  The extent fills the view rectangle at `0x72dac` with the four fields plus
+  `0x100000`.
+  Evidence: the block at `0x830ed` through `0x83150`.
+- Observation: the function rotates the two clip points at `0x72d48` and
+  `0x72d54` by the Q14 cosine and sine at `0x724ec` and `0x724f0`.  It uses
+  the arithmetic shift 14.  It expands the result to the central
+  `[-0x2000, 0x2000]` box, adds the camera position, and clamps the world
+  limits to `[-0x100000, 0xfffff]`.  It biases the result by `0x100000` and
+  intersects the range with the extent rectangle.
+  Evidence: the block at `0x83153` through `0x832e2`.
+- Observation: the function forms the grid row count in `eax` and the row
+  pointer in `esi` from the y range.  It forms the x offset at `0x73377` and
+  the column count at `0x73381` from the x range.  A sum above `0xfd` skips
+  the final increment.
+  Evidence: the block at `0x832e3` through `0x83350`.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction.  C cannot return a value in `esi`, so the rebuild stores the
+  row pointer in the global `grid_row`.  The minimal image needs one
+  initialized data byte, because the DOS4G loader leaves the BSS object
+  unmapped when the data object holds no page.  The module holds the marker
+  `sound_range_marker`.
+  Evidence: `tools/rebuild/sound_range_update.c`.
+- Observation: the harness holds the camera record, the spatial grid, the
+  extent record, the clip points, the cosine and sine, and the output globals.
+  The six paths cover the small clip, the inside extent, the zero cell count,
+  the negative row, the world limit clamp, and the empty x cross.  The output
+  holds the markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_range_update_main.c`, `python3
+  tools/rebuild/harness.py run --module sound_range_update`, and
+  `work/rebuild/sndrng.txt`.
+- Observation: the rebuilt function holds 746 bytes and 207 decoded
+  instructions.  The identity check stays open at 73 of 207 instructions and
+  25 of 649 bytes, because V2 adds a prologue, keeps the locals on the stack,
+  uses other registers, and reads the globals through near data addresses.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x830c8 --count 207 --rebuilt work/rebuild/sndrng.exe
+  --rebuilt-map work/rebuild/sound_range_update.map --rebuilt-symbol
+  sound_range_update_` and `python3 tools/rebuild/run.py run --function
+  0x830c8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the register-return model stay inferred.

@@ -138,9 +138,10 @@ current host.
   and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
   `0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
   `0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
-  `0x2cb20`, and `matrix_compose` at `0x82258`;
+  `0x2cb20`, and `matrix_compose` at `0x82258`, and `sound_range_update` at
+  `0x830c8`;
   twenty-nine modules are verified, one is matching, and one hundred and
-  seventy-three rebuilds hold the recorded difference; the `video_fill`,
+  seventy-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -291,10 +292,11 @@ The plan follows the size order, starting with the smallest functions.
     `traffic_object_link` at `0x1ef68`, and `collision_cell_test` at `0x11ccc`,
     and `race_simulation_update` at `0x2003c`, and `race_finish_update` at
     `0x21058`, and `music_load` at `0x2fcec`, and `lzw_bit_read` at `0x4d844`,
-    and `car_select_update` at `0x2cb20`, and `matrix_compose` at `0x82258`
+    and `car_select_update` at `0x2cb20`, and `matrix_compose` at `0x82258`,
+    and `sound_range_update` at `0x830c8`
     are done;
     the result is twenty-nine verified modules, one matching module, and one
-    hundred and seventy-three open rebuilds).
+    hundred and seventy-four open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

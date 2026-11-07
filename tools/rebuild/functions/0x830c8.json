@@ -1,9 +1,90 @@
 {
   "address": "0x830c8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x830c8 holds 207 instructions and 649 bytes up to the ret at 0x83350; the next function starts at 0x83354, so the store record keeps the 652-byte extent and sets no separate function size; the identity check uses 207 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x83354 builds the active sound list and reads the returned row count from eax and the returned row pointer from esi; the source update at 0x8a958 reads the world rectangle at 0x72d94 through 0x72da8 to cull the sound sources; the record takes the name sound_range_update with the confidence inferred and the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function finds the spatial grid cell under the camera position at 0x7a7ac; a row or cell pointer with a negative value is skipped; a cell count above zero at +0x24 selects the extent pointer at +0x10; the extent fills the view rectangle at 0x72dac with the four fields plus 0x100000"
+    },
+    {
+      "kind": "note",
+      "text": "the function rotates the two clip points at 0x72d48 and 0x72d54 by the Q14 cosine and sine at 0x724ec and 0x724f0 with the arithmetic shift 14; it expands the result to the central [-0x2000, 0x2000] box, adds the camera position, clamps to [-0x100000, 0xfffff], biases by 0x100000, and intersects the range with the extent rectangle"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the grid row count in eax and the row pointer in esi from the y range, and the x offset at 0x73377 and the column count at 0x73381 from the x range; a sum above 0xfd skips the final increment; C cannot return a value in esi, so the rebuild stores the row pointer in the global grid_row"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame; the module uses no floating-point instruction; the minimal image needs one initialized data byte, because the DOS4G loader leaves the BSS object unmapped when the data object holds no page; the module holds the marker sound_range_marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the camera record, the spatial grid, the extent record, the clip points, the cosine and sine, and the output globals; the six paths cover the small clip, the inside extent, the zero cell count, the negative row, the world limit clamp, and the empty x cross; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x830c8 --count 207"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x830c8 --count 207 --rebuilt work/rebuild/sndrng.exe --rebuilt-map work/rebuild/sound_range_update.map --rebuilt-symbol sound_range_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_range_update"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_range_update module at 0x830c8"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_range_update",
+  "name": "sound_range_update",
   "notes": [],
   "object_offset": "0x730c8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 649,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 73,
+        "instructions_total": 207,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x830c8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:560987865a1110e9e4574d2a384ac9ddfcda7148e1831f5b2028dbe216662c84",
+    "source_digest": "sha256:e607b7723c1d8ed9a74fdeadaeda71d48a93688e45f4a8037c2a2326453dc58b",
+    "tool": "run.py"
+  },
+  "role": "Computes the camera view rectangle and the spatial grid row range for the sound source update.",
+  "section": "Program functions",
   "size": 652,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_range_update_"
 }
