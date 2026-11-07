@@ -1,9 +1,91 @@
 {
   "address": "0x29bac",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 90,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x29bac holds 90 instructions and 348 bytes up to the ret at 0x29d07; the next function starts at 0x29d08, so the store record keeps the 348-byte extent and sets no function size; the identity check uses 90 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the call at 0x29027 in net_race_screen at 0x28ba4; it sits in the mode 2 overlay that shows the loading screen at 0x2a364, runs 0x29d08, saves the record through race_record_save at 0x2e82c, calls this function, and enters state 5 through race_state_begin at 0x294c8; state 5 is the championship screen at 0x2cf68"
+    },
+    {
+      "kind": "note",
+      "text": "the flag DAT_00118e1c bit 0x20 aborts the function, and the flag DAT_00118e1d bit 0x10 sets the result DAT_00120804 to 1, otherwise to 0; the selected record DAT_001203dc picks one 0x2c-byte record from the table at object-3 offset 0x22bc, and the field +0x24 is the championship group"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the car number DAT_0011d270, the race time DAT_0011d268, and the points DAT_001021f0[DAT_0011d270] into the standings row of the group at DAT_00120400, DAT_001203e8, and DAT_00120418; it sums the points from group 0 up to the group, adds 9 points for every higher group up to the sixth, advances the selected record, and sets the result to 2 when the sum is below the value field +0x04 of the new record"
+    },
+    {
+      "kind": "note",
+      "text": "the record takes the name championship_result_apply, because it applies the finished-race result to the championship standings that championship_screen at 0x2cf68 draws; the record takes the section race_frame callees with the caller net_race_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two input flag bytes, the result flag, the selected and previous record indices, the car number, the race time bits, the points table, the three standings arrays, and the 0x2c-byte championship records; the six paths cover the normal group 1 stores, the input bit 0x10, the low sum 42, group 5 with no fill, the abort bit, and the equal threshold; the output holds the markers 0 through 5 and D, and the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 14 of 90 instructions and 24 of 344 bytes equal, and 1 of 57 relocation slots equal, because V2 uses another prologue, keeps values in registers, and fuses the table index; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x29bac --count 90"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x29bac --count 90 --rebuilt work/rebuild/cramod.exe --rebuilt-map work/rebuild/championship_result_apply.map --rebuilt-symbol championship_result_apply_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x29bac"
+    },
+    {
+      "kind": "finding",
+      "text": "The championship_result_apply module at 0x29bac"
+    }
+  ],
+  "implementation": "c",
+  "module": "championship_result_apply",
+  "name": "championship_result_apply",
   "notes": [],
   "object_offset": "0x19bac",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 344,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 90,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29bac",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:ca60e8a9155bbdfbd1c80827f84c70ad7a9b651f1291900d8ddfe1f50b2d4ffb",
+    "source_digest": "sha256:a971d26a353e2f4958a3e81afeec0099d63e4682d09fda9c2b8b6b9cd0bd23eb",
+    "tool": "run.py"
+  },
+  "role": "applies the finished-race result to the championship standings row, advances the selected championship record, and flags a low points total",
+  "section": "race_frame callees",
   "size": 348,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "championship_result_apply_"
 }

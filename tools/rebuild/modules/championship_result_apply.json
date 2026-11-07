@@ -1,0 +1,32 @@
+{
+  "exe": "cramod.exe",
+  "map": "championship_result_apply.map",
+  "name": "championship_result_apply",
+  "run": {
+    "command": "cramod.exe > cra_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "cra_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "championship_result_apply.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "championship_result_apply_main.c"
+    }
+  ]
+}

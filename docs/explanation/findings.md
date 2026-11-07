@@ -16609,3 +16609,71 @@ temporary `-od` recipe.
   0x1d55c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the helper names in the harness stay inferred.
+
+## The championship_result_apply module at 0x29bac
+
+- Observation: the original body at `0x29bac` holds 90 instructions and 348
+  bytes up to the `ret` at `0x29d07`.  The next function starts at `0x29d08`, so
+  the store record keeps the 348-byte extent and sets no function size.  The
+  identity check uses 90 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x29bac --count 90` and
+  `tools/rebuild/functions/0x29bac.json`.
+- Observation: the only direct caller is the call at `0x29027` in
+  `net_race_screen` at `0x28ba4`.  The call sits in the mode 2 overlay.  The
+  overlay shows the loading screen at `0x2a364`, runs `0x29d08`, saves the
+  record through `race_record_save` at `0x2e82c`, calls this function, and then
+  enters state 5 through `race_state_begin` at `0x294c8`.  State 5 is the
+  championship screen at `0x2cf68`.
+  Evidence: the direct call sweep for `0x29bac`, the block at `0x28fd6` through
+  `0x29038`, and the record of `0x2cf68`.
+- Observation: the flag `DAT_00118e1c` bit `0x20` aborts the function.  The flag
+  `DAT_00118e1d` bit `0x10` sets the result `DAT_00120804` to 1, otherwise to 0.
+  The selected record `DAT_001203dc` picks one 0x2c-byte record from the table
+  at object-3 offset `0x22bc`.  The record field `+0x24` is the championship
+  group.
+  Evidence: the blocks at `0x29bb5` through `0x29c57` and the table at module
+  linear `0x1022bc`.
+- Observation: the function stores the car number `DAT_0011d270`, the race time
+  bits `DAT_0011d268`, and the points `DAT_001021f0[DAT_0011d270]` into the
+  standings row of the group at `DAT_00120400`, `DAT_001203e8`, and
+  `DAT_00120418`.  It sums the points from group 0 up to the group, adds 9
+  points for every higher group up to the sixth, advances the selected record,
+  and sets the result to 2 when the sum is below the value field `+0x04` of the
+  new record.
+  Evidence: the blocks at `0x29bd8` through `0x29d01`, the points table at
+  object-3 offset `0x21f0`, and the record of `championship_screen` at
+  `0x2cf68`.
+- Inference: the record takes the name `championship_result_apply`, because it
+  applies the finished-race result to the standings that `championship_screen`
+  draws.  The record takes the section `race_frame callees` with the caller
+  `net_race_screen`.
+  Evidence: the data flow above and the call graph.
+- Observation: the harness holds the two input flag bytes, the result flag, the
+  selected and previous record indices, the car number, the race time bits, the
+  points table, the three standings arrays, and the 0x2c-byte championship
+  records.  The six paths cover the normal group 1 stores, the input bit `0x10`,
+  the low sum 42, group 5 with no fill, the abort bit, and the equal threshold.
+  The output holds the markers `0` through `5` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/championship_result_apply_main.c`,
+  `python3 tools/rebuild/harness.py run --module championship_result_apply`,
+  and `work/rebuild/cra_out.txt`.
+- Observation: the original copies the race time bits with a dword move.  The
+  module declares the time and the time array as `int`, so it uses no
+  floating-point instruction.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/championship_result_apply.c` and
+  `tools/rebuild/modules/championship_result_apply.json`.
+- Observation: the rebuilt body holds 46 instructions and 173 bytes up to its
+  `ret`.  The identity check decodes 90 instructions from the symbol, so its
+  range continues past the function.  The check stays open at 14 of 90
+  instructions and 24 of 344 bytes, because V2 uses another prologue, keeps
+  values in registers, and fuses the table index.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x29bac --count 90 --rebuilt work/rebuild/cramod.exe
+  --rebuilt-map work/rebuild/championship_result_apply.map --rebuilt-symbol
+  championship_result_apply_` and `python3 tools/rebuild/run.py run --function
+  0x29bac`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the field names in the harness stay inferred.
