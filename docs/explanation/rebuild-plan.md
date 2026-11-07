@@ -306,6 +306,26 @@ reproduce the original bytes.
 | `0x23038` | `path_playback_update` (done) | 437 | 148 | 1 | 19 |
 | `0x219ec` | `quit_confirm_screen` (done) | 431 | 122 | 14 | 0 |
 
+### Phase M: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x19678` | unnamed | 431 | 124 | 7 | 16 |
+| `0x2c7a8` | unnamed | 425 | 125 | 9 | 0 |
+| `0x20d20` | unnamed | 421 | 106 | 5 | 15 |
+| `0x1fd70` | unnamed | 419 | 112 | 12 | 0 |
+| `0x1ef68` | unnamed | 415 | 117 | 5 | 20 |
+| `0x11ccc` | unnamed | 413 | 127 | 4 | 9 |
+| `0x2003c` | unnamed | 404 | 104 | 14 | 0 |
+| `0x21058` | unnamed | 391 | 114 | 10 | 5 |
+| `0x2fcec` | unnamed | 379 | 99 | 13 | 0 |
+| `0x4d844` | unnamed | 374 | 119 | 1 | 0 |
+| `0x2cb20` | unnamed | 373 | 103 | 3 | 19 |
+| `0x82258` | unnamed | 365 | 127 | 0 | 0 |
+
 ## Position
 
 One hundred ninety-one modules carry a recipe and a result: the twelve Phase A modules,
