@@ -15667,3 +15667,85 @@ temporary `-od` recipe.
   0x21058`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The music_load module at 0x2fcec
+
+- Observation: the original body at `0x2fcec` holds 99 instructions and 379
+  bytes up to the `ret` at `0x2fe66`.  The next function starts at `0x2fe68`,
+  so the store record keeps the 380-byte extent and sets no function size.  The
+  identity check uses the first 99 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2fcec --count 99` and
+  `tools/rebuild/functions/0x2fcec.json`.
+- Observation: two rebuilt callers name this function `music_load`.
+  `menu_space_init` at `0x29d08` calls it at `0x29f60` with the record `0x62b0`
+  and the member `music%d`.  `race_data_load` at `0x131a8` calls it at
+  `0x1352c` with the record `DAT_001062b0` and the path `music%d`.  Both rebuilt
+  callers declare the target as `music_load`, so the record takes that name.
+  Evidence: `tools/rebuild/menu_space_init.c`, `tools/rebuild/race_data_load.c`,
+  and the two call sites at `0x29f60` and `0x1352c`.
+- Observation: the record gate sits at `+0x14`, the result at `+0x10`, the
+  success flag at `+4`, the path at `+0x18`, and the resource at `+0x98`.  A
+  clear gate sets the result to 0 and returns it.
+  Evidence: the block at `0x2fd03` through `0x2fd18` and the block at `0x2fe4d`
+  through `0x2fe66`.
+- Observation: the function stops the current bank through `music_bank_stop` at
+  `0x2fe68`, builds the name `%s.HMP` through `sprintf` at `0x4d32c`, and opens
+  the member through `fopen` at `0x4c08d` with the mode `rb`.  A failed open
+  runs `file_error_report` at `0x4bf88`, which exits.
+  Evidence: the call at `0x2fd13`, the `sprintf` call at `0x2fd25`, the `fopen`
+  call at `0x2fd41`, the `file_error_report` call at `0x2fd50`, and the strings
+  at object-3 offsets `0x154c` and `0x1553`.
+- Observation: the function reads the member size through `stream_status` at
+  `0x4c7e0`, requests the `MIDI_MUSIC` resource through `resource_get` at
+  `0x2eed0`, and a zero result runs `memory_error_report` at `0x2edad`, which
+  exits.  It reads the member through `stream_read` at `0x4c4e5`, keeps the size
+  after the read at `0x20b68`, and closes the stream through `stream_close` at
+  `0x4c38d`.
+  Evidence: the blocks at `0x2fd55` through `0x2fdc9` and the string at
+  object-3 offset `0x1556`.
+- Observation: the function fills the 16-entry table at the module offset
+  `0x2f04` with `-1` and passes the buffer, the record, and the table to the
+  song loader at `0xd3035` through the far-pointer descriptor at `0x20ba0`.  A
+  non-zero result frees the `MIDI_MUSIC` resource through `resource_free_name`
+  at `0x2f326` and sets the result to 4.  A zero result sets the success flag
+  and the result to 0.
+  Evidence: the loop at `0x2fdc9` through `0x2fde8`, the descriptor stores at
+  `0x2fdf0` through `0x2fdf8`, the loader call at `0x2fe16`, the free call at
+  `0x2fe32`, and the result stores at `0x2fe3a` through `0x2fe50`.
+- Inference: the bank stop, the HMP member, the `MIDI_MUSIC` resource, and the
+  song loader support the name `music_load`.  The callers give the name
+  directly, and the callee name `midi_song_load` for `0xd3035` stays inferred.
+  Evidence: the call graph and the strings above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/music_load.c` and
+  `tools/rebuild/modules/music_load.json`.
+- Observation: the harness holds the record gate, the resource pointer, the
+  stream size, the open result, the resource result, and the song result.  The
+  stubs cover the clear gate, the full path, the song failure, the open failure,
+  and the resource failure.  The output holds the markers `0` through `4` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/music_load_main.c`, `python3
+  tools/rebuild/harness.py run --module music_load`, and
+  `work/rebuild/mload.txt`.
+- Observation: the name, the path, the resource name, and the open mode are
+  near data offsets in the original image.  The harness compares the received
+  pointers as byte strings, because the near offsets resolve through the
+  segment register.
+  Evidence: the `mov ecx, 7` at `0x10039` in the rebuilt image, the fixup at
+  `0x10039` to object 2 offset 7, and the `%s.HMP`, `rb`, and `MIDI_MUSIC`
+  bytes at the start of the `DGROUP` segment.
+- Observation: the rebuilt function holds 99 decoded instructions and 331
+  bytes.  The identity check stays open at 22 of 99 instructions and 19 of 331
+  bytes, because V2 saves the frame pointer first, keeps the record in `esi`,
+  passes the string pointers as near data offsets, uses another local layout,
+  and builds the gate as a test and a jump.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2fcec --count 99 --rebuilt work/rebuild/mload.exe
+  --rebuilt-map work/rebuild/music_load.map --rebuilt-symbol music_load_` and
+  `python3 tools/rebuild/run.py run --function 0x2fcec`.
+- Limit: the original has no symbol name for this function.  The caller name
+  `music_load` is inferred from the two rebuilt callers, and the callee name
+  `midi_song_load` stays inferred.

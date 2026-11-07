@@ -1,9 +1,99 @@
 {
   "address": "0x2fcec",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 99,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2fcec holds 99 instructions and 379 bytes up to the ret at 0x2fe66; the next function starts at 0x2fe68, so the store record keeps the 380-byte extent and sets no function size; the identity check uses 99 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "two rebuilt callers name the function music_load: menu_space_init at 0x29d08 calls it with the record 0x62b0 and the member music%d, and race_data_load at 0x131a8 calls it with the record DAT_001062b0 and the path music%d; the record takes the section The sound loaders"
+    },
+    {
+      "kind": "note",
+      "text": "the record gate sits at +0x14, the result at +0x10, the success flag at +4, the path at +0x18, and the resource at +0x98; a clear gate sets the result to 0 and returns it"
+    },
+    {
+      "kind": "note",
+      "text": "the function stops the current bank through music_bank_stop at 0x2fe68, builds %s.HMP through sprintf at 0x4d32c, and opens the member through fopen at 0x4c08d with the mode rb; a failed open runs file_error_report at 0x4bf88, which exits"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the member size through stream_status at 0x4c7e0, requests the MIDI_MUSIC resource through resource_get at 0x2eed0, and a zero result runs memory_error_report at 0x2edad, which exits; it reads the member through stream_read at 0x4c4e5, keeps the size after the read, and closes the stream through stream_close at 0x4c38d"
+    },
+    {
+      "kind": "note",
+      "text": "the function fills the 16-entry table at the module offset 0x2f04 with -1 and passes the buffer, the record, and the table to the song loader at 0xd3035 through the far-pointer descriptor at 0x20ba0; a non-zero result frees the MIDI_MUSIC resource through resource_free_name at 0x2f326 and sets the result to 4, and a zero result sets the success flag and the result to 0"
+    },
+    {
+      "kind": "note",
+      "text": "the strings %s.HMP, rb, and MIDI_MUSIC sit at object-3 offsets 0x154c, 0x1553, and 0x1556; the strings support the music load name; the original has no symbol, so the record keeps the name with the confidence inferred, and the callee name midi_song_load for 0xd3035 stays inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the record gate, the resource pointer, the stream size, the open result, the resource result, and the song result; the stubs cover the clear gate, the full path, the song failure, the open failure, and the resource failure; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 99 decoded instructions and 331 bytes; the identity check stays open at 22 of 99 instructions and 19 of 331 bytes, because V2 saves the frame pointer first, keeps the record in esi, passes the string pointers as near data offsets, uses another local layout, and builds the gate as a test and a jump; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2fcec --count 99"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2fcec --count 99 --rebuilt work/rebuild/mload.exe --rebuilt-map work/rebuild/music_load.map --rebuilt-symbol music_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module music_load"
+    }
+  ],
+  "implementation": "c",
+  "module": "music_load",
+  "name": "music_load",
   "notes": [],
   "object_offset": "0x1fcec",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 331,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 99,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2fcec",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:b59eef17ff842f17e4f74bb6d80bd546c0345e4040871c5f89c8a06a56bd1035",
+    "source_digest": "sha256:b178f4bfe2956f17a77043764a6b03eb109644b9b437ec52e11c7df151896b97",
+    "tool": "run.py"
+  },
+  "role": "stops the music bank, loads the HMP member into the MIDI resource, and starts the song",
+  "section": "The sound loaders",
   "size": 380,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "music_load_"
 }

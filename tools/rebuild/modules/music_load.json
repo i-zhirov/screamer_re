@@ -1,0 +1,31 @@
+{
+  "exe": "mload.exe",
+  "map": "music_load.map",
+  "name": "music_load",
+  "run": {
+    "command": "mload.exe > mload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_load_main.c"
+    }
+  ]
+}
