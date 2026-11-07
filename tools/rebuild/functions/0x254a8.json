@@ -1,9 +1,91 @@
 {
   "address": "0x254a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 104,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x254a8 holds 104 instructions and 360 bytes up to the ret at 0x2560f; the next function starts at 0x25620 after 16 bytes of padding at 0x25610, so the store record keeps the 376-byte extent and sets no separate function size; the identity check uses 104 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the four arguments arrive in the Watcom register order: the width pointer in eax, the height pointer in edx, the text pointer in ebx, and the font index in ecx; the function saves and restores the four registers, so it writes the results only through the two output pointers"
+    },
+    {
+      "kind": "note",
+      "text": "the font index selects a 12-byte record from the table at DAT_00015438 with the height at +0x00, the first character at +0x04, and the character count at +0x08, and it selects a 0x500-byte glyph row from the table at DAT_00015434 with the advance in the first 32-bit slot of 8 bytes; the count DAT_00015440 bounds the index"
+    },
+    {
+      "kind": "note",
+      "text": "the function scans the glyph row for the widest advance and adds 2, then walks the text; a visible character adds its own advance, or the widest advance plus 2 when the monospace mode holds; the control byte 1 clears and the control byte 2 sets the monospace mode, and the control byte 3 clears and the control byte 4 sets the widened mode that adds one pixel to each advance"
+    },
+    {
+      "kind": "note",
+      "text": "the function measures the text width and height, and the callers panel_draw_centered, credits_scroll, race_panel_2, race_panel_3, and race_hud_draw measure a text before they center it or draw it; the record keeps the name text_measure with the confidence inferred and takes the section Program functions, because the callers sit in several sections"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two font tables, the font count, and the measured text; the eight paths cover the out-of-range font, the two visible glyphs, the control byte 1 monospace mode, the control byte 2 restore, the control byte 3 widen clear, the control byte 4 widen set, the character below the first and past the range, and the two higher glyphs; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds the same behavior in C; the identity check stays open at 16 of 104 instructions and 12 of 284 bytes because the original saves all registers with pushal and keeps the argument copies and the two mode flags in the BSS globals, while the C build keeps them in locals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x254a8 --count 104"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x254a8 --count 104 --rebuilt work/rebuild/txm.exe --rebuilt-map work/rebuild/text_measure.map --rebuilt-symbol text_measure_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x254a8"
+    },
+    {
+      "kind": "finding",
+      "text": "The text_measure module at 0x254a8"
+    }
+  ],
+  "implementation": "c",
+  "module": "text_measure",
+  "name": "text_measure",
   "notes": [],
   "object_offset": "0x154a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 284,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 104,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x254a8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:1dd5c97bf93a9fb266446f00208644394135ed2dc4f96b2bad9ababb70fac812",
+    "source_digest": "sha256:9e682624e153598d7f561bd6fd6eed7e9ccb8d20ba0cf7bcd550a35341ad4f2e",
+    "tool": "run.py"
+  },
+  "role": "Measures the width and height of a text string from the font glyph tables.",
+  "section": "Program functions",
   "size": 376,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "text_measure_"
 }

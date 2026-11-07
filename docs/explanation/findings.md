@@ -16216,3 +16216,66 @@ temporary `-od` recipe.
   --function 0x194a0`.
 - Limit: the original has no symbol name for this function.  The module name,
   the effect subtypes, and the timer limits stay inferred.
+
+## The text_measure module at 0x254a8
+
+- Observation: the plan row records a 360-byte body of 104 instructions, zero
+  calls, and zero FPU instructions.  The body starts at `0x254a8` and ends at
+  the `ret` at `0x2560f`.  The next function starts at `0x25620` after 16 bytes
+  of padding at `0x25610`, so the store record keeps the 376-byte extent and
+  sets no separate function size.  The identity check uses 104 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x254a8 --count 104` and
+  `tools/rebuild/functions/0x254a8.json`.
+- Observation: the four arguments arrive in the Watcom register order.  They
+  are the width pointer in eax, the height pointer in edx, the text pointer in
+  ebx, and the font index in ecx.  The function saves and restores the four
+  registers, so it writes the results only through the two output pointers.
+  Evidence: the register save at `0x254a8`, the four global stores at
+  `0x254a9` through `0x254ba`, and the final `popal` at `0x2560e`.
+- Observation: the font index selects a 12-byte record from the table at
+  `DAT_00015438`.  The record holds the height at `+0x00`, the first character
+  at `+0x04`, and the character count at `+0x08`.  The same index selects a
+  `0x500`-byte glyph row from the table at `DAT_00015434`.  Each glyph holds
+  its advance in the first 32-bit slot of 8 bytes.  The count `DAT_00015440`
+  bounds the index with an unsigned compare.
+  Evidence: the record read at `0x254d2` through `0x2550b` and the row read at
+  `0x25510` through `0x2555b`.
+- Observation: the function scans the glyph row for the widest advance and
+  adds 2.  It then walks the text.  A visible character adds its own advance,
+  or the widest advance plus 2 when the monospace mode holds.  The control byte
+  1 clears and the control byte 2 sets the monospace mode.  The control byte 3
+  clears and the control byte 4 sets the widened mode that adds one pixel to
+  each advance.
+  Evidence: the scan at `0x25540` through `0x25551`, the text walk at
+  `0x25570` through `0x255cb`, and the mode switch at `0x255cd` through
+  `0x255f6`.
+- Observation: the callers `panel_draw_centered` at `0x2e7cc`,
+  `credits_scroll` at `0x27c34`, `race_panel_2` at `0x2e21c`, `race_panel_3`
+  at `0x2e58c`, and `race_hud_draw` at `0x23420` measure a text before they
+  center it or draw it.  The measurement, the two output pointers, and the font
+  argument support the name `text_measure` with the confidence `inferred`.  The
+  callers sit in several sections, so the record takes the section
+  `Program functions`.
+  Evidence: `docs/reference/program-map.md` rows for `0x2e7cc`, `0x27c34`,
+  `0x2e21c`, `0x2e58c`, and `0x23420`.
+- Observation: the harness holds the two font tables, the font count, and the
+  measured text.  The eight paths cover the out-of-range font, the two visible
+  glyphs, the control byte 1 monospace mode, the control byte 2 restore, the
+  control byte 3 widen clear, the control byte 4 widen set, the character below
+  the first and past the range, and the two higher glyphs.  The output holds
+  the markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/text_measure_main.c`, `python3
+  tools/rebuild/harness.py run --module text_measure`, and
+  `work/rebuild/txm.txt`.
+- Observation: the rebuilt module holds the same behavior in C.  The identity
+  check stays open at 16 of 104 instructions, 12 of 284 bytes, and 1 of 38
+  relocation slots.  The original saves all registers with `pushal` and keeps
+  the argument copies and the two mode flags in the BSS globals, while the C
+  build keeps them in locals.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x254a8 --count 104 --rebuilt work/rebuild/txm.exe
+  --rebuilt-map work/rebuild/text_measure.map --rebuilt-symbol text_measure_`
+  and `python3 tools/rebuild/run.py run --function 0x254a8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two mode names in the harness stay inferred.

@@ -1,0 +1,31 @@
+{
+  "exe": "txm.exe",
+  "map": "text_measure.map",
+  "name": "text_measure",
+  "run": {
+    "command": "txm.exe > txm.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "txm.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "text_measure.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "text_measure_main.c"
+    }
+  ]
+}
