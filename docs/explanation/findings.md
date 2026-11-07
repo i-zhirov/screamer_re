@@ -15155,3 +15155,69 @@ temporary `-od` recipe.
   0x19678`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The championship_screen_init module at 0x2c7a8
+
+- Observation: the original body at `0x2c7a8` holds 125 instructions and 425
+  bytes up to the `ret` at `0x2c950`.  The next function starts at `0x2c954`,
+  so the store record keeps the 428-byte extent and sets no function size.  The
+  identity check uses 125 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2c7a8 --count 125` and
+  `tools/rebuild/functions/0x2c7a8.json`.
+- Observation: the only caller at `0x2bec5` is case 5 of the state init
+  dispatcher at `0x2be94`.  The matching update case 5 at `0x295f1` calls
+  `championship_screen` at `0x2cf68`.  `race_state_update` at `0x29564` is a
+  `race_frame` callee at `0x2807c`, so the record takes the section
+  `race_frame callees`.
+  Evidence: the jump tables at linear `0x2be70` and `0x29540`, the call at
+  `0x2bec5`, and the call at `0x295f1`.
+- Observation: the function sets `DAT_0011d240` at 1, `DAT_00120378` at 1.5,
+  `DAT_00120380` at 0.95, and `DAT_0011fac8` at 1.  It runs the init at
+  `0x2dff4`.
+  Evidence: the stores at `0x2c7cd` through `0x2c7e5`.
+- Observation: the function builds the group start table at `DAT_001201c0`
+  from the champ list `DAT_00120030`.  An entry that holds the `#` marker ends
+  a group, and the table keeps the start index of each group and the sentinel
+  index.  When the mode `DAT_0011d260` is -1, it clears the six slots at
+  `DAT_00120400` to -1 and clears `DAT_001203dc` and `DAT_001203e0`.
+  Evidence: the scan at `0x2c7f9` through `0x2c865` and the clear at `0x2c867`
+  through `0x2c89c`.
+- Observation: the function builds the member `%s%c.pcx` with the record name
+  at `DAT_001022bc + 0x18 + index * 0x2c` and the letter `H`.  It loads the
+  member from `gfx\graf.dat` into `DAT_0011fad0` with the palette
+  `DAT_0010cf5c` through `pcx_load` at `0x1b5a4`.  A non-zero result calls the
+  cleanup at `0x15150`.
+  Evidence: the format at object-3 offset `0x118c`, the archive at `0x1195`,
+  and the calls at `0x2c8d0` and `0x2c8e3`.
+- Observation: the function sets `DAT_00118e08` at 0.08 and `DAT_000007f9` at
+  8.  It builds the palette shades through `0x258d0`, presents the buffer with
+  the scale 0 and the offset 0 through `0x27ec8`, copies `0x3e800` bytes to
+  `DAT_00121528` through `0x8c150`, fills the screen through `0x2aa98`,
+  presents again, and clears `DAT_0011d24c`.
+  Evidence: the block at `0x2c8f1` through `0x2c950`.
+- Inference: the champ list, the `champN` record table, the state 5 caller, and
+  the `championship_screen` update support the name `championship_screen_init`.
+  The original holds no symbol for this function, so the record keeps the name
+  with the confidence inferred.
+- Observation: the harness holds the record table, the slot array, the mode,
+  the selected index, the palette, the two buffers, the format, and the
+  archive.  It runs the empty list path, the mode reset, the failed load, the
+  record indices 0 through 3, and the palette, present, copy, and fill path.
+  The output holds the markers `0` through `4` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/championship_screen_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module championship_screen_init`, and
+  `work/rebuild/chsini.txt`.
+- Observation: the rebuilt module holds 125 decoded instructions.  The identity
+  check stays open at 28 of 125 instructions and 27 of 403 bytes because V2
+  uses another prologue and register order and the data constants arrive
+  through globals.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2c7a8 --count 125 --rebuilt work/rebuild/champini.exe
+  --rebuilt-map work/rebuild/championship_screen_init.map --rebuilt-symbol
+  championship_screen_init_` and `python3 tools/rebuild/run.py run --function
+  0x2c7a8`.
+- Limit: the behavior harness uses the empty list path.  A non-empty pointer
+  table needs an absolute pointer that the minimal image does not relocate.  The
+  empty list still runs the sentinel check and the group start store.

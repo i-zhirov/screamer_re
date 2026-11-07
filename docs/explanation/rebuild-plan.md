@@ -314,7 +314,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x19678` | `race_lap_complete` (done) | 431 | 124 | 7 | 16 |
-| `0x2c7a8` | unnamed | 425 | 125 | 9 | 0 |
+| `0x2c7a8` | `championship_screen_init` (done) | 425 | 125 | 9 | 0 |
 | `0x20d20` | unnamed | 421 | 106 | 5 | 15 |
 | `0x1fd70` | unnamed | 419 | 112 | 12 | 0 |
 | `0x1ef68` | unnamed | 415 | 117 | 5 | 20 |
@@ -328,7 +328,7 @@ reproduce the original bytes.
 
 ## Position
 
-One hundred ninety-two modules carry a recipe and a result: the twelve Phase A modules,
+One hundred ninety-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -402,5 +402,6 @@ and the Phase L modules `car_collision_pass` at `0x1d00c`,
 `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
 and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
 `func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`, and
-`quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`.
-The next unnamed function is `0x2c7a8`.
+`quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`, and
+`championship_screen_init` at `0x2c7a8`.
+The next unnamed function is `0x20d20`.

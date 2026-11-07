@@ -1,9 +1,99 @@
 {
   "address": "0x2c7a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 125,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2c7a8 holds 125 instructions and 425 bytes up to the ret at 0x2c950; the next function starts at 0x2c954, so the store record keeps the 428-byte extent and sets no function size; the identity check uses 125 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x2bec5 is case 5 of the state init dispatcher at 0x2be94; the matching update case 5 at 0x295f1 calls championship_screen at 0x2cf68, and race_state_update at 0x29564 is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets DAT_0011d240 at 1, DAT_00120378 at 1.5, DAT_00120380 at 0.95, and DAT_0011fac8 at 1, and runs the init at 0x2dff4"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the group start table at DAT_001201c0 from the champ list DAT_00120030 by the '#' marker and stores the sentinel index; when the mode DAT_0011d260 is -1 it clears the six slots at DAT_00120400 to -1 and clears DAT_001203dc and DAT_001203e0"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member %s%c.pcx with the record name at DAT_001022bc + 0x18 + index * 0x2c and the letter H, loads it from gfx\\graf.dat into DAT_0011fad0 with the palette DAT_0010cf5c through pcx_load at 0x1b5a4, and runs the cleanup at 0x15150 on a non-zero result"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets DAT_00118e08 at 0.08 and DAT_000007f9 at 8, builds the palette shades through 0x258d0, presents the buffer with the scale 0 and the offset 0 through 0x27ec8, copies 0x3e800 bytes to DAT_00121528 through 0x8c150, fills the screen through 0x2aa98, presents again, and clears DAT_0011d24c"
+    },
+    {
+      "kind": "note",
+      "text": "the champ list, the champN record table, the state 5 caller, and the championship_screen update support the name championship_screen_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the record table, the slot array, the mode, the selected index, the palette, the two buffers, the format, and the archive; it covers the empty list path, the mode reset, the failed load, the record indices 0 through 3, and the palette, present, copy, and fill path; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2c7a8 --count 125"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2c7a8 --count 125 --rebuilt work/rebuild/champini.exe --rebuilt-map work/rebuild/championship_screen_init.map --rebuilt-symbol championship_screen_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module championship_screen_init"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 125 decoded instructions; the identity check stays open at 28 of 125 instructions and 27 of 403 bytes because V2 uses another prologue and register order and the data constants arrive through globals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "note",
+      "text": "the behavior harness uses the empty list path, because a non-empty pointer table needs an absolute pointer that the minimal image does not relocate; the empty list still runs the sentinel check and the group start store"
+    }
+  ],
+  "implementation": "c",
+  "module": "championship_screen_init",
+  "name": "championship_screen_init",
   "notes": [],
   "object_offset": "0x1c7a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 403,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 28,
+        "instructions_total": 125,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2c7a8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:bb8e08b26c0d8b648847acae5aea4a6f7d9b3d3db3dd7572652dd66c4903170e",
+    "source_digest": "sha256:5da46f6a21a801f63e1b6ec2d1b5de7ffe38282431cb5b2394382d237bec177b",
+    "tool": "run.py"
+  },
+  "role": "loads the championship background, builds the championship list group starts, and initialises the state 5 screen",
+  "section": "race_frame callees",
   "size": 428,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "championship_screen_init_"
 }
