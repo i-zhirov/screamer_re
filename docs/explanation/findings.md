@@ -16146,3 +16146,73 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x8beb8`.
 - Limit: the original has no symbol name for this function.  The module name,
   the two height arguments, and the five bank pieces stay inferred.
+
+## The player_lap_progress_update module at 0x194a0
+
+- Observation: the plan row records a 363-byte body of 103 instructions, four
+  calls, and twelve FPU instructions.  The body starts at `0x194a0` and ends at
+  the `ret` at `0x1960a`.  The next function starts at `0x1960c`, so the store
+  record keeps the 364-byte extent and sets no separate function size.  The
+  identity check uses 103 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x194a0 --count 103` and
+  `tools/rebuild/functions/0x194a0.json`.
+- Observation: the only direct caller is the second player step group at
+  `0x15ab8`.  The call at `0x15acc` runs after the call to
+  `player_track_node_update` at `0x15ac4` on the same player object at
+  object-3 offset `0xf91c`.  The record takes the section
+  `The vehicle state chain`.
+  Evidence: the group at `0x15ab8` through `0x15acc`.
+- Observation: the function consumes the fields that
+  `player_track_node_update` stores.  The fields are the status `+0x780`, the
+  target index `+0x668`, the node flags `+0x678`, and the segment ratio
+  `+0x67c`.  The function marks the visited node, advances the lap, and forms
+  the progress `+0x680`.  The caller and the fields support the name
+  `player_lap_progress_update` with the confidence `inferred`.
+  Evidence: `tools/rebuild/player_lap_progress_update.c` and the finding "The
+  player_track_node_update module at 0x1821c".
+- Observation: a status of 1 marks the target node in the second visited chain
+  at `+0x5a0` and increments the lap counter at `+0x59c`.  When the node flags
+  hold bit 2, the first call sets the latch at `+0x784`.  A later call pushes
+  the effect 4 with the subtype 2 below the timer 3.0, the subtype 1 above the
+  timer 15.0, and the subtype 0 between the limits.  Each such call updates the
+  timer through `0x1960c`.
+  Evidence: the state 1 block at `0x194bf` through `0x19561`.
+- Observation: a status of 2 at the target node 0 runs only when the lap
+  counter equals the node count at `0x7ed0`.  It updates the timer through
+  `0x1960c` and starts the new lap through `race_lap_complete` at `0x19678`.
+  Any other status reaches only the tail.
+  Evidence: the status 2 block at `0x19563` through `0x1959a`.
+- Observation: the tail forms the progress at `+0x680` as 100 times the lap
+  index `+0x684`, plus the current node index `+0x598`, plus the ratio
+  `+0x67c`.  It does this only when the current node is marked in the second
+  chain.  It then clears the status at `+0x780`.
+  Evidence: the tail at `0x1959f` through `0x19603`.
+- Observation: the two timer limits sit at object-3 offsets `0x8ac` and
+  `0x8b0` and hold 3.0 and 15.0.  The minimal harness image does not load the
+  constant segment, so the module reads the limits from the globals
+  `lap_timer_low` and `lap_timer_high`.  The harness sets the bit patterns
+  `0x40400000` and `0x41700000`.
+  Evidence: `python3 tools/le.py map` and the object-3 read of `0x1008ac`
+  and `0x1008b0`.
+- Observation: the harness holds the player object, the node count, the two
+  timer limits, and the three callee stubs.  The eleven paths cover the clear
+  node flag, the first checkpoint latch, the timer values 1.0, 3.0, 20.0, and
+  10.0, the full-lap start, the target and counter gates, another status, and
+  the progress from the current node.  The output holds the markers `0` through
+  `9`, `A`, and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/player_lap_progress_update_main.c`, `python3
+  tools/rebuild/harness.py run --module player_lap_progress_update`, and
+  `work/rebuild/plpu.txt`.
+- Observation: the rebuilt module holds 363 bytes and 103 decoded
+  instructions.  The identity check stays open at 21 of 103 instructions, 27
+  of 363 bytes, and 0 of 16 relocation slots.  V2 saves ebp first, keeps the
+  object in ecx, uses another local layout for the timer and the progress
+  terms, and emits shorter compare branches.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x194a0 --count 103 --rebuilt work/rebuild/plpu.exe
+  --rebuilt-map work/rebuild/player_lap_progress_update.map --rebuilt-symbol
+  player_lap_progress_update_` and `python3 tools/rebuild/run.py run
+  --function 0x194a0`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the effect subtypes, and the timer limits stay inferred.

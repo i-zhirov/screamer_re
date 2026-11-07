@@ -1,9 +1,99 @@
 {
   "address": "0x194a0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 103,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x194a0 holds 103 instructions and 363 bytes up to the ret at 0x1960a; the next function starts at 0x1960c, so the store record keeps the 364-byte extent and sets no separate function size; the identity check uses 103 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15acc is the second player step group at 0x15ab8; the group calls player_track_node_update at 0x15ac4 first and this function at 0x15acc second on the player object at object-3 offset 0xf91c, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the caller and the consumed fields support the name player_lap_progress_update; player_track_node_update selects the node and stores the status +0x780, the target index +0x668, the node flags +0x678, and the segment ratio +0x67c, and this function marks the visited node, advances the lap, and forms the progress +0x680"
+    },
+    {
+      "kind": "note",
+      "text": "a status of 1 marks the target node in the second visited chain at +0x5a0 and increments the lap counter at +0x59c; when the node flags hold bit 2 the first call sets the latch at +0x784, and a later call pushes the effect 4 with the subtype 2 below the timer 3.0, the subtype 1 above the timer 15.0, and the subtype 0 between the two limits; each such call updates the timer through 0x1960c"
+    },
+    {
+      "kind": "note",
+      "text": "a status of 2 at the target node 0 runs only when the lap counter reaches the node count at 0x7ed0; it updates the timer through 0x1960c and starts the new lap through race_lap_complete at 0x19678; any other status 2 path and any other status reach only the tail"
+    },
+    {
+      "kind": "note",
+      "text": "the tail forms the race progress at +0x680 as 100 times the lap index +0x684 plus the current node index +0x598 plus the segment ratio +0x67c when the current node is marked in the second chain, and it clears the status at +0x780"
+    },
+    {
+      "kind": "note",
+      "text": "the two timer limits sit at object-3 offsets 0x8ac and 0x8b0 and hold 3.0 and 15.0; the minimal harness image does not load the constant segment, so the module reads the limits from the globals lap_timer_low and lap_timer_high and the harness sets the bit patterns 0x40400000 and 0x41700000"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the node count, the timer limits, and the three callee stubs; the eleven paths cover the clear node flag, the first checkpoint latch, the timer 1.0, 3.0, 20.0, and 10.0 subtypes, the full-lap start, the target and counter gates, another status, and the progress from the current node; the output holds the markers 0 through 9, A, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 103 decoded instructions and 363 bytes; the identity check stays open at 21 of 103 instructions, 27 of 363 bytes, and 0 of 16 relocation slots because V2 saves ebp first, keeps the object in ecx, uses another local layout for the timer and the progress terms, and emits shorter compare branches; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x194a0 --count 103"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x194a0 --count 103 --rebuilt work/rebuild/plpu.exe --rebuilt-map work/rebuild/player_lap_progress_update.map --rebuilt-symbol player_lap_progress_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x194a0"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_lap_progress_update module at 0x194a0"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_lap_progress_update",
+  "name": "player_lap_progress_update",
   "notes": [],
   "object_offset": "0x94a0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 363,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 103,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x194a0",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:bff8be6e6f730e48a71803a2f592275fe9ed34de9496870588fa4e9d958a0ae8",
+    "source_digest": "sha256:d6c1afa7d45847de21f33309531b2a42f9cb983c218faf62880c8e4c52f64a5f",
+    "tool": "run.py"
+  },
+  "role": "Consumes the track node status, marks the visited node, and advances the player lap progress.",
+  "section": "The vehicle state chain",
   "size": 364,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_lap_progress_update_"
 }
