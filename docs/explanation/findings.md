@@ -15097,3 +15097,61 @@ temporary `-od` recipe.
   0x219ec`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_lap_complete module at 0x19678
+
+- Observation: the original body at `0x19678` holds 124 instructions and 431
+  bytes up to the `ret` at `0x19826`.  The next function starts at `0x19828`,
+  so the store record keeps the 432-byte extent and sets no function size.  The
+  identity check uses 124 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19678 --count 124` and
+  `tools/rebuild/functions/0x19678.json`.
+- Observation: the only direct caller at `0x1959a` is the lap consumer at
+  `0x194a0`.  That function runs in the vehicle state chain after
+  `player_track_node_update` at `0x1821c`.  It calls this function when the lap
+  counter at `+0x59c` reaches the node count `0x7ed0`.
+  Evidence: the call at `0x1959a`, the compare at `0x19587`, and the caller at
+  `0x194a0`.
+- Observation: the function sets the lap counter at `+0x59c` to 1, clears the
+  flags at `+0x5a0` from index 1 up to the node count, and increments the lap
+  index at `+0x684`.
+  Evidence: the blocks at `0x1968b` through `0x196cb`.
+- Observation: the current lap time at `+0x794` updates the car best lap at
+  `+0x798` when it is smaller.  A lap below the global best lap `0x1d26c`
+  replaces the global value.  The function then formats the car best lap with
+  `sprintf` at `0x4d32c`, the format `%02d:%02d:%02d` at object-3 offset
+  `0x8b8`, and the buffer at `0x1f8c`.  The 100.0 scale is the float at
+  object-3 offset `0x8c7`.
+  Evidence: the blocks at `0x196d1` through `0x197aa`.
+- Observation: the function pushes the effect 7 with the subtype 3 and the
+  value 0.2 through `0x247fc`.  It then clears the current lap time.
+  Evidence: the call at `0x197bc` and the store at `0x197c4`.
+- Observation: the lap index is compared with the race position `0x1d2b0`.  An
+  equal index pushes the effect 5 with the subtype 2.  The next index sets bit
+  8 of the byte `0x18e1c`.  Any other index pushes the effect 5 with the
+  subtype that tells whether the best lap was recorded.
+  Evidence: the blocks at `0x197d1` through `0x19819`.
+- Inference: the lap counter, the best lap, the time format, and the caller
+  support the name `race_lap_complete`.  The original holds no symbol for this
+  function, so the record keeps the name with the confidence inferred.
+- Observation: the harness holds the car state, the node count, the global best
+  lap, the race position, the flag byte, the time buffer, the format string,
+  and the 100.0 scale.  It runs nine paths: the new best lap, the higher lap,
+  the car-only best, the global-only best, the hundredths 75 and 50, the
+  minutes above 59, the count 1 loop, and the equal lap.  The output holds the
+  markers `0` through `8` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_lap_complete_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_lap_complete`, and
+  `work/rebuild/rlap.txt`.
+- Observation: the rebuilt module holds 124 decoded instructions.  The
+  identity check stays open at 27 of 124 instructions, 26 of 377 bytes, and 0
+  of 17 relocation slots.  V2 saves the frame pointer first, inlines the
+  `__CHP` truncation, and uses other registers for the index.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19678 --count 124 --rebuilt work/rebuild/rlap.exe
+  --rebuilt-map work/rebuild/race_lap_complete.map --rebuilt-symbol
+  race_lap_complete_` and `python3 tools/rebuild/run.py run --function
+  0x19678`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
