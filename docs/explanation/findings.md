@@ -16931,3 +16931,75 @@ temporary `-od` recipe.
   gauge_marker_draw_` and `python3 tools/rebuild/run.py run --function 0x2392c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The player_car_wheel_effect_start module at 0x19828
+
+- Observation: the original body at `0x19828` holds 99 instructions and 344
+  bytes up to the `ret` at `0x1997f`.  The next function starts at `0x19980`,
+  so the store record keeps the 344-byte extent and sets no separate function
+  size.  The identity check uses 99 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19828 --count 99` and
+  `tools/rebuild/functions/0x19828.json`.
+- Observation: the two direct callers are the skid gate at `0x1810a` in
+  `player_car_skid_update` at `0x17d14` and the reset step at `0x18737` in
+  `player_car_reset_update` at `0x18528`.  Both callers run in the vehicle
+  state chain on the player object at object-3 offset `0xf91c`, after the
+  player physics group.  The record takes the section The vehicle state chain.
+  Evidence: the disassembly of `0x17d14` at the call `0x1810a` and of `0x18528`
+  at the call `0x18737`.
+- Observation: the rate timer `+0x304` below the double `0.05` at object-3
+  offset `0x8cb` takes the frame delta `DAT_00118e08` and returns.  Otherwise
+  the timer clears and the function fills up to two of the eight 0x28-byte
+  effect slots at `+0x308` through `+0x448`.
+  Evidence: the compare at `0x1984c` through `0x1985b`, the delta add at
+  `0x19965` through `0x19974`, and the slot bounds at `0x19836` through
+  `0x19846`.
+- Observation: the loop walks the slot index 0 and 2.  For each index it takes
+  the first free slot, sets the active flag at `+0x08`, runs the helper at
+  `0x11974` with the table `0x6530` and the float `0.0`, refreshes the list
+  through the helper at `0x117fc` with the table `0x6530` and the name
+  `0x6350`, and stores the slot position.
+  Evidence: the loop at `0x19873` through `0x19960`, the calls at `0x198b0`
+  and `0x198c2`, and the store at `0x1982c` through `0x19853`.
+- Observation: the slot position starts at the wheel offsets `+0x18` and
+  `+0x20` of the four 0x54-byte wheel units at `+0x194` with the index plus
+  one, so the loop uses the two odd rear units 1 and 3.  The function adds the
+  low three bits of the player position `DAT_0010fdcc` or `DAT_0010fdd4` times
+  the low six bits of the frame counter `DAT_000007fd`.  The x dither takes the
+  sign -1 when the frame counter holds the bit of the loop index.
+  Evidence: the index scaling at `0x19908` through `0x19953`, the frame counter
+  test at `0x198c7` through `0x198df`, and the dither at `0x198df` through
+  `0x19905`.
+- Inference: the two callers, the rear wheel units, the rate timer, and the two
+  helper calls support the name `player_car_wheel_effect_start`.  The original
+  has no symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the `0.05` limit arrives through a global, because the minimal
+  image does not load the constant segment.  The module has no conversion to an
+  integer, so the shared `fpu_stub.asm` supplies the FPU run-time symbols.  The
+  original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_car_wheel_effect_start.c` and
+  `tools/rebuild/modules/player_car_wheel_effect_start.json`.
+- Observation: the behavior check passes.  The harness holds one player
+  object, the four wheel units, the eight effect slots, the rate timer, the
+  frame counter, the player position, the frame delta, the `0.05` limit, and
+  the two helper stubs.  It prints the markers `0` through `5` and `D`.  The
+  six paths cover the timer below the limit, the timer at the limit, the
+  nonzero dither and both x signs, the slots 0 through 6 active, the slots 0
+  and 2 through 7 active, and all slots active.
+  Evidence: `tools/rebuild/player_car_wheel_effect_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module
+  player_car_wheel_effect_start`, and `work/rebuild/pcwe.txt`.
+- Observation: the rebuilt module holds 99 decoded instructions and 332 bytes
+  in the identity window.  The identity check stays open at 17 of 99
+  instructions, 17 of 332 bytes, and 1 of 22 relocation slots, because V2 saves
+  the registers after the frame, keeps the self pointer in `edi` and the slot
+  in `ecx`, and builds the address calculation with `imul 0x54`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19828 --count 99 --rebuilt work/rebuild/pcwe.exe
+  --rebuilt-map work/rebuild/player_car_wheel_effect_start.map
+  --rebuilt-symbol player_car_wheel_effect_start_` and `python3
+  tools/rebuild/run.py run --function 0x19828`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
