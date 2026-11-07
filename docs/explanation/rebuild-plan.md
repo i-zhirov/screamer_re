@@ -339,7 +339,7 @@ reproduce the original bytes.
 | `0x8beb8` | `video_copy` (done) | 468 | 143 | 5 | 0 |
 | `0x194a0` | `player_lap_progress_update` (done) | 363 | 103 | 4 | 12 |
 | `0x254a8` | `text_measure` (done) | 360 | 104 | 0 | 0 |
-| `0x1eae0` | unnamed | 358 | 112 | 6 | 0 |
+| `0x1eae0` | `traffic_step` (done) | 358 | 112 | 6 | 0 |
 | `0x22378` | unnamed | 353 | 121 | 1 | 31 |
 | `0x836ac` | unnamed | 351 | 100 | 2 | 13 |
 | `0x1e7b4` | unnamed | 350 | 124 | 1 | 96 |
@@ -348,7 +348,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred ten modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -431,5 +431,6 @@ and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 `0x2cb20`, and `matrix_compose` at `0x82258`, and `sound_range_update` at
 `0x830c8`, and `sound_mix_prepare` at `0x8aa60`, and `radar_world_draw` at
 `0x1057c`, and `video_copy` at `0x8beb8`, and `player_lap_progress_update`
-at `0x194a0`, and `text_measure` at `0x254a8`.
-The next unnamed function is `0x1eae0`.
+at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
+`0x1eae0`.
+The next unnamed function is `0x22378`.

@@ -16279,3 +16279,69 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x254a8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the two mode names in the harness stay inferred.
+
+## The traffic_step module at 0x1eae0
+
+- Observation: the plan row records a 358-byte body of 112 instructions, six
+  calls, and zero FPU instructions.  The body starts at `0x1eae0` and ends at
+  the `ret` at `0x1ec45`.  The next function starts at `0x1ec48` after the two
+  padding bytes at `0x1ec46`, so the store record keeps the 360-byte extent and
+  sets no separate function size.  The identity check uses 112 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1eae0 --count 112` and
+  `tools/rebuild/functions/0x1eae0.json`.
+- Observation: the caller passes the retry limit in `eax`.  The race session
+  start at `0x128e0` calls the function at `0x12bc6` and `0x12bd5` with `0x50`.
+  The mode-10 start at `0x12d0c` calls it at `0x12dac` with `0x50`.  The traffic
+  view group at `0x201d0` calls it at `0x2021f` with 3.  The race finish update
+  at `0x21058` calls it at `0x21148` with 3.  The options screen at `0x21338`
+  calls it at `0x21417` with 3.
+  Evidence: the call sweep for `0x1eae0` and the caller bodies above.
+- Observation: the function preserves `ebx`.  The race finish update reads the
+  traffic base from `ebx` after the call at `0x2114d`.  The other callers set
+  the base in `ebx` before the call.
+  Evidence: the register save at `0x1eae0`, the `pop ebx` at `0x1ec44`, and the
+  read at `0x2114d`.
+- Observation: the first loop clears the finished field at `+0x60` of each
+  `0x2a8`-byte record at `DAT_00113cd8` up to the count `DAT_00115218`.  The
+  shared counter `DAT_0000634c` drives the loop.
+  Evidence: the block at `0x1eae8` through `0x1eb25`.
+- Observation: the function resets the traffic table through `0x1ec7c`, saves
+  the frame counter `DAT_000007fd` and the phase `DAT_000007f9`, and compares
+  the low 16 bits of the result of `0x1fa04` with the low two bits of the frame
+  counter plus `0x50`.
+  Evidence: the block at `0x1eb27` through `0x1eb62`.
+- Observation: on each timeout the function resets the table again and advances
+  a retry count.  Past the limit it marks the last open record as -2, binds the
+  objects at `+0x64` and `+0x6c` through `0x11850` with the table `0x6530` and
+  the state `0x6350`, and restores the phase.
+  Evidence: the block at `0x1eb64` through `0x1ebb4`.
+- Observation: the scan reads the next traffic event through `0x1eed8`, skips a
+  negative state, sets -3 when bit 1 of `+0x16` holds, and keeps the wait while
+  `+0x60` is zero.  The traffic fields, the two bound slots, and the callers
+  support the name `traffic_step` with the confidence `inferred`.  The callers
+  sit in several sections, so the record takes the section `Program functions`.
+  Evidence: the block at `0x1ebb9` through `0x1ec45` and the caller bodies.
+- Observation: the harness holds four records and the script of the frame
+  result.  The eight paths cover the clear, the full wait to the -2 mark, the -3
+  mark, the link-set finished field, the limit 0 return, the first timeout below
+  the limit, the second-record mark, and the zero count.  The harness assigns
+  the script values at run time, because the minimal image does not load the
+  constant segment.  The output holds the markers `0` through `7` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/traffic_step_main.c`, `python3
+  tools/rebuild/harness.py run --module traffic_step`, and
+  `work/rebuild/trst.txt`.
+- Observation: the rebuilt module holds 21 of 112 instructions equal, 18 of 358
+  bytes equal, and 0 of 36 relocation slots.  The C build keeps the record
+  base in `esi`, the record pointer in `ecx`, and the retry count in `edi`,
+  while the original uses stack locals.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1eae0 --count 112 --rebuilt work/rebuild/trst.exe
+  --rebuilt-map work/rebuild/traffic_step.map --rebuilt-symbol traffic_step_`
+  and `python3 tools/rebuild/run.py run --function 0x1eae0`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the callee names in the harness stay inferred.
+- Limit: the original reads the record pointer from the stack before the first
+  scan on the limit 0 path.  The rebuilt module starts the pointer at the first
+  record, so that undefined path is stable.

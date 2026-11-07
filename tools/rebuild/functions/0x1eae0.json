@@ -1,9 +1,99 @@
 {
   "address": "0x1eae0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 112,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1eae0 holds 112 instructions and 358 bytes up to the ret at 0x1ec45; the next function starts at 0x1ec48 after the two padding bytes at 0x1ec46, so the store record keeps the 360-byte extent and sets no separate function size; the identity check uses 112 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the caller passes the retry limit in eax; the race session start at 0x128e0 calls the function at 0x12bc6 and 0x12bd5 with 0x50, the mode-10 start at 0x12d0c calls it at 0x12dac with 0x50, the traffic view group at 0x201d0 calls it at 0x2021f with 3, the race finish update at 0x21058 calls it at 0x21148 with 3, and the options screen at 0x21338 calls it at 0x21417 with 3"
+    },
+    {
+      "kind": "note",
+      "text": "the function preserves ebx, so the race finish update reads the traffic base from ebx after the call at 0x2114d; the other callers set the base in ebx before the call"
+    },
+    {
+      "kind": "note",
+      "text": "the first loop clears the finished field at +0x60 of each 0x2a8-byte record at DAT_00113cd8 up to the count DAT_00115218, and the shared counter DAT_0000634c drives the loop"
+    },
+    {
+      "kind": "note",
+      "text": "the function resets the traffic table through 0x1ec7c, saves the frame counter DAT_000007fd and the phase DAT_000007f9, and compares the low 16 bits of the result of 0x1fa04 with the low two bits of the frame counter plus 0x50"
+    },
+    {
+      "kind": "note",
+      "text": "on each timeout the function resets the table again and advances a retry count; past the limit it marks the last open record as -2, binds the objects at +0x64 and +0x6c through 0x11850 with the table 0x6530 and the state 0x6350, and restores the phase"
+    },
+    {
+      "kind": "note",
+      "text": "the scan reads the next traffic event through 0x1eed8, skips a negative state, sets -3 when bit 1 of +0x16 holds, and keeps the wait while +0x60 is zero; the traffic fields, the two bound slots, and the callers support the name traffic_step with the confidence inferred; the callers sit in several sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds four records and the script of the frame result; the eight paths cover the clear, the full wait to the -2 mark, the -3 mark, the link-set finished field, the limit 0 return, the first timeout below the limit, the second-record mark, and the zero count; the harness assigns the script values at run time, because the minimal image does not load the constant segment; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 21 of 112 instructions equal, 18 of 358 bytes equal, and 0 of 36 relocation slots; the C build keeps the record base in esi, the record pointer in ecx, and the retry count in edi, while the original uses stack locals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1eae0 --count 112"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1eae0 --count 112 --rebuilt work/rebuild/trst.exe --rebuilt-map work/rebuild/traffic_step.map --rebuilt-symbol traffic_step_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1eae0"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_step module at 0x1eae0"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_step",
+  "name": "traffic_step",
   "notes": [],
   "object_offset": "0xeae0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 358,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 112,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1eae0",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:71c4245095e5afea77cdbdac3dd41f970c559fe49fcd5923529820b8699825fe",
+    "source_digest": "sha256:079477884ba1fa43c7485ab34b8598150452c7056b2f652e90c27e9dcd0f3ee7",
+    "tool": "run.py"
+  },
+  "role": "Advances the traffic records and waits for them to finish, then marks the last open record.",
+  "section": "Program functions",
   "size": 360,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_step_"
 }
