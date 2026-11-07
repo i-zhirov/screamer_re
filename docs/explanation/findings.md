@@ -17079,3 +17079,71 @@ temporary `-od` recipe.
   0x12f50`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_brake_update module at 0x16150
+
+- Observation: the original body at `0x16150` holds 95 instructions and 332
+  bytes up to the `ret` at `0x1629b`.  The next function starts at `0x1629c`,
+  so the store record keeps the 332-byte extent and sets no function size.
+  The identity check uses 95 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16150 --count 95` and
+  `tools/rebuild/functions/0x16150.json`.
+- Observation: the only direct caller is the player update group at `0x15a80`.
+  It calls this function at `0x15aa4` after the input step at `0x160a4` and
+  before `player_steering_update` at `0x1629c`.  The group runs on the player
+  object at object-3 offset `0xf91c`, so the record takes the section The
+  vehicle state chain.
+  Evidence: the block at `0x15a80` through `0x15ab4`.
+- Observation: the function reads the pedal axis `DAT_00119884` and its centre
+  sign `DAT_00119808`.  When the sign matches and the axis is non-zero, it
+  forms the brake value `+0x114` as the absolute axis over 1023.0 at
+  `DAT_00100714`.  When `DAT_001197fc` is non-zero or `DAT_001197f8` is not 1,
+  it filters the value toward 1.0 through `filter_update` at `0x22b80` with the
+  index `0x52`.  Any other input clears the brake value.
+  Evidence: the block at `0x1615d` through `0x161d7`.
+- Observation: the sibling step at `0x160a4` forms the throttle `+0x144` from
+  the axis `DAT_00119880` in the same shape.  It divides the absolute axis by
+  1023.0 at `DAT_00100710`.  This shape supports the brake role of this
+  function.
+  Evidence: the block at `0x160a4` through `0x1614f`, and the constants at
+  object-3 offsets `0x710` and `0x714`.
+- Observation: the function runs the tail only when the state `+0x128` stays
+  below the 0.1 limit `DAT_00100718`.  It subtracts
+  `+0x17c * DAT_00118e04 * +0x114` from the road speed `+0x50c`, clamps the
+  road speed to zero, and, when the brake value times the road speed passes the
+  limit `+0x190`, sets the ramp flag `+0x170` on a set `+0x2f0` or copies the
+  brake value to the deceleration flag `+0x110`.
+  Evidence: the block at `0x161db` through `0x1629b`.
+- Inference: the pedal axis, the road-speed decrease, the deceleration flag,
+  and the sibling throttle step support the name `player_brake_update`.  The
+  caller notes and the program map already call `0x16150` the brake step.  The
+  original has no symbol, so the record keeps the name with the confidence
+  inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the minimal harness image does not load the constant segment,
+  so the 1023.0 scale, the 0.1 limit, and the frame delta arrive through
+  globals.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/player_brake_update.c` and
+  `tools/rebuild/modules/player_brake_update.json`.
+- Observation: the behavior check passes.  The harness holds the player object,
+  the pedal axis and its centre sign, the two mode cells, the 1023.0 scale, the
+  0.1 limit, the frame delta, and the filter stub.  It prints the markers `0`
+  through `8` and `D`.  The nine paths cover the direct path, the two filter
+  gates, the sign mismatch, the zero axis, the state gate, the road-speed
+  clamp, the ramp flag, and the already-set ramp flag.
+  Evidence: `tools/rebuild/player_brake_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_brake_update`, and
+  `work/rebuild/brkupd.txt`.
+- Observation: the rebuilt module holds 95 decoded instructions and 350 bytes
+  in the identity window.  The identity check stays open at 13 of 95
+  instructions and 15 of 332 bytes, because V2 saves the frame first, keeps the
+  object in `edx`, forms the absolute value with `neg` instead of `cdq`, `xor`,
+  and `sub`, and orders the tail in another shape.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x16150 --count 95 --rebuilt work/rebuild/brkupd.exe
+  --rebuilt-map work/rebuild/player_brake_update.map --rebuilt-symbol
+  player_brake_update_` and `python3 tools/rebuild/run.py run --function
+  0x16150`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

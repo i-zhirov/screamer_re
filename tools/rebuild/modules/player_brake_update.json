@@ -1,0 +1,39 @@
+{
+  "exe": "brkupd.exe",
+  "map": "player_brake_update.map",
+  "name": "player_brake_update",
+  "run": {
+    "command": "brkupd.exe > brkupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "brkupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_brake_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_brake_update_main.c"
+    }
+  ]
+}
