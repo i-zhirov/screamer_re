@@ -1,0 +1,28 @@
+{
+  "exe": "mtxcomp.exe",
+  "map": "matrix_compose.map",
+  "name": "matrix_compose",
+  "run": {
+    "command": "mtxcomp.exe > mtx_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mtx_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "matrix_compose.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "matrix_compose_main.c"
+    }
+  ]
+}

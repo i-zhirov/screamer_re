@@ -15818,3 +15818,55 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The caller name
   `music_load` is inferred from the two rebuilt callers, and the callee name
   `midi_song_load` stays inferred.
+
+## The matrix_compose module at 0x82258
+
+- Observation: the original body at `0x82258` holds 127 instructions and 365
+  bytes up to the `ret` at `0x823c4`.  The next recorded function starts at
+  `0x82c14`, so the store record keeps the 2492-byte extent and sets no
+  function size.  The identity check uses 127 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x82258 --count 127` and
+  `tools/rebuild/functions/0x82258.json`.
+- Observation: the direct callers at `0x8b088`, `0x8b0a6`, `0x8b0c1`,
+  `0x8b0d9`, `0x8b174`, `0x8b192`, `0x8b1ad`, and `0x8b1c5` compose the
+  matrix at an object `+0x28` with the basis at `+0x48` into the render blocks
+  at `+0xa0`, `+0x118`, `+0xd0`, and `+0x148`.  The second pass composes the
+  result with the camera basis at `+0x18`.  The function composes two affine
+  matrices, so the record takes the name `matrix_compose` with the confidence
+  `inferred` and the section `race_frame callees`.
+  Evidence: the call sites above and the callers at `0x8affc` and `0x8b0e8`.
+- Observation: the source matrix holds four columns of three rows.  The first
+  three columns are the rotation and the fourth column is the translation.
+  The matrix argument holds four rows of three columns.  The first three rows
+  are the rotation and the fourth row is the translation.  For each column `k`
+  the result takes the three rotation dots and the translation dot plus the
+  source translation value, all in Q14 with the arithmetic shift 14.
+  Evidence: the block at `0x82258` through `0x823c4`.
+- Observation: the original passes the source pointer in `esi`, the matrix
+  pointer in `ebp`, and the destination pointer in `edi`.  It has no EBP frame
+  and no saved register.  The C compiler cannot use `ebp` as a parameter
+  register, so the rebuild uses the standard argument passing.  The module uses
+  no floating-point instruction.
+  Evidence: `tools/rebuild/matrix_compose.c` and the prologue at `0x82258`.
+- Observation: the minimal image needs one initialized data byte, because the
+  DOS4G loader leaves the BSS object unmapped when the data object holds no
+  page.  The module holds the initialized marker `matrix_compose_marker`.  The
+  harness also uses run-time expected arrays, because an initialized constant
+  array did not read back in this image.  The harness covers the identity, the
+  scale and translation, the permutation, the negative values, and the
+  arithmetic shift.  The output holds the markers `0` through `4` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/matrix_compose_main.c`, `python3
+  tools/rebuild/harness.py run --module matrix_compose`, and
+  `work/rebuild/mtx_out.txt`.
+- Observation: the rebuilt function holds 562 bytes.  The identity check stays
+  open at 34 of 127 instructions and 8 of 365 bytes, because V2 spills the
+  three dot sums to the stack, uses `ebp` as a scratch register, and keeps the
+  translation row in `edi`, `ecx`, and `esi`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x82258 --count 127 --rebuilt work/rebuild/mtxcomp.exe
+  --rebuilt-map work/rebuild/matrix_compose.map --rebuilt-symbol
+  matrix_compose_` and `python3 tools/rebuild/run.py run --function 0x82258`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the caller names in the harness stay inferred.

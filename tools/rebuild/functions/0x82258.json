@@ -1,9 +1,83 @@
 {
   "address": "0x82258",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 127,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x82258 holds 127 instructions and 365 bytes up to the ret at 0x823c4; the next recorded function starts at 0x82c14, so the store record keeps the 2492-byte extent and sets no separate function size; the identity check uses 127 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers at 0x8b088, 0x8b0a6, 0x8b0c1, 0x8b0d9, 0x8b174, 0x8b192, 0x8b1ad, and 0x8b1c5 compose the matrix at an object +0x28 with the basis at +0x48 into the render blocks; the record takes the name matrix_compose with the confidence inferred and the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the source holds four columns of three rows, the matrix holds four rows of three columns, and the result takes the source layout; for each column k the four outputs are the three rotation dots and the translation dot plus the source translation value, all in Q14 with the arithmetic shift 14"
+    },
+    {
+      "kind": "note",
+      "text": "the original passes the source pointer in esi, the matrix pointer in ebp, and the destination pointer in edi and has no EBP frame; the C compiler cannot use ebp as a parameter register, so the rebuild uses the standard argument passing; the module uses no floating-point instruction"
+    },
+    {
+      "kind": "note",
+      "text": "the minimal image needs one initialized data byte, because the DOS4G loader leaves the BSS object unmapped when the data object holds no page; the module holds the initialized marker matrix_compose_marker; the harness covers the identity, the scale and translation, the permutation, the negative values, and the arithmetic shift; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x82258 --count 127"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x82258 --count 127 --rebuilt work/rebuild/mtxcomp.exe --rebuilt-map work/rebuild/matrix_compose.map --rebuilt-symbol matrix_compose_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module matrix_compose"
+    },
+    {
+      "kind": "finding",
+      "text": "The matrix_compose module at 0x82258"
+    }
+  ],
+  "implementation": "c",
+  "module": "matrix_compose",
+  "name": "matrix_compose",
   "notes": [],
   "object_offset": "0x72258",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 365,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 34,
+        "instructions_total": 127,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x82258",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:74bb4ba3dc25c31420a92da3042694c6dd19e8b5ce2229b23efd0a51dc492ca7",
+    "source_digest": "sha256:bc9a9d15ae1132f513b91144d844127332fde55bc57aaa4127e123f30b97b667",
+    "tool": "run.py"
+  },
+  "role": "Composes a 4x3 affine matrix with a 4x3 pose matrix in Q14 fixed point.",
+  "section": "race_frame callees",
   "size": 2492,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "matrix_compose_"
 }

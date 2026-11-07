@@ -324,11 +324,20 @@ reproduce the original bytes.
 | `0x2fcec` | `music_load` (done) | 379 | 99 | 13 | 0 |
 | `0x4d844` | `lzw_bit_read` (done) | 374 | 119 | 1 | 0 |
 | `0x2cb20` | `car_select_update` (done) | 373 | 103 | 3 | 19 |
-| `0x82258` | unnamed | 365 | 127 | 0 | 0 |
+| `0x82258` | `matrix_compose` (done) | 365 | 127 | 0 | 0 |
+
+### Phase N: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x830c8` | unnamed | 649 | 207 | 0 | 0 |
 
 ## Position
 
-Two hundred two modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -408,5 +417,5 @@ and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
 and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
 `0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
 `0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
-`0x2cb20`.
-The next unnamed function is `0x82258`.
+`0x2cb20`, and `matrix_compose` at `0x82258`.
+The next unnamed function is `0x830c8`.
