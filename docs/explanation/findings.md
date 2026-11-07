@@ -16091,3 +16091,58 @@ temporary `-od` recipe.
   radar_world_draw_` and `python3 tools/rebuild/run.py run --function 0x1057c`.
 - Limit: the original has no symbol name for this function.  The module name,
   the cell and segment field names, and the angle table model stay inferred.
+
+## The video_copy module at 0x8beb8
+
+- Observation: the plan row records a 468-byte body of 143 instructions, five
+  calls, and no floating-point instruction.  The body starts at `0x8beb8` and
+  ends at the `ret` at `0x8c08b`.  The next function starts at `0x8c0fc`, so the
+  store record keeps the 580-byte extent and sets no separate function size.
+  The identity check uses 143 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8beb8 --count 143` and
+  `tools/rebuild/functions/0x8beb8.json`.
+- Observation: the only direct caller is `video_fill` at `0x2aa98`.  It passes
+  the destination height 480 in eax, the source height 400 in edx, and the
+  source buffer pointer in ebx.  The caller names the function `video_copy`, so
+  the record takes that name with the confidence `inferred` and the section
+  `race_loop callees`.
+  Evidence: the call at `0x2aaad`, `tools/rebuild/video_fill.c`, and the
+  finding "The video_fill module and the video buffer pointer".
+- Observation: the entry forms the source row step
+  `((400 << 16) / 480) << 16` with the two heights.  For each row it adds the
+  step to a 32-bit accumulator and advances the source pointer by one
+  0x280-byte row on a carry.  It copies 0xa0 dwords, advances both pointers,
+  and then rewinds the source pointer by one row.  The source is a 640 by 400
+  buffer and the destination is the 640 by 480 framebuffer at `0xa0000`, so the
+  function scales the buffer vertically.
+  Evidence: the prologue at `0x8beb8` through `0x8bedf` and the row loop at
+  `0x8bef0` through `0x8bf08`.
+- Observation: the copy runs in five VBE banks of `0x10000` bytes.  The partial
+  rows of `0x40`, `0x60`, `0x80`, `0x20`, `0x20`, `0x80`, `0x60`, and `0x40`
+  dwords keep the source and destination streams contiguous at the bank
+  boundaries.  The five calls at `0x8bed0`, `0x8bf31`, `0x8bf91`, `0x8bff1`,
+  and `0x8c051` select the banks through the VBE bank switch at `0x8c0fc`.
+  Evidence: the five bank blocks from `0x8beda` through `0x8c088`.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction.  The module builds without `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/video_copy.c`.
+- Observation: the harness holds the 640 by 400 source buffer, the five bank
+  captures, and the `video_bank_set` stub.  The stub records the call order and
+  captures the 64 KiB window at `0xa0000`.  The expected output follows the
+  original row step and the partial-row widths, and the comparison covers all
+  307200 destination bytes.  The output holds the markers `0`, `1`, and `D`,
+  and the behavior check passes.
+  Evidence: `tools/rebuild/video_copy_main.c`, `python3
+  tools/rebuild/harness.py run --module video_copy`, and `work/rebuild/vcp.txt`.
+- Observation: the rebuilt module holds 407 bytes and 143 decoded instructions.
+  The identity check stays open at 17 of 143 instructions and 24 of 407 bytes.
+  V2 pushes ecx, esi, edi, and ebp and reserves 8 stack bytes instead of
+  `cld`, `pushal`, and `popal`, keeps the row step in a stack slot, uses `div`
+  instead of `idiv`, and copies with a dword loop instead of `rep movsd`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8beb8 --count 143 --rebuilt work/rebuild/vcpmod.exe
+  --rebuilt-map work/rebuild/video_copy.map --rebuilt-symbol video_copy_` and
+  `python3 tools/rebuild/run.py run --function 0x8beb8`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the two height arguments, and the five bank pieces stay inferred.

@@ -1,9 +1,120 @@
 {
   "address": "0x8beb8",
-  "checks": [],
-  "evidence": [],
-  "notes": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 143,
+  "evidence": [
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8beb8 --count 143"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8beb8 --count 143 --rebuilt work/rebuild/vcpmod.exe --rebuilt-map work/rebuild/video_copy.map --rebuilt-symbol video_copy_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8beb8"
+    },
+    {
+      "kind": "finding",
+      "text": "The video_copy module at 0x8beb8"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x8beb8 holds 143 instructions and 468 bytes up to the ret at 0x8c08b; the next function starts at 0x8c0fc, so the store record keeps the 580-byte extent and sets no function size; the identity check uses 143 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2aa98 is video_fill; it passes the destination height 480 in eax, the source height 400 in edx, and the source buffer pointer in ebx; the caller names the function video_copy, so the record keeps the name with the confidence inferred and the section race_loop callees"
+    },
+    {
+      "kind": "note",
+      "text": "the entry forms the source row step ((400 << 16) / 480) << 16; each row adds the step to a 32-bit accumulator, advances the source pointer by one 0x280-byte row on a carry, copies 0xa0 dwords, and then rewinds the source pointer; the source is a 640 by 400 buffer and the destination is the 640 by 480 framebuffer at 0xa0000, so the function scales the buffer vertically"
+    },
+    {
+      "kind": "note",
+      "text": "the copy runs in five VBE banks of 0x10000 bytes; the partial rows 0x40, 0x60, 0x80, 0x20, 0x20, 0x80, 0x60, and 0x40 dwords keep the streams contiguous, and the five calls to the bank switch at 0x8c0fc select the banks"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 640 by 400 source buffer, the five bank captures, and the bank stub; the bank stub records the call order and captures the 64 KiB window, and the expected output follows the original row step and the piece widths; the output holds the markers 0, 1, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 407 bytes and 143 decoded instructions; the identity check stays open at 17 of 143 instructions and 24 of 407 bytes because V2 pushes ecx, esi, edi, and ebp and reserves 8 stack bytes instead of cld, pushal, and popal, keeps the row step in a stack slot, uses div instead of idiv, and copies with a dword loop instead of rep movsd; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "video_copy",
+  "name": "video_copy",
+  "notes": [
+    {
+      "date": "2026-11-07",
+      "text": "the original body at 0x8beb8 holds 143 instructions and 468 bytes up to the ret at 0x8c08b; the next function starts at 0x8c0fc, so the store record keeps the 580-byte extent and sets no function size; the identity check uses 143 instructions"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the only direct caller at 0x2aa98 is video_fill; it passes the destination height 480 in eax, the source height 400 in edx, and the source buffer pointer in ebx; the caller names the function video_copy, so the record keeps the name with the confidence inferred and the section race_loop callees"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the entry forms the source row step ((400 << 16) / 480) << 16; each row adds the step to a 32-bit accumulator, advances the source pointer by one 0x280-byte row on a carry, copies 0xa0 dwords, and then rewinds the source pointer; the source is a 640 by 400 buffer and the destination is the 640 by 480 framebuffer at 0xa0000, so the function scales the buffer vertically"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the copy runs in five VBE banks of 0x10000 bytes; the partial rows 0x40, 0x60, 0x80, 0x20, 0x20, 0x80, 0x60, and 0x40 dwords keep the streams contiguous, and the five calls to the bank switch at 0x8c0fc select the banks"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the harness holds the 640 by 400 source buffer, the five bank captures, and the bank stub; the bank stub records the call order and captures the 64 KiB window, and the expected output follows the original row step and the piece widths; the output holds the markers 0, 1, and D; the behavior check passes"
+    },
+    {
+      "date": "2026-11-07",
+      "text": "the rebuilt module holds 407 bytes and 143 decoded instructions; the identity check stays open at 17 of 143 instructions and 24 of 407 bytes because V2 pushes ecx, esi, edi, and ebp and reserves 8 stack bytes instead of cld, pushal, and popal, keeps the row step in a stack slot, uses div instead of idiv, and copies with a word loop instead of rep movsd; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
   "object_offset": "0x7beb8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 407,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 143,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8beb8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:b46ddddea5a434d1b5cd0bee0a74be2e41cbd9e69d9cb2401fb81c21a2d12aeb",
+    "source_digest": "sha256:f8fb49a91ec91ef5096ba6e228790db092fa913bda47bc0242b30edcc830d4b8",
+    "tool": "run.py"
+  },
+  "role": "Scales the 640x400 video buffer to the 640x480 VGA framebuffer through the VBE banks.",
+  "section": "race_loop callees",
   "size": 580,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "video_copy_"
 }
