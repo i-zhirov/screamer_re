@@ -8391,6 +8391,10 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   Evidence: the ten call sites and the disassembly of each callee.
 - Limit: the original has no symbol name for these calls.  The helper names in
   the module stay inferred.
+- Correction: the `background_scale` module shows that `0x83ca8` is not a
+  timer helper.  The function scales the decoded background image into the
+  video buffer.
+  Evidence: the finding "The background_scale module at 0x83ca8".
 
 ## The input_map module at 0x211e0
 
@@ -17409,5 +17413,60 @@ temporary `-od` recipe.
   --original-address 0x25658 --count 93 --rebuilt work/rebuild/font.exe
   --rebuilt-map work/rebuild/font_load.map --rebuilt-symbol font_load_` and
   `python3 tools/rebuild/run.py run --function 0x25658`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
+
+## The background_scale module at 0x83ca8
+
+- Observation: the original body at `0x83ca8` holds 111 instructions and 323
+  bytes up to the `ret` at `0x83dea`.  The next store record starts at
+  `0x843a8`, so the store record keeps the 1792-byte extent and sets no
+  separate function size.  The identity check uses 111 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x83ca8 --count 111` and
+  `tools/rebuild/functions/0x83ca8.json`.
+- Observation: the only direct caller is the update at `0x81ab0`.  It calls
+  this function at `0x81abc` at the start of the frame, before the source
+  update at `0x8a958` and the mix prepare at `0x8aa60`.
+  Evidence: the call at `0x81abc` and the body at `0x81ac6`.
+- Observation: the material loader at `0x4cd9c` decodes the member `%s.BCK`
+  into the buffer at `DAT_000214e8`.  The video buffer pointer is
+  `DAT_00121528`.  The function scales the decoded background into the video
+  buffer, so the record takes the name `background_scale` with the confidence
+  inferred and the section `object_update_all callees`.
+  Evidence: the decode path at `0x4cd9c`, the global `DAT_000214e8`, and the
+  video buffer at `0x21528`.
+- Observation: the function forms the source row offset from the angle at
+  `0x724cc` and the pitch at `0x7a7dc`, and stores it at `0x73f10`.  It forms
+  the source column offset from the camera field at `+4` and stores it at
+  `0x73dec`.
+  Evidence: the blocks at `0x83ca9` through `0x83cf2`.
+- Observation: the function selects the source row from a negative offset or
+  a wrapped offset.  Each source byte becomes one 16-bit value with both
+  halves equal, and each source row is written twice.  The fill clears the
+  buffer up to the row `0x7a7c4` with the dword color at `0x7a7bc`.
+  Evidence: the blocks at `0x83cf7` through `0x83de9`.
+- Observation: the original saves all registers with `pushal` and has no EBP
+  frame.  The function uses no floating-point instruction and calls no
+  function.  The module needs one initialized data byte, because the DOS4G
+  loader leaves the BSS object unmapped when the data object holds no page.
+  Evidence: the prologue at `0x83ca8`, the epilogue at `0x83de9`, and
+  `tools/rebuild/background_scale.c`.
+- Observation: the behavior check passes.  The harness holds the source
+  buffer, the video buffer, the camera record, the four input globals, and the
+  two output globals.  The four paths cover the negative offset, the positive
+  offset with wrap, the column offset across a row boundary, and the negative
+  offset with wrap.  The output holds the markers `0` through `3` and `D`.
+  Evidence: `tools/rebuild/background_scale_main.c`,
+  `python3 tools/rebuild/harness.py run --module background_scale`, and
+  `work/rebuild/bgscale.txt`.
+- Observation: the rebuilt module holds 111 decoded instructions and 335
+  bytes.  The identity check stays open at 24 of 111 instructions, 11 of 323
+  bytes, and 0 of 25 relocation slots, because V2 saves the registers one by
+  one, uses a single data object, and emits the byte loops in another shape.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x83ca8 --count 111 --rebuilt work/rebuild/bgscale.exe
+  --rebuilt-map work/rebuild/background_scale.map --rebuilt-symbol
+  background_scale_` and `python3 tools/rebuild/run.py run --function 0x83ca8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.

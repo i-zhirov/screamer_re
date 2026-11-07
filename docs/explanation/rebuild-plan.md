@@ -364,11 +364,11 @@ reproduce the original bytes.
 | `0x13580` | `race_view_reset` (done) | 330 | 91 | 0 | 0 |
 | `0x18a14` | `race_clock_update` (done) | 329 | 92 | 0 | 17 |
 | `0x25658` | `font_load` (done) | 324 | 93 | 11 | 0 |
-| `0x83ca8` | unnamed | 323 | 111 | 0 | 0 |
+| `0x83ca8` | `background_scale` (done) | 323 | 111 | 0 | 0 |
 
 ## Position
 
-Two hundred twenty-six modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred twenty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -460,5 +460,5 @@ modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
 `player_car_wheel_effect_start` at `0x19828`, and `game_mode_100_start` at
 `0x12f50`, and `player_brake_update` at `0x16150`, and `stream_read_text` at
 `0x4c695`, and `race_view_reset` at `0x13580`, and `race_clock_update` at `0x18a14`,
-and `font_load` at `0x25658`.
-The next unnamed function is `0x83ca8`.
+and `font_load` at `0x25658`, and `background_scale` at `0x83ca8`.
+The next unnamed function is `0x25020`.

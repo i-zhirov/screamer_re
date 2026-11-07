@@ -1,0 +1,27 @@
+{
+  "exe": "bgscale.exe",
+  "map": "background_scale.map",
+  "name": "background_scale",
+  "run": {
+    "command": "bgscale.exe > bgscale.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "bgscale.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "background_scale.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "background_scale_main.c"
+    }
+  ]
+}
