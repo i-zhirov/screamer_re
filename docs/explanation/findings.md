@@ -15221,3 +15221,73 @@ temporary `-od` recipe.
 - Limit: the behavior harness uses the empty list path.  A non-empty pointer
   table needs an absolute pointer that the minimal image does not relocate.  The
   empty list still runs the sentinel check and the group start store.
+
+## The race_intro_update module at 0x20d20
+
+- Observation: the original body at `0x20d20` holds 106 instructions and 421
+  bytes up to the `ret` at `0x20ec4`.  The next function starts at `0x20ec8`,
+  so the store record keeps the 424-byte extent and sets no function size.  The
+  identity check uses 106 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20d20 --count 106` and
+  `tools/rebuild/functions/0x20d20.json`.
+- Observation: the direct call sweep finds one caller at `0x2001f`.  The caller
+  is the frame update at `0x1ff70`, which runs this function after the race HUD
+  draw at `0x23420`.  No named function sits between the frame update and the
+  target, so the record takes the section `Program functions`.
+  Evidence: the direct call sweep for `0x20d20`, the call at `0x2001f`, and the
+  disassembly of `0x1ff70`.
+- Observation: the gate is bit 1 of the byte `DAT_00118e1c`.  The race start
+  `race_session_start` at `0x128e0` sets the word `DAT_00118e1c` to 0x102 and
+  clears the timer `DAT_00118e24` at `0x12bef`.  The function adds the frame
+  delta `DAT_00118e08` to the timer and stores the half-second bucket at
+  `DAT_00118e20`.
+  Evidence: the store at `0x128ee`, the clear at `0x12bef`, the test at
+  `0x20d2b`, and the blocks at `0x20d38` through `0x20d7b`.
+- Observation: the bucket 3 sets bit 0 of `DAT_00118e1c` and clears the field
+  `+0x4f4` of every 0x590-byte car record at `DAT_00110ab8`.  The bucket 4
+  toggles bit 1 off, sets the bucket to 3, and ends the sequence.  A changed
+  bucket pushes the event `0x18e20` through `0x247ac`.
+  Evidence: the blocks at `0x20e1b` through `0x20e6e`, the loop at `0x20e2c`
+  through `0x20e53`, and the call at `0x20db7`.
+- Observation: the function sets the world view rectangle `DAT_0000056c`
+  through `DAT_00000578` to the full 640 by 400 screen.  It stores the centered
+  sprite position 0xf0 and 0x6c and the bucket at `DAT_0011cb18` through
+  `DAT_0011cb20`, and it flushes the sprite list through `0x25af0`.
+  Evidence: the stores at `0x20dd2` through `0x20dff`.
+- Observation: while bit 0 of `DAT_00118e1c` is clear, the function fills the
+  field `+0x4f4` of every car record with `sin(index * 0.5 * timer) * 15000.0`.
+  The constants sit at object-3 offsets 0xcf1 and 0xcf9 and hold 0.5 and
+  15000.0.
+  Evidence: the loop at `0x20e79` through `0x20eba` and the two constants.
+- Inference: the race start caller, the start timer, the half-second buckets 3
+  and 4, the centered start sprite, and the revving pitch terms support the name
+  `race_intro_update`.  The original holds no symbol for this function, so the
+  record keeps the name with the confidence `inferred`.
+- Observation: the harness holds the control byte, the bucket, the timer, the
+  frame delta, the record count, the two car records, the view rectangle, the
+  sprite fields, and the effect and panel stubs.  It runs eight paths: the clear
+  gate, the start frame, the bucket 3 transition, the bucket 4 transition, the
+  truncating bucket 1, the default bucket 5, the set bit 0 skip, and the zero
+  count.  The output holds the markers `0` through `7` and `D`, and the behavior
+  check passes.
+  Evidence: `tools/rebuild/race_intro_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_intro_update`, and
+  `work/rebuild/rintro.txt`.
+- Observation: a direct float compare against a float literal in the harness did
+  not match the stored value, so the harness compares the bit patterns through
+  an unsigned integer.  The markers `0`, `3`, and `6` failed with the direct
+  compare and passed with the bit compare.
+  Evidence: the comparisons in `tools/rebuild/race_intro_update_main.c` and
+  `work/rebuild/rintro.txt`.
+- Observation: the rebuilt module holds 106 decoded instructions and 416 bytes
+  in the identity window.  The identity check stays open at 13 of 106
+  instructions and 30 of 416 bytes because V2 saves the frame pointer first,
+  uses another prologue and register order, and builds the sine argument from
+  the local phase and amplitude.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20d20 --count 106 --rebuilt work/rebuild/rintro.exe
+  --rebuilt-map work/rebuild/race_intro_update.map --rebuilt-symbol
+  race_intro_update_` and `python3 tools/rebuild/run.py run --function 0x20d20`.
+- Limit: the original holds no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

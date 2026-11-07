@@ -1,9 +1,95 @@
 {
   "address": "0x20d20",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 106,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x20d20 holds 106 instructions and 421 bytes up to the ret at 0x20ec4; the next function starts at 0x20ec8, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 106 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2001f is the frame update at 0x1ff70, which runs this function after the race HUD draw at 0x23420; no named function sits between the frame update and the target, so the module takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the gate is bit 1 of DAT_00118e1c, which race_session_start at 0x128e0 sets with the word 0x102 and clears the timer DAT_00118e24 at 0x12bef; the function adds the frame delta DAT_00118e08 to the timer and stores the half-second bucket at DAT_00118e20"
+    },
+    {
+      "kind": "note",
+      "text": "the bucket 3 sets bit 0 of DAT_00118e1c and clears the field +0x4f4 of every 0x590-byte car record at DAT_00110ab8; the bucket 4 toggles bit 1 off, sets the bucket to 3, and ends the sequence; a changed bucket pushes the event 0x18e20 through 0x247ac"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the world view rectangle DAT_0000056c through DAT_00000578 to the full 640 by 400 screen, stores the centered sprite position 0xf0 and 0x6c and the bucket at DAT_0011cb18 through DAT_0011cb20, and flushes the sprite list through 0x25af0"
+    },
+    {
+      "kind": "note",
+      "text": "while bit 0 of DAT_00118e1c is clear, the function fills the field +0x4f4 of every car record with sin(index * 0.5 * timer) * 15000.0; the constants sit at object-3 offsets 0xcf1 and 0xcf9 and hold 0.5 and 15000.0"
+    },
+    {
+      "kind": "note",
+      "text": "the race start caller, the start timer, the half-second buckets 3 and 4, the centered start sprite, and the revving pitch terms support the name race_intro_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte, the bucket, the timer, the frame delta, the record count, the two car records, the view rectangle, the sprite fields, and the effect and panel stubs; it covers the clear gate, the start frame, the bucket 3 transition, the bucket 4 transition, the truncating bucket 1, the default bucket 5, the set bit 0 skip, and the zero count; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 106 decoded instructions and 416 bytes in the identity window; the identity check stays open at 13 of 106 instructions and 30 of 416 bytes because V2 saves the frame pointer first, uses another prologue and register order, and builds the sine argument from the local phase and amplitude; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x20d20 --count 106"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x20d20 --count 106 --rebuilt work/rebuild/rintro.exe --rebuilt-map work/rebuild/race_intro_update.map --rebuilt-symbol race_intro_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_intro_update"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_intro_update",
+  "name": "race_intro_update",
   "notes": [],
   "object_offset": "0x10d20",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 30,
+        "bytes_total": 416,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 106,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x20d20",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:7f963bc8539eaf69a861524f6f67e77f3de2fd1bf472784813dc2ed7b08b4609",
+    "source_digest": "sha256:a2a9566ecf97bc912cc4e961a4e77f4b8be1946d8404066f9d74f925248f1eb7",
+    "tool": "run.py"
+  },
+  "role": "runs the timed race intro sequence that sets the full-screen view, shows the centered start sprite, and revs the car pitch terms",
+  "section": "Program functions",
   "size": 424,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_intro_update_"
 }

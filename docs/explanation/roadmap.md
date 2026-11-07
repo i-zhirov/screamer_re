@@ -133,9 +133,9 @@ current host.
   `wheel_contact_update` at `0x11a30`, and `map_object_finish` at `0x2b494`,
   and `func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`, and
   `quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`, and
-  `championship_screen_init` at `0x2c7a8`;
+  `championship_screen_init` at `0x2c7a8`, and `race_intro_update` at `0x20d20`;
   twenty-nine modules are verified, one is matching, and one hundred and
-  sixty-three rebuilds hold the recorded difference; the `video_fill`,
+  sixty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -281,10 +281,11 @@ The plan follows the size order, starting with the smallest functions.
     `wheel_contact_update` at `0x11a30`, and `map_object_finish` at `0x2b494`,
     and `func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`,
     and `quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at
-    `0x19678`, and `championship_screen_init` at `0x2c7a8`
+    `0x19678`, and `championship_screen_init` at `0x2c7a8`, and
+    `race_intro_update` at `0x20d20`
     are done;
     the result is twenty-nine verified modules, one matching module, and one
-    hundred and sixty-three open rebuilds).
+    hundred and sixty-four open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11
