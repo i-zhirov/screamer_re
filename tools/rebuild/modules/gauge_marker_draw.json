@@ -1,0 +1,37 @@
+{
+  "exe": "gagemark.exe",
+  "map": "gauge_marker_draw.map",
+  "name": "gauge_marker_draw",
+  "run": {
+    "command": "gagemark.exe > gagemark.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "gagemark.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "gauge_marker_draw.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "gauge_marker_draw_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "gauge_marker_draw_main.c"
+    }
+  ]
+}

@@ -16868,3 +16868,66 @@ temporary `-od` recipe.
   unr_file_load_` and `python3 tools/rebuild/run.py run --function 0x4c98c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The gauge_marker_draw module at 0x2392c
+
+- Observation: the original body at `0x2392c` holds 110 instructions and 344
+  bytes up to the `ret 4` at `0x23a81`.  The next function starts at `0x23a94`,
+  so the store record keeps the 360-byte extent and sets no separate function
+  size.  The identity check uses 110 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2392c --count 110` and
+  `tools/rebuild/functions/0x2392c.json`.
+- Observation: the direct call sweep finds three callers at `0x23754`,
+  `0x237cf`, and `0x2391e`.  All three sit in the gauge panel at `0x2369c`.
+  `race_hud_draw` at `0x23420` calls the panel at `0x234c5`, and the frame
+  update at `0x1ff70` calls `race_hud_draw` at `0x2001a`.  The record takes the
+  section Program functions.
+  Evidence: the call sweep for `0x2392c`, the panel blocks from `0x2369c`
+  through `0x2392b`, and the `race_hud_draw` record at `0x23420`.
+- Observation: the function takes a point record in `eax`, a radius in `edx`,
+  an angle bias in `ebx`, and a float angle in the stack argument.  The record
+  holds two signed 32-bit coordinates.  The function doubles the radius and
+  both coordinates, because the line drawer at `0x102e4` works in doubled
+  screen coordinates.
+  Evidence: the blocks at `0x23933` through `0x2397f` and the callee at
+  `0x102e4`.
+- Observation: the angle delta is the argument minus the bias.  The function
+  forms three points on the circle of the doubled radius around the doubled
+  centre at the angles delta, delta plus pi/2, and delta minus pi/2.  Each
+  point is (centre x plus radius times the sine, centre y minus radius times
+  the cosine).  The function then draws one line from the centre to each
+  point, so it draws a three-arm marker that points forward and to both sides.
+  Evidence: the blocks at `0x2397d` through `0x23a81`.
+- Observation: the constants pi/2 at object-3 offset `0xe30` and -pi at
+  object-3 offset `0xe34` arrive through globals, because the minimal image
+  does not load the constant segment.  The original calls sin at `0x4da72`,
+  cos at `0x4da66`, and the truncate helper at `0x4d9f4`.  The harness links no
+  math library, so the local FPU stub supplies sin and cos and makes `__CHP`
+  truncate toward zero.  The original has the EBP frame, so the module builds
+  with `-of+`.
+  Evidence: `tools/rebuild/gauge_marker_draw.c`,
+  `tools/rebuild/gauge_marker_draw_fpu.asm`, and
+  `tools/rebuild/modules/gauge_marker_draw.json`.
+- Inference: the three-arm marker, the gauge panel caller, and the two angle
+  globals support the name `gauge_marker_draw`.  The original has no symbol, so
+  the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the behavior check passes.  The harness holds the point record,
+  the two angle constants, and the line sink.  It prints the markers `0`
+  through `6` and `D`.  The seven paths cover the doubled centre, the negative
+  sums, the zero radius, the angle bias, two more angles with other radii, and
+  the negative centre.
+  Evidence: `tools/rebuild/gauge_marker_draw_main.c`,
+  `python3 tools/rebuild/harness.py run --module gauge_marker_draw`, and
+  `work/rebuild/gagemark.txt`.
+- Observation: the rebuilt body holds 16 of 110 instructions and 9 of 304
+  bytes equal, and 0 of 4 relocation slots equal.  V2 saves ebp first, keeps
+  the point and the doubled centre in registers, and calls the local stub
+  functions.  The original stores each corner in a distinct stack slot.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2392c --count 110 --rebuilt work/rebuild/gagemark.exe
+  --rebuilt-map work/rebuild/gauge_marker_draw.map --rebuilt-symbol
+  gauge_marker_draw_` and `python3 tools/rebuild/run.py run --function 0x2392c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
