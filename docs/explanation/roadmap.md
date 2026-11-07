@@ -152,9 +152,10 @@ current host.
   `gauge_marker_draw` at `0x2392c`, and
   `player_car_wheel_effect_start` at `0x19828`, and
   `game_mode_100_start` at `0x12f50`, and
-  `player_brake_update` at `0x16150`;
+  `player_brake_update` at `0x16150`, and
+  `stream_read_text` at `0x4c695`;
   thirty modules are verified, one is matching, and one hundred and
-  ninety-two rebuilds hold the recorded difference; the `video_fill`,
+  ninety-three rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -320,10 +321,11 @@ The plan follows the size order, starting with the smallest functions.
     `gauge_marker_draw` at `0x2392c`, and
     `player_car_wheel_effect_start` at `0x19828`, and
     `game_mode_100_start` at `0x12f50`, and
-    `player_brake_update` at `0x16150`
+    `player_brake_update` at `0x16150`, and
+    `stream_read_text` at `0x4c695`
     are done;
     the result is thirty verified modules, one matching module, and one
-    hundred and ninety-two open rebuilds).
+    hundred and ninety-three open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

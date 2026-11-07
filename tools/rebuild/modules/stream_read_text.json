@@ -1,0 +1,36 @@
+{
+  "exe": "srtmod.exe",
+  "map": "stream_read_text.map",
+  "name": "stream_read_text",
+  "run": {
+    "command": "srtmod.exe > srt_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "srt_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_read_text.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_read_text_main.c"
+    }
+  ]
+}

@@ -17147,3 +17147,69 @@ temporary `-od` recipe.
   0x16150`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The stream_read_text module at 0x4c695
+
+- Observation: the original body at `0x4c695` holds 106 instructions and 331
+  bytes up to the `ret` at `0x4c7df`.  The next function starts at `0x4c7e0`,
+  so the store record keeps the 331-byte extent and sets no function size.
+  The identity check uses 106 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c695 --count 106` and
+  `tools/rebuild/functions/0x4c695.json`.
+- Observation: the two direct callers are `list_file_load` at `0x15460`, with
+  the call sites at `0x154fa` and `0x15684`, and `member_list_load` at
+  `0x1b394`, with the call sites at `0x1b419` and `0x1b498`.  They pass the
+  stream record, the destination buffer, and the mode.
+  Evidence: the caller records and the call sites above.
+- Observation: the line mode 1 stops at a newline.  The token mode 0 stops at
+  a newline, a tab, or a space.  Both callers read text, so the record takes
+  the section Resource loader.
+  Evidence: the blocks at `0x154fa`, `0x15523`, `0x15684`, `0x1b419`, and
+  `0x1b498`.
+- Observation: the stream record holds the handle at `+0x00`, the size at
+  `+0x08`, the position at `+0x0c`, the buffer flag at `+0x14`, the buffer
+  index at `+0x18`, the buffer pointer at `+0x1c`, and the status at `+0xac`.
+  At or past the size, the function clamps the position to the size, writes
+  the status 4, and returns -1.
+  Evidence: the block at `0x4c6aa` through `0x4c6dd`, and the sibling
+  `stream_read` record at `0x4c4e5`.
+- Observation: with the buffer flag set, the function copies one character at
+  a time from the buffer `+0x1c` plus the index `+0x18`, advances the index
+  and the position, and stops at the mode terminator.  It replaces the
+  terminator with the zero byte and keeps a carriage return out of the result.
+  Without the flag, it reads a line through `fgets` with the count 0x100 at
+  `0xd4965` in the line mode, or a token through `fscanf` with the format `%s`
+  at `0xc6618` in the token mode.  It adds the `strlen` at `0xd49c8` plus one
+  to the position.
+  Evidence: the block at `0x4c6f7` through `0x4c7cf`.
+- Inference: the two text callers, the sibling `stream_read` at `0x4c4e5`,
+  and the text read role support the name `stream_read_text`.  The original
+  has no symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/stream_read_text.c` and
+  `tools/rebuild/modules/stream_read_text.json`.
+- Observation: the behavior check passes.  The harness holds the stream
+  record, the destination buffer, the source buffer, the `fgets` stub, the
+  `fscanf` stub, and the `strlen` helper.  It prints the markers `0` through
+  `9` and `D`.  The ten paths cover the unbuffered line and token modes, the
+  buffered line and token modes, the space, the tab, the kept space, the
+  carriage return, the end clamp, and the two leading terminators.
+  Evidence: `tools/rebuild/stream_read_text_main.c`,
+  `python3 tools/rebuild/harness.py run --module stream_read_text`, and
+  `work/rebuild/srt_out.txt`.
+- Observation: the rebuilt module holds 106 decoded instructions and 277
+  bytes in the identity window.  The identity check stays open at 27 of 106
+  instructions and 7 of 277 bytes, because V2 saves the frame first, keeps
+  the three arguments in registers, forms the terminator branches with local
+  flags, and builds the unbuffered tail in another shape.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c695 --count 106 --rebuilt work/rebuild/srtmod.exe
+  --rebuilt-map work/rebuild/stream_read_text.map --rebuilt-symbol
+  stream_read_text_` and `python3 tools/rebuild/run.py run --function
+  0x4c695`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

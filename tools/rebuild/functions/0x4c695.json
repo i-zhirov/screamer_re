@@ -1,9 +1,95 @@
 {
   "address": "0x4c695",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 106,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c695 holds 106 instructions and 331 bytes up to the ret at 0x4c7df; the next function starts at 0x4c7e0, so the store record keeps the 331-byte extent and sets no function size; the identity check uses 106 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are list_file_load at 0x15460, with the call sites at 0x154fa and 0x15684, and member_list_load at 0x1b394, with the call sites at 0x1b419 and 0x1b498; they pass the stream record, the destination buffer, and the mode; the line mode 1 stops at a newline and the token mode 0 stops at a newline, a tab, or a space; both callers read text, so the module takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the stream record holds the handle at +0x00, the size at +0x08, the position at +0x0c, the buffer flag at +0x14, the buffer index at +0x18, the buffer pointer at +0x1c, and the status at +0xac; at or past the size the function clamps the position to the size, writes the status 4, and returns -1"
+    },
+    {
+      "kind": "note",
+      "text": "with the buffer flag set the function copies one character at a time from the buffer +0x1c plus the index +0x18, advances the index and the position, stops at the mode terminator, replaces the terminator with zero, and drops a carriage return; without the flag it reads a line through fgets with the count 0x100 at 0xd4965 in the line mode or a token through fscanf with the format %s at 0xc6618 in the token mode, and adds the strlen at 0xd49c8 plus one to the position"
+    },
+    {
+      "kind": "note",
+      "text": "the two text callers, the sibling stream_read at 0x4c4e5, and the text read role support the name stream_read_text; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the stream record, the destination buffer, the source buffer, the fgets stub, the fscanf stub, and the strlen helper; the ten paths cover the unbuffered line and token modes, the buffered line and token modes, the space, the tab, the kept space, the carriage return, the end clamp, and the two leading terminators; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 106 decoded instructions and 277 bytes in the identity window; the identity check stays open at 27 of 106 instructions and 7 of 277 bytes, because V2 saves the frame first, keeps the three arguments in registers, forms the terminator branches with local flags, and builds the unbuffered tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c695 --count 106"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c695 --count 106 --rebuilt work/rebuild/srtmod.exe --rebuilt-map work/rebuild/stream_read_text.map --rebuilt-symbol stream_read_text_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c695"
+    },
+    {
+      "kind": "finding",
+      "text": "The stream_read_text module at 0x4c695"
+    }
+  ],
+  "implementation": "c",
+  "module": "stream_read_text",
+  "name": "stream_read_text",
   "notes": [],
   "object_offset": "0x3c695",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 277,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 106,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c695",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:8db438bba29a0363e5c5d4ac0ce4c2ef73b429c45c84efca99d27094aa00327c",
+    "source_digest": "sha256:7e732fda8cef1f419ca756f17e8dcec6b8cd0892c965846d4184c6ef420f1c82",
+    "tool": "run.py"
+  },
+  "role": "reads a line or a token from the stream into the buffer, stops at the mode terminator, advances the position, and returns -1 at the stream end",
+  "section": "Resource loader",
   "size": 331,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "stream_read_text_"
 }
