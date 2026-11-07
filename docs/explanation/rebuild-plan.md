@@ -346,6 +346,26 @@ reproduce the original bytes.
 | `0x1d55c` | `object_revolution_matrix` (done) | 350 | 103 | 1 | 23 |
 | `0x29bac` | `championship_result_apply` (done) | 348 | 90 | 0 | 0 |
 
+### Phase O: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1c13c` | unnamed | 338 | 107 | 0 | 0 |
+| `0x188b8` | unnamed | 347 | 99 | 1 | 41 |
+| `0x4c98c` | unnamed | 344 | 96 | 13 | 0 |
+| `0x2392c` | unnamed | 344 | 110 | 15 | 43 |
+| `0x19828` | unnamed | 344 | 99 | 2 | 6 |
+| `0x12f50` | unnamed | 335 | 85 | 3 | 0 |
+| `0x16150` | unnamed | 332 | 95 | 1 | 22 |
+| `0x4c695` | unnamed | 331 | 106 | 3 | 0 |
+| `0x13580` | unnamed | 330 | 91 | 0 | 0 |
+| `0x18a14` | unnamed | 329 | 92 | 0 | 17 |
+| `0x25658` | unnamed | 324 | 93 | 11 | 0 |
+| `0x83ca8` | unnamed | 323 | 111 | 0 | 0 |
+
 ## Position
 
 Two hundred fifteen modules carry a recipe and a result: the twelve Phase A modules,
