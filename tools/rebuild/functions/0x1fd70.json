@@ -1,9 +1,99 @@
 {
   "address": "0x1fd70",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 112,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1fd70 holds 112 instructions and 419 bytes up to the ret at 0x1ff12; the next function starts at 0x1ff14, so the store record keeps the 420-byte extent and sets no function size; the identity check uses 112 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x2a514 and 0x2a753 are loading_screen at 0x2a364 and race_results_screen at 0x2a558; the loading path treats a non-zero result as a fatal error and exits the game; race_record_save at 0x2e82c has a caller inside this function at 0x1fecf, and net_race_screen at 0x28ba4 and the race-menu handler at 0x2a214 share that caller set, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function saves DAT_001d274, moves bit 0x80 of the mode byte DAT_001d260 to DAT_0018e30 and DAT_0000cf54, clears the bit with the mask 0x7f, and starts the session through race_session_start at 0x128e0 with 1; a non-zero start result ends the function"
+    },
+    {
+      "kind": "note",
+      "text": "the session loop runs the frame loop at 0x1ff14; a negative frame result with mode bit 2 and input bit 0x800 reads the replay record through 0x1b974 with the map name DAT_001d294; a read error returns 0x16 and skips the mode restore and the two cleanup calls, and a successful read sets DAT_001d264"
+    },
+    {
+      "kind": "note",
+      "text": "a set DAT_0018e30 reloads the controls through controls_load at 0x1b304 and ends the loop; otherwise a negative frame result with mode bits 0 and 1, the replay flag DAT_0018e60, and no input bits 0x1020 restores a replay through 0x1b738 with 0xc88, and a mode bit 0 restarts the session with 0 and runs one frame loop"
+    },
+    {
+      "kind": "note",
+      "text": "the function restores the input word DAT_00118e1c, runs quit_confirm_screen at 0x219ec behind the mode 2 and mode bit 0x10 gates, saves the record through race_record_save at 0x2e82c when a mode bit 0 or 1 is set, and restarts the session with 0; the loop repeats while the frame result is not 1"
+    },
+    {
+      "kind": "note",
+      "text": "the function restores DAT_001d274, calls 0x21da8 with 1, calls 0x156a8, and returns the last session result; the two cleanup calls and the saved mode word support the session-driver role, and the callers, the session start, the frame loop, the replay reads, the quit screen, and the record save support the name race_session_run; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the mode word, the mode byte, the input word, the replay flag, the two frame flags, the record index, and the map name; the ten paths cover the early start error, the replay record and its failure, the controls reload, the replay restart and its failure, the quit loop, the mode bit 0x10 gate, the mode 2 gate, and the mode 2 quit answer; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1fd70 --count 112"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1fd70 --count 112 --rebuilt work/rebuild/rsrun.exe --rebuilt-map work/rebuild/race_session_run.map --rebuilt-symbol race_session_run_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1fd70"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 112 decoded instructions and 416 bytes; the identity check stays open at 28 of 112 instructions and 37 of 401 bytes, and 1 of 45 relocation slots match, because V2 saves the frame first, keeps the mode byte and the input word in registers, uses other local offsets, and orders the loop test and the epilogue in another way; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_session_run module at 0x1fd70"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_session_run",
+  "name": "race_session_run",
   "notes": [],
   "object_offset": "0xfd70",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 401,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 28,
+        "instructions_total": 112,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1fd70",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:20a8331c32d7362e5e67d5a48b5c3bd703997172b999a73123c9d228669c176b",
+    "source_digest": "sha256:828c96db06f132c6a609c0184d4d72f72092efa53d569909337e8f86ac6cfa1e",
+    "tool": "run.py"
+  },
+  "role": "drives one race session: starts it, runs the frame loop, handles the replay modes, the controls reload, the quit screen, and the record save, and ends the session with the two cleanup calls",
+  "section": "race_frame callees",
   "size": 420,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_session_run_"
 }

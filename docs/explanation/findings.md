@@ -15291,3 +15291,73 @@ temporary `-od` recipe.
   race_intro_update_` and `python3 tools/rebuild/run.py run --function 0x20d20`.
 - Limit: the original holds no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_session_run module at 0x1fd70
+
+- Observation: the original body at `0x1fd70` holds 112 instructions and 419
+  bytes up to the `ret` at `0x1ff12`.  The next function starts at `0x1ff14`,
+  so the store record keeps the 420-byte extent and sets no function size.  The
+  identity check uses 112 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fd70 --count 112` and
+  `tools/rebuild/functions/0x1fd70.json`.
+- Observation: the two direct callers at `0x2a514` and `0x2a753` are
+  `loading_screen` at `0x2a364` and `race_results_screen` at `0x2a558`.  The
+  loading path treats a non-zero result as a fatal error and exits the game.
+  `race_record_save` at `0x2e82c` has a caller inside this function at
+  `0x1fecf`, and `net_race_screen` at `0x28ba4` and the race-menu handler at
+  `0x2a214` share that caller set, so the record takes the section
+  `race_frame callees`.
+  Evidence: the call sites at `0x2a514` and `0x2a753`, the call at `0x1fecf`,
+  and the records of `0x2a364`, `0x2a558`, `0x28ba4`, and `0x2a214`.
+- Observation: the function saves `DAT_001d274`, moves bit 0x80 of the mode
+  byte `DAT_001d260` to `DAT_0018e30` and `DAT_0000cf54`, clears the bit with
+  the mask 0x7f, and starts the session through `race_session_start` at
+  `0x128e0` with 1.  A non-zero start result ends the function.
+  Evidence: the blocks at `0x1fd7b` through `0x1fdb5`.
+- Observation: the session loop runs the frame loop at `0x1ff14`.  A negative
+  frame result with mode bit 2 and input bit 0x800 reads the replay record
+  through `0x1b974` with the map name `DAT_001d294`.  A read error returns
+  0x16 at once and skips the mode restore and the two cleanup calls.  A
+  successful read sets `DAT_001d264`.
+  Evidence: the test at `0x1fdc5` through `0x1fdfd` and the early return at
+  `0x1fdf3`.
+- Observation: a set `DAT_0018e30` reloads the controls through
+  `controls_load` at `0x1b304` and ends the loop.  Otherwise a negative frame
+  result with mode bits 0 and 1, the replay flag `DAT_0018e60`, and no input
+  bits 0x1020 restores a replay through `0x1b738` with 0xc88.  A mode bit 0
+  also restarts the session with 0 and runs one frame loop.
+  Evidence: the blocks at `0x1fe07` through `0x1fe86`.
+- Observation: the function restores the input word `DAT_00118e1c`, runs
+  `quit_confirm_screen` at `0x219ec` behind the mode 2 and mode bit 0x10 gates,
+  saves the record through `race_record_save` at `0x2e82c` when a mode bit 0
+  or 1 is set, and restarts the session with 0.  The loop repeats while the
+  frame result is not 1.
+  Evidence: the blocks at `0x1fe86` through `0x1fee4`.
+- Observation: the function restores `DAT_001d274`, calls `0x21da8` with 1,
+  calls `0x156a8`, and returns the last session result.
+  Evidence: the blocks at `0x1fef0` through `0x1ff12`.
+- Inference: the callers, the session start, the frame loop, the replay reads,
+  the quit screen, the record save, and the two cleanup calls support the name
+  `race_session_run`.  The original holds no symbol for this function, so the
+  record keeps the name with the confidence `inferred`.
+- Observation: the harness holds the mode word, the mode byte, the input word,
+  the replay flag, the two frame flags, the record index, and the map name.  It
+  runs ten paths: the early start error, the replay record and its failure, the
+  controls reload, the replay restart and its failure, the quit loop, the mode
+  bit 0x10 gate, the mode 2 gate, and the mode 2 quit answer.  The output holds
+  the markers `0` through `9` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_session_run_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_session_run`, and
+  `work/rebuild/rsrun.txt`.
+- Observation: the rebuilt module holds 112 decoded instructions and 416 bytes.
+  The identity check stays open at 28 of 112 instructions and 37 of 401 bytes,
+  and 1 of 45 relocation slots match, because V2 saves the frame first, keeps
+  the mode byte and the input word in registers, uses other local offsets, and
+  orders the loop test and the epilogue in another way.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1fd70 --count 112 --rebuilt work/rebuild/rsrun.exe
+  --rebuilt-map work/rebuild/race_session_run.map --rebuilt-symbol
+  race_session_run_` and `python3 tools/rebuild/run.py run --function 0x1fd70`.
+- Limit: the original holds no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
