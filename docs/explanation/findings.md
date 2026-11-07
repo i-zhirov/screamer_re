@@ -15952,3 +15952,80 @@ temporary `-od` recipe.
   0x830c8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the register-return model stay inferred.
+
+## The sound_mix_prepare module at 0x8aa60
+
+- Observation: the plan row records a 535-byte body of 155 instructions, one
+  call, and five floating-point instructions.  The body starts at `0x8aa60`
+  and ends at the `ret` at `0x8ac76`.  The next function starts at `0x8ac78`,
+  so the store record keeps the 536-byte extent and sets no separate function
+  size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8aa60 --count 155` and
+  `tools/rebuild/functions/0x8aa60.json`.
+- Observation: the only direct caller is `sound_effects_update` at `0x81ab0`.
+  The caller calls this function as the mix prepare.  It returns when the voice
+  count at `0x7aa9c` is zero or negative.  It then mixes the voices at
+  `0x45790`.  The record takes the name `sound_mix_prepare` with the confidence
+  `inferred` and the section `Program functions`.
+  Evidence: the call at `0x81ae0`, the voice test at `0x81aea`, the mix at
+  `0x81af0`, and the finding "The sound_effects_update module at 0x81ab0".
+- Observation: the entry calls the helper at `0x8a9e8`.  That helper copies
+  the camera basis at `+0x48` and the saved camera position at `0x7ad94`
+  through `0x7ad9c` into the immediate fields at `0x8aaca` through `0x8ab18`
+  of this function.  The original patches its own code.  The on-disk value
+  `0xaaaabbbb` is only the linker fill value.  The rebuild reads the same
+  matrix and position into local variables, which is equivalent because the
+  loop does not change them.
+  Evidence: the call at `0x8aa6c`, the stores at `0x8a9e8` through `0x8aa48`,
+  and the relocation at `0x8aa35` into the slot at `0x8aaca`.
+- Observation: the loop walks the 8-byte source records at `0x40330` while the
+  active count at `0x72488` is above zero.  Each record holds the squared
+  distance at `+0` and the emitter pointer at `+4`.  The flag `0x40000000` in
+  the pointer marks the near bias.  The function copies the record to the
+  20-byte voice record at `0x42ef0`.  It transforms the emitter position at
+  `+8`, `+0xc`, and `+0x10` from world space into camera space by the Q14
+  basis.
+  Evidence: the loop at `0x8aaa0` through `0x8ab3a` and the ret at `0x8ac76`.
+- Observation: the function computes the radius from the square root of the
+  squared distance.  It shifts the result by two and negates it.  It adds
+  `0x320` for the flag `0x40000000`.  It subtracts the object type bias at
+  `+0x32c`: type 1 `0x5dc`, type 2 `0x320`, type 3 `0x1770`, and type 4
+  `0xc8`.  The object comes from the handle table at `0x21540` with the emitter
+  field at `+0`.
+  Evidence: the block at `0x8ab3d` through `0x8abc2`.
+- Observation: the function skips a source behind the object radius at `+0`, a
+  source below the far limit at `0xc7cf0`, and a source whose projected box
+  leaves the view rectangle at `0x7a7c8` through `0x7a7e4`.  A kept source
+  appends the 4-byte entry at `0x45790` with the voice byte offset and the
+  radius.  The end of the loop replaces the voice count at `0x7aa9c` with the
+  entry count.
+  Evidence: the block at `0x8abc3` through `0x8ac70`.
+- Observation: the original has no EBP frame, so the module builds without
+  `-of+`.  The module takes the square root from the local
+  `sound_mix_prepare_fpu.asm` stub, because the harness links no math library.
+  The rebuild computes the signed 32x32 to 64-bit product and the shift 17 with
+  32-bit arithmetic, because the harness has no 64-bit runtime helper.
+  Evidence: `tools/rebuild/sound_mix_prepare.c` and
+  `tools/rebuild/sound_mix_prepare_fpu.asm`.
+- Observation: the harness holds the camera, the saved position, the source
+  list, the voice list, the entry list, the object table, the projection
+  table, and the view rectangle.  The nine paths cover the accept path, the
+  behind source, the far limit, the four rectangle sides, the five radius
+  biases, the compaction, and the Q14 rotation with the saved position.  The
+  output holds the markers `0` through `9` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/sound_mix_prepare_main.c`, `python3
+  tools/rebuild/harness.py run --module sound_mix_prepare`, and
+  `work/rebuild/mixprep.txt`.
+- Observation: the identity check stays open at 21 of 155 instructions, 6 of
+  535 bytes, and 0 of 32 relocation slots.  V2 saves the registers in another
+  order, keeps the matrix in local slots instead of the patched immediates,
+  and uses another loop shape.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8aa60 --count 155 --rebuilt work/rebuild/mixprep.exe
+  --rebuilt-map work/rebuild/sound_mix_prepare.map --rebuilt-symbol
+  sound_mix_prepare_` and `python3 tools/rebuild/run.py run --function
+  0x8aa60`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the object layout, and the projection table model stay inferred.
