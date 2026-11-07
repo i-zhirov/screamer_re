@@ -319,7 +319,7 @@ reproduce the original bytes.
 | `0x1fd70` | `race_session_run` (done) | 419 | 112 | 12 | 0 |
 | `0x1ef68` | `traffic_object_link` (done) | 415 | 117 | 5 | 20 |
 | `0x11ccc` | `collision_cell_test` (done) | 413 | 127 | 4 | 9 |
-| `0x2003c` | unnamed | 404 | 104 | 14 | 0 |
+| `0x2003c` | `race_simulation_update` (done) | 404 | 104 | 14 | 0 |
 | `0x21058` | unnamed | 391 | 114 | 10 | 5 |
 | `0x2fcec` | unnamed | 379 | 99 | 13 | 0 |
 | `0x4d844` | unnamed | 374 | 119 | 1 | 0 |
@@ -328,7 +328,7 @@ reproduce the original bytes.
 
 ## Position
 
-One hundred ninety-seven modules carry a recipe and a result: the twelve Phase A modules,
+One hundred ninety-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -405,5 +405,6 @@ and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
 `quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`, and
 `championship_screen_init` at `0x2c7a8`, and `race_intro_update` at `0x20d20`,
 and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
-and `collision_cell_test` at `0x11ccc`.
-The next unnamed function is `0x2003c`.
+and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
+`0x2003c`.
+The next unnamed function is `0x21058`.

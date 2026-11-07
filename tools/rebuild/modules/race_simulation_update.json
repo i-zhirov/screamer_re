@@ -1,0 +1,31 @@
+{
+  "exe": "rsim.exe",
+  "map": "race_simulation_update.map",
+  "name": "race_simulation_update",
+  "run": {
+    "command": "rsim.exe > rsim_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rsim_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_simulation_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_simulation_update_main.c"
+    }
+  ]
+}

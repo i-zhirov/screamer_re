@@ -15513,3 +15513,69 @@ temporary `-od` recipe.
   0x11ccc`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_simulation_update module at 0x2003c
+
+- Observation: the original body at `0x2003c` holds 104 instructions and 404
+  bytes up to the `ret` at `0x201cf`.  The next function starts at `0x201d0`, so
+  the store record keeps the 404-byte extent and sets no further function size.
+  The identity check uses 104 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2003c --count 104` and
+  `tools/rebuild/functions/0x2003c.json`.
+- Observation: the only direct caller at `0x1ffd2` is the frame update at
+  `0x1ff70`.  The frame update runs the five view groups in order, and the mode
+  byte `DAT_0011d260` selects the group.  No named function sits between the
+  frame update and the target, so the record takes the section
+  `Program functions`.
+  Evidence: the direct call sweep for `0x2003c`, the disassembly of `0x1ff70`,
+  and the call at `0x1ffd2`.
+- Observation: the function returns at once when bit 0 of `DAT_00118e1d` is
+  clear or when neither bit 0 nor bit 1 of `DAT_0011d260` is set.  The race
+  modes 1, 2, and 3 set those bits, so the five view groups map to the race
+  types.
+  Evidence: the gates at `0x20044` through `0x2005d`.
+- Observation: the function calls `func_20428` first.  It then interleaves each
+  player step with a pass over the 0x590-byte car records at `DAT_00110ab8`.
+  The player steps are `player_car_view_update` at `0x16f34`, the physics group
+  at `0x15a80`, the effect group at `0x15bac`, the step group at `0x15ab8`, the
+  proximity group at `0x15b08`, `player_update` at `0x19ab0`, and
+  `player_car_link` at `0x15c1c`.
+  Evidence: the blocks at `0x2005e` through `0x201cf`.
+- Observation: the six record passes call `object_transform` at `0x1cd44`,
+  `object_player_input` at `0x1c760`, `object_physics` at `0x1c810`,
+  `object_prepare` at `0x1c79c`, the collision step at `0x1c7d0`, and
+  `object_car_link` at `0x1c84c`.  Each loop reads the count `DAT_0010f8ec` and
+  the shared counter `DAT_0010634c`.
+  Evidence: the `imul eax,eax,0x590` at `0x2008c`, `0x200c7`, `0x20102`,
+  `0x2013d`, `0x20177`, and `0x201b7`, and the shared counter stores.
+- Inference: the frame update caller, the two mode gates, the seven player
+  steps, and the six car passes support the name `race_simulation_update`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the function uses no floating-point instruction.  The original
+  has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/race_simulation_update.c` and
+  `tools/rebuild/modules/race_simulation_update.json`.
+- Observation: the harness holds the two gate bytes, the record count, the
+  shared counter, two car records, the seven player stubs, and the six object
+  stubs.  The five paths cover the clear input gate, the clear mode gate, the
+  zero count, one record with mode bit 1, and two records with mode bit 0.  The
+  output holds the markers `0` through `4` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/race_simulation_update_main.c`, `python3
+  tools/rebuild/harness.py run --module race_simulation_update`, and
+  `work/rebuild/rsim_out.txt`.
+- Observation: the rebuilt function holds 375 bytes and 87 decoded
+  instructions.  The identity check stays open at 21 of 104 instructions, 28 of
+  404 bytes, and 3 of 59 relocation slots, because V2 saves `ebp` first, keeps
+  the loop counters in registers on some passes, reads the counter and the count
+  through near data addresses, and uses another local layout.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2003c --count 104 --rebuilt work/rebuild/rsim.exe
+  --rebuilt-map work/rebuild/race_simulation_update.map --rebuilt-symbol
+  race_simulation_update_` and `python3 tools/rebuild/run.py run --function
+  0x2003c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
