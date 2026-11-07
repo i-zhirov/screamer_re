@@ -334,6 +334,17 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x830c8` | unnamed | 649 | 207 | 0 | 0 |
+| `0x8aa60` | unnamed | 535 | 155 | 1 | 5 |
+| `0x1057c` | unnamed | 483 | 154 | 1 | 0 |
+| `0x8beb8` | unnamed | 468 | 143 | 5 | 0 |
+| `0x194a0` | unnamed | 363 | 103 | 4 | 12 |
+| `0x254a8` | unnamed | 360 | 104 | 0 | 0 |
+| `0x1eae0` | unnamed | 358 | 112 | 6 | 0 |
+| `0x22378` | unnamed | 353 | 121 | 1 | 31 |
+| `0x836ac` | unnamed | 351 | 100 | 2 | 13 |
+| `0x1e7b4` | unnamed | 350 | 124 | 1 | 96 |
+| `0x1d55c` | unnamed | 350 | 103 | 1 | 23 |
+| `0x29bac` | unnamed | 348 | 90 | 0 | 0 |
 
 ## Position
 
