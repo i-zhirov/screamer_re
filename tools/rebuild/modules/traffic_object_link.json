@@ -1,0 +1,37 @@
+{
+  "exe": "tolink.exe",
+  "map": "traffic_object_link.map",
+  "name": "traffic_object_link",
+  "run": {
+    "command": "tolink.exe > tolink.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "tolink.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_object_link.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "traffic_object_link_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_object_link_main.c"
+    }
+  ]
+}

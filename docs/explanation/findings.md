@@ -15361,3 +15361,80 @@ temporary `-od` recipe.
   race_session_run_` and `python3 tools/rebuild/run.py run --function 0x1fd70`.
 - Limit: the original holds no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The traffic_object_link module at 0x1ef68
+
+- Observation: the original body at `0x1ef68` holds 117 instructions and 415
+  bytes up to the `ret` at `0x1f106`.  The next function starts at `0x1f108`,
+  so the store record keeps the 416-byte extent and sets no function size.  The
+  identity check uses 117 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ef68 --count 117` and
+  `tools/rebuild/functions/0x1ef68.json`.
+- Observation: the only direct caller at `0x202b1` is the traffic view group at
+  `0x201d0`.  That group walks the `0x2a8`-byte traffic records at
+  `DAT_00113cd8` while the index stays below the count `DAT_00115218`.  The
+  group first runs the record update at `0x1f108` and then this function, and
+  the frame update at `0x1ff70` selects the group through the mode byte
+  `DAT_0011d260` bit `0x10`.  The module takes the section
+  `The vehicle state chain`.
+  Evidence: the direct call sweep for `0x1ef68`, the disassembly of `0x201d0`
+  through `0x202bc`, and the record of `traffic_collision_pass` at `0x175dc`.
+- Observation: a negative first record field ends the function at once inside
+  the frame.  The record field `+0x64` selects the 28-byte entry at
+  `DAT_0010653c`.  The entry field 0 is the body object and the entry field 4
+  is the render array.  The record field `+0x6c` selects the second 28-byte
+  entry, and its field 0 is the part object.  The original loads the render
+  pointer into a local, but the body never reads that local again.
+  Evidence: the blocks at `0x1ef6f` through `0x1efc6`.
+- Observation: the function copies the record position `+0x3c`, `+0x40`, and
+  `+0x44` to the body offsets 8, 0xc, and 0x10.  The record positions `+0x3c`
+  and `+0x44` also go to the part offsets 8 and 0x10.  The record field `+0x18`
+  goes to the body offset 0x3c, and the record field `+0x14` masked with
+  `0xf000` goes to the body offset 0x20.
+  Evidence: the blocks at `0x1efc9` through `0x1f005` and `0x1f089` through
+  `0x1f0a3`.
+- Observation: the function scales the record floats `+0x48`, `+0x4c`,
+  `+0x50`, `+0x58`, and `+0x5c` by 1024.0 at object-3 offset `0xbc4` and
+  divides by pi at object-3 offset `0xbc8`.  It truncates each result toward
+  zero and masks the low 11 bits.  The values go to the body offsets 0x14,
+  0x18, and 0x1c and to the part offsets 0x14 and 0x1c.  The body value at 0x18
+  also goes to the part offset 0x18.  The record field `+0x54` goes to the part
+  offset 0xc.
+  Evidence: the FPU blocks at `0x1f005` through `0x1f0ff`, and the constants
+  `0x44800000` and `0x40490fdb` at linear `0x100bc4` and `0x100bc8`.
+- Inference: the traffic table, the entry table, the render pointer load, and
+  the sibling `object_car_link` at `0x1c84c` support the name
+  `traffic_object_link`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the truncate helper at `0x4d9f4` before each
+  `fistp`.  The harness links no math library, so the local
+  `traffic_object_link_fpu.asm` makes `__CHP` truncate toward zero.  The
+  constants arrive through globals, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.
+  Evidence: `tools/rebuild/traffic_object_link_fpu.asm`,
+  `tools/rebuild/traffic_object_link.c`, and the helper at `0x4d9f4`.
+- Observation: the harness holds one `0x300`-byte traffic record, four entry
+  pairs of the 28-byte table, the body and render blocks, and the two float
+  constants.  It runs seven paths: the full path, the negative truncation, the
+  low 11-bit mask, the high-nibble flag mask, the entry selection, the part
+  field isolation, and the negative first field.  The output holds the markers
+  `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/traffic_object_link_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_object_link`, and
+  `work/rebuild/tolink.txt`.
+- Observation: the rebuilt module holds 117 decoded instructions and 383 bytes.
+  The identity check stays open at 22 of 117 instructions and 11 of 386 bytes,
+  and 0 of 32 relocation slots match, because V2 saves `ebx`, `ecx`, and `edx`,
+  keeps the body in `ecx` and the part in `ebx`, computes the entry offset with
+  `imul`, keeps the record in `edx`, and reads the constants through near data
+  operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ef68 --count 117 --rebuilt work/rebuild/tolink.exe
+  --rebuilt-map work/rebuild/traffic_object_link.map --rebuilt-symbol
+  traffic_object_link_` and `python3 tools/rebuild/run.py run --function
+  0x1ef68`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
