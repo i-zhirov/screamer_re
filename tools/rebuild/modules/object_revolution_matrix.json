@@ -1,0 +1,36 @@
+{
+  "exe": "ormmod.exe",
+  "map": "object_revolution_matrix.map",
+  "name": "object_revolution_matrix",
+  "run": {
+    "command": "ormmod.exe > orm_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "orm_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_revolution_matrix.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_revolution_matrix_main.c"
+    }
+  ]
+}

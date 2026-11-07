@@ -16554,3 +16554,58 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x1e7b4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the helper names in the harness stay inferred.
+
+## The object_revolution_matrix module at 0x1d55c
+
+- Observation: the original body at `0x1d55c` holds 103 instructions and 350
+  bytes up to the `ret` at `0x1d6b9`.  The next function starts at `0x1d6bc`,
+  so the store record keeps the 352-byte extent and sets no function size.  The
+  record sets the instruction count 103.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d55c --count 103` and
+  `tools/rebuild/functions/0x1d55c.json`.
+- Observation: the function reads the gear index at `+0x248` and the entry
+  index at `+0x24c`.  The gear index selects a 36-byte record in the table at
+  `DAT_0010f8e4`.  The first dword of the record points to an entry array with
+  a 56-byte stride.  The entry holds the next index at `+0x10` and three
+  signed integer points at `+0x14` with a three-int stride.
+  Evidence: the blocks at `0x1d568` through `0x1d5db` and the record for
+  `object_revolution_step` at `0x1d30c`.
+- Observation: the gear flag at `+0x254` selects the control-point window.
+  With flag 0 the points are the first and the second point of the current
+  entry and the first point of the next entry.  With flag 1 the points are the
+  second point of the current entry and the first and the second point of the
+  next entry.  Each x and y pair converts from a signed integer to a float and
+  lands at `+0x284` with a three-float stride.  The z slots stay unchanged.
+  Evidence: the blocks at `0x1d5de` through `0x1d68e`.
+- Observation: the function calls the two-dimensional spline sampler at
+  `0x1e7b4` with the output at `+0x2a8`, the control points at `+0x284`, and
+  the fraction at `+0x250`.  The only direct caller is `object_revolution_step`
+  at `0x1d30c`, and the two call sites sit at `0x1d3e2` and `0x1d458`.
+  Evidence: the block at `0x1d694` through `0x1d6b9` and the call sites.
+- Inference: the record takes the name `object_revolution_matrix`, because the
+  only caller treats the call as the matrix build and the function samples the
+  revolution curve.  The record takes the section `The vehicle state chain`
+  with the caller and the spline family.
+  Evidence: the caller at `0x1d30c`, the findings for `object_revolution_step`,
+  and the data flow above.
+- Observation: the harness holds the object record, the 36-byte gear table, the
+  56-byte entry table, and a sampler stub.  The six paths cover both gear
+  flags, a second gear and entry index, the negative conversion, the fraction
+  and pointer arguments, and the unchanged z slots.  The output holds the
+  markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_revolution_matrix_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_revolution_matrix`, and
+  `work/rebuild/orm_out.txt`.
+- Observation: the rebuilt body holds 52 instructions and 189 bytes up to the
+  `ret` at `0x100bc`.  The identity check decodes 103 instructions from the
+  symbol, so its range continues past the function.  The check stays open at 11
+  of 103 instructions and 21 of 340 bytes, because V2 reorders the
+  control-point stores, fuses the two table lookups, and uses a shorter frame.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d55c --count 103 --rebuilt work/rebuild/ormmod.exe
+  --rebuilt-map work/rebuild/object_revolution_matrix.map --rebuilt-symbol
+  object_revolution_matrix_` and `python3 tools/rebuild/run.py run --function
+  0x1d55c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the helper names in the harness stay inferred.
