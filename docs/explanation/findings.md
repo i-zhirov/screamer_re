@@ -14625,9 +14625,9 @@ temporary `-od` recipe.
   Evidence: the byte sweep for a relative call to `0x27c34` and the block at
   `0x27a34`.
 - Observation: the pointer table `DAT_0011cef8` holds the pages of the credits
-  text.  `engine_init` calls `member_list_load` at `0x1b394` with the member
-  name `attr` at object-3 offset `0x47b`, and `member_list_load` reads that
-  member from `data\local.dat`.  The index `DAT_0011ce3c` holds the first line
+  text.  The mode 0x100 start at `0x12f50` calls `member_list_load` at
+  `0x1b394` with the member name `attr` at object-3 offset `0x47b`, and
+  `member_list_load` reads that member from `data\local.dat`.  The index `DAT_0011ce3c` holds the first line
   of the page.  A line that starts with `#` ends the page.  The function walks
   up to 0x14 lines from the index.
   Evidence: the call at `0x1302e`, the string at object-3 offset `0x47b`, and
@@ -17003,3 +17003,79 @@ temporary `-od` recipe.
   tools/rebuild/run.py run --function 0x19828`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The game_mode_100_start module at 0x12f50
+
+- Observation: the original body at `0x12f50` holds 85 instructions and 335
+  bytes up to the `ret` at `0x1309e`.  The next function starts at `0x130a0`,
+  so the store record keeps the 336-byte extent and sets no separate function
+  size.  The identity check uses 85 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12f50 --count 85` and
+  `tools/rebuild/functions/0x12f50.json`.
+- Observation: the only direct caller is the game mode dispatch at `0x12996` in
+  `race_session_start` at `0x128e0`.  The dispatch sends the mode 0x100 to this
+  function.  The caller takes the section The timing and filter layer.
+  Evidence: the comparison chain at `0x1296d` through `0x1298e` and the call at
+  `0x12996`.
+- Observation: the function clears the credits session state
+  `DAT_0011ce44`, the timer `DAT_0011ce48`, the toggle `DAT_0011ce40`, the line
+  index `DAT_0011ce3c`, the two roll cells `DAT_0011d220` and `DAT_0011d21c`,
+  and the panel cell `DAT_0011ce50`.  It sets the panel position
+  `DAT_0011ce4c` to -320.0 and the fade level `DAT_0011d224` to 1.0.  The two
+  float cells take the bit patterns `0xc3a00000` and `0x3f800000`.
+  Evidence: the stores at `0x12f6a` through `0x12fa0`.
+- Observation: the function clears the car slot counter `DAT_0000f8f0` and
+  fills the twenty credit line positions `DAT_0011ce58` with `0x15e` and the
+  twenty cells `DAT_0011cea8` with `0x64`.
+  Evidence: the loop at `0x12fa6` through `0x12fd3`.
+- Observation: the car loop walks the car count `DAT_0000f8ec` and calls
+  `car_setup` at `0x142ec` for each 0x590-byte record at `DAT_00010ab8` with the
+  index and the load flag 1.  A non-zero result returns at once.
+  Evidence: the loop at `0x12fd5` through `0x13018`.
+- Observation: after the loop the function loads the `attr` member at object-3
+  offset `0x47b` into the credit page table `DAT_0011cef8` through
+  `member_list_load` at `0x1b394`, and it stores the result at
+  `DAT_0011d218`.  The two credit cells `DAT_0010a9c` and `DAT_00001e04` take 1,
+  `DAT_0010a80` and `DAT_0010a1c` take -1, and `DAT_0010a18` and `DAT_0010a94`
+  take 0.  The function sets bit `0x2001` of the word `DAT_00118e1c`, stores the
+  frame counter `DAT_000007fd` at `DAT_0011d228`, clears bit 1 of the byte
+  `DAT_00118e1d`, and runs the scene setup at `0x15984` with the mode argument.
+  Evidence: the block at `0x1301a` through `0x13094`.
+- Inference: the credits state cells, the `attr` member load, and the mode
+  0x100 dispatch support the name `game_mode_100_start`.  The caller and the
+  program map already hold this name.  The original has no symbol, so the
+  record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the earlier credits_scroll note names `engine_init` as the
+  caller of the `attr` load.  The call at `0x1302e` sits in this function
+  instead, so the note now names the mode 0x100 start.
+  Evidence: the call at `0x1302e` and the body at `0x12f50`.
+- Observation: the minimal harness image does not load the constant segment,
+  so the two float cells take their bit patterns as integers.  The function has
+  no FPU instruction.  The original has the EBP frame, so the module builds
+  with `-of+`.
+  Evidence: `tools/rebuild/game_mode_100_start.c` and
+  `tools/rebuild/modules/game_mode_100_start.json`.
+- Observation: the behavior check passes.  The harness holds the credits state
+  cells, the twenty line positions and cells, the credit page table, the four
+  car records, the car count and slot counter, the frame flags, the frame
+  counter, the two float cells, and the three callee stubs.  It prints the
+  markers `0` through `3` and `D`.  The four paths cover the normal three-car
+  start, the second-car failure, the zero car count, and the input word
+  `0x0300` that becomes `0x2101`.
+  Evidence: `tools/rebuild/game_mode_100_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module game_mode_100_start`, and
+  `work/rebuild/gm100.txt`.
+- Observation: the rebuilt module holds 85 decoded instructions and 335 bytes
+  in the identity window.  The identity check stays open at 31 of 85
+  instructions, 29 of 335 bytes, and 1 of 55 relocation slots, because V2 saves
+  the frame pointer first, uses a shorter prologue, and orders the tail stores
+  in another shape.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12f50 --count 85 --rebuilt work/rebuild/gm100.exe
+  --rebuilt-map work/rebuild/game_mode_100_start.map --rebuilt-symbol
+  game_mode_100_start_` and `python3 tools/rebuild/run.py run --function
+  0x12f50`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

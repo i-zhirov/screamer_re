@@ -358,7 +358,7 @@ reproduce the original bytes.
 | `0x4c98c` | `unr_file_load` (done) | 344 | 96 | 13 | 0 |
 | `0x2392c` | `gauge_marker_draw` (done) | 344 | 110 | 15 | 43 |
 | `0x19828` | `player_car_wheel_effect_start` (done) | 344 | 99 | 2 | 6 |
-| `0x12f50` | unnamed | 335 | 85 | 3 | 0 |
+| `0x12f50` | `game_mode_100_start` (done) | 335 | 85 | 3 | 0 |
 | `0x16150` | unnamed | 332 | 95 | 1 | 22 |
 | `0x4c695` | unnamed | 331 | 106 | 3 | 0 |
 | `0x13580` | unnamed | 330 | 91 | 0 | 0 |
@@ -368,7 +368,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred twenty modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred twenty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -456,6 +456,7 @@ at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
 at `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and `object_revolution_matrix`
 at `0x1d55c`, and `championship_result_apply` at `0x29bac`, and the Phase O
 modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
-`0x188b8`, `unr_file_load` at `0x4c98c`, `gauge_marker_draw` at `0x2392c`, and
-`player_car_wheel_effect_start` at `0x19828`.
-The next unnamed function is `0x12f50`.
+`0x188b8`, `unr_file_load` at `0x4c98c`, `gauge_marker_draw` at `0x2392c`,
+`player_car_wheel_effect_start` at `0x19828`, and `game_mode_100_start` at
+`0x12f50`.
+The next unnamed function is `0x16150`.
