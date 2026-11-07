@@ -17213,3 +17213,63 @@ temporary `-od` recipe.
   0x4c695`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The race_view_reset module at 0x13580
+
+- Observation: the original body at `0x13580` holds 91 instructions and 330
+  bytes up to the `ret` at `0x136c9`.  The next function starts at `0x136cc`,
+  so the store keeps the 332-byte extent and sets no function size.  The
+  identity check uses 91 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x13580 --count 91` and
+  `tools/rebuild/functions/0x13580.json`.
+- Observation: the only direct caller at `0x12946` is `race_session_start` at
+  `0x128e0`, which runs this function before the track load at `0x13540`.  The
+  caller takes the section The timing and filter layer, so the record takes the
+  section `race_session_start callees`.
+  Evidence: the call at `0x12946` and the caller record at `0x128e0`.
+- Observation: the function walks the 0x590-byte car records at
+  `DAT_00010ab8` up to the count `DAT_0000f8ec` with the shared counter
+  `DAT_0000634c`.  For each record it clears the four view flags at `+0x54c`,
+  `+0x550`, `+0x56c`, and `+0x574` and sets the view mode at `+0x580` to 8.
+  The fields sit in the view block at `+0x4f8` that `car_camera` and
+  `player_view_setup` use.
+  Evidence: the five loops at `0x1358b` through `0x13694`, the `car_camera`
+  record at `0x1a930`, and the `player_view_setup` record at `0x19ae8`.
+- Observation: the function then walks the seven 0x14-byte view slots at
+  `DAT_00101da4` and clears the chosen flag at `+0x10`.  `player_view_setup`
+  reads the same slots and clears the chosen flag after a change.
+  Evidence: the loop at `0x13696` through `0x136bf` and the slot table at
+  object-3 offset `0x1da4`.
+- Observation: the function also clears the shared view cells `DAT_0010a9c`,
+  `DAT_0010a94`, `DAT_0010a74`, `DAT_0010a78`, and `DAT_0010aa8`, and the
+  shared counter `DAT_0000634c`.
+  Evidence: the stores at `0x13593`, `0x135c8`, `0x135fd`, `0x13632`, and
+  `0x13667`.
+- Inference: the caller, the per-car view fields, the view slots, and the
+  shared cells support the name `race_view_reset`.  The original has no symbol,
+  so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction and no call, so it
+  needs no FPU stub.
+  Evidence: `tools/rebuild/race_view_reset.c` and
+  `tools/rebuild/modules/race_view_reset.json`.
+- Observation: the behavior check passes.  The harness holds four 0x590-byte
+  car records, the car count, the shared counter, the five shared view cells,
+  and the seven view slots.  It prints the markers `0` through `3` and `D`.
+  The four paths cover three cars, zero cars, one car, and two cars.
+  Evidence: `tools/rebuild/race_view_reset_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_view_reset`, and
+  `work/rebuild/rvr_out.txt`.
+- Observation: the rebuilt module holds 91 decoded instructions and 327 bytes
+  in the identity window.  The identity check stays open at 20 of 91
+  instructions and 23 of 327 bytes, because V2 saves the frame first, keeps
+  the counter in a register inside each loop, and adds the symbol offset at the
+  field store.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x13580 --count 91 --rebuilt work/rebuild/rvrmod.exe
+  --rebuilt-map work/rebuild/race_view_reset.map --rebuilt-symbol
+  race_view_reset_` and `python3 tools/rebuild/run.py run --function 0x13580`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

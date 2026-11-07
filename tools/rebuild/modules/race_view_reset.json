@@ -1,0 +1,30 @@
+{
+  "exe": "rvrmod.exe",
+  "map": "race_view_reset.map",
+  "name": "race_view_reset",
+  "run": {
+    "command": "rvrmod.exe > rvr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rvr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_view_reset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_view_reset_main.c"
+    }
+  ]
+}

@@ -361,14 +361,14 @@ reproduce the original bytes.
 | `0x12f50` | `game_mode_100_start` (done) | 335 | 85 | 3 | 0 |
 | `0x16150` | `player_brake_update` (done) | 332 | 95 | 1 | 22 |
 | `0x4c695` | `stream_read_text` (done) | 331 | 106 | 3 | 0 |
-| `0x13580` | unnamed | 330 | 91 | 0 | 0 |
+| `0x13580` | `race_view_reset` (done) | 330 | 91 | 0 | 0 |
 | `0x18a14` | unnamed | 329 | 92 | 0 | 17 |
 | `0x25658` | unnamed | 324 | 93 | 11 | 0 |
 | `0x83ca8` | unnamed | 323 | 111 | 0 | 0 |
 
 ## Position
 
-Two hundred twenty-three modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred twenty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -459,5 +459,5 @@ modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
 `0x188b8`, `unr_file_load` at `0x4c98c`, `gauge_marker_draw` at `0x2392c`,
 `player_car_wheel_effect_start` at `0x19828`, and `game_mode_100_start` at
 `0x12f50`, and `player_brake_update` at `0x16150`, and `stream_read_text` at
-`0x4c695`.
-The next unnamed function is `0x13580`.
+`0x4c695`, and `race_view_reset` at `0x13580`.
+The next unnamed function is `0x18a14`.
