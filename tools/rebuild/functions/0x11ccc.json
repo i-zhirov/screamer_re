@@ -1,9 +1,103 @@
 {
   "address": "0x11ccc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 127,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11ccc holds 127 instructions and 413 bytes up to the first ret at 0x11e68; the normal exit jumps to the second epilogue at 0x11e69, and the full body ends at the ret at 0x11e73; the next function starts at 0x11e74, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 127 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x11caa is the map collision check at 0x11c00; that check walks the three-by-three cell neighborhood of the spatial grid at DAT_00102fa4 and calls this function for each cell with the mode in eax; the cell slot address arrives through DAT_00108034, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x40-byte collision records of the cell while the current pointer DAT_0010c744 stays below the end at the count cell + 0x14; the first record field selects the object from the handle table DAT_00021540; the object field +0x18 is the offset to the collision shape, which the function keeps at DAT_0010c740"
+    },
+    {
+      "kind": "note",
+      "text": "the shape holds the radius at +0x00, the centre x as a signed 16-bit value at +0x04, and the centre y as a signed 16-bit value at +0x08; the function forms the offset from the world position DAT_00108038 and DAT_00108040 to the record position at +0x08 and +0x10; a squared offset above the squared radius skips the record"
+    },
+    {
+      "kind": "note",
+      "text": "inside the radius the function scales the record angle at +0x18 by the float 1/1024 at object-3 offset 0x404 and pi at object-3 offset 0x408; it rotates the offset through 0x2218c and forms the world position at DAT_0010c728 and DAT_0010c730; it then probes three points ten units apart"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 1 calls 0x1c0ac; any other mode calls 0x1bfd4; a hit returns 1; the mode 1 returns at once; the other mode rotates the pair DAT_0010c734 and DAT_0010c73c back by the negative angle, stores the result, copies the shape byte +0x6b to DAT_00108024, and returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "the map collision check, the record table, and the shape test support the name collision_cell_test; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the module converts an int to a float only, so the shared fpu_stub.asm supplies the FPU run-time symbols; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one cell with up to four records, four objects with the shape at offset 0x40, the handle table, the world position, the two float constants, and the three callee stubs; the ten paths cover the empty cell, the outside radius, the mode 0 and mode 1 misses, the hit on the first probe in each mode, the miss twice then hit, the equal radius boundary, the skipped first record, and the negative angle; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 397 bytes and 127 decoded instructions; the identity check stays open at 37 of 127 instructions, 28 of 397 bytes, and 3 of 42 relocation slots, because V2 saves ebp first, keeps the current record pointer in ecx, keeps the shape in ebx, stores the distance terms in other locals, and reads the globals through near data addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11ccc --count 127"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11ccc --count 127 --rebuilt work/rebuild/cctest.exe --rebuilt-map work/rebuild/collision_cell_test.map --rebuilt-symbol collision_cell_test_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11ccc"
+    },
+    {
+      "kind": "finding",
+      "text": "The collision_cell_test module at 0x11ccc"
+    }
+  ],
+  "implementation": "c",
+  "module": "collision_cell_test",
+  "name": "collision_cell_test",
   "notes": [],
   "object_offset": "0x1ccc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 28,
+        "bytes_total": 397,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 37,
+        "instructions_total": 127,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11ccc",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:9eae50685f3176e6da0526c6f74f43ceed9e896ab9fce4948a17d1275ff12b41",
+    "source_digest": "sha256:9fea6993169fb9281bad2e49378520357c53f72d77e309896a2a5643a122c382",
+    "tool": "run.py"
+  },
+  "role": "tests the collision records of one spatial cell against the world position along the record angle and reports a hit with the surface value",
+  "section": "The vehicle state chain",
   "size": 424,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "collision_cell_test_"
 }

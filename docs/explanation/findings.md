@@ -15438,3 +15438,78 @@ temporary `-od` recipe.
   0x1ef68`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The collision_cell_test module at 0x11ccc
+
+- Observation: the original body at `0x11ccc` holds 127 instructions and 413
+  bytes up to the first `ret` at `0x11e68`.  The normal exit jumps to the second
+  epilogue at `0x11e69`, and the full body ends at the `ret` at `0x11e73`.  The
+  next function starts at `0x11e74`, so the store record keeps the 424-byte
+  extent and sets no function size.  The identity check uses 127 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11ccc --count 127`, the
+  disassembly at `0x11e69`, and `tools/rebuild/functions/0x11ccc.json`.
+- Observation: the only direct caller at `0x11caa` is the map collision check at
+  `0x11c00`.  That check walks the three-by-three cell neighborhood of the
+  spatial grid at `DAT_00102fa4` and calls this function for each cell with the
+  mode in `eax`.  The cell slot address arrives through `DAT_00108034`.  The
+  module takes the section `The vehicle state chain`.
+  Evidence: the call sweep for `0x11ccc`, the disassembly of `0x11c00` through
+  `0x11cc0`, and the record of `track_nearest_node` at `0x120c0`.
+- Observation: the function walks the 0x40-byte collision records of the cell
+  while the current pointer `DAT_0010c744` stays below the end at the count at
+  cell `+0x14`.  The first record field selects the object from the handle table
+  `DAT_00021540`.  The object field `+0x18` is the offset to the collision
+  shape, which the function keeps at `DAT_0010c740`.
+  Evidence: the blocks at `0x11cda` through `0x11d23`.
+- Observation: the shape holds the radius at `+0x00`, the centre x as a signed
+  16-bit value at `+0x04`, and the centre y as a signed 16-bit value at `+0x08`.
+  The function forms the offset from the world position `DAT_00108038` and
+  `DAT_00108040` to the record position at `+0x08` and `+0x10`.  A squared
+  offset above the squared radius skips the record.
+  Evidence: the blocks at `0x11d29` through `0x11d7e`.
+- Observation: inside the radius the function scales the record angle at
+  `+0x18` by the float 1/1024 at object-3 offset 0x404 and pi at object-3 offset
+  0x408.  It rotates the offset at `0x11da5` through `0x2218c` and forms the
+  world position at `DAT_0010c728` and `DAT_0010c730`.  It then probes three
+  points ten units apart.
+  Evidence: the FPU block at `0x11d84` through `0x11dd3` and the constants
+  `0x3a800000` and `0x40490fdb` at linear `0x100404` and `0x100408`.
+- Observation: the mode 1 calls `0x1c0ac`.  Any other mode calls `0x1bfd4`.  A
+  hit returns 1.  The mode 1 returns at once.  The other mode rotates the pair
+  `DAT_0010c734` and `DAT_0010c73c` at `0x11df1` back by the negative angle,
+  stores the result, copies the shape byte `+0x6b` to `DAT_00108024`, and
+  returns 1.
+  Evidence: the blocks at `0x11dd5` through `0x11e1d`.
+- Inference: the map collision check, the record table, and the shape test
+  support the name `collision_cell_test`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the module converts an int to a float only, so the shared
+  `fpu_stub.asm` supplies the FPU run-time symbols.  The constants arrive
+  through globals, because the minimal image does not load the constant
+  segment.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/collision_cell_test.c` and
+  `tools/rebuild/fpu_stub.asm`.
+- Observation: the harness holds one cell with up to four records, four objects
+  with the shape at offset 0x40, the handle table, the world position, the two
+  float constants, and the three callee stubs.  The ten paths cover the empty
+  cell, the outside radius, the mode 0 and mode 1 misses, the hit on the first
+  probe in each mode, the miss twice then hit, the equal radius boundary, the
+  skipped first record, and the negative angle.  The output holds the markers
+  `0` through `9` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/collision_cell_test_main.c`, `python3
+  tools/rebuild/harness.py run --module collision_cell_test`, and
+  `work/rebuild/cctest.txt`.
+- Observation: the rebuilt module holds 397 bytes and 127 decoded instructions.
+  The identity check stays open at 37 of 127 instructions, 28 of 397 bytes, and
+  3 of 42 relocation slots, because V2 saves `ebp` first, keeps the current
+  record pointer in `ecx`, keeps the shape in `ebx`, stores the distance terms
+  in other locals, and reads the globals through near data addresses.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11ccc --count 127 --rebuilt work/rebuild/cctest.exe
+  --rebuilt-map work/rebuild/collision_cell_test.map --rebuilt-symbol
+  collision_cell_test_` and `python3 tools/rebuild/run.py run --function
+  0x11ccc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
