@@ -16803,3 +16803,68 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x188b8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The unr_file_load module at 0x4c98c
+
+- Observation: the original body at `0x4c98c` holds 96 instructions and 344
+  bytes up to the `ret` at `0x4cae3`.  The next function starts at `0x4cae4`,
+  so the store record keeps the 344-byte extent and sets no function size.
+  The identity check uses 96 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c98c --count 96` and
+  `tools/rebuild/functions/0x4c98c.json`.
+- Observation: the direct call sweep finds one caller at `0x4c979`.  The
+  caller sits in the wrapper at `0x4c94c`, which copies its argument to the
+  global name buffer `DAT_002154c`, calls this function, and then calls the
+  loader at `0x4cae4` for the `%s.MMP` member.  `race_data_load` at `0x131a8`
+  calls the wrapper as `material_name_set` after the `material_load` call at
+  `0x4cd9c`.  The level data loads `MAP1.UNR` before `MAP1.MMP`, so the module
+  takes the section Resource loader.
+  Evidence: the call sweep for `0x4c98c`, the blocks at `0x4c94c` through
+  `0x4c988`, and the run-time member order in this file.
+- Observation: the function builds the member name `%s.UNR` from
+  `DAT_002154c` and opens it with the empty path at object-3 offset `0x7fb4`
+  and the category `rb` at object-3 offset `0x16d5`.  A failed open runs the
+  file error report at `0x4bf88` and then the exit at `0x300be`.
+  Evidence: the strings at object-3 offsets `0x16ce`, `0x16d5`, and `0x7fb4`,
+  and the blocks at `0x4c99e` through `0x4c9dc`.
+- Observation: the first two reads take the four-byte `UNR_FILE` size and the
+  four-byte object count.  The function gets the `OBJ_LST` resource of
+  `count * 4 + 0x1e4` bytes and the `UNR_FILE` resource of the file size
+  through `0x2eed0`.  A zero result runs the memory error report at
+  `0x2edad`.
+  Evidence: the blocks at `0x4c9dc` through `0x4ca57` and the strings at
+  object-3 offsets `0x16d8` and `0x16e0`.
+- Observation: the function stores the object list at `DAT_0021540`, the value
+  `DAT_0021464` at `DAT_00214bc`, and the object list at `DAT_0021488` and
+  `DAT_0021530`.  It reads `count * 4` bytes into the list, writes the -1
+  sentinel at index `count`, and adds the `UNR_FILE` base to the low entries.
+  It then reads the file size bytes into the `UNR_FILE` resource and closes
+  the stream at `0x4c38d`.
+  Evidence: the blocks at `0x4ca57` through `0x4cae3`.
+- Inference: the `.UNR` member, the `OBJ_LST` and `UNR_FILE` resource names,
+  and the wrapper caller support the name `unr_file_load`.  The original has
+  no symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero.  The harness build defines `UNR_FILE_LOAD_HARNESS`, so the function
+  builds the constant text in local buffers.  The default build keeps the
+  literals of the original for the later period build.
+  Evidence: `tools/rebuild/unr_file_load.c` and
+  `tools/rebuild/modules/unr_file_load.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The three paths cover the full load with two object
+  entries, the open failure, and the zero object count.
+  Evidence: `tools/rebuild/unr_file_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module unr_file_load`, and
+  `work/rebuild/unrload.txt`.
+- Observation: the rebuilt body holds 16 of 96 instructions, 25 of 327 bytes,
+  and 0 of 25 relocation slots equal.  V2 saves ebp first and builds the
+  harness text in local buffers.  The original uses the literal data object
+  and the frame.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c98c --count 96 --rebuilt work/rebuild/unrload.exe
+  --rebuilt-map work/rebuild/unr_file_load.map --rebuilt-symbol
+  unr_file_load_` and `python3 tools/rebuild/run.py run --function 0x4c98c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

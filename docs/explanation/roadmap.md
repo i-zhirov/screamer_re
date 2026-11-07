@@ -147,9 +147,10 @@ current host.
   `object_revolution_matrix` at `0x1d55c`, and
   `championship_result_apply` at `0x29bac`, and
   `quad_point_test` at `0x1c13c`, and
-  `player_car_spin_update` at `0x188b8`;
+  `player_car_spin_update` at `0x188b8`, and
+  `unr_file_load` at `0x4c98c`;
   thirty modules are verified, one is matching, and one hundred and
-  eighty-seven rebuilds hold the recorded difference; the `video_fill`,
+  eighty-eight rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
@@ -310,10 +311,11 @@ The plan follows the size order, starting with the smallest functions.
     `object_revolution_matrix` at `0x1d55c`, and
     `championship_result_apply` at `0x29bac`, and
     `quad_point_test` at `0x1c13c`, and
-    `player_car_spin_update` at `0x188b8`
+    `player_car_spin_update` at `0x188b8`, and
+    `unr_file_load` at `0x4c98c`
     are done;
     the result is thirty verified modules, one matching module, and one
-    hundred and eighty-seven open rebuilds).
+    hundred and eighty-eight open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

@@ -1,0 +1,30 @@
+{
+  "exe": "unrload.exe",
+  "map": "unr_file_load.map",
+  "name": "unr_file_load",
+  "run": {
+    "command": "unrload.exe > unrload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "unrload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "unr_file_load.c",
+      "flags": [
+        "-of+",
+        "-dUNR_FILE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "unr_file_load_main.c"
+    }
+  ]
+}
