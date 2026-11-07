@@ -1,0 +1,38 @@
+{
+  "exe": "opceval.exe",
+  "map": "opponent_curve_eval.map",
+  "name": "opponent_curve_eval",
+  "run": {
+    "command": "opceval.exe > opceval.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "opceval.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_curve_eval.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_curve_eval_main.c"
+    }
+  ]
+}

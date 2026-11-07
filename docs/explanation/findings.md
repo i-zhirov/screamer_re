@@ -16345,3 +16345,76 @@ temporary `-od` recipe.
 - Limit: the original reads the record pointer from the stack before the first
   scan on the limit 0 path.  The rebuilt module starts the pointer at the first
   record, so that undefined path is stable.
+
+## The opponent_curve_eval module at 0x22378
+
+- Observation: the original body at `0x22378` holds 121 instructions and 353
+  bytes up to the `ret` at `0x224d8`.  The next function starts at `0x224dc`
+  after the three padding bytes at `0x224d9`, so the store record keeps the
+  356-byte extent and sets no separate function size.  The identity check uses
+  121 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22378 --count 121` and
+  `tools/rebuild/functions/0x22378.json`.
+- Observation: the only direct callers are `opponent_update` at `0x20954` and
+  `opponent_path_update` at `0x20b1c`.  `opponent_update` calls the function at
+  `0x209f0` when its argument is not zero.  `opponent_path_update` calls it at
+  `0x20bb6` and `0x20c19`.  Both pass the state base `DAT_0010f174` and the path
+  record.  The callers sit in the object_update_all group, so the record takes
+  the section `object_update_all callees`.
+  Evidence: the call sweep for `0x22378`, the calls above, and
+  `tools/rebuild/functions/0x20954.json`.
+- Observation: the state base holds a pointer at `track * 36` to an array of
+  56-byte nodes.  A node holds the scalar value at `+0xc`, the next node index
+  at `+0x10`, the first point at `+0x14`, `+0x18`, and `+0x1c`, and the second
+  point at `+0x20`, `+0x24`, and `+0x28`.  The path record holds the track
+  index at `+0`, the node index at `+4`, the phase at `+8`, and the direction
+  flag at `+0xc`.
+  Evidence: the block at `0x22385` through `0x223f2`.
+- Observation: a clear direction flag takes the first and the second point of
+  the first node and the first point of the second node.  A set direction flag
+  takes the second point of the first node and the first and the second point
+  of the second node.  The function converts the x and the y value of each
+  point to a float at `+0x3c`, `+0x48`, and `+0x54`.  It then calls the 2D
+  curve sampler at `0x1e7b4`, which writes the target position at `+0x60` and
+  `+0x64` and the forward tangent at `+0x6c` and `+0x70`.
+  Evidence: the two blocks at `0x223f5` through `0x22484`, the call at
+  `0x22499`, and the sampler block at `0x1e7b4` through `0x1e90f`.
+- Observation: the function interpolates the node scalar value as
+  `scalar1 + 0.5 * (scalar2 - scalar1) * (flag + phase)` and writes the result
+  to `+0x68`.  The double 0.5 sits at object-3 offset `0xd7c`.  It arrives
+  through a global, because the minimal image does not load the constant
+  segment.  The original has the EBP frame, so the module builds with `-of+`.
+  The module uses the shared `fpu_stub.asm`, because it needs no truncation and
+  no math helper.
+  Evidence: the block at `0x2249e` through `0x224d8`, the fixup at `0x224c2`,
+  and `tools/rebuild/fpu_stub.asm`.
+- Inference: the callers, the node control points, the 2D sampler, and the
+  scalar interpolation support the name `opponent_curve_eval`.  The
+  `opponent_path_update` source already names the callee
+  `opponent_curve_eval`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the call graph, the data flow above, and
+  `tools/rebuild/opponent_path_update.c`.
+- Observation: the harness holds six nodes, the two state entries, the path
+  record, and the sampler stub.  The eight paths cover the clear and the set
+  direction, the second track entry, the negative values, the fractional
+  scalar, the equal scalar values, a non-zero flag, and the sampler output.
+  The harness compares the float fields by their bit pattern, because the
+  minimal image does not load the initialized data and the compiler constant
+  pool reads as zero.  The output holds the markers `0` through `7` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/opponent_curve_eval_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_curve_eval`, and
+  `work/rebuild/opceval.txt`.
+- Observation: the rebuilt function holds 69 instructions and 177 bytes.  The
+  identity check stays open at 8 of 121 instructions, 5 of 304 bytes, and 0 of
+  6 relocation slots, because V2 orders the register saves before the frame,
+  keeps the path in `ebx` and the state result in `eax`, and uses another local
+  layout.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22378 --count 121 --rebuilt work/rebuild/opceval.exe
+  --rebuilt-map work/rebuild/opponent_curve_eval.map --rebuilt-symbol
+  opponent_curve_eval_` and `python3 tools/rebuild/run.py run --function
+  0x22378`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the sampler name in the harness stay inferred.
