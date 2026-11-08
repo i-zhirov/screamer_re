@@ -167,8 +167,9 @@ current host.
   `material_load` at `0x4cd9c`, and
   `terrain_contact_update` at `0x1cbac`, and
   `player_car_wheel_effect_update` at `0x19980`, and
-  `player_segment_update` at `0x11f98`;
-  thirty modules are verified, one is matching, and two hundred and seven
+  `player_segment_update` at `0x11f98`, and
+  `sound_source_frame_select` at `0x8b1d4`;
+  thirty modules are verified, one is matching, and two hundred and eight
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -350,10 +351,11 @@ The plan follows the size order, starting with the smallest functions.
     `material_load` at `0x4cd9c`, and
     `terrain_contact_update` at `0x1cbac`, and
     `player_car_wheel_effect_update` at `0x19980`, and
-    `player_segment_update` at `0x11f98`
+    `player_segment_update` at `0x11f98`, and
+    `sound_source_frame_select` at `0x8b1d4`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and seven open rebuilds).
+    hundred and eight open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

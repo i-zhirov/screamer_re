@@ -18178,3 +18178,76 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x11f98`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The sound_source_frame_select module at 0x8b1d4
+
+- Observation: the original body at `0x8b1d4` holds 103 instructions and 293
+  bytes up to the `ret` at `0x8b2f8`.  The next function starts at `0x8b2fc`.
+  The next recorded function starts at `0x8b610`, so the store record keeps the
+  1084-byte extent and sets no separate function size.  The identity check uses
+  103 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8b1d4 --count 103` and
+  `tools/rebuild/functions/0x8b1d4.json`.
+- Observation: the only direct caller is at `0x8b0e0` in the per-source frame
+  prepare at `0x8affc`.  The frame prepare at `0x8af08` calls that helper.
+  `sound_effects_update` at `0x81ab0` calls the frame prepare in the per-frame
+  loop.  The record takes the section `object_update_all callees`.
+  Evidence: the call site at `0x8b0e0`, the calls at `0x8af35`, `0x8af72`, and
+  `0x81b11`, and the finding "The sound_effects_update module at 0x81ab0".
+- Observation: the context record holds the voice record at `+0x0c`, the
+  current object at `+0x14`, the frame index at `+0x08`, the frame table entry
+  pointer at `+0xb4`, and the table base at `+0xb8`.  The object holds three
+  signed shorts at `+0x04`, `+0x06`, and `+0x08` and an identifier at `+0x68`.
+  The voice record holds the camera matrix at `+0x118`.
+  Evidence: the loads at `0x8b1d6` through `0x8b1ec` and the stores at
+  `0x8b272` through `0x8b2f8`.
+- Observation: the function transforms the three shorts by the Q14 matrix.  It
+  forms the square root of the sum of the three squared results.  The raw
+  `fistp` at `0x8b259` rounds to the nearest integer.  The function negates the
+  result.  The matrix rows and the translation stay in the order 0, 3, 6, 9
+  and so on.
+  Evidence: the block at `0x8b1f0` through `0x8b268`.
+- Observation: the identifier byte `A` or `a` skips the distance bias.  If the
+  second byte is zero and the third byte is `i` or `x`, the function subtracts
+  4000 or 1000.
+  Evidence: the block at `0x8b276` through `0x8b2b4`.
+- Observation: the raw negative distance selects a frame band from the two
+  limits at `0x7a800` and `0x7a804`.  The band is 0, `0x104`, or `0x208`.  The
+  entry at the frame table pointer plus the band holds a byte offset.  A zero
+  offset gives the null frame.  The function stores the frame in the voice
+  record at `+0x00` and in the object field at `+0x14`.  It stores the biased
+  distance at `0x7a6e6 + index * 4`.
+  Evidence: the block at `0x8b2b8` through `0x8b2f8`.
+- Inference: the transform, the distance bands, the identifier bias, and the
+  per-voice distance store support the name `sound_source_frame_select`.  The
+  original has no symbol.  The record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and the sound chain.
+- Observation: the original has no EBP frame setup.  It saves `ebp` because it
+  uses the register as a scratch register.  The module needs no `-of+`.  The
+  original uses 11 FPU instructions.  The local
+  `sound_source_frame_select_fpu.asm` supplies `sqrt` and keeps the `__CHP`
+  no-op, so the conversion keeps the round-to-nearest mode of the original.
+  Evidence: the prologue at `0x8b1d4`, the FPU block at `0x8b240`,
+  `tools/rebuild/sound_source_frame_select.c`, and
+  `tools/rebuild/sound_source_frame_select_fpu.asm`.
+- Observation: the harness holds the context, the voice record, the object, the
+  three-band frame table, the distance limits, the distance table, and the
+  frame base.  The ten paths cover the three bands, the two no-bias names, the
+  two biases, the nonzero second byte, the zero offset, the scaled and
+  translated matrix, the nearest rounding, and the third index.  The output
+  holds the markers 0 through 9 and D, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_source_frame_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_source_frame_select`,
+  and `work/rebuild/ssfsel.txt`.
+- Observation: the rebuilt body holds 103 instructions and 326 bytes.  The
+  identity check stays open at 12 of 103 instructions, 3 of 293 bytes, and 0 of
+  6 relocation slots.  V2 saves six registers and keeps the values in locals.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8b1d4 --count 103 --rebuilt work/rebuild/ssfsel.exe
+  --rebuilt-map work/rebuild/sound_source_frame_select.map --rebuilt-symbol
+  sound_source_frame_select_` and
+  `python3 tools/rebuild/run.py run --function 0x8b1d4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
