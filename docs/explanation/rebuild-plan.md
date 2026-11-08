@@ -446,13 +446,13 @@ reproduce the original bytes.
 | `0x1b974` | `replay_save_atk` (done) | 213 | 67 | 5 | 2 |
 | `0x20ec8` | `race_finish_laps_update` (done) | 208 | 58 | 7 | 5 |
 | `0x1814c` | `player_car_surface_effect_update` (done) | 208 | 56 | 1 | 0 |
-| `0x4c5c7` | unnamed | 206 | 72 | 1 | 0 |
+| `0x4c5c7` | `stream_seek` (done) | 206 | 72 | 1 | 0 |
 
 This table starts Phase S.
 
 ## Position
 
-Two hundred seventy-four modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred seventy-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -582,5 +582,6 @@ and `camera_pose_build` at `0x1a144`, and
 `angle_step` at `0x21f40`, and
 `replay_save_atk` at `0x1b974`, and
 `race_finish_laps_update` at `0x20ec8`, and
-`player_car_surface_effect_update` at `0x1814c`.
-The next unnamed function is `0x4c5c7`.
+`player_car_surface_effect_update` at `0x1814c`, and
+`stream_seek` at `0x4c5c7`.
+The next unnamed function is `0x1be6c`.

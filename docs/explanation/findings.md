@@ -20643,3 +20643,63 @@ temporary `-od` recipe.
   tools/rebuild/run.py run --function 0x1814c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The stream_seek module at 0x4c5c7
+
+- Observation: the original body at `0x4c5c7` holds 72 instructions and 206
+  bytes up to the `ret` at `0x4c694`.  The next function starts at `0x4c695`,
+  so the store record keeps the 206-byte extent and the identity check uses 72
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c5c7 --count 72` and
+  `tools/rebuild/functions/0x4c5c7.json`.
+- Observation: the four direct call sites at `0x1b5fe` and `0x1b621` sit in
+  `pcx_load` at `0x1b5a4`, and the sites at `0x1b419` and `0x1b498` sit in
+  `member_list_load` at `0x1b394`.  `spline_load` at `0x1af70` also calls the
+  function.  The callers pass the stream record, the offset, and the origin.
+  Evidence: `tools/rebuild/pcx_load.c`, `tools/rebuild/member_list_load.c`,
+  and `tools/rebuild/spline_load.c`.
+- Observation: the stream record holds the file at `+0x00`, the start at
+  `+0x04`, the size at `+0x08`, the position at `+0x0c`, the buffer index at
+  `+0x18`, the field at `+0x6c`, and the status at `+0xac`.
+  Evidence: the field accesses at `0x4c5e4` through `0x4c68b`.
+- Observation: the origin 0 sets the position from the start plus the offset
+  and the buffer index from the offset.  The origin 1 adds the offset to the
+  position and the buffer index.  The origin 2 sets the position from the size
+  plus the offset and the buffer index from the field at `+0x6c` plus the
+  offset.  Any other origin keeps the record unchanged.
+  Evidence: the three branches at `0x4c5e4`, `0x4c5fe`, and `0x4c612`.
+- Observation: the function then calls `fseek` at `0xd484f` with the file at
+  `+0x00`, the position at `+0x0c`, and the origin 0.  When the new position
+  passes the size, it writes the status 4 at `+0xac` and returns -1.
+  Otherwise it returns 0.
+  Evidence: the call block at `0x4c64e` through `0x4c694`.
+- Inference: the sibling stream helpers `stream_close` at `0x4c38d`,
+  `stream_read` at `0x4c4e5`, `stream_read_text` at `0x4c695`, and
+  `stream_status` at `0x4c7e0`, the four callers, and the seek role support the
+  name `stream_seek`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the call graph and the stream field accesses above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/stream_seek.c` and the module recipe.
+- Observation: the harness holds the stream record and the `fseek` stub.  The
+  eight paths cover the origin 0, 1, and 2 seeks, the origin 2, 0, and 1 seeks
+  past the end, the invalid origin 3, and the negative offset before the start.
+  The output holds the markers `0` through `7` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/stream_seek_main.c`, `python3
+  tools/rebuild/harness.py run --module stream_seek`, and
+  `work/rebuild/ssk_out.txt`.
+- Observation: the identity check compares 72 instructions.  The rebuilt body
+  holds 20 of 72 instructions and 9 of 206 bytes equal.  The identity check
+  stays open because V2 saves the frame pointer first, keeps the stream in
+  `ecx` and the offset in `edx`, folds the three origin paths into compare
+  chains, and returns through a register.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c5c7 --count 72 --rebuilt work/rebuild/sskmod.exe
+  --rebuilt-map work/rebuild/stream_seek.map --rebuilt-symbol stream_seek_`
+  and `python3 tools/rebuild/run.py run --function 0x4c5c7`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
