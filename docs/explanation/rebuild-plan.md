@@ -381,14 +381,14 @@ reproduce the original bytes.
 | `0x1b840` | `replay_load` (done) | 306 | 84 | 8 | 0 |
 | `0x4cd9c` | `material_load` (done) | 303 | 81 | 12 | 0 |
 | `0x1cbac` | `terrain_contact_update` (done) | 297 | 81 | 2 | 25 |
-| `0x19980` | unnamed | 297 | 90 | 4 | 7 |
+| `0x19980` | `player_car_wheel_effect_update` (done) | 297 | 90 | 4 | 7 |
 | `0x11f98` | unnamed | 295 | 96 | 3 | 5 |
 | `0x8b1d4` | unnamed | 293 | 103 | 0 | 11 |
 | `0x11e74` | unnamed | 292 | 85 | 6 | 17 |
 
 ## Position
 
-Two hundred thirty-five modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred thirty-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -484,5 +484,6 @@ and `font_load` at `0x25658`, and `background_scale` at `0x83ca8`, and the Phase
 modules `text_draw` at `0x25020`, `sound_range_reset` at `0x82e0c`,
 `spline_table_load` at `0x14fb8`, and `path_keyframe_append` at `0x231f0`,
 and `race_position_update` at `0x20428`, and `replay_load` at `0x1b840`,
-and `material_load` at `0x4cd9c`, and `terrain_contact_update` at `0x1cbac`.
-The next unnamed function is `0x19980`.
+and `material_load` at `0x4cd9c`, and `terrain_contact_update` at `0x1cbac`,
+and `player_car_wheel_effect_update` at `0x19980`.
+The next unnamed function is `0x11f98`.

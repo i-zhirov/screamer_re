@@ -1,0 +1,36 @@
+{
+  "exe": "pcweu.exe",
+  "map": "player_car_wheel_effect_update.map",
+  "name": "player_car_wheel_effect_update",
+  "run": {
+    "command": "pcweu.exe > pcweu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pcweu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_wheel_effect_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_wheel_effect_update_main.c"
+    }
+  ]
+}
