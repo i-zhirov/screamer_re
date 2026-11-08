@@ -1,9 +1,115 @@
 {
   "address": "0x833a4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 98,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x833a4 holds 98 instructions and 242 bytes up to the ret at 0x83495; the next record starts at 0x83500 after the padding that follows the ret, so the store record keeps the 348-byte extent and sets no function size; the identity check uses 98 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x83386 is the active sound list builder at 0x83354; it takes the grid rows from sound_range_update at 0x830c8, calls this function once per row with the row pointer in ebp and the output cursor in edi, and divides the output length by the 8-byte record into the active count 0x72488; sound_effects_update at 0x81ab0 reaches the builder, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the row is an array of region pointers that ends at -1, and the global 0x734f4 is the row limit; a region holds two source lists: the list at +0x04 with the count at +0x18, and the list at +0x00 with the count at +0x14; the function walks the first list, then the second list"
+    },
+    {
+      "kind": "note",
+      "text": "a source record is 0x40 bytes and holds the position at +0x08, +0x0c, and +0x10; for each source the function clears the field at +0x04 and forms the squared distance to the camera position at 0x7a7ac + 0x0c, +0x10, and +0x14; it shifts the 64-bit sum right by two and truncates the result to 32 bits"
+    },
+    {
+      "kind": "note",
+      "text": "a value below the limit 0x284af100 appends one 8-byte record to the output list at 0x40330: the shifted sum and the source pointer; the signed compare also keeps a shifted value with the high bit set, because the original truncates the shifted sum to 32 bits and compares it as a signed value; sound_mix_prepare at 0x8aa60 reads the same 8-byte records"
+    },
+    {
+      "kind": "note",
+      "text": "the grid region scan, the camera distance, the two source lists, and the active source list support the name sound_source_collect; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub; the rebuild forms the signed 32x32 product and the 64-bit sum with 32-bit arithmetic, because the harness links no 64-bit runtime helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the camera record, the row limit, the two source lists of each region, the region array with its -1 end marker, and the output array; the ten paths cover the skipped null first list, the two-list order, the far source, the signed truncation, the shifted camera, the two row limits, the zero count, and the -1 end marker; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x833a4 --count 98"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x833a4 --count 98 --rebuilt work/rebuild/sscol.exe --rebuilt-map work/rebuild/sound_source_collect.map --rebuilt-symbol sound_source_collect_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_source_collect"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x833a4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_collect.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_collect_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_source_collect.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 21 of 98 instructions and 8 of 242 bytes equal and 0 of 19 relocation slots equal; V2 saves the registers in a prologue, keeps the output cursor and the camera in registers, and builds the two list loops in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_source_collect module at 0x833a4"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_source_collect",
+  "name": "sound_source_collect",
   "notes": [],
   "object_offset": "0x733a4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 242,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 98,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x833a4",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:4cb0995691869090f32fdde23d8c728d93f3872c97812e7e7b9bb50478db12a1",
+    "source_digest": "sha256:ba11dfd0931e12fcad5dccbddcee20cda5038e317acb060a648916fc4577e3cd",
+    "tool": "run.py"
+  },
+  "role": "Collects the sound sources within the camera range from a spatial grid row into the active source list.",
+  "section": "Program functions",
   "size": 348,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_source_collect_"
 }

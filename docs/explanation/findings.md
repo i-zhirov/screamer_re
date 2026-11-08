@@ -19466,3 +19466,75 @@ temporary `-od` recipe.
   0x1c38a`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The sound_source_collect module at 0x833a4
+
+- Observation: the plan row records a 242-byte body of 98 instructions.  The
+  last instruction is the `ret` at `0x83495`.  The next record starts at
+  `0x83500` after the padding that follows the `ret`, so the store record
+  keeps the 348-byte extent and sets no separate function size.  The identity
+  check uses 98 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x833a4 --count 98` and
+  `tools/rebuild/functions/0x833a4.json`.
+- Observation: the only direct caller at `0x83386` is the active sound list
+  builder at `0x83354`.  The builder takes the grid rows from
+  `sound_range_update` at `0x830c8`, and it calls this function once per row.
+  It passes the row pointer in `ebp`, the output cursor in `edi`, and the row
+  limit in the global `0x734f4`.  It divides the output length by the 8-byte
+  record and stores the result at the active count `0x72488`.
+  `sound_effects_update` at `0x81ab0` reaches the builder, so the record takes
+  the section Program functions.
+  Evidence: the calls at `0x83386` and `0x81ac1`, the stores at `0x8339e` and
+  `0x8342b`, and `tools/rebuild/functions/0x81ab0.json`.
+- Observation: the row is an array of region pointers that ends at -1.  The
+  global `0x734f4` is the row limit.  A region holds two source lists: the
+  list at `+0x04` with the count at `+0x18`, and the list at `+0x00` with the
+  count at `+0x14`.  The function walks the first list and then the second
+  list.  A null first list is skipped.
+  Evidence: the block at `0x833aa` through `0x83489`.
+- Observation: a source record is 0x40 bytes and holds the position at
+  `+0x08`, `+0x0c`, and `+0x10`.  For each source the function clears the
+  field at `+0x04` and forms the squared distance to the camera position at
+  `0x7a7ac + 0x0c`, `+0x10`, and `+0x14`.  It shifts the 64-bit sum right by
+  two and truncates the result to 32 bits.
+  Evidence: the block at `0x833d1` through `0x83406`.
+- Observation: a value below the limit `0x284af100` appends one 8-byte record
+  to the output list at `0x40330`: the shifted sum and the source pointer.
+  The signed compare also keeps a shifted value with the high bit set, because
+  the original truncates the shifted sum to 32 bits and compares it as a
+  signed value.  `sound_mix_prepare` at `0x8aa60` reads the same 8-byte
+  records.
+  Evidence: the compare and the two `stosd` stores at `0x8340b` through
+  `0x83415`, and `tools/rebuild/functions/0x8aa60.json`.
+- Inference: the grid region scan, the camera distance, the two source lists,
+  and the active source list support the name `sound_source_collect`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the caller, the data flow, and the reader at `0x8aa60`.
+- Observation: the function uses no call and no floating-point instruction.
+  The original has no EBP frame, so the module builds without `-of+`.  The
+  rebuild forms the signed 32x32 product and the 64-bit sum with 32-bit
+  arithmetic, because the harness links no 64-bit runtime helper.
+  Evidence: `tools/rebuild/sound_source_collect.c` and
+  `tools/rebuild/modules/sound_source_collect.json`.
+- Observation: the harness holds the camera record, the row limit, the two
+  source lists of each region, the region array with its -1 end marker, and
+  the output array.  The ten paths cover the skipped null first list, the
+  two-list order, the far source, the signed truncation, the shifted camera,
+  the two row limits, the zero count, and the -1 end marker.  The output holds
+  the markers `0` through `9` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_source_collect_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_source_collect`, and
+  `work/rebuild/sscol.txt`.
+- Observation: the diff reports 21 of 98 instructions and 8 of 242 bytes
+  equal.  The identity check stays open because V2 saves the registers in a
+  prologue, keeps the output cursor and the camera in registers, and builds
+  the two list loops in another shape.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x833a4 --count 98 --rebuilt work/rebuild/sscol.exe
+  --rebuilt-map work/rebuild/sound_source_collect.map --rebuilt-symbol
+  sound_source_collect_` and `python3 tools/rebuild/run.py run --function
+  0x833a4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
