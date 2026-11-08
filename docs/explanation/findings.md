@@ -20192,3 +20192,72 @@ temporary `-od` recipe.
   net_race_lobby_init_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The basis_transform_build module at 0x8b610
+
+- Observation: the original body at `0x8b610` holds 65 instructions and 222
+  bytes up to the `ret` at `0x8b6ed`.  The next recorded function starts at
+  `0x8bc7c`, so the store record keeps the 1644-byte extent and sets no
+  separate function size.  The identity check uses 65 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8b610 --count 65` and
+  `tools/rebuild/functions/0x8b610.json`.
+- Observation: the three direct call sites are `0x8ac94` in `camera_update` at
+  `0x8ac78`, `0x8aea0` in `sound_voice_setup` at `0x8adac`, and `0x8b073` in
+  `sound_source_frame_prepare` at `0x8affc`.  Two callers sit in the object
+  update chain, so the record takes the section `object_update_all callees`.
+  Evidence: the three call sites and the findings "The camera_update module at
+  0x8ac78", "The sound_voice_setup module at 0x8adac", and "The
+  sound_source_frame_prepare module at 0x8affc".
+- Observation: the object record holds the three angle indices at `+0x00`,
+  `+0x04`, and `+0x08`, the position at `+0x0c`, `+0x10`, and `+0x14`, the
+  forward basis at `+0x18`, the saved position at `+0x3c`, `+0x40`, and
+  `+0x44`, and the inverse basis at `+0x48`.  The forward basis holds nine
+  dwords.  The inverse basis holds nine rotation dwords and the three
+  translation dwords at `+0x24`, `+0x28`, and `+0x2c`.
+  Evidence: the loads at `0x8b610` through `0x8b63b` and the stores at
+  `0x8b6cd` through `0x8b6e3`.
+- Observation: an angle index selects an 8-byte table entry at `0x203d0`.  The
+  entry holds a signed 16-bit cosine in the low word at `+0x00` and a signed
+  16-bit sine in the low word at `+0x04`.  The function sign-extends each value
+  and shifts it one bit to the right with the arithmetic shift, which converts
+  the Q15 value to Q14.
+  Evidence: the `movsx` and `sar` blocks at `0x8b642` through `0x8b65e` and the
+  angle table model of the finding "The camera_project module at 0x82c14".
+- Observation: the first pass calls `0x81fd0` with the forward basis at
+  `+0x18` and the three angle pairs.  The second pass forms the complement
+  index `0x7ff - angle` for each angle and calls `0x82074` with the inverse
+  basis at `+0x48`.  The function then copies the position to `+0x3c`, `+0x40`,
+  and `+0x44`, negates it, and calls `0x81f80`, which stores the inverse
+  translation at `+0x6c`, `+0x70`, and `+0x74`.
+  Evidence: the blocks at `0x8b660` through `0x8b6ec`.
+- Inference: the camera caller, the two sound callers, the angle table, and the
+  two basis builders support the generic name `basis_transform_build`.  The
+  original has no symbol for the function.  The record keeps the name with the
+  confidence `inferred`.
+  Evidence: the three call sites and the data flow above.
+- Observation: the original has no EBP frame.  It uses `ebp` as a scratch
+  register and does not save it, so the module builds without `-of+`.  The
+  original uses no floating-point instruction, so the module needs no FPU
+  stub.
+  Evidence: the prologue at `0x8b610` and the record recipe.
+- Observation: the harness holds one 0x78-byte object record, the 0x800-entry
+  angle table, and the three callee stubs.  The three paths cover the positive,
+  negative, and odd shifts with the complement indices, the table limits
+  `0x7fff` and `-0x8000`, and two calls on one object that reload the angle and
+  the position.  The output holds the markers `0`, `1`, `2`, and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/basis_transform_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module basis_transform_build`, and
+  `work/rebuild/btbuild.txt`.
+- Observation: the rebuilt body holds 19 of 65 instructions equal, 9 of 222
+  bytes equal, and 0 of 21 relocation slots equal.  The identity check stays
+  open because V2 saves registers, orders the prologue differently, folds the
+  pointer increments, and places the negated position in other registers.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8b610 --count 65 --rebuilt work/rebuild/btbuild.exe
+  --rebuilt-map work/rebuild/basis_transform_build.map --rebuilt-symbol
+  basis_transform_build_` and
+  `python3 tools/rebuild/run.py run --function 0x8b610`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

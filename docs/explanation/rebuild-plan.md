@@ -439,7 +439,7 @@ reproduce the original bytes.
 | `0x835c0` | `sound_event_transform` (done) | 225 | 56 | 0 | 0 |
 | `0x2ce84` | `name_entry_update` (done) | 225 | 61 | 6 | 18 |
 | `0x2ca40` | `net_race_lobby_init` (done) | 223 | 60 | 10 | 0 |
-| `0x8b610` | unnamed | 222 | 65 | 3 | 0 |
+| `0x8b610` | `basis_transform_build` (done) | 222 | 65 | 3 | 0 |
 | `0x1a144` | unnamed | 219 | 63 | 3 | 15 |
 | `0x2b308` | unnamed | 218 | 66 | 0 | 0 |
 | `0x21f40` | unnamed | 215 | 87 | 0 | 42 |
@@ -452,7 +452,7 @@ This table starts Phase S.
 
 ## Position
 
-Two hundred sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -576,5 +576,5 @@ and `replay_save` at `0x1b738`, and
 `member_open` at `0x4c128`, and
 `sound_event_transform` at `0x835c0`, and
 `name_entry_update` at `0x2ce84`, and
-`net_race_lobby_init` at `0x2ca40`.
-The next unnamed function is `0x8b610`.
+`net_race_lobby_init` at `0x2ca40`, and `basis_transform_build` at `0x8b610`.
+The next unnamed function is `0x1a144`.

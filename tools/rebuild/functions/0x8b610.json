@@ -1,9 +1,103 @@
 {
   "address": "0x8b610",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 65,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8b610 holds 65 instructions and 222 bytes up to the ret at 0x8b6ed; the next recorded function starts at 0x8bc7c, so the store record keeps the 1644-byte extent and sets no separate function size; the identity check uses 65 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct call sites are 0x8ac94 in camera_update at 0x8ac78, 0x8aea0 in sound_voice_setup at 0x8adac, and 0x8b073 in sound_source_frame_prepare at 0x8affc; two callers sit in the object update chain, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the object record holds the three angle indices at +0x00, +0x04, and +0x08, the position at +0x0c, +0x10, and +0x14, the forward basis at +0x18, the saved position at +0x3c, +0x40, and +0x44, and the inverse basis at +0x48; the forward basis holds nine dwords and the inverse basis holds nine rotation dwords plus the three translation dwords at +0x24, +0x28, and +0x2c"
+    },
+    {
+      "kind": "note",
+      "text": "an angle index selects an 8-byte table entry at 0x203d0; the entry holds a signed 16-bit cosine in the low word at +0x00 and a signed 16-bit sine in the low word at +0x04; the function sign-extends each value and shifts it one bit to the right with the arithmetic shift, which converts the Q15 value to Q14"
+    },
+    {
+      "kind": "note",
+      "text": "the first pass calls 0x81fd0 with the forward basis at +0x18 and the three angle pairs; the second pass forms the complement index 0x7ff - angle for each angle and calls 0x82074 with the inverse basis at +0x48; the function then copies the position to +0x3c, +0x40, and +0x44, negates it, and calls 0x81f80, which stores the inverse translation at +0x6c, +0x70, and +0x74"
+    },
+    {
+      "kind": "note",
+      "text": "the camera caller, the two sound callers, the angle table, and the two basis builders support the generic name basis_transform_build; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses ebp as a scratch register without a save; the original uses no floating-point instruction, so the module builds without -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one 0x78-byte object record, the 0x800-entry angle table, and the three callee stubs; the three paths cover the positive, negative, and odd shifts with the complement indices, the table limits 0x7fff and -0x8000, and two calls on one object that reload the angle and the position; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 19 of 65 instructions, 9 of 222 bytes, and 0 of 21 relocation slots equal; the identity check stays open because V2 saves registers, orders the prologue differently, folds the pointer increments, and places the negated position in other registers; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8b610 --count 65"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8b610 --count 65 --rebuilt work/rebuild/btbuild.exe --rebuilt-map work/rebuild/basis_transform_build.map --rebuilt-symbol basis_transform_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module basis_transform_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8b610"
+    },
+    {
+      "kind": "finding",
+      "text": "The basis_transform_build module at 0x8b610"
+    }
+  ],
+  "implementation": "c",
+  "module": "basis_transform_build",
+  "name": "basis_transform_build",
   "notes": [],
   "object_offset": "0x7b610",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 222,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 65,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8b610",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:4bcdebc518a1c264edd4dab96cb22f4048e69bde0b741b7d498404abdd57ac2c",
+    "source_digest": "sha256:1d755175d1e9756bd8699b9d1be196ae7a4e6331c959a6b4a7df35b2d1e46daa",
+    "tool": "run.py"
+  },
+  "role": "Builds the forward and inverse basis of an object record from its three angle indices and its position, saves the position, and stores the inverse translation.",
+  "section": "object_update_all callees",
   "size": 1644,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "basis_transform_build_"
 }
