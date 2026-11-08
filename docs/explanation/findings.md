@@ -18466,3 +18466,66 @@ temporary `-od` recipe.
   sla_marker_check_` and `python3 tools/rebuild/run.py run --function 0x18ba8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The lzw_block module at 0x4d4c4
+
+- Observation: the original body at `0x4d4c4` holds 73 instructions and 290
+  bytes up to the first `ret` at `0x4d5e5`.  The function has further exits at
+  the `ret` at `0x4d79d` and the `ret` at `0x4d843`.  The next function starts
+  at `0x4d844`, so the store record keeps the 896-byte extent and sets no
+  separate function size.  The identity check uses 73 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d4c4 --count 73` and
+  `tools/rebuild/functions/0x4d4c4.json`.
+- Observation: the only direct caller is the expander at `0x4d3fc`.  The
+  expander reads one header byte and loops on this function until it returns
+  0.  The bit reader `0x4d844` supplies the codes.
+  Evidence: the decompiled `FUN_0004d3fc` and the call sites `0x4d4f7` and
+  `0x4d546` of the bit reader.
+- Observation: the context holds the output buffer pointer at `+0x8488`, the
+  output limit at `+0x4048`, the state at `+0x404c`, the working code at
+  `+0x4050`, the previous code at `+0x4054`, the saved code at `+0x4058`, the
+  next free entry at `+0x405c`, the width threshold at `+0x4060`, the stack
+  count at `+0x4064`, the code width at `+0x4068`, the output position at
+  `+0x4070`, the character stack at `+0x4074`, and the two characters at
+  `+0x8084` and `+0x8085`.  The dictionary table starts at `+0x0000`; an entry
+  holds a 16-bit prefix at `+0x00` and a character at `+0x02`.
+  Evidence: the operand offsets of the disassembly of `0x4d4c4`.
+- Observation: a clear code `0x100` resets the width to 9, the threshold to
+  `0x200`, the next entry to `0x102`, reads the first code, and writes its
+  character.  An end code `0x101` returns 0.  Any other code walks the prefix
+  chain, writes the string to the output buffer, and adds the entry previous
+  code plus first character at the next free slot.  When the incremented next
+  entry reaches the threshold, the width grows by one and the threshold
+  doubles, up to 12.
+  Evidence: the blocks at `0x4d51c` through `0x4d5e5` and `0x4d5e6` through
+  `0x4d843`.
+- Observation: when the output position reaches the limit in the middle of a
+  string, the state becomes 2 and the next call continues the string.  The
+  clear path with the output position at the limit sets the state to 1.
+  Evidence: the blocks at `0x4d5c9`, `0x4d6d3`, and `0x4d723` through
+  `0x4d79d`.
+- Inference: the reference table in `docs/reference/file-formats.md` names the
+  address `lzw_block`, so the record keeps the name with the confidence
+  `inferred`.  The original has no symbol for the function.
+  Evidence: the table row for `0x4d4c4` in `docs/reference/file-formats.md`.
+- Observation: the harness holds the 0x8490-byte decoder context, the output
+  buffer, and the `lzw_bit_read` stub, which returns a scripted code sequence.
+  The nine paths cover the end code, the clear code and a literal, the
+  dictionary entry add, the repeated-string code, the prefix chain, the
+  output-limit resume, the width growth, the width cap at 12, and the clear
+  path at the output limit.  The output holds the markers `0` through `8` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/lzw_block_main.c`,
+  `python3 tools/rebuild/harness.py run --module lzw_block`, and
+  `work/rebuild/lzwblk.txt`.
+- Observation: the rebuilt module holds 73 decoded instructions and 360 bytes.
+  The identity check stays open at 36 of 73 instructions and 39 of 290 bytes,
+  because V2 keeps the context in `edx`, saves the frame pointer first, and
+  builds the prefix walk and the drain loop in another shape.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d4c4 --count 73 --rebuilt work/rebuild/lzwblk.exe
+  --rebuilt-map work/rebuild/lzw_block.map --rebuilt-symbol lzw_block_` and
+  `python3 tools/rebuild/run.py run --function 0x4d4c4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

@@ -171,8 +171,9 @@ current host.
   `sound_source_frame_select` at `0x8b1d4`, and
   `body_point_collision_detect` at `0x11e74`, and
   `championship_record_select` at `0x293a8`, and
-  `sla_marker_check` at `0x18ba8`;
-  thirty modules are verified, one is matching, and two hundred and eleven
+  `sla_marker_check` at `0x18ba8`, and
+  `lzw_block` at `0x4d4c4`;
+  thirty modules are verified, one is matching, and two hundred and twelve
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -358,10 +359,11 @@ The plan follows the size order, starting with the smallest functions.
     `sound_source_frame_select` at `0x8b1d4`, and
     `body_point_collision_detect` at `0x11e74`, and
     `championship_record_select` at `0x293a8`, and
-    `sla_marker_check` at `0x18ba8`
+    `sla_marker_check` at `0x18ba8`, and
+    `lzw_block` at `0x4d4c4`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and eleven open rebuilds).
+    hundred and twelve open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11
