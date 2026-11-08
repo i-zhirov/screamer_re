@@ -1,9 +1,107 @@
 {
   "address": "0x8b1d4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 103,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8b1d4 holds 103 instructions and 293 bytes up to the ret at 0x8b2f8; the next function starts at 0x8b2fc; the next recorded function starts at 0x8b610, so the store record keeps the 1084-byte extent and sets no separate function size; the identity check uses 103 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x8b0e0 is the per-source frame prepare at 0x8affc; the frame prepare at 0x8af08 calls that helper, and sound_effects_update at 0x81ab0 calls the frame prepare in the per-frame loop, so the module takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the context record holds the voice record at +0x0c, the current object at +0x14, the frame index at +0x08, the frame table entry pointer at +0xb4, and the table base at +0xb8; the object holds three signed shorts at +0x04, +0x06, and +0x08 and an identifier at +0x68; the voice record holds the camera matrix at +0x118"
+    },
+    {
+      "kind": "note",
+      "text": "the function transforms the three shorts by the Q14 matrix, forms the square root of the sum of the three squared results, and negates it; the raw fistp rounds to the nearest integer; the matrix rows and the translation stay in the order 0, 3, 6, 9 and so on"
+    },
+    {
+      "kind": "note",
+      "text": "the identifier byte A or a skips the distance bias; a zero second byte with i or x in the third byte subtracts 4000 or 1000"
+    },
+    {
+      "kind": "note",
+      "text": "the raw negative distance selects the frame band 0, 0x104, or 0x208 from the two limits at 0x7a800 and 0x7a804; the entry at the frame table pointer plus the band holds a byte offset, and a zero offset gives the null frame; the function stores the frame in the voice record at +0x00 and in the object field at +0x14 and stores the biased distance at 0x7a6e6 + index * 4"
+    },
+    {
+      "kind": "note",
+      "text": "the transform, the distance bands, the identifier bias, and the per-voice distance store support the name sound_source_frame_select; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame setup and saves ebp because it uses the register as a scratch register, so the module needs no -of+; the original uses 11 FPU instructions; the local sound_source_frame_select_fpu.asm supplies sqrt and keeps the __CHP no-op, so the conversion keeps the round-to-nearest mode"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the context, the voice record, the object, the three-band frame table, the distance limits, the distance table, and the frame base; the ten paths cover the three bands, the two no-bias names, the two biases, the nonzero second byte, the zero offset, the scaled and translated matrix, the nearest rounding, and the third index; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 103 instructions and 326 bytes; the identity check stays open at 12 of 103 instructions, 3 of 293 bytes, and 0 of 6 relocation slots, because V2 saves six registers and keeps the values in locals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8b1d4 --count 103"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8b1d4 --count 103 --rebuilt work/rebuild/ssfsel.exe --rebuilt-map work/rebuild/sound_source_frame_select.map --rebuilt-symbol sound_source_frame_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_source_frame_select"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8b1d4"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_source_frame_select module at 0x8b1d4"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_source_frame_select",
+  "name": "sound_source_frame_select",
   "notes": [],
   "object_offset": "0x7b1d4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 293,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 103,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8b1d4",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:a3c3203e3f4ae5b9097f61e1de25e4e63ada9775f071d8bca2174ee9e17a46ba",
+    "source_digest": "sha256:228ebd6b53dba7ce6a366dfb027b45945659af5670cf17297a6e6ef1a7df7e80",
+    "tool": "run.py"
+  },
+  "role": "Selects the distance-band frame of a sound source, biases the distance from the source identifier, and stores the adjusted distance for the voice.",
+  "section": "object_update_all callees",
   "size": 1084,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_source_frame_select_"
 }

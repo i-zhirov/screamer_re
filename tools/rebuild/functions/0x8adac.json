@@ -1,9 +1,95 @@
 {
   "address": "0x8adac",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 71,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8adac holds 71 instructions and 279 bytes up to the first ret at 0x8aec2; the function has a second path that ends at the ret at 0x8af05; the next function starts at 0x8af08, so the store record keeps the 348-byte extent and sets no separate function size; the identity check uses 71 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the frame prepare at 0x8af08, which runs on the per-frame path of sound_effects_update at 0x81ab0; the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads one 4-byte entry from the voice entry list at 0x7251c; the entry holds the byte offset of a 20-byte voice record at 0x42ef0; the record holds the emitter pointer at +0x04; the function clears bit 0x40000000 of the pointer, and for a set bit it stores the biased radius at +0xc8 of the voice context at 0x74454"
+    },
+    {
+      "kind": "note",
+      "text": "the emitter holds the object index at +0x00, the flag word at +0x04, the position at +0x08, +0x0c, and +0x10, the three basis values at +0x14, +0x18, and +0x1c, the level at +0x20, and one value at +0x3c; the function copies the level to 0x74524 and 0x74534, copies the basis values and the camera-relative position to +0x30 through +0x44 of the voice context, and builds the camera basis at +0x30"
+    },
+    {
+      "kind": "note",
+      "text": "bit 0x8000 of the emitter flag word selects the second basis builder at 0x8b51c; that builder receives the emitter and sets the flag 0x7b518; the first builder at 0x8b610 takes only the basis; after the call the function reads the object through the handle table at 0x21540, stores the object at +0x00, the object count at +0x04, and zero at +0x08; a non-negative object field at +0x10 becomes field * 0x2153c >> 16 * 0x30 at +0xd4, and a negative field stays unchanged"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the original uses no floating-point instruction, so the module needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0xdc-byte voice context, the voice record area, the voice entry list, the three emitters, the two objects, the handle table, the camera position, the scale, and the two basis builder stubs; the four paths cover the plain emitter, the near flag 0x40000000, the event flag 0x8000 with a negative level, and the entry pointer advance over two calls; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 71 decoded instructions and 301 bytes; the identity check stays open at 29 of 71 instructions, 21 of 279 bytes, and 0 of 38 relocation slots, because V2 saves four registers, keeps the context base and the emitter in registers, builds the flag test in another shape, and uses another branch layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --count 71"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8adac --count 71 --rebuilt work/rebuild/svsetup.exe --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol sound_voice_setup_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8adac"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_voice_setup module at 0x8adac"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_voice_setup",
+  "name": "sound_voice_setup",
   "notes": [],
   "object_offset": "0x7adac",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 21,
+        "bytes_total": 279,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 29,
+        "instructions_total": 71,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8adac",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:05c902083b5ef3d6716e4877968535842a134b6f576e8f73b003c2167c8c9502",
+    "source_digest": "sha256:37ace5dbfffd3dc41776112b0cf4b3f3b95307e951f4bd80d7f7cbdd0322cd5e",
+    "tool": "run.py"
+  },
+  "role": "sets up the sound voice context for the next voice entry and builds its camera basis",
+  "section": "object_update_all callees",
   "size": 348,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_voice_setup_"
 }

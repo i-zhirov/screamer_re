@@ -1,9 +1,91 @@
 {
   "address": "0x27c34",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 133,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x27c34 holds 133 instructions and 466 bytes up to the ret at 0x27e05; the next function starts at 0x27e08, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 133 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x27a45 is hud_update at 0x27a34; object_update_all at 0x2786c calls hud_update at the end of the object pass, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the pointer table DAT_0011cef8 holds the pages of the credits text that member_list_load at 0x1b394 reads from the attr member of data\\local.dat; the index DAT_0011ce3c holds the first line of the page, and a line that starts with # ends the page; the function walks up to 0x14 lines from that index"
+    },
+    {
+      "kind": "note",
+      "text": "the integer filter at 0x22bb4 moves the position DAT_0011ce58[i] toward -(DAT_0011ce40 * 0x190) at the coefficient DAT_0010cf08[0x5a], unless the position sits at or below -0x168, which sets the timer DAT_0011ce48 to 4.0; the function measures each line through text_measure at 0x254a8, centers it on the 0x140 width, and draws it through text_draw at 0x25020 at the doubled position and the row i * 0x28 with the font 0 and the color 2"
+    },
+    {
+      "kind": "note",
+      "text": "after the page the timer grows by the frame delta DAT_00118e04; a timer below 4.0 returns; otherwise the timer clears and the toggle DAT_0011ce40 flips; the flip from 1 to 0 advances DAT_0011ce3c past the # line, increments the page state DAT_0011ce54, and resets the 0x14 positions to 0x15e; the -1 sentinel sets the session state DAT_0011ce44 to 3, clears the page state and the index, and resets the positions to 0x15e and the cells DAT_0011cea8 to 0x64"
+    },
+    {
+      "kind": "note",
+      "text": "the caller hud_update, the credits text from local.dat, and the page walk support the name credits_scroll; the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the target DOS/4G build leaves the initialized data pages zero under DOSBox-X, so the harness fills the line table in the BSS at run time; the seven paths cover the first page below the timer, the low line on the second page, the toggle 1 to 0 advance, the toggle 0 to 1 hold, the -1 sentinel, the width 40 center, the coefficient 0.5 filter with the timer boundary, and the timer 2.0 below the bound; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function body holds 98 instructions and 370 bytes; the identity window uses the 133 original instructions, so the check stays open at 30 of 133 instructions and 22 of 466 bytes because V2 saves the frame pointer first, uses another prologue order, and uses integer immediates for the float constants; the build and behavior checks pass, so the store records rebuilt; the original has no symbol name for this function, so the module name and the callee names in the harness stay inferred"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x27c34 --count 133 --rebuilt work/rebuild/credits.exe --rebuilt-map work/rebuild/credits.map --rebuilt-symbol credits_scroll_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x27c34"
+    },
+    {
+      "kind": "finding",
+      "text": "The credits_scroll module at 0x27c34"
+    }
+  ],
+  "implementation": "c",
+  "module": "credits_scroll",
+  "name": "credits_scroll",
   "notes": [],
   "object_offset": "0x17c34",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 466,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 30,
+        "instructions_total": 133,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27c34",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:3cf82460511afe225f23e459bed239fff385a45e828b8d26f6e6adc85e862677",
+    "source_digest": "sha256:59d894c773ffc7b45c0f3cb320fe784075ce6011bf254a8887013e51c062241a",
+    "tool": "run.py"
+  },
+  "role": "scrolls the credits text pages from local.dat, advances each page, and ends the session after the last page",
+  "section": "object_update_all callees",
   "size": 468,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "credits_scroll_"
 }

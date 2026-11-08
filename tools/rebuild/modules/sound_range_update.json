@@ -1,0 +1,29 @@
+{
+  "exe": "sndrng.exe",
+  "map": "sound_range_update.map",
+  "name": "sound_range_update",
+  "run": {
+    "command": "sndrng.exe > sndrng.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "sndrng.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_range_update.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_range_update_main.c"
+    }
+  ]
+}

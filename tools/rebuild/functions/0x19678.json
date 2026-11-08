@@ -1,9 +1,95 @@
 {
   "address": "0x19678",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 124,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x19678 holds 124 instructions and 431 bytes up to the ret at 0x19826; the next function starts at 0x19828, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 124 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1959a is the lap consumer at 0x194a0; that function runs in the vehicle state chain after player_track_node_update at 0x1821c, and it calls this function when the lap counter reaches the node count 0x7ed0"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the lap counter at +0x59c to 1, clears the visited flags at +0x5a0 from index 1 up to the node count, and increments the lap index at +0x684"
+    },
+    {
+      "kind": "note",
+      "text": "the current lap time at +0x794 updates the car best lap at +0x798 when it is smaller; a lap below the global best lap 0x1d26c replaces the global value, formats the car best lap through sprintf at 0x4d32c with the format 0x8b8 and the buffer 0x1f8c, and pushes the effect 7 with the subtype 3 and the value 0.2 through 0x247fc; it then clears the current lap time"
+    },
+    {
+      "kind": "note",
+      "text": "the lap index is compared with the race position 0x1d2b0; an equal index pushes the effect 5 with the subtype 2, the next index sets bit 8 of the byte 0x18e1c, and any other index pushes the effect 5 with the subtype that tells whether the best lap was recorded"
+    },
+    {
+      "kind": "note",
+      "text": "the lap counter, the best lap, the time format, and the caller support the name race_lap_complete; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the car state, the node count, the global best lap, the race position, the flag byte, the time buffer, the format string, and the 100.0 scale; the nine paths cover the new best lap, the higher lap, the car-only best, the global-only best, the hundredths 75 and 50, the minutes above 59, the count 1 loop, and the equal lap; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x19678 --count 124"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x19678 --count 124 --rebuilt work/rebuild/rlap.exe --rebuilt-map work/rebuild/race_lap_complete.map --rebuilt-symbol race_lap_complete_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x19678"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 124 decoded instructions; the identity check stays open at 27 of 124 instructions, 26 of 377 bytes, and 0 of 17 relocation slots, because V2 saves the frame pointer first, inlines the __CHP truncation, and uses other registers for the index; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_lap_complete module at 0x19678"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_lap_complete",
+  "name": "race_lap_complete",
   "notes": [],
   "object_offset": "0x9678",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 26,
+        "bytes_total": 377,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 124,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19678",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:df0a62eb4407ce05e14f19ab77fa834d9ece7c23975516e05418c7bbcb5bc424",
+    "source_digest": "sha256:628c7674986a4bfc714c904be54dcaa72ff51d1631c1751ed24e39baaf5dc4d4",
+    "tool": "run.py"
+  },
+  "role": "starts a new lap, updates the car and the global best lap, formats the best lap time, and pushes the lap position effects",
+  "section": "The vehicle state chain",
   "size": 432,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_lap_complete_"
 }

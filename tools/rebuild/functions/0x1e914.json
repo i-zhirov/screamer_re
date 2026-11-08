@@ -1,9 +1,95 @@
 {
   "address": "0x1e914",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 160,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1e914 holds 160 instructions and 452 bytes up to the ret 4 at 0x1ead5; the next function starts at 0x1eae0, so the store record keeps the 460-byte extent and sets no function size; the identity check uses 160 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "no direct call, no data reference, and no LE relocation target reaches 0x1e914, so the function has no known caller; the sibling at 0x1e7b4 evaluates the same uniform quadratic basis in two dimensions, and the opponent path update at 0x20b1c calls it through 0x22378; this function is the three-dimensional variant of the same curve sampler"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the output pointer in eax, the three control points in edx, and the fraction on the stack; it computes the basis weights w0 = 0.5 * (1 - t)^2, w2 = 0.5 * t^2, and w1 = 1 - (w0 + w2) over the points at offsets 0, 0xc, and 0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the output at +0x00, +0x04, and +0x08 holds the sampled position; the function then samples the same basis at t + 0.002, subtracts the first sample, divides the difference by its length through the square-root helper at 0xc6cbe, and writes the three tangent components to +0x0c, +0x10, and +0x14"
+    },
+    {
+      "kind": "note",
+      "text": "the double 0.5 sits at object-3 offset 0xbb8 and the float 0.002 sits at object-3 offset 0xbc0; the constants arrive through globals, because the minimal image does not load the constant segment; the original calls the Watcom square-root helper, so the local func_1e914_fpu.asm supplies sqrt_ from the hardware and the FPU run-time symbols; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the record takes the name func_1e914, because no caller and no data reference support a stronger name; the sibling 2D sampler and the three-dimensional tangent output are the only evidence, so the name stays weak; the record takes the section The vehicle state chain with the spline family, because the sibling sampler serves the opponent path update and the function holds the same curve role"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three control points, the six-float output, and the two basis constants; the seven paths cover the x, y, and z control axes, the mid fraction, the end fraction, and the two negative tangent signs; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 431 bytes and 160 decoded instructions; the identity check stays open at 24 of 160 instructions and 21 of 431 bytes because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1e914 --count 160"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1e914 --count 160 --rebuilt work/rebuild/func1e9.exe --rebuilt-map work/rebuild/func_1e914.map --rebuilt-symbol func_1e914_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1e914"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_1e914 module at 0x1e914"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_1e914",
+  "name": "func_1e914",
   "notes": [],
   "object_offset": "0xe914",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 21,
+        "bytes_total": 431,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 160,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1e914",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:65995eab193ff880103ec686e907a1324b03583127a14be7675a18ec050e33f4",
+    "source_digest": "sha256:73fd6041e1bb98a3c7742d30caeef9e383e94c83b8815ec8b88c1e941d7e8d61",
+    "tool": "run.py"
+  },
+  "role": "evaluates a uniform quadratic B-spline in three dimensions and writes the sample position and the normalized forward tangent",
+  "section": "The vehicle state chain",
   "size": 460,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_1e914_"
 }

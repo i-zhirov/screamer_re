@@ -1,0 +1,36 @@
+{
+  "exe": "bpcdet.exe",
+  "map": "body_point_collision_detect.map",
+  "name": "body_point_collision_detect",
+  "run": {
+    "command": "bpcdet.exe > bpcdet.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "bpcdet.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "body_point_collision_detect.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "body_point_collision_detect_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "body_point_collision_detect_main.c"
+    }
+  ]
+}

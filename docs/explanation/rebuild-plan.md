@@ -20,8 +20,10 @@ One module is one function record.  For each function the method is:
 3. Write the rebuilt source under `tools/rebuild/`:
    - The C source is the primary build, with the stack-frame option `-of+`
      when the original game file uses a frame.
-   - The assembly source is the build for a library routine that the original
-     compiler produced as assembly, for example `memcpy`.
+   - An assembly source is the build only when C cannot reproduce the original
+     bytes, for example a library routine that the original compiler produced
+     as assembly.  Record the reason.  Do not use assembly only to raise the
+     verified count.
    - The harness source holds the callee stubs and prints the markers.
 4. Add the module record under `tools/rebuild/modules/`.
 5. Build the module with the harness and run it under DOSBox-X.
@@ -283,11 +285,130 @@ These are the next unnamed game functions in the object, in size order.
 | `0x20b1c` | `opponent_path_update` (done) | 516 | 166 | 10 | 60 |
 | `0x1b394` | `member_list_load` (done) | 502 | 166 | 10 | 0 |
 | `0x1517c` | `opponent_route_setup` (done) | 499 | 137 | 4 | 13 |
-| `0x1d00c` | unnamed | 497 | 144 | 3 | 7 |
+
+### Phase L: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1d00c` | `car_collision_pass` (done) | 497 | 144 | 3 | 7 |
+| `0x2cc98` | `track_select_update` (done) | 491 | 124 | 5 | 19 |
+| `0x258d0` | `palette_shade_build` (done) | 475 | 151 | 0 | 44 |
+| `0x27a5c` | `hud_panel_show` (done) | 471 | 135 | 8 | 15 |
+| `0x27c34` | `credits_scroll` (done) | 466 | 133 | 3 | 7 |
+| `0x17408` | `car_proximity_pass` (done) | 466 | 133 | 4 | 5 |
+| `0x1ed04` | `player_state_snapshot` (done) | 465 | 115 | 0 | 17 |
+| `0x11a30` | `wheel_contact_update` (done) | 461 | 141 | 8 | 21 |
+| `0x2b494` | `map_object_finish` (done) | 457 | 118 | 5 | 14 |
+| `0x1e914` | `func_1e914` (done) | 452 | 160 | 1 | 123 |
+| `0x23038` | `path_playback_update` (done) | 437 | 148 | 1 | 19 |
+| `0x219ec` | `quit_confirm_screen` (done) | 431 | 122 | 14 | 0 |
+
+### Phase M: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x19678` | `race_lap_complete` (done) | 431 | 124 | 7 | 16 |
+| `0x2c7a8` | `championship_screen_init` (done) | 425 | 125 | 9 | 0 |
+| `0x20d20` | `race_intro_update` (done) | 421 | 106 | 5 | 15 |
+| `0x1fd70` | `race_session_run` (done) | 419 | 112 | 12 | 0 |
+| `0x1ef68` | `traffic_object_link` (done) | 415 | 117 | 5 | 20 |
+| `0x11ccc` | `collision_cell_test` (done) | 413 | 127 | 4 | 9 |
+| `0x2003c` | `race_simulation_update` (done) | 404 | 104 | 14 | 0 |
+| `0x21058` | `race_finish_update` (done) | 391 | 114 | 10 | 5 |
+| `0x2fcec` | `music_load` (done) | 379 | 99 | 13 | 0 |
+| `0x4d844` | `lzw_bit_read` (done) | 374 | 119 | 1 | 0 |
+| `0x2cb20` | `car_select_update` (done) | 373 | 103 | 3 | 19 |
+| `0x82258` | `matrix_compose` (done) | 365 | 127 | 0 | 0 |
+
+### Phase N: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x830c8` | `sound_range_update` (done) | 649 | 207 | 0 | 0 |
+| `0x8aa60` | `sound_mix_prepare` (done) | 535 | 155 | 1 | 5 |
+| `0x1057c` | `radar_world_draw` (done) | 483 | 154 | 1 | 0 |
+| `0x8beb8` | `video_copy` (done) | 468 | 143 | 5 | 0 |
+| `0x194a0` | `player_lap_progress_update` (done) | 363 | 103 | 4 | 12 |
+| `0x254a8` | `text_measure` (done) | 360 | 104 | 0 | 0 |
+| `0x1eae0` | `traffic_step` (done) | 358 | 112 | 6 | 0 |
+| `0x22378` | `opponent_curve_eval` (done) | 353 | 121 | 1 | 31 |
+| `0x836ac` | `sound_event_render` (done) | 351 | 100 | 2 | 13 |
+| `0x1e7b4` | `func_1e7b4` (done) | 350 | 124 | 1 | 96 |
+| `0x1d55c` | `object_revolution_matrix` (done) | 350 | 103 | 1 | 23 |
+| `0x29bac` | `championship_result_apply` (done) | 348 | 90 | 0 | 0 |
+
+### Phase O: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1c13c` | `quad_point_test` (done) | 338 | 107 | 0 | 0 |
+| `0x188b8` | `player_car_spin_update` (done) | 347 | 99 | 1 | 41 |
+| `0x4c98c` | `unr_file_load` (done) | 344 | 96 | 13 | 0 |
+| `0x2392c` | `gauge_marker_draw` (done) | 344 | 110 | 15 | 43 |
+| `0x19828` | `player_car_wheel_effect_start` (done) | 344 | 99 | 2 | 6 |
+| `0x12f50` | `game_mode_100_start` (done) | 335 | 85 | 3 | 0 |
+| `0x16150` | `player_brake_update` (done) | 332 | 95 | 1 | 22 |
+| `0x4c695` | `stream_read_text` (done) | 331 | 106 | 3 | 0 |
+| `0x13580` | `race_view_reset` (done) | 330 | 91 | 0 | 0 |
+| `0x18a14` | `race_clock_update` (done) | 329 | 92 | 0 | 17 |
+| `0x25658` | `font_load` (done) | 324 | 93 | 11 | 0 |
+| `0x83ca8` | `background_scale` (done) | 323 | 111 | 0 | 0 |
+
+### Phase P: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x25020` | `text_draw` (done) | 1044 | 292 | 0 | 0 |
+| `0x82e0c` | `sound_range_reset` (done) | 699 | 216 | 0 | 0 |
+| `0x14fb8` | `spline_table_load` (done) | 316 | 80 | 12 | 0 |
+| `0x231f0` | `path_keyframe_append` (done) | 309 | 89 | 0 | 13 |
+| `0x20428` | `race_position_update` (done) | 308 | 86 | 0 | 10 |
+| `0x1b840` | `replay_load` (done) | 306 | 84 | 8 | 0 |
+| `0x4cd9c` | `material_load` (done) | 303 | 81 | 12 | 0 |
+| `0x1cbac` | `terrain_contact_update` (done) | 297 | 81 | 2 | 25 |
+| `0x19980` | `player_car_wheel_effect_update` (done) | 297 | 90 | 4 | 7 |
+| `0x11f98` | `player_segment_update` (done) | 295 | 96 | 3 | 5 |
+| `0x8b1d4` | `sound_source_frame_select` (done) | 293 | 103 | 0 | 11 |
+| `0x11e74` | `body_point_collision_detect` (done) | 292 | 85 | 6 | 17 |
+
+### Phase Q: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x293a8` | `championship_record_select` (done) | 288 | 78 | 0 | 0 |
+| `0x18ba8` | `sla_marker_check` (done) | 291 | 90 | 2 | 8 |
+| `0x4d4c4` | `lzw_block` (done) | 290 | 73 | 2 | 0 |
+| `0x8adac` | `sound_voice_setup` (done) | 279 | 71 | 1 | 0 |
+| `0x17b54` | `traffic_push_response` (done) | 279 | 70 | 3 | 26 |
+| `0x82c14` | `camera_project` (done) | 277 | 72 | 0 | 0 |
+| `0x15874` | `cd_check_screen` (done) | 269 | 69 | 18 | 0 |
+| `0x1d200` | `car_collision_push` (done) | 268 | 70 | 2 | 32 |
+| `0x1ba4c` | `replay_load_atk` (done) | 267 | 82 | 5 | 0 |
+| `0x1b738` | `replay_save` (done) | 263 | 69 | 8 | 0 |
+| `0x16b98` | `player_segment_apply` (done) | 262 | 95 | 1 | 4 |
+| `0x257b0` | `sprite_load` (done) | 261 | 67 | 12 | 0 |
 
 ## Position
 
-One hundred seventy-nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -354,5 +475,46 @@ and `traffic_collision_pass` at `0x175dc`, and `view_transition_update` at
 `0x19f00`, and `opponent_start` at `0x124c0`, and `spline_load` at `0x1af70`,
 and `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
 and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at `0x20b1c`,
-and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`.
-The next unnamed function is `0x1d00c`.
+and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`,
+and the Phase L modules `car_collision_pass` at `0x1d00c`,
+`track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
+`hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
+`car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+and `wheel_contact_update` at `0x11a30`, `map_object_finish` at `0x2b494`, and
+`func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`, and
+`quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`, and
+`championship_screen_init` at `0x2c7a8`, and `race_intro_update` at `0x20d20`,
+and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
+and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
+`0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
+`0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
+`0x2cb20`, and `matrix_compose` at `0x82258`, and `sound_range_update` at
+`0x830c8`, and `sound_mix_prepare` at `0x8aa60`, and `radar_world_draw` at
+`0x1057c`, and `video_copy` at `0x8beb8`, and `player_lap_progress_update`
+at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
+`0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
+at `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and `object_revolution_matrix`
+at `0x1d55c`, and `championship_result_apply` at `0x29bac`, and the Phase O
+modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
+`0x188b8`, `unr_file_load` at `0x4c98c`, `gauge_marker_draw` at `0x2392c`,
+`player_car_wheel_effect_start` at `0x19828`, and `game_mode_100_start` at
+`0x12f50`, and `player_brake_update` at `0x16150`, and `stream_read_text` at
+`0x4c695`, and `race_view_reset` at `0x13580`, and `race_clock_update` at `0x18a14`,
+and `font_load` at `0x25658`, and `background_scale` at `0x83ca8`, and the Phase P
+modules `text_draw` at `0x25020`, `sound_range_reset` at `0x82e0c`,
+`spline_table_load` at `0x14fb8`, and `path_keyframe_append` at `0x231f0`,
+and `race_position_update` at `0x20428`, and `replay_load` at `0x1b840`,
+and `material_load` at `0x4cd9c`, and `terrain_contact_update` at `0x1cbac`,
+and `player_car_wheel_effect_update` at `0x19980`, and
+`player_segment_update` at `0x11f98`, and
+`sound_source_frame_select` at `0x8b1d4`, and
+`body_point_collision_detect` at `0x11e74`, and the Phase Q modules
+`championship_record_select` at `0x293a8`, `sla_marker_check` at `0x18ba8`,
+`lzw_block` at `0x4d4c4`, and `sound_voice_setup` at `0x8adac`,
+`traffic_push_response` at `0x17b54`, and `camera_project` at `0x82c14`,
+and `cd_check_screen` at `0x15874`, and
+`car_collision_push` at `0x1d200`, and `replay_load_atk` at `0x1ba4c`,
+and `replay_save` at `0x1b738`, and
+`player_segment_apply` at `0x16b98`, and
+`sprite_load` at `0x257b0`.
+The next unnamed function is `0x22018`.

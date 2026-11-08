@@ -1,0 +1,42 @@
+{
+  "exe": "ccpass.exe",
+  "map": "car_collision_pass.map",
+  "name": "car_collision_pass",
+  "run": {
+    "command": "ccpass.exe > ccpass.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "A",
+      "B",
+      "D"
+    ],
+    "output": "ccpass.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_pass.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_collision_pass_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_pass_main.c"
+    }
+  ]
+}

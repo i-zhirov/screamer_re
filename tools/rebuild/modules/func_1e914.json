@@ -1,0 +1,37 @@
+{
+  "exe": "func1e9.exe",
+  "map": "func_1e914.map",
+  "name": "func_1e914",
+  "run": {
+    "command": "func1e9.exe > func1e9.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "func1e9.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_1e914.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "func_1e914_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_1e914_main.c"
+    }
+  ]
+}

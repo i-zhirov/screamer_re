@@ -304,6 +304,11 @@ rebuilt modules.  The build runs in a container, because the OpenWatcom V2
 release has no macOS asset.  The container holds the extracted toolchain, so
 no installer run is needed.
 
+C is the default module implementation.  An assembly implementation is used
+only when C cannot reproduce the original bytes; the finding records why.  Do
+not add an assembly oracle only to raise the verified count.  The FPU and math
+stubs are harness support, not module implementations.
+
 | Item | Value |
 | --- | --- |
 | Container | `arlaneenalra/watcom-docker@sha256:16e4845ddd0df7bc877b45d103aacf66bc48aaab6d1c61d6bcaa9c1274f06a65` |
@@ -327,8 +332,9 @@ The files:
 | `exit_main.c` | the `exit` test harness: the hook slots and the terminator stub |
 | `printf.c` | the rebuilt `printf` module, after the run-time file `bld/clib/streamio/c/printf.c` |
 | `printf_main.c` | the `printf` test harness: the `__iob` table and the print-engine stub |
-| `shutdown.c` | the rebuilt `engine_shutdown` module, built with the stack-frame option `-of+` |
-| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs |
+| `shutdown.asm` | the hand-written `engine_shutdown` module: the frame, the eight calls, and the data address; the source pins the original `mov ebp,esp` and `xor eax,eax` encodings |
+| `shutdown.c` | the C reference version of the `engine_shutdown` module, kept alongside the assembly; the V2 `-of+` build adds `mov esp,ebp` |
+| `shutdown_main.c` | the `engine_shutdown` test harness: the eight callee stubs and the `DAT_000062b0` data symbol |
 | `memcpy.asm` | the rebuilt `memcpy` module, the only module with no call and no data reference |
 | `memcpy_main.c` | the `memcpy` test harness: the source and target buffers |
 | `error_report.c` | the rebuilt `error_report` module, the first game module, a switch over the codes -1 through 22 that prints the format strings of the data segment through a compiler jump table that the link does not relocate; built with `-of+ -ot`, a volatile parameter, and the `modify exact` printer pragma |
@@ -340,10 +346,11 @@ The files:
 | `list_destroy_main.c` | the `list_destroy` test harness: the set pointer, the null pointer, and the markers |
 | `memory_available.c` | the rebuilt `memory_available` module: the two heap probes and the sum |
 | `memory_available_main.c` | the `memory_available` test harness: the probe stand-ins and the markers |
-| `frame_step.c` | the rebuilt `frame_step` module: the three calls in call order |
+| `frame_step.asm` | the hand-written `frame_step` module: the frame, the three calls in call order, and the epilogue; the source pins the original `mov ebp,esp` encoding |
+| `frame_step.c` | the C reference version of the `frame_step` module, kept alongside the assembly; the module builds the assembly because the V2 `-of+` epilogue adds `mov esp,ebp` |
 | `frame_step_main.c` | the `frame_step` test harness: the three callee stubs |
-| `video_fill.c` | the rebuilt `video_fill` module, the active C build with `-of+`: the size pair 480 and 400 and the video buffer pointer |
-| `video_fill.asm` | the alternative assembly build of `video_fill`, kept alongside for the later Watcom 10.x build; it matches the original with only the link-time addresses |
+| `video_fill.asm` | the hand-written `video_fill` module: the size pair 480 and 400, the video buffer pointer, and the copy call; the source pins the original `mov ebp,esp` encoding |
+| `video_fill.c` | the C reference version of the `video_fill` module, kept alongside the assembly; the V2 `-of+` build adds `lea esp,[ebp-8]` |
 | `video_fill_main.c` | the `video_fill` test harness: the copy stub and the pointer check |
 | `memset.asm` | the rebuilt `memset` module, byte-identical to the original: the dword filler |
 | `memset_main.c` | the `memset` test harness: the filled buffer check |
@@ -366,14 +373,17 @@ The files:
 | `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
 | `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
 | `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
-| `hud_update.c` | the rebuilt `hud_update` module: the three overlay calls, gated on the session state |
+| `hud_update.asm` | the hand-written `hud_update` module: the two guards on the session state and the three overlay calls; the source pins the original `mov ebp,esp` encoding |
+| `hud_update.c` | the C reference version of the `hud_update` module, kept alongside the assembly; the V2 `-of+` build adds `mov esp,ebp` |
 | `hud_update_main.c` | the `hud_update` test harness: the session state and the overlay stubs |
-| `stream_status.c` | the rebuilt `stream_status` module: the word at `stream + 0x70` |
+| `stream_status.asm` | the hand-written `stream_status` module: the word at `stream + 0x70`; the source pins the original `mov ebp,esp`, `mov esp,ebp`, and `sub esp,8` encodings |
+| `stream_status.c` | the C reference version of the `stream_status` module, kept alongside the assembly; the V2 `-of+ -od` build changes the prologue order, the local offsets, and the epilogue |
 | `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
 | `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
 | `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
 | `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
-| `music_bank_reset.c` | the rebuilt `music_bank_reset` module: the three field stores of the music bank record |
+| `music_bank_reset.asm` | the hand-written `music_bank_reset` module: the local argument slot, the three field stores of the music bank record, and the source pins the original `mov ebp,esp` and `mov esp,ebp` encodings |
+| `music_bank_reset.c` | the C reference version of the `music_bank_reset` module, kept alongside the assembly; the V2 `-of+` build drops the argument slot and its reloads |
 | `music_bank_reset_main.c` | the `music_bank_reset` test harness: the bank record check |
 | `object_gear_state.c` | the rebuilt `object_gear_state` module: the gear state mapping through an if-else chain |
 | `object_gear_state_main.c` | the `object_gear_state` test harness: the gear state and the field check |
@@ -510,6 +520,16 @@ The files:
 | `camera_update_main.c` | the `camera_update` test harness: the camera record, the three globals, the two stubs, and the three paths |
 | `stream_read.c` | the rebuilt `stream_read` module: the flag test, the expander call, the raw `fread` call, the position advance, and the two clamps |
 | `stream_read_main.c` | the `stream_read` test harness: the stream record, the two buffers, the two stubs, and the five paths |
+| `stream_read_text.c` | the rebuilt `stream_read_text` module: the size clamp, the buffered character loop, the carriage-return skip, the terminator store, and the `fgets`, `fscanf`, and `strlen` calls |
+| `stream_read_text_main.c` | the `stream_read_text` test harness: the stream record, the source and expected buffers, the three stubs, and the ten paths |
+| `race_view_reset.c` | the rebuilt `race_view_reset` module: the five per-car view loops, the seven view slot clears, and the five shared cell clears |
+| `race_view_reset_main.c` | the `race_view_reset` test harness: the four car records, the shared counter, the five cells, the seven view slots, and the four paths |
+| `race_clock_update.c` | the rebuilt `race_clock_update` module: the two input gates, the total and lap clock advance, the traffic scan, the remaining-time countdown, and the throttle-cut control bit |
+| `race_clock_update_main.c` | the `race_clock_update` test harness: the player object, three traffic records, the input bytes, the mode word, the saved word, the count, the player index, the frame delta, and the ten paths |
+| `font_load.c` | the rebuilt `font_load` module: the member open, the font count, the descriptor table, the bitmap table, the `FONTS` tail, and the stream close |
+| `font_load_main.c` | the `font_load` test harness: the count, the two tables, the tail size, the tail pointer, the engine pointer, and the three paths |
+| `background_scale.c` | the rebuilt `background_scale` module: the row and column offsets, the negative and wrapped source row, the doubled byte rows, and the fill |
+| `background_scale_main.c` | the `background_scale` test harness: the source buffer, the video buffer, the camera record, the four input globals, the two output globals, and the four paths |
 | `malloc_rt.c` | the rebuilt `malloc` module as `malloc_rt`: the size checks, the round-up, the free-list walk, the cursor and largest-free update, the three helper calls, and the heap-flag clear |
 | `malloc_rt_main.c` | the `malloc_rt` test harness: the three free-list blocks, the four globals, the three stubs, and the nine paths |
 | `replay_write.c` | the rebuilt `replay_write` module: the enable guard, the record address, the two float copies, the six 16-bit copies, the index advance, the wrap, and the second-marker update |
@@ -600,7 +620,10 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the one hundred and eighty module records: the sources, the compiler, the link, and the run expectations |
+| `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
+| `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
+| `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
+| `modules/*.json` | the two hundred and fifty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -716,8 +739,23 @@ list_destroy slot order", "The Watcom 9.5 compiler and the list_destroy slot
 order", "The Watcom 9.01d compiler and the list_destroy slot order", and "The
 hand-written list_destroy assembly matches the original".  `error_report` uses
 `-of+ -ot` for both harnesses, because the original keeps an EBP frame and
-expands every case body.  The `frame_step` `-of+` epilogue (`mov esp,ebp`) stays
-a limit; see the last findings section.
+expands every case body.  The `frame_step` module uses the hand-written
+assembly, because the V2 `-of+` epilogue adds `mov esp,ebp`; see the finding
+"The hand-written frame_step assembly matches the original".  The `video_fill`
+module uses the hand-written assembly for the same reason, because the V2
+`-of+` epilogue adds `lea esp,[ebp-8]`; see the finding "The hand-written
+video_fill assembly matches the original".  The `hud_update` module uses the
+hand-written assembly for the same reason, because the V2 `-of+` epilogue adds
+`mov esp,ebp`; see the finding "The hand-written hud_update assembly matches
+the original".  The `music_bank_reset` module uses the hand-written assembly
+because the V2 `-of+` build drops the argument slot and its reloads; see the
+finding "The hand-written music_bank_reset assembly matches the original".  The
+`stream_status` module uses the hand-written assembly because the V2 `-of+ -od`
+build changes the prologue order, the local offsets, and the epilogue; see the
+finding "The hand-written stream_status assembly matches the original".  The
+`engine_shutdown` module uses the hand-written assembly because the V2 `-of+`
+epilogue adds `mov esp,ebp`; see the finding "The hand-written engine_shutdown
+assembly matches the original".
 
 The module rebuild:
 
@@ -810,7 +848,10 @@ The rebuild holds 54 bytes and 15 instructions against the original 52 bytes and
 instructions, and the diff names the difference: `the rebuilt module holds one
 instruction the original does not: mov esp, ebp`.  The frame and the eight calls match,
 the run writes the markers `1` to `8` in order, and no compiler option removes the
-restore, so the module stays open as a byte-level match.
+restore, so the C rebuild stays open as a byte-level match.  The hand-written
+assembly source `shutdown.asm` holds the original body exactly, and the module is
+`verified`; see the finding "The hand-written engine_shutdown assembly matches the
+original".
 
 The `memcpy` module is the first exact match:
 
@@ -904,7 +945,9 @@ sets an interrupt breakpoint on the game stub's DOS4GW exec call
 (`BPINT 21 "4B"`), and starts a CPU instruction log.  The tool reads the
 growing log, reports the first game instruction, and then stops the emulation.
 The log scan skips each run of equal lines, because the debugger repeats an
-instruction a varying number of times.  The tool needs a terminal for the
+instruction a varying number of times.  The log budget is 0x400000
+instructions, because a smaller budget can stop in the DOS/4GW loader before
+the game entry.  The tool needs a terminal for the
 DOSBox-X debugger, so it runs the emulator under a pseudo terminal.  It writes
 only under `work/`.  It exits with code 0 when it finds the entry and code 1
 when it does not.
@@ -970,10 +1013,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 231 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 227 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 216 checks.  Both flags
-report 212 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 303 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 299 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 288 checks.  Both flags
+report 284 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

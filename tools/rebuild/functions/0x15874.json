@@ -1,9 +1,91 @@
 {
   "address": "0x15874",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 69,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15874 holds 69 instructions and 269 bytes up to the ret at 0x15980; the next function starts at 0x15984, so the store record keeps the 272-byte extent and sets no separate function size; the identity check uses 69 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_end at 0x279a4, which calls this function at 0x279f4 when the dword at object-3 offset 0x18e3c is zero and then sets the dword to 1; race_loop calls race_end after the loop exit test, so the module takes the section race_loop callees"
+    },
+    {
+      "kind": "note",
+      "text": "the helper at 0x157b8 reads the real-mode CD driver through 0x26014 and compares four response fields with PC, SCREAMER, VIE, and SCREAMER; it returns 0 when the correct Screamer CD is present, and this function returns at once on that success"
+    },
+    {
+      "kind": "note",
+      "text": "the screen path stops the CD audio through 0x264ec, clears the dword at 0x166ac, gets the OPT_PCX resource of 0x3e800 bytes into 0x1fad0 through 0x2eed0, reports a zero result through 0x2edad, clears 0x21528 through 0x8c160, fills through 0x2aa98, loads menu1h.pcx from gfx\\graf.dat with the palette at 0xcf5c through 0x1b5a4, runs 0x15150 on a non-zero result, copies through 0x8c150, draws the text pointer at 0x18ff4 centered at y 0x3c with font 0 and color 2 through 0x2e7cc, fills again, sets the palette through 0x81a05, and stops the CD audio through 0x262a8 with 0"
+    },
+    {
+      "kind": "note",
+      "text": "the wait loops poll 0x25f90 while the flag at 0x16688 goes from 0 to 1 and back, wait while 0x157b8 still fails, set the word at 0x1669e to 1, wait while 0x16688 is set, and reset the CD audio through 0x262fc; the original has the EBP frame, so the module builds with -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive pointer, the two buffers, the palette, the message, the two audio flags, and the stubs; the five paths cover the present CD, the full path with four polls, the zero resource, the failed PCX load, and the immediate wait success; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the CD check, the OPT_PCX screen, the menu1h.pcx background, and the wait for the correct disc support the name cd_check_screen; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15874 --count 69"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15874 --count 69 --rebuilt work/rebuild/cdchk.exe --rebuilt-map work/rebuild/cd_check_screen.map --rebuilt-symbol cd_check_screen_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15874"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_check_screen module at 0x15874"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_check_screen",
+  "name": "cd_check_screen",
   "notes": [],
   "object_offset": "0x5874",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 33,
+        "bytes_total": 269,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 47,
+        "instructions_total": 69,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15874",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:7a1412417e9fe3ec8a2aaee740b571ccbee024e58a3292aa4e7b296b3b55f06d",
+    "source_digest": "sha256:47e1f7bd38bca1c77c6d392d5f79e928e5d24b5b635e1f7231d0cce4fe9ae3b4",
+    "tool": "run.py"
+  },
+  "role": "Shows the insert-CD screen and waits until the correct Screamer CD is present.",
+  "section": "race_loop callees",
   "size": 272,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_check_screen_"
 }

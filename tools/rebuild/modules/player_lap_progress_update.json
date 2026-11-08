@@ -1,0 +1,41 @@
+{
+  "exe": "plpu.exe",
+  "map": "player_lap_progress_update.map",
+  "name": "player_lap_progress_update",
+  "run": {
+    "command": "plpu.exe > plpu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "A",
+      "D"
+    ],
+    "output": "plpu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_lap_progress_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_lap_progress_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_lap_progress_update_main.c"
+    }
+  ]
+}

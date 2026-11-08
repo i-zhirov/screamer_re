@@ -1,0 +1,36 @@
+{
+  "exe": "pcwe.exe",
+  "map": "player_car_wheel_effect_start.map",
+  "name": "player_car_wheel_effect_start",
+  "run": {
+    "command": "pcwe.exe > pcwe.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pcwe.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_wheel_effect_start.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_wheel_effect_start_main.c"
+    }
+  ]
+}

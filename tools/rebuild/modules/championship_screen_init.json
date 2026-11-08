@@ -1,0 +1,35 @@
+{
+  "exe": "champini.exe",
+  "map": "championship_screen_init.map",
+  "name": "championship_screen_init",
+  "run": {
+    "command": "champini.exe > chsini.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "chsini.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "championship_screen_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "championship_screen_init_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "championship_screen_init_main.c"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "exe": "lzwblk.exe",
+  "map": "lzw_block.map",
+  "name": "lzw_block",
+  "run": {
+    "command": "lzwblk.exe > lzwblk.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "lzwblk.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "lzw_block.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "lzw_block_main.c"
+    }
+  ]
+}

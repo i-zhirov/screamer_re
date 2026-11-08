@@ -1,0 +1,36 @@
+{
+  "exe": "tcu.exe",
+  "map": "terrain_contact_update.map",
+  "name": "terrain_contact_update",
+  "run": {
+    "command": "tcu.exe > tcu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "tcu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "terrain_contact_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "terrain_contact_update_main.c"
+    }
+  ]
+}

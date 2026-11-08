@@ -1,0 +1,25 @@
+{
+  "exe": "vcpmod.exe",
+  "map": "video_copy.map",
+  "name": "video_copy",
+  "run": {
+    "command": "vcpmod.exe > vcp.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "vcp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_copy.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_copy_main.c"
+    }
+  ]
+}

@@ -1,9 +1,99 @@
 {
   "address": "0x1ef68",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 117,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ef68 holds 117 instructions and 415 bytes up to the ret at 0x1f106; the next function starts at 0x1f108, so the store record keeps the 416-byte extent and sets no function size; the identity check uses 117 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x202b1 is the traffic view group at 0x201d0; that group walks the 0x2a8-byte traffic records at DAT_00113cd8 while the index stays below the count DAT_00115218, first runs the record update at 0x1f108, and then runs this function, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the original returns at once inside the frame when the first record field is negative; the record field +0x64 selects the 28-byte entry at DAT_0010653c, where entry field 0 is the body object and entry field 4 is the render array; the record field +0x6c selects the second entry, where field 0 is the part object; the original loads the render pointer into a local but the body never reads it"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the record position +0x3c, +0x40, and +0x44 to the body offsets 8, 0xc, and 0x10; the record positions +0x3c and +0x44 also go to the part offsets 8 and 0x10; the record field +0x18 goes to the body offset 0x3c; the record field +0x14 masked with 0xf000 goes to the body offset 0x20"
+    },
+    {
+      "kind": "note",
+      "text": "the function scales the record floats +0x48, +0x4c, +0x50, +0x58, and +0x5c by the constant 1024.0 at object-3 offset 0xbc4 and divides by pi at object-3 offset 0xbc8; it truncates each result toward zero and masks the low 11 bits; the values go to the body offsets 0x14, 0x18, and 0x1c and to the part offsets 0x14 and 0x1c; the body value at 0x18 also goes to the part offset 0x18; the record field +0x54 goes to the part offset 0xc"
+    },
+    {
+      "kind": "note",
+      "text": "the traffic table, the entry table, and the sibling object_car_link at 0x1c84c support the name traffic_object_link; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncate helper at 0x4d9f4 before each fistp; this harness links no math library, so the local traffic_object_link_fpu.asm makes __CHP truncate toward zero; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one 0x300-byte traffic record, four entry pairs of the 28-byte table, the body and render blocks, and the two float constants; the seven paths cover the full path, the negative truncation, the low 11-bit mask, the high-nibble flag mask, the entry selection, the part field isolation, and the negative first field; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ef68 --count 117"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ef68 --count 117 --rebuilt work/rebuild/tolink.exe --rebuilt-map work/rebuild/traffic_object_link.map --rebuilt-symbol traffic_object_link_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ef68"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_object_link module at 0x1ef68"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 117 decoded instructions and 383 bytes; the identity check stays open at 22 of 117 instructions and 11 of 386 bytes, and 0 of 32 relocation slots match, because V2 saves ebx, ecx, and edx, keeps the body in ecx and the part in ebx, computes the entry offset with imul, keeps the record in edx, and reads the constants through near data operands; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_object_link",
+  "name": "traffic_object_link",
   "notes": [],
   "object_offset": "0xef68",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 11,
+        "bytes_total": 386,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 22,
+        "instructions_total": 117,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ef68",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:34e528baa222569efb6ad82d63836aa8e13c8b1fed55bffa1a9052545798e87e",
+    "source_digest": "sha256:c33b1db480fd9d60192d1fd68ad64acab7c581dd4e70f8f8ad786b3ee5586a5a",
+    "tool": "run.py"
+  },
+  "role": "links one traffic record to its body and part object entries: it copies the position, the five scaled angles, the state value, and the masked flag",
+  "section": "The vehicle state chain",
   "size": 416,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_object_link_"
 }

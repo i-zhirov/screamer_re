@@ -1,9 +1,79 @@
 {
   "address": "0x4d844",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 119,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4d844 holds 119 instructions and 374 bytes up to the ret at 0x4d9b9; the next function starts at 0x4d9ba, so the store record keeps the 374-byte extent and sets no separate function size; the identity check uses 119 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the block decoder at 0x4d4c4, with the call sites 0x4d4f7 and 0x4d546; the reference table in docs/reference/file-formats.md names the address lzw_bit_read, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the context holds the bit position at +0x406c, the code width at +0x4068, the mask table at +0x8050, the 0x400-byte bit buffer at +0x8086, the stream position at +0x4040, the stream limit at +0x4044, and the stream handle at +0x848c"
+    },
+    {
+      "kind": "note",
+      "text": "when fewer than five buffer bytes remain, the function moves the remaining bytes to the front, reads more bytes through fread at 0xc607b with the size 1, advances the stream position, and keeps only the sub-byte bit offset; the read count is the smaller of the free space and the bytes left in the stream"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms a 24-bit little-endian window, shifts it right by the sub-byte bit offset, masks it with the table entry of the code width, and advances the bit position by the code width; the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d844 --count 119"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d844 --count 119 --rebuilt work/rebuild/lzrmod.exe --rebuilt-map work/rebuild/lzw_bit_read.map --rebuilt-symbol lzw_bit_read_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module lzw_bit_read"
+    }
+  ],
+  "implementation": "c",
+  "module": "lzw_bit_read",
+  "name": "lzw_bit_read",
   "notes": [],
   "object_offset": "0x3d844",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 365,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 119,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d844",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:6ad95f93ccba3ce26efcd7cccd0229c21180443cd813063a71b7aaa8431dba26",
+    "source_digest": "sha256:481a43818c6d77849d44283e870d59ea9a3eac3d35401185a247496e9f399c24",
+    "tool": "run.py"
+  },
+  "role": "reads one code of the compressed member stream from the bit buffer",
+  "section": "The graphics decoders",
   "size": 374,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "lzw_bit_read_"
 }

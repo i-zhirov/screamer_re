@@ -1,0 +1,31 @@
+{
+  "exe": "rplload.exe",
+  "map": "replay_load.map",
+  "name": "replay_load",
+  "run": {
+    "command": "rplload.exe > rplload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rplload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_load_main.c"
+    }
+  ]
+}

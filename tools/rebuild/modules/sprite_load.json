@@ -1,0 +1,31 @@
+{
+  "exe": "spr.exe",
+  "map": "sprite_load.map",
+  "name": "sprite_load",
+  "run": {
+    "command": "spr.exe > spr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "spr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sprite_load.c",
+      "flags": [
+        "-of+",
+        "-dSPRITE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sprite_load_main.c"
+    }
+  ]
+}

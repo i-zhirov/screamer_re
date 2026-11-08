@@ -6,12 +6,14 @@
     "behavior"
   ],
   "confidence": "inferred",
+  "count": 11,
   "evidence": [
     {
       "kind": "note",
       "text": "gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set"
     }
   ],
+  "implementation": "assembly",
   "module": "hud_update",
   "name": "hud_update",
   "notes": [],
@@ -27,23 +29,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
+        "bytes_equal": 27,
         "bytes_total": 38,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 9,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 11,
         "instructions_total": 11,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27a34",
     "date": "2026-11-06",
-    "fingerprint": "sha256:3066ad4ae4daece9addc422981b7ae406c209bb361d70b6337249c26e1e8a8c8",
-    "source_digest": "sha256:069e78120e10d0bffad327b762e1d4643167fdcee2b00f9779cf4547aeacc404",
+    "fingerprint": "sha256:c50373aafee8b13ab808a14390a0c92a150aa21d1f9999052707990b1ca900f0",
+    "source_digest": "sha256:f347068cf5bc02ebc4d5aebc9e574240bc7ac8201b61a70d74089139422ead1e",
     "tool": "run.py"
   },
   "role": "gated on the session state `DAT_0011ce44`: the overlays 0 and 1 run when the state is not 3, and the overlay 2 runs when bit 1 is set",
   "section": "object_update_all callees",
   "size": 40,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "hud_update_"
 }

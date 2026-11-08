@@ -1,9 +1,107 @@
 {
   "address": "0x21058",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 114,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x21058 holds 114 instructions and 391 bytes up to the ret at 0x211de; the next function starts at 0x211e0, so the store record keeps the 392-byte extent and sets no function size; the identity check uses 114 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20033 is the frame update at 0x1ff70, which runs this function last after the transition handlers at 0x20ec8 and 0x20f98; no named function sits between the frame update and the target, so the module takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the gate is bit 2 of DAT_00118e1c; the handler at 0x20ec8 after the final lap sets bit 3 and the handler at 0x20f98 after the finish sets bit 4, and both set bit 2, so the function runs the finish delay"
+    },
+    {
+      "kind": "note",
+      "text": "when bit 4 of DAT_00118e1d is set, the function draws the text pointer DAT_00118fec at y 0x5a with the font 2 through panel_draw_centered at 0x2e7cc; otherwise the mode DAT_0011d260 selects the overlay at 0x240c4 for 1, 0x2414c for 2, 0x241d4 for 4, 0x240a0 for 0x10, 0x24264 for 0x20, and 0x2420c for 0x40; the overlays format the car table DAT_00118f94 and the clock text"
+    },
+    {
+      "kind": "note",
+      "text": "the function adds the frame delta DAT_00118e08 to the timer DAT_00118e28 and ends below the 5.0 constant at object-3 offset 0xd01 or while the effect queue DAT_00119080 is not -1"
+    },
+    {
+      "kind": "note",
+      "text": "past the limit and with an empty queue the function sets the slot DAT_0010ffa4 at 1 and, in the traffic mode, runs the step at 0x1eae0 with 3; it walks the 0x2a8-byte traffic records at DAT_00113cd8 up to DAT_00115218 and sets a record to -3 when the flag at +0x16 bit 1 is set, or clears the finished flag; a set flag sets bits 1 and 2 of DAT_00118e1d"
+    },
+    {
+      "kind": "note",
+      "text": "the function releases DAT_001100ec through 0x1f880 when the handle is not -1; the finish delay, the mode overlays, the timer, the effect wait, and the traffic marks support the name race_finish_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses the shared fpu_stub.asm, because it needs no truncation and no math helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control bytes, the timer, the delta, the mode, the slot, the traffic count, the records, the finish limit, the effect queue, and the handle; the seven overlay stubs, the panel stub, the queue stub, the traffic stub, and the release stub cover the gate, the panel path, the six mode overlays, the no-draw mode, the non-empty queue, the finish path without traffic, the traffic mark and the open record, the high finish bit, and the short-timer release; the output holds the markers 0 through 9, a through e, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the finish limit is the float 5.0 at object-3 offset 0xd01; the harness assigns it at run time, because the initialized data page does not reach the DOS/4G image"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 114 decoded instructions and 396 bytes; the identity check stays open at 12 of 114 instructions, 15 of 391 bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer first, keeps the finished flag in ecx, uses other local offsets, reads the data globals through near operands, and emits an if chain for the mode switch; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x21058 --count 114"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x21058 --count 114 --rebuilt work/rebuild/rfin.exe --rebuilt-map work/rebuild/race_finish_update.map --rebuilt-symbol race_finish_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_update"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol name for this function; the module name and the callee names in the harness stay inferred"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_update",
+  "name": "race_finish_update",
   "notes": [],
   "object_offset": "0x11058",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 391,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 114,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x21058",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:052e331a55e3d842687427d35b937115cafcd2de9d4a8ee3aecd162fb4197e5b",
+    "source_digest": "sha256:77ff2cb1ffd720d23e8c00dcc4fc0209db7b5ab34c4213833d247a2ec25e902c",
+    "tool": "run.py"
+  },
+  "role": "draws the finish message, waits five seconds and the effect queue, marks the traffic records finished, and sets the finish flags",
+  "section": "Program functions",
   "size": 392,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_update_"
 }

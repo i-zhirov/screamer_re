@@ -13,12 +13,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "stream_status.c",
-      "flags": [
-        "-of+",
-        "-od"
-      ]
+      "compiler": "wasm",
+      "file": "stream_status.asm"
     },
     {
       "compiler": "wcc386",

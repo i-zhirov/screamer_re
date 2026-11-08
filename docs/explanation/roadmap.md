@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: one hundred seventy-nine named modules are rebuilt with the harness and the
+  progress: two hundred twenty-one named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -126,12 +126,70 @@ current host.
   `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`, and
   `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
   `0x20b1c`, and `member_list_load` at `0x1b394`, and `opponent_route_setup` at
-  `0x1517c`;
-  twenty-three modules are verified, one is matching, and one hundred and
-  fifty-five rebuilds hold the recorded difference; the
-  `video_fill` module holds an assembly
-  alternative that matches exactly, for the later build with the original
-  Watcom 10.x compiler).
+  `0x1517c`, and the Phase L modules `car_collision_pass` at `0x1d00c`,
+  `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
+  `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
+  `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+  `wheel_contact_update` at `0x11a30`, and `map_object_finish` at `0x2b494`,
+  and `func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`, and
+  `quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at `0x19678`, and
+  `championship_screen_init` at `0x2c7a8`, and `race_intro_update` at `0x20d20`,
+  and `race_session_run` at `0x1fd70`, and `traffic_object_link` at `0x1ef68`,
+  and `collision_cell_test` at `0x11ccc`, and `race_simulation_update` at
+  `0x2003c`, and `race_finish_update` at `0x21058`, and `music_load` at
+  `0x2fcec`, and `lzw_bit_read` at `0x4d844`, and `car_select_update` at
+  `0x2cb20`, and `matrix_compose` at `0x82258`, and `sound_range_update` at
+  `0x830c8`, and `sound_mix_prepare` at `0x8aa60`, and `radar_world_draw` at
+  `0x1057c`, and `video_copy` at `0x8beb8`, and `player_lap_progress_update`
+  at `0x194a0`, and `text_measure` at `0x254a8`, and `traffic_step` at
+  `0x1eae0`, and `opponent_curve_eval` at `0x22378`, and `sound_event_render`
+  at `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and
+  `object_revolution_matrix` at `0x1d55c`, and
+  `championship_result_apply` at `0x29bac`, and
+  `quad_point_test` at `0x1c13c`, and
+  `player_car_spin_update` at `0x188b8`, and
+  `unr_file_load` at `0x4c98c`, and
+  `gauge_marker_draw` at `0x2392c`, and
+  `player_car_wheel_effect_start` at `0x19828`, and
+  `game_mode_100_start` at `0x12f50`, and
+  `player_brake_update` at `0x16150`, and
+  `stream_read_text` at `0x4c695`, and
+  `race_view_reset` at `0x13580`, and
+  `race_clock_update` at `0x18a14`, and
+  `font_load` at `0x25658`, and
+  `background_scale` at `0x83ca8`, and
+  `text_draw` at `0x25020`, and
+  `sound_range_reset` at `0x82e0c`, and
+  `spline_table_load` at `0x14fb8`, and
+  `path_keyframe_append` at `0x231f0`, and
+  `race_position_update` at `0x20428`, and
+  `replay_load` at `0x1b840`, and
+  `material_load` at `0x4cd9c`, and
+  `terrain_contact_update` at `0x1cbac`, and
+  `player_car_wheel_effect_update` at `0x19980`, and
+  `player_segment_update` at `0x11f98`, and
+  `sound_source_frame_select` at `0x8b1d4`, and
+  `body_point_collision_detect` at `0x11e74`, and
+  `championship_record_select` at `0x293a8`, and
+  `sla_marker_check` at `0x18ba8`, and
+  `lzw_block` at `0x4d4c4`, and
+  `sound_voice_setup` at `0x8adac`, and
+  `traffic_push_response` at `0x17b54`, and
+  `camera_project` at `0x82c14`, and
+  `cd_check_screen` at `0x15874`, and
+  `car_collision_push` at `0x1d200`, and
+  `replay_load_atk` at `0x1ba4c`, and
+  `replay_save` at `0x1b738`, and
+  `player_segment_apply` at `0x16b98`, and
+  `sprite_load` at `0x257b0`;
+  thirty modules are verified, one is matching, and two hundred and twenty-one
+  rebuilds hold the recorded difference; the `video_fill`,
+  `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
+  `engine_shutdown` modules use hand-written assembly oracles that match
+  exactly).
+- Keep assembly implementations to the necessary minimum.  Use C first; add
+  assembly only when C cannot reproduce the original bytes, and record why.  Do
+  not convert a module to assembly only to raise the verified count.
 - Rebuild the data pipeline that produces the shipped data files.
 - Compare the rebuild with the original: same files, same behavior (in progress:
   `tools/rebuild/diff_module.py` compares the rebuilt code with the original
@@ -263,10 +321,61 @@ The plan follows the size order, starting with the smallest functions.
     `sound_emitter_update` at `0x21b9c`, and `dos_datetime_set` at `0x1fa2c`,
     and `player_car_contact_update` at `0x166a8`, and `opponent_path_update` at
     `0x20b1c`
-    and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`
+    and `member_list_load` at `0x1b394`, and `opponent_route_setup` at `0x1517c`,
+    and the Phase L modules `car_collision_pass` at `0x1d00c`,
+    `track_select_update` at `0x2cc98`, `palette_shade_build` at `0x258d0`,
+    `hud_panel_show` at `0x27a5c`, `credits_scroll` at `0x27c34`,
+    `car_proximity_pass` at `0x17408`, `player_state_snapshot` at `0x1ed04`,
+    `wheel_contact_update` at `0x11a30`, and `map_object_finish` at `0x2b494`,
+    and `func_1e914` at `0x1e914`, and `path_playback_update` at `0x23038`,
+    and `quit_confirm_screen` at `0x219ec`, and `race_lap_complete` at
+    `0x19678`, and `championship_screen_init` at `0x2c7a8`, and
+    `race_intro_update` at `0x20d20`, and `race_session_run` at `0x1fd70`, and
+    `traffic_object_link` at `0x1ef68`, and `collision_cell_test` at `0x11ccc`,
+    and `race_simulation_update` at `0x2003c`, and `race_finish_update` at
+    `0x21058`, and `music_load` at `0x2fcec`, and `lzw_bit_read` at `0x4d844`,
+    and `car_select_update` at `0x2cb20`, and `matrix_compose` at `0x82258`,
+    and `sound_range_update` at `0x830c8`, and `sound_mix_prepare` at
+    `0x8aa60`, and `radar_world_draw` at `0x1057c`, and `video_copy` at
+    `0x8beb8`, and `player_lap_progress_update` at `0x194a0`, and
+    `text_measure` at `0x254a8`, and `traffic_step` at `0x1eae0`, and
+    `opponent_curve_eval` at `0x22378`, and `sound_event_render` at
+    `0x836ac`, and `func_1e7b4` at `0x1e7b4`, and
+    `object_revolution_matrix` at `0x1d55c`, and
+    `championship_result_apply` at `0x29bac`, and
+    `quad_point_test` at `0x1c13c`, and
+    `player_car_spin_update` at `0x188b8`, and
+    `unr_file_load` at `0x4c98c`, and
+    `gauge_marker_draw` at `0x2392c`, and
+    `player_car_wheel_effect_start` at `0x19828`, and
+    `game_mode_100_start` at `0x12f50`, and
+    `player_brake_update` at `0x16150`, and
+    `stream_read_text` at `0x4c695`, and
+    `race_view_reset` at `0x13580`, and
+    `race_clock_update` at `0x18a14`, and
+    `font_load` at `0x25658`, and
+    `background_scale` at `0x83ca8`, and
+    `text_draw` at `0x25020`, and
+    `sound_range_reset` at `0x82e0c`, and
+    `spline_table_load` at `0x14fb8`, and
+    `path_keyframe_append` at `0x231f0`, and
+    `race_position_update` at `0x20428`, and
+    `replay_load` at `0x1b840`, and
+    `material_load` at `0x4cd9c`, and
+    `terrain_contact_update` at `0x1cbac`, and
+    `player_car_wheel_effect_update` at `0x19980`, and
+    `player_segment_update` at `0x11f98`, and
+    `sound_source_frame_select` at `0x8b1d4`, and
+    `body_point_collision_detect` at `0x11e74`, and
+    `championship_record_select` at `0x293a8`, and
+    `sla_marker_check` at `0x18ba8`, and
+    `lzw_block` at `0x4d4c4`, and
+    `sound_voice_setup` at `0x8adac`, and
+    `traffic_push_response` at `0x17b54`, and
+    `camera_project` at `0x82c14`
     are done;
-    the result is twenty-three verified modules, one matching module, and one
-    hundred and fifty-five open rebuilds).
+    the result is thirty verified modules, one matching module, and two
+    hundred and fifteen open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

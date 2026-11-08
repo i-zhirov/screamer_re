@@ -116,7 +116,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the one hundred and eighty module recipes
+│   │   ├── modules/           # the two hundred and fifty-two module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -165,10 +165,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 231 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 227 checks.
+about 8 minutes plus the Ghidra import and reports 303 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 299 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 216 checks.  Both flags report 212 checks and take about 16
+run reports 288 checks.  Both flags report 284 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -338,8 +338,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 231 checks in the `cross-check` shell.  `--skip-cross`
-  gives 227 checks, `--skip-runtime` gives 216 checks, and both flags give 212
+- The full check reports 303 checks in the `cross-check` shell.  `--skip-cross`
+  gives 299 checks, `--skip-runtime` gives 288 checks, and both flags give 284
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - Stage 12 checks the program-map tables and the call graph for drift.  The
@@ -445,3 +445,8 @@ supply-chain, and maintenance costs.
 - The period Watcom 10.0a toolchain stays alongside the pinned OpenWatcom V2
   harness.  The two harnesses serve two goals: V2 runs the declared checks, and
   10.0a targets the byte-for-byte match.  Do not replace one with the other.
+- Prefer a C implementation.  Add an assembly implementation only when the C
+  build cannot reproduce the original bytes, and record the reason in the
+  finding and in the record.  Do not convert a module to assembly only to raise
+  the verified count; leave it `rebuilt` when C is insufficient.  The FPU and
+  math stubs are harness support, not module implementations.

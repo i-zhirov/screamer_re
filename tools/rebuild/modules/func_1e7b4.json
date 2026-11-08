@@ -1,0 +1,36 @@
+{
+  "exe": "func1e7.exe",
+  "map": "func_1e7b4.map",
+  "name": "func_1e7b4",
+  "run": {
+    "command": "func1e7.exe > func1e7.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "func1e7.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_1e7b4.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "func_1e7b4_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_1e7b4_main.c"
+    }
+  ]
+}

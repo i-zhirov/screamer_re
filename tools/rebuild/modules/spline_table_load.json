@@ -1,0 +1,31 @@
+{
+  "exe": "spltld.exe",
+  "map": "spline_table_load.map",
+  "name": "spline_table_load",
+  "run": {
+    "command": "spltld.exe > spltld.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "spltld.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "spline_table_load.c",
+      "flags": [
+        "-of+",
+        "-dSPLINE_TABLE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "spline_table_load_main.c"
+    }
+  ]
+}

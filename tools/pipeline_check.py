@@ -447,7 +447,7 @@ def check_runtime(
 ) -> dict:
     result = run_probe(
         game_dir,
-        count=0x100000,
+        count=0x400000,
         port=port,
         timeout=timeout,
         work_root=work_root,

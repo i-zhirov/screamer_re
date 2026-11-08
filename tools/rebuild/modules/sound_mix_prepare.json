@@ -1,0 +1,37 @@
+{
+  "exe": "mixprep.exe",
+  "map": "sound_mix_prepare.map",
+  "name": "sound_mix_prepare",
+  "run": {
+    "command": "mixprep.exe > mixprep.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "mixprep.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_mix_prepare.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "sound_mix_prepare_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_mix_prepare_main.c"
+    }
+  ]
+}

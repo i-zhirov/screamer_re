@@ -15,11 +15,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "frame_step.c",
-      "flags": [
-        "-of+"
-      ]
+      "compiler": "wasm",
+      "file": "frame_step.asm"
     },
     {
       "compiler": "wcc386",

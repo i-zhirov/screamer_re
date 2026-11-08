@@ -1,0 +1,39 @@
+{
+  "exe": "pssnap.exe",
+  "map": "player_state_snapshot.map",
+  "name": "player_state_snapshot",
+  "run": {
+    "command": "pssnap.exe > pssnap.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "pssnap.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_state_snapshot.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_state_snapshot_main.c"
+    }
+  ]
+}

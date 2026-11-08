@@ -1,9 +1,95 @@
 {
   "address": "0x22378",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 121,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22378 holds 121 instructions and 353 bytes up to the ret at 0x224d8; the next function starts at 0x224dc after the three padding bytes at 0x224d9, so the store record keeps the 356-byte extent and sets no separate function size; the identity check uses 121 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct callers are opponent_update at 0x20954 and opponent_path_update at 0x20b1c; opponent_update calls the function at 0x209f0 when its argument is not zero, and opponent_path_update calls it at 0x20bb6 and 0x20c19; both pass the state base DAT_0010f174 and the path record; the callers sit in the object_update_all group, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the state base holds a pointer at track * 36 to an array of 56-byte nodes; a node holds the scalar value at +0xc, the next node index at +0x10, the first point at +0x14, +0x18, and +0x1c, and the second point at +0x20, +0x24, and +0x28; the path record holds the track index at +0, the node index at +4, the phase at +8, and the direction flag at +0xc"
+    },
+    {
+      "kind": "note",
+      "text": "a clear direction flag takes the first and the second point of the first node and the first point of the second node; a set direction flag takes the second point of the first node and the first and the second point of the second node; the function converts the x and y value of each point to a float at +0x3c, +0x48, and +0x54 and calls the 2D curve sampler at 0x1e7b4, which writes the target position at +0x60 and +0x64 and the tangent at +0x6c and +0x70"
+    },
+    {
+      "kind": "note",
+      "text": "the function interpolates the node scalar value as scalar1 + 0.5 * (scalar2 - scalar1) * (flag + phase) and writes the result to +0x68; the double 0.5 sits at object-3 offset 0xd7c and arrives through a global, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+; the module uses the shared fpu_stub.asm, because it needs no truncation and no math helper"
+    },
+    {
+      "kind": "note",
+      "text": "the callers, the node control points, the 2D sampler, and the scalar interpolation support the name opponent_curve_eval; opponent_path_update already names the callee opponent_curve_eval; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds six nodes, the two state entries, the path record, and the sampler stub; the eight paths cover the clear and the set direction, the second track entry, the negative values, the fractional scalar, the equal scalar values, a non-zero flag, and the sampler output; the harness compares the float fields by their bit pattern, because the minimal image does not load the initialized data; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 69 instructions and 177 bytes; the identity check stays open at 8 of 121 instructions, 5 of 304 bytes, and 0 of 6 relocation slots, because V2 orders the register saves before the frame, keeps the path in ebx and the state result in eax, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22378 --count 121"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22378 --count 121 --rebuilt work/rebuild/opceval.exe --rebuilt-map work/rebuild/opponent_curve_eval.map --rebuilt-symbol opponent_curve_eval_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22378"
+    },
+    {
+      "kind": "finding",
+      "text": "The opponent_curve_eval module at 0x22378"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_curve_eval",
+  "name": "opponent_curve_eval",
   "notes": [],
   "object_offset": "0x12378",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 304,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 121,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22378",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:5ea67375dad5877fc5624d28d658d12f4f05f2f14c3830f693064074f21423e5",
+    "source_digest": "sha256:b068e4cd26b27d0a21fddc63a43a1a7f7ad049fe04ad134887e462bab8fbec11",
+    "tool": "run.py"
+  },
+  "role": "evaluates the opponent path segment and writes the target position and the interpolated scalar",
+  "section": "object_update_all callees",
   "size": 356,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_curve_eval_"
 }

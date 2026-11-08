@@ -1,0 +1,36 @@
+{
+  "exe": "tpush.exe",
+  "map": "traffic_push_response.map",
+  "name": "traffic_push_response",
+  "run": {
+    "command": "tpush.exe > tpush.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "tpush.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_push_response.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "traffic_push_response_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_push_response_main.c"
+    }
+  ]
+}

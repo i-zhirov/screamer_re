@@ -1,9 +1,99 @@
 {
   "address": "0x82e0c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 216,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x82e0c holds 216 instructions and 699 bytes up to the ret at 0x830c6; the next function at 0x830c8 gives the store record the 700-byte extent and no separate function size; the identity check uses 216 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x81a7c is sound_update at 0x81a70; it ignores the two returned registers, and the source update at 0x8a958 reads the world rectangle at 0x72d94 through 0x72da8 to cull the sound sources; the record takes the name sound_range_reset with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the body holds the same code as sound_range_update at 0x830c8, but an unconditional jump at 0x82e4e skips the spatial-cell block at 0x82e50 through 0x82e96; the shipped image never extends the view rectangle from the map cell, so this rebuild omits it"
+    },
+    {
+      "kind": "note",
+      "text": "the function rotates the two clip points at 0x72d48 and 0x72d54 by the Q14 cosine and sine at 0x724ec and 0x724f0 with the arithmetic shift 14; it expands the result to the central [-0x2000, 0x2000] box, adds the camera position, clamps to [-0x100000, 0xfffff], biases by 0x100000, and intersects the range with the default extent rectangle"
+    },
+    {
+      "kind": "note",
+      "text": "the function writes the intersected clip rectangle minus 0x100000 to the world rectangle at 0x72d94 through 0x72da8, and it returns the row count in eax with the row pointer in esi; C cannot return a value in esi, so the rebuild stores the row pointer in the global grid_row; it stores the x byte offset at 0x73377 and the column count at 0x73381"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame; the module uses no floating-point instruction; the minimal image needs one initialized data byte, because the DOS4G loader leaves the BSS object unmapped when the data object holds no page; the module holds the marker sound_range_reset_marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the camera record, the spatial grid, the extent record, the clip points, the cosine and sine, and the output globals; the four paths cover the small clip, the ignored cell, the world limit clamp, and the rotated clip; the output holds the markers 0 through 3 and D"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x82e0c --count 216"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x82e0c --count 216 --rebuilt work/rebuild/sndrngs.exe --rebuilt-map work/rebuild/sound_range_reset.map --rebuilt-symbol sound_range_reset_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_range_reset"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x82e0c"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_range_reset module at 0x82e0c"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function keeps the same behavior in C but holds another instruction shape, because the C build saves the registers and keeps the state in locals; the identity check stays open at 39 of 216 instructions and 31 of 699 bytes; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_range_reset",
+  "name": "sound_range_reset",
   "notes": [],
   "object_offset": "0x72e0c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 699,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 39,
+        "instructions_total": 216,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x82e0c",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:879f36be0d8e7eb68220123f0ba303247a2de99b83c2510a5b612210a6647bef",
+    "source_digest": "sha256:6f31b8a77303812f0cf09a113e72516985c4a5b64618c933ffcd6cce5744169c",
+    "tool": "run.py"
+  },
+  "role": "Computes the camera view rectangle and the spatial grid row range for the sound source update, without the map-cell extent.",
+  "section": "Program functions",
   "size": 700,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_range_reset_"
 }

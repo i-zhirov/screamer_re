@@ -1,9 +1,103 @@
 {
   "address": "0x293a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 78,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x293a8 holds 78 instructions and 288 bytes up to the ret at 0x294c7; the next function starts at 0x294c8, so the store record keeps the 288-byte extent and sets no separate function size; the identity check uses 78 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x292ae is the net_race_screen case for record type 3 at 0x28ba4; the type 3 record is the standings page that championship_screen at 0x2cf68 draws; the case calls this function and then enters the state through race_state_begin at 0x294c8 with the value 5, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the selected record DAT_001203dc picks one 0x2c-byte record from the table at object-3 offset 0x22bc; the record field +0x04 is the value, +0x08 is the title index, +0x10 is the win record, +0x14 is the lose record, and +0x24 is the standings row"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the standings car value DAT_00120400[row] and the result flag DAT_00120804; a car value below 4 with a clear flag takes the win path when the title index is below 3 or the car value is 1"
+    },
+    {
+      "kind": "note",
+      "text": "on the win path a row other than 5 stores the old record in DAT_001203e0 and selects the win record; row 5 with the point sum DAT_001203e4 at or above the value selects the win record in both slots and clears the six standings slots to -1; every other path selects the lose record in DAT_001203dc and stores the record before the old one in DAT_001203e0"
+    },
+    {
+      "kind": "note",
+      "text": "the championship record table, the standings slots, the point sum, the result flag, and the two follow-up records support the name championship_record_select; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original uses no floating-point instruction, so the module needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the selected and previous record indices, the point sum, the six standings car slots, the result flag, and the 0x2c-byte championship records; the seven paths cover the win path, a high car value, a set result flag, a high title index with and without the car value 1, the last row at the value, and the last row below the value; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 44 instructions and 143 bytes up to the ret at 0x1008e; the identity check decodes 78 instructions from the symbol, so its range continues past the function; the check stays open at 10 of 78 instructions and 10 of 238 bytes because V2 uses another prologue and register order, uses imul for the record index, and keeps the record pointer in eax; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x293a8 --count 78"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x293a8 --count 78 --rebuilt work/rebuild/crsel.exe --rebuilt-map work/rebuild/championship_record_select.map --rebuilt-symbol championship_record_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module championship_record_select"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x293a8"
+    },
+    {
+      "kind": "finding",
+      "text": "The championship_record_select module at 0x293a8"
+    }
+  ],
+  "implementation": "c",
+  "module": "championship_record_select",
+  "name": "championship_record_select",
   "notes": [],
   "object_offset": "0x193a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 238,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 78,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x293a8",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:dec41b3793e88627df2a5489f7d63625754e5787b8560282decddea9e11e7e66",
+    "source_digest": "sha256:67cec61f376277786db5e10202d7f4cc1660d3ea07a7b3eda6eab7ec5acf9b22",
+    "tool": "run.py"
+  },
+  "role": "selects the next championship record from the race outcome and the standings",
+  "section": "race_frame callees",
   "size": 288,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "championship_record_select_"
 }

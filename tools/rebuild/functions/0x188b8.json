@@ -1,9 +1,95 @@
 {
   "address": "0x188b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 99,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x188b8 holds 99 instructions and 347 bytes up to the ret at 0x18a12; the next function starts at 0x18a14, so the store record keeps the 348-byte extent and sets no function size; the identity check uses 99 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15bd8 is the effect group at 0x15bac; the group runs this function after player_car_reset_update at 0x18528, and the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call the group on the player object at object-3 offset 0xf91c, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function is a state machine on the counter +0x170; the skid update at 0x17d14 sets the counter to 1, and player_car_link at 0x15c1c adds the offset +0x128 to the render yaw +0x4cc, so the offset is a render angle; state 1 selects the sign of the yaw step +0x2f4, adds +2*pi or -2*pi at +0x128, and sets the counter to 4 or 2"
+    },
+    {
+      "kind": "note",
+      "text": "state 2 adds the step to +0x128 and state 4 or above subtracts it; the step is the frame delta DAT_00118e04 times (abs(+0x128) + 0.2) / pi times 3.0; a crossing of zero clears +0x128 and +0x170; state 3 holds both values and a state at or below 0 returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "the constants sit in object 3: 3.0 at offset 0x83c, 2*pi at 0x840, the double 0.2 at 0x844, and the double pi at 0x84c; the function converts the sign and the counter to an integer through the Watcom helper at 0x4d9f4, which truncates toward zero; the local FPU stub makes __CHP truncate, because the shared stub rounds to nearest"
+    },
+    {
+      "kind": "note",
+      "text": "the full turn, the render-yaw use, the effect group caller, and the skid counter support the name player_car_spin_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one player object, the frame delta, and the four constants; the nine paths cover the two start directions, the two unwind directions with and without a zero crossing, the hold state, and the two early returns; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 of 99 instructions, 25 of 336 bytes, and 0 of 19 relocation slots equal; V2 keeps the object in ecx and edx, folds the sign into a local, and emits a shorter body, while the original keeps the object on the frame and stores the sign in a second local; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x188b8 --count 99"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x188b8 --count 99 --rebuilt work/rebuild/pcspin.exe --rebuilt-map work/rebuild/player_car_spin_update.map --rebuilt-symbol player_car_spin_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x188b8"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_spin_update module at 0x188b8"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_spin_update",
+  "name": "player_car_spin_update",
   "notes": [],
   "object_offset": "0x88b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 336,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 99,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x188b8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:8264adfc82e619a3ccc3a6f8b40471e6aaceba20cd4a32b18b2c59818c30b596",
+    "source_digest": "sha256:da3a7581a1e8b3461748ac8a242f2bae13703c7aaad50fdd540928ee60662552",
+    "tool": "run.py"
+  },
+  "role": "updates the player car render-yaw offset during a skid and unwinds the offset to zero",
+  "section": "The vehicle state chain",
   "size": 348,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_spin_update_"
 }

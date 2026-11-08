@@ -1,0 +1,28 @@
+{
+  "exe": "svsetup.exe",
+  "map": "sound_voice_setup.map",
+  "name": "sound_voice_setup",
+  "run": {
+    "command": "svsetup.exe > svsetup.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "svsetup.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_setup.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_setup_main.c"
+    }
+  ]
+}

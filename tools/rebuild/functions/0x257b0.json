@@ -1,9 +1,103 @@
 {
   "address": "0x257b0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 67,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x257b0 holds 67 instructions and 261 bytes up to the ret at 0x258b4; the next function starts at 0x258b8, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 67 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers name the function: race_data_load at 0x131a8 calls it at 0x13426 with logo%c.spr and at 0x134b6 with game%c.spr, and menu_space_init at 0x29d08 calls it at 0x29db4 with menu%c.spr; each caller builds the member name and the container path first, so the module takes the section The graphics decoders"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member with the path, the member name, and the category rb at object-3 offset 0xeb4 through 0x4c08d; a failed open runs the file error report at 0x4bf88 and then exit(0) at 0x300be"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the four-byte record count at object-3 offset 0x15cd4 and the four-byte data size at 0x15cdc through 0x4c4e5; it gets the SPRITES resource of count times 0x14 bytes at object-3 offset 0xeb7 through 0x2eed0, stores the pointer at 0x15ccc, and a zero result runs the memory error report at 0x2edad"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the count times 0x14 bytes into the first resource; it gets the SPRITES resource of the data size at object-3 offset 0xebf, stores the pointer at 0x15ce0, and a zero result runs the memory error report; it reads the data size bytes into the second resource, closes the stream at 0x4c38d, and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the two sprite member names, the caller group, and the two SPRITES resources support the name sprite_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the record count, the data size, the two resource pointers, the engine pointer, and the two resource buffers; the four paths cover the success load with two records, the open failure, the zero record resource, and the zero data resource; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 10 of 67 instructions and 27 of 251 bytes equal; the identity check stays open because V2 saves the frame pointer first, builds the harness constant texts in local buffers, keeps the two arguments in esi and edi, and uses imul for the record size; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x257b0 --count 67"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x257b0 --count 67 --rebuilt work/rebuild/spr.exe --rebuilt-map work/rebuild/sprite_load.map --rebuilt-symbol sprite_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sprite_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x257b0"
+    },
+    {
+      "kind": "finding",
+      "text": "The sprite_load module at 0x257b0"
+    }
+  ],
+  "implementation": "c",
+  "module": "sprite_load",
+  "name": "sprite_load",
   "notes": [],
   "object_offset": "0x157b0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 251,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 67,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x257b0",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:c0b4860e92837ee14f042e41960c4e62b77b1b00232e048c3b7183a86f9ca7d1",
+    "source_digest": "sha256:0666428eab50e414059b74e16d5b631f196da68d05c227fbc82aff4331e9901c",
+    "tool": "run.py"
+  },
+  "role": "loads a sprite member from the graphics container into the sprite record array and the sprite data resource",
+  "section": "The graphics decoders",
   "size": 264,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sprite_load_"
 }

@@ -1,0 +1,38 @@
+{
+  "exe": "tsupd.exe",
+  "map": "track_select_update.map",
+  "name": "track_select_update",
+  "run": {
+    "command": "tsupd.exe > tsupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "tsupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_select_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "track_select_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_select_update_main.c"
+    }
+  ]
+}

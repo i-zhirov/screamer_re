@@ -1,9 +1,95 @@
 {
   "address": "0x1ed04",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 115,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ed04 holds 115 instructions and 465 bytes up to the ret at 0x1eed4; the next function starts at 0x1eed8, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 115 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1ec88 is the mode-10 step body at 0x1ec7c; that body loads the player object at object-3 offset 0xf91c in eax and then calls this function; the mode-10 step at 0x1eae0 calls the body at 0x1eb27 and 0x1eb64, and the race session start at 0x12d0c calls the step"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the current player fields to the snapshot block; +0x7e8 takes the global at 0x11521c, +0x7ec the global at 0x11d250, +0x7f4 the field at +0x7b0, +0x7f8 the global at 0x11d2a0, +0x7fc the field at +0x684, +0x800 the field at +0x688, +0x804 the field at +0x680, and +0x808 the field at +0x78c"
+    },
+    {
+      "kind": "note",
+      "text": "the three view-offset sums store +0x4b0 + +0x130, +0x4b4 + +0x134, and +0x4b8 + +0x138 at +0x818, +0x81c, and +0x820; the three angle sums store +0x4c8 + +0x124, +0x4cc + +0x128, and +0x4d0 + +0x12c at +0x824, +0x828, and +0x82c; the height at +0x4ec minus 2 lands at +0x830"
+    },
+    {
+      "kind": "note",
+      "text": "the state flag at +0x148 adds 0x10000 when it is not zero; the input byte at 0x118e1c bit 4 adds 0x20000 unless the input byte at 0x118e1d bit 4 is also set; the combined value of +0x2fc, +0x7b4, and the extra bits lands at +0x7f0"
+    },
+    {
+      "kind": "note",
+      "text": "when the state at +0x148 is not 1, the function copies +0x824 and +0x82c to +0x834 and +0x838; the player object, the caller mode-10 step, the snapshot block, and the conditional copies support the name player_state_snapshot; the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses the FPU loads, stores, and adds, and the local fpu_stub.asm supplies the FPU run-time symbols"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the five globals, and the two input bytes; it covers the four simple copies, the reordered field copies, the float copies, the three view-offset sums, the three angle sums, the height minus 2, the two conditional copies, the state flag, the input flag, the state 1 copy skip, the control bit, and the clear input bit; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 474 bytes and 115 decoded instructions; the identity check stays open at 34 of 115 instructions and 20 of 465 bytes because V2 saves the frame pointer first, keeps the object in a register, and uses near data offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ed04 --count 115 --rebuilt work/rebuild/pssnap.exe --rebuilt-map work/rebuild/player_state_snapshot.map --rebuilt-symbol player_state_snapshot_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ed04"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_state_snapshot module at 0x1ed04"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_state_snapshot",
+  "name": "player_state_snapshot",
   "notes": [],
   "object_offset": "0xed04",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 20,
+        "bytes_total": 465,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 34,
+        "instructions_total": 115,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ed04",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:363cde46a59accc909465256cd92ecd047897d646008bf2d5ac79089d1e34abf",
+    "source_digest": "sha256:3948f16905d50f8d46d9d058f5e7c5cfa09b24ec2aa79cef6e1d2a264ef93a05",
+    "tool": "run.py"
+  },
+  "role": "copies the current player state into the snapshot block at +0x7e8 through +0x838 before a mode-10 race restart",
+  "section": "The vehicle state chain",
   "size": 468,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_state_snapshot_"
 }

@@ -1,0 +1,38 @@
+{
+  "exe": "rintro.exe",
+  "map": "race_intro_update.map",
+  "name": "race_intro_update",
+  "run": {
+    "command": "rintro.exe > rintro.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "rintro.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_intro_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_intro_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_intro_update_main.c"
+    }
+  ]
+}

@@ -1,9 +1,95 @@
 {
   "address": "0x14fb8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 80,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x14fb8 holds 80 instructions and 316 bytes up to the ret at 0x150f3; the next function at 0x150f4 gives the store record the 316-byte extent and no separate function size; the identity check uses 80 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x133af is race_data_load at 0x131a8; it passes the local level name at [ebp + 0x17e] in eax and then calls the track resource loader at 0x150f4 with the same buffer; the record takes the name spline_table_load with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds five member names from the level prefix at DAT_0011d294 through sprintf at 0x4d32c; the suffixes are opp, anm, cam, and rpl at object-3 offsets 0x603, 0x609, 0x60f, and 0x615; the fifth suffix is CNG for the game mode 0x20, SLA for 0x40, and OST for every other mode at object-3 offsets 0x61b, 0x621, and 0x627"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls spline_load at 0x1af70 five times with the level name in eax and the member name in edx; the third argument receives the spline table pointer; the returned count goes to DAT_0010f8e8, DAT_0010f178, DAT_0010f914, DAT_0010f918, and DAT_0010d6fc"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction; the harness build defines SPLINE_TABLE_LOAD_HARNESS and the function builds the format text in local buffers, because DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the level prefix, the game mode, the five name buffers, the five table pointers, and the five counts; the four paths cover the mode 0x20, the mode 0x40, the mode 0x03, and the mode 0x50; the output holds the markers 0 through 3 and D"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function keeps the same behavior in C but holds another instruction shape, because the harness build keeps the format text in local buffers and the C build uses another register layout; the identity check stays open at 18 of 80 instructions and 19 of 251 bytes; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x14fb8 --count 80"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x14fb8 --count 80 --rebuilt work/rebuild/spltld.exe --rebuilt-map work/rebuild/spline_table_load.map --rebuilt-symbol spline_table_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module spline_table_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x14fb8"
+    },
+    {
+      "kind": "finding",
+      "text": "The spline_table_load module at 0x14fb8"
+    }
+  ],
+  "implementation": "c",
+  "module": "spline_table_load",
+  "name": "spline_table_load",
   "notes": [],
   "object_offset": "0x4fb8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 251,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 18,
+        "instructions_total": 80,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x14fb8",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:074b3496e2a6a5c6f3cf1e4d31517374ca0b2048af547f15ab6b4fe3058ed5a6",
+    "source_digest": "sha256:04ae07b5b9d1e5debee09e9d21de77b13b953f98c5d954c21dc698ea82c2c9f2",
+    "tool": "run.py"
+  },
+  "role": "Builds the five level spline member names from the level prefix and loads each spline table into its global pointer and count.",
+  "section": "race_session_start callees",
   "size": 316,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "spline_table_load_"
 }

@@ -1,0 +1,31 @@
+{
+  "exe": "rwdmod.exe",
+  "map": "radar_world_draw.map",
+  "name": "radar_world_draw",
+  "run": {
+    "command": "rwdmod.exe > rwd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "rwd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "radar_world_draw.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "radar_world_draw_main.c"
+    }
+  ]
+}

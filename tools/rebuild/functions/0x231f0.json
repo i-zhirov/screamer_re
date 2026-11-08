@@ -1,9 +1,95 @@
 {
   "address": "0x231f0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 89,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x231f0 holds 89 instructions and 309 bytes up to the ret at 0x23324; the next record starts at 0x23328, so the store record keeps the 312-byte extent and sets no separate function size; the identity check uses 89 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20306 is the view group at 0x202c0; that group passes the player object at object-3 offset 0xf91c in eax and a record at object-3 offset 0x18e8c plus the view index times 0x24 in edx, then calls path_playback_update at 0x23038 with the playback block at object-3 offset 0x18ed8; the frame update at 0x1ff70 selects the view group through the mode byte"
+    },
+    {
+      "kind": "note",
+      "text": "the second argument points to a recording state with the count at +0x00, the index at +0x04, the current index at +0x08, the active flag at +0x0c, and the keyframe array at +0x20; the function returns at once when the active flag is not 1"
+    },
+    {
+      "kind": "note",
+      "text": "the function writes the 0x28-byte keyframe at array plus the index times 0x28: the position terms are the fields at +0x4b0 through +0x4b8 plus the fields at +0x130 through +0x138, the angle terms are the fields at +0x4c8 through +0x4d0 plus the fields at +0x124 through +0x12c, the timestamp is the global clock DAT_00118e10, and the other fields come from +0x7b4, +0x680, and +0x7b0"
+    },
+    {
+      "kind": "note",
+      "text": "the function then advances the index; when the new index equals the count it keeps the index at the last slot, clears the active flag, and writes the current index at +0x08; the keyframe layout and the caller support the name path_keyframe_append with the confidence inferred; the record takes the section The vehicle state chain, because the caller sits in the recorded view path chain"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses floating-point instructions, so the recipe adds the FPU run-time stubs"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the view object, the recording state, and eight keyframes; the six paths cover the zero active flag, the index zero, the index two, the last slot, the active flag -1, and the count one; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 89 decoded instructions and 353 bytes; the identity check stays open at 25 of 89 instructions and 10 of 309 bytes, because V2 saves the registers in another order, keeps the state pointer in ecx, multiplies the index by 0x28 directly, and reads the clock through a near data address; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x231f0 --count 89"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x231f0 --count 89 --rebuilt work/rebuild/pkfa.exe --rebuilt-map work/rebuild/path_keyframe_append.map --rebuilt-symbol path_keyframe_append_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x231f0"
+    },
+    {
+      "kind": "finding",
+      "text": "The path_keyframe_append module at 0x231f0"
+    }
+  ],
+  "implementation": "c",
+  "module": "path_keyframe_append",
+  "name": "path_keyframe_append",
   "notes": [],
   "object_offset": "0x131f0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 309,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 89,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x231f0",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:db4c8b638d5af4f4e60ab18e996cdec70d538ce8edbafac22ff014885a706176",
+    "source_digest": "sha256:7af55bb59d5388ce9d5c37d85ac5e321bc7fb5c87620e211f2d0db328f4fa955",
+    "tool": "run.py"
+  },
+  "role": "appends the current view keyframe to the path recording, advances the index, and clears the active flag at the last slot",
+  "section": "The vehicle state chain",
   "size": 312,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "path_keyframe_append_"
 }

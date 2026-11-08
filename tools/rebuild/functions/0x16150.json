@@ -1,9 +1,95 @@
 {
   "address": "0x16150",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 95,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x16150 holds 95 instructions and 332 bytes up to the ret at 0x1629b; the next function starts at 0x1629c, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 95 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the player update group at 0x15a80, which runs this function at 0x15aa4 after the input step at 0x160a4 and before player_steering_update at 0x1629c; the group runs on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the pedal axis DAT_00119884 and its centre sign DAT_00119808; when the sign matches and the axis is non-zero, it forms the brake value +0x114 as the absolute axis over 1023.0 at DAT_00100714, or filters the value toward 1.0 through filter_update at 0x22b80 with the index 0x52 when DAT_001197fc is non-zero or DAT_001197f8 is not 1; any other input clears the brake value; the sibling step at 0x160a4 forms the throttle +0x144 from the axis DAT_00119880 in the same shape"
+    },
+    {
+      "kind": "note",
+      "text": "when the state +0x128 stays below the 0.1 limit DAT_00100718, the function subtracts +0x17c * DAT_00118e04 * +0x114 from the road speed +0x50c, clamps the road speed to zero, and, when the brake value times the road speed passes the limit +0x190, sets the ramp flag +0x170 on a set +0x2f0 or copies the brake value to the deceleration flag +0x110"
+    },
+    {
+      "kind": "note",
+      "text": "the pedal axis, the road-speed decrease, the deceleration flag, and the sibling throttle step support the name player_brake_update; the caller and the program map already call 0x16150 the brake step; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the float constants and the frame delta arrive through globals, because a float literal in this minimal image reads the constant segment, which the harness does not load; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the pedal axis and its centre sign, the two mode cells, the 1023.0 scale, the 0.1 limit, the frame delta, and the filter stub; the nine paths cover the direct path, the two filter gates, the sign mismatch, the zero axis, the state gate, the road-speed clamp, the ramp flag, and the already-set ramp flag; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x16150 --count 95"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x16150 --count 95 --rebuilt work/rebuild/brkupd.exe --rebuilt-map work/rebuild/player_brake_update.map --rebuilt-symbol player_brake_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x16150"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 95 decoded instructions and 350 bytes in the identity window; the identity check stays open at 13 of 95 instructions and 15 of 332 bytes, because V2 saves the frame first, keeps the object in edx, forms the absolute value with neg instead of cdq, xor, and sub, and orders the tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_brake_update module at 0x16150"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_brake_update",
+  "name": "player_brake_update",
   "notes": [],
   "object_offset": "0x6150",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 332,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 95,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x16150",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:4fe633cedbb722dacf11c4c9f70fb3125d64f53a1c14b8f5ce68b9011beeede4",
+    "source_digest": "sha256:3cf5509876b4de219c0e0d2b4b134bd7a943ffa0049eb9edcc5569ba79e94b88",
+    "tool": "run.py"
+  },
+  "role": "forms the brake value from the pedal axis, reduces the road speed by the brake force and the frame delta, clamps the road speed to zero, and sets the ramp or deceleration flag",
+  "section": "The vehicle state chain",
   "size": 332,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_brake_update_"
 }

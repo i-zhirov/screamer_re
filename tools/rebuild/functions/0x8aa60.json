@@ -1,9 +1,99 @@
 {
   "address": "0x8aa60",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 155,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8aa60 holds 155 instructions and 535 bytes up to the ret at 0x8ac76; the next function starts at 0x8ac78, so the store record keeps the 536-byte extent and sets no separate function size; the identity check uses 155 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_effects_update at 0x81ab0; it calls this function as the mix prepare, returns when the voice count at 0x7aa9c is zero or negative, and then mixes the voices at 0x45790; the record takes the name sound_mix_prepare with the confidence inferred and the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the entry calls the helper at 0x8a9e8; that helper copies the camera basis at +0x48 and the saved camera position at 0x7ad94 through 0x7ad9c into the immediate fields at 0x8aaca through 0x8ab18 of this function; the on-disk value 0xaaaabbbb is the linker fill value, so the original patches its own code; the rebuild reads the same matrix and position into local variables, which is equivalent because the loop does not change them"
+    },
+    {
+      "kind": "note",
+      "text": "the loop walks the 8-byte source records at 0x40330 while the active count at 0x72488 is above zero; each record holds the squared distance at +0 and the emitter pointer at +4 with the flag 0x40000000; the function copies the record to the 20-byte voice record at 0x42ef0 and transforms the emitter position at +8, +0xc, and +0x10 from world space into camera space by the Q14 basis"
+    },
+    {
+      "kind": "note",
+      "text": "the function computes the radius from the square root of the squared distance, shifts it by two, and negates it; it adds 0x320 for the flag 0x40000000, and it subtracts the object type bias at +0x32c: type 1 0x5dc, type 2 0x320, type 3 0x1770, and type 4 0xc8; the object comes from the handle table at 0x21540 with the emitter field at +0"
+    },
+    {
+      "kind": "note",
+      "text": "the function skips a source behind the object radius at +0, a source below the far limit at 0xc7cf0, and a source whose projected box leaves the view rectangle at 0x7a7c8 through 0x7a7e4; a kept source appends the 4-byte entry at 0x45790 with the voice byte offset and the radius; the end of the loop replaces the voice count at 0x7aa9c with the entry count"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the module takes the square root from the local sound_mix_prepare_fpu.asm stub, because the harness links no math library; the rebuild computes the signed 32x32 to 64-bit product and the shift 17 with 32-bit arithmetic, because the harness has no 64-bit runtime helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the camera, the saved position, the source list, the voice list, the entry list, the object table, the projection table, and the view rectangle; the nine paths cover the accept path, the behind source, the far limit, the four rectangle sides, the five radius biases, the compaction, and the Q14 rotation with the saved position; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check stays open at 21 of 155 instructions, 6 of 535 bytes, and 0 of 32 relocation slots, because V2 saves the registers in another order, keeps the matrix in local slots instead of the patched immediates, and uses another loop shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8aa60 --count 155"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8aa60 --count 155 --rebuilt work/rebuild/mixprep.exe --rebuilt-map work/rebuild/sound_mix_prepare.map --rebuilt-symbol sound_mix_prepare_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_mix_prepare"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_mix_prepare module at 0x8aa60"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_mix_prepare",
+  "name": "sound_mix_prepare",
   "notes": [],
   "object_offset": "0x7aa60",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 535,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 155,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8aa60",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:b3143fd98f802f9bead1509a1af1effb22910e837eb652e53f1608d1f1514ce1",
+    "source_digest": "sha256:4e1354d477f7884cdcbb23550d7abd0d318065bbdd8d89326876a1126480f23b",
+    "tool": "run.py"
+  },
+  "role": "Builds the camera-space voice list and the audible source entries from the active sound sources.",
+  "section": "Program functions",
   "size": 536,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_mix_prepare_"
 }

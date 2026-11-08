@@ -1,0 +1,33 @@
+{
+  "exe": "crsel.exe",
+  "map": "championship_record_select.map",
+  "name": "championship_record_select",
+  "run": {
+    "command": "crsel.exe > crsel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "crsel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "championship_record_select.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "championship_record_select_main.c"
+    }
+  ]
+}

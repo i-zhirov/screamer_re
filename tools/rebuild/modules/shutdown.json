@@ -19,11 +19,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "shutdown.c",
-      "flags": [
-        "-of+"
-      ]
+      "compiler": "wasm",
+      "file": "shutdown.asm"
     },
     {
       "compiler": "wcc386",

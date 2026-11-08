@@ -1,9 +1,95 @@
 {
   "address": "0x13580",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 91,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x13580 holds 91 instructions and 330 bytes up to the ret at 0x136c9; the next function starts at 0x136cc, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 91 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x12946 is race_session_start at 0x128e0, which runs this function before the track load at 0x13540; the caller takes the section The timing and filter layer, so this module takes the section race_session_start callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x590-byte car records at DAT_00010ab8 up to the count DAT_0000f8ec with the shared counter DAT_0000634c; for each record it clears the four view flags at +0x54c, +0x550, +0x56c, and +0x574 and sets the view mode at +0x580 to 8; the fields sit in the view block at +0x4f8 that car_camera and player_view_setup use"
+    },
+    {
+      "kind": "note",
+      "text": "the function then walks the seven 0x14-byte view slots at DAT_00101da4 and clears the chosen flag at +0x10; player_view_setup reads the same slots and clears the chosen flag after a change, so the fields agree"
+    },
+    {
+      "kind": "note",
+      "text": "the function also clears the shared view cells DAT_0010a9c, DAT_0010a94, DAT_0010a74, DAT_0010a78, and DAT_0010aa8; the caller, the per-car view fields, the view slots, and the shared cells support the name race_view_reset; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction and no call, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds four 0x590-byte car records, the car count, the shared counter, the five shared view cells, and the seven view slots with the byte buffer for the markers; the four paths cover three cars, zero cars, one car, and two cars; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 91 decoded instructions and 327 bytes in the identity window; the identity check stays open at 20 of 91 instructions and 23 of 327 bytes, because V2 saves the frame first, keeps the counter in a register inside each loop, and adds the symbol offset at the field store; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x13580 --count 91"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x13580 --count 91 --rebuilt work/rebuild/rvrmod.exe --rebuilt-map work/rebuild/race_view_reset.map --rebuilt-symbol race_view_reset_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x13580"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_view_reset module at 0x13580"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_view_reset",
+  "name": "race_view_reset",
   "notes": [],
   "object_offset": "0x3580",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 23,
+        "bytes_total": 327,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 91,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x13580",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:e759dea7451dbd2c2151aed20eeff974ec92229b228a42a013250d224fb387ef",
+    "source_digest": "sha256:01ac7dbaae93aa35433401866851f9f1161bf79424cda5f9bd28e2a5eae93616",
+    "tool": "run.py"
+  },
+  "role": "clears the per-car view flags and the view slot chosen flags, sets the default view mode, and clears the shared view cells",
+  "section": "race_session_start callees",
   "size": 332,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_view_reset_"
 }

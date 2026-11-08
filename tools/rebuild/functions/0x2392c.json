@@ -1,9 +1,95 @@
 {
   "address": "0x2392c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 110,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The gauge_marker_draw module at 0x2392c"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x2392c holds 110 instructions and 344 bytes up to the ret 4 at 0x23a81; the next function starts at 0x23a94, so the store record keeps the 360-byte extent and sets no separate function size; the identity check uses 110 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct callers at 0x23754, 0x237cf, and 0x2391e all sit in the gauge panel at 0x2369c; race_hud_draw at 0x23420 calls the panel at 0x234c5, and the frame update at 0x1ff70 calls race_hud_draw at 0x2001a, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes a point record in eax, a radius in edx, an angle bias in ebx, and a float angle in the stack argument; it doubles the radius and both record coordinates because the line drawer at 0x102e4 uses doubled screen coordinates"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms three points on the circle around the doubled centre at the angle minus the bias, that angle plus pi/2, and that angle minus pi/2; each point is (centre x + radius * sin(angle), centre y - radius * cos(angle)) and the function draws one line from the centre to each point"
+    },
+    {
+      "kind": "note",
+      "text": "the constants pi/2 at object-3 offset 0xe30 and -pi at object-3 offset 0xe34 arrive through globals, because the minimal image does not load the constant segment; the original calls sin at 0x4da72, cos at 0x4da66, and the truncate helper at 0x4d9f4; the local FPU stub supplies sin and cos and makes __CHP truncate toward zero; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the three-arm marker, the gauge panel caller, and the two angle globals support the name gauge_marker_draw; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers seven paths: the doubled centre, the negative sums, the zero radius, the angle bias, two more angles with other radii, and the negative centre; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2392c --count 110"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2392c --count 110 --rebuilt work/rebuild/gagemark.exe --rebuilt-map work/rebuild/gauge_marker_draw.map --rebuilt-symbol gauge_marker_draw_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2392c"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 16 of 110 instructions and 9 of 304 bytes equal, and 0 of 4 relocation slots equal; V2 saves ebp first, keeps the point and the doubled centre in registers, and calls the local stub functions, while the original stores each corner in a distinct stack slot; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "gauge_marker_draw",
+  "name": "gauge_marker_draw",
   "notes": [],
   "object_offset": "0x1392c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 304,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 110,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2392c",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:efd26812f48d1d90c046396b1344dce6ca72334a0108e5b3dcb1bb05987eadaa",
+    "source_digest": "sha256:3c64432dd164b3c7c02a546ce80759f4f3a4dca0c50ccb423bf9e9e76c015814",
+    "tool": "run.py"
+  },
+  "role": "draws a three-arm gauge marker around a doubled centre point at the angle, the angle plus pi/2, and the angle minus pi/2",
+  "section": "Program functions",
   "size": 360,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "gauge_marker_draw_"
 }

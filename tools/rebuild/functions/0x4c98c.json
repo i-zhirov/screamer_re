@@ -1,9 +1,95 @@
 {
   "address": "0x4c98c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 96,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The unr_file_load module at 0x4c98c"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c98c holds 96 instructions and 344 bytes up to the ret at 0x4cae3; the next function starts at 0x4cae4, so the store record keeps the 344-byte extent and sets no function size; the identity check uses 96 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x4c979 sits in the wrapper at 0x4c94c; the wrapper copies its argument to DAT_002154c, calls this function, and then calls the loader at 0x4cae4 for the %s.MMP member; race_data_load at 0x131a8 calls the wrapper as material_name_set after the material_load call at 0x4cd9c, and the level data holds MAP1.UNR before MAP1.MMP, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member name %s.UNR from DAT_002154c and opens it with the empty path and the category rb; a failed open runs the file error report at 0x4bf88 and then the exit at 0x300be"
+    },
+    {
+      "kind": "note",
+      "text": "the first two reads take the four-byte UNR_FILE size and the four-byte object count; the function gets the OBJ_LST resource of count * 4 + 0x1e4 bytes and the UNR_FILE resource of the file size through 0x2eed0, and a zero result runs the memory error report at 0x2edad"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the object list at DAT_0021540, the value DAT_0021464 at DAT_00214bc, and the object list at DAT_0021488 and DAT_0021530; it reads count * 4 bytes into the list, writes the -1 sentinel at index count, adds the UNR_FILE base to the low entries, reads the file size bytes into the UNR_FILE resource, and closes the stream at 0x4c38d"
+    },
+    {
+      "kind": "note",
+      "text": "the .UNR member, the OBJ_LST and UNR_FILE resource names, and the wrapper caller support the name unr_file_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines UNR_FILE_LOAD_HARNESS and the function builds the constant text in local buffers; the harness covers the full path with two object entries, the open failure, and the zero object count; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 16 of 96 instructions, 25 of 327 bytes, and 0 of 25 relocation slots equal; V2 saves ebp first and builds the harness text in local buffers, while the original uses the literal data object and the frame; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c98c --count 96"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c98c --count 96 --rebuilt work/rebuild/unrload.exe --rebuilt-map work/rebuild/unr_file_load.map --rebuilt-symbol unr_file_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c98c"
+    }
+  ],
+  "implementation": "c",
+  "module": "unr_file_load",
+  "name": "unr_file_load",
   "notes": [],
   "object_offset": "0x3c98c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 327,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 96,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c98c",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:fa24b359921f8b1ac85e8c8435ce5dfe1b1a956a1843def5013abf43e943c04f",
+    "source_digest": "sha256:058ce902c01cec5338d4291564c7cc2109b2b2a41befa495759ecd2803a64aed",
+    "tool": "run.py"
+  },
+  "role": "loads the track .UNR member, allocates the object list and the unresolved file data, relocates the object list, and closes the stream",
+  "section": "Resource loader",
   "size": 344,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "unr_file_load_"
 }

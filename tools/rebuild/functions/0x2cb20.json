@@ -1,9 +1,83 @@
 {
   "address": "0x2cb20",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 103,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2cb20 holds 103 instructions and 373 bytes up to the ret at 0x2cc94; the next function starts at 0x2cc98, so the store record keeps the 376-byte extent and sets no separate function size; the identity check uses 103 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is case 2 of race_state_update at 0x29564, with the call site 0x295d3; race_state_update is a race_frame callee at 0x2807c, so the record takes the section race_frame callees; the matching init car_select_screen at 0x2bedc builds the same 14 records, so the record keeps the name car_select_update with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 14 records at DAT_0011d550, stride 0x44; each record holds an object index at +0x00 and float angles at +0x08, +0x0c, and +0x10; the step is DAT_0018e08 * pi/2; the function adds the step to the angle +0x0c, clears it to 0 at 2 * pi, and writes the object angles +0x14, +0x18, and +0x1c from the table DAT_0010653c with the factor 1024.0 / pi and the mask 0x7ff; the constants sit at object-3 offsets 0x11d3, 0x11d7, 0x11db, and 0x11df"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncate helper at 0x4d9f4 before each fistp; this harness links no math library, so the local car_select_update_fpu.asm makes __CHP truncate toward zero; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 15 car records, the object pointer table, the 15 display objects, and the five float globals; the five paths cover the full step, the wrap at 2 * pi, the permuted table, the negative truncation, and the boundary 2 * pi; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2cb20 --count 103"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2cb20 --count 103 --rebuilt work/rebuild/cselupd.exe --rebuilt-map work/rebuild/car_select_update.map --rebuilt-symbol car_select_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module car_select_update"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_select_update module at 0x2cb20"
+    }
+  ],
+  "implementation": "c",
+  "module": "car_select_update",
+  "name": "car_select_update",
   "notes": [],
   "object_offset": "0x1cb20",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 322,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 103,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2cb20",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:04d7f65bbb3ab2b967863d2b5d643da55577ec1c59571b6d5b63fa7e96f84ad5",
+    "source_digest": "sha256:3df63214a099c4c57ce231f1466d817d1ecccd51494f1bf3bfcee3e83cfa70b0",
+    "tool": "run.py"
+  },
+  "role": "advances the car selection angle and writes the three car object angles",
+  "section": "race_frame callees",
   "size": 376,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_select_update_"
 }

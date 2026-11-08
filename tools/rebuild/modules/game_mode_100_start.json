@@ -1,0 +1,30 @@
+{
+  "exe": "gm100.exe",
+  "map": "game_mode_100_start.map",
+  "name": "game_mode_100_start",
+  "run": {
+    "command": "gm100.exe > gm100.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "gm100.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "game_mode_100_start.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "game_mode_100_start_main.c"
+    }
+  ]
+}

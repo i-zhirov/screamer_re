@@ -1,9 +1,107 @@
 {
   "address": "0x19980",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 90,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x19980 holds 90 instructions and 297 bytes up to the ret at 0x19aa8; the next function starts at 0x19ab0, so the store record keeps the 304-byte extent and sets no separate function size; the identity check uses 90 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15be0 is the effect group at 0x15bac; the group runs the player car steps on the player object at object-3 offset 0xf91c after player_car_spin_update at 0x188b8 and before car_sound_update at 0x242bc, and the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call the group, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the eight 0x28-byte effect slots at +0x308 through +0x448 and skips a slot with a clear flag at +0x08"
+    },
+    {
+      "kind": "note",
+      "text": "the rotation helper at 0x2218c turns the pair at +0x18 and +0x20 by the negated heading +0x4cc plus the yaw offset +0x128; the helper writes two int values eight bytes apart, so the local middle value clears, and the rotation helper at 0x221fc turns the pair by the pitch +0x4c8 into the slot position +0x0c, +0x10, and +0x14"
+    },
+    {
+      "kind": "note",
+      "text": "the object index at +0x00 selects one 0x1c-byte entry of the object table DAT_0010653c; the object position +0x08, +0x0c, and +0x10 takes the slot position plus the player world position +0x4b0, +0x4b4, and +0x4b8"
+    },
+    {
+      "kind": "note",
+      "text": "the timer helper at 0x118e8 advances the object frame by the frame delta DAT_00118e04 times the double at object-3 offset 0x8d3; a negative result clears the slot flag and binds the list name at 0x6350 to the slot through the helper at 0x11850, so the slot releases its object"
+    },
+    {
+      "kind": "note",
+      "text": "the matching starter player_car_wheel_effect_start at 0x19828 fills the same slots, and the caller group and the slot layout support the name player_car_wheel_effect_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the double rate arrives through a global, because the minimal image does not load the constant segment; the function holds no conversion to an integer, so the shared fpu_stub.asm supplies the FPU run-time symbols"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the eight effect slots, three object entries, the frame delta, the double rate, and the four callee stubs; the six paths cover the empty loop, one active slot, the first and last slot, the advance release, the frame delta times the rate, and the mixed advance results; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 90 decoded instructions and 301 bytes; the identity check stays open at 20 of 90 instructions, 13 of 297 bytes, and 0 of 16 relocation slots, because V2 saves ebp first, keeps the self pointer and the slot in registers, hoists the loop bound, uses imul 0x1c, and places the two float constants in the local data; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x19980 --count 90"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x19980 --count 90 --rebuilt work/rebuild/pcweu.exe --rebuilt-map work/rebuild/player_car_wheel_effect_update.map --rebuilt-symbol player_car_wheel_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_wheel_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x19980"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_wheel_effect_update module at 0x19980"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_wheel_effect_update",
+  "name": "player_car_wheel_effect_update",
   "notes": [],
   "object_offset": "0x9980",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 297,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 90,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19980",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:ad7b943a214041d964a7515a2437197db48aa7434d754611ca9c5dc1af4f2b64",
+    "source_digest": "sha256:cc15a5ed9703eaf6493f1759805bc28ad85e5c1eb9310d621f3a37b731eb2f85",
+    "tool": "run.py"
+  },
+  "role": "updates the effect slot objects from the player wheel position and the yaw and pitch, advances their timer, and releases an expired slot",
+  "section": "The vehicle state chain",
   "size": 304,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_wheel_effect_update_"
 }

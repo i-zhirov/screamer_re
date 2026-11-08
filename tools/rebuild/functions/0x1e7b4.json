@@ -1,9 +1,95 @@
 {
   "address": "0x1e7b4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 124,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1e7b4 holds 124 instructions and 350 bytes up to the ret 4 at 0x1e90f; the next function starts at 0x1e914, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 124 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are the unnamed function at 0x1d55c and opponent_curve_eval at 0x22378; both build three two-dimensional control points at a three-float stride and call this sampler with the output pointer in eax and the fraction on the stack"
+    },
+    {
+      "kind": "note",
+      "text": "the function computes the basis weights w0 = 0.5 * (1 - t)^2, w2 = 0.5 * t^2, and w1 = 1 - (w0 + w2) over the points at offsets 0, 0xc, and 0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the output at +0x00 and +0x04 holds the sampled position; the function then samples the same basis at t + 0.002, subtracts the first sample, divides the difference by its length through the square-root helper at 0xc6cbe, and writes the two tangent components to +0x0c and +0x10"
+    },
+    {
+      "kind": "note",
+      "text": "the double 0.5 sits at object-3 offset 0xbac and the float 0.002 sits at object-3 offset 0xbb4; the constants arrive through globals, because the minimal image does not load the constant segment; the original calls the Watcom square-root helper, so the local func_1e7b4_fpu.asm supplies sqrt_ from the hardware and the FPU run-time symbols; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the record keeps the name func_1e7b4, because the two callers and the sibling three-dimensional sampler at 0x1e914 support no stronger name; the sibling keeps its own weak name; the record takes the section The vehicle state chain with the spline family, because the sampler serves the opponent path update and holds the same curve role"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three control points at the three-float stride, the five-float output, and the two basis constants; the six paths cover the x and y axes, the mid fraction, the end fraction, and the two negative tangent signs; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 124 instructions and 336 bytes; the identity check stays open at 14 of 124 instructions and 16 of 336 bytes, because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), uses fst for the second fraction, and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1e7b4 --count 124"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1e7b4 --count 124 --rebuilt work/rebuild/func1e7.exe --rebuilt-map work/rebuild/func_1e7b4.map --rebuilt-symbol func_1e7b4_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1e7b4"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_1e7b4 module at 0x1e7b4"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_1e7b4",
+  "name": "func_1e7b4",
   "notes": [],
   "object_offset": "0xe7b4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 336,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 124,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1e7b4",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:b24d8b4796779a2e3a0ab8c798cf24f1925915d773d5041bbc4eeb41c4cdb833",
+    "source_digest": "sha256:003a80560b7e809a13d0f94687ab84dea6373b3697b3607daad382832bd62573",
+    "tool": "run.py"
+  },
+  "role": "evaluates a uniform quadratic B-spline in two dimensions and writes the sample position and the normalized forward tangent",
+  "section": "The vehicle state chain",
   "size": 352,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_1e7b4_"
 }

@@ -1,9 +1,95 @@
 {
   "address": "0x83ca8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 111,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x83ca8 holds 111 instructions and 323 bytes up to the ret at 0x83dea; the next store record starts at 0x843a8, so the record keeps the 1792-byte extent and sets no separate function size; the identity check uses 111 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the update at 0x81ab0; it calls this function at 0x81abc at the start of the frame, before the source update at 0x8a958 and the mix prepare at 0x8aa60"
+    },
+    {
+      "kind": "note",
+      "text": "the material loader at 0x4cd9c decodes the member %s.BCK into the buffer at DAT_000214e8; the video buffer pointer is DAT_00121528; the function scales the decoded background into the video buffer, so the record takes the name background_scale with the confidence inferred and the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the source row offset from the angle at 0x724cc and the pitch at 0x7a7dc, stores it at 0x73f10, forms the source column offset from the camera field at +4, and stores it at 0x73dec"
+    },
+    {
+      "kind": "note",
+      "text": "the function selects the source row from a negative offset or a wrapped offset; each source byte becomes one 16-bit value with both halves equal, and each source row is written twice; the fill clears the buffer up to the row 0x7a7c4 with the dword color at 0x7a7bc"
+    },
+    {
+      "kind": "note",
+      "text": "the original saves all registers with pushal and has no EBP frame; the function uses no floating-point instruction and calls no function; the module needs one initialized data byte, because the DOS4G loader leaves the BSS object unmapped when the data object holds no page"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the source buffer, the video buffer, the camera record, the four input globals, and the two output globals; the four paths cover the negative offset, the positive offset with wrap, the column offset across a row boundary, and the negative offset with wrap; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x83ca8 --count 111"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x83ca8 --count 111 --rebuilt work/rebuild/bgscale.exe --rebuilt-map work/rebuild/background_scale.map --rebuilt-symbol background_scale_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x83ca8"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 111 decoded instructions and 335 bytes; the identity check stays open at 24 of 111 instructions, 11 of 323 bytes, and 0 of 25 relocation slots, because V2 saves the registers one by one, uses a single data object, and emits the byte loops in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The background_scale module at 0x83ca8"
+    }
+  ],
+  "implementation": "c",
+  "module": "background_scale",
+  "name": "background_scale",
   "notes": [],
   "object_offset": "0x73ca8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 11,
+        "bytes_total": 323,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 111,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x83ca8",
+    "date": "2026-11-07",
+    "fingerprint": "sha256:980141688e93d146c614b16c29db9c3d60219bf641c5076a15a69599d159c8a9",
+    "source_digest": "sha256:22baee2e5732469c9def964b3358671abdd3812061b62788c5d263909d3287d9",
+    "tool": "run.py"
+  },
+  "role": "scales the decoded background image into the video buffer with the camera scroll offset and fills the rest with the background color",
+  "section": "object_update_all callees",
   "size": 1792,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "background_scale_"
 }
