@@ -366,6 +366,26 @@ reproduce the original bytes.
 | `0x25658` | `font_load` (done) | 324 | 93 | 11 | 0 |
 | `0x83ca8` | `background_scale` (done) | 323 | 111 | 0 | 0 |
 
+### Phase P: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x25020` | unnamed | 1044 | 292 | 0 | 0 |
+| `0x82e0c` | unnamed | 699 | 216 | 0 | 0 |
+| `0x14fb8` | unnamed | 316 | 80 | 12 | 0 |
+| `0x231f0` | unnamed | 309 | 89 | 0 | 13 |
+| `0x20428` | unnamed | 308 | 86 | 0 | 10 |
+| `0x1b840` | unnamed | 306 | 84 | 8 | 0 |
+| `0x4cd9c` | unnamed | 303 | 81 | 12 | 0 |
+| `0x1cbac` | unnamed | 297 | 81 | 2 | 25 |
+| `0x19980` | unnamed | 297 | 90 | 4 | 7 |
+| `0x11f98` | unnamed | 295 | 96 | 3 | 5 |
+| `0x8b1d4` | unnamed | 293 | 103 | 0 | 11 |
+| `0x11e74` | unnamed | 292 | 85 | 6 | 17 |
+
 ## Position
 
 Two hundred twenty-seven modules carry a recipe and a result: the twelve Phase A modules,
