@@ -12402,6 +12402,72 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The sound_source_frame_prepare module at 0x8affc
+
+- Observation: the original body at `0x8affc` holds 74 instructions and 234
+  bytes up to the `ret` at `0x8b0e5`.  The next function starts at `0x8b0e8`.
+  The next recorded function starts at `0x8b1d4`, so the store record keeps the
+  472-byte extent and sets no function size.  The identity check uses 74
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8affc --count 74` and
+  `tools/rebuild/functions/0x8affc.json`.
+- Observation: the only direct caller at `0x8af35` is the per-source frame
+  prepare at `0x8af08`.  That helper runs on the per-frame path of
+  `sound_effects_update` at `0x81ab0`, so the record takes the section
+  `object_update_all callees`.
+  Evidence: the call at `0x8af35` and the call at `0x81b11`.
+- Observation: the context record holds the frame table base at `+0x00`, the
+  frame index at `+0x08`, the voice record at `+0x0c`, the current object at
+  `+0x14`, the frame table entry pointer at `+0xb4`, the table base at
+  `+0xb8`, and the source record at `+0xc8`.
+  Evidence: the block at `0x8affc` through `0x8b028`.
+- Observation: the function resets the source distance identifier at
+  `0x7a6e4 + index * 4`, points the frame table entry at
+  `table + index * 4 + 0x18`, takes the object offset from that entry, and
+  stores the object in the context and in the voice record.
+  Evidence: the block at `0x8b004` through `0x8b025`.
+- Observation: the function copies six dwords from the source record at
+  `+0x08` through `+0x1c` to the voice record at `+0x10` through `+0x24`.
+  Evidence: the block at `0x8b028` through `0x8b04f`.
+- Observation: the function runs the flag helper at `0x8afb2`.  A
+  non-negative sample offset at `0x74528` runs the view helper at `0x8afa0`
+  and the pose copy at `0x8afc4`.  A negative offset runs the index transform
+  at `0x8b610` on the six copied dwords.
+  Evidence: the block at `0x8b052` through `0x8b073`.
+- Observation: the function composes four Q14 matrices through
+  `matrix_compose` at `0x82258`.  The calls use the context block `+0x48`,
+  the camera basis at `+0x48` and `+0x18`, the voice blocks `+0x28`, `+0x58`,
+  `+0xa0`, and `+0xd0`, and the results at `+0xa0`, `+0x118`, `+0xd0`, and
+  `+0x148`.  The function then calls `sound_source_frame_select` at `0x8b1d4`
+  with the context.
+  Evidence: the block at `0x8b078` through `0x8b0e5`.
+- Inference: the caller, the per-source loop, the source record copy, and the
+  frame select call support the name `sound_source_frame_prepare`.  The module
+  records the name with the confidence `inferred`.
+  Evidence: the call graph, the source copy, and the frame select call.
+- Observation: the original has no EBP frame setup and saves ebp because it
+  uses the register as the voice pointer, so the module builds without
+  `-of+`.  The original uses no floating-point instruction and calls no FPU
+  helper.
+  Evidence: the prologue at `0x8affc` and the module record.
+- Observation: the behavior check passes.  The harness prints the markers
+  `0`, `1`, `2`, and `D`.  The paths cover the index 0 with a non-negative
+  offset, the index 1 with a negative offset, and the index 2.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  sound_source_frame_prepare`, `work/rebuild/ssfprep.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x8affc`.
+- Observation: the rebuilt body holds 74 instructions and 234 bytes.  The
+  identity check stays open at 21 of 74 instructions, 13 of 234 bytes, and 0
+  of 8 relocation slots.  The V2 toolchain saves the registers first, uses
+  another prologue order, keeps the values in other registers, and addresses
+  the camera through a local.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8affc --count 74 --rebuilt work/rebuild/ssfprep.exe
+  --rebuilt-map work/rebuild/sound_source_frame_prepare.map --rebuilt-symbol
+  sound_source_frame_prepare_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the
