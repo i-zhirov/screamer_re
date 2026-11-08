@@ -17601,3 +17601,61 @@ temporary `-od` recipe.
   sound_range_reset_` and `python3 tools/rebuild/run.py run --function 0x82e0c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The spline_table_load module at 0x14fb8
+
+- Observation: the original body at `0x14fb8` holds 80 instructions and 316
+  bytes up to the `ret` at `0x150f3`.  The next function starts at `0x150f4`,
+  so the store record keeps the 316-byte extent and sets no separate function
+  size.  The identity check uses 80 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x14fb8 --count 80` and
+  `tools/rebuild/functions/0x14fb8.json`.
+- Observation: the only direct caller at `0x133af` is `race_data_load` at
+  `0x131a8`.  It passes the local level name at `[ebp + 0x17e]` in `eax`, and
+  it then calls the track resource loader at `0x150f4` with the same buffer.
+  Evidence: the call scan for `0x14fb8` and the calls at `0x133af` and
+  `0x133ba`.
+- Observation: the function builds five member names from the level prefix at
+  `DAT_0011d294` through the `sprintf` at `0x4d32c`.  The suffixes `opp`, `anm`,
+  `cam`, and `rpl` sit at object-3 offsets `0x603`, `0x609`, `0x60f`, and
+  `0x615`.  The fifth suffix is `CNG` for the game mode `0x20`, `SLA` for
+  `0x40`, and `OST` for every other mode, at object-3 offsets `0x61b`, `0x621`,
+  and `0x627`.
+  Evidence: the four calls at `0x14fd2` through `0x15017`, the mode read at
+  `0x1501c`, the compare block at `0x15024` through `0x15078`, and the member
+  strings.
+- Observation: the function calls `spline_load` at `0x1af70` five times with
+  the level name in `eax` and the member name in `edx`.  The third argument
+  receives the spline table pointer.  The returned count goes to
+  `DAT_0010f8e8`, `DAT_0010f178`, `DAT_0010f914`, `DAT_0010f918`, and
+  `DAT_0010d6fc`.
+  Evidence: the calls at `0x15088`, `0x1509f`, `0x150b6`, `0x150cd`, and
+  `0x150e4`, and the stores at `0x1508d`, `0x150a4`, `0x150bb`, `0x150d2`, and
+  `0x150e9`.
+- Inference: the caller name, the five member names, and the spline table
+  writes support the name `spline_table_load`.  The module records the name
+  with the confidence `inferred`.  The original has no symbol name, so the
+  module name and the global names in the harness stay inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction.  The harness build
+  defines `SPLINE_TABLE_LOAD_HARNESS` and the function builds the format text
+  in local buffers, because DOS/4G 2.01a under DOSBox-X leaves the initialized
+  data pages zero.
+  Evidence: `tools/rebuild/spline_table_load.c` and the module recipe.
+- Observation: the harness holds the level prefix, the game mode, the five
+  name buffers, the five table pointers, and the five counts.  The four paths
+  cover the mode `0x20`, the mode `0x40`, the mode `0x03`, and the mode
+  `0x50`.  The output holds the markers `0` through `3` and `D`.
+  Evidence: `tools/rebuild/spline_table_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module spline_table_load`, and
+  `work/rebuild/spltld.txt`.
+- Observation: the rebuilt function keeps the same behavior in C but holds
+  another instruction shape, because the harness build keeps the format text
+  in local buffers and the C build uses another register layout.  The identity
+  check stays open at 18 of 80 instructions and 19 of 251 bytes.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x14fb8 --count 80 --rebuilt work/rebuild/spltld.exe
+  --rebuilt-map work/rebuild/spline_table_load.map --rebuilt-symbol
+  spline_table_load_` and `python3 tools/rebuild/run.py run --function 0x14fb8`.
