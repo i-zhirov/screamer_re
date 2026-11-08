@@ -386,6 +386,26 @@ reproduce the original bytes.
 | `0x8b1d4` | `sound_source_frame_select` (done) | 293 | 103 | 0 | 11 |
 | `0x11e74` | `body_point_collision_detect` (done) | 292 | 85 | 6 | 17 |
 
+### Phase Q: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x293a8` | unnamed | 288 | 78 | 0 | 0 |
+| `0x18ba8` | unnamed | 291 | 90 | 2 | 8 |
+| `0x4d4c4` | unnamed | 290 | 73 | 2 | 0 |
+| `0x8adac` | unnamed | 279 | 71 | 1 | 0 |
+| `0x17b54` | unnamed | 279 | 70 | 3 | 26 |
+| `0x82c14` | unnamed | 277 | 72 | 0 | 0 |
+| `0x15874` | unnamed | 269 | 69 | 18 | 0 |
+| `0x1d200` | unnamed | 268 | 70 | 2 | 32 |
+| `0x1ba4c` | unnamed | 267 | 82 | 5 | 0 |
+| `0x1b738` | unnamed | 263 | 69 | 8 | 0 |
+| `0x16b98` | unnamed | 262 | 95 | 1 | 4 |
+| `0x257b0` | unnamed | 261 | 67 | 12 | 0 |
+
 ## Position
 
 Two hundred thirty-nine modules carry a recipe and a result: the twelve Phase A modules,
