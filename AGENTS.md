@@ -370,6 +370,11 @@ through the store.
   an artifact.  On a push to `master`, the `deploy` job publishes the packaged
   site to GitHub Pages after the syntax gate.  The page is generated output, so
   it stays out of git.
+- The status page progress bar holds two fills on one track.  A legend names
+  the fills.  The green verified fill comes first and the red rebuilt fill
+  comes second.  The legend swatches are `aria-hidden`, so a screen reader
+  announces only the labels.  The filter updates both fills.  `test_view.py`
+  checks the two widths, their order, and the legend.
 - Verify a tool by running it against the shipped artifacts.
 - Record the exact tool command with every new finding in
   `docs/explanation/findings.md`.
