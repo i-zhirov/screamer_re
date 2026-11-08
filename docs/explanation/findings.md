@@ -12524,6 +12524,61 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The player_screen_offset module at 0x18ccc
+
+- Observation: the original body at `0x18ccc` holds 69 instructions and 226
+  bytes up to the `ret` at `0x18dad`.  The next function starts at `0x18db0`,
+  so the store record keeps the 228-byte extent and sets no separate function
+  size.  The identity check uses 69 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x18ccc --count 69` and
+  `tools/rebuild/functions/0x18ccc.json`.
+- Observation: the only direct caller at `0x15c7e` is `player_car_link` at
+  `0x15c1c`.  The caller passes the player object at object-3 offset `0xf91c`
+  in `eax` and runs on the vehicle state chain.  The record therefore takes the
+  section `The vehicle state chain`.
+  Evidence: the call site at `0x15c7e` and
+  `tools/rebuild/functions/0x15c1c.json`.
+- Observation: the function forms the horizontal difference from the world
+  reference `DAT_00110a20` and `DAT_00110a28` to the object position at
+  `+0x4b0` and `+0x4b8`.  It sums the two squares and takes the square root at
+  `0x22bec`.
+  Evidence: the block at `0x18cd9` through `0x18d12`.
+- Observation: the two normalized ratios scale the screen limit 20.0 at
+  object-3 offset `0x854`.  The function subtracts the scaled ratios from the
+  object position and stores the truncation at `+0x118` and `+0x120`.  It
+  stores the height `+0x4b4 - 20` at `+0x11c`.
+  Evidence: the block at `0x18d15` through `0x18da0` and the data at
+  object-3 offset `0x854`.
+- Inference: the player object, the world reference, the screen limit, and the
+  caller support the name `player_screen_offset`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the call site, the object fields, and the constant.
+- Observation: the original calls `sqrt` at `0x22bec` and the truncating
+  helper at `0x4d9f4`.  The local `player_screen_offset_fpu.asm` supplies
+  `sqrt` and makes `__CHP` truncate toward zero.  The original has the EBP
+  frame, so the module builds with `-of+`.
+  Evidence: the call sites at `0x18d0d`, `0x18d64`, and `0x18d9b` and the
+  module record.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `5` and `D`.  The six paths cover the positive x offset, the second
+  horizontal axis, the negative fractional truncation, the positive fractional
+  truncation from a non-zero record position, the negative x difference, and
+  the limit 10.0.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_screen_offset`, `work/rebuild/pscrnofs.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x18ccc`.
+- Observation: the rebuilt body holds 69 instructions and 225 bytes.  The
+  identity check stays open at 12 of 69 instructions, 5 of 225 bytes, and 2 of
+  9 relocation slots.  The V2 toolchain puts the frame first, keeps the object
+  in `edx`, keeps the world value in a register, and emits the two ratio
+  computations in another order.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x18ccc --count 69 --rebuilt work/rebuild/pscrnofs.exe
+  --rebuilt-map work/rebuild/player_screen_offset.map --rebuilt-symbol
+  player_screen_offset_`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  Phase R is complete after this row.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the

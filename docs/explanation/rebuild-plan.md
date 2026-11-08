@@ -424,11 +424,13 @@ reproduce the original bytes.
 | `0x2c954` | `race_records_screen_init` (done) | 235 | 65 | 9 | 0 |
 | `0x8affc` | `sound_source_frame_prepare` (done) | 234 | 74 | 9 | 0 |
 | `0x15378` | `opponent_records_init` (done) | 229 | 70 | 2 | 0 |
-| `0x18ccc` | unnamed | 226 | 69 | 3 | 19 |
+| `0x18ccc` | `player_screen_offset` (done) | 226 | 69 | 3 | 19 |
+
+This row completes Phase R.
 
 ## Position
 
-Two hundred sixty-two modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -547,5 +549,6 @@ and `replay_save` at `0x1b738`, and
 `traffic_simulation_update` at `0x201d0`, and
 `race_records_screen_init` at `0x2c954`, and
 `sound_source_frame_prepare` at `0x8affc`, and
-`opponent_records_init` at `0x15378`.
-The next unnamed function is `0x18ccc`.
+`opponent_records_init` at `0x15378`, and
+`player_screen_offset` at `0x18ccc`.
+The next unnamed function is `0x4c128`.
