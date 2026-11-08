@@ -17881,3 +17881,85 @@ temporary `-od` recipe.
   --original-address 0x1b840 --count 84 --rebuilt work/rebuild/rplload.exe
   --rebuilt-map work/rebuild/replay_load.map --rebuilt-symbol replay_load_`
   and `python3 tools/rebuild/run.py run --function 0x1b840`.
+
+## The material_load module at 0x4cd9c
+
+- Observation: the original body at `0x4cd9c` holds 81 instructions and 303
+  bytes up to the `ret` at `0x4ceca`.  The next function starts at `0x4cecc`,
+  so the store record keeps the 304-byte extent and sets no separate function
+  size.  The identity check uses 81 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cd9c --count 81` and
+  `tools/rebuild/functions/0x4cd9c.json`.
+- Observation: the two direct callers pass the material name.
+  `race_data_load` at `0x131a8` calls the function at `0x1333d` with the level
+  name at `DAT_0011d294`, and `menu_space_init` at `0x29d08` calls it at
+  `0x29e19` with the text `menu`.  The function builds the `%s.BCK` and
+  `%s.MLB` member names, so the record takes the section Resource loader.
+  Evidence: the call sweep for `0x4cd9c`, the blocks at `0x13338` through
+  `0x13347` and `0x29e0f` through `0x29e1e`, and the text at object-3 offset
+  `0xf83`.
+- Observation: the function builds `%s.BCK` through the `sprintf` at
+  `0x4d32c` with the format string at object-3 offset `0x16f6`.  It then calls
+  the decoder at `0x4d098` with the empty path at object-3 offset `0x7fb4`,
+  the name buffer, the address of `DAT_00214e8`, the palette buffer, and the
+  mode 2.  The decoder opens the member, reads the 0x80-byte PCX header,
+  computes `(xmax - xmin + 1) * (ymax - ymin + 1)`, closes the stream, and
+  returns that count.  A count at or below zero becomes `0x10000`.
+  Evidence: the blocks at `0x4cdb1` through `0x4ce08` and the decoder at
+  `0x4d098` through `0x4d120`.
+- Observation: the function builds `%s.MLB` through the format string at
+  object-3 offset `0x16fd` and opens the member through the `fopen` at
+  `0x4c08d` with the empty path and the mode `rb` at object-3 offset
+  `0x1704`.  A failed open runs the file error report at `0x4bf88` and then
+  the exit at `0x300be` with the code 0.
+  Evidence: the blocks at `0x4cdc6` through `0x4ce39` and the strings at
+  object-3 offsets `0x16f6`, `0x16fd`, and `0x1704`.
+- Observation: the function reads the member size through the
+  `stream_status` at `0x4c7e0`, which returns the word at `stream + 0x70`.
+  It gets the `MATERIALS` resource of the member size plus the decoded size
+  through the `resource_get` at `0x2eed0` with the name at object-3 offset
+  `0x1707`.  A zero result runs the memory error report at `0x2edad`.
+  Evidence: the blocks at `0x4ce44` through `0x4ce72` and the string at
+  object-3 offset `0x1707`.
+- Observation: the function reads the member into `DAT_0021544` through the
+  `stream_read` at `0x4c4e5`, closes the stream through the `stream_close` at
+  `0x4c38d`, and sets `DAT_00214e8` to the resource plus the member size.  It
+  then calls the decoder at `0x4d098` again with the mode 3.  The decoder reads
+  the 0x300-byte palette into the palette buffer and decodes the RLE data into
+  the output pointer, so the PCX image follows the material data.  The
+  `background_scale` at `0x83ca8` reads the decoded buffer at `DAT_00214e8`.
+  Evidence: the blocks at `0x4ce77` through `0x4ceca`, the decoder at
+  `0x4d158` through `0x4d1ea`, and the reader at `0x83ca8`.
+- Inference: the `MATERIALS` resource, the two member names, the two callers,
+  and the `background_scale` reader support the name `material_load`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.  The decoder at `0x4d098` has no name in the store yet, so the module
+  declares it as `pcx_decode`.
+  Evidence: `tools/rebuild/material_load.c` and
+  `tools/rebuild/modules/material_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `MATERIAL_LOAD_HARNESS` and the function
+  builds the constant texts in local buffers.  The harness holds the name, the
+  decoder, the open, the status, the resource, the read, the close, the two
+  error reports, and the exit.  The four paths cover the full path, the
+  negative decoder size, the failed open with the exit return, and the zero
+  resource.  The output holds the markers `0` through `3` and `D`.
+  Evidence: `tools/rebuild/material_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module material_load`, and
+  `work/rebuild/matload.txt`.
+- Observation: the rebuilt body holds 81 decoded instructions and 232 bytes.
+  The identity check stays open at 16 of 81 instructions, 16 of 232 bytes, and
+  0 of 16 relocation slots, because the harness build adds the five constant
+  buffers and V2 saves the frame first with another local layout.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cd9c --count 81 --rebuilt work/rebuild/matload.exe
+  --rebuilt-map work/rebuild/material_load.map --rebuilt-symbol material_load_`
+  and `python3 tools/rebuild/run.py run --function 0x4cd9c`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the decoder name `pcx_decode`, and the global names in the harness stay
+  inferred.

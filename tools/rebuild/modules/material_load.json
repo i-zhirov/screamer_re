@@ -1,0 +1,31 @@
+{
+  "exe": "matload.exe",
+  "map": "material_load.map",
+  "name": "material_load",
+  "run": {
+    "command": "matload.exe > matload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "matload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "material_load.c",
+      "flags": [
+        "-of+",
+        "-dMATERIAL_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "material_load_main.c"
+    }
+  ]
+}

@@ -1,9 +1,107 @@
 {
   "address": "0x4cd9c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 81,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cd9c holds 81 instructions and 303 bytes up to the ret at 0x4ceca; the next function starts at 0x4cecc, so the store record keeps the 304-byte extent and sets no separate function size; the identity check uses 81 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers pass the material name; race_data_load at 0x131a8 calls the function at 0x1333d with the level name at DAT_0011d294, and menu_space_init at 0x29d08 calls it at 0x29e19 with the text menu; the function builds the %s.BCK and %s.MLB member names, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds %s.BCK through sprintf at 0x4d32c with the format string at object-3 offset 0x16f6, then calls the decoder at 0x4d098 with the empty path at object-3 offset 0x7fb4 and the mode 2; the decoder returns the width times the height of the PCX header, and a count at or below zero becomes 0x10000"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds %s.MLB through the format string at object-3 offset 0x16fd and opens the member through fopen at 0x4c08d with the empty path and the mode rb at object-3 offset 0x1704; a failed open runs the file error report at 0x4bf88 and then the exit at 0x300be with the code 0"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the member size through stream_status at 0x4c7e0, which returns the word at stream + 0x70; it gets the MATERIALS resource of the size plus the decoded size through resource_get at 0x2eed0 with the name at object-3 offset 0x1707, and a zero result runs the memory error report at 0x2edad"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the member into DAT_0021544 through stream_read at 0x4c4e5, closes the stream through stream_close at 0x4c38d, sets DAT_00214e8 to the resource plus the member size, and calls the decoder at 0x4d098 again with the mode 3; the PCX image follows the material data, so background_scale at 0x83ca8 reads the decoded buffer at DAT_00214e8"
+    },
+    {
+      "kind": "note",
+      "text": "the MATERIALS resource, the two member names, the two callers, and the background_scale reader support the name material_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction, so it needs no FPU stub; the decoder at 0x4d098 has no name in the store yet, so the module declares it as pcx_decode"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines MATERIAL_LOAD_HARNESS and the function builds the constant texts in local buffers; the harness holds the name, the decoder, the open, the status, the resource, the read, the close, the two error reports, and the exit; the four paths cover the full path, the negative decoder size, the failed open with the exit return, and the zero resource; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 81 decoded instructions and 232 bytes; the identity check stays open at 16 of 81 instructions, 16 of 232 bytes, and 0 of 16 relocation slots, because the harness build adds the five constant buffers and V2 saves the frame first with another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cd9c --count 81"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cd9c --count 81 --rebuilt work/rebuild/matload.exe --rebuilt-map work/rebuild/material_load.map --rebuilt-symbol material_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module material_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cd9c"
+    },
+    {
+      "kind": "finding",
+      "text": "The material_load module at 0x4cd9c"
+    }
+  ],
+  "implementation": "c",
+  "module": "material_load",
+  "name": "material_load",
   "notes": [],
   "object_offset": "0x3cd9c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 232,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 81,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cd9c",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:eb60dbd5a6576a830d1c922fcfbde5974c1af453c93f202e233cb7de208b1a8b",
+    "source_digest": "sha256:09bf069245fffaa7b5aed009d67cd43d945227c1991afd35edb0dafbd40694ba",
+    "tool": "run.py"
+  },
+  "role": "loads the %s.MLB material member into the MATERIALS resource and decodes the %s.BCK PCX image into the buffer at DAT_00214e8 after the member data",
+  "section": "Resource loader",
   "size": 304,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "material_load_"
 }
