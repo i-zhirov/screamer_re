@@ -378,7 +378,7 @@ reproduce the original bytes.
 | `0x14fb8` | `spline_table_load` (done) | 316 | 80 | 12 | 0 |
 | `0x231f0` | `path_keyframe_append` (done) | 309 | 89 | 0 | 13 |
 | `0x20428` | `race_position_update` (done) | 308 | 86 | 0 | 10 |
-| `0x1b840` | unnamed | 306 | 84 | 8 | 0 |
+| `0x1b840` | `replay_load` (done) | 306 | 84 | 8 | 0 |
 | `0x4cd9c` | unnamed | 303 | 81 | 12 | 0 |
 | `0x1cbac` | unnamed | 297 | 81 | 2 | 25 |
 | `0x19980` | unnamed | 297 | 90 | 4 | 7 |
@@ -388,7 +388,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred thirty-two modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred thirty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -483,5 +483,5 @@ modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
 and `font_load` at `0x25658`, and `background_scale` at `0x83ca8`, and the Phase P
 modules `text_draw` at `0x25020`, `sound_range_reset` at `0x82e0c`,
 `spline_table_load` at `0x14fb8`, and `path_keyframe_append` at `0x231f0`,
-and `race_position_update` at `0x20428`.
-The next unnamed function is `0x1b840`.
+and `race_position_update` at `0x20428`, and `replay_load` at `0x1b840`.
+The next unnamed function is `0x4cd9c`.

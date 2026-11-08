@@ -17808,3 +17808,76 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/race_position_update.map --rebuilt-symbol
   race_position_update_` and `python3 tools/rebuild/run.py run --function
   0x20428`.
+
+## The replay_load module at 0x1b840
+
+- Observation: the original body at `0x1b840` holds 84 instructions and 306
+  bytes up to the `ret` at `0x1b971`.  The next function starts at `0x1b974`,
+  so the store record keeps the 308-byte extent and sets no separate function
+  size.  The identity check uses 84 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b840 --count 84` and
+  `tools/rebuild/functions/0x1b840.json`.
+- Observation: the two direct callers pass the replay name buffer
+  `DAT_0001d278`.  `race_data_load` at `0x131a8` calls the function at
+  `0x13224` with the flag 0, and the mode 1 start at `0x12c0c`, which the
+  program map names `game_mode_1_start`, calls it at `0x12cdc` with the flag 1.
+  Both calls run only when the replay flag `DAT_0018e30` is set, and
+  `race_session_run` sets that flag from bit `0x80` of the mode byte.
+  Evidence: the call sweep for `0x1b840`, the gate at `0x13214`, the gate at
+  `0x12ca5`, and the mode bit move in `race_session_run` at `0x1fd70`.
+- Observation: the function builds the member name `%s\replays\%s.rpl` from
+  the base path buffer `DAT_00007edc` and the name through the `sprintf` at
+  `0x4d32c`.  The format string sits at object-3 offset `0xa0d`, and the mode
+  string `rb` sits at object-3 offset `0xa1f`.  The function opens the member
+  through `fopen` at `0xc5fe5` and returns 1 when the open fails.
+  Evidence: the block at `0x1b850` through `0x1b885` and the member strings.
+- Observation: the function reads four blocks through `fread` at `0xc607b`:
+  6 records of `0x1c` bytes into `DAT_000197d8`, `0x28` records of `0x1c`
+  bytes into `DAT_000192a4`, `0xa` records of 4 bytes into `DAT_00019704`, and
+  one record of `0x18` bytes into the header `DAT_00018e74`.
+  Evidence: the calls at `0x1b89c`, `0x1b8b3`, `0x1b8ca`, and `0x1b8e1`.
+- Observation: the header holds the frame count and five setup words.  The
+  function copies them to `DAT_00018e70`, `DAT_0001d2a0`, `DAT_0001d2b0`,
+  `DAT_0001d2b4`, `DAT_0001d260`, and `DAT_0001d274`.  The field
+  `DAT_0001d260` is the game mode byte and `DAT_0001d274` is the mode flag
+  word, so the member restores the race setup.
+  Evidence: the block at `0x1b8e6` through `0x1b924`.
+- Observation: when the flag is not zero, the function reads the frame records
+  into the buffer pointer `DAT_00018e5c`.  The read needs a non-zero pointer
+  and a frame count below the limit `DAT_00018e68`.  Otherwise the result
+  becomes 1.  The function closes the stream through `fclose` at `0xc6245` and
+  returns the result.  The sibling writer at `0x1b974` uses the same 0x24-byte
+  ghost record and the `%s\replays\%s.atk` member.
+  Evidence: the block at `0x1b927` through `0x1b96a` and the disassembly of
+  `0x1b974`.
+- Inference: the member name, the replay record layout of `replay_read` and
+  `replay_write`, and the replay flag at both callers support the name
+  `replay_load`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.  The record takes the section The replay
+  records.
+  Evidence: the call graph, the `%s\replays\%s.rpl` member, and the data flow
+  above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/replay_load.c` and
+  `tools/rebuild/modules/replay_load.json`.
+- Observation: the harness holds the base path, the replay name, the four
+  header blocks, the frame buffer pointer, the frame limit, the header cells,
+  and a simulated member image.  The five paths cover the failed open, the set
+  flag with three frame records, the clear flag, the null frame buffer, and
+  the frame count at the limit.  The output holds the markers `0` through `4`
+  and `D`.
+  Evidence: `tools/rebuild/replay_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_load`, and
+  `work/rebuild/rplload.txt`.
+- Observation: the rebuilt module holds 84 decoded instructions and 301 bytes.
+  The identity check stays open at 40 of 84 instructions and 29 of 301 bytes,
+  because V2 saves the frame pointer first, keeps the stream in `esi` and
+  `edi`, passes the string pointers as near data offsets, and uses another
+  local layout.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b840 --count 84 --rebuilt work/rebuild/rplload.exe
+  --rebuilt-map work/rebuild/replay_load.map --rebuilt-symbol replay_load_`
+  and `python3 tools/rebuild/run.py run --function 0x1b840`.
