@@ -413,7 +413,7 @@ reproduce the original bytes.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x22018` | unnamed | 257 | 93 | 0 | 43 |
+| `0x22018` | `angle_approach` (done) | 257 | 93 | 0 | 43 |
 | `0x1a2bc` | unnamed | 250 | 71 | 2 | 10 |
 | `0x12d0c` | unnamed | 249 | 76 | 6 | 10 |
 | `0x23328` | unnamed | 248 | 71 | 3 | 12 |
@@ -428,7 +428,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred fifty-one modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -536,5 +536,6 @@ and `cd_check_screen` at `0x15874`, and
 `car_collision_push` at `0x1d200`, and `replay_load_atk` at `0x1ba4c`,
 and `replay_save` at `0x1b738`, and
 `player_segment_apply` at `0x16b98`, and
-`sprite_load` at `0x257b0`.
-The next unnamed function is `0x22018`.
+`sprite_load` at `0x257b0`, and
+`angle_approach` at `0x22018`.
+The next unnamed function is `0x1a2bc`.

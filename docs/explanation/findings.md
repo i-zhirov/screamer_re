@@ -19126,3 +19126,65 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x257b0`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The angle_approach module at 0x22018
+
+- Observation: the original body at `0x22018` holds 93 instructions and 257
+  bytes up to the `ret 8` at `0x22116`.  The next function starts at `0x2211c`,
+  so the store record keeps the 260-byte extent and sets no separate function
+  size.  The identity check uses 93 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22018 --count 93` and
+  `tools/rebuild/functions/0x22018.json`.
+- Observation: the first argument arrives in `eax`.  The float argument makes
+  the Watcom compiler pass the remaining arguments on the stack, so the callee
+  cleans them with `ret 8`.
+  Evidence: the prologue at `0x22018` and the epilogue at `0x22116`.
+- Observation: two functions call this function.  `view_transition_update` at
+  `0x19f00` calls it at `0x19fa0`, `0x19faf`, and `0x19fbe`.
+  `player_view_orbit` at `0x1a3b8` calls it at `0x1a55e`, `0x1a574`, and
+  `0x1a58a`.  They pass the angle deltas and the player angles.  The function
+  sits next to `filter_update` at `0x22b80` and `timing_update` at `0x22df8`,
+  so the record takes the section The timing and filter layer.
+  Evidence: the call sites and
+  `python3 tools/le.py calls STARTH.EXE 0x19f00` and
+  `python3 tools/le.py calls STARTH.EXE 0x1a3b8`.
+- Observation: the function moves the value at `*value` toward the target with
+  the coefficient `DAT_0010cf08[step]`.  The first compare sends an equal value
+  straight to the wrap.  When the absolute difference is at least pi, the
+  function shifts the difference by one full turn, so the value takes the short
+  path.
+  Evidence: the blocks at `0x22022` through `0x220d7` and the three constants
+  at object-3 offsets `0xd64` (pi), `0xd68` (-2 pi), and `0xd6c` (2 pi).
+- Observation: the function then wraps the value into the range zero to 2 pi.
+  A negative value gains 2 pi.  A value of 2 pi or more loses 2 pi.  The wrap
+  also runs when the value equals the target.
+  Evidence: the blocks at `0x220dc` through `0x22115`.
+- Inference: the wrapped one-pole angle filter supports the name
+  `angle_approach`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the arithmetic above and the two caller groups.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original compares against the three float constants in the
+  constant segment, so the harness passes them through globals.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: `tools/rebuild/angle_approach.c` and
+  `tools/rebuild/modules/angle_approach.json`.
+- Observation: the harness holds the coefficient table and the three angle
+  constants.  The nine paths cover the equal value, the small positive and
+  negative differences, the two large-difference short paths, the lower and
+  upper wrap, the equal value above one turn, and the exact zero result.  The
+  output holds the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/angle_approach_main.c`,
+  `python3 tools/rebuild/harness.py run --module angle_approach`, and
+  `work/rebuild/aang.txt`.
+- Observation: the diff reports 19 of 93 instructions and 10 of 246 bytes
+  equal.  The identity check stays open because V2 saves the frame first,
+  keeps the value pointer in `edx`, uses a local difference cell, and orders
+  the two sign branches in another shape.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22018 --count 93 --rebuilt work/rebuild/aang.exe
+  --rebuilt-map work/rebuild/angle_approach.map --rebuilt-symbol
+  angle_approach_` and `python3 tools/rebuild/run.py run --function 0x22018`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
