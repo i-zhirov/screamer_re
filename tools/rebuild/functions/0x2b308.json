@@ -1,9 +1,95 @@
 {
   "address": "0x2b308",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 66,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2b308 holds 66 instructions and 218 bytes up to the ret at 0x2b3e1; the store record keeps the 221-byte extent and sets no function size; the identity check uses 66 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x29ada and 0x2ce96 are menu_text_update at 0x29918 and name_entry_update at 0x2ce84; both are race_frame callees and both walk the 0x50 map object records at DAT_001db78 with the stride 0x64"
+    },
+    {
+      "kind": "note",
+      "text": "a record holds the key at +0x04 and the animation flag at +0x0c; the function sets the flag to zero on the records whose key equals the code and to one on the other records; a flag that already holds the target value stays unchanged"
+    },
+    {
+      "kind": "note",
+      "text": "the map_object_place and menu_text_update modules and the two callers support the name map_object_line_select; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original pushes ebx, edx, esi, and ebp; the edx save lets name_entry_update keep its loop counter in edx across the call; the original has the EBP frame, so the module builds with -of+; the module needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x50 records; the four paths cover one matching record, a code that no record holds, three matching records, and a mix of flags and keys; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 8 of 66 instructions, 4 of 150 bytes, and 0 of 8 relocation slots equal; the identity check stays open because V2 saves a different register set, inlines the record address, and computes the stride with imul; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2b308 --count 66"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b308 --count 66 --rebuilt work/rebuild/moselect.exe --rebuilt-map work/rebuild/map_object_line_select.map --rebuilt-symbol map_object_line_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_object_line_select"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2b308"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_object_line_select module at 0x2b308"
+    }
+  ],
+  "implementation": "c",
+  "module": "map_object_line_select",
+  "name": "map_object_line_select",
   "notes": [],
   "object_offset": "0x1b308",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 150,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 66,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b308",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:acb74a772e3eaddfc3f8eff02087e3ac9b73c21a67f8947a60cae1bcde7fe0f4",
+    "source_digest": "sha256:c80dd879be5eca99b0eae8d5a8de77587a8b98947239c927432a85151ba96ba9",
+    "tool": "run.py"
+  },
+  "role": "selects the map object line with the given code by clearing the animation flag on the matching records and setting it on the other records",
+  "section": "race_frame callees",
   "size": 221,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_object_line_select_"
 }

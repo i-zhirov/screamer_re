@@ -20328,3 +20328,55 @@ temporary `-od` recipe.
   0x1a144`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The map_object_line_select module at 0x2b308
+
+- Observation: the original body at `0x2b308` holds 66 instructions and 218
+  bytes up to the `ret` at `0x2b3e1`.  The store record keeps the 221-byte
+  extent and sets no function size.  The identity check uses 66 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b308 --count 66` and
+  `tools/rebuild/functions/0x2b308.json`.
+- Observation: the two direct callers are `menu_text_update` at `0x29918` and
+  `name_entry_update` at `0x2ce84`.  The calls sit at `0x29ada` and `0x2ce96`.
+  Both callers are `race_frame` callees, and both walk the 0x50 map object
+  records at `DAT_001db78` with the stride 0x64.
+  Evidence: the calls at `0x29ada` and `0x2ce96`, the loop at `0x29a27`
+  through `0x29ab4`, and the loop at `0x2ceac` through `0x2ceca`.
+- Observation: a record holds the key at `+0x04` and the animation flag at
+  `+0x0c`.  The function sets the flag to zero on the records whose key equals
+  the code in `eax`.  It sets the flag to one on the other records.  A flag
+  that already holds the target value stays unchanged.  The `edx` save lets
+  `name_entry_update` keep its loop counter in `edx` across the call.
+  Evidence: the key reads at `0x2b32c`, `0x2b38e`, and `0x2b3b1`, the flag
+  writes at `0x2b366` and `0x2b3d2`, and the `push edx` and `pop edx` at
+  `0x2b309` and `0x2b3df`.
+- Inference: the shared map object records, the two menu callers, and the flag
+  semantics support the name `map_object_line_select`.  The `map_object_place`
+  and `menu_text_update` modules use the same name for this callee.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original pushes `ebx`, `edx`, `esi`, and `ebp`.  The original
+  has the EBP frame, so the module builds with `-of+`.  The module needs no
+  FPU stub, because the original has no FPU instruction.
+  Evidence: `tools/rebuild/map_object_line_select.c` and
+  `tools/rebuild/modules/map_object_line_select.json`.
+- Observation: the harness holds the 0x50 records.  The four paths cover one
+  matching record, a code that no record holds, three matching records, and a
+  mix of flags and keys.  The output holds the markers `0` through `3` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/map_object_line_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_object_line_select`, and
+  `work/rebuild/moselect.txt`.
+- Observation: the identity check compares 66 instructions.  The rebuilt
+  module holds 8 of 66 instructions, 4 of 150 bytes, and 0 of 8 relocation
+  slots equal.  The identity check stays open because V2 saves a different
+  register set, inlines the record address, and computes the stride with
+  `imul`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b308 --count 66 --rebuilt work/rebuild/moselect.exe
+  --rebuilt-map work/rebuild/map_object_line_select.map --rebuilt-symbol
+  map_object_line_select_` and `python3 tools/rebuild/run.py run --function
+  0x2b308`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.

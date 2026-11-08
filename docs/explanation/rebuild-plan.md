@@ -441,7 +441,7 @@ reproduce the original bytes.
 | `0x2ca40` | `net_race_lobby_init` (done) | 223 | 60 | 10 | 0 |
 | `0x8b610` | `basis_transform_build` (done) | 222 | 65 | 3 | 0 |
 | `0x1a144` | `camera_pose_build` (done) | 219 | 63 | 3 | 15 |
-| `0x2b308` | unnamed | 218 | 66 | 0 | 0 |
+| `0x2b308` | `map_object_line_select` (done) | 218 | 66 | 0 | 0 |
 | `0x21f40` | unnamed | 215 | 87 | 0 | 42 |
 | `0x1b974` | unnamed | 213 | 67 | 5 | 2 |
 | `0x20ec8` | unnamed | 208 | 58 | 7 | 5 |
@@ -452,7 +452,7 @@ This table starts Phase S.
 
 ## Position
 
-Two hundred sixty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred seventy modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -577,5 +577,6 @@ and `replay_save` at `0x1b738`, and
 `sound_event_transform` at `0x835c0`, and
 `name_entry_update` at `0x2ce84`, and
 `net_race_lobby_init` at `0x2ca40`, and `basis_transform_build` at `0x8b610`,
-and `camera_pose_build` at `0x1a144`.
-The next unnamed function is `0x2b308`.
+and `camera_pose_build` at `0x1a144`, and
+`map_object_line_select` at `0x2b308`.
+The next unnamed function is `0x21f40`.
