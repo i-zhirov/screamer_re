@@ -1,9 +1,103 @@
 {
   "address": "0x16b98",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 95,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x16b98 holds 95 instructions and 262 bytes up to the ret at 0x16c9d; the next function starts at 0x16ca0, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 95 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15ae4 is the second player step group at 0x15ab8; the group runs on the player object at object-3 offset 0xf91c and calls player_segment_update at 0x11f98 before this function and wheel_contact_update at 0x11a30 after it; the five view groups call the group, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs only with the flag +0x40 set; it clears +0x4c and copies it to +0x44, walks the four 0x2c-byte slots at +0x54 through +0x104, and skips a slot with a clear flag +0x18"
+    },
+    {
+      "kind": "note",
+      "text": "for each active slot the function keeps the larger absolute value of +0x1c in +0x44 and the larger absolute value of +0x24 in +0x4c; each replacement copies the slot angle +0x28 to +0x50; the compare uses the absolute value through cdq, xor, and sub, so the larger value wins"
+    },
+    {
+      "kind": "note",
+      "text": "the function adds +0x44 to the x position +0x4b0 and +0x4c to the y position +0x4b8, calls the wheel contact step at 0x11a30, and the cornering step at 0x16ca0 adds the selected angle +0x50 to the body yaw +0x4cc"
+    },
+    {
+      "kind": "note",
+      "text": "the caller group, the slot layout, and the angle consumer support the name player_segment_apply; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function assigns one float value and calls no math routine, so the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the four slots, the two lateral terms, the angle, the two positions, and the callee stub; the six paths cover the clear flag, the inactive slots, the one active slot, the mixed active slots, the equal absolute tie, and the inactive big slot; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 20 of 95 instructions and 7 of 235 bytes equal; the identity check stays open because V2 saves the frame pointer first, keeps the self pointer in edx and the slot pointer in eax, uses test and neg, and copies the float with mov; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x16b98 --count 95"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x16b98 --count 95 --rebuilt work/rebuild/psa.exe --rebuilt-map work/rebuild/player_segment_apply.map --rebuilt-symbol player_segment_apply_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_segment_apply"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x16b98"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_segment_apply module at 0x16b98"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_segment_apply",
+  "name": "player_segment_apply",
   "notes": [],
   "object_offset": "0x6b98",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 235,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 95,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x16b98",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:69414e63e4a913dc5301a47e875759844032624b1c8d6fc01af7c74308a05076",
+    "source_digest": "sha256:2d4a03f59c5fbf7b11b944201e6e0a5af3e103d219baf4bc4856ffead67b5991",
+    "tool": "run.py"
+  },
+  "role": "applies the larger lateral segment corrections of the active player body slots to the body position and records the segment angle before the wheel contact step",
+  "section": "The vehicle state chain",
   "size": 264,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_segment_apply_"
 }

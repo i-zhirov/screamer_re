@@ -18997,3 +18997,69 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x1b738`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The player_segment_apply module at 0x16b98
+
+- Observation: the original body at `0x16b98` holds 95 instructions and 262
+  bytes up to the `ret` at `0x16c9d`.  The next function starts at `0x16ca0`, so
+  the store record keeps the 264-byte extent and sets no separate function
+  size.  The identity check uses 95 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16b98 --count 95` and
+  `tools/rebuild/functions/0x16b98.json`.
+- Observation: the only direct caller is at `0x15ae4` in the second player
+  step group at `0x15ab8`.  The group runs on the player object at object-3
+  offset `0xf91c`.  It calls `player_segment_update` at `0x11f98` before this
+  function and `wheel_contact_update` at `0x11a30` after it.  The five view
+  groups call the group, so the record takes the section The vehicle state
+  chain.
+  Evidence: the call at `0x15ae4`, the group at `0x15ab8` through `0x15b04`,
+  and the group call sites.
+- Observation: the function runs only when the flag `+0x40` is set.  It sets
+  `+0x4c` to 0 and copies `+0x4c` to `+0x44`.  It walks the four 0x2c-byte
+  slots at `+0x54` through `+0x104`.  It skips a slot with a clear flag
+  `+0x18`.
+  Evidence: the blocks at `0x16ba4` through `0x16bef` and the record
+  "The player_segment_update module at 0x11f98".
+- Observation: for each active slot the function keeps the larger absolute
+  value of `+0x1c` in `+0x44` and the larger absolute value of `+0x24` in
+  `+0x4c`.  On each replacement it copies the slot angle `+0x28` to `+0x50`.
+  The compare uses the absolute value through the `cdq`, `xor`, and `sub`
+  sequence.  The larger value wins, not the smaller value.
+  Evidence: the blocks at `0x16bf1` through `0x16c62`.
+- Observation: the function adds `+0x44` to the x position `+0x4b0` and
+  `+0x4c` to the y position `+0x4b8`.  It then calls the wheel contact step at
+  `0x11a30`.  The cornering step at `0x16ca0` adds the selected angle `+0x50`
+  to the body yaw `+0x4cc`.
+  Evidence: the blocks at `0x16c71` through `0x16c92`, the call at `0x16c92`,
+  and the cornering step at `0x16ca0`.
+- Inference: the caller group, the slot layout, and the angle consumer support
+  the name `player_segment_apply`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function assigns one float value and calls no math routine, so
+  the shared `fpu_stub.asm` supplies the FPU run-time symbols and the
+  float-used marker.
+  Evidence: `tools/rebuild/player_segment_apply.c` and
+  `tools/rebuild/modules/player_segment_apply.json`.
+- Observation: the harness holds the player object, the four slots, the two
+  lateral terms, the angle, the two positions, and the callee stub.  The six
+  paths cover the clear flag, the inactive slots, the one active slot, the
+  mixed active slots, the equal absolute tie, and the inactive big slot.  The
+  output holds the markers `0` through `5` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/player_segment_apply_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_segment_apply`, and
+  `work/rebuild/psa.txt`.
+- Observation: the diff reports 20 of 95 instructions and 7 of 235 bytes
+  equal.  The identity check stays open because V2 saves the frame pointer
+  first, keeps the self pointer in `edx` and the slot pointer in `eax`, uses
+  `test` and `neg`, and copies the float with `mov`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x16b98 --count 95 --rebuilt work/rebuild/psa.exe
+  --rebuilt-map work/rebuild/player_segment_apply.map --rebuilt-symbol
+  player_segment_apply_` and
+  `python3 tools/rebuild/run.py run --function 0x16b98`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

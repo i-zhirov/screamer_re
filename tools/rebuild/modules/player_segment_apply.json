@@ -1,0 +1,36 @@
+{
+  "exe": "psa.exe",
+  "map": "player_segment_apply.map",
+  "name": "player_segment_apply",
+  "run": {
+    "command": "psa.exe > psa.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "psa.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_segment_apply.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_segment_apply_main.c"
+    }
+  ]
+}

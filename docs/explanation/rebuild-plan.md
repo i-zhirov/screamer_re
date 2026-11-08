@@ -403,12 +403,12 @@ reproduce the original bytes.
 | `0x1d200` | `car_collision_push` (done) | 268 | 70 | 2 | 32 |
 | `0x1ba4c` | `replay_load_atk` (done) | 267 | 82 | 5 | 0 |
 | `0x1b738` | `replay_save` (done) | 263 | 69 | 8 | 0 |
-| `0x16b98` | unnamed | 262 | 95 | 1 | 4 |
+| `0x16b98` | `player_segment_apply` (done) | 262 | 95 | 1 | 4 |
 | `0x257b0` | unnamed | 261 | 67 | 12 | 0 |
 
 ## Position
 
-Two hundred forty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -514,5 +514,6 @@ and `player_car_wheel_effect_update` at `0x19980`, and
 `traffic_push_response` at `0x17b54`, and `camera_project` at `0x82c14`,
 and `cd_check_screen` at `0x15874`, and
 `car_collision_push` at `0x1d200`, and `replay_load_atk` at `0x1ba4c`,
-and `replay_save` at `0x1b738`.
-The next unnamed function is `0x16b98`.
+and `replay_save` at `0x1b738`, and
+`player_segment_apply` at `0x16b98`.
+The next unnamed function is `0x257b0`.
