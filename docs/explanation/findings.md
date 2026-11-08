@@ -18529,3 +18529,77 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x4d4c4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The sound_voice_setup module at 0x8adac
+
+- Observation: the original body at `0x8adac` holds 71 instructions and 279
+  bytes up to the first `ret` at `0x8aec2`.  The function has a second path
+  that ends at the `ret` at `0x8af05`.  The next function starts at `0x8af08`,
+  so the store record keeps the 348-byte extent and sets no separate function
+  size.  The identity check uses 71 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8adac --count 71` and
+  `tools/rebuild/functions/0x8adac.json`.
+- Observation: the only direct caller is the frame prepare at `0x8af08`.  That
+  helper runs in the per-frame loop of `sound_effects_update` at `0x81ab0`
+  after the mix prepare.  The record takes the section
+  `object_update_all callees`.
+  Evidence: the call at `0x8af08`, the loop at `0x81b09` through `0x81b8c`,
+  and the finding "The sound_effects_update module at 0x81ab0".
+- Observation: the function reads one 4-byte entry from the voice entry list
+  at `0x7251c`.  The entry holds the byte offset of a 20-byte voice record at
+  `0x42ef0`.  The record holds the emitter pointer at `+0x04`.  The function
+  clears bit `0x40000000` of the pointer.  For a set bit it stores the biased
+  radius `pointer + 0x40` at `+0xc8` of the voice context at `0x74454`.
+  Evidence: the block at `0x8adac` through `0x8adf4` and the voice record
+  layout in the finding "The sound_mix_prepare module at 0x8aa60".
+- Observation: the emitter holds the object index at `+0x00`, the flag word at
+  `+0x04`, the position at `+0x08`, `+0x0c`, and `+0x10`, the three basis
+  values at `+0x14`, `+0x18`, and `+0x1c`, the level at `+0x20`, and one value
+  at `+0x3c`.  The function copies the level to `0x74524` and `0x74534`.
+  It copies the three basis values and the camera-relative position to
+  `+0x30` through `+0x44` of the voice context.  It builds the camera basis at
+  `+0x30` through the call at `0x8b610`.
+  Evidence: the block at `0x8adf4` through `0x8aea5`.
+- Observation: bit `0x8000` of the emitter flag word selects the second basis
+  builder at `0x8b51c`.  That builder receives the emitter and sets the flag
+  `0x7b518`.  The first builder at `0x8b610` takes only the basis.  After the
+  call the function reads the object through the handle table at `0x21540`.
+  It stores the object at `+0x00`, the object count at `+0x04`, and zero at
+  `+0x08`.  A non-negative object field at `+0x10` becomes
+  `field * 0x2153c >> 16 * 0x30` at `+0xd4`.  A negative field stays
+  unchanged.
+  Evidence: the branch at `0x8ae77` through `0x8af05`.
+- Observation: the original has no EBP frame.  It uses `ebp` as a scratch
+  register and does not save it, so the module builds without `-of+`.  The
+  original uses no floating-point instruction, so the module needs no FPU
+  stub.
+  Evidence: the prologue at `0x8adac` and the `lea ebp, [edx + 0x30]` at
+  `0x8adf4`.
+- Observation: the harness holds the 0xdc-byte voice context, the voice record
+  area, the voice entry list, the three emitters, the two objects, the handle
+  table, the camera position, the scale, and the two basis builder stubs.  The
+  four paths cover the plain emitter, the near flag `0x40000000`, the event
+  flag `0x8000` with a negative level, and the entry pointer advance over two
+  calls.  The output holds the markers `0` through `4` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/sound_voice_setup_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_setup`, and
+  `work/rebuild/svsetup.txt`.
+- Observation: the rebuilt module holds 71 decoded instructions and 301 bytes.
+  The identity check stays open at 29 of 71 instructions, 21 of 279 bytes, and
+  0 of 38 relocation slots, because V2 saves four registers, keeps the context
+  base and the emitter in registers, builds the flag test in another shape,
+  and uses another branch layout.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8adac --count 71 --rebuilt work/rebuild/svsetup.exe
+  --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol
+  sound_voice_setup_` and
+  `python3 tools/rebuild/run.py run --function 0x8adac`.
+- Inference: the voice entry list, the voice record, the emitter, and the
+  basis builders support the name `sound_voice_setup`.  The original has no
+  symbol for the function.  The record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and the sound chain.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
