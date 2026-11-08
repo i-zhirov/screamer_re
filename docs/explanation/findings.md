@@ -18867,3 +18867,72 @@ temporary `-od` recipe.
   Evidence: the call graph and the data flow above.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The replay_load_atk module at 0x1ba4c
+
+- Observation: the original body at `0x1ba4c` holds 82 instructions and 267
+  bytes up to the `ret` at `0x1bb56`.  The next function starts at `0x1bb58`, so
+  the store record keeps the 268-byte extent and sets no separate function
+  size.  The identity check uses 82 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ba4c --count 82` and
+  `tools/rebuild/functions/0x1ba4c.json`.
+- Observation: the only direct caller at `0x12ea6` is
+  `game_mode_4_start` at `0x12e18`.  It calls this function with the map name
+  `DAT_0011d294` when the replay flag `DAT_0011d264` is set.  The sibling
+  writer at `0x1b974` uses the same 0x24-byte ghost record and the same
+  `%s\replays\%s.atk` member, so the record takes the section The replay
+  records.
+  Evidence: the call at `0x12ea6`, the gate at `0x12e9d`, the writer at
+  `0x1b974`, and the finding "The replay_load module at 0x1b840".
+- Observation: the function builds the member name `%s\replays\%s.atk` from
+  the base path buffer `DAT_00007edc` and the name through the `sprintf` at
+  `0x4d32c`.  The format string sits at object-3 offset `0xa37`, and the mode
+  string `rb` sits at object-3 offset `0xa49`.  The function opens the member
+  through `fopen` at `0xc5fe5` and returns `0x16` when the open fails.
+  Evidence: the block at `0x1ba5e` through `0x1ba96` and the two strings.
+- Observation: the function reads one 0x24-byte header through `fread` at
+  `0xc607b`.  The header field at `+0x10` selects the 0x24-byte ghost record at
+  `DAT_0018e8c`.  The function stores that field in `DAT_0018ed4` and copies
+  the header fields at `+0x08`, `+0x0c`, `+0x18`, and `+0x1c` to the record
+  fields at `+0x08`, `+0x0c`, `+0x18`, and `+0x1c`.  It moves the record field
+  at `+0x14` to `DAT_001d274` and the record field at `+0x1c` to
+  `DAT_001d26c`.  The header field at `+0x14` is not copied to the record.
+  Evidence: the block at `0x1ba9b` through `0x1bb07`.
+- Observation: when the header field at `+0x0c` is not zero, the function
+  reads the keyframe records into the record pointer at `+0x20`.  The read
+  needs a record count at `+0x00` above the header frame count at `+0x08`.
+  Otherwise the function clears the record field at `+0x0c`.  The function
+  closes the stream through `fclose` at `0xc6245`, toggles the low byte of
+  `DAT_0018ed4`, and returns 0.
+  Evidence: the block at `0x1bb07` through `0x1bb56`.
+- Inference: the `.atk` member, the ghost record layout, the sibling writer at
+  `0x1b974`, and the caller at `0x12e18` support the name `replay_load_atk`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph, the member name, and the record layout above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/replay_load_atk.c` and the module recipe.
+- Observation: the harness holds the base path, the replay name, the four
+  ghost records, the index `DAT_0018ed4`, the two exported globals, and a
+  simulated member image.  The six paths cover the failed open, the slot 0 load
+  with three keyframes, the slot 1 load with two keyframes, the clear active
+  flag, the record count not above the frame count, and the zero frame count.
+  The output holds the markers `0` through `5` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/replay_load_atk_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_load_atk`, and
+  `work/rebuild/atkload.txt`.
+- Observation: the rebuilt module holds 82 decoded instructions and 251 bytes
+  in the identity window.  The identity check stays open at 33 of 82
+  instructions and 16 of 251 bytes, because V2 saves the frame pointer first,
+  keeps the stream in `esi` and `edi`, uses another local layout, and copies
+  the header fields in another order.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ba4c --count 82 --rebuilt work/rebuild/atkload.exe
+  --rebuilt-map work/rebuild/replay_load_atk.map --rebuilt-symbol
+  replay_load_atk_` and `python3 tools/rebuild/run.py run --function 0x1ba4c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

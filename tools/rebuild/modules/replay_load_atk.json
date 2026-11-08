@@ -1,0 +1,32 @@
+{
+  "exe": "atkload.exe",
+  "map": "replay_load_atk.map",
+  "name": "replay_load_atk",
+  "run": {
+    "command": "atkload.exe > atkload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "atkload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_load_atk.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_load_atk_main.c"
+    }
+  ]
+}
