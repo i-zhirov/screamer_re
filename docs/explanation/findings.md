@@ -12579,6 +12579,86 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  Phase R is complete after this row.
 
+## The member_open module at 0x4c128
+
+- Observation: the original body at `0x4c128` holds 190 instructions and 613
+  bytes up to the `ret` at `0x4c38c`.  The next function starts at `0x4c38d`,
+  so the store record keeps the 613-byte extent and sets no separate function
+  size.  The identity check uses 190 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c128 --count 190` and
+  `tools/rebuild/functions/0x4c128.json`.
+- Observation: the only direct caller at `0x4c106` is `fopen` at `0x4c08d`.
+  The caller passes the stream record in `eax` and the member name in `edx`.
+  The record therefore takes the section `Resource loader`.
+  Evidence: the call site at `0x4c106` and
+  `tools/rebuild/functions/0x4c08d.json`.
+- Observation: the directory sits at the end of the container.  The function
+  seeks four bytes before the end, reads the directory size through `fread` at
+  `0xc607b`, seeks back by the size plus four bytes through `fseek` at
+  `0xd484f`, and reads 32-byte records forward.
+  Evidence: the block at `0x4c13b` through `0x4c192`.
+- Observation: a record holds the member name at `+0x00` with every byte
+  exclusive-ORed with `0x3a`, the offset at `+0x10`, the size at `+0x14`, the
+  end offset at `+0x18`, and the flags at `+0x1c`.  The function exclusive-ORs
+  each name byte until a zero byte and compares the name with the wanted member
+  through `stricmp` at `0x4d9ba`.  A non-matching record with a non-empty name
+  reads the next record.  An empty name ends the search.
+  Evidence: the block at `0x4c197` through `0x4c1d3`.
+- Observation: a missing member copies the name to `stream + 0x78` through
+  `strcpy` at `0xd47ee`, closes the stream through `fclose` at `0xc6245`, sets
+  the state at `stream + 0xac` to 2, and returns -1.
+  Evidence: the block at `0x4c1de` through `0x4c20a`.
+- Observation: a found member sets the line flag at `stream + 0x14` from bit 0
+  of the record flags at `stream + 0x74`, the compression flag at
+  `stream + 0x10` from bit 1, the end at `stream + 0x08` from the record offset
+  plus the end offset, the start at `stream + 0x04`, and the position at
+  `stream + 0x0c`.  It seeks to the start.
+  Evidence: the block at `0x4c20f` through `0x4c264`.
+- Observation: when the category at `stream + 0x20` has no `b` through
+  `strchr` at `0xd494b` and the line flag is clear, the function closes the
+  stream and reopens the path at `stream + 0x24` with the category as the mode
+  through `fopen` at `0xc5fe5`.  A failed reopen returns -1.
+  Evidence: the block at `0x4c269` through `0x4c2b9`.
+- Observation: when the compression flag is set, the function allocates the
+  0x8490-byte decoder context through `memory_alloc` at `0x30050` and
+  initializes it through `lzw_init` at `0x4d360`.
+  Evidence: the block at `0x4c2be` through `0x4c2ff`.
+- Observation: when the line flag and the compression flag are both set, the
+  function allocates the member size plus one bytes through `malloc` at
+  `0xd1f25`, expands the member through `lzw_expand` at `0x4d3fc` with the
+  context, the buffer, the member size, the end offset plus one, and the
+  handle, and clears `stream + 0x18`.  A failed allocation returns 5.
+  Otherwise it clears the buffer pointer at `stream + 0x1c` and returns 0.
+  Evidence: the block at `0x4c305` through `0x4c38c`.
+- Inference: the member search, the directory layout, the file-layer caller,
+  and the stream fields support the name `member_open`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call site, the directory layout, and the stream fields.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction, so the module builds with `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/member_open.c` and
+  `tools/rebuild/modules/member_open.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The seven paths cover a plain member in the binary
+  category, a compressed member with the line flag, a missing member, a text
+  member in the text category, a failed reopen, a failed decoder allocation,
+  and a failed output allocation.  The harness fills every text at run time,
+  because DOS/4G leaves the initialized data pages zero.
+  Evidence: `python3 tools/rebuild/harness.py run --module member_open`,
+  `work/rebuild/memopn.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4c128`.
+- Observation: the rebuilt body holds 190 instructions and 591 bytes.  The
+  identity check stays open at 59 of 190 instructions, 31 of 591 bytes, and 0
+  of 3 relocation slots.  The V2 toolchain puts the frame first, keeps the
+  stream in `esi`, keeps the name in a local, folds the seek, and emits another
+  search loop.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c128 --count 190 --rebuilt work/rebuild/memopn.exe
+  --rebuilt-map work/rebuild/member_open.map --rebuilt-symbol member_open_`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the

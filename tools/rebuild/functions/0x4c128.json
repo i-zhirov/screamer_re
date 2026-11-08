@@ -1,9 +1,107 @@
 {
   "address": "0x4c128",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 190,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c128 holds 190 instructions and 613 bytes up to the ret at 0x4c38c; the next function starts at 0x4c38d, so the store record keeps the 613-byte extent and sets no separate function size; the identity check uses 190 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x4c106 is fopen at 0x4c08d; the caller passes the stream record in eax and the member name in edx, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function seeks four bytes before the end, reads the directory size, seeks back by the size plus four bytes, and reads 32-byte records forward; it exclusive-ORs each name byte with 0x3a until a zero byte and compares the name with the wanted member through stricmp at 0x4d9ba; a non-matching record with a non-empty name reads the next record, and an empty name ends the search"
+    },
+    {
+      "kind": "note",
+      "text": "a missing member copies the name to stream + 0x78 through strcpy at 0xd47ee, closes the stream through fclose at 0xc6245, sets the state at stream + 0xac to 2, and returns -1"
+    },
+    {
+      "kind": "note",
+      "text": "a found member sets the line flag at stream + 0x14 from bit 0 of the record flags at stream + 0x74, the compression flag at stream + 0x10 from bit 1, the end at stream + 0x08 from the record offset plus the end offset, the start at stream + 0x04, and the position at stream + 0x0c; it seeks to the start through fseek at 0xd484f; when the category at stream + 0x20 has no b through strchr at 0xd494b and the line flag is clear, it closes the stream and reopens the path at stream + 0x24 with the category as the mode through fopen at 0xc5fe5, and a failed reopen returns -1"
+    },
+    {
+      "kind": "note",
+      "text": "when the compression flag is set, the function allocates the 0x8490-byte decoder context through memory_alloc at 0x30050 and initializes it through lzw_init at 0x4d360; when the line flag and the compression flag are both set, it allocates the member size plus one bytes through malloc at 0xd1f25, expands the member through lzw_expand at 0x4d3fc, and clears stream + 0x18; a failed allocation returns 5; otherwise it clears the buffer pointer at stream + 0x1c and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the member search, the directory layout, the file-layer caller, and the stream fields support the name member_open; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original uses no floating-point instruction, so the module needs no FPU stub"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c128 --count 190"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c128 --count 190 --rebuilt work/rebuild/memopn.exe --rebuilt-map work/rebuild/member_open.map --rebuilt-symbol member_open_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module member_open"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c128"
+    },
+    {
+      "kind": "finding",
+      "text": "The member_open module at 0x4c128"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the stream record, the simulated directory, and the stubs of the file layer and the decoder layer; the seven paths cover a plain member in the binary category, a compressed member with the line flag, a missing member, a text member in the text category, a failed reopen, a failed decoder allocation, and a failed output allocation; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 190 decoded instructions and 591 bytes; the identity check stays open at 59 of 190 instructions, 31 of 591 bytes, and 0 of 3 relocation slots, because V2 saves the frame first, keeps the stream in esi, keeps the name in a local, folds the seek, and emits another search loop; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "member_open",
+  "name": "member_open",
   "notes": [],
   "object_offset": "0x3c128",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 591,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 59,
+        "instructions_total": 190,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c128",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:070e873f445f4ab1347c7aae3e11adc1aa7e3f907e25ddb3a2ab44dbdabe640b",
+    "source_digest": "sha256:8073cb262ec2a161063ea0139794e9cc0aa5037c0da194f924958170e366c14c",
+    "tool": "run.py"
+  },
+  "role": "Searches the container directory for the named member, sets the stream bounds and flags, and prepares the decoder context and output buffer.",
+  "section": "Resource loader",
   "size": 613,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "member_open_"
 }

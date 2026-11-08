@@ -435,7 +435,7 @@ reproduce the original bytes.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x4c128` | unnamed | 613 | 190 | 15 | 0 |
+| `0x4c128` | `member_open` (done) | 613 | 190 | 15 | 0 |
 | `0x835c0` | unnamed | 225 | 56 | 0 | 0 |
 | `0x2ce84` | unnamed | 225 | 61 | 6 | 18 |
 | `0x2ca40` | unnamed | 223 | 60 | 10 | 0 |
@@ -452,7 +452,7 @@ This table starts Phase S.
 
 ## Position
 
-Two hundred sixty-three modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -572,5 +572,6 @@ and `replay_save` at `0x1b738`, and
 `race_records_screen_init` at `0x2c954`, and
 `sound_source_frame_prepare` at `0x8affc`, and
 `opponent_records_init` at `0x15378`, and
-`player_screen_offset` at `0x18ccc`.
-The next unnamed function is `0x4c128`.
+`player_screen_offset` at `0x18ccc`, and
+`member_open` at `0x4c128`.
+The next unnamed function is `0x835c0`.
