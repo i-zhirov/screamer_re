@@ -19063,3 +19063,66 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x16b98`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The sprite_load module at 0x257b0
+
+- Observation: the original body at `0x257b0` holds 67 instructions and 261
+  bytes up to the `ret` at `0x258b4`.  The next function starts at `0x258b8`, so
+  the store record keeps the 264-byte extent and sets no separate function
+  size.  The identity check uses 67 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x257b0 --count 67` and
+  `tools/rebuild/functions/0x257b0.json`.
+- Observation: the two direct callers name the function.  `race_data_load` at
+  `0x131a8` calls it at `0x13426` with `logo%c.spr` and at `0x134b6` with
+  `game%c.spr`.  `menu_space_init` at `0x29d08` calls it at `0x29db4` with
+  `menu%c.spr`.  Each caller builds the member name and the container path
+  first, so the record takes the section The graphics decoders.
+  Evidence: the call sites at `0x13426`, `0x134b6`, and `0x29db4`, and the
+  member names at object-3 offsets `0x501`, `0x534`, and `0xf5d`.
+- Observation: the function opens the member with the path, the member name,
+  and the category `rb` at object-3 offset `0xeb4` through `0x4c08d`.  A failed
+  open runs the file error report at `0x4bf88` and then `exit(0)` at `0x300be`.
+  Evidence: the blocks at `0x257c1` through `0x257ed` and the string at
+  object-3 offset `0xeb4`.
+- Observation: the function reads the four-byte record count at object-3
+  offset `0x15cd4` and the four-byte data size at `0x15cdc` through `0x4c4e5`.
+  It gets the `SPRITES` resource of `count * 0x14` bytes at object-3 offset
+  `0xeb7` through `0x2eed0` and stores the pointer at `0x15ccc`.  A zero
+  result runs the memory error report at `0x2edad`.
+  Evidence: the blocks at `0x257ed` through `0x25845` and the string at
+  object-3 offset `0xeb7`.
+- Observation: the function reads the `count * 0x14` bytes into the first
+  resource.  It gets the `SPRITES` resource of the data size at object-3
+  offset `0xebf` and stores the pointer at `0x15ce0`.  A zero result runs the
+  memory error report.  It reads the data size bytes into the second resource,
+  closes the stream at `0x4c38d`, and returns 0.
+  Evidence: the blocks at `0x25845` through `0x258b4` and the string at
+  object-3 offset `0xebf`.
+- Inference: the two sprite member names, the caller group, and the two
+  `SPRITES` resources support the name `sprite_load`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the member names above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/sprite_load.c` and
+  `tools/rebuild/modules/sprite_load.json`.
+- Observation: the harness holds the record count, the data size, the two
+  resource pointers, the engine pointer, and the two resource buffers.  The
+  four paths cover the success load with two records, the open failure, the
+  zero record resource, and the zero data resource.  The output holds the
+  markers `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sprite_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module sprite_load`, and
+  `work/rebuild/spr.txt`.
+- Observation: the diff reports 10 of 67 instructions and 27 of 251 bytes
+  equal.  The identity check stays open because V2 saves the frame pointer
+  first, builds the harness constant texts in local buffers, keeps the two
+  arguments in `esi` and `edi`, and uses `imul` for the record size.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x257b0 --count 67 --rebuilt work/rebuild/spr.exe
+  --rebuilt-map work/rebuild/sprite_load.map --rebuilt-symbol sprite_load_` and
+  `python3 tools/rebuild/run.py run --function 0x257b0`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
