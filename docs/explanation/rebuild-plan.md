@@ -428,6 +428,28 @@ reproduce the original bytes.
 
 This row completes Phase R.
 
+### Phase S: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x4c128` | unnamed | 613 | 190 | 15 | 0 |
+| `0x835c0` | unnamed | 225 | 56 | 0 | 0 |
+| `0x2ce84` | unnamed | 225 | 61 | 6 | 18 |
+| `0x2ca40` | unnamed | 223 | 60 | 10 | 0 |
+| `0x8b610` | unnamed | 222 | 65 | 3 | 0 |
+| `0x1a144` | unnamed | 219 | 63 | 3 | 15 |
+| `0x2b308` | unnamed | 218 | 66 | 0 | 0 |
+| `0x21f40` | unnamed | 215 | 87 | 0 | 42 |
+| `0x1b974` | unnamed | 213 | 67 | 5 | 2 |
+| `0x20ec8` | unnamed | 208 | 58 | 7 | 5 |
+| `0x1814c` | unnamed | 208 | 56 | 1 | 0 |
+| `0x4c5c7` | unnamed | 206 | 72 | 1 | 0 |
+
+This table starts Phase S.
+
 ## Position
 
 Two hundred sixty-three modules carry a recipe and a result: the twelve Phase A modules,
