@@ -436,7 +436,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x4c128` | `member_open` (done) | 613 | 190 | 15 | 0 |
-| `0x835c0` | unnamed | 225 | 56 | 0 | 0 |
+| `0x835c0` | `sound_event_transform` (done) | 225 | 56 | 0 | 0 |
 | `0x2ce84` | unnamed | 225 | 61 | 6 | 18 |
 | `0x2ca40` | unnamed | 223 | 60 | 10 | 0 |
 | `0x8b610` | unnamed | 222 | 65 | 3 | 0 |
@@ -452,7 +452,7 @@ This table starts Phase S.
 
 ## Position
 
-Two hundred sixty-four modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -573,5 +573,6 @@ and `replay_save` at `0x1b738`, and
 `sound_source_frame_prepare` at `0x8affc`, and
 `opponent_records_init` at `0x15378`, and
 `player_screen_offset` at `0x18ccc`, and
-`member_open` at `0x4c128`.
-The next unnamed function is `0x835c0`.
+`member_open` at `0x4c128`, and
+`sound_event_transform` at `0x835c0`.
+The next unnamed function is `0x2ce84`.

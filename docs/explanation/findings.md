@@ -12659,6 +12659,66 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
 
+## The sound_event_transform module at 0x835c0
+
+- Observation: the plan row records a 225-byte body of 56 instructions.  The
+  body starts at `0x835c0` and ends at the `ret` at `0x836a0`.  The next store
+  record starts at `0x836ac`, so the store record keeps the 236-byte extent and
+  sets no separate function size.  The identity check uses 56 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x835c0 --count 56` and
+  `tools/rebuild/functions/0x835c0.json`.
+- Observation: the only direct caller is `sound_effects_update` at `0x81ab0`.
+  It calls this function in the per-frame event path after the event helper at
+  `0x8a8d8`, so the record takes the section `object_update_all callees`.
+  Evidence: the call at `0x81b35` and the disassembly of `0x81ab0`.
+- Observation: the helper at `0x8a8d8` sets the source pointer at `0x7446c`
+  from the event record at `0x74464`.  The setup at `0x83560` patches the twelve
+  immediate matrix fields of this function from the view basis at `view + 0x118`.
+  The on-disk value `0xaaaabbbb` is the linker fill value, so the original
+  patches its own code.  The rebuild reads the twelve values from the global
+  `event_matrix`.
+  Evidence: the stores at `0x83562` through `0x835ba` and the immediates at
+  `0x835ea` through `0x83647`.
+- Observation: the source is a list of 6-byte records that hold the signed
+  short x, y, and z values.  The list ends at the signed short x value `0x7fff`.
+  Evidence: the loop at `0x835e0` through `0x836a0`.
+- Observation: the function forms the camera-space point from the 3x3 basis and
+  the three translations with the Q14 arithmetic shift.  It stores the three
+  dwords at `0x4f308` with a 12-byte stride.  A positive third value stores the
+  clipped point `0x10001000`.  A non-positive third value scales the first two
+  values through the table at `0x3badc` and stores the packed 16-bit pair at the
+  ES destination from the selector at `0x2149c` with a 6-byte stride.
+  Evidence: the block at `0x835e0` through `0x8368d`.
+- Inference: the caller path, the event source list, the camera basis, and the
+  point and screen outputs support the name `sound_event_transform`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call site and the data flow above.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction, so the module builds without `-of+` and links no FPU stub.  The
+  flat harness models the ES destination with a byte pointer.
+  Evidence: `tools/rebuild/sound_event_transform.c` and
+  `tools/rebuild/modules/sound_event_transform.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `6` and `D`.  The seven paths cover the positive third value, the zero
+  and negative table index, the 6-byte and 12-byte strides, the off-diagonal
+  basis, the two sides of the compare, and the end marker at the first record.
+  Evidence: `tools/rebuild/sound_event_transform_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_event_transform`, and
+  `work/rebuild/sevtx.txt`.
+- Observation: the rebuilt body holds 56 instructions and 204 bytes.  The
+  identity check stays open at 9 of 56 instructions, 1 of 204 bytes, and 0 of 20
+  relocation slots.  The C reads the basis from memory, keeps the point cursor
+  in a register, and stores the screen value through a pointer.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x835c0 --count 56 --rebuilt work/rebuild/sevtx.exe
+  --rebuilt-map work/rebuild/sound_event_transform.map --rebuilt-symbol
+  sound_event_transform_` and `python3 tools/rebuild/run.py run --function
+  0x835c0`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the
