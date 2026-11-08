@@ -19606,3 +19606,68 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x15984`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The traffic_simulation_update module at 0x201d0
+
+- Observation: the original body at `0x201d0` holds 66 instructions and 237
+  bytes up to the `ret` at `0x202bc`.  The next function starts at `0x202c0`,
+  so the store record keeps the 240-byte extent and sets no separate function
+  size.  The identity check uses 66 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x201d0 --count 66` and
+  `tools/rebuild/functions/0x201d0.json`.
+- Observation: the only direct caller at `0x1ffd7` is the frame update at
+  `0x1ff70`.  The frame update runs the five view groups in order, and the mode
+  byte `DAT_0011d260` selects the group.  Bit `0x10` selects this group.  No
+  named function sits between the frame update and the target, so the record
+  takes the section `Program functions`.
+  Evidence: the call at `0x1ffd7`, the disassembly of `0x1ff70`, and the
+  record of `race_simulation_update` at `0x2003c`.
+- Observation: the function returns at once when bit 0 of `DAT_00118e1d` is
+  clear or when bit `0x10` of `DAT_0011d260` is clear.
+  Evidence: the tests at `0x201d6` and `0x201e3`.
+- Observation: the function then runs `player_car_view_update` at `0x16f34`,
+  the player physics group at `0x15a80`, the player effect group at `0x15bac`,
+  and the player step group at `0x15ab8` on the player object at object-3
+  offset `0xf91c`.  It then runs `traffic_step` at `0x1eae0` with the retry
+  limit 3.
+  Evidence: the calls at `0x201f5`, `0x201ff`, `0x20209`, `0x20213`, and
+  `0x2021f`.
+- Observation: the first loop walks the `0x2a8`-byte traffic records at
+  `DAT_00113cd8` while the index `DAT_0000634c` stays below the count
+  `DAT_00115218`.  It runs the record update at `0x1f108` on each record.  The
+  group then runs `race_position_update` at `0x20428`, the traffic effect group
+  at `0x15b44`, `player_update` at `0x19ab0`, and `player_car_link` at
+  `0x15c1c`.  The second loop walks the same records and runs
+  `traffic_object_link` at `0x1ef68` on each record.
+  Evidence: the loops at `0x2022c` and `0x20286`, the calls at `0x2025e`,
+  `0x20268`, `0x2026d`, `0x20279`, and `0x202b1`, and the stride arithmetic at
+  `0x20241` through `0x20252`.
+- Inference: the frame update caller, the two gates, the player steps, the
+  traffic step, and the two record loops support the name
+  `traffic_simulation_update`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction, so the module builds with `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/traffic_simulation_update.c` and
+  `tools/rebuild/modules/traffic_simulation_update.json`.
+- Observation: the harness holds the two gate bytes, the traffic count, the
+  shared counter, two traffic records, and the eleven callee stubs.  The five
+  paths cover the clear input gate, the clear mode bit, the zero count, one
+  record, and two records.  The step stub checks the retry limit 3.  The output
+  holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/traffic_simulation_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_simulation_update`, and
+  `work/rebuild/tsim.txt`.
+- Observation: the rebuilt module holds 17 of 66 instructions, 12 of 237
+  bytes, and 0 of 30 relocation slots equal.  The identity check stays open
+  because V2 saves the frame pointer first, keeps the loop counters in other
+  slots, and builds the record address with `imul`.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x201d0 --count 66 --rebuilt work/rebuild/tsim.exe
+  --rebuilt-map work/rebuild/traffic_simulation_update.map --rebuilt-symbol
+  traffic_simulation_update_` and `python3 tools/rebuild/run.py run --function
+  0x201d0`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
