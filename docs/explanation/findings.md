@@ -17470,3 +17470,68 @@ temporary `-od` recipe.
   background_scale_` and `python3 tools/rebuild/run.py run --function 0x83ca8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The text_draw module at 0x25020
+
+- Observation: the original body at `0x25020` holds 292 instructions and 1044
+  bytes up to the `ret 4` at `0x25431`.  The next store record starts at
+  `0x254a8`, so the store record keeps the 1160-byte extent and sets no
+  separate function size.  The identity check uses 292 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25020 --count 292` and
+  `tools/rebuild/functions/0x25020.json`.
+- Observation: the five arguments arrive in the Watcom register order: the
+  screen x in `eax`, the screen y in `edx`, the text in `ebx`, the font index
+  in `ecx`, and the color on the stack.  The function shifts the color left by
+  four and stores the base at `0x15460`.
+  Evidence: the prologue at `0x25020` through `0x25040`.
+- Observation: the font index selects a 12-byte descriptor from the table at
+  `DAT_00015438` with the height at `+0x00`, the first character at `+0x04`,
+  and the count at `+0x08`.  It selects a `0x500`-byte glyph row from the
+  table at `DAT_00015434`.  Each glyph entry holds the advance at `+0x00` and
+  the bitmap offset at `+0x04`, and the bitmap base is `DAT_0001543c`.  Each
+  bitmap row holds `(width + 1) / 2` packed bytes, two pixels per byte.
+  Evidence: the blocks at `0x25089` through `0x250df` and `0x2525e` through
+  `0x252d3`.
+- Observation: the clip rectangle is the right edge `0x280`, the bottom edge
+  `DAT_00015448`, the top edge `DAT_00015444`, and the left edge
+  `DAT_0001544c`.  The function returns 3 when the position is outside the
+  rectangle or above the glyph height, returns 2 when the font index is at or
+  past the count, and returns 0 at the end of the text.
+  Evidence: the checks at `0x25053` through `0x250d8` and the return at
+  `0x2542d` through `0x25431`.
+- Observation: the control bytes 1 and 2 clear and set the uniform cell mode,
+  and the control bytes 3 and 4 clear and set the widened mode.  The uniform
+  cell is as wide as the widest glyph plus two.  The other mode uses the glyph
+  width plus one, plus one more in the widened mode.  Each glyph pixel is the
+  four-bit value or the color base, and a zero nibble stays transparent.
+  Evidence: the control block at `0x253ed` through `0x25416`, the advance at
+  `0x2539d` through `0x253e5`, and the pixel writes at `0x25310` through
+  `0x25352`.
+- Observation: the callers `panel_draw_centered` at `0x2e7cc`,
+  `credits_scroll` at `0x27c34`, `race_results_screen` at `0x2a558`,
+  `net_race_lobby` at `0x2d7c4`, `race_panel_2` at `0x2e21c`, `race_panel_3`
+  at `0x2e58c`, and `race_panel_4` at `0x2e724` draw text through `0x25020`.
+  The record takes the name `text_draw` with the confidence inferred and the
+  section `Program functions`, because the callers sit in several sections.
+  Evidence: the call sites and `docs/reference/program-map.md`.
+- Observation: the harness holds the one font, the three glyphs, the
+  descriptor, the clip rectangle, and the video buffer.  The ten paths cover
+  the default cell, the advance of two glyphs, the whole skip, the partial
+  left cut, the font bound, the bottom and right bounds, the widened clear,
+  the top clip, and the uniform cell.  The output holds the markers `0`
+  through `9` and `D`.
+  Evidence: `tools/rebuild/text_draw_main.c`,
+  `python3 tools/rebuild/harness.py run --module text_draw`, and
+  `work/rebuild/txd.txt`.
+- Observation: the rebuilt function keeps the same behavior in C but holds
+  fewer instructions than the 292 original instructions, because the original
+  keeps the draw state in the BSS cells at `0x154xx` and the C build keeps the
+  same state in locals.  The identity check stays open at 38 of 292
+  instructions and 25 of 918 bytes.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25020 --count 292 --rebuilt work/rebuild/txd.exe
+  --rebuilt-map work/rebuild/text_draw.map --rebuilt-symbol text_draw_` and
+  `python3 tools/rebuild/run.py run --function 0x25020`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

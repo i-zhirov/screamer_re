@@ -1,9 +1,95 @@
 {
   "address": "0x25020",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 292,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25020 holds 292 instructions and 1044 bytes up to the ret 4 at 0x25431; the next record starts at 0x254a8, so the store record keeps the 1160-byte extent and sets no separate function size; the identity check uses 292 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five arguments arrive in the Watcom register order: the screen x in eax, the screen y in edx, the text in ebx, the font index in ecx, and the color on the stack; the color base is the color times sixteen"
+    },
+    {
+      "kind": "note",
+      "text": "the font index selects a 12-byte descriptor from the table at DAT_00015438 with the height at +0x00, the first character at +0x04, and the count at +0x08, and a 0x500-byte glyph row from the table at DAT_00015434; each glyph entry holds the advance at +0x00 and the bitmap offset at +0x04, and the bitmap base is DAT_0001543c"
+    },
+    {
+      "kind": "note",
+      "text": "the clip rectangle is the right edge 0x280, the bottom edge DAT_00015448, the top edge DAT_00015444, and the left edge DAT_0001544c; the function returns 3 outside the rectangle or above the glyph height, returns 2 past the font count, and returns 0 at the end of the text"
+    },
+    {
+      "kind": "note",
+      "text": "the control bytes 1 and 2 clear and set the uniform cell mode, and the control bytes 3 and 4 clear and set the widened mode; the uniform cell is as wide as the widest glyph plus two, and the other mode uses the glyph width plus one and one more in the widened mode"
+    },
+    {
+      "kind": "note",
+      "text": "the callers panel_draw_centered at 0x2e7cc, credits_scroll at 0x27c34, race_results_screen at 0x2a558, net_race_lobby at 0x2d7c4, race_panel_2 at 0x2e21c, race_panel_3 at 0x2e58c, and race_panel_4 at 0x2e724 draw text through 0x25020; the record keeps the name text_draw with the confidence inferred and the section Program functions, because the callers sit in several sections"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the one font, the three glyphs, the descriptor, the clip rectangle, and the video buffer, and the ten paths cover the default cell, the advance of two glyphs, the whole skip, the partial left cut, the font bound, the bottom and right bounds, the widened clear, the top clip, and the uniform cell; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25020 --count 292"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25020 --count 292 --rebuilt work/rebuild/txd.exe --rebuilt-map work/rebuild/text_draw.map --rebuilt-symbol text_draw_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25020"
+    },
+    {
+      "kind": "finding",
+      "text": "The text_draw module at 0x25020"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function keeps the same behavior in C but holds fewer instructions than the 292 original instructions, because the original keeps the draw state in the BSS cells at 0x154xx and the C build keeps the same state in locals; the identity check stays open at 38 of 292 instructions and 25 of 918 bytes; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "text_draw",
+  "name": "text_draw",
   "notes": [],
   "object_offset": "0x15020",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 918,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 38,
+        "instructions_total": 292,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25020",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:2bb298077c8cf5631b410ad6e0ceb942730e24afa0274adfd7d64df406487876",
+    "source_digest": "sha256:87cc6348c4fb6154349fefa302c6017058166545f8b31011db1484fdefceefa3",
+    "tool": "run.py"
+  },
+  "role": "Draws a text string with a font, a color, and the clip rectangle.",
+  "section": "Program functions",
   "size": 1160,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "text_draw_"
 }
