@@ -18603,3 +18603,60 @@ temporary `-od` recipe.
   Evidence: the data flow above and the sound chain.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The traffic_push_response module at 0x17b54
+
+- Observation: the original body at `0x17b54` holds 70 instructions and 279
+  bytes up to the `ret` at `0x17c6a`.  The next function starts at `0x17c6c`.
+  The store record keeps the 280-byte extent and sets no separate function
+  size.  The identity check uses 70 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x17b54 --count 70` and
+  `tools/rebuild/functions/0x17b54.json`.
+- Observation: the only direct caller is `traffic_collision_pass` at `0x175dc`.
+  It calls this function at `0x1775a` with the zero flag on the velocity
+  branch.  It calls at `0x177de` with the set flag on the contact branch.  The
+  pass runs from the traffic effect group at `0x15b44` on the player object at
+  object-3 offset `0xf91c`.  The record takes the section
+  `The vehicle state chain`.
+  Evidence: the two call sites and the finding "The traffic_collision_pass
+  module at 0x175dc".
+- Observation: the function always calls `table_lookup` at `0x1f718` with 1.
+  It sets the turn rate at `+0x54c` to 5000.0.  With a zero flag it returns.
+  With a non-zero flag it keeps the contact distance at `+0x55c` above zero.
+  It forms the terms at `+0x550` and `+0x558` from the deltas at `+0x564` and
+  `+0x56c` over the distance.  It copies both terms to `+0x80c` and `+0x814`.
+  Evidence: the block at `0x17b61` through `0x17bf4`.
+- Observation: the function moves the player position at `+0x4b0` and
+  `+0x4b8` by the contact distance at `+0x560` times the term, minus the
+  delta.  The result truncates toward zero through the helper at `0x4d9f4`.
+  Evidence: the block at `0x17bfa` through `0x17c60`.
+- Observation: the original has the EBP frame.  The module builds with `-of+`.
+  The module converts a float to an integer.  The local
+  `traffic_push_response_fpu.asm` makes `__CHP` truncate toward zero.
+  Evidence: the prologue at `0x17b54` and the two calls at `0x17c25` and
+  `0x17c5b`.
+- Observation: the harness holds the player object and the `table_lookup`
+  stub.  The six paths cover the zero flag, the zero distance, the fractional
+  sum, the negative toward-zero truncation, the negative distance, and the
+  non-unit flag.  The output holds the markers `0` through `5` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/traffic_push_response_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_push_response`, and
+  `work/rebuild/tpush.txt`.
+- Observation: the rebuilt module holds 70 decoded instructions and 265 bytes.
+  The identity check stays open at 9 of 70 instructions, 19 of 265 bytes, and
+  0 of 5 relocation slots.  V2 keeps the object in `ecx`, saves fewer
+  registers, keeps the first term on the FPU stack, and uses another call
+  shape.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17b54 --count 70 --rebuilt work/rebuild/tpush.exe
+  --rebuilt-map work/rebuild/traffic_push_response.map --rebuilt-symbol
+  traffic_push_response_` and
+  `python3 tools/rebuild/run.py run --function 0x17b54`.
+- Inference: the caller name, the contact fields, the two terms, and the
+  player position move support the name `traffic_push_response`.  The original
+  has no symbol for the function.  The record keeps the name with the
+  confidence `inferred`.
+  Evidence: the data flow above and the traffic chain.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

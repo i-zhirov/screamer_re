@@ -397,7 +397,7 @@ reproduce the original bytes.
 | `0x18ba8` | `sla_marker_check` (done) | 291 | 90 | 2 | 8 |
 | `0x4d4c4` | `lzw_block` (done) | 290 | 73 | 2 | 0 |
 | `0x8adac` | `sound_voice_setup` (done) | 279 | 71 | 1 | 0 |
-| `0x17b54` | unnamed | 279 | 70 | 3 | 26 |
+| `0x17b54` | `traffic_push_response` (done) | 279 | 70 | 3 | 26 |
 | `0x82c14` | unnamed | 277 | 72 | 0 | 0 |
 | `0x15874` | unnamed | 269 | 69 | 18 | 0 |
 | `0x1d200` | unnamed | 268 | 70 | 2 | 32 |
@@ -408,7 +408,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred forty-three modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred forty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -510,5 +510,6 @@ and `player_car_wheel_effect_update` at `0x19980`, and
 `sound_source_frame_select` at `0x8b1d4`, and
 `body_point_collision_detect` at `0x11e74`, and the Phase Q modules
 `championship_record_select` at `0x293a8`, `sla_marker_check` at `0x18ba8`,
-`lzw_block` at `0x4d4c4`, and `sound_voice_setup` at `0x8adac`.
-The next unnamed function is `0x17b54`.
+`lzw_block` at `0x4d4c4`, and `sound_voice_setup` at `0x8adac`, and
+`traffic_push_response` at `0x17b54`.
+The next unnamed function is `0x82c14`.
