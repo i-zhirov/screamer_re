@@ -421,14 +421,14 @@ reproduce the original bytes.
 | `0x833a4` | `sound_source_collect` (done) | 242 | 98 | 0 | 0 |
 | `0x15984` | `scene_setup` (done) | 240 | 70 | 7 | 0 |
 | `0x201d0` | `traffic_simulation_update` (done) | 237 | 66 | 11 | 0 |
-| `0x2c954` | unnamed | 235 | 65 | 9 | 0 |
+| `0x2c954` | `race_records_screen_init` (done) | 235 | 65 | 9 | 0 |
 | `0x8affc` | unnamed | 234 | 74 | 9 | 0 |
 | `0x15378` | unnamed | 229 | 70 | 2 | 0 |
 | `0x18ccc` | unnamed | 226 | 69 | 3 | 19 |
 
 ## Position
 
-Two hundred fifty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred sixty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -544,5 +544,6 @@ and `replay_save` at `0x1b738`, and
 `tri_point_test` at `0x1c38a`, and
 `sound_source_collect` at `0x833a4`, and
 `scene_setup` at `0x15984`, and
-`traffic_simulation_update` at `0x201d0`.
-The next unnamed function is `0x2c954`.
+`traffic_simulation_update` at `0x201d0`, and
+`race_records_screen_init` at `0x2c954`.
+The next unnamed function is `0x8affc`.

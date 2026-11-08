@@ -12336,6 +12336,72 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   race_records_screen_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_records_screen_init module at 0x2c954
+
+- Observation: the original body at `0x2c954` holds 65 instructions and 235
+  bytes up to the `ret` at `0x2ca3e`.  The next function starts at `0x2ca40`,
+  so the store record keeps the 236-byte extent and sets no function size.
+  The identity check uses 65 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2c954 --count 65` and
+  `tools/rebuild/functions/0x2c954.json`.
+- Observation: the only direct caller at `0x2becc` is case 6 of the state init
+  dispatcher at `0x2be94`.  The jump table at linear `0x2be70` maps the state 6
+  to `0x2becc`.  The matching state 6 update at `0x295fb` calls
+  `race_records_screen` at `0x2d4b8`, and `race_state_update` at `0x29564` is
+  a `race_frame` callee at `0x2807c`, so the record takes the section
+  `race_frame callees`.
+  Evidence: the jump table at `0x2be70`, the call at `0x2becc`, and the call
+  at `0x295fb`.
+- Observation: the function reads the menu index `DAT_0011fb60`, the row
+  `DAT_0011fb08[index]`, and the base `DAT_00102de8[index]`.  It stores the
+  dword at base + row * 16 + 0xc in `DAT_0012098c`.
+  Evidence: the block at `0x2c962` through `0x2c98b`.
+- Observation: the function sets `DAT_00120380` at 8.0, `DAT_0011fac8` at 1,
+  and `DAT_00120378` at 1.5, and runs the init at `0x2dff4`.
+  Evidence: the stores at `0x2c98b` through `0x2c99c` and the call at
+  `0x2c9a2`.
+- Observation: the function builds the member `load<track + 1>H.pcx` from the
+  format at object-3 offset `0x11a2` and the letter `H`.  It loads the member
+  from `gfx\graf.dat` at object-3 offset `0x11af` into `DAT_0011fad0` with the
+  palette `DAT_0010cf5c` through `pcx_load` at `0x1b5a4`.  A non-zero result
+  runs the cleanup at `0x15150`.
+  Evidence: the format at file offset `0xf79a2`, the archive at `0xf79af`, and
+  the calls at `0x2c9c2` and `0x2c9d5`.
+- Observation: the function sets `DAT_00118e08` at 0.08 and `DAT_000007f9` at
+  8, builds the palette shades through `0x258d0`, presents the buffer with the
+  scale 0 and the offset 0 through `0x27ec8`, copies `0x3e800` bytes to
+  `DAT_00121528` through `0x8c150`, fills the screen through `0x2aa98`,
+  presents again, and clears the highlight row `DAT_00120990`.
+  Evidence: the blocks at `0x2c9e3` through `0x2ca31`.
+- Inference: the state 6 caller, the selected track `DAT_0012098c`, the load
+  member, and the shared init tail with `championship_screen_init` at `0x2c7a8`
+  support the name `race_records_screen_init`.  The module records the name
+  with the confidence `inferred`.
+  Evidence: the call graph, the selected track, the member name, and the two
+  init tails.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction.  The module builds with `-of+` and links the shared
+  `fpu_stub.asm` float run-time support.
+  Evidence: the prologue at `0x2c954` and the module record.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, and `D`.  The paths cover the track 5 with the member `load6H.pcx`,
+  the track 9 with the member `load10H.pcx` and the failed load cleanup, and
+  the track 99 with the member `load100H.pcx`.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  race_records_screen_init`, `work/rebuild/rrsi.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2c954`.
+- Observation: the rebuilt module holds 65 decoded instructions.  The identity
+  check stays open at 17 of 65 instructions, 16 of 235 bytes, and 0 of 33
+  relocation slots.  The V2 toolchain saves the frame pointer first, orders
+  the pushes differently, and reaches the data through near addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2c954 --count 65 --rebuilt work/rebuild/rrsi.exe
+  --rebuilt-map work/rebuild/race_records_screen_init.map --rebuilt-symbol
+  race_records_screen_init_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the
