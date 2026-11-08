@@ -18324,3 +18324,70 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x11e74`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The championship_record_select module at 0x293a8
+
+- Observation: the original body at `0x293a8` holds 78 instructions and 288
+  bytes up to the `ret` at `0x294c7`.  The next function starts at `0x294c8`,
+  so the store record keeps the 288-byte extent and sets no separate function
+  size.  The identity check uses 78 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x293a8 --count 78` and
+  `tools/rebuild/functions/0x293a8.json`.
+- Observation: the only direct caller at `0x292ae` is the `net_race_screen`
+  case for record type 3 at `0x28ba4`.  The type 3 record is the standings page
+  that `championship_screen` at `0x2cf68` draws.  The case calls this function
+  and then enters the state through `race_state_begin` at `0x294c8` with the
+  value 5, so the module takes the section `race_frame callees`.
+  Evidence: the call at `0x292ae`, the jump table at linear `0x28b94`, and the
+  finding "The championship_screen module at 0x2cf68".
+- Observation: the selected record `DAT_001203dc` picks one 0x2c-byte record
+  from the table at object-3 offset `0x22bc`.  The record field `+0x04` is the
+  value, `+0x08` is the title index, `+0x10` is the win record, `+0x14` is the
+  lose record, and `+0x24` is the standings row.
+  Evidence: the blocks at `0x293b2` through `0x2941f` and the table at module
+  linear `0x1022bc`.
+- Observation: the function reads the standings car value
+  `DAT_00120400[row]` and the result flag `DAT_00120804`.  A car value below 4
+  with a clear flag takes the win path when the title index is below 3 or the
+  car value is 1.
+  Evidence: the blocks at `0x293d2` through `0x293fc`.
+- Observation: on the win path a row other than 5 stores the old record in
+  `DAT_001203e0` and selects the win record.  Row 5 with the point sum
+  `DAT_001203e4` at or above the value selects the win record in both slots and
+  clears the six standings slots to -1.  Every other path selects the lose
+  record in `DAT_001203dc` and stores the record before the old one in
+  `DAT_001203e0`.
+  Evidence: the blocks at `0x29402` through `0x294c7`.
+- Inference: the championship record table, the standings slots, the point
+  sum, the result flag, and the two follow-up records support the name
+  `championship_record_select`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the call graph.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original uses no floating-point instruction, so the module needs
+  no FPU stub.
+  Evidence: the prologue at `0x293a8` and
+  `tools/rebuild/modules/championship_record_select.json`.
+- Observation: the harness holds the selected and previous record indices, the
+  point sum, the six standings car slots, the result flag, and the 0x2c-byte
+  championship records.  The seven paths cover the win path, a high car value,
+  a set result flag, a high title index with and without the car value 1, the
+  last row at the value, and the last row below the value.  The output holds
+  the markers `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/championship_record_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module championship_record_select`,
+  and `work/rebuild/crsel.txt`.
+- Observation: the rebuilt body holds 44 instructions and 143 bytes up to its
+  `ret`.  The identity check decodes 78 instructions from the symbol, so its
+  range continues past the function.  The check stays open at 10 of 78
+  instructions and 10 of 238 bytes, because V2 uses another prologue and
+  register order, uses `imul` for the record index, and keeps the record
+  pointer in `eax`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x293a8 --count 78 --rebuilt work/rebuild/crsel.exe
+  --rebuilt-map work/rebuild/championship_record_select.map --rebuilt-symbol
+  championship_record_select_` and
+  `python3 tools/rebuild/run.py run --function 0x293a8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
