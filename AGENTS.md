@@ -106,8 +106,10 @@ screamer_re/
 │   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
 │   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
 │   │   ├── run.py             # run the declared checks and print progress
-│   │   ├── view.py            # render the self-contained status page
+│   │   ├── view.py            # render the five status-page views
 │   │   ├── docs.py            # render the program-map tables
+│   │   ├── callgraph.py       # build and check the named call graph
+│   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
 │   │   ├── modules/           # the ten module recipes
@@ -128,6 +130,8 @@ python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/docs.py render
+python3 tools/rebuild/callgraph.py build
+python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
 ```
 
@@ -142,7 +146,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/store.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -205,7 +209,7 @@ open ~/Documents/Screamer.app
       tools/rebuild/store.py tools/rebuild/harness.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
-      tools/pipeline_check.py` to check the syntax
+      tools/rebuild/callgraph.py tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
@@ -274,6 +278,10 @@ open ~/Documents/Screamer.app
   counts, for example the page count and the object count.
 - Keep It Boring: the tools use the standard library and one
   `ctypes` binding to capstone.
+- Shared View Logic: every record element of the status page carries
+  `data-key`, `data-address`, `data-name`, `data-module`, `data-status`, and
+  `data-stale`. The filter and the selection use these attributes, so a new
+  view adds no separate filter or selection code.
 
 Layers:
 
@@ -318,6 +326,8 @@ through the store.
   gives 57 checks, `--skip-runtime` gives 46 checks, and both flags give 42
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
+- Stage 12 checks the program-map tables and the call graph for drift.  The
+  call graph check needs capstone and the original executable.
 - `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.

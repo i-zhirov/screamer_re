@@ -321,8 +321,10 @@ The files:
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, and the extent guard |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
-| `view.py` | render the self-contained status page of the store |
+| `view.py` | render the self-contained status page of the store: the board, the table, the address-space map, the treemap, and the call graph |
 | `docs.py` | render the `program-map.md` tables and check the drift |
+| `callgraph.py` | build the named call graph from the store and the original executable, and check the drift |
+| `callgraph.json` | the direct call edges between named records |
 | `diff_module.py` | the module diff; it compares the rebuilt code with the original code |
 
 ```sh
@@ -331,8 +333,23 @@ python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/docs.py render
+python3 tools/rebuild/callgraph.py build
+python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
 ```
+
+`view.py html` writes five views. The board groups the records by the
+program-map section. The table lists one row per record. The map places each
+function on an axis of the module address space and groups the functions by
+section. The treemap sizes each section and function by the byte span. The call
+graph places the named functions in columns by call depth. The five views share
+the filters, the selection, and the detail pane.
+
+`callgraph.py build` scans the body of each named record and resolves each
+direct call target to the record that starts at or before it. `check` writes
+nothing and exits 1 when `callgraph.json` differs from the scan. The view reads
+the committed file, so it needs no game image. Run `callgraph.py build` after a
+record gains a name or moves.
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,

@@ -19,6 +19,7 @@ Initial reconnaissance is complete.  The project has:
   (`tools/rebuild/run.py`),
 - a self-contained status page of the store (`tools/rebuild/view.py`),
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
+- a named call graph with a drift check (`tools/rebuild/callgraph.py`),
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
