@@ -18251,3 +18251,76 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x8b1d4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The body_point_collision_detect module at 0x11e74
+
+- Observation: the original body at `0x11e74` holds 85 instructions and 292
+  bytes up to the `ret` at `0x11f97`.  The next function starts at `0x11f98`,
+  so the store record keeps the 292-byte extent and sets no separate function
+  size.  The identity check uses 85 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11e74 --count 85` and
+  `tools/rebuild/functions/0x11e74.json`.
+- Observation: the only direct caller is at `0x15ad4` in the second player
+  step group at `0x15ab8`.  The group runs the player car steps on the player
+  object at object-3 offset `0xf91c` after `player_lap_progress_update` at
+  `0x194a0` and before `player_segment_update` at `0x11f98` and
+  `wheel_contact_update` at `0x11a30`.  `car_setup` at `0x142dc` and the five
+  view groups call the group, so the module takes the section The vehicle
+  state chain.
+  Evidence: the call at `0x15ad4` in the group at `0x15ab8` and the finding
+  "The player_segment_update module at 0x11f98".
+- Observation: the function forms the absolute cosine of `+0x4d0` and the
+  absolute cosine of `+0x4c8` through `0x4da66`.  It clears the body contact
+  flag `+0x40` and walks the four 0x2c-byte body slots at `+0x54` through
+  `+0x104`.
+  Evidence: the block at `0x11e7e` through `0x11ecb`.
+- Observation: a slot holds the two local offsets at `+0x00` and `+0x08`, the
+  screen position at `+0x0c` and `+0x14`, and the contact flag at `+0x18`.
+  Evidence: the reads at `0x11ee6` and `0x11ef6` and the stores at `0x11f2f`,
+  `0x11f4c`, and `0x11f74`.
+- Observation: for each slot the function scales the two offsets by the two
+  cosines, truncates them through `0x4d9f4`, and rotates the pair through
+  `0x2218c` by the negative yaw `+0x4cc`.  It adds the view offsets `+0x4b0`
+  and `+0x4b8` and stores the screen position through the globals `0x8038` and
+  `0x8040`.
+  Evidence: the block at `0x11ee3` through `0x11f55`.
+- Observation: the map collision check at `0x11c00` reads the screen position
+  through the globals `0x8038` and `0x8040`.  A zero return marks a contact,
+  so the slot flag `+0x18` takes the compare result and the body flag `+0x40`
+  takes 1 on any contact.
+  Evidence: the block at `0x11f5a` through `0x11f8e`.
+- Inference: the four body slots, the two cosines, the two screen positions,
+  the contact flags, and the only caller support the name
+  `body_point_collision_detect`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the conversions to an integer use the Watcom helper at
+  `0x4d9f4`, which truncates toward zero, and the cosine uses the routine at
+  `0x4da66`.  The harness links no math library, so the local
+  `body_point_collision_detect_fpu.asm` supplies `cos` and `fabs` and makes
+  `__CHP` truncate toward zero.  The original has the EBP frame, so the module
+  builds with `-of+`.
+  Evidence: `tools/rebuild/body_point_collision_detect_fpu.asm` and the block
+  at `0x11ee6` through `0x11f01`.
+- Observation: the harness holds the player object, the four body slots, the
+  two cosines, the yaw, the two view offsets, the two position globals, and
+  the two callee stubs.  The six paths cover the no-contact path, the contact
+  on every slot, the contact on the first and the third slot, the negative yaw
+  angle, the absolute cosine of pi, and the loop bound.  The output holds the
+  markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/body_point_collision_detect_main.c`,
+  `python3 tools/rebuild/harness.py run --module body_point_collision_detect`,
+  and `work/rebuild/bpcdet.txt`.
+- Observation: the rebuilt body holds 85 instructions and 267 bytes.  The
+  identity check stays open at 12 of 85 instructions, 8 of 267 bytes, and 0 of
+  4 relocation slots, because V2 saves the frame first, keeps the object in
+  `ebx` and the slot in `ecx`, uses other local offsets, and keeps the values
+  in locals.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11e74 --count 85 --rebuilt work/rebuild/bpcdet.exe
+  --rebuilt-map work/rebuild/body_point_collision_detect.map --rebuilt-symbol
+  body_point_collision_detect_` and
+  `python3 tools/rebuild/run.py run --function 0x11e74`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

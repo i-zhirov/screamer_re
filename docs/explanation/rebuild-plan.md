@@ -384,11 +384,11 @@ reproduce the original bytes.
 | `0x19980` | `player_car_wheel_effect_update` (done) | 297 | 90 | 4 | 7 |
 | `0x11f98` | `player_segment_update` (done) | 295 | 96 | 3 | 5 |
 | `0x8b1d4` | `sound_source_frame_select` (done) | 293 | 103 | 0 | 11 |
-| `0x11e74` | unnamed | 292 | 85 | 6 | 17 |
+| `0x11e74` | `body_point_collision_detect` (done) | 292 | 85 | 6 | 17 |
 
 ## Position
 
-Two hundred thirty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred thirty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -487,5 +487,6 @@ and `race_position_update` at `0x20428`, and `replay_load` at `0x1b840`,
 and `material_load` at `0x4cd9c`, and `terrain_contact_update` at `0x1cbac`,
 and `player_car_wheel_effect_update` at `0x19980`, and
 `player_segment_update` at `0x11f98`, and
-`sound_source_frame_select` at `0x8b1d4`.
-The next unnamed function is `0x11e74`.
+`sound_source_frame_select` at `0x8b1d4`, and
+`body_point_collision_detect` at `0x11e74`.
+The next unnamed function is `0x293a8`.

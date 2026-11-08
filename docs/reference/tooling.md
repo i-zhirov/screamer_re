@@ -620,7 +620,10 @@ The files:
 | `file_error_report_main.c` | the `file_error_report` test harness: the interface record, the printer stub, the exit stub, and the eight paths |
 | `player_car_init.c` | the rebuilt `player_car_init` module: the record copy, the cockpit name build, the cockpit resource load, the cars list read, and the SHADOW and animation object loads |
 | `player_car_init_main.c` | the `player_car_init` test harness: the record table, the selected index, the player object, the four stubs, and the six paths |
-| `modules/*.json` | the two hundred and thirty-nine module records: the sources, the compiler, the link, and the run expectations |
+| `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
+| `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
+| `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
+| `modules/*.json` | the two hundred and forty module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
