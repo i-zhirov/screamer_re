@@ -623,7 +623,7 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the two hundred and seventy-four module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and seventy-six module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -1013,10 +1013,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 315 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 311 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 300 checks.  Both flags
-report 296 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 327 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 323 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 312 checks.  Both flags
+report 308 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:
