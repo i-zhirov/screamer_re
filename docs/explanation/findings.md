@@ -12468,6 +12468,62 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The opponent_records_init module at 0x15378
+
+- Observation: the original body at `0x15378` holds 70 instructions and 229
+  bytes up to the `ret` at `0x1545c`.  The next function starts at `0x15460`,
+  so the store record keeps the 232-byte extent and sets no separate function
+  size.  The identity check uses 70 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15378 --count 70` and
+  `tools/rebuild/functions/0x15378.json`.
+- Observation: the only direct caller at `0x13564` is `race_track_load` at
+  `0x13540`.  `race_session_start` at `0x128e0` calls `0x13540` at `0x1294e`
+  and drops a non-zero result.  The record therefore takes the section
+  `race_session_start callees`.
+  Evidence: the byte sweep for a relative call to `0x15378` and
+  `tools/rebuild/functions/0x13540.json`.
+- Observation: the difficulty flag `DAT_0011d2b8` below 1 stores the clear flag
+  `DAT_0010cf58` and returns 0 at once.  A value of 1 or more stores the set
+  flag and walks the `DAT_0010f178` opponent records of 0xbc bytes at
+  `DAT_0010f180`.
+  Evidence: the block at `0x15384` through `0x15398`.
+- Observation: a non-zero load value loads the opponent object first through
+  the object table at `0x6530` and the slot at `record + 0x18`.  A non-zero
+  result returns at once.
+  Evidence: the block at `0x15424` through `0x15448`.
+- Observation: for every record the function copies the track field at `+0x10`
+  to the path field at `+0x44`, takes the state entry at
+  `DAT_0010f174 + track * 0x24 + 0x20` into `+0x48`, clears `+0x4c` and
+  `+0x50`, and sets the sound field at `+0x38` to -1.  After the loop it runs
+  `opponent_update` at `0x20954` with 1 and returns 0.
+  Evidence: the block at `0x153a5` through `0x15456`.
+- Inference: the opponent record array, the load path, and the closing update
+  support the name `opponent_records_init`.  The module records the name with
+  the confidence `inferred`.
+  Evidence: the call graph, the record array, and the update call.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original uses no floating-point instruction and calls no FPU
+  helper.
+  Evidence: the prologue at `0x15378` and the module record.
+- Observation: the behavior check passes.  The harness prints the markers `0`,
+  `1`, `2`, `3`, and `D`.  The paths cover the clear difficulty flag, the zero
+  load value, the non-zero load value with one load per record and the slot at
+  `record + 0x18`, and a failing second load that returns 7 before the update.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  opponent_records_init`, `work/rebuild/oprecini.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15378`.
+- Observation: the rebuilt body holds 70 instructions and 218 bytes.  The
+  identity check stays open at 17 of 70 instructions, 15 of 218 bytes, and 0 of
+  21 relocation slots.  The V2 toolchain puts the frame first, saves five
+  registers, keeps the record in a register, multiplies with `imul`, and uses
+  another branch layout.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15378 --count 70 --rebuilt work/rebuild/oprecini.exe
+  --rebuilt-map work/rebuild/opponent_records_init.map --rebuilt-symbol
+  opponent_records_init_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The strict byte gate and the whole-image oracle
 
 - The default identity gate accepts three verdicts.  Only one of them, the

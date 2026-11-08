@@ -1,0 +1,30 @@
+{
+  "exe": "oprecini.exe",
+  "map": "opponent_records_init.map",
+  "name": "opponent_records_init",
+  "run": {
+    "command": "oprecini.exe > oprecini.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "oprecini.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_records_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_records_init_main.c"
+    }
+  ]
+}
