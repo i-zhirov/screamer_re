@@ -18660,3 +18660,66 @@ temporary `-od` recipe.
   Evidence: the data flow above and the traffic chain.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The camera_project module at 0x82c14
+
+- Observation: the original body at `0x82c14` holds 72 instructions and 277
+  bytes up to the `ret` at `0x82d28`.  The next recorded function starts at
+  `0x82e0c`.  The store record keeps the 504-byte extent and sets no separate
+  function size.  The identity check uses 72 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x82c14 --count 72` and
+  `tools/rebuild/functions/0x82c14.json`.
+- Observation: the only direct caller is `camera_update` at `0x8ac99`.  That
+  helper stores the camera pointer in `0x7a7ac`, calls the transform at
+  `0x8b610`, and then calls this function.  The race frame path runs the
+  helper, so the record takes the section `race_frame callees`.
+  Evidence: the call at `0x8ac99` and the finding "The camera_update module
+  at 0x8ac78".
+- Observation: the function reads the camera record from the global
+  `0x7a7ac`.  The record holds three angle indices at `+0x00`, `+0x04`, and
+  `+0x08`.  An angle index selects an 8-byte table entry at `0x203d0`.  The
+  entry holds a signed 16-bit cosine in the low word at `+0x00` and a signed
+  16-bit sine in the low word at `+0x04`.
+  Evidence: the loads at `0x82c23` through `0x82c55` and the angle table
+  model of the finding "The radar_world_draw module at 0x1057c".
+- Observation: the function sign-extends each table value and shifts it one
+  bit to the right with the arithmetic shift, which converts the Q15 value to
+  Q14.  The first pass stores the three pairs in the globals `0x724cc`,
+  `0x724d0`, `0x724d4`, `0x724d8`, `0x724dc`, and `0x724e0`.
+  Evidence: the `movsx` and `sar` blocks at `0x82c5c` through `0x82c98`.
+- Observation: the second pass reads the camera pointer and the three angles
+  again.  It forms the complement index `0x7ff - angle` for each angle and
+  stores the second three pairs in the globals `0x724e4`, `0x724e8`,
+  `0x724ec`, `0x724f0`, `0x724f4`, and `0x724f8`.
+  Evidence: the block at `0x82c9d` through `0x82d1b`.
+- Observation: the original saves all registers and the four segment
+  registers.  It has no EBP frame and uses no floating-point instruction.  The
+  module builds without `-of+` and links no FPU stub.
+  Evidence: the prologue at `0x82c14` and the epilogue at `0x82d20`.
+- Observation: the harness holds the camera pointer, two camera records, the
+  `0x800`-entry angle table, and the twelve output globals.  The four paths
+  cover the negative odd arithmetic shifts, the table limits, a second call
+  with one new angle, and a second camera pointer with a zero table.  The
+  output holds the markers `0` through `3` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/camera_project_main.c`, `python3
+  tools/rebuild/harness.py run --module camera_project`, and
+  `work/rebuild/cproj.txt`.
+- Observation: the rebuilt module holds 72 decoded instructions and 290 bytes.
+  The identity check stays open at 25 of 72 instructions, 12 of 277 bytes, and
+  0 of 46 relocation slots.  V2 saves the registers one by one, keeps the
+  camera pointer in `eax` and the angles in registers, and emits the table
+  reads in another order.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x82c14 --count 72 --rebuilt work/rebuild/cproj.exe
+  --rebuilt-map work/rebuild/camera_project.map --rebuilt-symbol
+  camera_project_` and `python3 tools/rebuild/run.py run --function 0x82c14`.
+- Inference: the `camera_update` record already calls the function the
+  projection at `0x82c14`.  The three angle indices, the cosine and sine
+  table, and the two complement sets support the name `camera_project`.  The
+  original has no symbol for the function.  The record keeps the name with the
+  confidence `inferred`.
+  Evidence: the data flow above and the camera chain.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

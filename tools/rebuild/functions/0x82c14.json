@@ -1,9 +1,95 @@
 {
   "address": "0x82c14",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 72,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x82c14 holds 72 instructions and 277 bytes up to the ret at 0x82d28; the next recorded function starts at 0x82e0c, so the store record keeps the 504-byte extent and sets no separate function size; the identity check uses 72 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is camera_update at 0x8ac99; that helper runs in the race frame path, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the camera record from the global 0x7a7ac; the record holds three angle indices at +0x00, +0x04, and +0x08"
+    },
+    {
+      "kind": "note",
+      "text": "an angle index selects an 8-byte table entry at 0x203d0; the entry holds a signed 16-bit cosine in the low word at +0x00 and a signed 16-bit sine in the low word at +0x04; the function sign-extends each value and shifts it one bit to the right with the arithmetic shift"
+    },
+    {
+      "kind": "note",
+      "text": "the first pass stores the three cosine and sine pairs in the globals 0x724cc, 0x724d0, 0x724d4, 0x724d8, 0x724dc, and 0x724e0; the second pass forms the complement index 0x7ff - angle and stores the second three pairs in the globals 0x724e4, 0x724e8, 0x724ec, 0x724f0, 0x724f4, and 0x724f8"
+    },
+    {
+      "kind": "note",
+      "text": "the original saves all registers and the four segment registers, has no EBP frame, and uses no floating-point instruction; the module builds without -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the camera pointer, two camera records, the 0x800-entry angle table, and the twelve output globals; the four paths cover the negative odd arithmetic shifts, the table limits, a second call with one new angle, and a second camera pointer with a zero table; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the camera_update record already calls the function the projection at 0x82c14; the three angle indices, the cosine and sine table, and the complement pairs support the name camera_project; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x82c14 --count 72"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x82c14 --count 72 --rebuilt work/rebuild/cproj.exe --rebuilt-map work/rebuild/camera_project.map --rebuilt-symbol camera_project_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x82c14"
+    },
+    {
+      "kind": "finding",
+      "text": "The camera_project module at 0x82c14"
+    }
+  ],
+  "implementation": "c",
+  "module": "camera_project",
+  "name": "camera_project",
   "notes": [],
   "object_offset": "0x72c14",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 277,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 72,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x82c14",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:0a0738de93e711f9f6802891be12a0edaec0f9478900baeef75843987eb88b89",
+    "source_digest": "sha256:75521f6f2b413bb86b96ebe1f12d386c5a1e40a0674ca70e2b73c8fede9a8215",
+    "tool": "run.py"
+  },
+  "role": "Builds the camera projection basis from the three camera angle indices.",
+  "section": "race_frame callees",
   "size": 504,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "camera_project_"
 }

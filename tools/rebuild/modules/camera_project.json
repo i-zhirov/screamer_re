@@ -1,0 +1,27 @@
+{
+  "exe": "cproj.exe",
+  "map": "camera_project.map",
+  "name": "camera_project",
+  "run": {
+    "command": "cproj.exe > cproj.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "cproj.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "camera_project.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "camera_project_main.c"
+    }
+  ]
+}
