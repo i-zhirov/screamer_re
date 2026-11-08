@@ -1,0 +1,35 @@
+{
+  "exe": "ccpush.exe",
+  "map": "car_collision_push.map",
+  "name": "car_collision_push",
+  "run": {
+    "command": "ccpush.exe > ccpush.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "ccpush.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_push.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "car_collision_push_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_push_main.c"
+    }
+  ]
+}

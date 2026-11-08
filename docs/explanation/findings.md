@@ -18806,3 +18806,64 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The message
   pointer at `0x18ff4` is a BSS global with no visible writer.  The module name
   and the field names in the harness stay inferred.
+
+## The car_collision_push module at 0x1d200
+
+- Observation: the original body at `0x1d200` holds 70 instructions and 268
+  bytes up to the `ret` at `0x1d30b`.  The next function starts at `0x1d30c`.
+  The store record keeps the 268-byte extent and sets no separate function
+  size.  The identity check uses 70 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1d200 --count 70` and
+  `tools/rebuild/functions/0x1d200.json`.
+- Observation: the only direct caller is `car_collision_pass` at `0x1d00c`.
+  It calls this function at `0x1d130` with the scanning record in `eax` and
+  the candidate in `edx`.  Just before the call it stores the contact distance
+  at `+0x488`, the x delta at `+0x48c`, the z delta at `+0x494`, and the
+  distance at `+0x484`.  `car_collision_pass` runs in the per-object step at
+  `0x1c7d0`, which runs in the object update at `0x2003c`, so the record takes
+  the section `object update callees`.
+  Evidence: the call at `0x1d130`, the stores at `0x1d155` through `0x1d10a`,
+  the finding "The car_collision_pass module at 0x1d00c", and the section of
+  `tools/rebuild/functions/0x1d00c.json`.
+- Observation: the function sets the distance at `+0x484` to 1 when it is
+  zero, so the two divisions cannot fail.  It compares the speed at `+0x418`
+  of the two records.  It replaces the larger speed with the average of the two
+  through the double 0.5 at object-3 offset `0xb1c`.
+  Evidence: the blocks at `0x1d20c` through `0x1d274` and the constant at
+  object-3 offset `0xb1c`.
+- Observation: the function forms the unit values `dx / distance` and
+  `dz / distance`.  It moves the candidate x position at `+0x454` and z
+  position at `+0x45c` to the contact distance at `+0x488` along the two
+  directions.  The original truncates both positions toward zero through the
+  helper at `0x4d9f4`.
+  Evidence: the blocks at `0x1d27a` through `0x1d306` and the two calls at
+  `0x1d2cd` and `0x1d2fd`.
+- Observation: the original has the EBP frame and uses 32 FPU instructions.
+  The module builds with `-of+` and links the local `car_collision_push_fpu.asm`.
+  The local stub makes `__CHP` truncate toward zero, because the shared
+  `fpu_stub.asm` leaves round-to-nearest.
+  Evidence: the prologue at `0x1d200`, the epilogue at `0x1d308`, and
+  `tools/rebuild/car_collision_push_fpu.asm`.
+- Observation: the harness holds the two car records and the double constant.
+  The five paths cover the faster scanning record, the faster candidate, the
+  zero distance, the negative truncation, and the fractional average.  The
+  output holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/car_collision_push_main.c`,
+  `python3 tools/rebuild/harness.py run --module car_collision_push`, and
+  `work/rebuild/ccpush.txt`.
+- Observation: the rebuilt module holds 70 instructions and 262 bytes.  The
+  identity check stays open at 10 of 70 instructions, 23 of 262 bytes, and 0 of
+  7 relocation slots.  V2 saves `ebp` first, keeps the scanning record in
+  `ecx`, uses another local layout, and orders the calls in another way.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1d200 --count 70 --rebuilt work/rebuild/ccpush.exe
+  --rebuilt-map work/rebuild/car_collision_push.map --rebuilt-symbol
+  car_collision_push_` and `python3 tools/rebuild/run.py run --function
+  0x1d200`.
+- Inference: the caller `car_collision_pass`, the speed average, and the
+  position push support the name `car_collision_push`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
