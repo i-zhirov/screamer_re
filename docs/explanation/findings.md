@@ -20128,3 +20128,67 @@ temporary `-od` recipe.
   name_entry_update_`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The net_race_lobby_init module at 0x2ca40
+
+- Observation: the original body at `0x2ca40` holds 60 instructions and 223
+  bytes up to the `ret` at `0x2cb1e`.  The next function starts at `0x2cb20`,
+  so the store record keeps the 224-byte extent and sets no function size.  The
+  identity check uses 60 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ca40 --count 60` and
+  `tools/rebuild/functions/0x2ca40.json`.
+- Observation: the only direct caller at `0x2bed3` is case 8 of the state init
+  dispatcher at `0x2be94`.  The jump table at object offset `0x1be70` maps the
+  state 8 to `0x2bed3`.  The matching state 8 update at `0x29605` calls
+  `net_race_lobby` at `0x2d7c4`, and `race_state_update` at `0x29564` is a
+  `race_frame` callee at `0x2807c`, so the record takes the section
+  `race_frame callees`.
+  Evidence: the jump table at object offset `0x1be70`, the call at `0x2bed3`,
+  and the call at `0x29605`.
+- Observation: the function sets `DAT_00120378` at 1.5, `DAT_00120380` at 8.0,
+  and `DAT_0011fac8` at 1, and runs the init at `0x2dff4`.
+  Evidence: the stores at `0x2ca4e` through `0x2ca69` and the call at
+  `0x2ca6f`.
+- Observation: the function builds the member `netH.pcx` from the format at
+  object-3 offset `0x11bc` and the letter `H`.  It loads the member from
+  `gfx\graf.dat` at object-3 offset `0x11c6` into `DAT_0011fad0` with the
+  palette `DAT_0010cf5c` through `pcx_load` at `0x1b5a4`.  A non-zero result
+  runs the cleanup at `0x15150`.
+  Evidence: the format at file offset `0xf79bc`, the archive at `0xf79c6`, and
+  the calls at `0x2ca8d` and `0x2caa0`.
+- Observation: the function sets `DAT_00118e08` at 0.08, `DAT_000007f9` at 8,
+  and `DAT_00120998` at 1, presents the buffer with the scale 0 and the offset
+  0 through `0x27ec8`, copies `0x3e800` bytes to `DAT_00121528` through
+  `0x8c150`, fills the screen through `0x2aa98`, and presents again.  It then
+  clears the lobby flag `DAT_00120994`, clears the eight 0x38-byte player
+  records at `DAT_0012099c` through `memset` at `0xd1ec0`, and waits through
+  the timing loop at `0x1ec48`.
+  Evidence: the blocks at `0x2caae` through `0x2cb11`.
+- Inference: the state 8 caller, the `netH.pcx` member, the player record
+  clear, and the shared init tail with `championship_screen_init` at `0x2c7a8`
+  support the name `net_race_lobby_init`.  The module records the name with the
+  confidence `inferred`.
+  Evidence: the call graph, the member name, and the two init tails.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction.  The module builds with `-of+` and links the shared
+  `fpu_stub.asm` float run-time support.
+  Evidence: the prologue at `0x2ca40` and the module record.
+- Observation: the harness holds the four float cells, the five integer cells,
+  the two buffers, the palette, the eight 0x38-byte player records, the
+  format, and the archive.  The two paths cover the successful load and the
+  failed load cleanup.  The output holds the markers `0`, `1`, and `D`.  The
+  behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  net_race_lobby_init`, `work/rebuild/nrlobby.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2ca40`.
+- Observation: the rebuilt module holds 13 of 60 instructions equal, 25 of 223
+  bytes equal, and 0 of 26 relocation slots equal.  The identity check stays
+  open because V2 saves the frame pointer first, orders the pushes differently,
+  folds the constant stores, and reaches the data through near addresses.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2ca40 --count 60 --rebuilt work/rebuild/nrlobby.exe
+  --rebuilt-map work/rebuild/net_race_lobby_init.map --rebuilt-symbol
+  net_race_lobby_init_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
