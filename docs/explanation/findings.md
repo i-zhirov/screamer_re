@@ -19538,3 +19538,71 @@ temporary `-od` recipe.
   0x833a4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The scene_setup module at 0x15984
+
+- Observation: the original body at `0x15984` holds 70 instructions and 240
+  bytes up to the `ret` at `0x15a73`.  The next record starts at `0x15a80`
+  after the alignment padding, so the store record keeps the 252-byte extent
+  and sets no separate function size.  The identity check uses 70
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15984 --count 70` and
+  `tools/rebuild/functions/0x15984.json`.
+- Observation: the six direct callers are the game mode starts at `0x12c0c`
+  for the modes 1 and 2, `0x12d0c` for the mode 0x10, `0x12e18` for the mode
+  4, `0x12f50` for the mode 0x100, `0x13120` for the mode 0x20, and `0x130a0`
+  for the mode 0x40.  `race_session_start` at `0x128e0` dispatches the game
+  mode to them, and every caller passes the mode argument.  The rebuilt
+  callers already declare the call as `scene_setup`, so the record keeps that
+  name with the confidence `inferred`.  The callers sit in The timing and
+  filter layer, so the record takes the same section.
+  Evidence: the call sites at `0x12ca0`, `0x12e08`, `0x12e47`, `0x1308f`,
+  `0x13110`, and `0x13197`, and `docs/reference/program-map.md`.
+- Observation: the function builds three names from the level prefix at
+  `DAT_0011d294` through `sprintf` at `0x4d32c`.  The first name is `%s%s`
+  with the suffix `i` when bit 3 of `DAT_0011d274` is set, or no suffix.  The
+  second name is `%s%c` with the character `0x41` plus `DAT_0011d2b4`.  The
+  third name is `%sdat`.  The format strings sit at object-3 offsets `0x6ba`,
+  `0x6bf`, and `0x6c4`, and the suffix strings sit at `0x6b7` and `0x6b9`.
+  Evidence: the three `sprintf` calls and the string bytes.
+- Observation: a non-zero mode loads the base list `SFXSBASE` and the level
+  list through `list_file_load` at `0x15460` into the table at
+  `DAT_00115224` with the stride 0x24 and the limit 0x24.  The first call
+  starts at the table base and stores its count at `DAT_0018d88`.  The second
+  call starts after the first count times 0x24 and its count adds at
+  `DAT_0018d84`.  The member name `SOUND_FX` and the list names `SFXSBASE` sit
+  at object-3 offsets `0x6ca`, `0x6d3`, `0x6dc`, and `0x6e0`.
+  Evidence: the two calls at `0x15a1b` and `0x15a48`, and the stores at
+  `0x15a27` and `0x15a5a`.
+- Observation: the function then loads the player sound lists through the
+  helper at `0x24600` and the sample bank through `sound_bank_load` at
+  `0x1f2e0`.  The run-time member trace and the run-time table dump hold the
+  12 `SFXSBASE` records and the two `MAP1` records, so the data flow supports
+  the name `scene_setup`.
+  Evidence: the calls at `0x15a5f` and `0x15a64`, and the sample loader notes
+  above.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction, so the module builds with `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/scene_setup.c` and
+  `tools/rebuild/modules/scene_setup.json`.
+- Observation: the harness holds the level prefix, the flag word, the player
+  index, the sound table, the two counts, and the four callee stubs.  The
+  eight paths cover the set and clear flag bit, the mode 0, the two zero list
+  counts, the letter `Z`, the longer prefix, and the other flag bit.  The
+  output holds the markers `0` through `7` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/scene_setup_main.c`,
+  `python3 tools/rebuild/harness.py run --module scene_setup`, and
+  `work/rebuild/ssetup.txt`.
+- Observation: the rebuilt module holds 19 of 70 instructions, 20 of 229
+  bytes, and 6 of 31 relocation slots equal.  The identity check stays open
+  because V2 saves the frame pointer first, keeps the three name pointers as
+  near offsets, calls the local `sprintf` stub, and builds the table
+  arithmetic with `imul`.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15984 --count 70 --rebuilt work/rebuild/ssetup.exe
+  --rebuilt-map work/rebuild/scene_setup.map --rebuilt-symbol scene_setup_`
+  and `python3 tools/rebuild/run.py run --function 0x15984`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

@@ -419,7 +419,7 @@ reproduce the original bytes.
 | `0x23328` | `path_playback_apply` (done) | 248 | 71 | 3 | 12 |
 | `0x1c38a` | `tri_point_test` (done) | 243 | 73 | 0 | 0 |
 | `0x833a4` | `sound_source_collect` (done) | 242 | 98 | 0 | 0 |
-| `0x15984` | unnamed | 240 | 70 | 7 | 0 |
+| `0x15984` | `scene_setup` (done) | 240 | 70 | 7 | 0 |
 | `0x201d0` | unnamed | 237 | 66 | 11 | 0 |
 | `0x2c954` | unnamed | 235 | 65 | 9 | 0 |
 | `0x8affc` | unnamed | 234 | 74 | 9 | 0 |
@@ -428,7 +428,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred fifty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -542,5 +542,6 @@ and `replay_save` at `0x1b738`, and
 `game_mode_10_start` at `0x12d0c`, and
 `path_playback_apply` at `0x23328`, and
 `tri_point_test` at `0x1c38a`, and
-`sound_source_collect` at `0x833a4`.
-The next unnamed function is `0x15984`.
+`sound_source_collect` at `0x833a4`, and
+`scene_setup` at `0x15984`.
+The next unnamed function is `0x201d0`.
