@@ -203,7 +203,13 @@ class ViewTestCase(unittest.TestCase):
         ]
         page = view.render_page(records, [], {"free": "sha256:" + "1" * 64})
         self.assertIn(
-            'id="progress-fill" class="progress-fill" style="width: 100%"',
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 100%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 0%"',
             page,
         )
         self.assertIn("<b>Screamer rebuild</b> · 1 function</span>", page)
@@ -226,6 +232,40 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn(
             'data-status="not_a_function">1 not_a_function</span>', page
         )
+
+    def test_page_progress_holds_verified_and_rebuilt(self) -> None:
+        page = self.page()
+        self.assertIn(
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 50%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 50%"',
+            page,
+        )
+        self.assertLess(
+            page.index('id="progress-verified"'),
+            page.index('id="progress-rebuilt"'),
+        )
+        legend = re.search(
+            r'<div class="progress-legend">.*?</div>', page, re.DOTALL
+        )
+        self.assertIsNotNone(legend, "the progress bar holds no legend")
+        self.assertIn("verified</span>", legend.group(0))
+        self.assertIn("rebuilt</span>", legend.group(0))
+        self.assertLess(
+            legend.group(0).index("legend-swatch-verified"),
+            legend.group(0).index("legend-swatch-rebuilt"),
+        )
+        swatches = re.findall(
+            r'<span class="legend-swatch[^"]*"[^>]*></span>',
+            legend.group(0),
+        )
+        self.assertEqual(len(swatches), 2)
+        for swatch in swatches:
+            self.assertIn('aria-hidden="true"', swatch)
 
     def test_page_marks_stale(self) -> None:
         changed = self.result()
@@ -314,7 +354,8 @@ class ViewTestCase(unittest.TestCase):
         )
         self.assertIn("document.querySelectorAll(TARGETS)", script)
         self.assertIn('document.querySelectorAll(".counter")', script)
-        self.assertIn('getElementById("progress-fill")', script)
+        self.assertIn('getElementById("progress-verified")', script)
+        self.assertIn('getElementById("progress-rebuilt")', script)
         self.assertIn("function setView", script)
         self.assertIn(
             'for (const name of ["board", "table", "map", "treemap", "calls"])',

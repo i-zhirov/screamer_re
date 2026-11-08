@@ -146,20 +146,39 @@ h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem; }
 }
 .view-switch.selected { border-color: var(--accent); color: var(--accent); }
 .spacer { flex: 1; }
+.progress-block { margin-bottom: 0.75rem; }
 .progress-row {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  margin-bottom: 0.75rem;
 }
 .progress-track {
+  display: flex;
   flex: 1;
   height: 6px;
   background: var(--bg-elevated);
   border-radius: 3px;
   overflow: hidden;
 }
-.progress-fill { display: block; height: 100%; background: var(--success); }
+.progress-fill { display: block; height: 100%; }
+.progress-fill-verified { background: var(--success); }
+.progress-fill-rebuilt { background: var(--error); }
+.progress-legend {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+.legend-item { display: inline-flex; gap: 0.3rem; align-items: center; }
+.legend-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.legend-swatch-verified { background: var(--success); }
+.legend-swatch-rebuilt { background: var(--error); }
 .counters { color: var(--text-secondary); font-size: 0.8rem; white-space: nowrap; }
 .content { display: flex; gap: 0.75rem; align-items: flex-start; }
 .board-column { flex: 2.1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -481,6 +500,7 @@ function applyFilters() {
   const seen = new Map();
   let visible = 0;
   let verified = 0;
+  let rebuilt = 0;
   for (const target of document.querySelectorAll(TARGETS)) {
     const name = target.dataset.name.toLowerCase();
     const match = (status === "" || target.dataset.status === status)
@@ -498,6 +518,8 @@ function applyFilters() {
       visible += 1;
       if (data.status === "verified") {
         verified += 1;
+      } else if (data.status === "rebuilt") {
+        rebuilt += 1;
       }
     }
     counts[data.status] = (counts[data.status] || 0) + 1;
@@ -506,8 +528,10 @@ function applyFilters() {
     const count = counts[counter.dataset.status] || 0;
     counter.textContent = count + " " + counter.dataset.status;
   }
-  document.getElementById("progress-fill").style.width =
+  document.getElementById("progress-verified").style.width =
     visible === 0 ? "0%" : Math.round((100 * verified) / visible) + "%";
+  document.getElementById("progress-rebuilt").style.width =
+    visible === 0 ? "0%" : Math.round((100 * rebuilt) / visible) + "%";
   updateGraphEdges();
 }
 
@@ -652,12 +676,17 @@ def _counted_rows(rows: list[dict]) -> list[dict]:
     return [row for row in rows if row.get("status") != "not_a_function"]
 
 
-def _progress_width(rows: list[dict]) -> str:
+def _progress_widths(rows: list[dict]) -> tuple[str, str]:
+    """The verified and rebuilt percentages of the progress total."""
     counted = _counted_rows(rows)
     if not counted:
-        return "0%"
+        return "0%", "0%"
     verified = sum(1 for row in counted if row.get("status") == "verified")
-    return f"{round(100 * verified / len(counted))}%"
+    rebuilt = sum(1 for row in counted if row.get("status") == "rebuilt")
+    return (
+        f"{round(100 * verified / len(counted))}%",
+        f"{round(100 * rebuilt / len(counted))}%",
+    )
 
 
 def _last_run(rows: list[dict]) -> str:
@@ -1599,13 +1628,37 @@ def _filter_row(module_names: list[str]) -> str:
     )
 
 
-def _progress_row(rows: list[dict]) -> str:
+def _progress_legend() -> str:
     return (
+        '<div class="progress-legend">'
+        '<span class="legend-item">'
+        '<span class="legend-swatch legend-swatch-verified"'
+        ' aria-hidden="true"></span>'
+        "verified</span>"
+        '<span class="legend-item">'
+        '<span class="legend-swatch legend-swatch-rebuilt"'
+        ' aria-hidden="true"></span>'
+        "rebuilt</span>"
+        "</div>"
+    )
+
+
+def _progress_row(rows: list[dict]) -> str:
+    verified_width, rebuilt_width = _progress_widths(rows)
+    return (
+        '<div class="progress-block">'
         '<div class="progress-row">'
         '<span class="progress-track">'
-        f'<span id="progress-fill" class="progress-fill"'
-        f' style="width: {_progress_width(rows)}"></span></span>'
+        f'<span id="progress-verified"'
+        f' class="progress-fill progress-fill-verified"'
+        f' style="width: {verified_width}"></span>'
+        f'<span id="progress-rebuilt"'
+        f' class="progress-fill progress-fill-rebuilt"'
+        f' style="width: {rebuilt_width}"></span>'
+        "</span>"
         f'<span id="counters" class="counters">{_counters(rows)}</span>'
+        "</div>"
+        f"{_progress_legend()}"
         "</div>"
     )
 

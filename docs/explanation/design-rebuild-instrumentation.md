@@ -463,6 +463,11 @@ Behavior the static wireframe cannot show:
 
 - The filter row narrows every view together. The progress bar and the counters
   follow the filter, so a person reads a subset.
+- The progress bar holds two fills on one track. The green fill shows the
+  `verified` rows and the red fill shows the `rebuilt` rows. The green fill
+  comes first and the red fill follows it. A legend with a color swatch and a
+  label names each fill. The swatches are `aria-hidden`, so a screen reader
+  announces only the labels.
 - The view switch keeps the selection and the filters.
 - A click on an element of a view loads the detail pane without a page load.
 - The detail pane holds the test command of the record, so a person copies it
