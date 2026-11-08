@@ -19188,3 +19188,79 @@ temporary `-od` recipe.
   angle_approach_` and `python3 tools/rebuild/run.py run --function 0x22018`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The player_cockpit_camera module at 0x1a2bc
+
+- Observation: the original body at `0x1a2bc` holds 71 instructions and 250
+  bytes up to the `ret` at `0x1a3b5`.  The next function starts at `0x1a3b8`,
+  so the store record keeps the 252-byte extent and sets no separate function
+  size.  The identity check uses 71 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1a2bc --count 71` and
+  `tools/rebuild/functions/0x1a2bc.json`.
+- Observation: the only direct caller at `0x19ea1` is the view mode dispatch
+  at `0x19e78`.  The dispatch table at `0x19e50` sends the state 0 to
+  `0x9e99`, and the dispatch passes the player object at object-3 offset
+  `0xf91c` in `eax` and the player view object at `DAT_00110a20` in `edx`.
+  The player update at `0x19ab0` and `player_view_setup` at `0x19ae8` both
+  call the dispatch.
+  Evidence: the call sweep for `0x1a2bc`, the dispatch table at `0x19e50`,
+  and the call at `0x19ea1`.
+- Observation: the seven 0x14-byte view slots at `DAT_00101da4` hold the view
+  kinds 0, 1, 2, 9, 9, 9, and 3.  The view kind 0 slot carries the render mode
+  0, the distance 0x190, and the video mode 2.  The state 0 function is the
+  default view.
+  Evidence: the table at object-3 offset `0x1da4` and the dispatch at
+  `0x19e78`.
+- Observation: the function refreshes the two list slots at `+0x460` and
+  `+0x468` through the helper at `0x11850`.  The helper copies the selected
+  object value and inverts the two top bits.  The sibling `player_view_orbit`
+  at `0x1a3b8` uses the helper at `0x117fc`, which copies the same value
+  without the inversion.
+  Evidence: the calls at `0x1a2dd` and `0x1a2f5`, and the bodies at `0x117fc`
+  and `0x11850`.
+- Observation: the function forms the pitch at `+0x30` from the contact angle
+  `+0x4c8` and the body angle `+0x4e0`.  It forms the yaw at `+0x34` from the
+  heading `+0x4cc` and the view yaw offset `+0x128`.  It forms the roll at
+  `+0x38` from the body angle `+0x4e8` times the scale at object-3 offset
+  `0x900` plus the contact angle `+0x4d0`.  The scale is 3.0.
+  Evidence: the FPU blocks at `0x1a2fa` through `0x1a345` and the float at
+  object-3 offset `0x900`.
+- Observation: the position takes the player position `+0x4b0`, `+0x4b4`,
+  and `+0x4b8` plus the body offsets `+0x4bc` and `+0x4c0` and the height bias
+  `DAT_0010cf48`.  The view keeps the two saved copies at `+0x0c` and
+  `+0x14`, which copy the x and z values.
+  Evidence: the integer blocks at `0x1a348` through `0x1a3ad` and the global
+  at object-3 offset `0xcf48`.
+- Inference: the body-fixed view with the body pitch, yaw, and roll supports
+  the name `player_cockpit_camera`.  The view kind 0 slot is the default view.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the caller, the view kind 0 slot, and the body angles above.
+- Observation: the roll scale arrives through the global `camera_roll_scale`
+  and the height bias through the global `camera_height_bias`, because the
+  minimal image does not load the constant segment.  The original has the EBP
+  frame, so the module builds with `-of+`.  The shared `fpu_stub.asm` supplies
+  the FPU run-time symbols and the float-used marker.
+  Evidence: `tools/rebuild/player_cockpit_camera.c` and
+  `tools/rebuild/modules/player_cockpit_camera.json`.
+- Observation: the harness holds the car object, the view object, the roll
+  scale, the height bias, and the list mirror stub.  The four paths cover the
+  positive values, the negative values, another roll scale with a zero bias,
+  and the two slot pointers at `+0x460` and `+0x468`.  The output holds the
+  markers `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_cockpit_camera_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_cockpit_camera`, and
+  `work/rebuild/pccam.txt`.
+- Observation: the diff reports 24 of 71 instructions and 14 of 249 bytes
+  equal.  The identity check stays open because V2 sets the frame first, keeps
+  the car in `ecx` and the view in `esi`, uses `lea` for the two slots, folds
+  the two saved-copy pairs, and keeps no EBP local slots.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1a2bc --count 71 --rebuilt work/rebuild/pccam.exe
+  --rebuilt-map work/rebuild/pccam.map --rebuilt-symbol
+  player_cockpit_camera_` and `python3 tools/rebuild/run.py run --function
+  0x1a2bc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.  The name does not prove
+  that the function draws the cockpit object.

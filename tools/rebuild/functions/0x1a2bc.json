@@ -1,9 +1,103 @@
 {
   "address": "0x1a2bc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 71,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1a2bc holds 71 instructions and 250 bytes up to the ret at 0x1a3b5; the next function starts at 0x1a3b8, so the store record keeps the 252-byte extent and sets no separate function size; the identity check uses 71 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x19ea1 is the view mode dispatch at 0x19e78; the dispatch table at 0x19e50 sends the state 0 to 0x9e99 and passes the player object at object-3 offset 0xf91c in eax and the player view object at DAT_00110a20 in edx; the player update at 0x19ab0 and player_view_setup at 0x19ae8 both call the dispatch, so the module takes the section player_view_setup callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function refreshes the two list slots at +0x460 and +0x468 through the helper at 0x11850; that helper copies the selected object value and inverts the two top bits; the sibling player_view_orbit at 0x1a3b8 uses the helper at 0x117fc, which copies the same value without the inversion"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the pitch at +0x30 from the contact angle +0x4c8 and the body angle +0x4e0, the yaw at +0x34 from the heading +0x4cc and the view yaw offset +0x128, and the roll at +0x38 from the body angle +0x4e8 times the scale at object-3 offset 0x900 plus the contact angle +0x4d0; the scale is 3.0"
+    },
+    {
+      "kind": "note",
+      "text": "the position takes the player position +0x4b0, +0x4b4, and +0x4b8 plus the body offsets +0x4bc and +0x4c0 and the height bias DAT_0010cf48; the view keeps the two saved copies at +0x0c and +0x14; the two copies at +0x0c and +0x14 copy the x and z values"
+    },
+    {
+      "kind": "note",
+      "text": "the seven 0x14-byte view slots at DAT_00101da4 hold the view kinds 0, 1, 2, 9, 9, 9, and 3; the view kind 0 slot carries the render mode 0, the distance 0x190, and the video mode 2; the body-fixed view supports the name player_cockpit_camera, and the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the roll scale arrives through the global camera_roll_scale and the height bias through the global camera_height_bias, because the minimal image does not load the constant segment; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the car object, the view object, the roll scale, the height bias, and the list mirror stub; the four paths cover the positive values, the negative values, another roll scale with a zero bias, and the two slot pointers at +0x460 and +0x468; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 24 of 71 instructions and 14 of 249 bytes equal; the identity check stays open because V2 sets the frame first, keeps the car in ecx and the view in esi, uses lea for the two slots, folds the two saved-copy pairs, and keeps no EBP local slots; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1a2bc --count 71"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1a2bc --count 71 --rebuilt work/rebuild/pccam.exe --rebuilt-map work/rebuild/pccam.map --rebuilt-symbol player_cockpit_camera_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_cockpit_camera"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1a2bc"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_cockpit_camera module at 0x1a2bc"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_cockpit_camera",
+  "name": "player_cockpit_camera",
   "notes": [],
   "object_offset": "0xa2bc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 249,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 71,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1a2bc",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:765e82da4e6631d1c72e8d89f11d238e73867913198a0678fd13efabb8353060",
+    "source_digest": "sha256:70712335537c6db0aaf08b9d16ddecf5358c5133df37122354c41f306acc68fa",
+    "tool": "run.py"
+  },
+  "role": "places the view on the player body and adds the body pitch, yaw, and roll to the camera angles for the default cockpit view",
+  "section": "player_view_setup callees",
   "size": 252,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_cockpit_camera_"
 }

@@ -1,0 +1,34 @@
+{
+  "exe": "pccam.exe",
+  "map": "pccam.map",
+  "name": "player_cockpit_camera",
+  "run": {
+    "command": "pccam.exe > pccam.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "pccam.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_cockpit_camera.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_cockpit_camera_main.c"
+    }
+  ]
+}
