@@ -1,9 +1,99 @@
 {
   "address": "0x20428",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 86,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the body runs from 0x20428 past the first ret at 0x2055b to the second ret at 0x205c0, so it holds 110 instructions and 409 bytes; the plan row and the identity check use the first 86 instructions and 308 bytes up to the first ret; the store record keeps the 412-byte extent and sets no separate function size"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct callers at 0x2005e, 0x2025e, and 0x202de are the view groups at 0x2003c, 0x201d0, and 0x202c0; the frame update at 0x1ff70 selects a view group through the mode byte DAT_0011d260; the 0x2003c group runs on the mode bits 0 and 1, the 0x201d0 group on the mode bit 0x10, and the 0x202c0 group on the mode bit 4"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when bit 0 of DAT_00118e1c is clear or when the gate DAT_001100a0 is zero, and it saves the old position DAT_0000ffa4 in DAT_0000feb0"
+    },
+    {
+      "kind": "note",
+      "text": "the traffic branch on the mode bit 0x10 walks the 0x2a8-byte traffic records at DAT_00113cd8 up to the count DAT_0011d254; it sets the position to one plus the number of records that are not -1 and whose progress at +0x28 is above DAT_0000ff9c"
+    },
+    {
+      "kind": "note",
+      "text": "the race branch on the mode bits 0 and 1 walks the 0x590-byte car records at DAT_00110ab8 up to the count DAT_0010f8ec; a record whose place at +0x410 and progress at +0x408 disagree with the position and the threshold DAT_0000ff9c swaps its place with the position and then returns"
+    },
+    {
+      "kind": "note",
+      "text": "the replay branch on the mode bit 4 runs only when DAT_0011d264 is set; it selects the ghost state at DAT_00118e98 plus the index DAT_00118ed4 ^ 1 times 0x24; an active ghost compares DAT_0000ff9c with DAT_00118f08, and an inactive ghost compares the clock DAT_001100a8 with the ghost time at +0x10, so the result is the position 1 or 2"
+    },
+    {
+      "kind": "note",
+      "text": "the old position, the position, the traffic and car records, and the ghost compare support the name race_position_update; the record takes the section The vehicle state chain, because the callers sit in the recorded view path chain; the original has no symbol, so the name is inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses floating-point instructions, so the recipe adds the FPU run-time stubs"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the gate byte, the gate value, the mode byte, the old position, the position, the traffic count, the car count, the replay flag, the replay index, the three float thresholds, four traffic records, four car records, and two ghost records; the paths cover the two gates, the three counting paths, the two car paths, the replay flag, the four ghost compares, the mode precedence, and the zero mode; the output holds the markers 0 through 9, a, b, c, and D"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x20428 --count 86"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x20428 --count 86 --rebuilt work/rebuild/rposupd.exe --rebuilt-map work/rebuild/race_position_update.map --rebuilt-symbol race_position_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x20428"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_position_update module at 0x20428"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_position_update",
+  "name": "race_position_update",
   "notes": [],
   "object_offset": "0x10428",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 308,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 86,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x20428",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:d5719bbb7260ef2a6b30c73ea25b3552318048516cb4e42fdadde81173cb8eed",
+    "source_digest": "sha256:b51ff65e070a03fedbb4985a4ccac560c71f64846bdb5a8ff817a09f276a8311",
+    "tool": "run.py"
+  },
+  "role": "updates the player race position from the traffic records, the car records, or the ghost time, according to the mode byte",
+  "section": "The vehicle state chain",
   "size": 412,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_position_update_"
 }

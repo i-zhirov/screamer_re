@@ -22,7 +22,7 @@
     },
     {
       "kind": "note",
-      "text": "the function calls func_20428, then interleaves each player step with a pass over the 0x590-byte car records at DAT_00110ab8; the player steps are player_car_view_update at 0x16f34, the physics group at 0x15a80, the effect group at 0x15bac, the step group at 0x15ab8, the proximity group at 0x15b08, player_update at 0x19ab0, and player_car_link at 0x15c1c"
+      "text": "the function calls race_position_update, then interleaves each player step with a pass over the 0x590-byte car records at DAT_00110ab8; the player steps are player_car_view_update at 0x16f34, the physics group at 0x15a80, the effect group at 0x15bac, the step group at 0x15ab8, the proximity group at 0x15b08, player_update at 0x19ab0, and player_car_link at 0x15c1c"
     },
     {
       "kind": "note",

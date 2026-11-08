@@ -161,8 +161,9 @@ current host.
   `text_draw` at `0x25020`, and
   `sound_range_reset` at `0x82e0c`, and
   `spline_table_load` at `0x14fb8`, and
-  `path_keyframe_append` at `0x231f0`;
-  thirty modules are verified, one is matching, and two hundred and one
+  `path_keyframe_append` at `0x231f0`, and
+  `race_position_update` at `0x20428`;
+  thirty modules are verified, one is matching, and two hundred and two
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -338,10 +339,11 @@ The plan follows the size order, starting with the smallest functions.
     `text_draw` at `0x25020`, and
     `sound_range_reset` at `0x82e0c`, and
     `spline_table_load` at `0x14fb8`, and
-    `path_keyframe_append` at `0x231f0`
+    `path_keyframe_append` at `0x231f0`, and
+    `race_position_update` at `0x20428`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and one open rebuilds).
+    hundred and two open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

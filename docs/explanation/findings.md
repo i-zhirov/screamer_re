@@ -17723,3 +17723,88 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/path_keyframe_append.map --rebuilt-symbol
   path_keyframe_append_` and `python3 tools/rebuild/run.py run --function
   0x231f0`.
+
+## The race_position_update module at 0x20428
+
+- Observation: the original body starts at `0x20428` and holds a first `ret`
+  at `0x2055b` and a second `ret` at `0x205c0`.  The first branch ends at the
+  first `ret`, and the other branches share the second `ret`, so the full body
+  holds 110 instructions and 409 bytes.  The plan row and the identity check
+  use the first 86 instructions and 308 bytes.  The store record keeps the
+  412-byte extent and sets no separate function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20428 --count 86`,
+  `python3 tools/le.py disasm STARTH.EXE 0x2055c --count 40`, and
+  `tools/rebuild/functions/0x20428.json`.
+- Observation: the three direct callers at `0x2005e`, `0x2025e`, and
+  `0x202de` are the view groups at `0x2003c`, `0x201d0`, and `0x202c0`.  The
+  frame update at `0x1ff70` selects a view group through the mode byte
+  `DAT_0011d260`.  The `0x2003c` group runs when bit 0 or bit 1 of the mode
+  byte is set, the `0x201d0` group when bit `0x10` is set, and the `0x202c0`
+  group when bit 4 is set.
+  Evidence: the call sweep for `0x20428`, the gates at `0x20051`, `0x201e3`,
+  and `0x202d1`, and the frame update at `0x1ff70`.
+- Observation: the function returns at once when bit 0 of `DAT_00118e1c` is
+  clear or when the gate `DAT_001100a0` is zero.  It saves the old position
+  `DAT_0000ffa4` in `DAT_0000feb0` and then selects a branch from the mode
+  byte `DAT_0011d260`.
+  Evidence: the tests at `0x20431` and `0x2043e`, the save at `0x20456`, and
+  the mode load at `0x20450`.
+- Observation: the traffic branch on the mode bit `0x10` walks the 0x2a8-byte
+  traffic records at `DAT_00113cd8` up to the count `DAT_0011d254`.  It sets
+  the position to one and adds one for each record that is not `-1` and whose
+  progress at `+0x28` is above `DAT_0000ff9c`.
+  Evidence: the loop at `0x20460` through `0x204cb`.
+- Observation: the race branch on the mode bits 0 and 1 walks the 0x590-byte
+  car records at `DAT_00110ab8` up to the count `DAT_0010f8ec`.  For each
+  record it forms `(place - position) * (DAT_0000ff9c - progress)` from the
+  place at `+0x410` and the progress at `+0x408`.  A negative product swaps
+  the place with the position, and the function then returns.  The car setup at
+  `0x142ec` sets the place at `+0x410` to the car number plus one, and the
+  track progress at `0x1db94` sets the progress at `+0x408`, so the exchange
+  updates the race order.
+  Evidence: the loop at `0x204d6` through `0x2055b`, the store at `0x1491f`,
+  and the store at `0x1df23`.
+- Observation: the replay branch on the mode bit 4 runs only when
+  `DAT_0011d264` is set.  It selects the ghost state at `DAT_00118e98` plus
+  the index `DAT_00118ed4` exclusive-or 1 times `0x24`.  An active ghost
+  compares `DAT_0000ff9c` with `DAT_00118f08`, and an inactive ghost compares
+  the clock `DAT_001100a8` with the ghost time at `+0x10`.  The result is the
+  position 1 or 2.  The finish handler at `0x23f50` repeats the same compare,
+  and the handler at `0x23ed8` tests the position 1 for the win effect.
+  Evidence: the block at `0x2055c` through `0x205c0`, the block at `0x23f50`
+  through `0x23f88`, and the test at `0x23edc`.
+- Inference: the saved old position, the position `DAT_0000ffa4`, the traffic
+  and car records, and the ghost compare support the name
+  `race_position_update`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.  The record takes the section The
+  vehicle state chain, because the callers sit in the recorded view path
+  chain.
+  Evidence: the call graph, the car place and progress fields, and the data
+  flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses floating-point instructions, so the recipe adds the
+  FPU run-time stubs.
+  Evidence: `tools/rebuild/race_position_update.c` and
+  `tools/rebuild/modules/race_position_update.json`.
+- Observation: the harness holds the gate byte, the gate value, the mode byte,
+  the old position, the position, the traffic count, the car count, the replay
+  flag, the replay index, the three float thresholds, four traffic records,
+  four car records, and two ghost records.  The paths cover the two gates, the
+  two traffic paths, the two car paths, the replay flag, the four ghost
+  compares, the mode precedence, and the zero mode.  The output holds the
+  markers `0` through `9`, `a`, `b`, `c`, and `D`.
+  Evidence: `tools/rebuild/race_position_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_position_update`, and
+  `work/rebuild/rposupd.txt`.
+- Observation: the rebuilt module holds 86 decoded instructions and 321 bytes
+  in the identity window.  The identity check stays open at 21 of 86
+  instructions, 34 of 308 bytes, and 3 of 29 relocation slots, because V2
+  saves the frame pointer first, keeps the mode byte in a register, reads the
+  data globals through near addresses, keeps the loop record and the end
+  pointer in registers, and emits the car read before the loop test.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20428 --count 86 --rebuilt work/rebuild/rposupd.exe
+  --rebuilt-map work/rebuild/race_position_update.map --rebuilt-symbol
+  race_position_update_` and `python3 tools/rebuild/run.py run --function
+  0x20428`.
