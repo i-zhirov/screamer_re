@@ -1,0 +1,36 @@
+{
+  "exe": "pseg.exe",
+  "map": "player_segment_update.map",
+  "name": "player_segment_update",
+  "run": {
+    "command": "pseg.exe > pseg.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pseg.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_segment_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_segment_update_main.c"
+    }
+  ]
+}

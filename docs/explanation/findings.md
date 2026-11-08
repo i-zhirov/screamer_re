@@ -18103,3 +18103,78 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x19980`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The player_segment_update module at 0x11f98
+
+- Observation: the original body at `0x11f98` holds 96 instructions and 295
+  bytes up to the `ret` at `0x120be`.  The next function starts at `0x120c0`,
+  so the store record keeps the 296-byte extent and sets no separate function
+  size.  The identity check uses 96 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11f98 --count 96` and
+  `tools/rebuild/functions/0x11f98.json`.
+- Observation: the only direct caller is at `0x15adc` in the second player
+  step group at `0x15ab8`.  The group runs the player car steps on the player
+  object at object-3 offset `0xf91c` after `player_lap_progress_update` at
+  `0x194a0` and the detection helper at `0x11e74`, and before
+  `wheel_contact_update` at `0x11a30`.  `car_setup` at `0x142dc` and the five
+  view groups at `0x2011b`, `0x20213`, `0x20335`, `0x203a2`, and `0x20406`
+  call the group, so the module takes the section The vehicle state chain.
+  Evidence: the call sweep for `0x11f98`, the group at `0x15ab8` through
+  `0x15b04`, and the group call sites.
+- Observation: the detection helper at `0x11e74` walks the same four
+  0x2c-byte slots at `+0x54` through `+0x104`.  It sets the flag `+0x40` when
+  a body point meets a collision shape and stores a clear flag at `+0x18`.
+  This function runs only with the flag `+0x40` set.  It skips a slot with a
+  clear flag `+0x18` and clears `+0x1c`, `+0x24`, and `+0x28` of that slot.
+  Evidence: the helper at `0x11e74` through `0x11f97` and the branch at
+  `0x12026`.
+- Observation: for each active slot the function publishes the slot position
+  `+0x0c` and `+0x14` through the globals `0x8038` and `0x8040` and calls
+  `track_nearest_node` at `0x120c0` with the mode 1.  On a hit the global
+  `0x8044` points to the nearest segment, which holds the angle at `+0x00`,
+  the x position at `+0x04`, and the y position at `+0x08`.
+  Evidence: the blocks at `0x1202d` through `0x12051` and the segment entry.
+- Observation: the function forms the delta from the segment position to the
+  slot and turns it by the negated segment angle through `0x2218c`.  It sets
+  the local x term to plus or minus 30 from its sign and turns the result by
+  the segment angle again.  It stores the difference from the delta at
+  `+0x1c` and `+0x24` and the segment angle at `+0x28`.  A search miss leaves
+  the three fields.
+  Evidence: the blocks at `0x12051` through `0x12010` and the helper body.
+- Observation: the contact step at `0x16b98` reads the flag `+0x18`, the
+  fields `+0x1c` and `+0x24`, and the angle `+0x28` of the same slots.  It
+  shifts the player position `+0x4b0` and `+0x4b8` by the smallest lateral
+  term and stores the segment angle at `+0x50`.
+  Evidence: the blocks at `0x16b98` through `0x16c9d`.
+- Inference: the caller group, the slot layout, and the consumer support the
+  name `player_segment_update`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The rotation helper writes two int values eight bytes apart, so
+  the module uses the point structure.  The function converts no float to an
+  integer and calls no math routine, so the shared `fpu_stub.asm` supplies
+  the FPU run-time symbols and the float-used marker.
+  Evidence: `tools/rebuild/player_segment_update.c` and
+  `tools/rebuild/modules/player_segment_update.json`.
+- Observation: the harness holds the player object, the four slots, the two
+  position globals, one segment entry, and the two callee stubs.  The six
+  paths cover the clear flag, the clear slots, the search miss, the
+  non-negative and negative local x, and the hit and miss pair.  The output
+  holds the markers `0` through `5` and `D`.
+  Evidence: `tools/rebuild/player_segment_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_segment_update`, and
+  `work/rebuild/pseg.txt`.
+- Observation: the rebuilt body holds 70 decoded instructions and 219 bytes.
+  The identity check stays open at 21 of 96 instructions, 9 of 295 bytes, and
+  0 of 22 relocation slots, because V2 saves `ebp` first, keeps the self
+  pointer and the slot in registers, uses other local offsets, folds the two
+  stores, and hoists the loop bound.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11f98 --count 96 --rebuilt work/rebuild/pseg.exe
+  --rebuilt-map work/rebuild/player_segment_update.map --rebuilt-symbol
+  player_segment_update_` and
+  `python3 tools/rebuild/run.py run --function 0x11f98`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
