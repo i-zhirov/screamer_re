@@ -1,9 +1,91 @@
 {
   "address": "0x1a3b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 179,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x1a3b8` holds 179 instructions and 631 bytes up to the `ret` at `0x1a62e`; the next function starts at `0x1a630`, so the store record keeps the 632-byte extent and sets no function size; the identity check uses 179 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct callers at `0x19eb5`, `0x19ed8`, and `0x19ef3` are the view mode dispatch at `0x19e78`; the dispatch selects this function for the view modes 1, 2, and 0 and passes the player object at object-3 offset `0xf91c` in `eax`, the player view object at `DAT_00110a20` in `edx`, and the mode in `ebx`; the player update at `0x19ab0` and `player_view_setup` at `0x19ae8` both call the dispatch, so the module takes the section player_view_setup callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function refreshes the two list slots at `+0x460` and `+0x468` through the helper at `0x117fc`, and it wraps the player yaw at `+0x4cc` into the range zero to 2 pi through the floats at object-3 offsets `0x904` and `0x908`, which hold 2 pi and -2 pi"
+    },
+    {
+      "kind": "note",
+      "text": "the mode selects the height offset at `+0x12c`, `+0x12c`, and `+0x64`, the orbit radius at `+0x6a4`, `+0x514`, and `+0x578`, and the pitch offset at `+0x4d4` plus the double at object-3 offset `0x90c` or `0x914`; the doubles hold 6.157521772384643 and 6.094689917564392"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the height at `+0x04` from the player height `+0x4b4` and the mode offset minus the radius times the sine of the old pitch `+0x30`; a set flag `+0x7c` writes the height, the yaw `+0x34`, the second angle `+0x38`, and the pitch `+0x30` directly, and the clear flag approaches the values through the helpers at `0x22bb4` and `0x22018` with the step table index `0x51`"
+    },
+    {
+      "kind": "note",
+      "text": "the function then places the view on the orbit: `+0x00` is `+0x4b0` minus the radius times the sine of the yaw times the cosine of the pitch, and `+0x08` is `+0x4b8` plus the radius times the cosine of the yaw times the cosine of the pitch; the two saved copies sit at `+0x0c` and `+0x14`"
+    },
+    {
+      "kind": "note",
+      "text": "the view mode dispatch, the player view object, the three orbit presets, and the sibling player_route_camera and car_camera support the name player_view_orbit; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls `sin` through the helper at `0x4da72` and `cos` through `0x4da66`, and it truncates through `0x4d9f4`; this harness links no math library, so the local player_view_orbit_fpu.asm supplies `sin`, `cos`, and the truncating `__CHP`; the four constants arrive through globals, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the three modes, the pitch below zero, the high and the low yaw wrap, the approach branch with the three angle calls, and the long mode-1 offset; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1a3b8 --count 179 --rebuilt work/rebuild/pvorbit.exe --rebuilt-map work/rebuild/player_view_orbit.map --rebuilt-symbol player_view_orbit_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1a3b8"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_view_orbit",
+  "name": "player_view_orbit",
   "notes": [],
   "object_offset": "0xa3b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 566,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 31,
+        "instructions_total": 179,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1a3b8",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:206c5fb99057cee9dcfcbb86fbfed12df397700219d9fa4ee407317f798baf39",
+    "source_digest": "sha256:06265e3578e37c70aaf80f8826f650e94ff11fa0df8c804f74b1ed88e8e8ae1e",
+    "tool": "run.py"
+  },
+  "role": "places the player view on a mode-specific orbit around the player car and sets the yaw, the pitch, and the two angles",
+  "section": "player_view_setup callees",
   "size": 632,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_view_orbit_"
 }

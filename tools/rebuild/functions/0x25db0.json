@@ -1,17 +1,48 @@
 {
   "address": "0x25db0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls the DOS/4GW real-mode interrupt dispatcher with `0x1500`"
+      "text": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path"
     }
   ],
+  "module": "dpmi_real_int",
   "name": "dpmi_real_int",
   "notes": [],
-  "role": "calls the DOS/4GW real-mode interrupt dispatcher with `0x1500`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 43,
+        "bytes_total": 58,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 17,
+        "instructions_total": 17,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25db0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:eac413f546008031484fd83373d437245acafa65ec4e02d6b63491a7bbdc4ff9",
+    "source_digest": "sha256:d36f8896dca9e2ba8ed71d4641eeb255d2d8656c871d123f34496039159491a0",
+    "tool": "run.py"
+  },
+  "role": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path",
   "section": "Subsystem initialisation",
-  "size": 1272,
-  "status": "named"
+  "size": 356,
+  "status": "verified",
+  "symbol": "dpmi_real_int_"
 }

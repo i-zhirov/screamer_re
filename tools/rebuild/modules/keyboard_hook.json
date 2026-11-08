@@ -1,0 +1,31 @@
+{
+  "exe": "kbhmod.exe",
+  "map": "keyboard_hook.map",
+  "name": "keyboard_hook",
+  "run": {
+    "command": "kbhmod.exe > kbh_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "kbh_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "keyboard_hook.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "keyboard_hook_main.c"
+    }
+  ]
+}

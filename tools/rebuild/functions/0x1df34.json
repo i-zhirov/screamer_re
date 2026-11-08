@@ -1,17 +1,52 @@
 {
   "address": "0x1df34",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1df34 holds 65 instructions and 215 bytes: it forms the slide from `+0x418`, `+0x2f4`, `+0x27c`, and `+0x280`, clamps it between -2.0 and 2.0 with the slots at `0x100b4c` and `0x100b50`, and calls `filter_update` at 0x22b80 for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0` with the values `slide * 0.5`, `slide * 0.02`, and `-abs(slide * 0.02)`; the guard is the low bit of the state at `+0x25c`"
     }
   ],
+  "module": "object_slide_step",
   "name": "object_slide_step",
   "notes": [],
-  "role": "computes the slide from `+0x418` and `+0x2f4`, clamps it between -2.0 and 2.0, and calls `0x22b80` for the parts at `+0x4c8`, `+0x4b8`, and `+0x4b0`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 213,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 63,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1df34",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:3e6f8042684bbd632efc9ae1d83e97e866c5a5c6bd76374ad0959e4647c7a730",
+    "source_digest": "sha256:3daea7003fc0fcee58bfcc2acf1346d42fe4a89a2ee89a55fe2e43be3e09e8dd",
+    "tool": "run.py"
+  },
+  "role": "computes the slide from the speed and the distance, clamps it between -2.0 and 2.0, and filters the three object parts",
   "section": "object_physics callees",
   "size": 216,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_slide_step_"
 }

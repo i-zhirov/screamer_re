@@ -1,0 +1,37 @@
+{
+  "exe": "ocrmod.exe",
+  "map": "object_car_link.map",
+  "name": "object_car_link",
+  "run": {
+    "command": "ocrmod.exe > ocr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "ocr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_car_link.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "object_car_link_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_car_link_main.c"
+    }
+  ]
+}

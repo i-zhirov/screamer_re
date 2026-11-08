@@ -1,9 +1,18 @@
 {
   "address": "0xc8cbb",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c8cbb` calls `FUN_000de9be` 17 times and returns 5 on the first failure"
+    }
+  ],
+  "name": "music_driver_lock",
   "notes": [],
   "object_offset": "0xb8cbb",
+  "role": "locks the 17 music driver memory regions through DPMI AX=0x0601 and returns 5 when a lock fails",
+  "section": "The HMI sound driver",
   "size": 710,
-  "status": "unknown"
+  "status": "named"
 }

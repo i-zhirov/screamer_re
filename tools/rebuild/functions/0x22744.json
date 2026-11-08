@@ -1,9 +1,86 @@
 {
   "address": "0x22744",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 360,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x22744 holds 360 instructions and 1081 bytes up to the ret 4 at 0x22b7a; the record keeps the 1084-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x231e0 sits in the path playback at 0x23038; that function walks the 0x28-byte keyframe records that 0x231f0 appends from the view fields of the player object at 0xf91c; the frame update at 0x1ff70 selects the view group at 0x202c0, which calls 0x231f0 and 0x23038"
+    },
+    {
+      "kind": "note",
+      "text": "the caller passes the previous, the first, the second, and the next keyframe plus the fraction between the two timestamps; the function reads the four points from the pointer frame and writes three interpolated integers to the output"
+    },
+    {
+      "kind": "note",
+      "text": "the function measures the chords AB, BD, and AC with the square-root wrapper at 0x22bec; the chord AB divides by the double 3.0 at object-3 offset 0xda4; the tangents are A plus (B - D) times (|AB| / (3 * |BD|)) and B plus (A - C) times (|AB| / (3 * |AC|)), and a zero distance keeps the matching tangent"
+    },
+    {
+      "kind": "note",
+      "text": "the result is the cubic Hermite form A + t * 3(Aprime - A) + t^2 * (3Bprime - 6Aprime + 3A) + t^3 * (3Aprime + B - 3Bprime - A), where Aprime and Bprime are the two tangents; the fraction, its square, and its cube stay in single precision, the polynomial evaluates in double precision, and each axis truncates through 0x4d9f4"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the keyframe append, and the cubic form support the name spline_interpolate; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the four keyframes, the pointer frame, the output triple, and the chord scale 3.0; it covers the collinear fraction 0.5, the two endpoints, the zero |BD|, the zero |AC|, the three-dimensional point, the two three-dimensional endpoints, and the negative coordinates; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22744 --count 360 --rebuilt work/rebuild/spline.exe --rebuilt-map work/rebuild/spline_interpolate.map --rebuilt-symbol spline_interpolate_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module spline_interpolate"
+    },
+    {
+      "kind": "finding",
+      "text": "The spline_interpolate module at 0x22744"
+    }
+  ],
+  "module": "spline_interpolate",
+  "name": "spline_interpolate",
   "notes": [],
   "object_offset": "0x12744",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 55,
+        "bytes_total": 1030,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 82,
+        "instructions_total": 360,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22744",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:0d1532c1a01469c3abc6068d49ce925159fbea70f22b67614cda7d192367808b",
+    "source_digest": "sha256:4e99c981c675bdaa6b2699d7a85d17fa18e29180e72160f9f93b889e06cf7335",
+    "tool": "run.py"
+  },
+  "role": "interpolates a position between two keyframes with a cubic spline whose tangents come from the two neighboring keyframes",
+  "section": "The vehicle state chain",
   "size": 1084,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "spline_interpolate_"
 }

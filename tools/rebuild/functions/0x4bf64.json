@@ -1,17 +1,48 @@
 {
   "address": "0x4bf64",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "wraps `0xd429f` with the real-mode buffer and the protected-mode buffer"
+      "text": "formats into a stream through the run-time `__fprtf` at `0xd429f`"
     }
   ],
-  "name": "dpmi_real_copy",
+  "module": "fprintf",
+  "name": "fprintf",
   "notes": [],
-  "role": "wraps `0xd429f` with the real-mode buffer and the protected-mode buffer",
-  "section": "The runtime memory manager",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 33,
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "instructions_equal": 13,
+        "instructions_total": 13,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf64",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:ad83b350f5efe23064f4be9b83e600951957116b044bb3117b15b50c573f586f",
+    "source_digest": "sha256:d1d5b999cb3ed48bc26a15980b80bdc5baaa153ea116a4bdd39c6c9db14f34f5",
+    "tool": "run.py"
+  },
+  "role": "formats into a stream through the run-time `__fprtf` at `0xd429f`",
+  "section": "Resource loader",
   "size": 36,
-  "status": "named"
+  "status": "verified",
+  "symbol": "fprintf_"
 }

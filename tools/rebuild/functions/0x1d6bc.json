@@ -1,17 +1,56 @@
 {
   "address": "0x1d6bc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "integrates the position at `+0x454` and `+0x45c` from the float velocity at `+0x460` and `+0x468` and the factor at `+0x450` with the frame delta `DAT_00118e04`, damps the factor with `DAT_0010cf08 + 0x13c`, and clamps it at 0"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1d6bc holds 82 instructions and 339 bytes up to the first ret at 0x1d80e: it truncates each scaled velocity sum with the helper at 0x4d9f4, multiplies the factor by the damping at DAT_0010cf08 + 0x13c, clears the factor below the 10.0 constant at object 3 offset 0xb24, accumulates the dwell timer +0x46c while both positions equal the target at +0x160 and +0x168, and snaps both positions by the scale at DAT_0010cf08 + 0x180 at the 3.0 constant at offset 0xb28; the rebuild keeps the 376-byte extent and uses a module-local FPU stub with a truncating __CHP"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the integration, the factor clamp, the dwell accumulation, the snap, both truncation directions, the threshold boundary, and the damping reduction; the behavior check passes"
     }
   ],
+  "module": "object_integrate",
   "name": "object_integrate",
   "notes": [],
-  "role": "integrates the position at `+0x454` and `+0x45c` from the float velocity at `+0x460` and `+0x468` and the factor at `+0x450` with the frame delta `DAT_00118e04`, damps the factor with `DAT_0010cf08 + 0x13c`, and clamps it at 0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 267,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 62,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1d6bc",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:92c2719a7e82f3e4704c11c1c08c1f44785bcc998c2102eaf96d845cba8ebd56",
+    "source_digest": "sha256:44cc8314f59e6f9ecd52df37ae9092cb0970b52a4a081b9a1f7a1700368f73bf",
+    "tool": "run.py"
+  },
+  "role": "integrates the position at +0x454 and +0x45c from the velocity at +0x460 and +0x468 and the factor at +0x450 with the frame delta DAT_00118e04, damps the factor, and snaps the position to the target from the dwell timer",
   "section": "object_transform callees",
   "size": 376,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_integrate_"
 }

@@ -1,18 +1,49 @@
 {
   "address": "0x19ab0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "runs five steps on the player structure `DAT_00110a20`"
+      "text": "runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20`"
     }
   ],
+  "module": "player_update",
   "name": "player_update",
   "notes": [],
   "object_offset": "0x9ab0",
-  "role": "runs five steps on the player structure `DAT_00110a20`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 55,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 14,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19ab0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:e3133afe73493ca8f438435285ccb72d3544ae17c00753bf0ba3a3e95ee4ec8a",
+    "source_digest": "sha256:c8d33740d81bd2ba91172135847d28ebad4d6d2b1326579d5601cf1603d1c285",
+    "tool": "run.py"
+  },
+  "role": "runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20`",
   "section": "object_update_all callees",
   "size": 56,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "player_update_"
 }

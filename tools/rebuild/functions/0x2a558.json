@@ -1,9 +1,65 @@
 {
   "address": "0x2a558",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The race_results_screen module at 0x2a558"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2a558 holds 343 instructions and 1323 bytes up to the ret at 0x2aa82, so the record keeps the 1324-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x2a335 is the race-menu handler at 0x2a214; the named ancestors are net_race_screen at 0x28ba4 and net_race_lobby at 0x2d7c4, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the video buffer, loads load<N>H.pcx and champ5h.pcx from gfx\\graf.dat, marks the local result record at 0x13cd8 as finished with the race time DAT_0011d268, collects the finished records, sorts them by the time at +0x2c, and draws the position, the player name, the time, and the car name through text_draw at 0x25020, so the module names the function race_results_screen"
+    },
+    {
+      "kind": "note",
+      "text": "the screen index comes from the chosen player record at 0x2099c field +0x14 and a value above 5 drops by 6 and sets the flag 0x08; the input word DAT_00118e1c bits 0x1020 skip the results, and the wait loop exits on the bytes at 3 and 0x1e or polls the input behind DAT_0011d2c0 and DAT_0011d2cc"
+    }
+  ],
+  "module": "race_results_screen",
+  "name": "race_results_screen",
   "notes": [],
   "object_offset": "0x1a558",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 56,
+        "bytes_total": 970,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 47,
+        "instructions_total": 256,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2a558",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:a6de9c3244d8ecd7ff3e152291b9e70bcaebbce86055f06883945b9d9cb22257",
+    "source_digest": "sha256:1adc7c85a1d55bbea0b87e0c69b7bbd867e2a8e19a9e235d508e170fe6e926be",
+    "tool": "run.py"
+  },
+  "role": "shows the track loading screen, marks the local result as finished, sorts the finished results by the race time, draws the result lines, and waits for the exit or the input",
+  "section": "race_frame callees",
   "size": 1324,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_results_screen_"
 }

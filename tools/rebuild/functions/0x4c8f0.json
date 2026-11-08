@@ -1,17 +1,48 @@
 {
   "address": "0x4c8f0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "loads the `VIDEO_BUF` resource"
+      "text": "loads the `VIDEO_BUF` resource through `resource_get`, stores the pointer in `DAT_00021504` and `DAT_00121528`, and releases the stream on failure"
     }
   ],
+  "module": "video_buf_load",
   "name": "video_buf_load",
   "notes": [],
-  "role": "loads the `VIDEO_BUF` resource",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 53,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c8f0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:8f9ea8045a65ca0a380e8ca49e0b3612013029dc7ac029227711c5bd7d118388",
+    "source_digest": "sha256:881bd50d2b04ae3b202becacd1e09a95d1b9699c83694298992dddce9f974369",
+    "tool": "run.py"
+  },
+  "role": "loads the `VIDEO_BUF` resource through `resource_get`, stores the pointer in `DAT_00021504` and `DAT_00121528`, and releases the stream on failure",
   "section": "Subsystem initialisation",
   "size": 56,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "video_buf_load_"
 }

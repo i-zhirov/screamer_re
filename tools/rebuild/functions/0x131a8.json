@@ -1,9 +1,61 @@
 {
   "address": "0x131a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The race_data_load module at 0x131a8"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x131a8 holds 236 instructions and 919 bytes up to the ret at 0x1353e, so the record keeps the 920-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the caller race_session_start at 0x128e0 calls this function at 0x128fb as its first step on the race level, so the module names the function race_data_load"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds %s\\gfx\\%s%c.dat from DAT_00007f44, DAT_0011d294, and the letter H or L from DAT_0011d2b8, loads the five lists OSTACLES, TRACK_DATA, OPPONENTS, ANIMATIONS, and CARS_DATA, sets the screen mode 0x140 by 0x190 with the value 0x104, copies the TRACK_DATA color to PTR_DAT_0008a844 + 0x10, and starts the music through 0x2fcec behind DAT_0011d2cc"
+    }
+  ],
+  "module": "race_data_load",
+  "name": "race_data_load",
   "notes": [],
   "object_offset": "0x31a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 90,
+        "bytes_total": 919,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 57,
+        "instructions_total": 233,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x131a8",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:28d5ec672629c64dbfcbabc23d12fe77be3c00b1b184a06200f0bb2a674ee7bf",
+    "source_digest": "sha256:a8c43faf679a6e915d5e6d6b56db20bd1cf65918087ea58b7e50cc357681250d",
+    "tool": "run.py"
+  },
+  "role": "builds the race file names, loads the five race lists and the race assets, sets the screen mode and the track color, and starts the race music",
+  "section": "race_session_start callees",
   "size": 920,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_data_load_"
 }

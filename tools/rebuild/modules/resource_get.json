@@ -1,0 +1,31 @@
+{
+  "exe": "rgetmod.exe",
+  "map": "resource_get.map",
+  "name": "resource_get",
+  "run": {
+    "command": "rgetmod.exe > rget_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rget_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "resource_get.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "resource_get_main.c"
+    }
+  ]
+}

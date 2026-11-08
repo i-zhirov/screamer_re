@@ -1,9 +1,87 @@
 {
   "address": "0x23420",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 173,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x23420` holds 173 instructions and 633 bytes up to the `ret` at `0x23698`; the next function starts at `0x2369c`, so the store record keeps the 636-byte extent and sets no function size; the identity check uses 173 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at `0x2001a` is the frame update at `0x1ff70`, which calls this function after the five view groups at `0x2003c`, `0x201d0`, `0x202c0`, `0x20360`, and `0x203c4`; no named function sits between the frame update and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function formats the race clock `DAT_001100a8` into the global text at `0x101f98` as `%02d:%02d:%02d`; a set replay flag `DAT_00118e6c` stops after the clock format, and the frame counter `DAT_000007fd` bit 0x80 adds the replay label `R` at object-3 offset 0xddf"
+    },
+    {
+      "kind": "note",
+      "text": "otherwise the function draws the gauge panel at `0x2369c`, the lap value `DAT_001100ac` centered at the top, the lap number from `DAT_0010ffa0` against `DAT_0011d2b0`, the counter `DAT_0011d2b0` plus one, and the offset `DAT_0010ffa4`; it then formats the lap clock `DAT_001100b0`, draws the two clocks and the static clock label at `0x101f8c`, and draws the race radar at `0x23a94`"
+    },
+    {
+      "kind": "note",
+      "text": "the strings and formats sit at object-3 offsets 0xdd0, 0xde1, 0xde4, 0xde9, 0xdec, 0xdef, 0x1f8c, and 0x1f98; the centisecond scale 100.0 is the float at object-3 offset 0xdfe"
+    },
+    {
+      "kind": "note",
+      "text": "the frame update caller, the race clock, the lap counters, the gauge panel, and the radar support the name race_hud_draw; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original truncates each float through the helper at 0x4d9f4; the shared fpu_stub.asm leaves round-to-nearest, so the module uses the local truncating __CHP stub; the 100.0 scale arrives through a global, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the normal path, the replay label, the replay return, the position above the display, and the equal position; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23420 --count 173 --rebuilt work/rebuild/racehud.exe --rebuilt-map work/rebuild/race_hud_draw.map --rebuilt-symbol race_hud_draw_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23420"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_hud_draw",
+  "name": "race_hud_draw",
   "notes": [],
   "object_offset": "0x13420",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 41,
+        "bytes_total": 593,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 27,
+        "instructions_total": 173,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23420",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:0ee0e13e27e9c3d5af73b10f56e58e42074279f3730bcd4775eb73c8948060ec",
+    "source_digest": "sha256:8436b822969f648f17bd56cf09013c0e5584d51adf4202e71826e36b1f6f8b8d",
+    "tool": "run.py"
+  },
+  "role": "draws the race clock, the lap and position labels, the gauge panel, and the race radar",
+  "section": "Program functions",
   "size": 636,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_hud_draw_"
 }

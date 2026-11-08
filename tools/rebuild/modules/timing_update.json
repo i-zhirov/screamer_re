@@ -1,0 +1,33 @@
+{
+  "exe": "timmod.exe",
+  "map": "timing_update.map",
+  "name": "timing_update",
+  "run": {
+    "command": "timmod.exe > tim_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "tim_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "timing_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "timing_update_main.c"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "exe": "sdrmod.exe",
+  "map": "sound_driver_set.map",
+  "name": "sound_driver_set",
+  "run": {
+    "command": "sdrmod.exe > sdr_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "sdr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "sound_driver_set.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_driver_set_main.c"
+    }
+  ]
+}

@@ -1,17 +1,53 @@
 {
   "address": "0x24da0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
+  "count": 201,
   "evidence": [
     {
       "kind": "note",
-      "text": "walks the 28-byte control records at `DAT_001197d8` with floating-point scaling"
+      "text": "the original at `0x24da0` holds 201 instructions and 630 bytes: it walks the six 28-byte control records at `0x197d8`, searches the earlier records for a duplicate device and axis, reads an axis through `0x10263` and a button port through `0x10257`, scales the axis by the 28-byte table at `0x192a4`, truncates toward zero, clamps the result, and stores the six dwords at `0x19880`"
+    },
+    {
+      "kind": "note",
+      "text": "the record keeps the 2176-byte extent to the next entry, so the identity check uses `--count 201`"
     }
   ],
+  "module": "joystick_update",
   "name": "joystick_update",
   "notes": [],
-  "role": "walks the 28-byte control records at `DAT_001197d8` with floating-point scaling",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 630,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 48,
+        "instructions_total": 201,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24da0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:28b94c119ac6eeb50b940971e503e3c8a7fd2dc934bca82bb4e4fef50195da2e",
+    "source_digest": "sha256:a08932c4307fc5b365f4672ef85cbf0f61c3e97b199706d34ffecad64abe2867",
+    "tool": "run.py"
+  },
+  "role": "walks the six 28-byte control records at `0x197d8`, scales the axis values with floating point, and resolves the duplicate and button controls",
   "section": "race_loop callees",
-  "size": 2176,
-  "status": "named"
+  "size": 640,
+  "status": "rebuilt",
+  "symbol": "joystick_update_"
 }

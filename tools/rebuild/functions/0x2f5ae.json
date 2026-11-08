@@ -1,9 +1,18 @@
 {
   "address": "0x2f5ae",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002f5ae` halves the probe size and keeps the largest block that `FUN_000d1f25` returns"
+    }
+  ],
+  "name": "heap_block_largest",
   "notes": [],
   "object_offset": "0x1f5ae",
+  "role": "finds the largest single heap block with a halving search over `malloc`",
+  "section": "The runtime memory manager",
   "size": 190,
-  "status": "unknown"
+  "status": "named"
 }

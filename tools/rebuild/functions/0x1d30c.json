@@ -1,17 +1,52 @@
 {
   "address": "0x1d30c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254`"
+      "text": "the original at `0x1d30c` holds 151 instructions and 589 bytes: it accumulates the revolution fraction at `+0x250` from the speed at `+0x418` and the frame delta `DAT_00118e04` divided by the axis call at `0x222e0`, wraps the fraction at 1.0, toggles the gear at `+0x254`, advances the table index at `+0x24c` from the entry at `+0x10`, builds the matrix through `0x1d55c`, truncates the positions at `+0x258` and `+0x260` with the helper at `0x4d9f4`, shifts the five state fields, and stores the angle from `0x226bc` at `+0x27c`; the record keeps the 592-byte extent"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the object record, the two globals, the gear table, and the four callee stubs; it covers the no-wrap path, the wrap with gear 0 and gear 1, the negative truncation, the exact 1.0 boundary, and the distance argument; the behavior check passes, and the module uses a local truncating FPU stub because the shared stub rounds to nearest"
     }
   ],
+  "module": "object_revolution_step",
   "name": "object_revolution_step",
   "notes": [],
-  "role": "accumulates `+0x250` from the speed `+0x418` and the frame delta and wraps at 1.0; reads the gear `+0x254`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 40,
+        "bytes_total": 423,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 89,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1d30c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:fe72ecdcd00c89737de557837a5b1c614188722177c8559ac447536b24e9252d",
+    "source_digest": "sha256:b65e209f84e546ed2e66a28ae64a80fc2d8d0cf29ba80808fb0b3259aa1f5144",
+    "tool": "run.py"
+  },
+  "role": "accumulates the revolution fraction at +0x250 from the speed at +0x418 and the frame delta, wraps the fraction at 1.0, toggles the gear at +0x254, advances the table index at +0x24c, truncates the two matrix positions, and stores the angle",
   "section": "The vehicle state chain",
   "size": 592,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_revolution_step_"
 }

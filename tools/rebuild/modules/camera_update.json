@@ -1,0 +1,36 @@
+{
+  "exe": "camupd.exe",
+  "map": "camera_update.map",
+  "name": "camera_update",
+  "run": {
+    "command": "camupd.exe > cam_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "cam_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "camera_update.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "camera_update_main.c"
+    }
+  ]
+}

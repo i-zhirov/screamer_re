@@ -1,0 +1,33 @@
+{
+  "exe": "oqupd.exe",
+  "map": "overlay_queue_update.map",
+  "name": "overlay_queue_update",
+  "run": {
+    "command": "oqupd.exe > oqup_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "oqup_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "overlay_queue_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "overlay_queue_update_main.c"
+    }
+  ]
+}

@@ -1,9 +1,18 @@
 {
   "address": "0xc8ffa",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c8ffa` calls `FUN_000c8cbb` and clears `DAT_00127d84` when the lock succeeds"
+    }
+  ],
+  "name": "music_driver_reset",
   "notes": [],
   "object_offset": "0xb8ffa",
+  "role": "locks the music driver regions through `0xc8cbb` and clears the state at `DAT_00127d84`",
+  "section": "The HMI sound driver",
   "size": 64,
-  "status": "unknown"
+  "status": "named"
 }

@@ -1,17 +1,48 @@
 {
   "address": "0x29610",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap"
+      "text": "the original at 0x29610 holds 136 instructions and 519 bytes up to the ret at 0x29816; it scales DAT_00120388, DAT_00120394, DAT_00120384, and DAT_0012038c by the float 1024.0 at object-3 offset 0xf33 and the float pi at 0xf37, truncates toward zero through 0x4d9f4, and masks with 0x7ff; the first two headings wrap by 0x800 when they differ by at least 0x400; a set DAT_0011d240 makes the factor the power of DAT_0012037c raised to 2.0 through 0xc21e2, and a clear flag copies DAT_0012037c; the four outputs land at DAT_00109a0, DAT_00109a4, DAT_00109a8, DAT_00109ac, DAT_00109b0, and DAT_00109b4 from DAT_0012038c and from the three integer pairs 0x2039c/0x203a8, 0x203a0/0x203ac, and 0x203a4/0x203b0; a zero DAT_0012037c returns, and a negative value after DAT_0012037c - DAT_00118e08 * DAT_00120380 copies DAT_00120394 into DAT_00120388, copies the three second integers into the first ones, and clears DAT_0012037c"
     }
   ],
+  "module": "race_heading_update",
   "name": "race_heading_update",
   "notes": [],
-  "role": "angle arithmetic on `_DAT_00120388` and `_DAT_00120394` with a 0x7ff wrap",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 502,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 130,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29610",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:11edcfca0238b21f08d9136653eca326f3c6ac9166c207d6687b9c9493a15b65",
+    "source_digest": "sha256:242f206700c3484462c7b1282c4259998601b5b51594507d7dd502a40451b419",
+    "tool": "run.py"
+  },
+  "role": "converts the four race angles and interpolates the heading record at 0x109a0 with the frame factor, then resets the base angles when the factor runs below zero",
   "section": "race_frame callees",
   "size": 520,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_heading_update_"
 }

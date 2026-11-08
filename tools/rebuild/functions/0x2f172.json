@@ -1,17 +1,48 @@
 {
   "address": "0x2f172",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address"
+      "text": "the original at `0x2f172` holds 49 instructions and 147 bytes: it sets `0x0501` at block offset 0, splits the size into the words at offsets 4 and 8, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status at block offset `0x18`, and otherwise stores the address from block offsets `0x10` and `0x14` at the third argument and returns the size words"
     }
   ],
+  "module": "memory_alloc_small",
   "name": "memory_alloc",
   "notes": [],
-  "role": "calls INT 31h AX=0x0501 with the size in EBX:ECX and returns the block address",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 112,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 39,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f172",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:77164d79f572949ecd692e371068f01a7f646082f25abf9e0fc84bff91c1ea09",
+    "source_digest": "sha256:374fad8b9f5434e44863dd9792acb923f218d115fb32bbaf27e360cb042ad483",
+    "tool": "run.py"
+  },
+  "role": "calls the DPMI function 0x0501 with the size words and stores the returned block address at the third argument",
   "section": "The resource layer",
   "size": 147,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "memory_alloc_small_"
 }

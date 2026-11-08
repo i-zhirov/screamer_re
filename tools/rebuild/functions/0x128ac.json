@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down"
+      "text": "releases the engine interface, restores the text mode and the keyboard handler, stops the music bank and the sound system, and syncs the DOS clock"
     }
   ],
   "module": "shutdown",
@@ -29,19 +29,19 @@
       "identity": {
         "bytes_equal": 28,
         "bytes_total": 52,
-        "detail": "the rebuilt module holds one instruction the original does not: mov esp, ebp",
+        "detail": "the instruction sequences differ",
         "instructions_equal": 12,
         "instructions_total": 14,
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128ac",
-    "date": "2026-10-29",
-    "fingerprint": "sha256:43c1e6232359fb72de02a29073cf969f15f7de391fe8f315524bec7f7f06f1f3",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:891429d22bb7f6ac178f67cbd3d0389a35dda19fc2803b66f0e7fad9eebffe49",
     "source_digest": "sha256:4fc8fc60b3c78deb49242e4d7b4deb1a3e716aff1fa0bf05462103304f7d4dad",
     "tool": "run.py"
   },
-  "role": "counterpart of `engine_init`: stops the music with `FUN_00014e20(0)` and tears the subsystems down",
+  "role": "counterpart of `engine_init`: restores the keyboard interrupt handler with `FUN_00014e20(0)` and tears the subsystems down",
   "section": "Program functions",
   "size": 52,
   "status": "rebuilt",

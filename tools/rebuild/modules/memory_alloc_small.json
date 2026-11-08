@@ -1,0 +1,28 @@
+{
+  "exe": "masmod.exe",
+  "map": "memory_alloc_small.map",
+  "name": "memory_alloc_small",
+  "run": {
+    "command": "masmod.exe > mas_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "mas_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_alloc_small.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_alloc_small_main.c"
+    }
+  ]
+}

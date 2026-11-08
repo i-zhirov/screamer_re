@@ -4,13 +4,16 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   syntax:
     name: syntax gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
       - name: compile every tool
@@ -23,8 +26,9 @@ jobs:
             tools/entry_probe.py \
             tools/gfx_container.py tools/export_assets.py tools/sound_bank.py \
             tools/member_probe.py tools/rebuild/diff_module.py \
-            tools/rebuild/store.py \
-            tools/rebuild/harness.py \
+            tools/rebuild/oracle.py \
+            tools/rebuild/store.py tools/rebuild/schema.py \
+            tools/rebuild/image_compare.py tools/rebuild/harness.py \
             tools/rebuild/harness_dos.py \
             tools/rebuild/watcom10_setup.py \
             tools/rebuild/run.py \
@@ -40,17 +44,44 @@ jobs:
     name: status page
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
       - name: regenerate the status page
-        run: python3 tools/rebuild/view.py html
-      - name: publish the status page
-        uses: actions/upload-artifact@v4
+        run: python3 tools/rebuild/view.py html --out _site/index.html
+      - name: publish the status page artifact
+        uses: actions/upload-artifact@v7
         with:
           name: rebuild-status
-          path: work/rebuild/status.html
+          path: _site/index.html
+      - name: configure the pages site
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/configure-pages@v6
+      - name: package the pages site
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: deploy status page
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [syntax, status]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v5
 
   pipeline:
     name: full pipeline
@@ -61,7 +92,7 @@ jobs:
     if: vars.SCREAMER_SELF_HOSTED == 'true'
     runs-on: [self-hosted, macOS, screamer-artifacts]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: run the pipeline check
         env:
           SCREAMER_GAME_DIR: ${{ vars.SCREAMER_GAME_DIR }}

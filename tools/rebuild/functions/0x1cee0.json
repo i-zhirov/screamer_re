@@ -1,17 +1,56 @@
 {
   "address": "0x1cee0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "computes the drive force from `+0x2e4`, `+0x2f0`, and the throttle `+0x3fc`; sets the brake flag `+0x2c0` when the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times the frame delta"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1cee0 holds 83 instructions and 297 bytes: it compares the mode at +0x410 with DAT_0000ffa4, forms the target (+0x2e4 + +0x2f0) * +0x3fc and the bound +0x2e4 * +0x3fc, or the single target +0x2e4 * +0x3fc; below the target it clears +0x2c0 and adds +0x2e8 times DAT_00118e04; above the target it sets +0x2c0 when the speed is above the bound, subtracts +0x2ec times DAT_00118e04, and clamps the speed to the target"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the accelerate branch, both clamps, the brake set and no-set paths, the equal-speed path, the inactive mode, and the negative-throttle bound; the behavior check passes"
     }
   ],
+  "module": "object_drive_step",
   "name": "object_drive_step",
   "notes": [],
-  "role": "computes the drive force from `+0x2e4`, `+0x2f0`, and the throttle `+0x3fc`; sets the brake flag `+0x2c0` when the force is below the speed `+0x418` and reduces the speed by `+0x2ec` times the frame delta",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 212,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1cee0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:bc4689b12b7b2a23823399b25c9b3eec2b0a283626e5a8222925cfcc9f7b910e",
+    "source_digest": "sha256:ffc089210aceccfa17bc62b4a0ddb0256e8e488b548cc5714a8809684b23ccd3",
+    "tool": "run.py"
+  },
+  "role": "controls the speed at +0x418 from the drive force, the throttle, and the frame delta, and sets the brake flag +0x2c0 above the speed bound",
   "section": "The vehicle state chain",
   "size": 300,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "object_drive_step_"
 }

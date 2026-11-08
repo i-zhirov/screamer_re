@@ -1,0 +1,33 @@
+{
+  "exe": "mblmod.exe",
+  "map": "music_bank_load.map",
+  "name": "music_bank_load",
+  "run": {
+    "command": "mblmod.exe > mbl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "mbl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_bank_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_bank_load_main.c"
+    }
+  ]
+}

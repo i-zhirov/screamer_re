@@ -18,7 +18,13 @@ frame that is four bytes too high, and the return address comes from the wrong s
 slot.  The tool repairs the frame: it decrements the stack pointer by four and writes
 the `ESI` value at the new top, which is exactly what the skipped `push esi` does.
 The member open then runs with a correct frame, and the opcode stays in place, so the
-next member open fires the same breakpoint.
+next member open fires the same breakpoint.  The tool keeps the full pre-patch copy
+as a backup, and the backup restore and the final restore retry once after a partial
+write.
+
+The DOSBox-X control connection can close or time out when the game exits, after the
+member list is complete.  A close or a timeout after the first member open ends the
+run with the collected names; either before the first member open is an error.
 
 Usage:
     python3 tools/member_probe.py [--game-dir DIR] [--limit N]
@@ -42,6 +48,14 @@ STACK_DUMP_SIZE = 0x2000
 REGISTERS = ("EAX", "EBX", "ECX", "EDX", "ESI", "EDI", "EBP", "ESP", "EIP")
 
 
+def write_retry(exe: Path, payload: bytes) -> None:
+    """Write the game copy, retrying once after a partial write."""
+    try:
+        exe.write_bytes(payload)
+    except OSError:
+        exe.write_bytes(payload)
+
+
 def run_probe(
     game_dir: Path,
     work_dir: Path,
@@ -54,9 +68,17 @@ def run_probe(
     exe = game_dir / "STARTH.EXE"
     data = bytearray(exe.read_bytes())
     original = bytes(data[MEMBER_OPEN_FILE : MEMBER_OPEN_FILE + 5])
+    backup = bytes(data)
     print(f"member open bytes: {original.hex(' ')}")
     data[MEMBER_OPEN_FILE] = 0xCC
-    exe.write_bytes(bytes(data))
+    try:
+        exe.write_bytes(bytes(data))
+    except OSError:
+        try:
+            write_retry(exe, backup)
+        except OSError:
+            pass
+        raise
 
     env = dict(os.environ)
     env["TERM"] = "xterm-256color"
@@ -140,11 +162,27 @@ def run_probe(
                         f"the capture ends after {len(names)} member opens"
                     )
                     break
+    except (ConnectionError, TimeoutError) as error:
+        if not names:
+            raise
+        print(
+            f"note: the control connection ended during the restore after "
+            f"{len(names)} member opens: {error}",
+            file=sys.stderr,
+        )
     finally:
-        child.close()
-        data[MEMBER_OPEN_FILE] = original[0]
-        exe.write_bytes(bytes(data))
-        print("game copy restored")
+        try:
+            child.close()
+        except (ConnectionError, TimeoutError) as error:
+            print(
+                f"note: the control connection ended during the restore after "
+                f"{len(names)} member opens: {error}",
+                file=sys.stderr,
+            )
+        finally:
+            data[MEMBER_OPEN_FILE] = original[0]
+            write_retry(exe, bytes(data))
+            print("game copy restored")
     return names
 
 

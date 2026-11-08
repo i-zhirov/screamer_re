@@ -1,0 +1,28 @@
+{
+  "exe": "seumod.exe",
+  "map": "sound_effects_update.map",
+  "name": "sound_effects_update",
+  "run": {
+    "command": "seumod.exe > seu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "seu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_effects_update.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_effects_update_main.c"
+    }
+  ]
+}

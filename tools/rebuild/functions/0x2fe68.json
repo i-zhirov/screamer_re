@@ -1,9 +1,18 @@
 {
   "address": "0x2fe68",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_0002fe68` calls `FUN_000d38e6`, `FUN_000d380d`, and `FUN_0002f326` with `MIDI_MUSIC`, then clears the fields at `+0xc` and `+4`"
+    }
+  ],
+  "name": "music_bank_stop",
   "notes": [],
   "object_offset": "0x1fe68",
+  "role": "stops the song through the driver, removes the `MIDI_MUSIC` resource, and clears the bank state",
+  "section": "The sound loaders",
   "size": 84,
-  "status": "unknown"
+  "status": "named"
 }

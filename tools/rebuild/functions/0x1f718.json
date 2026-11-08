@@ -1,17 +1,48 @@
 {
   "address": "0x1f718",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "inferred",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058`"
+      "text": "returns the table entry for the index when the table flag is set, and `-1` otherwise"
     }
   ],
+  "module": "table_lookup",
   "name": "table_lookup",
   "notes": [],
-  "role": "calls `0xc9db5` with the table `DAT_00118d94`, guarded by `DAT_00108058`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 54,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f718",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:ad4fa21b005316eefc43c631e67cce8acdde9d8c4ef19034beb26719cf952387",
+    "source_digest": "sha256:36b91eaefda11ef35579426558ef70f3e460e7bb2ecacab00023588aa99ba6d8",
+    "tool": "run.py"
+  },
+  "role": "returns the table entry for the index when the table flag is set, and `-1` otherwise",
   "section": "overlay_dispatch callees",
   "size": 76,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "table_lookup_"
 }

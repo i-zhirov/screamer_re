@@ -1,0 +1,32 @@
+{
+  "exe": "splmod.exe",
+  "map": "spline_load.map",
+  "name": "spline_load",
+  "run": {
+    "command": "splmod.exe > spl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "spl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "spline_load.c",
+      "flags": [
+        "-of+",
+        "-dSPLINE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "spline_load_main.c"
+    }
+  ]
+}

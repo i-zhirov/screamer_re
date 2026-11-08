@@ -1,17 +1,52 @@
 {
   "address": "0x127a0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "calls 17 setup functions, loads `MENU` from `%s\\DATA\\MUSIC.DAT`, and reads the video mode"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x127a0` holds 71 instructions and 266 bytes: it calls `config_load` at `0x1bf38`, `list_file_load` at `0x15460` with the `GEN`, `MENU`, and `CD_TRACKS` constants and the table at `0x1f00`, `setup_load` at `0x1bb58`, `controls_load` at `0x1b304`, `mouse_init` at `0x1f1a0`, `dpmi_real_int` at `0x25db0`, `sound_driver_set` at `0x262a8`, `sprintf` at `0x4d32c` with the format at `0x43b` and the config string at `0x7f44`, `music_bank_load` at `0x2f9e0` with the bank at `0x62b0` and the engine list `DAT_000062ac`, `music_start` at `0x2ffc4`, `palette_build` at `0x15720`, `keyboard_hook` at `0x14e20` with 1, `engine_interface_init` at `0x10810` with `0x6530` and `0x6350`, `stream_layer_init` at `0x4c810`, `video_buf_load` at `0x4c8f0`, and `vesa_set_mode` at `0x8bdec` with 1"
     }
   ],
+  "module": "engine_init",
   "name": "engine_init",
   "notes": [],
-  "role": "calls 17 setup functions, loads `MENU` from `%s\\DATA\\MUSIC.DAT`, and reads the video mode",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 85,
+        "bytes_total": 266,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 44,
+        "instructions_total": 70,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x127a0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:093c83acdf7619976feed67aca25612008e97a89172e3760e6d988efef7cf0cf",
+    "source_digest": "sha256:629d54f943beac1de5b20b1aba4bcaaa74b14d134a4b08f1f0534828cd379bce",
+    "tool": "run.py"
+  },
+  "role": "runs the subsystem setup in order, loads the menu music bank when the setup word is set, and sets the video mode",
   "section": "Program functions",
   "size": 268,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "engine_init_"
 }

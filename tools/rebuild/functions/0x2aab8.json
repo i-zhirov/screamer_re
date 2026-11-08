@@ -1,9 +1,78 @@
 {
   "address": "0x2aab8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "count": 395,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original at 0x2aab8 holds 395 instructions and 1420 bytes up to the ret at 0x2b043, so the record keeps the 1420-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller at 0x29f0c is menu_space_init at 0x29d08; the function loads the object list and fills the car, map, and member tables, so the module names it menu_objects_init"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies AAUTO00 from DAT_00002edc and AMAP1 from DAT_00002ef0, looks ALETTER up through 0x11060, loads 79 slots at DAT_001d2d0 through 0x10ed4, fills AAUTO00 through AAUTO06 in two loads each at DAT_001d550 with the field +0x20 at 0x6000 and 0xe000 and +0x3c at 0, and fills AMAP1 through AMAP6 twice at DAT_001d908"
+    },
+    {
+      "kind": "note",
+      "text": "the cardat list at DAT_001fd10 supplies 14 names and five numbers each, the trackdat list at DAT_001fea0 supplies 12 names and one number each, the two lists bind through 0x11850, and the last call at 0x2b037 runs the init at 0x2dff4"
+    },
+    {
+      "kind": "note",
+      "text": "the data at object-3 offset 0x3f0 holds OBJ_LIST, at 0x3ca 3D_BLKOBJ, at 0x108f ALETTER, at 0x2edc AAUTO00, and at 0x2ef0 AMAP1"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2aab8 --count 395 --rebuilt work/rebuild/menuobj.exe --rebuilt-map work/rebuild/menu_objects_init.map --rebuilt-symbol menu_objects_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module menu_objects_init"
+    },
+    {
+      "kind": "finding",
+      "text": "The menu_objects_init module at 0x2aab8"
+    }
+  ],
+  "module": "menu_objects_init",
+  "name": "menu_objects_init",
   "notes": [],
   "object_offset": "0x1aab8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 53,
+        "bytes_total": 1244,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 67,
+        "instructions_total": 395,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2aab8",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:b235ab841ae5b3fff0a036d9f0d02c518541cde0a27303c772daeadedc511bef",
+    "source_digest": "sha256:ac7f3c49ea7574929a1956bf384115f1984c4ae6b084aced9d47edb4a4fc9daf",
+    "tool": "run.py"
+  },
+  "role": "loads the menu object list, fills the car, map, and member slots, links the object list, and runs the final menu init",
+  "section": "frame_update callees",
   "size": 1420,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "menu_objects_init_"
 }

@@ -1,17 +1,48 @@
 {
   "address": "0x2a1b0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "tears the race down and releases the `OPT_PCX` resource"
+      "text": "the original at `0x2a1b0` holds 24 instructions and 97 bytes: the frame, the twelve cleanup calls at `0x264ec`, `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`, `0x2f326`, `0x1f6f8`, and `0x2fe68`, and the epilogue; the two argument call pairs receive the imported data addresses and the last two calls receive the pointer at `DAT_000062ac` and the address `DAT_000062b0`"
     }
   ],
+  "module": "race_cleanup",
   "name": "race_cleanup",
   "notes": [],
-  "role": "tears the race down and releases the `OPT_PCX` resource",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 97,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 24,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2a1b0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:3fd8ca977450e3bf2107bcfd6bcb4cfed4368bb855a6aab01e4f6c7da0725bed",
+    "source_digest": "sha256:9c56495871b8678dfc224fd0ea26787441da8d5e77695b61139a5cd42acb8a70",
+    "tool": "run.py"
+  },
+  "role": "runs the twelve race cleanup calls and passes the imported data addresses",
   "section": "frame_update callees",
   "size": 100,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_cleanup_"
 }

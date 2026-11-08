@@ -1,0 +1,34 @@
+{
+  "exe": "fupdmod.exe",
+  "map": "frame_update.map",
+  "name": "frame_update",
+  "run": {
+    "command": "fupdmod.exe > fupd_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "fupd_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "frame_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "frame_update_main.c"
+    }
+  ]
+}

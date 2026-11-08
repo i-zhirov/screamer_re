@@ -1,0 +1,31 @@
+{
+  "exe": "pupmod.exe",
+  "map": "player_update.map",
+  "name": "player_update",
+  "run": {
+    "command": "pupmod.exe > pup_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "pup_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_update_main.c"
+    }
+  ]
+}

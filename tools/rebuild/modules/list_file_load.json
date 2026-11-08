@@ -1,0 +1,35 @@
+{
+  "exe": "lflmod.exe",
+  "map": "list_file_load.map",
+  "name": "list_file_load",
+  "run": {
+    "command": "lflmod.exe > lfl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "lfl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "list_file_load.c",
+      "flags": [
+        "-of+",
+        "-oi",
+        "-dLIST_FILE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "list_file_load_main.c",
+      "flags": []
+    }
+  ]
+}

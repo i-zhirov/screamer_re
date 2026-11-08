@@ -1,0 +1,35 @@
+{
+  "exe": "tracksel.exe",
+  "map": "track_select_screen.map",
+  "name": "track_select_screen",
+  "run": {
+    "command": "tracksel.exe > tsel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "tsel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_select_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "track_select_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_select_screen_main.c"
+    }
+  ]
+}

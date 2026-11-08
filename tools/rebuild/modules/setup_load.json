@@ -1,0 +1,28 @@
+{
+  "exe": "slmod.exe",
+  "map": "setup_load.map",
+  "name": "setup_load",
+  "run": {
+    "command": "slmod.exe > sl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "sl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "setup_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "setup_load_main.c"
+    }
+  ]
+}

@@ -1,17 +1,48 @@
 {
   "address": "0x205c4",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "float computation through `0x11c00` and `0x2218c`"
+      "text": "the original at 0x205c4 holds 260 instructions and 911 bytes up to the ret at 0x20952; the loop walks DAT_0010d6f8 records of 0x40 bytes at DAT_0010d700; a record runs when the flag at +0x38 is set; a running record advances the position at +0 and +8 by the speed at +0x30 times the direction at +0x24 and +0x2c times DAT_00118e04, turns the angles at +0xc, +0x10, and +0x14 by the doubles 0.008, 0.004, and 0.0015, and falls the speed by the frame delta times 2000.0; the collision check at 0x11c00 through DAT_00108038 and DAT_00108040 saves the height at +4 in DAT_0010c72c, restores the saved position, flips the sign bit of the bytes at +0x27 and +0x2f, and scales the speed by 0.3; the vertical speed at +0x34 falls by the frame delta times 500.0, the height takes the truncated sum, the height clamps to DAT_0010c72c with a reversed vertical speed through the double 0.8, and a magnitude below 50.0 clears the vertical speed; a stopped record with a collision sets the height to -0x4e20, a stopped record without a collision rotates DAT_0010c734 and DAT_0010c73c through 0x2218c with the angle at +0x10 plus -pi / 2 into the angle at +0xc, and the run flag clears; a record with the flag at +0x20 publishes the position and height into the target record from DAT_0010653c at the 0x1c-byte entry named by +0x18 and scales the three angles by 1024.0 / pi and masks them with 0x7ff into +0x14, +0x18, and +0x1c"
     }
   ],
+  "module": "ai_update",
   "name": "ai_update",
   "notes": [],
-  "role": "float computation through `0x11c00` and `0x2218c`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 652,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 181,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x205c4",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:c5f87c0290d8cae726108d39414e7829c287117ed4aac2c1f99f63a3a6307b1e",
+    "source_digest": "sha256:60991dad3b86a0638a54d2a9010bb2715be598ac3a41cc9630d1894a4d9e3e63",
+    "tool": "run.py"
+  },
+  "role": "advances the ai records, turns the motion angles, handles the collision and the stop, and publishes the state into the target record",
   "section": "object_update_all callees",
   "size": 912,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "ai_update_"
 }

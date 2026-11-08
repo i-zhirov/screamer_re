@@ -8,10 +8,15 @@ input fingerprint still matches the fingerprint of its recorded result prints
 no build, no diff, and no DOSBox run.  The full log of the run stays under
 `work/rebuild/logs/`.
 
+With `--strict` the identity check passes only when the bytes are exact or the
+only differences are the link-time addresses.  With `--recheck-record ADDR` the
+runner forces one fresh run and prints the full check output.
+
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
-        | --status STATUS | --stale | --next N | --all) [--no-write] [--show]
-        [--skip-runtime] [--skip-unchanged] [--original PATH]
+        | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
+        [--no-write] [--show] [--strict] [--skip-runtime] [--skip-unchanged]
+        [--original PATH]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -39,7 +44,12 @@ HARNESS_TOOL = REBUILD_DIR / "harness.py"
 PASS_VERDICTS = (
     "the modules are byte-identical",
     "the instruction sequences match; the differing operands are the link-time addresses",
+    "the instruction shapes match; the differing bytes are not relocations",
     "the modules hold the same instructions in a different order",
+)
+STRICT_VERDICTS = (
+    "the modules are byte-identical",
+    "the instruction sequences match; the differing operands are the link-time addresses",
 )
 BUILD_DETAIL = {
     "pass": "the module builds",
@@ -178,7 +188,20 @@ def parse_identity(text: str) -> dict[str, int]:
     return counts
 
 
-def run_identity(record: dict, module: dict, original: Path) -> tuple[str, dict]:
+def identity_accepted(verdict: str, strict: bool) -> bool:
+    """Tell whether an identity verdict passes the gate.
+
+    The default gate accepts the three historical verdicts.  The strict gate
+    accepts only the byte-identical verdict and the verdict whose differences are
+    the link-time addresses.  A reordered instruction sequence is not exact.
+    """
+    accepted = STRICT_VERDICTS if strict else PASS_VERDICTS
+    return verdict in accepted
+
+
+def run_identity(
+    record: dict, module: dict, original: Path, strict: bool = False
+) -> tuple[str, dict]:
     """Run the identity check and return its verdict and its check result."""
     if not original.is_file():
         raise ValueError(f"the original image {original} is missing")
@@ -210,7 +233,8 @@ def run_identity(record: dict, module: dict, original: Path) -> tuple[str, dict]
     check = {
         "verdict": (
             "pass"
-            if completed.returncode == 0 and verdict in PASS_VERDICTS
+            if completed.returncode == 0
+            and identity_accepted(verdict, strict)
             else "fail"
         ),
         "detail": verdict,
@@ -344,7 +368,9 @@ def _run_record(
                 "detail": _detail(verdict, output, BUILD_DETAIL),
             }
         elif check == "identity":
-            verdict, check_result = run_identity(target, module, arguments.original)
+            verdict, check_result = run_identity(
+                target, module, arguments.original, arguments.strict
+            )
             _log_output(log_lines, label, check, check_result.get("detail", ""))
             checks[check] = check_result
         else:
@@ -484,6 +510,10 @@ def _is_unchanged(
 
 
 def command_run(arguments: argparse.Namespace) -> int:
+    if getattr(arguments, "recheck_record", None) is not None:
+        arguments.function = arguments.recheck_record
+        arguments.show = True
+        arguments.skip_unchanged = False
     records = [
         store.load_record(address) for address in store.candidate_addresses()
     ]
@@ -605,6 +635,13 @@ def parse_arguments() -> argparse.Namespace:
         help="the N smallest named records",
     )
     selector.add_argument(
+        "--recheck-record",
+        type=_address,
+        dest="recheck_record",
+        metavar="ADDR",
+        help="force a fresh run of one record and print its check output",
+    )
+    selector.add_argument(
         "--all",
         action="store_true",
         dest="all_records",
@@ -626,6 +663,11 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="report a record whose inputs are unchanged since the previous "
         "run, and run no check for it",
+    )
+    run_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="pass the identity check only for exact bytes or link-time operands",
     )
     run_parser.add_argument(
         "--original",

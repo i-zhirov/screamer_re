@@ -1,17 +1,48 @@
 {
   "address": "0x10ba4",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "loads a graphics file by name"
+      "text": "the original at `0x10ba4` holds 40 instructions and 88 bytes and copies the two name arguments into the object-3 buffers at offsets `0x7f80` and `0x7fb4`, which the loader relocates to linear `0x107f80` and `0x107fb4`; a buffer holds up to `0x33` characters and the terminator"
     }
   ],
+  "module": "graphics_load",
   "name": "graphics_load",
   "notes": [],
-  "role": "loads a graphics file by name",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 78,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10ba4",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:a968efb790adf092de8fba3aa52a3a91bed992601fda00f89ab7e038acad6e33",
+    "source_digest": "sha256:e73ed9246067a1573c3d836dd9c4ca7b1e00fcbdb887f4399fbb21d32f2ee5c8",
+    "tool": "run.py"
+  },
+  "role": "copies the two name arguments into the two static graphics name buffers",
   "section": "The graphics decoders",
   "size": 88,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "graphics_load_"
 }

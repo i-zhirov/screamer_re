@@ -1,9 +1,18 @@
 {
   "address": "0xd38e6",
   "checks": [],
-  "evidence": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000d38e6` calls `FUN_000c86dc`, `FUN_000e3adb`, and `FUN_000d39ec` and clears the channel record"
+    }
+  ],
+  "name": "sound_channel_free",
   "notes": [],
   "object_offset": "0xc38e6",
+  "role": "stops the channel timer and releases the driver voice when the index is below 8",
+  "section": "The HMI sound driver",
   "size": 262,
-  "status": "unknown"
+  "status": "named"
 }

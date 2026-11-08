@@ -1,0 +1,24 @@
+{
+  "exe": "msetmod.exe",
+  "map": "memset.map",
+  "name": "memset",
+  "run": {
+    "command": "msetmod.exe > mset_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "mset_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "memset.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memset_main.c"
+    }
+  ]
+}

@@ -1,9 +1,95 @@
 {
   "address": "0x18528",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 168,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_car_reset_update module at 0x18528"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x18528 holds 168 instructions and 776 bytes up to the first ret at 0x1882f; the state 5 and state 6 blocks continue to the ret at 0x188b7, so the record keeps the 912-byte extent and sets no function size; the identity check uses 168 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15bd0 is the effect group at 0x15bac; the player physics group at 0x15a80 sets the state to 2 at 0x16da4 when the heading error times the speed passes the threshold at +0x180, and the five view groups call the effect group on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the init block looks the sound entry 8 up through table_lookup at 0x1f718, enqueues the effect 9 with the value 3 and 0.5 through 0x247fc, sets the state to 1, copies the slot index DAT_00110aa4 to +0x160, sets DAT_00001e18 when DAT_00118e6c is zero, and scales the speed +0x50c by 0.6"
+    },
+    {
+      "kind": "note",
+      "text": "the init block publishes +0x4b0 and +0x4b8 through DAT_00108038 and DAT_00108040, calls 0x120c0 with 0, copies the direction DAT_00108048 to the heading +0x4cc, sets the timer +0x14c to 3000.0, clears the counter +0x150, sets +0x154 and +0x15c to 12.0, clears +0x124, +0x128, +0x12c, +0x134, and +0x170, and falls through to the update block"
+    },
+    {
+      "kind": "note",
+      "text": "the update block adds the scaled timer to +0x134, subtracts 6000.0 times DAT_00118e04 from +0x14c, damps +0x154 and +0x15c with the coefficient at DAT_0010cf08 + 0x184, and integrates them into +0x124 and +0x12c; when +0x134 stops above zero it returns"
+    },
+    {
+      "kind": "note",
+      "text": "a non-positive +0x134 starts the four effect slots through 0x19828, increments +0x150, reflects +0x14c by 0.4, clears +0x124 and +0x12c, selects -0.6 on an odd counter or 0.6 on an even counter at +0x15c, and sets +0x154 to -1.0; when the counter passes 3 the state clears and, with DAT_00118e1c bit 0 set and DAT_00118e6c zero, the slot record at DAT_00101db4 + 5 * +0x160 sets"
+    },
+    {
+      "kind": "note",
+      "text": "state 5 runs only with a non-zero gear +0x7ac: it allocates +0x7d0 through table_lookup when the handle is -1, toggles the low five bits of +0x4bc, advances +0x4cc by 0.3 times +0x108, and starts the effect; state 6 clears +0x4bc and the state"
+    },
+    {
+      "kind": "note",
+      "text": "the heading error test at 0x16ca0, the direction snap at +0x4cc, the speed scale 0.6, and the three-step timer support the name player_car_reset_update; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one player object, the frame delta, the filter table, the slot index, the two flags, the position globals, the direction result, the slot record array, and the constants; it covers the state 2 init, the positive and negative accumulator, the odd and even counter, the slot mark, the flag gates, the state 5 gear gate, the state 5 handle and heading, the state 6 clear, and the default state; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x18528 --count 168 --rebuilt work/rebuild/pcrsmod.exe --rebuilt-map work/rebuild/player_car_reset_update.map --rebuilt-symbol player_car_reset_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_reset_update"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_reset_update",
+  "name": "player_car_reset_update",
   "notes": [],
   "object_offset": "0x8528",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 86,
+        "bytes_total": 776,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 31,
+        "instructions_total": 168,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18528",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:55df6decea4d2c3c16920333192cbdd71cb905db60a2d952c5374d8456c74c74",
+    "source_digest": "sha256:7770e6c6887409282593f18dcb0efff3020b2eb33eb7699ad1d3273f2bd72d19",
+    "tool": "run.py"
+  },
+  "role": "starts the player car reset from the heading and speed test and runs its timer, effect, and clear states",
+  "section": "The vehicle state chain",
   "size": 912,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_reset_update_"
 }

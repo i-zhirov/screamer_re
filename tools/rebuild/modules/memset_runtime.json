@@ -1,0 +1,24 @@
+{
+  "exe": "msrtmod.exe",
+  "map": "memset_runtime.map",
+  "name": "memset_runtime",
+  "run": {
+    "command": "msrtmod.exe > msrt_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "msrt_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "memset_runtime.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memset_runtime_main.c"
+    }
+  ]
+}

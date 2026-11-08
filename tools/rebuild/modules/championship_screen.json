@@ -1,0 +1,34 @@
+{
+  "exe": "champmod.exe",
+  "map": "championship_screen.map",
+  "name": "championship_screen",
+  "run": {
+    "command": "champmod.exe > cscr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "cscr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "championship_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "championship_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "championship_screen_main.c"
+    }
+  ]
+}

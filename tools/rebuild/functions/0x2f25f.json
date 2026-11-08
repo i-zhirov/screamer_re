@@ -1,17 +1,48 @@
 {
   "address": "0x2f25f",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066`"
+      "text": "the original at `0x2f25f` holds 69 instructions and 199 bytes: it walks the 0x1c-byte records up to the count at `+0x04`, matches the key at `+0xc`, calls `resource_free` at `0x2f470`, shifts the records after the match with the memmove at `0xd2066`, decrements the count, and sets the status at `+0x0c` to 3 on a failure and 0 on a success"
     }
   ],
+  "module": "resource_find",
   "name": "resource_find",
   "notes": [],
-  "role": "walks the records, matches the key at `+0xc`, and removes the match with a memmove at `0xd2066`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 139,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 53,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f25f",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:85a9967dfd6040029cb3fbb5df5ec74c3d321ce84b352ee918eaba65e790682d",
+    "source_digest": "sha256:ad02d8cdd12ab5be39c469e7a5f14223039b83d7a1886bc9fa866a07cf585f85",
+    "tool": "run.py"
+  },
+  "role": "frees the matching record through resource_free, shifts the array with memmove, decrements the count, and sets the status",
   "section": "The resource layer",
   "size": 199,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "resource_find_"
 }

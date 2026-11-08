@@ -1,9 +1,18 @@
 {
   "address": "0xd3c8a",
   "checks": [],
-  "evidence": [],
+  "confidence": "observed",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000d3c8a` shifts each 7-bit group and stops on the high bit"
+    }
+  ],
+  "name": "sound_varint_read",
   "notes": [],
   "object_offset": "0xc3c8a",
+  "role": "reads a 7-bit variable-length integer from a far pointer and returns the byte count",
+  "section": "The HMI sound driver",
   "size": 138,
-  "status": "unknown"
+  "status": "named"
 }

@@ -1,0 +1,33 @@
+{
+  "exe": "otrmod.exe",
+  "map": "object_transform.map",
+  "name": "object_transform",
+  "run": {
+    "command": "otrmod.exe > otr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "otr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_transform.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_transform_main.c"
+    }
+  ]
+}

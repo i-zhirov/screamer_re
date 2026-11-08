@@ -1,9 +1,79 @@
 {
   "address": "0x29918",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 174,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x29918` holds 174 instructions and 657 bytes up to the `ret` at `0x29ba8`; the next function starts at `0x29bac`, so the store record keeps the 660-byte extent and sets no function size; the identity check uses 174 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at `0x29581` is case 0 of `race_state_update` at `0x29564`, which `race_frame` at `0x2807c` calls; the function resets the 0x50 records at `DAT_001db78`, counts the active lines of `DAT_002de8[DAT_0011fb60]`, and places each line through `map_object_place` at `0x2b044`, so the module names the function `menu_text_update`"
+    },
+    {
+      "kind": "note",
+      "text": "the line descriptor at `DAT_0011fad4` holds the line at `+0x00`, the row at `+0x04`, the centered flag 1 at `+0x0c`, the selection flag at `+0x10`, the five entries of the 8-entry table at `0x221c` at `+0x14` through `+0x24`, the angle 0.09 at `+0x28`, and the timer 0 at `+0x2c`; the line rises by one and the row rises by two per line, and the table index `DAT_0011fabc` wraps above 7"
+    },
+    {
+      "kind": "note",
+      "text": "the function marks the selected line through `0x2b308`, advances the phase `DAT_0011d248` by the frame delta `DAT_0018e08` times 3 pi, and resets the phase above 8 pi; then it either runs `0x2b494` on every record when the key `DAT_0011fb64` is -2 or runs `map_object_update` at `0x2b9cc` on every record and keeps a -2 key, so the module records the confidence `inferred`"
+    },
+    {
+      "kind": "note",
+      "text": "the constants 3 pi at `0xf3b` and 8 pi at `0xf3f` arrive through globals, because the minimal image does not load the constant segment; the module uses the shared `fpu_stub.asm`, because it needs no truncation; the harness covers the page change, the unchanged key, the finish path, the phase wrap, the counter wrap, the empty menu, and the kept -2 key; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x29918 --count 174 --rebuilt work/rebuild/menutxt.exe --rebuilt-map work/rebuild/menu_text_update.map --rebuilt-symbol menu_text_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x29918"
+    },
+    {
+      "kind": "finding",
+      "text": "The menu_text_update module at 0x29918"
+    }
+  ],
+  "implementation": "c",
+  "module": "menu_text_update",
+  "name": "menu_text_update",
   "notes": [],
   "object_offset": "0x19918",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 605,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 36,
+        "instructions_total": 174,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x29918",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:8113fcf6a7ecd96779f25d2bf9981eefb0caf79f5eeb0c03ff907e46f9f3040c",
+    "source_digest": "sha256:de6c9f07637dd259432929ac0989bed7f2330b31aef7c8cc10f706210bad03c2",
+    "tool": "run.py"
+  },
+  "role": "places and animates the text lines of the selected menu as map objects and advances the menu transition",
+  "section": "race_frame callees",
   "size": 660,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "menu_text_update_"
 }

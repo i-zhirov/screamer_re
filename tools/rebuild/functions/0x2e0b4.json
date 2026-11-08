@@ -1,17 +1,52 @@
 {
   "address": "0x2e0b4",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "the overlay for the race state 0"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2e0b4 holds 103 instructions and 357 bytes: it centers half of the object width at +0x134 and half of the object height at +0x120 on the 0x140 screen width, moves each axis position by the frame delta DAT_0018e08 times a step constant while the target stays above it, snaps the position down when the target stays below it, converts the x sum with the offset at 0x12d8 and each axis through the truncating helper at 0x4d9f4, draws the panels through panel_show at 0x2dfac, and draws the title at 0xbe with the font 0 and the color 2 through panel_draw_centered at 0x2e7cc when the state at DAT_00020988 is 1 or 2 and the low seven bits of the frame counter DAT_000007fd stay below 0x48"
     }
   ],
+  "module": "race_panel_0",
   "name": "race_panel_0",
   "notes": [],
-  "role": "the overlay for the race state 0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 69,
+        "bytes_total": 357,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 103,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e0b4",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:6f0b4a75ee7290b8237f455540c48782a441823a79235e46768c2a1bd3472bd5",
+    "source_digest": "sha256:d3987313d6fc0a2629a7a392f6f70c240a9d0c11195ffa2a99cbd3443432be4b",
+    "tool": "run.py"
+  },
+  "role": "draws the two smoothed race panels and the race state title",
   "section": "race_frame callees",
   "size": 360,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_panel_0_"
 }

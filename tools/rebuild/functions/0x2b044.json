@@ -1,9 +1,83 @@
 {
   "address": "0x2b044",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 222,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2b044 holds 222 instructions and 708 bytes up to the ret at 0x2b307; the next function starts at 0x2b308, so the record keeps the 708-byte extent and sets no function size; the identity check uses 222 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x29a88 is the race state update at 0x29918, which walks the selected menu lines and calls this function with the line descriptor at DAT_0011fad4 and the string from the pointer arrays at DAT_0011fb80; the map_object_update module at 0x2b9cc reads the records this function writes, so the module names the function map_object_place"
+    },
+    {
+      "kind": "note",
+      "text": "the function computes the line start as (length - 1) * 320 for a centered line, 0x1200 - field8 * 640 otherwise, and the vertical position as 0x820 - field4 * 384"
+    },
+    {
+      "kind": "note",
+      "text": "for each code in 0x20 through 0x7f the function takes the first free record of the 0x50 records at DAT_001db78 and stores the code minus 0x20 at +0x08, the line id at +0x04, the target x and y at +0x40 and +0x44, the start x, y, and z at +0x34, +0x38, and +0x3c, the state flag at +0x0c, the angle pi or 0 at +0x10, the amplitudes at +0x4c and +0x50, the progress and direction 1.0 at +0x58 and +0x5c, and the timer at +0x60"
+    },
+    {
+      "kind": "note",
+      "text": "the timer rises by 0.01 for each placed code, and the function rotates the line origin by the angle at +0x28 for the next code with cos at 0x4da66 and sin at 0x4da72; the truncate helper at 0x4d9f4 rounds the new origin toward zero"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one line descriptor, one string, the 0x50 records, and the timer step; it covers the centered line, the left line with the start override and the pi/2 rotation, the occupied record, the low code stop, and the high code stop; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b044 --count 222 --rebuilt work/rebuild/moplace.exe --rebuilt-map work/rebuild/map_object_place.map --rebuilt-symbol map_object_place_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_object_place"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_object_place module at 0x2b044"
+    }
+  ],
+  "implementation": "c",
+  "module": "map_object_place",
+  "name": "map_object_place",
   "notes": [],
   "object_offset": "0x1b044",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 671,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 47,
+        "instructions_total": 222,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b044",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:f7d0b6c3b2815eb99d53310dc6adf7124d820338b00214aaf2e7f3b3530ac9cd",
+    "source_digest": "sha256:f2a6019f747a8a10596832f00b32d5adc6296d2ee43ff6940d35866a662c89d3",
+    "tool": "run.py"
+  },
+  "role": "places a menu line into the map object records, sets the start and target positions, the code slot, the amplitudes, the progress, and the timer, and advances the rotated line origin",
+  "section": "race_frame callees",
   "size": 708,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_object_place_"
 }

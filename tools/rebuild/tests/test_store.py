@@ -20,6 +20,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import schema  # noqa: E402
 import store  # noqa: E402
 
 
@@ -94,6 +95,7 @@ class StoreTestCase(unittest.TestCase):
             module="free",
             symbol="free_",
             count=3,
+            implementation="assembly",
         )
         record["result"] = self.result({"build": ("pass", "the module builds")})
         return record
@@ -378,6 +380,7 @@ class StoreTestCase(unittest.TestCase):
             "section": "Program functions",
             "evidence": [{"kind": "note", "text": "a note"}],
             "notes": [{"date": "2026-10-26", "text": "a note"}],
+            "implementation": "assembly",
         }
         self.assertEqual(
             before,
@@ -398,6 +401,16 @@ class StoreTestCase(unittest.TestCase):
         violations = store.validate_record(path)
         self.assertEqual(len(violations), 1)
         self.assertIn("status", violations[0])
+
+    def test_schema_rejects_unknown_implementation(self) -> None:
+        record = self.record(implementation="pascal")
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("implementation", violations[0])
 
     def test_validate_record_named_without_name(self) -> None:
         path = self.write_record(0x300EC, self.record(status="named"))
@@ -599,6 +612,58 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(set(self.full_module()), set(schema["properties"]))
         self.assertEqual(set(schema["required"]), set(self.module_record()))
 
+    def test_is_dos_83_name(self) -> None:
+        self.assertTrue(store.is_dos_83("fp_out.txt"))
+        self.assertTrue(store.is_dos_83("out"))
+        self.assertFalse(store.is_dos_83("dpiex_out.txt"))
+        self.assertFalse(store.is_dos_83("a.b.c"))
+        self.assertFalse(store.is_dos_83("bad name.txt"))
+
+    def test_validate_module_rejects_long_output(self) -> None:
+        module = self.full_module()
+        module["run"]["output"] = "dpiex_out.txt"
+        module["run"]["command"] = "free.exe > dpiex_out.txt"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("8.3" in violation for violation in violations))
+
+    def test_validate_module_rejects_mismatched_redirect(self) -> None:
+        module = self.full_module()
+        module["run"]["command"] = "free.exe > other.txt"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("writes" in violation for violation in violations))
+
+    def test_validate_module_rejects_missing_redirect(self) -> None:
+        module = self.full_module()
+        module["run"]["command"] = "free.exe"
+        path = self.write_module("free", module)
+        violations = store.validate_module(path)
+        self.assertTrue(any("redirect" in violation for violation in violations))
+
+    def test_module_name_collisions(self) -> None:
+        first = self.full_module()
+        first["name"] = "first"
+        first["exe"] = "same.exe"
+        first["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("first", first)
+        second = self.full_module()
+        second["name"] = "second"
+        second["exe"] = "same.exe"
+        second["run"] = {
+            "command": "same.exe > same_out.txt",
+            "output": "same_out.txt",
+            "expect": ["DONE"],
+        }
+        self.write_module("second", second)
+        violations = store.module_name_violations()
+        self.assertTrue(any("executable" in violation for violation in violations))
+        self.assertTrue(any("output" in violation for violation in violations))
+
     def test_seed_diff_added_and_lost(self) -> None:
         candidates = [0x300EC]
         records = {
@@ -624,6 +689,9 @@ class PrologueTestCase(unittest.TestCase):
     def test_prologue_start_walks_back_over_the_saves(self) -> None:
         self.assertEqual(
             store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x89\xe5", 5), 0
+        )
+        self.assertEqual(
+            store.le.prologue_start(b"\x53\x51\x52\x56\x57\x55\x8b\xec", 5), 0
         )
         self.assertEqual(store.le.prologue_start(b"\x55\x89\xe5", 0), 0)
         self.assertEqual(store.le.prologue_start(b"\x90\x55\x89\xe5", 1), 1)
@@ -659,6 +727,27 @@ class PrologueTestCase(unittest.TestCase):
                     (0x110, "sits in alignment padding"),
                     (0x120, "sits inside a jump"),
                 ],
+            )
+        finally:
+            store.candidate_addresses = saved
+
+    def test_non_entry_addresses_reports_the_second_prologue_form(self) -> None:
+        class Image:
+            def read(self, address: int, count: int) -> bytes:
+                return bytes(data[address : address + count])
+
+            def object_at(self, target: int) -> object | None:
+                return object() if target in range(0x100, 0x200) else None
+
+        data = bytearray(b"\x40" * 0x200)
+        data[0x104] = 0x53
+        data[0x105:0x108] = b"\x55\x8b\xec"
+        saved = store.candidate_addresses
+        try:
+            store.candidate_addresses = lambda: [0x105]
+            self.assertEqual(
+                store.non_entry_addresses(Image()),
+                [(0x105, "sits inside a prologue")],
             )
         finally:
             store.candidate_addresses = saved
@@ -780,6 +869,31 @@ class ExtentTestCase(unittest.TestCase):
             ),
             [],
         )
+
+    def test_scan_candidates_adds_the_call_targets_of_the_roots(self) -> None:
+        scan = mock.Mock(
+            returncode=0,
+            stdout="candidate function starts: 1\n  0x000300ec\n",
+            stderr="",
+        )
+        targets = mock.Mock(
+            returncode=0,
+            stdout="call targets: 2\n  0x000de7fd\n  0x000de9be\n",
+            stderr="",
+        )
+        with mock.patch.object(
+            store.subprocess, "run", side_effect=[scan, targets]
+        ) as run:
+            result = store.scan_candidates(Path("STARTH.EXE"), [0x300EC])
+
+        self.assertEqual(
+            result, [0x300D6, 0x300EC, 0x300F8, 0xDE7FD, 0xDE9BE]
+        )
+        self.assertEqual(run.call_count, 2)
+        target_command = run.call_args_list[1].args[0]
+        self.assertEqual(target_command[2], "targets")
+        self.assertEqual(target_command[3], "STARTH.EXE")
+        self.assertEqual(target_command[4], "0x300ec")
 
     def test_manual_candidate_addition_leaves_no_overlap(self) -> None:
         # The store before the two manual candidates.  The exit record reaches
@@ -920,6 +1034,21 @@ class ExtentTestCase(unittest.TestCase):
         self.assertEqual(store.load_record(0x100)["size"], 16)
         self.assertEqual(store.load_record(0x110)["size"], 16)
         self.assertNotIn("size", store.load_record(0x120))
+
+
+class ShippedModuleTestCase(unittest.TestCase):
+    """Check the shipped recipes against the DOS 8.3 output rule."""
+
+    def test_every_shipped_module_has_an_8_3_output(self) -> None:
+        modules = store.REBUILD_DIR / "modules"
+        for path in sorted(modules.glob("*.json")):
+            record = json.loads(path.read_text())
+            run = record.get("run")
+            if run is None:
+                continue
+            self.assertTrue(store.is_dos_83(run["output"]), path.name)
+            target = run["command"].split(">", 1)[1].strip().split()[0]
+            self.assertEqual(target.lower(), run["output"].lower(), path.name)
 
 
 if __name__ == "__main__":

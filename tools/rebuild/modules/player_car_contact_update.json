@@ -1,0 +1,35 @@
+{
+  "exe": "pccu.exe",
+  "map": "player_car_contact_update.map",
+  "name": "player_car_contact_update",
+  "run": {
+    "command": "pccu.exe > pccu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "pccu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_contact_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_car_contact_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_contact_update_main.c"
+    }
+  ]
+}

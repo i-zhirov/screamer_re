@@ -1,17 +1,48 @@
 {
   "address": "0x1f1a0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "calls interrupt 33h and delays"
+      "text": "the original at 0x1f1a0 holds 67 instructions and 233 bytes: it sets the timer rate at 0xff00 through 0xc8245, installs the 0x64-rate timer with the code handler CS:0x20d and its id at DAT_00018d8c through 0xc835b, returns when DAT_00008058 is zero, starts the mouse system through 0xc8f81, stores 0x2b11 at DAT_00001e50, installs the mouse handler through 0xc903a with the handler DAT_00008060, the state DAT_00001e40, and the id DAT_00018d94, installs the 0x1e-rate timer from the far pointer DAT_00001e5c through 0xc835b with its id at DAT_00018d90, and shuts the started parts down through 0xc8321, 0xc8ffa, and 0xc98f9 before it exits through 0x300be"
     }
   ],
+  "module": "mouse_init",
   "name": "mouse_init",
   "notes": [],
-  "role": "calls interrupt 33h and delays",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 219,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 62,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f1a0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:3c1acb6c3bcb6ea647fa995460d010a44dec1901d470a5201ddb92aadab976cb",
+    "source_digest": "sha256:a68d3cf43d270d5addf8e5acc98f6e8ae8cc4f9bdad3aaad0320d6679111f6a9",
+    "tool": "run.py"
+  },
+  "role": "sets the timer rate, installs the two timer callbacks, and installs the mouse handler when the setup word is set",
   "section": "Subsystem initialisation",
   "size": 236,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "mouse_init_"
 }

@@ -1,0 +1,28 @@
+{
+  "exe": "oprmod.exe",
+  "map": "object_prepare.map",
+  "name": "object_prepare",
+  "run": {
+    "command": "oprmod.exe > opr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "opr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_prepare.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_prepare_main.c"
+    }
+  ]
+}

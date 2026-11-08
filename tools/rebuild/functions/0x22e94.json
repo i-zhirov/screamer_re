@@ -1,17 +1,52 @@
 {
   "address": "0x22e94",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x22e94 holds 58 instructions and 190 bytes: the record address from the index at DAT_00118e64, the two dword copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08, +0x0a, +0x0c, +0x0e, +0x10, and +0x12, the index advance, and the two end-marker tests; the behavior check passes; the identity check stays open because the prologue and the register saves differ"
     }
   ],
+  "module": "replay_read",
   "name": "replay_read",
   "notes": [],
-  "role": "reads the 20-byte record at `DAT_00118e5c + index * 0x14` and returns 1 at the end markers",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 176,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 24,
+        "instructions_total": 54,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22e94",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:c1fbe1061a460d8a2af8e6e551d38a7d5de6558665095f1a22fb489b9ec5745e",
+    "source_digest": "sha256:9b2e73bfa6b2c374827cff6688e52413b48cda22a06a637e7368469aad377ec2",
+    "tool": "run.py"
+  },
+  "role": "reads the next 20-byte replay record into the replay globals, advances the index, and returns 1 at the two end markers",
   "section": "The replay records",
   "size": 192,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "replay_read_"
 }

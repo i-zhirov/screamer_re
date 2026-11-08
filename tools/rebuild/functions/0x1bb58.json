@@ -1,17 +1,48 @@
 {
   "address": "0x1bb58",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure"
+      "text": "the original at `0x1bb58` holds 35 instructions and 111 bytes: it builds `%s\\config\\setup.cfg` with the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the path with the mode `rb` through `fopen` at `0xc5fe5`, reports `Run SETUP before.` through `0xc656e` and exits with -1 on failure, reads `0x90` bytes into the buffer at `DAT_00008058` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
     }
   ],
+  "module": "setup_load",
   "name": "setup_load",
   "notes": [],
-  "role": "reads `CONFIG/SETUP.CFG` (144 bytes) and reports `Run SETUP before.` on failure",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 109,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 35,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1bb58",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:4a36c6ab33e8e516277758820aa115bbc508c706a9db89de3408893083a78e16",
+    "source_digest": "sha256:ef26140a44d73d11d2f862faf2515c9ebb8ed89092de025761df489fbf967382",
+    "tool": "run.py"
+  },
+  "role": "builds the setup.cfg path, reads 0x90 bytes, and reports the SETUP error on failure",
   "section": "Subsystem initialisation",
   "size": 112,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "setup_load_"
 }

@@ -1,0 +1,28 @@
+{
+  "exe": "obphmod.exe",
+  "map": "object_physics.map",
+  "name": "object_physics",
+  "run": {
+    "command": "obphmod.exe > obph_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "obph_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_physics.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_physics_main.c"
+    }
+  ]
+}

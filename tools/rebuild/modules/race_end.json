@@ -1,0 +1,28 @@
+{
+  "exe": "remod.exe",
+  "map": "race_end.map",
+  "name": "race_end",
+  "run": {
+    "command": "remod.exe > re_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "re_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_end.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_end_main.c"
+    }
+  ]
+}

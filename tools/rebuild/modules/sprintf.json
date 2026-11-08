@@ -1,0 +1,24 @@
+{
+  "exe": "sprmod.exe",
+  "map": "sprintf.map",
+  "name": "sprintf",
+  "run": {
+    "command": "sprmod.exe > spr_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "spr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sprintf.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sprintf_main.c"
+    }
+  ]
+}

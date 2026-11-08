@@ -1,17 +1,52 @@
 {
   "address": "0x2e724",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "the overlay for the race state 4"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2e724 holds 50 instructions and 167 bytes: it reads the title pointer at DAT_0011fc38, calls panel_draw_centered at 0x2e7cc with the y 2, the font 3, and the color 2, formats the name at DAT_001203cc with the format \\001%s through sprintf at 0x4d32c, draws the buffer at (0x106, 0x98), shifts x by 21 pixels for each unit of DAT_0011d244, and draws the separator \\001- at (2 * (0x83 + DAT_0011d244 * 21), 0xb0) through draw at 0x25020"
     }
   ],
+  "module": "race_panel_4",
   "name": "race_panel_4",
   "notes": [],
-  "role": "the overlay for the race state 4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 24,
+        "bytes_total": 131,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2e724",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:f3baa40a1c1203f1b0f7b3e541f8a54ddc43dfed225943b26c315a3927a0e505",
+    "source_digest": "sha256:703a06f93951b9b93132fa96366492a55d0d886995345f75c1691caa84298f4b",
+    "tool": "run.py"
+  },
+  "role": "draws the race state 4 title, the formatted player name, and the shifted separator",
   "section": "race_frame callees",
   "size": 168,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_panel_4_"
 }

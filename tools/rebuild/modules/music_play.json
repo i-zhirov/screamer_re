@@ -1,0 +1,30 @@
+{
+  "exe": "mpmod.exe",
+  "map": "music_play.map",
+  "name": "music_play",
+  "run": {
+    "command": "mpmod.exe > mp_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "mp_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_play.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_play_main.c"
+    }
+  ]
+}

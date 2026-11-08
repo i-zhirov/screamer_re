@@ -1,17 +1,48 @@
 {
   "address": "0xd429f",
-  "checks": [],
-  "confidence": "inferred",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0`"
+      "text": "the original at `0xd429f` holds 52 instructions and 133 bytes: it saves the file flag bits 0x30, clears them, allocates the buffer through `0xddda9` when the buffer pointer at `+8` is zero, changes the `+0xd` bit 2 to bit 0, formats through `0xd68c0` with the table `DAT_001c428e`, restores the flags and calls `0xddfa8`, returns -1 when the `+0xc` bit 0x20 is set, and restores the saved 0x30 bits; the call sites are `printf` at `0x3009b` and `fprintf` at `0x4bf64`, so this is the run-time `__fprtf`"
     }
   ],
-  "name": "dpmi_issue_int",
+  "module": "fprtf",
+  "name": "__fprtf",
   "notes": [],
-  "role": "clears the flags at `+0xc` and `+0xd`, calls `0xddda9` and `0xd68c0`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 132,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 28,
+        "instructions_total": 52,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd429f",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:2315872f55577f0a87ccf4081c517cf717522870a5f13544c4afef753e4c9ff7",
+    "source_digest": "sha256:24d15105dc06657cdbcb935bcfdbb3b1d93bc95081737239382339fb460005a0",
+    "tool": "run.py"
+  },
+  "role": "formats a stream through the run-time engine and manages the file flags",
   "section": "The runtime memory manager",
   "size": 133,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "__fprtf_"
 }

@@ -1,0 +1,35 @@
+{
+  "exe": "pcsu.exe",
+  "map": "player_car_suspension_update.map",
+  "name": "player_car_suspension_update",
+  "run": {
+    "command": "pcsu.exe > pcsu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "pcsu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_suspension_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_car_suspension_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_suspension_update_main.c"
+    }
+  ]
+}

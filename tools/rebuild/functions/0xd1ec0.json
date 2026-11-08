@@ -1,17 +1,48 @@
 {
   "address": "0xd1ec0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "replicates the byte through the dword and calls `0xe0860`"
+      "text": "replicates the value byte over the dword and calls the run-time core at `0xe0860`"
     }
   ],
+  "module": "memset_runtime",
   "name": "memset",
   "notes": [],
-  "role": "replicates the byte through the dword and calls `0xe0860`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 24,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 12,
+        "instructions_total": 12,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd1ec0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:a4cc64af4c333b6c21e430101c8ccbaf5c9c2bb349effb49c1a6891a499d8c70",
+    "source_digest": "sha256:710c8c8de6e0f25733b1888e2774cb2ac5960c182b63d4be2bc1fd6beccc8b56",
+    "tool": "run.py"
+  },
+  "role": "replicates the value byte over the dword and calls the run-time core at `0xe0860`",
   "section": "The runtime memory manager",
-  "size": 101,
-  "status": "named"
+  "size": 24,
+  "status": "verified",
+  "symbol": "memset_runtime_"
 }

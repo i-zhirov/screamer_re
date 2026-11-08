@@ -16,7 +16,8 @@ Stages:
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
 11. check_run: run every recorded check of the changed records, verify the
     unchanged records against their stored fingerprint, and compare the
-    printed verdicts with the recorded results.
+    printed verdicts with the recorded results.  Then compare the rebuilt
+    whole image with the original, when `--rebuilt-image` exists.
 12. check_store: prove the store, the seed, the generated tables, and the
     status page.
 
@@ -33,7 +34,7 @@ The tool never modifies the shipped artifacts.  It writes only under `work/`.
 
 Usage:
     python3 tools/pipeline_check.py --game-dir DIR [--skip-runtime]
-        [--skip-cross]
+        [--skip-cross] [--record-timeout 3000]
 """
 
 from __future__ import annotations
@@ -69,9 +70,12 @@ TOOLS = (
     "member_probe.py",
     "cross_check.py",
     "rebuild/diff_module.py",
+    "rebuild/oracle.py",
     "rebuild/store.py",
+    "rebuild/schema.py",
     "rebuild/harness.py",
     "rebuild/run.py",
+    "rebuild/image_compare.py",
     "rebuild/view.py",
     "rebuild/docs.py",
     "rebuild/callgraph.py",
@@ -259,23 +263,37 @@ def verify_reference_digests(checks: Checks, game_dir: Path) -> None:
 
 def check_member_probe(checks: Checks, work_dir: Path, port: int, timeout: float) -> None:
     """Hook the member open and check the first member name."""
-    from member_probe import run_probe
-
-    result = run(
-        [
-            sys.executable,
-            "tools/member_probe.py",
-            "--game-dir",
-            str(work_dir / "game"),
-            "--work-dir",
-            str(work_dir),
-            "--port",
-            str(port),
-            "--timeout",
-            str(timeout),
-        ],
-        timeout=timeout + 30,
+    command = [
+        sys.executable,
+        "tools/member_probe.py",
+        "--game-dir",
+        str(work_dir / "game"),
+        "--work-dir",
+        str(work_dir),
+        "--port",
+        str(port),
+        "--limit",
+        "55",
+        "--timeout",
+        str(timeout),
+    ]
+    result = run(command, timeout=timeout + 30)
+    samples_missing = (
+        "name='skidfx.RAW'" not in result.stdout
+        or "name='airplane.RAW'" not in result.stdout
     )
+    if (
+        result.returncode != 0
+        and (
+            "closed the control connection" in result.stderr
+            or "timed out" in result.stderr
+        )
+    ) or (result.returncode == 0 and samples_missing):
+        # The debugger can close the connection or time out before the probe
+        # reports the first member.  A mid-run timeout can also end the probe
+        # before the sample loads, and the fallback then makes the run look
+        # successful.  Repeat the probe once in both cases.
+        result = run(command, timeout=timeout + 30)
     checks.check("stage 9: the member probe runs", result.returncode == 0, result.stderr.strip())
     checks.check(
         "stage 9: the member probe observes the first member",
@@ -710,7 +728,9 @@ def unchanged_is_verified(record: dict, game_dir: Path) -> bool:
     return stored == current
 
 
-def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
+def check_run(
+    checks: Checks, game_dir: Path, skip_runtime: bool, record_timeout: float
+) -> None:
     """Run every recorded check and compare the verdicts with the store.
 
     The runner builds and runs the modules of the records that declare checks, so
@@ -737,7 +757,7 @@ def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
     ]
     if skip_runtime:
         command.append("--skip-runtime")
-    result = run(command)
+    result = run(command, timeout=record_timeout)
     records = recorded_records()
     entries = progress_lines(result.stdout)
     if not entries:
@@ -778,6 +798,40 @@ def check_run(checks: Checks, game_dir: Path, skip_runtime: bool) -> None:
         "stage 11: the run compares every record with a recorded result",
         compared == with_result,
         f"{compared} of {with_result}",
+    )
+
+
+def check_image(
+    checks: Checks, game_dir: Path, exe: str, rebuilt_image: Path
+) -> None:
+    """Compare the rebuilt whole image with the original, when it exists.
+
+    The record checks compare one function or one module.  This stage is the
+    whole-image gate: the rebuilt `STARTH.EXE` must equal the original byte for
+    byte, including the stub, the header, the objects, the pages, and the fixup
+    section.  The stage reports a skip until a whole image is built, because the
+    module recipes build separate executables.
+    """
+    if not rebuilt_image.is_file():
+        checks.skip(
+            "stage 11: the whole image matches",
+            f"no rebuilt image at {rebuilt_image}",
+        )
+        return
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/image_compare.py",
+            "--original",
+            str(game_dir / exe),
+            "--rebuilt",
+            str(rebuilt_image),
+        ]
+    )
+    checks.check(
+        "stage 11: the whole image matches",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
     )
 
 
@@ -891,7 +945,19 @@ def main() -> int:
     parser.add_argument("--exe", default="STARTH.EXE")
     parser.add_argument("--port", type=int, default=9876)
     parser.add_argument("--timeout", type=float, default=300.0)
+    parser.add_argument(
+        "--record-timeout",
+        type=float,
+        default=3000.0,
+        help="the seconds the record run of stage 11 may take",
+    )
     parser.add_argument("--work-root", type=Path, default=Path("work/entry"))
+    parser.add_argument(
+        "--rebuilt-image",
+        type=Path,
+        default=Path("work/rebuild/STARTH.EXE"),
+        help="the rebuilt whole image for the image gate",
+    )
     parser.add_argument("--skip-runtime", action="store_true")
     parser.add_argument("--skip-cross", action="store_true")
     args = parser.parse_args()
@@ -959,7 +1025,8 @@ def main() -> int:
     if stage_enabled(9, args.skip_runtime, args.skip_cross):
         check_member_probe(checks, work_root / "run", args.port, args.timeout)
     check_sound(checks, game_dir, work_root)
-    check_run(checks, game_dir, args.skip_runtime)
+    check_run(checks, game_dir, args.skip_runtime, args.record_timeout)
+    check_image(checks, game_dir, args.exe, args.rebuilt_image)
     check_store(checks, game_dir, work_root)
 
     print()

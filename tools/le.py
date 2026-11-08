@@ -12,8 +12,10 @@ Usage:
     python3 tools/le.py disasm <file> <linear-address> [--count N]
     python3 tools/le.py calls <file> <linear-address> [--max N]
     python3 tools/le.py tree <file> <linear-address> [--depth N]
-    python3 tools/le.py funcs <file> [--from ADDR] [--to ADDR]
+    python3 tools/le.py funcs <file> [--from ADDR] [--to ADDR] [--limit N]
     python3 tools/le.py near <file> <linear-address>
+    python3 tools/le.py targets <file> <linear-address> [<linear-address> ...]
+        [--max N]
 """
 
 from __future__ import annotations
@@ -96,6 +98,125 @@ class Page:
     virtual_size: int
 
 
+FIXUP_WIDTHS = {
+    0: 1,  # byte
+    2: 2,  # 16-bit selector
+    3: 4,  # 16:16 pointer
+    5: 2,  # 16-bit offset
+    6: 6,  # 16:32 pointer
+    7: 4,  # 32-bit offset
+    8: 4,  # 32-bit self-relative offset
+}
+
+
+@dataclass(frozen=True)
+class Relocation:
+    """One fixup slot of an LE image.
+
+    `offset` is the module linear address of the slot.  `kind` is one of
+    `internal`, `import-ordinal`, `import-name`, or `entry`.  The target fields
+    hold the declared target.  An internal target is an object number and an
+    object offset.  The object number and the offset are link-time values, so a
+    comparison normally matches them by kind and width, not by value.
+    """
+
+    offset: int
+    width: int
+    kind: str
+    object: int | None = None
+    target: int | None = None
+    module: int | None = None
+    ordinal: int | None = None
+    name_offset: int | None = None
+    addend: int | None = None
+
+
+def _read_int(data: bytes, position: int, size: int) -> int:
+    return int.from_bytes(data[position : position + size], "little")
+
+
+def fixup_records(
+    data: bytes, start: int, end: int, page_address: int
+) -> list[Relocation]:
+    """Parse the fixup records of one logical page.
+
+    The source offset is relative to the page start.  The source type gives the
+    slot width.  The target flags give the target type and the field sizes.
+    """
+    relocations: list[Relocation] = []
+    position = start
+    while position + 2 <= end:
+        source = data[position]
+        flags = data[position + 1]
+        position += 2
+        source_type = source & 0x0F
+        if source & 0x20:
+            count = data[position]
+            position += 1
+            single_offsets: list[int] | None = None
+        else:
+            count = 1
+            single_offsets = [struct.unpack_from("<h", data, position)[0]]
+            position += 2
+        object_size = 2 if flags & 0x40 else 1
+        offset_size = 4 if flags & 0x10 else 2
+        ordinal_size = 1 if flags & 0x80 else 2
+        target_type = flags & 0x03
+        kind = "internal"
+        obj = target = module = ordinal = name_offset = None
+        if target_type == 0:
+            obj = _read_int(data, position, object_size)
+            position += object_size
+            if source_type != 2:
+                target = _read_int(data, position, offset_size)
+                position += offset_size
+        elif target_type == 1:
+            module = _read_int(data, position, object_size)
+            position += object_size
+            ordinal = _read_int(data, position, ordinal_size)
+            position += ordinal_size
+            kind = "import-ordinal"
+        elif target_type == 2:
+            module = _read_int(data, position, object_size)
+            position += object_size
+            name_offset = _read_int(data, position, offset_size)
+            position += offset_size
+            kind = "import-name"
+        else:
+            ordinal = _read_int(data, position, ordinal_size)
+            position += ordinal_size
+            kind = "entry"
+        addend = None
+        if flags & 0x04:
+            addend_size = 4 if flags & 0x20 else 2
+            addend = _read_int(data, position, addend_size)
+            position += addend_size
+        if source & 0x20:
+            offsets = [
+                struct.unpack_from("<h", data, position + 2 * index)[0]
+                for index in range(count)
+            ]
+            position += 2 * count
+        else:
+            offsets = single_offsets or []
+        width = FIXUP_WIDTHS.get(source_type, 0)
+        for source_offset in offsets:
+            relocations.append(
+                Relocation(
+                    offset=page_address + source_offset,
+                    width=width,
+                    kind=kind,
+                    object=obj,
+                    target=target,
+                    module=module,
+                    ordinal=ordinal,
+                    name_offset=name_offset,
+                    addend=addend,
+                )
+            )
+    return relocations
+
+
 @dataclass
 class LinearExecutable:
     path: Path
@@ -146,15 +267,25 @@ class LinearExecutable:
             "page_size": u32(0x28),
             "last_page_size": u32(0x2C),
             "fixup_size": u32(0x30),
+            "fixup_checksum": u32(0x34),
+            "loader_section_size": u32(0x38),
+            "loader_section_checksum": u32(0x3C),
             "object_table_offset": u32(0x40),
             "object_count": u32(0x44),
             "object_page_table_offset": u32(0x48),
+            "iterated_pages_offset": u32(0x4C),
             "resource_table_offset": u32(0x50),
+            "resource_count": u32(0x54),
             "resident_name_table_offset": u32(0x58),
             "entry_table_offset": u32(0x5C),
+            "module_directive_table_offset": u32(0x60),
+            "module_directive_count": u32(0x64),
+            "fixup_page_table_offset": u32(0x68),
+            "fixup_record_table_offset": u32(0x6C),
             "import_module_table_offset": u32(0x70),
             "import_module_count": u32(0x74),
             "import_procedure_table_offset": u32(0x78),
+            "per_page_checksum_offset": u32(0x7C),
             "data_pages_offset": u32(0x80),
             "preload_pages": u32(0x84),
             "non_resident_name_table_offset": u32(0x88),
@@ -281,6 +412,38 @@ class LinearExecutable:
         if offset is None:
             return None
         return self.data[offset : offset + length]
+
+    def fixup_section(self) -> bytes:
+        """The raw fixup section: the page table, the record table, and names."""
+        size = self.header.get("fixup_size", 0)
+        if not size:
+            return b""
+        offset = self.header_offset + self.header.get("fixup_page_table_offset", 0)
+        return self.data[offset : offset + size]
+
+    def relocations(self) -> list[Relocation]:
+        """Read the fixup slots of every object page."""
+        page_table_offset = self.header.get("fixup_page_table_offset", 0)
+        record_table_offset = self.header.get("fixup_record_table_offset", 0)
+        if not page_table_offset or not record_table_offset or not self.pages:
+            return []
+        page_table = self.header_offset + page_table_offset
+        record_table = self.header_offset + record_table_offset
+        count = len(self.pages)
+        offsets = [
+            struct.unpack_from("<I", self.data, page_table + 4 * index)[0]
+            for index in range(count + 1)
+        ]
+        relocations: list[Relocation] = []
+        for index, page in enumerate(self.pages):
+            start = record_table + offsets[index]
+            end = record_table + offsets[index + 1]
+            if end < start or start < record_table or end > len(self.data):
+                continue
+            relocations.extend(
+                fixup_records(self.data, start, end, page.virtual_address)
+            )
+        return relocations
 
 
 def load(path: Path) -> LinearExecutable:
@@ -544,16 +707,52 @@ def print_call_tree(
     return 0
 
 
+def reachable_call_targets(
+    exe: LinearExecutable, roots: list[int], max_instructions: int = 4000
+) -> list[int]:
+    """Return every direct call target reachable from the roots.
+
+    The walk follows the call sites of `function_body`, so it stops at the same
+    terminators.  An indirect call has no target and is not added.  The roots
+    themselves stay out of the result unless another call reaches them.
+    """
+    visited = set(roots)
+    pending = list(roots)
+    targets: set[int] = set()
+    while pending:
+        address = pending.pop()
+        body = function_body(exe, address, max_instructions)
+        for site in call_sites(body):
+            if site.target is None or site.target in targets:
+                continue
+            targets.add(site.target)
+            if site.target not in visited:
+                visited.add(site.target)
+                pending.append(site.target)
+    return sorted(targets)
+
+
+def print_targets(exe: LinearExecutable, roots: list[int], max_instructions: int) -> int:
+    targets = reachable_call_targets(exe, roots, max_instructions)
+    print(f"call targets: {len(targets)}")
+    for target in targets:
+        print(f"  {target:#010x}")
+    return 0
+
+
 SAVE_REGISTERS = {0x53: 0, 0x51: 1, 0x52: 2, 0x56: 3, 0x57: 4}
+PROLOGUE_PATTERNS = (b"\x55\x89\xe5", b"\x55\x8b\xec")
 
 
 def prologue_start(data: bytes, position: int) -> int:
     """Walk from a `push ebp; mov ebp,esp` match back over the register saves.
 
-    Watcom saves the used registers in the canonical order `ebx`, `ecx`, `edx`,
-    `esi`, `edi` and then `ebp`, so a function that uses registers starts before
-    the `push ebp` that the raw pattern matches.  The walk stops at the first
-    byte that is not a register save or that breaks the order.
+    The prologue has two encodings: `55 89 e5` and `55 8b ec`, both of which
+    encode `push ebp; mov ebp,esp`.  Watcom saves the used registers in the
+    canonical order `ebx`, `ecx`, `edx`, `esi`, `edi` and then `ebp`, so a
+    function that uses registers starts before the `push ebp` that the raw
+    pattern matches.  The walk stops at the first byte that is not a register
+    save or that breaks the order.
     """
     start = position
     previous = len(SAVE_REGISTERS)
@@ -564,6 +763,17 @@ def prologue_start(data: bytes, position: int) -> int:
         previous = index
         start -= 1
     return start
+
+
+def _prologue_positions(data: bytes) -> list[int]:
+    """The positions of both prologue encodings in the buffer."""
+    positions: list[int] = []
+    for pattern in PROLOGUE_PATTERNS:
+        position = data.find(pattern)
+        while position != -1:
+            positions.append(position)
+            position = data.find(pattern, position + 1)
+    return positions
 
 
 def function_starts(
@@ -581,13 +791,10 @@ def function_starts(
     data = exe.read(low, high - low)
     if data is None:
         raise ValueError("the range is not mapped to a file offset")
-    pattern = b"\x55\x89\xe5"
-    found: list[int] = []
-    position = data.find(pattern)
-    while position != -1 and len(found) < limit:
-        found.append(low + prologue_start(data, position))
-        position = data.find(pattern, position + 1)
-    return found
+    starts = sorted(
+        {low + prologue_start(data, position) for position in _prologue_positions(data)}
+    )
+    return starts[:limit]
 
 
 def nearest_function_start(exe: LinearExecutable, address: int) -> int | None:
@@ -599,8 +806,7 @@ def nearest_function_start(exe: LinearExecutable, address: int) -> int | None:
     data = exe.read(low, address - low + 1)
     if data is None:
         raise ValueError("the range is not mapped to a file offset")
-    pattern = b"\x55\x89\xe5"
-    position = data.rfind(pattern)
+    position = max(data.rfind(pattern) for pattern in PROLOGUE_PATTERNS)
     if position == -1:
         return None
     return low + prologue_start(data, position)
@@ -684,6 +890,17 @@ def main() -> int:
     near_parser.add_argument("file", type=Path)
     near_parser.add_argument("address", type=lambda value: int(value, 0))
 
+    targets_parser = subparsers.add_parser(
+        "targets", help="list the direct call targets reachable from the roots"
+    )
+    targets_parser.add_argument("file", type=Path)
+    targets_parser.add_argument(
+        "roots", nargs="+", type=lambda value: int(value, 0)
+    )
+    targets_parser.add_argument(
+        "--max", dest="max_instructions", type=int, default=4000
+    )
+
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
@@ -712,6 +929,8 @@ def main() -> int:
         return print_functions(exe, args.start, args.end, args.limit)
     elif args.command == "near":
         return print_nearest_function(exe, args.address)
+    elif args.command == "targets":
+        return print_targets(exe, args.roots, args.max_instructions)
     return 0
 
 

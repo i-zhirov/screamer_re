@@ -1,0 +1,33 @@
+{
+  "exe": "rcrec.exe",
+  "map": "race_records_screen.map",
+  "name": "race_records_screen",
+  "run": {
+    "command": "rcrec.exe > rcrec.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rcrec.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_records_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_records_screen_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_records_screen_main.c"
+    }
+  ]
+}

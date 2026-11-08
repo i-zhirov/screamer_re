@@ -1,0 +1,27 @@
+{
+  "exe": "slimod.exe",
+  "map": "stream_layer_init.map",
+  "name": "stream_layer_init",
+  "run": {
+    "command": "slimod.exe > sli_out.txt",
+    "expect": [
+      "V",
+      "D"
+    ],
+    "output": "sli_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_layer_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_layer_init_main.c"
+    }
+  ]
+}

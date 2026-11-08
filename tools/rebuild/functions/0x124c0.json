@@ -1,9 +1,91 @@
 {
   "address": "0x124c0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 164,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x124c0 holds 164 instructions and 545 bytes up to the ret at 0x126e0. The next function starts at 0x126e4, so the store record keeps the 548-byte extent and sets no function size. The identity check uses 164 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct callers at 0x15b38, 0x15b74, and 0x15ba0 are the vehicle groups at 0x15b0c, 0x15b44, and 0x15b80. The car path runs the car proximity pass at 0x17408 first and the traffic path runs the nearby marker at 0x12424 and the traffic collision pass at 0x175dc first. All three groups run this function on the player object at object-3 offset 0xf91c, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the DAT_0010d6f8 opponent records of 0x40 bytes at DAT_0010d700. A record with a set run flag +0x38 is skipped. Otherwise the record position at +0, +4, and +8 must stay within 1500 units of the player position at +0x4b0, +0x4b4, and +0x4b8 on every axis"
+    },
+    {
+      "kind": "note",
+      "text": "for a record in range the function sets the contact distance at +0x560 to the player radius +0x544 plus 100. It tests the two 12-byte player body points at +0x52c and +0x538 against the record position and stores the truncated distance at +0x55c. A distance below the contact distance by less than 100 units starts the record"
+    },
+    {
+      "kind": "note",
+      "text": "a started record takes the sine and the negated cosine of the player heading +0x4cc into +0x24 and +0x2c. The vertical speed +0x34 takes the player speed +0x50c times 0.02 and the speed +0x30 takes the player speed times 1.4. The first start increments the player counter +0x7b8, sets the flags +0x3c and +0x38, and calls table_lookup at 0x1f718 with 5"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain, the opponent record array, the player body points, and the start of the nearby record support the name opponent_start. The module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls sin at 0x4da72, cos at 0x4da66, sqrt at 0x22bec, and the truncating helper at 0x4d9f4. This harness links no math library, so the local opponent_start_fpu.asm supplies sin, cos, and sqrt from the hardware and makes __CHP truncate toward zero. The two scales arrive through globals, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness covers the empty list, the three range guards, the contact-distance boundary, the first and the second body point, an already running record, a record that started before, and the truncation of two non-square distances. The output holds the markers 0 through 9 and D. The behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x124c0 --count 164 --rebuilt work/rebuild/ostart.exe --rebuilt-map work/rebuild/opponent_start.map --rebuilt-symbol opponent_start_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x124c0"
+    },
+    {
+      "kind": "finding",
+      "text": "The opponent_start module at 0x124c0"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_start",
+  "name": "opponent_start",
   "notes": [],
   "object_offset": "0x24c0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 509,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 18,
+        "instructions_total": 164,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x124c0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:ef111fcad774a54e5bd99a48749c975f9ac2a643ec79b7f16df850889bac36f0",
+    "source_digest": "sha256:6c858d6a876a506a861452c82f7ddcda3a84d8faf900c2a66581b9029f8f4e52",
+    "tool": "run.py"
+  },
+  "role": "starts an inactive opponent record near the player and sets its direction and speed from the player",
+  "section": "The vehicle state chain",
   "size": 548,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_start_"
 }

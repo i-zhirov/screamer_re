@@ -2,9 +2,10 @@
 
 The tool reads the original module and the rebuilt module with tools/le.py,
 compares the machine code byte for byte, and compares the instruction
-sequences.  A reference to another function or to a data slot carries a link-time
-address, so the tool reports the differing operands separately from the differing
-opcodes.
+sequences.  The comparison uses the function oracle: it masks every byte that a
+fixup slot or a direct branch target controls, then compares the remaining bytes
+in instruction order.  A reference to another function or to a data slot
+therefore does not fail an exact match, while a reordered sequence does.
 
 Usage:
     python3 tools/rebuild/diff_module.py \
@@ -16,7 +17,7 @@ Usage:
 The rebuilt address comes from `--rebuilt-address` or from the linker map with
 `--rebuilt-map` and `--rebuilt-symbol`.
 
-Exit code 0 when the instruction sequences match, 1 when they differ.
+Exit code 0 when the default gate passes, 1 when the sequences differ.
 """
 from __future__ import annotations
 
@@ -26,8 +27,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import le  # noqa: E402
+import oracle  # noqa: E402
 
 MAP_SYMBOL = re.compile(
     r"^([0-9a-f]{4}):([0-9a-f]{8})[+*]?\s+(\S+)\s*$", re.IGNORECASE
@@ -195,39 +198,34 @@ def main() -> int:
           f"{common} instructions equal, "
           f"{opcode_differences} opcodes different, "
           f"{operand_differences} operands different")
+    result = oracle.compare(
+        original_body,
+        rebuilt_body,
+        original_relocations=original.relocations(),
+        rebuilt_relocations=rebuilt.relocations(),
+    )
     if len(original_body) != len(rebuilt_body):
+        print(f"instruction count differs: {len(original_body)} and "
+              f"{len(rebuilt_body)}")
         for index, (a, b) in enumerate(zip(original_shapes, rebuilt_shapes)):
             if a == b:
                 continue
             tail = len(original_body) - index
             if rebuilt_shapes[index + 1 : index + 1 + tail] == original_shapes[index:]:
                 extra = rebuilt_body[index]
-                print(f"verdict: the rebuilt module holds one instruction the "
+                print(f"the rebuilt module holds one instruction the "
                       f"original does not: {extra.text}")
-                return 1
-            if original_shapes[index + 1 : index + 1 + tail] == rebuilt_shapes[index:]:
+            elif original_shapes[index + 1 : index + 1 + tail] == rebuilt_shapes[index:]:
                 extra = original_body[index]
-                print(f"verdict: the original holds one instruction the rebuilt "
+                print(f"the original holds one instruction the rebuilt "
                       f"module does not: {extra.text}")
-                return 1
             break
-        print(f"verdict: the instruction counts differ, "
-              f"{len(original_body)} and {len(rebuilt_body)}")
-        return 1
-    if not opcode_differences and not operand_differences:
-        print("verdict: the modules are byte-identical")
-        return 0
-    if original_shapes == rebuilt_shapes:
-        print("verdict: the instruction sequences match; the differing operands "
-              "are the link-time addresses")
-        return 0
-    if sorted(insn.mnemonic for insn in original_body) == sorted(
-        insn.mnemonic for insn in rebuilt_body
-    ):
-        print("verdict: the modules hold the same instructions in a different order")
-        return 0
-    print("verdict: the instruction sequences differ")
-    return 1
+    print(f"relocation compare: {result.relocations_equal} of "
+          f"{result.relocations_total} slots equal")
+    for difference in result.differences[:3]:
+        print(f"oracle difference: {difference}")
+    print(f"verdict: {result.verdict}")
+    return 0 if result.passes_default else 1
 
 
 if __name__ == "__main__":

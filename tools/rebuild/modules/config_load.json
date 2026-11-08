@@ -1,0 +1,29 @@
+{
+  "exe": "cfglmod.exe",
+  "map": "config_load.map",
+  "name": "config_load",
+  "run": {
+    "command": "cfglmod.exe > cfg_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "cfg_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "config_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "config_load_main.c"
+    }
+  ]
+}

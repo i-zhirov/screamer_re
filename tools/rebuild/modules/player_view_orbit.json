@@ -1,0 +1,38 @@
+{
+  "exe": "pvorbit.exe",
+  "map": "player_view_orbit.map",
+  "name": "player_view_orbit",
+  "run": {
+    "command": "pvorbit.exe > pvorbit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "pvorbit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_view_orbit.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_view_orbit_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_view_orbit_main.c"
+    }
+  ]
+}

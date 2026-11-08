@@ -1,17 +1,52 @@
 {
   "address": "0x2edad",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "the six bodies print the memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2; the dispatch compares the status at [arg+0xc] at 0x2ee84"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x2edad holds 97 instructions and 291 bytes: it reads the status at [arg+0xc], prints the six memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2 through the printer at 0x4bf64 with the stream 0x2fd2, passes the name at +0x10 and the slot count at +0x08, and calls exit(-1) at 0x300be"
     }
   ],
+  "module": "memory_error_report",
   "name": "memory_error_report",
   "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 172,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2edad",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:bc3379bb2d74358c55f8e2e9bd3f5891ccb6e58893286fe080574eab0a821440",
+    "source_digest": "sha256:bd1a7af2c604de7d7ad87fa636f785410716e503264b2680d52e6a3279b3df55",
+    "tool": "run.py"
+  },
   "role": "reports a memory-handler fault, the slot count, and the handler name through the printer at 0x4bf64",
   "section": "The resource layer",
   "size": 291,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "memory_error_report_"
 }

@@ -1,0 +1,33 @@
+{
+  "exe": "memlist.exe",
+  "map": "member_list_load.map",
+  "name": "member_list_load",
+  "run": {
+    "command": "memlist.exe > mlist.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mlist.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "member_list_load.c",
+      "flags": [
+        "-of+",
+        "-oi",
+        "-dMEMBER_LIST_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "member_list_load_main.c"
+    }
+  ]
+}

@@ -1,9 +1,18 @@
 {
   "address": "0xc86dc",
   "checks": [],
-  "evidence": [],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the decompiled `FUN_000c86dc` scans the 16 records at `DAT_00127c18`, calls `FUN_000c88b2`, and computes the values at `DAT_00127cb8`"
+    }
+  ],
+  "name": "music_timer_update",
   "notes": [],
   "object_offset": "0xb86dc",
+  "role": "finds the highest rate of the 16 active tracks, sets the timer rate, and computes the per-track step values",
+  "section": "The HMI sound driver",
   "size": 428,
-  "status": "unknown"
+  "status": "named"
 }

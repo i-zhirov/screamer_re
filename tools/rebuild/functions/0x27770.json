@@ -1,17 +1,52 @@
 {
   "address": "0x27770",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
-      "text": "sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)`"
+      "text": "sets the 640x400 screen rectangle, loads the choice file, copies the state globals, and calls `race_session_start(1)`"
+    },
+    {
+      "kind": "note",
+      "text": "the original at `0x27770` holds 66 instructions and 251 bytes: the five register saves, the frame, the 4-byte local, the four stores 0, 0x280, 0, and 0x190 at `0x15ce4` through `0x15cf0`, the call at `0x1bbc8`, the five state copies, the context reads at `+0x48` and `+8`, the call at `0x8bd54` with the table value `DAT_001021d8[index]`, the two clears, the `MAP%d` build at `0x4d32c` with `DAT_001207f8 + 1`, the mode store `0x100`, the `DAT_0011d274` copy, and the `race_session_start(1)` call at `0x128e0`"
     }
   ],
+  "module": "race_start",
   "name": "race_start",
   "notes": [],
-  "role": "sets the 640x400 screen, copies the state globals, loads the resources, and calls `FUN_000128e0(1)`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 30,
+        "bytes_total": 231,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 29,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27770",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:064882c33ad95e33c4aff09b1fed317970e8220d5573c6b92b69e0c9e51ccc84",
+    "source_digest": "sha256:aaf5bd43d2b7a9270fc9a5bb445ccf7433464ac131bb8fe369a16280f737ab47",
+    "tool": "run.py"
+  },
+  "role": "starts one level by setting the screen rectangle, loading the choice file, copying the state, and running the race session start",
   "section": "race_loop callees",
   "size": 252,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "race_start_"
 }

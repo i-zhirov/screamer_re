@@ -1,0 +1,38 @@
+{
+  "exe": "ogstmod.exe",
+  "map": "object_gear_step.map",
+  "name": "object_gear_step",
+  "run": {
+    "command": "ogstmod.exe > ogst_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "ogst_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_gear_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "object_gear_step_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_gear_step_main.c"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "exe": "dmamod.exe",
+  "map": "dos_memory_alloc.map",
+  "name": "dos_memory_alloc",
+  "run": {
+    "command": "dmamod.exe > dma_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "dma_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "dos_memory_alloc.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dos_memory_alloc_main.c"
+    }
+  ]
+}

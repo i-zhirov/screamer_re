@@ -1,9 +1,65 @@
 {
   "address": "0x1629c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The player_steering_update module at 0x1629c"
+    },
+    {
+      "kind": "note",
+      "text": "the original at 0x1629c holds 267 instructions and 997 bytes up to the ret at 0x16680, so the record keeps the 1036-byte extent and sets no function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller is the player update group at 0x15a80, which calls this function at 0x15aac after the brake step at 0x16150; the group runs on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function selects the filter index 0x50, 0x55, or 0x58 from the state at +0x148 and the flags at +0x110, +0x4f4, and +0x170, forms the limit (1 - sqrt(+0x50c / +0x480)) * 0x100720 + 0x100728, scales the six control values at 0x119880 by 1/1024 and the limit, and uses the mode at 0x119818, so the module names the function player_steering_update"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero angle gives the turn radius wheelbase/tan(angle) at +0x2f8, the yaw step +0x50c * 0x118e04 / radius at +0x2f4, adds it to the heading at +0x4cc, and stores the rotated position difference at +0x1c and +0x24"
+    }
+  ],
+  "module": "player_steering_update",
+  "name": "player_steering_update",
   "notes": [],
   "object_offset": "0x629c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 713,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 213,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1629c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:bc56d871c00d9a6606ff4284a2fcca47e0c966a761cf285fda8ac861a44dd133",
+    "source_digest": "sha256:75ec21d4bd55a2028ec4be0a278f8ed603ab3cb4a0b044b39c688c5f40812bff",
+    "tool": "run.py"
+  },
+  "role": "computes the player steering angle from the joystick and keyboard controls, limits it by the speed ratio, and writes the turn radius, the yaw step, the heading, and the position delta",
+  "section": "The vehicle state chain",
   "size": 1036,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_steering_update_"
 }

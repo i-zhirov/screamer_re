@@ -1,17 +1,52 @@
 {
   "address": "0x2f9e0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
       "kind": "note",
       "text": "builds `%s\\DATA\\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d`"
+    },
+    {
+      "kind": "note",
+      "text": "the body continues past the first 72-instruction block to the full 688-byte extent: it opens melodic.bnk and drum.bnk, reads both through resource_read, installs them for the driver values 0xa002 and 0xa009, and reports the statuses 1, 2, and 3"
     }
   ],
+  "module": "music_bank_load",
   "name": "music_bank_load",
   "notes": [],
-  "role": "builds `%s\\DATA\\MUSIC.DAT`, copies the name, and opens the member `melodic.bnk` (or `drum.bnk`) through the member open `0x4c08d`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 220,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 72,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f9e0",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:ce5d2c635519ad922e14ecb042ee45a619c9888031ccc3fce2b2b8e8999c6973",
+    "source_digest": "sha256:2446db94d2e225a4b73434d250a83fc9ce17d5f5f58e44eccb59e0ef119f471d",
+    "tool": "run.py"
+  },
+  "role": "Loads the melodic and drum music banks through the sound driver and sets the bank status.",
   "section": "The sound loaders",
   "size": 688,
-  "status": "named"
+  "status": "rebuilt",
+  "symbol": "music_bank_load_"
 }

@@ -1,6 +1,10 @@
 {
   "address": "0x4d32c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "derived",
   "evidence": [
     {
@@ -8,10 +12,37 @@
       "text": "formats into a buffer through the run-time `vsprintf` and writes the terminator"
     }
   ],
+  "module": "sprintf",
   "name": "sprintf",
   "notes": [],
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 32,
+        "bytes_total": 48,
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d32c",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:7c78b0c416a5f6382a335c732ca8604c907b966a1008d1baa1ceece849e5133c",
+    "source_digest": "sha256:05d98feb2cc3c1fdf4aadfddf7faa32c07b76c81fdd22f85102357d282624449",
+    "tool": "run.py"
+  },
   "role": "formats into a buffer through the run-time `vsprintf` and writes the terminator",
   "section": "Resource loader",
   "size": 52,
-  "status": "named"
+  "status": "verified",
+  "symbol": "sprintf_"
 }

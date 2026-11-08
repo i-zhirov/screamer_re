@@ -1,17 +1,48 @@
 {
   "address": "0xd2008",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
-      "text": "walks the free list and keeps the largest free block in `DAT_001031d8`"
+      "text": "the original at `0xd2008` holds 35 instructions and 94 bytes: it walks the free list from `DAT_001031d0`, stops before the next free block, releases the block through the heap routine at `0xe0a84`, keeps the largest free size in `DAT_001031d8`, and clears the heap flag at `0x27de5`"
     }
   ],
+  "module": "runtime_free",
   "name": "free",
   "notes": [],
-  "role": "walks the free list and keeps the largest free block in `DAT_001031d8`",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 66,
+        "bytes_total": 94,
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "instructions_equal": 35,
+        "instructions_total": 35,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd2008",
+    "date": "2026-11-06",
+    "fingerprint": "sha256:f4b087abb61308076425ac19557935d4118ef1e8d3cf318b18625a011f460cf8",
+    "source_digest": "sha256:60836ee4588741f92d83a4ed89b97fc687238f61a9aa0ea6189e4a568ef61ebb",
+    "tool": "run.py"
+  },
+  "role": "walks the free list, releases the block through the heap routine, and keeps the largest free size",
   "section": "The runtime memory manager",
   "size": 94,
-  "status": "named"
+  "status": "verified",
+  "symbol": "free_"
 }

@@ -17,13 +17,19 @@ Initial reconnaissance is complete.  The project has:
   (`tools/rebuild/store.py`),
 - a check runner that builds and tests the declared checks
   (`tools/rebuild/run.py`),
-- a self-contained status page of the store (`tools/rebuild/view.py`),
+- a strict identity gate and a whole-image oracle
+  (`--strict`, `tools/rebuild/oracle.py`, and
+  `tools/rebuild/image_compare.py`),
+- a self-contained status page of the store (`tools/rebuild/view.py`), published
+  to GitHub Pages at <https://i-zhirov.github.io/screamer_re/>,
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
 - a named call graph with a drift check (`tools/rebuild/callgraph.py`),
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
-No reconstructed source code exists yet.
+Reconstructed module sources exist under `tools/rebuild/`.  One function,
+`memcpy`, matches the original byte for byte.  The other modules hold a recorded
+difference or a shape match.
 
 ## Repository layout
 
@@ -56,6 +62,17 @@ python3 tools/le.py map  ~/Documents/Screamer.app/Contents/Resources/game/STARTH
 python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
 python3 tools/le.py tree  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x300f8
+python3 tools/le.py targets ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x10020 0x300be
+```
+
+Run the strict byte gate and the whole-image oracle:
+
+```sh
+python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --recheck-record 0x300ec
+python3 tools/rebuild/image_compare.py \
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
+  --rebuilt work/rebuild/STARTH.EXE
 ```
 
 Find the program entry at run time.  The tool needs DOSBox-X:
@@ -126,18 +143,31 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-61 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 57 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 46 checks.  Both flags report 42 checks.
+231 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 227 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 216 checks.  Both flags report 212 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
-time for the unchanged modules.  CI runs the syntax gate and the unit suite on
-every push and pull request, and the full check on a self-hosted runner.
+time for the unchanged modules.  `--strict` turns the identity check into a
+byte gate: the relocation-aware oracle masks the fixup slots and the direct
+branch targets, so `free` and `exit` pass, and a reordered or shape-only match
+fails.  `--recheck-record ADDR`
+forces one fresh run and prints the full check output.  `store.py check`
+validates every record and module against the JSON Schema contracts.  Stage 11
+also runs the whole-image oracle when `--rebuilt-image` exists, and reports a
+skip when no whole image is built.  CI runs the syntax gate and the unit suite
+on every push and pull request, and the full check on a self-hosted runner.
 The pre-commit hook regenerates the status page; enable the hooks once per clone:
 
 ```sh
 git config core.hooksPath .githooks
 ```
+
+On a push to `master`, the `status` job packages the page for GitHub Pages, and
+the `deploy` job runs after the syntax gate.  Pull requests upload the
+`rebuild-status` artifact but do not deploy.  The published page is
+<https://i-zhirov.github.io/screamer_re/>.  The Pages source is
+`GitHub Actions` in the repository settings.
 
 The full check needs the game directory, DOSBox-X, and the installed Ghidra
 loader.  Set `SCREAMER_GAME_DIR` to use another game directory.
