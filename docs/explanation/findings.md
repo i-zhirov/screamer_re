@@ -17659,3 +17659,67 @@ temporary `-od` recipe.
   --original-address 0x14fb8 --count 80 --rebuilt work/rebuild/spltld.exe
   --rebuilt-map work/rebuild/spline_table_load.map --rebuilt-symbol
   spline_table_load_` and `python3 tools/rebuild/run.py run --function 0x14fb8`.
+
+## The path_keyframe_append module at 0x231f0
+
+- Observation: the original body at `0x231f0` holds 89 instructions and 309
+  bytes up to the `ret` at `0x23324`.  The next function starts at `0x23328`,
+  so the store record keeps the 312-byte extent and sets no separate function
+  size.  The identity check uses 89 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x231f0 --count 89` and
+  `tools/rebuild/functions/0x231f0.json`.
+- Observation: the only direct caller at `0x20306` is the view group at
+  `0x202c0`.  The group passes the player object at object-3 offset `0xf91c`
+  in `eax` and a record at object-3 offset `0x18e8c` plus the view index times
+  `0x24` in `edx`.  The group then calls `path_playback_update` at `0x23038`
+  with the playback block at object-3 offset `0x18ed8`.  The frame update at
+  `0x1ff70` selects the view group through the mode byte.
+  Evidence: the calls at `0x20306` and `0x20317`, the index scale at
+  `0x202ed` through `0x20304`, and the disassembly of `0x202c0`.
+- Observation: the second argument points to a recording state with the count
+  at `+0x00`, the index at `+0x04`, the current index at `+0x08`, the active
+  flag at `+0x0c`, and the keyframe array at `+0x20`.  The function returns at
+  once when the active flag is not 1.
+  Evidence: the compare at `0x23200`, the return at `0x23204`, and the field
+  loads at `0x2320a` through `0x23224`.
+- Observation: the function writes the 0x28-byte keyframe at the array plus
+  the index times `0x28`.  The position terms are the fields at `+0x4b0`
+  through `+0x4b8` plus the fields at `+0x130` through `+0x138`.  The angle
+  terms are the fields at `+0x4c8` through `+0x4d0` plus the fields at
+  `+0x124` through `+0x12c`.  The timestamp is the global clock
+  `DAT_00118e10`.  The other fields come from `+0x7b4`, `+0x680`, and
+  `+0x7b0`.
+  Evidence: the stores at `0x23239` through `0x232ec` and the keyframe
+  layout of `path_playback_update`.
+- Observation: the function then advances the index.  When the new index
+  equals the count, it keeps the index at the last slot, clears the active
+  flag, and writes the current index at `+0x08`.
+  Evidence: the block at `0x232ef` through `0x2331d`.
+- Inference: the keyframe layout, the append position in the view group, and
+  the matching playback consumer support the name `path_keyframe_append`.
+  The module records the name with the confidence `inferred`.  The original
+  has no symbol name, so the module name and the global names in the harness
+  stay inferred.
+  Evidence: the call graph, the keyframe layout, and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses floating-point instructions, so the recipe adds the
+  FPU run-time stubs.
+  Evidence: `tools/rebuild/path_keyframe_append.c` and the module recipe.
+- Observation: the harness holds the view object, the recording state, and
+  eight keyframes.  The six paths cover the zero active flag, the index zero,
+  the index two, the last slot, the active flag -1, and the count one.  The
+  output holds the markers `0` through `5` and `D`.
+  Evidence: `tools/rebuild/path_keyframe_append_main.c`,
+  `python3 tools/rebuild/harness.py run --module path_keyframe_append`, and
+  `work/rebuild/pkfa.txt`.
+- Observation: the rebuilt module holds 89 decoded instructions and 353 bytes.
+  The identity check stays open at 25 of 89 instructions and 10 of 309 bytes,
+  because V2 saves the registers in another order, keeps the state pointer in
+  `ecx`, multiplies the index by `0x28` directly, and reads the clock through a
+  near data address.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x231f0 --count 89 --rebuilt work/rebuild/pkfa.exe
+  --rebuilt-map work/rebuild/path_keyframe_append.map --rebuilt-symbol
+  path_keyframe_append_` and `python3 tools/rebuild/run.py run --function
+  0x231f0`.

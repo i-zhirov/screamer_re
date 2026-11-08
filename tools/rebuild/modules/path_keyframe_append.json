@@ -1,0 +1,36 @@
+{
+  "exe": "pkfa.exe",
+  "map": "path_keyframe_append.map",
+  "name": "path_keyframe_append",
+  "run": {
+    "command": "pkfa.exe > pkfa.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pkfa.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "path_keyframe_append.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "path_keyframe_append_main.c"
+    }
+  ]
+}
