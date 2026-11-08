@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: two hundred thirty-eight named modules are rebuilt with the harness and the
+  progress: two hundred thirty-nine named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -198,8 +198,9 @@ current host.
   `sound_event_transform` at `0x835c0`, and
   `name_entry_update` at `0x2ce84`, and
   `net_race_lobby_init` at `0x2ca40`, and
-  `basis_transform_build` at `0x8b610`;
-  thirty modules are verified, one is matching, and two hundred and thirty-eight
+  `basis_transform_build` at `0x8b610`, and
+  `camera_pose_build` at `0x1a144`;
+  thirty modules are verified, one is matching, and two hundred and thirty-nine
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

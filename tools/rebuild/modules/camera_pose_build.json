@@ -1,0 +1,34 @@
+{
+  "exe": "campose.exe",
+  "map": "camera_pose_build.map",
+  "name": "camera_pose_build",
+  "run": {
+    "command": "campose.exe > campose.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "campose.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "camera_pose_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "camera_pose_build_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "camera_pose_build_main.c"
+    }
+  ]
+}

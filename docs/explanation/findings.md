@@ -20261,3 +20261,70 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x8b610`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The camera_pose_build module at 0x1a144
+
+- Observation: the body at `0x1a144` reaches its first `ret` at `0x1a21e`.
+  The plan row counts 63 instructions and 219 bytes to that `ret`.  The else
+  branch then runs from `0x1a21f` to the `ret` at `0x1a2b8`, so the complete
+  body holds 103 instructions and 373 bytes.  The next function starts at
+  `0x1a2bc`, so the store record keeps the 376-byte extent and sets no
+  function size.  The identity check uses the plan count 63.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1a144 --count 103` and
+  `tools/rebuild/functions/0x1a144.json`.
+- Observation: the only direct caller at `0x19ad6` is `player_update` at
+  `0x19ab0`.  It runs this function as the fourth step on the player view
+  object `DAT_00110a20`, after `view_transition_update` at `0x19f00`.  The
+  function writes the camera pose at `DAT_00109a0`.  `camera_update` at
+  `0x8ac78` reads the pose through `basis_transform_build` at `0x8b610`, so the
+  record takes the section `player_update callees`.
+  Evidence: the call at `0x19ad6`, the pose stores at `0x1a183` through
+  `0x1a215`, and the finding "The basis_transform_build module at 0x8b610".
+- Observation: the view object holds the base position at `+0x00`, `+0x04`,
+  and `+0x08`, the position delta at `+0x24`, `+0x28`, and `+0x2c`, the base
+  angles at `+0x30`, `+0x34`, and `+0x38`, the angle delta at `+0x3c`, `+0x40`,
+  and `+0x44`, and the transition flag `+0x58`.  `view_transition_update`
+  forms the two deltas and sets the flag.
+  Evidence: the loads at `0x1a15e` through `0x1a164` and `0x1a1b5` through
+  `0x1a1be` and the finding "The view_transition_update module at 0x19f00".
+- Observation: when the flag `+0x58` is set, the angle takes the base plus the
+  delta, and the position takes the base plus the delta.  When the flag is
+  clear, the angle and the position take the base alone.  The float 1024.0 at
+  object-3 offset `0x8f8` and the float pi at object-3 offset `0x8fc` convert
+  the angle to the table index.  The mask `0x7ff` wraps the index into the
+  0x800-entry angle table.
+  Evidence: the two blocks at `0x1a15b` through `0x1a21e` and `0x1a21f`
+  through `0x1a2b8`, and the constants at the two offsets.
+- Inference: the caller chain, the camera pose at `DAT_00109a0`, the angle
+  table scale, and the basis transform at `0x8b610` support the name
+  `camera_pose_build`.  The original has no symbol for the function.  The
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller, the data flow, and the constants above.
+- Observation: the original calls the truncating helper at `0x4d9f4`.  This
+  harness links no math library, so the local `camera_pose_build_fpu.asm`
+  makes `__CHP` truncate toward zero.  The two constants arrive through
+  globals, because the minimal image does not load the constant segment.  The
+  original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/camera_pose_build_fpu.asm` and
+  `tools/rebuild/modules/camera_pose_build.json`.
+- Observation: the harness holds one view object, the camera pose, and the two
+  float constants.  The four paths cover the flag set with the base plus the
+  delta and the two pi wrap, the flag clear with the unused delta, the 1.0 and
+  -1.0 truncation toward zero, and the flag clear with the zero position.
+  The output holds the markers `0` through `3` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/camera_pose_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module camera_pose_build`, and
+  `work/rebuild/campose.txt`.
+- Observation: the identity check compares 63 instructions.  The rebuilt
+  module holds 8 of 63 instructions, 17 of 219 bytes, and 1 of 27 relocation
+  slots equal.  The identity check stays open because V2 orders the prologue
+  differently, keeps the view pointer in `edx`, and folds the two branches.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1a144 --count 63 --rebuilt work/rebuild/campose.exe
+  --rebuilt-map work/rebuild/camera_pose_build.map --rebuilt-symbol
+  camera_pose_build_` and `python3 tools/rebuild/run.py run --function
+  0x1a144`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
