@@ -415,7 +415,7 @@ reproduce the original bytes.
 | --- | --- | --- | --- | --- | --- |
 | `0x22018` | `angle_approach` (done) | 257 | 93 | 0 | 43 |
 | `0x1a2bc` | `player_cockpit_camera` (done) | 250 | 71 | 2 | 10 |
-| `0x12d0c` | unnamed | 249 | 76 | 6 | 10 |
+| `0x12d0c` | `game_mode_10_start` (done) | 249 | 76 | 6 | 10 |
 | `0x23328` | unnamed | 248 | 71 | 3 | 12 |
 | `0x1c38a` | unnamed | 243 | 73 | 0 | 0 |
 | `0x833a4` | unnamed | 242 | 98 | 0 | 0 |
@@ -428,7 +428,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred fifty-three modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -538,5 +538,6 @@ and `replay_save` at `0x1b738`, and
 `player_segment_apply` at `0x16b98`, and
 `sprite_load` at `0x257b0`, and
 `angle_approach` at `0x22018`, and
-`player_cockpit_camera` at `0x1a2bc`.
-The next unnamed function is `0x12d0c`.
+`player_cockpit_camera` at `0x1a2bc`, and
+`game_mode_10_start` at `0x12d0c`.
+The next unnamed function is `0x23328`.

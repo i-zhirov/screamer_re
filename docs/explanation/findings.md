@@ -19264,3 +19264,74 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.  The name does not prove
   that the function draws the cockpit object.
+
+## The game_mode_10_start module at 0x12d0c
+
+- Observation: the original body at `0x12d0c` holds 76 instructions and 249
+  bytes up to the first `ret` at `0x12e04`.  The loop-exit path ends at the
+  second `ret` at `0x12e16`, and the next function starts at `0x12e18`.  The
+  store record keeps the 268-byte extent and sets no separate function size.
+  The identity check uses 76 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12d0c --count 76` and
+  `tools/rebuild/functions/0x12d0c.json`.
+- Observation: the only direct caller is the game mode dispatch at `0x12968`
+  in `race_session_start` at `0x128e0`, which sends the mode 0x10 to this
+  function through the call at `0x129b7`.  The caller takes the section The
+  timing and filter layer.  The caller and the program map already hold the
+  name `game_mode_10_start`.
+  Evidence: the comparison chain at `0x1296d` through `0x1298e` and the call
+  at `0x129b7`.
+- Observation: the function stores the player index plus one at
+  `DAT_0000cf40` and loads the player car through `player_car_init` at
+  `0x136cc` with the object offset `0xf91c` and the mode argument.  A non-zero
+  result returns at once.
+  Evidence: the block at `0x12d19` through `0x12d3d`.
+- Observation: the traffic count `DAT_0011d254` sets the float cell
+  `DAT_0000d6e0` to `(sqrt(count * 0.1) - 0.3) * 0.7` and the float cell
+  `DAT_0000d6e4` to `1.0 - DAT_0000d6e0`.  The constants sit in object 3 at
+  the offsets `0x44d`, `0x455`, and `0x45d` and hold 0.1, -0.3, and 0.7.  The
+  count lands at `DAT_001100a4` and `DAT_00115218`.
+  Evidence: the FPU block at `0x12d42` through `0x12d9c` and the doubles at
+  object-3 offsets `0x44d`, `0x455`, and `0x45d`.
+- Observation: the function clears `count * 0x2a8` bytes at `DAT_00113cd8`
+  through the memset helper at `0x8c160`, runs `traffic_step` at `0x1eae0`
+  with the retry limit `0x50`, waits through the timing loop at `0x1ec48`,
+  prepares each traffic record through the record init at `0x14970` with the
+  shared counter `DAT_0000634c`, returns the first non-zero result, and runs
+  the scene setup at `0x15984` with the mode argument.
+  Evidence: the block at `0x12da2` through `0x12e16`.
+- Inference: the mode 0x10 dispatch, the traffic count, the traffic table, the
+  `traffic_step` call, and the scene setup support the name
+  `game_mode_10_start`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the caller, the data flow, and the call graph above.
+- Observation: the three constants arrive through the globals
+  `traffic_time_scale`, `traffic_time_bias`, and `traffic_time_factor`,
+  because the harness image does not load the constant segment.  The local
+  `game_mode_10_start_fpu.asm` supplies the square root at `0x22bec` and the
+  FPU run-time symbols.  The original has the EBP frame, so the module builds
+  with `-of+`.
+  Evidence: `tools/rebuild/game_mode_10_start.c` and
+  `tools/rebuild/modules/game_mode_10_start.json`.
+- Observation: the harness holds the player index, the traffic count, the two
+  float cells, the traffic table, the shared counter, the three constants, and
+  the seven callee stubs.  The four paths cover the normal three-record start,
+  the player car load failure, the second record failure, and the zero count.
+  The output holds the markers `0` through `3` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/game_mode_10_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module game_mode_10_start`, and
+  `work/rebuild/gm10.txt`.
+- Observation: the diff reports 13 of 76 instructions and 23 of 249 bytes
+  equal.  The identity check stays open because V2 saves the frame pointer
+  first, keeps the count and the result in registers, and uses `imul` for the
+  record address.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12d0c --count 76 --rebuilt work/rebuild/gm10.exe
+  --rebuilt-map work/rebuild/game_mode_10_start.map --rebuilt-symbol
+  game_mode_10_start_` and `python3 tools/rebuild/run.py run --function
+  0x12d0c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
