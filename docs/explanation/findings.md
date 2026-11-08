@@ -18936,3 +18936,64 @@ temporary `-od` recipe.
   replay_load_atk_` and `python3 tools/rebuild/run.py run --function 0x1ba4c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The replay_save module at 0x1b738
+
+- Observation: the original body at `0x1b738` holds 69 instructions and 263
+  bytes up to the `ret` at `0x1b83e`.  The next function starts at `0x1b840`, so
+  the store record keeps the 264-byte extent and sets no separate function
+  size.  The identity check uses 69 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b738 --count 69` and
+  `tools/rebuild/functions/0x1b738.json`.
+- Observation: the only direct caller at `0x1fe4a` is `race_session_run` at
+  `0x1fd70`.  It calls this function with the member name `temp` at object-3
+  offset `0xc88` when the replay flag `DAT_00018e60` is set.  The sibling
+  reader at `0x1b840` reads the same `%s\replays\%s.rpl` member and the same
+  block layout, and the writer at `0x1b974` writes the
+  `%s\replays\%s.atk` ghost records.  The record takes the section The replay
+  records.
+  Evidence: the call at `0x1fe4a`, the name at object-3 offset `0xc88`, the
+  reader at `0x1b840`, and the finding "The replay_load module at 0x1b840".
+- Observation: the function builds the member name `%s\replays\%s.rpl` from
+  the base path buffer `DAT_00007edc` and the name through the `sprintf` at
+  `0x4d32c`.  The format string sits at object-3 offset `0x9f8`, and the mode
+  string `wb` sits at object-3 offset `0xa0a`.  The function opens the member
+  through `fopen` at `0xc5fe5` and returns 1 when the open fails.
+  Evidence: the block at `0x1b741` through `0x1b77e` and the two strings.
+- Observation: the function copies the six setup words `DAT_00018e70`,
+  `DAT_0001d2a0`, `DAT_0001d2b0`, `DAT_0001d2b4`, `DAT_0001d260`, and
+  `DAT_0001d274` into the header `DAT_00018e74`.  Then it writes five blocks
+  through `fwrite` at `0xc6387`: 6 records of 0x1c bytes from `DAT_000197d8`,
+  0x28 records of 0x1c bytes from `DAT_000192a4`, 0xa records of 4 bytes from
+  `DAT_00019704`, one record of 0x18 bytes from `DAT_00018e74`, and
+  `DAT_00018e70` records of 0x14 bytes from the buffer `DAT_00018e5c`.  The
+  function closes the stream through `fclose` at `0xc6245` and returns 0.
+  Evidence: the block at `0x1b77e` through `0x1b838`.
+- Inference: the `.rpl` member, the block layout of the reader at `0x1b840`,
+  and the caller at `0x1fd70` support the name `replay_save`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph, the member name, and the block layout above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no floating-point instruction, so it needs no FPU
+  stub.
+  Evidence: `tools/rebuild/replay_save.c` and the module recipe.
+- Observation: the harness holds the base path, the six setup words, the five
+  block buffers, and the frame buffer pointer.  The three paths cover the
+  failed open, the header copy with five block writes, and the zero frame
+  count.  The output holds the markers `0` through `2` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/replay_save_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_save`, and
+  `work/rebuild/rplsave.txt`.
+- Observation: the rebuilt module holds 69 decoded instructions and 251 bytes
+  in the identity window.  The identity check stays open at 37 of 69
+  instructions and 22 of 251 bytes, because V2 saves the frame pointer first,
+  keeps the stream in `esi`, passes the data pointers as near offsets, and uses
+  another local layout.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b738 --count 69 --rebuilt work/rebuild/rplsave.exe
+  --rebuilt-map work/rebuild/replay_save.map --rebuilt-symbol replay_save_`
+  and `python3 tools/rebuild/run.py run --function 0x1b738`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

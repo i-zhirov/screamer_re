@@ -1,9 +1,99 @@
 {
   "address": "0x1b738",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 69,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1b738 holds 69 instructions and 263 bytes up to the ret at 0x1b83e; the next function starts at 0x1b840, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 69 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1fe4a is race_session_run at 0x1fd70; it calls this function with the member name temp at object-3 offset 0xc88 when the replay flag DAT_00018e60 is set; the sibling reader at 0x1b840 reads the same %s\\replays\\%s.rpl member and block layout, and the writer at 0x1b974 writes the %s\\replays\\%s.atk ghost records, so the record takes the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member name %s\\replays\\%s.rpl from the base path buffer DAT_00007edc and the name through sprintf at 0x4d32c; the format string sits at object-3 offset 0x9f8 and the mode string wb at object-3 offset 0xa0a; the function opens the member through fopen at 0xc5fe5 and returns 1 when the open fails"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the six setup words DAT_00018e70, DAT_0001d2a0, DAT_0001d2b0, DAT_0001d2b4, DAT_0001d260, and DAT_0001d274 into the header DAT_00018e74, then writes five blocks through fwrite at 0xc6387: 6 records of 0x1c bytes from DAT_000197d8, 0x28 records of 0x1c bytes from DAT_000192a4, 0xa records of 4 bytes from DAT_00019704, one record of 0x18 bytes from DAT_00018e74, and DAT_00018e70 records of 0x14 bytes from the buffer DAT_00018e5c"
+    },
+    {
+      "kind": "note",
+      "text": "the .rpl member, the block layout of the reader at 0x1b840, and the caller at 0x1fd70 support the name replay_save; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no floating-point instruction, so it needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the six setup words, the five block buffers, and the frame buffer pointer; the three paths cover the failed open, the header copy with five block writes, and the zero frame count; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 69 decoded instructions and 251 bytes in the identity window; the identity check stays open at 37 of 69 instructions and 22 of 251 bytes, because V2 saves the frame pointer first, keeps the stream in esi, passes the data pointers as near offsets, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1b738 --count 69"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1b738 --count 69 --rebuilt work/rebuild/rplsave.exe --rebuilt-map work/rebuild/replay_save.map --rebuilt-symbol replay_save_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_save"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1b738"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_save module at 0x1b738"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_save",
+  "name": "replay_save",
   "notes": [],
   "object_offset": "0xb738",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 251,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 37,
+        "instructions_total": 69,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b738",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:1612f95f50dd791b92c6f6bb06c08935334d5bc26c9281a81bdbe8a358bb375f",
+    "source_digest": "sha256:2ea5ba97c5544dac8453cee43978911a89d2d3d416530efec65b45e20c37fab6",
+    "tool": "run.py"
+  },
+  "role": "writes the %s\\replays\\%s.rpl member from the five replay blocks and the six setup words",
+  "section": "The replay records",
   "size": 264,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_save_"
 }

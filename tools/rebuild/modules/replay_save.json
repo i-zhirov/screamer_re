@@ -1,0 +1,29 @@
+{
+  "exe": "rplsave.exe",
+  "map": "replay_save.map",
+  "name": "replay_save",
+  "run": {
+    "command": "rplsave.exe > rplsave.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rplsave.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_save.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_save_main.c"
+    }
+  ]
+}
