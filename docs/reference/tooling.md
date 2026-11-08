@@ -996,10 +996,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 279 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 275 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 264 checks.  Both flags
-report 260 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 291 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 287 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 276 checks.  Both flags
+report 272 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:
