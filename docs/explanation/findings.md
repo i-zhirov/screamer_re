@@ -20441,3 +20441,66 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x21f40`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The replay_save_atk module at 0x1b974
+
+- Observation: the original body at `0x1b974` holds 67 instructions and 213
+  bytes up to the `ret` at `0x1ba48`.  The next function starts at `0x1ba4c`, so
+  the store record keeps the 216-byte extent and sets no separate function
+  size.  The identity check uses 67 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b974 --count 67` and
+  `tools/rebuild/functions/0x1b974.json`.
+- Observation: the only direct caller at `0x1fde4` is `race_session_run` at
+  `0x1fd70`.  It calls this function with the map name `DAT_0011d294` when bit 3
+  of `DAT_0018e1d` is set.  The sibling loader at `0x1ba4c` reads the same
+  `%s\replays\%s.atk` member and the same 0x24-byte ghost record.
+  Evidence: the call at `0x1fde4`, the gate at `0x1fdd6`, and the finding "The
+  replay_load_atk module at 0x1ba4c".
+- Observation: the function selects the 0x24-byte ghost record at
+  `DAT_0018e8c` through the index `DAT_0018ed4`.  It builds the member name
+  `%s\replays\%s.atk` from the base path buffer `DAT_00007edc` and the name
+  through the `sprintf` at `0x4d32c`.  The format string sits at object-3 offset
+  `0xa22`, and the mode string `wb` sits at object-3 offset `0xa34`.  The
+  function opens the member through `fopen` at `0xc5fe5` and returns `0x16`
+  when the open fails.
+  Evidence: the block at `0x1b980` through `0x1b9d1` and the two strings.
+- Observation: the function copies the record field at `+0x04` to `+0x08`,
+  clears the float field at `+0x1c` from the zero float at object-3 offset
+  `0x100a8`, stores the index at `+0x10`, and stores `DAT_001d274` at `+0x14`.
+  It writes one 0x24-byte header through `fwrite` at `0xc6387`.  When the active
+  field at `+0x0c` is not zero, it writes records of 0x28 bytes from the
+  keyframe pointer at `+0x20`; the count comes from the record field at
+  `+0x08`.  It closes the stream through `fclose` at `0xc6245` and returns 0.
+  Evidence: the block at `0x1b9d3` through `0x1ba48`.
+- Inference: the `.atk` member, the ghost record layout, the sibling loader at
+  `0x1ba4c`, and the caller at `0x1fd70` support the name `replay_save_atk`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph, the member name, and the record layout above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original copies the zero float at object-3 offset `0x100a8`, so
+  the harness passes that cell through the global `DAT_00100a8`.  The module
+  uses no assembly.
+  Evidence: `tools/rebuild/replay_save_atk.c` and the module recipe.
+- Observation: the harness holds the base path, the replay name, the four ghost
+  records, the index `DAT_0018ed4`, the flag cell `DAT_001d274`, the zero float,
+  and the member image.  The five paths cover the failed open, slot 0 with the
+  active flag and eleven keyframes, the clear active flag, the zero frame count,
+  and slot 1.  The output holds the markers `0` through `4` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/replay_save_atk_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_save_atk`, and
+  `work/rebuild/atksave.txt`.
+- Observation: the rebuilt module holds 67 decoded instructions and 202 bytes
+  in the identity window.  The identity check stays open at 23 of 67
+  instructions, 9 of 202 bytes, and 0 of 17 relocation slots, because V2 saves
+  the frame pointer first, keeps the record in `esi`, keeps the stream in
+  `edi`, uses `imul` for the record address, and passes the data pointers as
+  near offsets.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b974 --count 67 --rebuilt work/rebuild/atksave.exe
+  --rebuilt-map work/rebuild/replay_save_atk.map --rebuilt-symbol
+  replay_save_atk_` and `python3 tools/rebuild/run.py run --function 0x1b974`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

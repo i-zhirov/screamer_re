@@ -443,7 +443,7 @@ reproduce the original bytes.
 | `0x1a144` | `camera_pose_build` (done) | 219 | 63 | 3 | 15 |
 | `0x2b308` | `map_object_line_select` (done) | 218 | 66 | 0 | 0 |
 | `0x21f40` | `angle_step` (done) | 215 | 87 | 0 | 42 |
-| `0x1b974` | unnamed | 213 | 67 | 5 | 2 |
+| `0x1b974` | `replay_save_atk` (done) | 213 | 67 | 5 | 2 |
 | `0x20ec8` | unnamed | 208 | 58 | 7 | 5 |
 | `0x1814c` | unnamed | 208 | 56 | 1 | 0 |
 | `0x4c5c7` | unnamed | 206 | 72 | 1 | 0 |
@@ -452,7 +452,7 @@ This table starts Phase S.
 
 ## Position
 
-Two hundred seventy-one modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred seventy-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -579,5 +579,6 @@ and `replay_save` at `0x1b738`, and
 `net_race_lobby_init` at `0x2ca40`, and `basis_transform_build` at `0x8b610`,
 and `camera_pose_build` at `0x1a144`, and
 `map_object_line_select` at `0x2b308`, and
-`angle_step` at `0x21f40`.
-The next unnamed function is `0x1b974`.
+`angle_step` at `0x21f40`, and
+`replay_save_atk` at `0x1b974`.
+The next unnamed function is `0x20ec8`.
