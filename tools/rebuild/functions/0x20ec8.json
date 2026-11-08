@@ -1,9 +1,103 @@
 {
   "address": "0x20ec8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x20ec8 holds 58 instructions and 208 bytes up to the ret at 0x20f97; the next function starts at 0x20f98, so the store record keeps the 208-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20029 is the frame update at 0x1ff70; it runs this function after race_intro_update at 0x20d20 and before the sibling handler at 0x20f98 and race_finish_update at 0x21058; no named function sits between the frame update and the target, so the module takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the gate is bit 3 of DAT_00118e1c; race_lap_complete at 0x19678 sets the bit at 0x197fd when the lap index passes the race distance DAT_0011d2b0, so the function runs after the player completes the last lap; the sibling handler at 0x20f98 gates bit 4, which race_clock_update at 0x18a14 sets at 0x18b45 when the time limit expires"
+    },
+    {
+      "kind": "note",
+      "text": "the function releases the sound handle DAT_00100e8 through 0x1f880; it copies the float cells DAT_00100a8 and DAT_00100b4 into the race time DAT_0011d268 and the lap time DAT_0011d26c; it copies the player slot DAT_000ffa4 into the car number DAT_0011d270"
+    },
+    {
+      "kind": "note",
+      "text": "the mode DAT_0011d260 selects the finish handler: 0x23ed8 for 1, 0x23f14 for 2, 0x23f50 for 4, 0x23ed0 for 0x10, 0x2401c for 0x20, and 0x23fc8 for 0x40; the mode handlers set bit 3 of DAT_00118e1d and push the finish effect; the mode 0x10 path calls the empty stub at 0x23ed0"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets DAT_0011df0 to 1, clears the finish timer DAT_00118e28, and clears bits 0 through 3 and bit 14 of DAT_00118e1c; it then sets bits 2 and 14 with the value 0x4004, so race_finish_update at 0x21058 runs the finish delay on the next frame"
+    },
+    {
+      "kind": "note",
+      "text": "the completed-lap gate, the result stores, the per-mode finish handlers, and the control word update support the name race_finish_laps_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module uses no assembly; the two float cells arrive through globals, and the harness sets them to distinct values to confirm the copy order"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control word, the finish timer, the two source floats, the sound handle, the player slot, the mode, the result cells, and the state flag; the eight paths cover the clear gate, the six mode handlers, and the default mode; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x20ec8 --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x20ec8 --count 58 --rebuilt work/rebuild/rflap.exe --rebuilt-map work/rebuild/race_finish_laps_update.map --rebuilt-symbol race_finish_laps_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_laps_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x20ec8"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_laps_update module at 0x20ec8"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_laps_update",
+  "name": "race_finish_laps_update",
   "notes": [],
   "object_offset": "0x10ec8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 208,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x20ec8",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:b0eb93be5105531a282109b810078b76d1812285fab4abe0b3ed69844447b9a9",
+    "source_digest": "sha256:f962b0d9362564030de010956ee7b198f7ec5cb35dc9ecaf3b4d44e2812ea67c",
+    "tool": "run.py"
+  },
+  "role": "releases the sound handle, stores the race result cells, runs the mode finish handler, and starts the finish delay after the last lap",
+  "section": "Program functions",
   "size": 208,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_laps_update_"
 }

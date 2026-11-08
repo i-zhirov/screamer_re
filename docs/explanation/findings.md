@@ -20504,3 +20504,75 @@ temporary `-od` recipe.
   replay_save_atk_` and `python3 tools/rebuild/run.py run --function 0x1b974`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The race_finish_laps_update module at 0x20ec8
+
+- Observation: the original body at `0x20ec8` holds 58 instructions and 208
+  bytes up to the `ret` at `0x20f97`.  The next function starts at `0x20f98`, so
+  the store record keeps the 208-byte extent and sets no separate function
+  size.  The identity check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20ec8 --count 58` and
+  `tools/rebuild/functions/0x20ec8.json`.
+- Observation: the only direct caller at `0x20029` is the frame update at
+  `0x1ff70`.  It runs this function after `race_intro_update` at `0x20d20` and
+  before the sibling handler at `0x20f98` and `race_finish_update` at `0x21058`.
+  No named function sits between the frame update and the target, so the record
+  takes the section `Program functions`.
+  Evidence: the block at `0x1ff70` through `0x2003b` and the call sweep for
+  `0x20ec8`.
+- Observation: the gate is bit 3 of `DAT_00118e1c`.  `race_lap_complete` at
+  `0x19678` sets the bit at `0x197fd` when the lap index passes the race
+  distance `DAT_0011d2b0`, so the function runs after the player completes the
+  last lap.  The sibling handler at `0x20f98` gates bit 4, which
+  `race_clock_update` at `0x18a14` sets at `0x18b45` when the time limit
+  expires.
+  Evidence: the two gates, the two setters, and the two handler blocks.
+- Observation: the function releases the sound handle `DAT_00100e8` through
+  `0x1f880`.  It copies the float cells `DAT_00100a8` and `DAT_00100b4` into the
+  race time `DAT_0011d268` and the lap time `DAT_0011d26c`.  It copies the
+  player slot `DAT_000ffa4` into the car number `DAT_0011d270`.
+  Evidence: the block at `0x20eda` through `0x20f08` and the relocation targets
+  of object 3.
+- Observation: the mode `DAT_0011d260` selects the finish handler: the call at
+  `0x23ed8` for 1, `0x23f14` for 2, `0x23f50` for 4, `0x23ed0` for `0x10`,
+  `0x2401c` for `0x20`, and `0x23fc8` for `0x40`.  The mode handlers set bit 3
+  of `DAT_00118e1d` and push the finish effect.  The mode `0x10` path calls the
+  empty stub at `0x23ed0`.
+  Evidence: the dispatch tree at `0x20f08` through `0x20f5d` and the six
+  handler bodies.
+- Observation: the function sets `DAT_0011df0` to 1, clears the finish timer
+  `DAT_00118e28`, and clears bits 0 through 3 and bit 14 of `DAT_00118e1c`.
+  It then sets bits 2 and 14 with the value `0x4004`, so `race_finish_update` at
+  `0x21058` runs the finish delay on the next frame.
+  Evidence: the block at `0x20f5f` through `0x20f97`.
+- Inference: the completed-lap gate, the result stores, the per-mode finish
+  handlers, and the control word update support the name
+  `race_finish_laps_update`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the data flow above and the sibling module at `0x20f98`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The two float cells arrive through globals, and the harness sets
+  them to distinct values to confirm the copy order.  The module uses no
+  assembly.
+  Evidence: `tools/rebuild/race_finish_laps_update.c` and the module recipe.
+- Observation: the harness holds the control word, the finish timer, the two
+  source floats, the sound handle, the player slot, the mode, the result cells,
+  and the state flag.  The eight paths cover the clear gate, the six mode
+  handlers, and the default mode.  The output holds the markers `0` through `7`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/race_finish_laps_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_laps_update`, and
+  `work/rebuild/rflap.txt`.
+- Observation: the identity check compares 58 instructions.  The rebuilt module
+  holds 7 of 58 instructions and 14 of 208 bytes equal.  The identity check
+  stays open because V2 saves the frame pointer first, keeps the values in
+  registers, orders the switch cases in another shape, and uses absolute data
+  operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20ec8 --count 58 --rebuilt work/rebuild/rflap.exe
+  --rebuilt-map work/rebuild/race_finish_laps_update.map --rebuilt-symbol
+  race_finish_laps_update_` and `python3 tools/rebuild/run.py run --function
+  0x20ec8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
