@@ -17535,3 +17535,69 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x25020`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The sound_range_reset module at 0x82e0c
+
+- Observation: the original body at `0x82e0c` holds 216 instructions and 699
+  bytes up to the `ret` at `0x830c6`.  The next function starts at `0x830c8`.
+  The store record keeps the 700-byte extent and sets no separate function
+  size.  The identity check uses 216 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x82e0c --count 216` and
+  `tools/rebuild/functions/0x82e0c.json`.
+- Observation: the only direct caller at `0x81a7c` is `sound_update` at
+  `0x81a70`.  The caller runs at the start of the frame and ignores the two
+  returned registers.  The source update at `0x8a958` reads the world
+  rectangle at `0x72d94` through `0x72da8` to cull the sound sources.  The
+  record takes the name `sound_range_reset` with the confidence inferred.
+  Evidence: the call at `0x81a7c`, the record `0x81a70`, and
+  `docs/reference/program-map.md`.
+- Observation: the body holds the same code as `sound_range_update` at
+  `0x830c8`, but an unconditional `jmp 0x82e99` at `0x82e4e` skips the
+  spatial-cell block at `0x82e50` through `0x82e96`.  The shipped image never
+  extends the view rectangle from the map cell.  The rebuild omits the block.
+  Evidence: the jump at `0x82e4e` and the matching block at `0x8310a` through
+  `0x83153`.
+- Observation: the function reads the two clip points at `0x72d48` and
+  `0x72d54` and the Q14 cosine and sine at `0x724ec` and `0x724f0`.  It
+  rotates the two points, sorts the two corners, and expands the result to the
+  central `[-0x2000, 0x2000]` box.  It adds the camera position at `0x7a7ac`
+  and clamps the limits to `[-0x100000, 0xfffff]`.
+  Evidence: the blocks at `0x82e99` through `0x82f40`.
+- Observation: the function biases the rectangle by `0x100000`, stores it at
+  `0x72ddc`, and intersects it with the default extent at `0x72dac`.  It then
+  stores the intersected rectangle minus `0x100000` at `0x72d94` through
+  `0x72da8`.  It returns the row count in `eax` and leaves the row pointer in
+  `esi`.
+  Evidence: the blocks at `0x82f40` through `0x83011` and the return at
+  `0x830c6`.
+- Observation: the function forms the grid row count and the row pointer from
+  the y range, and the x byte offset at `0x73377` and the column count at
+  `0x73381` from the x range.  A sum above `0xfd` skips the final increment.
+  C cannot return a value in `esi`, so the rebuild stores the row pointer in
+  the global `grid_row`.
+  Evidence: the block at `0x83010` through `0x830c6`.
+- Observation: the original has no EBP frame and no floating-point
+  instruction.  The minimal image needs one initialized data byte, because the
+  DOS4G loader leaves the BSS object unmapped when the data object holds no
+  page.
+  Evidence: `tools/rebuild/sound_range_reset.c` and
+  `work/rebuild/sound_range_reset.map`.
+- Observation: the harness holds the camera record, the spatial grid, the
+  extent record, the clip points, the cosine and sine, and the output globals.
+  The four paths cover the small clip, the ignored cell, the world limit
+  clamp, and the rotated clip.  The output holds the markers `0` through `3`
+  and `D`.
+  Evidence: `tools/rebuild/sound_range_reset_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_range_reset`, and
+  `work/rebuild/sndrngs.txt`.
+- Observation: the rebuilt function keeps the same behavior in C but holds
+  another instruction shape, because the C build saves the registers and keeps
+  the state in locals.  The identity check stays open at 39 of 216
+  instructions and 31 of 699 bytes.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x82e0c --count 216 --rebuilt work/rebuild/sndrngs.exe
+  --rebuilt-map work/rebuild/sound_range_reset.map --rebuilt-symbol
+  sound_range_reset_` and `python3 tools/rebuild/run.py run --function 0x82e0c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

@@ -374,7 +374,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x25020` | `text_draw` (done) | 1044 | 292 | 0 | 0 |
-| `0x82e0c` | unnamed | 699 | 216 | 0 | 0 |
+| `0x82e0c` | `sound_range_reset` (done) | 699 | 216 | 0 | 0 |
 | `0x14fb8` | unnamed | 316 | 80 | 12 | 0 |
 | `0x231f0` | unnamed | 309 | 89 | 0 | 13 |
 | `0x20428` | unnamed | 308 | 86 | 0 | 10 |
@@ -388,7 +388,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred twenty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred twenty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -481,5 +481,5 @@ modules `quad_point_test` at `0x1c13c`, `player_car_spin_update` at
 `0x12f50`, and `player_brake_update` at `0x16150`, and `stream_read_text` at
 `0x4c695`, and `race_view_reset` at `0x13580`, and `race_clock_update` at `0x18a14`,
 and `font_load` at `0x25658`, and `background_scale` at `0x83ca8`, and the Phase P
-module `text_draw` at `0x25020`.
-The next unnamed function is `0x82e0c`.
+modules `text_draw` at `0x25020` and `sound_range_reset` at `0x82e0c`.
+The next unnamed function is `0x14fb8`.

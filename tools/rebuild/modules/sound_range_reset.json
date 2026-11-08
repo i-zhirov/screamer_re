@@ -1,0 +1,27 @@
+{
+  "exe": "sndrngs.exe",
+  "map": "sound_range_reset.map",
+  "name": "sound_range_reset",
+  "run": {
+    "command": "sndrngs.exe > sndrngs.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "sndrngs.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_range_reset.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_range_reset_main.c"
+    }
+  ]
+}
