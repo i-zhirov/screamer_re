@@ -19335,3 +19335,68 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+
+## The path_playback_apply module at 0x23328
+
+- Observation: the original body at `0x23328` holds 71 instructions and 248
+  bytes up to the `ret` at `0x2341f`.  The next function starts at `0x23420`,
+  so the store record keeps the 248-byte extent and sets no separate function
+  size.  The identity check uses 71 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23328 --count 71` and
+  `tools/rebuild/functions/0x23328.json`.
+- Observation: the only direct caller at `0x20358` is the replay view group at
+  `0x202c0`.  That group updates the playback block at object-3 offset
+  `0x18ed8` through `path_playback_update` at `0x23038` and then calls this
+  function with the same block.  The frame update at `0x1ff70` selects the view
+  group through the mode byte, so the record takes the section The vehicle
+  state chain.
+  Evidence: the call at `0x20358`, the call at `0x20317`, and
+  `tools/rebuild/functions/0x23038.json`.
+- Observation: the argument points to the playback block.  The field at
+  `+0x00` selects the 28-byte entry of the object table `DAT_0010653c`, and
+  entry field 0 is the display object.  The field at `+0x08` points to the
+  playback state, and the flag at `+0x0c` of that state gates the write.  The
+  function returns at once when the global `DAT_0011d264` is zero or when the
+  state flag is zero.
+  Evidence: the block at `0x23332` through `0x23352`.
+- Observation: the function copies the sampled view from the playback block to
+  the display object.  The position `+0x10`, `+0x14`, and `+0x18` goes to
+  `+0x08`, `+0x0c`, and `+0x10`.  The angles `+0x1c`, `+0x20`, and `+0x24` scale
+  by 1024.0 and divide by pi, truncate toward zero, mask with `0x7ff`, and go to
+  `+0x14`, `+0x18`, and `+0x1c`.  The field `+0x28` goes to `+0x20`, and the
+  field `+0x2c` goes to `+0x3c`.
+  Evidence: the block at `0x23367` through `0x23418`.
+- Inference: the caller position in the replay view group, the shared playback
+  block, the object table, and the sibling `traffic_object_link` at `0x1ef68`
+  support the name `path_playback_apply`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller, the data flow, and the call graph above.
+- Observation: the original calls the truncate helper at `0x4d9f4` before each
+  `fistp`.  This harness links no math library, so the local
+  `path_playback_apply_fpu.asm` makes `__CHP` truncate toward zero.  The
+  constants 1024.0 and pi arrive through the globals `DAT_00100dc8` and
+  `DAT_00100dcc`, because the minimal image does not load the constant segment.
+  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/path_playback_apply.c` and
+  `tools/rebuild/modules/path_playback_apply.json`.
+- Observation: the harness holds the playback block, the playback state, the
+  object table, four display objects, the enable flag, and the two float
+  constants.  The five paths cover the full path, the zero enable flag, the zero
+  state flag, the negative and large angles, and the active state -1 on slot 1.
+  The output holds the markers `0` through `4` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/path_playback_apply_main.c`,
+  `python3 tools/rebuild/harness.py run --module path_playback_apply`, and
+  `work/rebuild/papply.txt`.
+- Observation: the diff reports 14 of 71 instructions and 20 of 238 bytes
+  equal.  The identity check stays open because V2 saves the frame first, keeps
+  the view in `edx` and the object in `ecx`, uses `imul` for the object address,
+  and reads the enable flag through a near data address.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23328 --count 71 --rebuilt work/rebuild/papply.exe
+  --rebuilt-map work/rebuild/path_playback_apply.map --rebuilt-symbol
+  path_playback_apply_` and `python3 tools/rebuild/run.py run --function
+  0x23328`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

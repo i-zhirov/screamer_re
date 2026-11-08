@@ -1,0 +1,35 @@
+{
+  "exe": "papply.exe",
+  "map": "path_playback_apply.map",
+  "name": "path_playback_apply",
+  "run": {
+    "command": "papply.exe > papply.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "papply.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "path_playback_apply.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "path_playback_apply_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "path_playback_apply_main.c"
+    }
+  ]
+}
