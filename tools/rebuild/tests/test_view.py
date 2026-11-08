@@ -265,6 +265,15 @@ class ViewTestCase(unittest.TestCase):
         self.assertNotIn("<script src", page)
         self.assertNotIn("<link", page)
 
+    def test_page_stacks_the_detail_pane_at_a_narrow_width(self) -> None:
+        page = self.page()
+        self.assertIn("@media (max-width: 760px)", page)
+        self.assertIn(
+            ".content { flex-direction: column; align-items: stretch; }", page
+        )
+        self.assertIn(".detail-pane { position: static; }", page)
+        self.assertIn(".counters { white-space: normal; }", page)
+
     def test_page_holds_the_driver_module_row(self) -> None:
         page = view.render_page(
             [], [self.module("driver")], {"driver": "sha256:" + "1" * 64}
@@ -295,20 +304,135 @@ class ViewTestCase(unittest.TestCase):
             self.assertIn(f'id="{control}"', page)
         self.assertIn('id="view-board"', page)
         self.assertIn('id="view-table"', page)
+        self.assertIn('id="view-map"', page)
+        self.assertIn('id="view-treemap"', page)
+        self.assertIn('id="view-calls"', page)
         self.assertIn("function applyFilters", script)
-        self.assertIn('document.querySelectorAll(".chip, .record-row")', script)
+        self.assertIn(
+            '".chip, .record-row, .map-block, .treemap-block, .graph-node"',
+            script,
+        )
+        self.assertIn("document.querySelectorAll(TARGETS)", script)
         self.assertIn('document.querySelectorAll(".counter")', script)
         self.assertIn('getElementById("progress-fill")', script)
         self.assertIn("function setView", script)
+        self.assertIn(
+            'for (const name of ["board", "table", "map", "treemap", "calls"])',
+            script,
+        )
+        self.assertIn("function updateGraphEdges", script)
         self.assertIn("applyFilters();", script)
         self.assertIn("showDetail(state.selected);", script)
+
+    def test_page_holds_the_address_map(self) -> None:
+        page = self.page()
+        self.assertIn('<div id="map" class="map-view" hidden>', page)
+        self.assertIn('class="map-axis"', page)
+        self.assertIn('class="map-track"', page)
+        self.assertIn("0x300ec", page)
+        self.assertRegex(
+            page,
+            r'<button class="map-block status-verified[^"]*"[^>]*'
+            r'data-key="0x300ec"[^>]*style="left: [0-9.]+%; width: [0-9.]+%"',
+        )
+        self.assertRegex(
+            page,
+            r'<button class="map-block status-rebuilt[^"]*"[^>]*'
+            r'data-key="0x300f0"',
+        )
+        self.assertIn('data-address="0x300ec"', page)
+        self.assertIn('data-module="free"', page)
+        self.assertIn('data-stale="false"', page)
+        self.assertIn('title="0x300ec free · verified ·', page)
+        self.assertIn("The map places each function", page)
+        self.assertIn("amber outline = stale", page)
+
+    def test_map_tiles_the_address_space(self) -> None:
+        records = [
+            self.record("0x10020", name="low", section="Startup path", size=16),
+            self.record("0x10030", name="middle", section="Startup path", size=16),
+            self.record("0x10040", name="high", section="Program functions", size=16),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn("0x10020", page)
+        self.assertIn("0x10050", page)
+        self.assertIn('style="left: 0.000%; width: 33.333%"', page)
+        self.assertIn('style="left: 33.333%; width: 33.333%"', page)
+        self.assertIn('style="left: 66.667%; width: 33.333%"', page)
+        self.assertEqual(page.count('class="board-group map-group"'), 2)
+
+    def test_page_holds_the_treemap(self) -> None:
+        page = self.page()
+        self.assertIn('<div id="treemap" class="treemap-view" hidden>', page)
+        self.assertIn('class="treemap-canvas"', page)
+        self.assertIn('class="treemap-group"', page)
+        self.assertIn(
+            '<span class="treemap-group-label">'
+            "Program functions · 2 functions</span>",
+            page,
+        )
+        self.assertRegex(
+            page,
+            r'<button class="treemap-block status-verified[^"]*"[^>]*'
+            r'data-key="0x300ec"[^>]*style="left: [0-9.]+%;'
+            r' top: [0-9.]+%; width: [0-9.]+%; height: [0-9.]+%"',
+        )
+        self.assertIn('title="0x300ec free · verified"', page)
+        self.assertIn("The treemap sizes each section", page)
+
+    def test_page_holds_the_call_graph(self) -> None:
+        records = [
+            self.record(
+                "0x10020",
+                name="main",
+                status="named",
+                section="Program functions",
+                size=371,
+            ),
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                size=12,
+                result=self.result(),
+            ),
+            self.record(
+                "0x300f0",
+                name="exit_flush",
+                status="rebuilt",
+                section="Program functions",
+                size=8,
+            ),
+        ]
+        edges = [
+            {"from": "0x10020", "site": "0x1002d", "to": "0x300ec"},
+            {"from": "0x300ec", "site": "0x300f4", "to": "0x300f0"},
+            {"from": "0x300ec", "site": "0x300f6", "to": "0x9999"},
+            {"from": "0x10020", "site": "0x1002e", "to": "0x10020"},
+        ]
+        page = view.render_page(
+            records, [], {"free": "sha256:" + "1" * 64}, edges
+        )
+        self.assertIn('<div id="calls" class="graph-view" hidden>', page)
+        self.assertIn('role="group"', page)
+        self.assertIn('class="graph-node status-named"', page)
+        self.assertIn(
+            'class="graph-edge" data-from="0x10020" data-to="0x300ec"', page
+        )
+        self.assertNotIn('data-to="0x9999"', page)
+        self.assertNotIn('data-from="0x10020" data-to="0x10020"', page)
+        self.assertIn("3 named functions and 2 direct edges", page)
+        self.assertIn(">main</text>", page)
+        self.assertIn(">0x300ec</text>", page)
 
     def test_page_detail_pane_click(self) -> None:
         page = self.page()
         script = self.script(page)
         self.assertIn('id="detail"', page)
         self.assertIn("function showDetail", script)
-        self.assertIn('event.target.closest(".chip, .record-row")', script)
+        self.assertIn("event.target.closest(TARGETS)", script)
         self.assertIn("showDetail(target.dataset.key)", script)
         detail = self.detail(page, "0x300ec")
         self.assertIn("free", detail)

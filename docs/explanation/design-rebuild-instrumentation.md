@@ -16,6 +16,7 @@
 | Data model | [`data-model.md`](design-rebuild-instrumentation/data-model.md) | The function record, the module record, the status ladder, the validation rules, and the data flow |
 | Contract: function record | [`tools/rebuild/contracts/record.schema.json`](../../tools/rebuild/contracts/record.schema.json) | JSON Schema of `functions/0x*.json` |
 | Contract: module record | [`tools/rebuild/contracts/module.schema.json`](../../tools/rebuild/contracts/module.schema.json) | JSON Schema of `modules/*.json` |
+| Data: call graph | [`tools/rebuild/callgraph.json`](../../tools/rebuild/callgraph.json) | The direct call edges between named records |
 | Wireframe: status view, default state | [`wireframes/status-view-default.html`](design-rebuild-instrumentation/wireframes/status-view-default.html) | The approved layout D of the status view |
 
 ## Context And Problem
@@ -155,7 +156,8 @@ A person recovers the name and the role of a candidate.
 - **FR-014**: The standard-library `unittest` suite MUST cover the pure
   logic: the status advance, the percentages, the staleness compare, the
   validation, the seed diff, the selection, the progress line, the summary,
-  and the table grouping.
+  the table grouping, the treemap layout, the call graph edge rules, and the
+  call graph layout.
 - **FR-015**: `pipeline_check.py` MUST use the store as the module
   registry and MUST run `run.py run --all --no-write --skip-unchanged`. It MUST
   pass `--skip-runtime` when it skips the run-time stages. It MUST compare the
@@ -165,6 +167,9 @@ A person recovers the name and the role of a candidate.
   of a named record.
 - **FR-016**: A module record MUST hold its own status, checks, and result
   when it holds no function record of `STARTH.EXE`, for example the driver.
+- **FR-017**: `callgraph.py build` MUST write one direct edge per call from a
+  named record to another named record, and `callgraph.py check` MUST fail on
+  drift. The status view MUST read the edge file and MUST need no game image.
 
 ## Assumptions And Constraints
 
@@ -257,8 +262,10 @@ A person recovers the name and the role of a candidate.
 | `tools/rebuild/store.py` | The record schema, the read, the write, the validation, the seed, and the edits | `le.py` |
 | `tools/rebuild/harness.py` | Build one module in the container. Run one module in DOSBox-X. | `dosboxx_control.py` |
 | `tools/rebuild/run.py` | Select records, run the declared checks, print progress, write results | `store.py`, `harness.py`, `diff_module.py` |
-| `tools/rebuild/view.py` | Render the self-contained HTML page | `store.py` |
+| `tools/rebuild/view.py` | Render the self-contained HTML page | `store.py`, `docs.py`, `callgraph.py` |
 | `tools/rebuild/docs.py` | Render the `program-map.md` tables. Check for drift. | `store.py` |
+| `tools/rebuild/callgraph.py` | Build the named call graph and check the drift | `store.py`, `le.py` |
+| `tools/rebuild/callgraph.json` | The direct call edges between named records | — |
 | `tools/rebuild/diff_module.py` | The identity engine. The byte and instruction compare lines print on every path, so the counts are always available. | `le.py` |
 | `tools/le.py` | The candidate scan and the disassembly, unchanged | capstone |
 | `tools/pipeline_check.py` | The repository-wide checks | Every tool |
@@ -305,8 +312,10 @@ flowchart LR
    declared behavior check.
 5. `run.py` writes the result through `store.py`, prints the progress
    line, and keeps the full log under `work/rebuild/logs/`.
-6. `view.py` renders the page from the store, and `docs.py` renders the
-   tables of `program-map.md` from the store.
+6. `callgraph.py build` scans the named records and the original image,
+   and writes the direct call edges to `callgraph.json`.
+7. `view.py` renders the page from the store and the call graph file, and
+   `docs.py` renders the tables of `program-map.md` from the store.
 
 ## Component Interfaces
 
@@ -387,8 +396,11 @@ flowchart LR
 
 - **Purpose**: Render the self-contained HTML page of the store.
 - **Interface**: `view.py html [--out PATH]` writes
-  `work/rebuild/status.html` by default.
-- **Failure Modes**: A broken record raises `ValueError` with the file path.
+  `work/rebuild/status.html` by default. The page holds the board, the table,
+  the address-space map, the treemap, and the call graph.
+- **Failure Modes**: A broken record raises `ValueError` with the file path. A
+  missing or broken `callgraph.json` prints a warning and renders the call
+  graph view without edges.
 
 ### docs.py
 
@@ -401,6 +413,17 @@ flowchart LR
   address.
 - **Failure Modes**: A missing marker raises `ValueError`. A record with an
   unknown section goes to the last table.
+
+### callgraph.py
+
+- **Purpose**: Build the named call graph from the store and the original
+  executable, and check the drift.
+- **Interface**: `callgraph.py build [--original PATH] [--out PATH]` scans the
+  body of each named record, resolves each direct call target to the record
+  that starts at or before it, and writes `callgraph.json`. `callgraph.py
+  check` writes nothing and exits 1 on drift.
+- **Failure Modes**: A missing executable or a broken edge file raises
+  `ValueError` with the path.
 
 ## Data Model
 
@@ -438,13 +461,25 @@ the inline detail pane on the right. See
 
 Behavior the static wireframe cannot show:
 
-- The filter row narrows the board and the table together. The progress bar
-  and the counters follow the filter, so a person reads a subset.
-- The board and table switch keeps the selection and the filters.
-- A click on a chip or a row loads the detail pane without a page load.
+- The filter row narrows every view together. The progress bar and the counters
+  follow the filter, so a person reads a subset.
+- The view switch keeps the selection and the filters.
+- A click on an element of a view loads the detail pane without a page load.
 - The detail pane holds the test command of the record, so a person copies it
   from the page.
-- A stale record carries the mark in the board and in the table.
+- A stale record carries the mark in every view.
+- The map places each function on an axis of the module address space. Each
+  section is one lane. The block color is the status.
+- The treemap sizes each section and function by the byte span. The block color
+  is the status.
+- The call graph places the named functions in columns by call depth. It draws
+  one edge per direct call between named functions. The page reads the edges
+  from `callgraph.json`, so it needs no game image.
+- The map, the treemap, and the call graph carry the same filters and the same
+  selection as a chip or a row.
+- At a width under 760 px, the detail pane moves below the views and the
+  counters wrap, so the page needs no horizontal scroll. The call graph keeps
+  its own horizontal scroll.
 - The status is a word as well as a color, so color is not the only signal.
 - The board holds a module group for a module that carries no function of
   `STARTH.EXE`, for example the driver. The module row holds its own
@@ -484,15 +519,17 @@ Behavior the static wireframe cannot show:
 - **Pure logic**: The standard-library `unittest` suite under
   `tools/rebuild/tests/` tests the status advance, the percentages, the
   staleness compare, the validation errors, the seed diff, the selection
-  order, the progress line, the summary, and the table grouping. Every test
+  order, the progress line, the summary, the table grouping, the treemap
+  layout, the call graph edge rules, and the call graph layout. Every test
   uses a temporary directory, so it needs no Docker, no DOSBox-X, and no
   game directory.
 - **Toolchain**: `pipeline_check.py` builds the modules in the pinned
   container and diffs them against the original. This layer needs the
   artifacts and the engines.
-- **Documentation**: `store.py check`, `store.py seed --check`, and
-  `docs.py check` run in the pipeline check, so the store, the seed, and the
-  page cannot drift. A `view.py html` render proves that the page builds.
+- **Documentation**: `store.py check`, `store.py seed --check`,
+  `docs.py check`, and `callgraph.py check` run in the pipeline check, so the
+  store, the seed, the tables, and the call graph cannot drift. A `view.py
+  html` render proves that the page builds.
 - **Prior art**: The suite follows the existing check pattern of the
   repository: a clear line per check and a non-zero exit code on a failure.
 
