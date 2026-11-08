@@ -20576,3 +20576,70 @@ temporary `-od` recipe.
   0x20ec8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The player_car_surface_effect_update module at 0x1814c
+
+- Observation: the original body at `0x1814c` holds 56 instructions and 208
+  bytes up to the `ret` at `0x1821b`.  The next function starts at `0x1821c`, so
+  the store record keeps the 208-byte extent and sets no separate function
+  size.  The identity check uses 56 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1814c --count 56` and
+  `tools/rebuild/functions/0x1814c.json`.
+- Observation: the only direct caller at `0x15bc8` is the player car step group
+  at `0x15bac`.  The group runs this function after the suspension update at
+  `0x168b4` and the skid update at `0x17d14` and before the reset update at
+  `0x18528`, the spin update at `0x188b8`, the wheel effect update at `0x19980`,
+  and the car sound update at `0x242bc`.  No named function sits between the
+  group and the target, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1814c` and the block at `0x15bac` through `0x15bf9`.
+- Observation: the state at `+0x148` gates the surface selection.  When the
+  state is zero, the track node value at `+0x66c` selects the effect control
+  word at `+0x7b0` and the effect scale at object-1 offset 0xb26d8: 0 gives 0
+  and 0.002, 1 gives 0x8000 and 0.03, and 2 gives 0xff00 and 0.03.  The
+  cornering update at `0x16ca0` sets the effect state to 2 through `0x19478`
+  only when the control word is zero.
+  Evidence: the switch at `0x18159` through `0x181ce`, the gate at `0x16d8e`,
+  and the setter at `0x19478`.
+- Observation: when the node value at `+0x66c` differs from the previous value
+  at `+0x58c`, the function starts a sound through `0x1f764` with the handle at
+  `+0x7cc` and the sample index from the table at object-3 offset 0x1d7c.  The
+  car index at object-3 offset 0xff88 selects the entry, and the race mode 0xc
+  at object-3 offset 0x1d2a0 selects the second pair.  The table holds the four
+  entries 3, 7, 10, and 11.
+  Evidence: the block at `0x181d0` through `0x1820f` and the data at object-3
+  offsets 0x1d7c, 0xff88, and 0x1d2a0.
+- Inference: the caller position, the track node value, the effect control
+  word, the effect scale, and the surface sound support the name
+  `player_car_surface_effect_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module stores the float scale as the literal bit pattern, so it
+  uses no FPU instruction and no constant segment.  The module uses no
+  assembly.
+  Evidence: `tools/rebuild/player_car_surface_effect_update.c` and the module
+  recipe.
+- Observation: the harness holds the player object, the four sound table
+  entries, the car index, the race mode, the effect scale, and the sound stub.
+  The ten paths cover the clear state, the three node values, the default
+  value, the previous-value gates, the race mode 0xc pairs, the car index 1,
+  and the state gate.  The output holds the markers `0` through `8` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/player_car_surface_effect_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module
+  player_car_surface_effect_update`, and `work/rebuild/pcsfx.txt`.
+- Observation: the identity check compares 56 instructions.  The rebuilt module
+  holds 10 of 56 instructions and 0 of 16 relocation slots equal.  The identity
+  check stays open because V2 saves the frame pointer first, keeps the values in
+  registers, orders the switch cases in another shape, and uses absolute data
+  operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1814c --count 56 --rebuilt work/rebuild/pcsfx.exe
+  --rebuilt-map work/rebuild/player_car_surface_effect_update.map
+  --rebuilt-symbol player_car_surface_effect_update_` and `python3
+  tools/rebuild/run.py run --function 0x1814c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
