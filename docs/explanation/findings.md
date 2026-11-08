@@ -19400,3 +19400,69 @@ temporary `-od` recipe.
   0x23328`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The tri_point_test module at 0x1c38a
+
+- Observation: the plan row records a 243-byte body and 73 instructions up to
+  the first `ret` at `0x1c47c`.  The function continues through seven early
+  exits and ends at the `ret` at `0x1c545`.  The next function starts at
+  `0x1c548`, and the next record starts at `0x1c760`, so the store record
+  keeps the 982-byte extent and sets no separate function size.  The identity
+  check uses 73 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c38a --count 73` and
+  `tools/rebuild/functions/0x1c38a.json`.
+- Observation: the two direct callers at `0x1c03c` and `0x1c114` sit in the
+  two unnamed point probes at `0x1bfd4` and `0x1c0ac`.  Both probes walk the
+  polygon entries of a collision shape and call this function when the vertex
+  count word at `+0x06` is 3.  The sibling `quad_point_test` at `0x1c13c`
+  takes the four-vertex case.  `collision_cell_test` at `0x11ccc` reaches the
+  probes, so the record takes the section The vehicle state chain.
+  Evidence: the calls at `0x1c03c` and `0x1c114`, the probes at `0x1bfd4` and
+  `0x1c0ac`, and `tools/rebuild/functions/0x1c13c.json`.
+- Observation: the function takes the polygon entry in `ecx` and the object in
+  `esi`.  The entry holds three unsigned short byte offsets at `+0x08`,
+  `+0x0a`, and `+0x0c`.  The global `DAT_000c71c` points to the vertex array,
+  and each offset selects a signed short triple.  The function adds the object
+  translation at `+0x08`, `+0x0c`, and `+0x10` and stores the three world
+  points at `DAT_000c6d4`, `DAT_000c6e0`, and `DAT_000c6ec` at the 0x0c
+  stride.
+  Evidence: the block at `0x1c38a` through `0x1c40b`.
+- Observation: the function forms the bounding box of the three points at
+  `DAT_000c704` and `DAT_000c708` for the maximum and `DAT_000c70c` and
+  `DAT_000c710` for the minimum.  It tests the point `DAT_000c728` and
+  `DAT_000c730` against the box and returns 0 on each side.  Inside the box it
+  tests the three edges 0-1, 1-2, and 2-0 with the side term
+  `(b.y - a.y) * (px - a.x) + (a.x - b.x) * (py - a.y)`.  A negative term
+  returns 0, and the function returns 1 when the point stays on one side of
+  every edge.
+  Evidence: the block at `0x1c40e` through `0x1c545`.
+- Inference: the bbox, the edge side terms, the three-vertex case, and the two
+  probes support the name `tri_point_test`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller, the data flow, and the sibling `quad_point_test`.
+- Observation: the function uses no call and no floating-point instruction.
+  The original has no EBP frame, so the module builds without `-of+`.
+  Evidence: `tools/rebuild/tri_point_test.c` and
+  `tools/rebuild/modules/tri_point_test.json`.
+- Observation: the harness holds the three-vertex palette, the polygon entry,
+  the object translation, the test point, the three scratch world points, and
+  the four bounding-box outputs.  The nine paths cover the inside triangle, the
+  four box sides, the point inside the box but outside the hypotenuse, the
+  translated triangle, the negative triangle, and the z copy.  The output
+  holds the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/tri_point_test_main.c`,
+  `python3 tools/rebuild/harness.py run --module tri_point_test`, and
+  `work/rebuild/tritest.txt`.
+- Observation: the diff reports 13 of 73 instructions and 10 of 243 bytes
+  equal.  The identity check stays open because V2 saves the registers in a
+  prologue, builds the three points in a loop, reads `DAT_000c71c` through a
+  near data address, uses `imul` for the point address, and updates the box in
+  a loop rather than with the exchange network of the original.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1c38a --count 73 --rebuilt work/rebuild/tritest.exe
+  --rebuilt-map work/rebuild/tri_point_test.map --rebuilt-symbol
+  tri_point_test_` and `python3 tools/rebuild/run.py run --function
+  0x1c38a`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

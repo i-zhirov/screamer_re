@@ -417,7 +417,7 @@ reproduce the original bytes.
 | `0x1a2bc` | `player_cockpit_camera` (done) | 250 | 71 | 2 | 10 |
 | `0x12d0c` | `game_mode_10_start` (done) | 249 | 76 | 6 | 10 |
 | `0x23328` | `path_playback_apply` (done) | 248 | 71 | 3 | 12 |
-| `0x1c38a` | unnamed | 243 | 73 | 0 | 0 |
+| `0x1c38a` | `tri_point_test` (done) | 243 | 73 | 0 | 0 |
 | `0x833a4` | unnamed | 242 | 98 | 0 | 0 |
 | `0x15984` | unnamed | 240 | 70 | 7 | 0 |
 | `0x201d0` | unnamed | 237 | 66 | 11 | 0 |
@@ -428,7 +428,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred fifty-five modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred fifty-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -540,5 +540,6 @@ and `replay_save` at `0x1b738`, and
 `angle_approach` at `0x22018`, and
 `player_cockpit_camera` at `0x1a2bc`, and
 `game_mode_10_start` at `0x12d0c`, and
-`path_playback_apply` at `0x23328`.
-The next unnamed function is `0x1c38a`.
+`path_playback_apply` at `0x23328`, and
+`tri_point_test` at `0x1c38a`.
+The next unnamed function is `0x833a4`.
