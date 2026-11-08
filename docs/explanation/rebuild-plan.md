@@ -406,6 +406,26 @@ reproduce the original bytes.
 | `0x16b98` | `player_segment_apply` (done) | 262 | 95 | 1 | 4 |
 | `0x257b0` | `sprite_load` (done) | 261 | 67 | 12 | 0 |
 
+### Phase R: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x22018` | unnamed | 257 | 93 | 0 | 43 |
+| `0x1a2bc` | unnamed | 250 | 71 | 2 | 10 |
+| `0x12d0c` | unnamed | 249 | 76 | 6 | 10 |
+| `0x23328` | unnamed | 248 | 71 | 3 | 12 |
+| `0x1c38a` | unnamed | 243 | 73 | 0 | 0 |
+| `0x833a4` | unnamed | 242 | 98 | 0 | 0 |
+| `0x15984` | unnamed | 240 | 70 | 7 | 0 |
+| `0x201d0` | unnamed | 237 | 66 | 11 | 0 |
+| `0x2c954` | unnamed | 235 | 65 | 9 | 0 |
+| `0x8affc` | unnamed | 234 | 74 | 9 | 0 |
+| `0x15378` | unnamed | 229 | 70 | 2 | 0 |
+| `0x18ccc` | unnamed | 226 | 69 | 3 | 19 |
+
 ## Position
 
 Two hundred fifty-one modules carry a recipe and a result: the twelve Phase A modules,
