@@ -1,9 +1,103 @@
 {
   "address": "0x18ba8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 90,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x18ba8 holds 90 instructions and 291 bytes up to the ret at 0x18cca; the next function starts at 0x18ccc, so the store record keeps the 292-byte extent and sets no separate function size; the identity check uses 90 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x203de is the view group at 0x203c4; that group runs on the player object at object-3 offset 0xf91c after player_car_suspension_update at 0x168b4, and it calls this function only when bit 0 of DAT_00118e1d is set and bit 0x40 of the game mode DAT_0011d260 is set, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the game mode 0x40 is the SLA mode; the loader at 0x150f4 fills the 0x20-byte marker table at 0x7890 with the count at 0x7ed4 from the %ssla member through 0x1b198 only for that mode; the MAP%d member fills the track node table at 0x7250 for every mode"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the SLA markers and tests the player position at +0x4b0 and +0x4b8 against the marker radius at +0x00, the x position at +0x14, and the y position at +0x1c; a marker in range ends the scan, and an out-of-range marker advances the counter at +0x75c"
+    },
+    {
+      "kind": "note",
+      "text": "an in-range marker with a clear flag at +0x694 sets the flag, increments the hit count at +0x7c0, adds the value at +0x10 to the score float at +0x790, and calls table_lookup at 0x1f718 with 9; an in-range marker with a set flag returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "the SLA marker table, the mode 0x40 gate, the hit count, and the score support the name sla_marker_check; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls sqrt at 0x22bec and the table lookup at 0x1f718; the module converts no float to an integer, so the local sla_marker_check_fpu.asm supplies sqrt and the FPU run-time symbols; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, four 0x20-byte SLA markers, the marker count, and the table_lookup stub; the ten paths cover the empty table, a fresh hit, an already visited hit, the x and y radius guards, the square-root skip and equality, a skipped marker with a negative value, a skip to a set flag, and the x radius boundary; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 76 instructions and 244 bytes up to the ret at 0x100f3; the identity check stays open at 12 of 90 instructions and 5 of 277 bytes, because V2 saves other registers, keeps the object in edx and the marker in ecx, and emits the flag store and the value add in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x18ba8 --count 90"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x18ba8 --count 90 --rebuilt work/rebuild/slamrk.exe --rebuilt-map work/rebuild/sla_marker_check.map --rebuilt-symbol sla_marker_check_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sla_marker_check"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x18ba8"
+    },
+    {
+      "kind": "finding",
+      "text": "The sla_marker_check module at 0x18ba8"
+    }
+  ],
+  "implementation": "c",
+  "module": "sla_marker_check",
+  "name": "sla_marker_check",
   "notes": [],
   "object_offset": "0x8ba8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 277,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 90,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18ba8",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:077bd70a813b371e7c9d7916183a8c97eae9b3ec4d671a08704bba823fd1a231",
+    "source_digest": "sha256:88b9b355dc6459f6e5f6e6b98e97f017184bb305146a6ee09844b770c7800d30",
+    "tool": "run.py"
+  },
+  "role": "checks the player against the SLA markers, marks the first marker in range, and adds its value to the score",
+  "section": "The vehicle state chain",
   "size": 292,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sla_marker_check_"
 }

@@ -18391,3 +18391,78 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x293a8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The sla_marker_check module at 0x18ba8
+
+- Observation: the original body at `0x18ba8` holds 90 instructions and 291
+  bytes up to the `ret` at `0x18cca`.  The next function starts at `0x18ccc`,
+  so the store record keeps the 292-byte extent and sets no separate function
+  size.  The identity check uses 90 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x18ba8 --count 90` and
+  `tools/rebuild/functions/0x18ba8.json`.
+- Observation: the only direct caller at `0x203de` is the view group at
+  `0x203c4`.  That group runs on the player object at object-3 offset `0xf91c`
+  after `player_car_suspension_update` at `0x168b4`.  It calls this function
+  only when bit 0 of `DAT_00118e1d` is set and bit `0x40` of the game mode
+  `DAT_0011d260` is set.
+  Evidence: the call scan for `0x18ba8`, the gates at `0x203c7` through
+  `0x203d7`, and the disassembly of `0x203c4`.
+- Observation: the game mode `0x40` is the SLA mode.  The loader at `0x150f4`
+  fills the 0x20-byte marker table at `0x7890` with the count at `0x7ed4`
+  from the `%ssla` member through `0x1b198` only for that mode.  The `MAP%d`
+  member fills the track node table at `0x7250` for every mode.  The format
+  string at object-3 offset `0x62d` holds `%ssla`, and the format at
+  `0x972` holds `%s\data\%s.dat` and the format at `0x981` holds `%s.mrk`.
+  Evidence: the disassembly of `0x150f4` and `0x1b198`, the mode gate at
+  `0x15116`, and the member strings.
+- Observation: the mode `0x40` init at `0x130a0` clears the flag array at
+  `0xffb0` with the count `0x7ed4`, clears the hit count at `0x100dc`, and
+  clears `0x100d4`.  The array at `0xffb0` is the object field `+0x694`, and
+  the hit count at `0x100dc` is the object field `+0x7c0`.  The HUD at
+  `0x234ca` draws the score float at `0x100ac`, which is the object field
+  `+0x790`.  The checker at `0x23fc8` compares the count `0x7ed4` with the hit
+  count and sets bit `0x80` of `0x18e1d` when every marker is hit.
+  Evidence: the disassembly of `0x130a0`, `0x234c5`, and `0x23fc8`.
+- Observation: the function walks the SLA markers.  A marker holds the radius
+  at `+0x00`, the value at `+0x10`, the x position at `+0x14`, and the y
+  position at `+0x1c`.  A marker is out of range when the absolute x delta or
+  the absolute y delta is at or above the radius, or when the square root of
+  the summed squares is above the radius.  An out-of-range marker advances the
+  search counter at `+0x75c` and the next marker.
+  Evidence: the blocks at `0x18bf6` through `0x18c6f`.
+- Observation: the first marker in range ends the scan.  When its flag in the
+  array at `+0x694` is set, the function returns at once.  Otherwise it sets
+  the flag, increments the hit count at `+0x7c0`, adds the value at `+0x10` to
+  the score float at `+0x790`, and calls `table_lookup` at `0x1f718` with 9.
+  Evidence: the blocks at `0x18c75` through `0x18cbf`.
+- Inference: the SLA marker table, the mode `0x40` gate, the hit count, and the
+  score support the name `sla_marker_check`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the call graph.
+- Observation: the original calls `sqrt` at `0x22bec` and the table lookup at
+  `0x1f718`.  The function converts no float to an integer, so the local
+  `sla_marker_check_fpu.asm` supplies `sqrt` and the FPU run-time symbols.  The
+  original has the EBP frame, so the module builds with `-of+`.
+  Evidence: the call at `0x18c60`, the prologue at `0x18ba8`, and
+  `tools/rebuild/modules/sla_marker_check.json`.
+- Observation: the harness holds the player object, four 0x20-byte SLA markers,
+  the marker count, and the `table_lookup` stub.  The ten paths cover the empty
+  table, a fresh hit, an already visited hit, the x and y radius guards, the
+  square-root skip and equality, a skipped marker with a negative value, a skip
+  to a set flag, and the x radius boundary.  The output holds the markers `0`
+  through `9` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sla_marker_check_main.c`,
+  `python3 tools/rebuild/harness.py run --module sla_marker_check`, and
+  `work/rebuild/slamrk.txt`.
+- Observation: the rebuilt body holds 76 instructions and 244 bytes up to the
+  `ret` at `0x100f3`.  The identity check stays open at 12 of 90 instructions
+  and 5 of 277 bytes, because V2 saves other registers, keeps the object in
+  `edx` and the marker in `ecx`, and emits the flag store and the value add in
+  another order.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x18ba8 --count 90 --rebuilt work/rebuild/slamrk.exe
+  --rebuilt-map work/rebuild/sla_marker_check.map --rebuilt-symbol
+  sla_marker_check_` and `python3 tools/rebuild/run.py run --function 0x18ba8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

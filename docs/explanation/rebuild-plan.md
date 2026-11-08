@@ -394,7 +394,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x293a8` | `championship_record_select` (done) | 288 | 78 | 0 | 0 |
-| `0x18ba8` | unnamed | 291 | 90 | 2 | 8 |
+| `0x18ba8` | `sla_marker_check` (done) | 291 | 90 | 2 | 8 |
 | `0x4d4c4` | unnamed | 290 | 73 | 2 | 0 |
 | `0x8adac` | unnamed | 279 | 71 | 1 | 0 |
 | `0x17b54` | unnamed | 279 | 70 | 3 | 26 |
@@ -408,7 +408,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred forty modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred forty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -508,6 +508,6 @@ and `material_load` at `0x4cd9c`, and `terrain_contact_update` at `0x1cbac`,
 and `player_car_wheel_effect_update` at `0x19980`, and
 `player_segment_update` at `0x11f98`, and
 `sound_source_frame_select` at `0x8b1d4`, and
-`body_point_collision_detect` at `0x11e74`, and the Phase Q module
-`championship_record_select` at `0x293a8`.
-The next unnamed function is `0x18ba8`.
+`body_point_collision_detect` at `0x11e74`, and the Phase Q modules
+`championship_record_select` at `0x293a8` and `sla_marker_check` at `0x18ba8`.
+The next unnamed function is `0x4d4c4`.
