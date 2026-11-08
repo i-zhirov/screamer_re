@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: two hundred thirty-five named modules are rebuilt with the harness and the
+  progress: two hundred thirty-six named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -195,8 +195,9 @@ current host.
   `opponent_records_init` at `0x15378`, and
   `player_screen_offset` at `0x18ccc`, and
   `member_open` at `0x4c128`, and
-  `sound_event_transform` at `0x835c0`;
-  thirty modules are verified, one is matching, and two hundred and thirty-five
+  `sound_event_transform` at `0x835c0`, and
+  `name_entry_update` at `0x2ce84`;
+  thirty modules are verified, one is matching, and two hundred and thirty-six
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -389,7 +390,7 @@ The plan follows the size order, starting with the smallest functions.
     `camera_project` at `0x82c14`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and thirty-five open rebuilds).
+    hundred and thirty-six open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

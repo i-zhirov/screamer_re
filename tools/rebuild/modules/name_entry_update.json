@@ -1,0 +1,34 @@
+{
+  "exe": "neutupd.exe",
+  "map": "name_entry_update.map",
+  "name": "name_entry_update",
+  "run": {
+    "command": "neutupd.exe > neutupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "neutupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "name_entry_update_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "name_entry_update_main.c"
+    }
+  ]
+}

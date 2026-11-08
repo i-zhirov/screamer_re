@@ -20054,3 +20054,77 @@ temporary `-od` recipe.
   0x201d0`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The name_entry_update module at 0x2ce84
+
+- Observation: the original body at `0x2ce84` holds 61 instructions and 225
+  bytes up to the `ret` at `0x2cf64`.  The next function starts at `0x2cf68`,
+  so the store record keeps the 228-byte extent and sets no function size.  The
+  identity check uses 61 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ce84 --count 61` and
+  `tools/rebuild/functions/0x2ce84.json`.
+- Observation: the only direct caller at `0x295e7` is case 4 of
+  `race_state_update` at `0x29564`.  The jump table at linear `0x29540` maps
+  case 4 to `0x295e7`.  `race_state_update` is a `race_frame` callee at
+  `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call at `0x295e7`, the jump table at linear `0x29540`, and the
+  call at `0x2807c`.
+- Observation: the state 4 init is `name_entry_screen` at `0x2c430`.  It builds
+  the 26 A to Z records at `DAT_001db78`, and the input at `0x2893a` selects
+  the letter `DAT_0011d23c`.  The update belongs to the same screen, so the
+  module names the function `name_entry_update`.
+  Evidence: the init table at `0x2be70`, the input block at `0x288f0` through
+  `0x28976`, and the name_entry_screen module.
+- Observation: the function calls `0x2b308` with the letter code
+  `DAT_0011d23c + 0x41`.  That function sets the animation flag `+0x0c` to 1 on
+  every record whose key differs and to 0 on the selected record.  The call
+  preserves `edx`, so the compiler keeps the loop counter in `edx` across the
+  call.  The module names the callee `map_object_line_select`, the name the
+  `menu_text_update` module uses.
+  Evidence: the call at `0x2ce96`, the flag writes at `0x2b366` and `0x2b3d2`,
+  the `push edx` and `pop edx` at `0x2b309` and `0x2b3df`, and the loop entry at
+  `0x2cea6`.
+- Observation: the loop runs the `name_entry_letter_update` module at `0x2b660`
+  on each of the 0x50 records at `DAT_001db78`, stride 0x64.
+  Evidence: the address arithmetic at `0x2ceac` through `0x2cec0` and the call
+  at `0x2cec5`.
+- Observation: a non-zero index places the menu marker from the cosine and the
+  sine of `index * -0.24166098` at the scale 4500.0.  The sine gives
+  `DAT_001203a8`, the cosine gives `DAT_001203b0`, and the heading
+  `index * 0.24166098` gives `DAT_00120394`.  A zero index clears the two
+  integer cells and stores the default 0x1194 at `DAT_001203b0`.  The three
+  constants are the float values `0xbe7775fa`, `0x458ca000`, and `0x3e7775fa`
+  at object-3 offsets `0x11f3`, `0x11f7`, and `0x11fb`.
+  Evidence: the FPU blocks at `0x2ced6` through `0x2cf40` and the float bytes
+  at object-3 offsets `0x11f3`, `0x11f7`, and `0x11fb`.
+- Inference: the state 4 position, the shared records, the letter update loop,
+  and the marker math support the name `name_entry_update`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original calls the cosine helper at `0x4da66`, the sine
+  helper at `0x4da72`, and the truncate helper at `0x4d9f4`.  This harness links
+  no math library, so the local `name_entry_update_fpu.asm` supplies `cos` and
+  `sin` from the hardware and makes `__CHP` truncate toward zero.  The constants
+  arrive through globals, because the minimal image does not load the constant
+  segment.  The original has the EBP frame, so the module builds with `-of+`.
+  Evidence: `tools/rebuild/name_entry_update_fpu.asm` and
+  `tools/rebuild/modules/name_entry_update.json`.
+- Observation: the harness holds the letter index, the 0x50 records, the three
+  marker cells, and the three float constants.  The two callees record the call
+  order and the arguments.  The four paths cover the index 1, the index 0, the
+  index 13, and the index 25.  The output holds the markers `0` through `3` and
+  `D`.  The behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module name_entry_update`,
+  `work/rebuild/neutupd.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2ce84`.
+- Observation: the rebuilt module holds 4 of 61 instructions equal, 7 of 192
+  bytes equal, and 0 of 24 relocation slots equal.  The identity check stays
+  open because V2 orders the prologue differently, keeps the float locals in
+  other slots, and folds the FPU operations.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2ce84 --count 61 --rebuilt work/rebuild/neutupd.exe
+  --rebuilt-map work/rebuild/name_entry_update.map --rebuilt-symbol
+  name_entry_update_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

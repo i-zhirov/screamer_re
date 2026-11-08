@@ -1,9 +1,95 @@
 {
   "address": "0x2ce84",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 61,
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "The name_entry_update module at 0x2ce84"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x2ce84 holds 61 instructions and 225 bytes up to the ret at 0x2cf64; the next function starts at 0x2cf68, so the store record keeps the 228-byte extent and sets no function size; the identity check uses 61 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x295e7 is case 4 of race_state_update at 0x29564; the jump table at linear 0x29540 maps case 4 to 0x295e7; race_state_update is a race_frame callee at 0x2807c, so the record takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the state 4 init is name_entry_screen at 0x2c430, which builds the 26 A to Z records at DAT_001db78; the input at 0x2893a selects the letter DAT_0011d23c, so the state 4 update is the name entry update"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls 0x2b308 with the letter code DAT_0011d23c + 0x41; that function sets the animation flag +0x0c to 1 on every record whose key differs and to 0 on the selected record; the call preserves edx, so the module names the callee map_object_line_select, the name the menu_text_update module uses"
+    },
+    {
+      "kind": "note",
+      "text": "the loop runs name_entry_letter_update at 0x2b660 on each of the 0x50 records at DAT_001db78 with the stride 0x64"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero index places the menu marker from the cosine and the sine of index * -0.24166098 at the scale 4500.0; the sine gives DAT_001203a8, the cosine gives DAT_001203b0, and the heading index * 0.24166098 gives DAT_00120394; a zero index clears the two integer cells and stores the default 0x1194 at DAT_001203b0"
+    },
+    {
+      "kind": "note",
+      "text": "the constants are the float values 0xbe7775fa, 0x458ca000, and 0x3e7775fa at object-3 offsets 0x11f3, 0x11f7, and 0x11fb; the original calls cos at 0x4da66, sin at 0x4da72, and the truncate helper at 0x4d9f4; the local FPU stub supplies cos and sin and makes __CHP truncate toward zero; the constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the letter index, the 0x50 records, the three marker cells, and the three float constants; the two callees record the call order and the arguments; the four paths cover the index 1, the index 0, the index 13, and the index 25; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 4 of 61 instructions equal, 7 of 192 bytes equal, and 0 of 24 relocation slots equal; the identity check stays open because V2 orders the prologue differently, keeps the float locals in other slots, and folds the FPU operations; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2ce84 --count 61 --rebuilt work/rebuild/neutupd.exe --rebuilt-map work/rebuild/name_entry_update.map --rebuilt-symbol name_entry_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2ce84"
+    }
+  ],
+  "implementation": "c",
+  "module": "name_entry_update",
+  "name": "name_entry_update",
   "notes": [],
   "object_offset": "0x1ce84",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 192,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 61,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2ce84",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:71830b04aceea76fae2b4a537f658b50e3f7c105d9e11f695c4239e3a664e10f",
+    "source_digest": "sha256:29104a3ff98ef6f7d48d99d8d7a82e85aa6b1b71fda4b78f880776f2038de3ac",
+    "tool": "run.py"
+  },
+  "role": "marks the selected name-entry letter, updates the letter objects, and recomputes the menu marker from the letter index",
+  "section": "race_frame callees",
   "size": 228,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "name_entry_update_"
 }
