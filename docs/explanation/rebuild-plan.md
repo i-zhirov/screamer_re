@@ -399,7 +399,7 @@ reproduce the original bytes.
 | `0x8adac` | `sound_voice_setup` (done) | 279 | 71 | 1 | 0 |
 | `0x17b54` | `traffic_push_response` (done) | 279 | 70 | 3 | 26 |
 | `0x82c14` | `camera_project` (done) | 277 | 72 | 0 | 0 |
-| `0x15874` | unnamed | 269 | 69 | 18 | 0 |
+| `0x15874` | `cd_check_screen` (done) | 269 | 69 | 18 | 0 |
 | `0x1d200` | unnamed | 268 | 70 | 2 | 32 |
 | `0x1ba4c` | unnamed | 267 | 82 | 5 | 0 |
 | `0x1b738` | unnamed | 263 | 69 | 8 | 0 |
@@ -408,7 +408,7 @@ reproduce the original bytes.
 
 ## Position
 
-Two hundred forty-five modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred forty-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -511,5 +511,6 @@ and `player_car_wheel_effect_update` at `0x19980`, and
 `body_point_collision_detect` at `0x11e74`, and the Phase Q modules
 `championship_record_select` at `0x293a8`, `sla_marker_check` at `0x18ba8`,
 `lzw_block` at `0x4d4c4`, and `sound_voice_setup` at `0x8adac`,
-`traffic_push_response` at `0x17b54`, and `camera_project` at `0x82c14`.
-The next unnamed function is `0x15874`.
+`traffic_push_response` at `0x17b54`, and `camera_project` at `0x82c14`,
+and `cd_check_screen` at `0x15874`.
+The next unnamed function is `0x1d200`.

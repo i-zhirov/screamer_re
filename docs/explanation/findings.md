@@ -18723,3 +18723,86 @@ temporary `-od` recipe.
   Evidence: the data flow above and the camera chain.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The cd_check_screen module at 0x15874
+
+- Observation: the original body at `0x15874` holds 69 instructions and 269
+  bytes up to the `ret` at `0x15980`.  The next function starts at `0x15984`.
+  The store record keeps the 272-byte extent and sets no separate function
+  size.  The identity check uses 69 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15874 --count 69` and
+  `tools/rebuild/functions/0x15874.json`.
+- Observation: the only direct caller is `race_end` at `0x279a4`.  It calls
+  this function at `0x279f4` when the dword at object-3 offset `0x18e3c` is
+  zero, and then sets the dword to 1.  `race_loop` calls `race_end` at
+  `0x27761` after the loop exit test, so the record takes the section
+  `race_loop callees`.
+  Evidence: the call site at `0x279f4`, the test at `0x279e5`, the finding
+  "The race_end module", and `python3 tools/le.py disasm STARTH.EXE 0x27700
+  --count 45`.
+- Observation: the helper at `0x157b8` gets the real-mode driver response
+  through `0x26014`, and it compares four response fields with the texts `PC`,
+  `SCREAMER`, `VIE`, and `SCREAMER` through the case-insensitive compare at
+  `0xc21f2`.  It returns 0 when every field matches and 1 when the driver
+  result is zero or a field differs.
+  Evidence: the blocks at `0x157c8` through `0x1586b`, the string constants at
+  object-3 offsets `0x67e`, `0x681`, `0x68a`, and `0x68e`, and the compare at
+  `0xc21f2`.
+- Observation: the `dpmi_real_int` module at `0x25db0` runs the DOS multiplexer
+  check INT 2Fh AX=1500h and stores the returned segment at `0x1668c`.  The
+  helper at `0x157b8` reads the driver through that segment, so the check reads
+  the CD.  The function returns at once when the check returns 0, so the screen
+  runs only when the CD is missing or wrong.
+  Evidence: the finding "The dpmi_real_int module", the store at `0x25ddd`,
+  and the tests in the helper.
+- Observation: the screen path stops the CD audio through `0x264ec`, clears
+  the dword at `0x166ac`, and gets the `OPT_PCX` resource of `0x3e800` bytes
+  into `0x1fad0` through `0x2eed0`.  A zero result runs the memory error report
+  at `0x2edad` and the path continues.
+  Evidence: the blocks at `0x15887` through `0x158b6` and the member name at
+  object-3 offset `0x697`.
+- Observation: the function clears the `0x3e800`-byte video buffer at `0x21528`
+  through `0x8c160` and fills the screen through `0x2aa98`.  It loads
+  `menu1h.pcx` from `gfx\graf.dat` into the pixel buffer with the palette at
+  `0xcf5c` through `0x1b5a4`.  A non-zero result runs the cleanup at `0x15150`.
+  Evidence: the blocks at `0x158bb` through `0x158f3` and the member names at
+  object-3 offsets `0x69f` and `0x6aa`.
+- Observation: the function copies the pixels to the video buffer through
+  `0x8c150`, draws the text pointer at `0x18ff4` centered at y `0x3c` with font
+  0 and color 2 through `0x2e7cc`, fills the screen again, sets the palette
+  through `0x81a05`, and stops the CD audio through `0x262a8` with 0.
+  Evidence: the blocks at `0x158f4` through `0x15930`.
+- Observation: the function waits for the audio flag at `0x16688` to go from 0
+  to 1 and back, polling `0x25f90`.  It then waits while the CD check still
+  fails, so the user can insert the correct disc.  After that it sets the word
+  at `0x1669e` to 1, waits while the audio flag is set, and resets the CD audio
+  through `0x262fc`.
+  Evidence: the loops at `0x15935` through `0x15977`.
+- Observation: the original has the EBP frame and uses no floating-point
+  instruction.  The module builds with `-of+` and links no FPU stub.
+  Evidence: the prologue at `0x15874` and the epilogue at `0x1597c`.
+- Observation: the harness holds the archive pointer, the two buffers, the
+  palette, the message, the two audio flags, and the stub of every callee.  The
+  five paths cover the present CD, the full path with four polls, the zero
+  resource, the failed PCX load, and the immediate wait success.  The output
+  holds the markers `0` through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/cd_check_screen_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_check_screen`, and
+  `work/rebuild/cdchk.txt`.
+- Observation: the rebuilt module holds 69 instructions and 275 bytes.  The
+  identity check stays open at 47 of 69 instructions, 33 of 269 bytes, and 7 of
+  25 relocation slots.  V2 saves `ebp` first, keeps the archive pointer in a
+  local, and orders the calls in another way.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15874 --count 69 --rebuilt work/rebuild/cdchk.exe
+  --rebuilt-map work/rebuild/cd_check_screen.map --rebuilt-symbol
+  cd_check_screen_` and `python3 tools/rebuild/run.py run --function 0x15874`.
+- Inference: the CD check, the `OPT_PCX` screen, the `menu1h.pcx` background,
+  and the wait for the correct disc support the name `cd_check_screen`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and the CD audio path.
+- Limit: the original has no symbol name for this function.  The message
+  pointer at `0x18ff4` is a BSS global with no visible writer.  The module name
+  and the field names in the harness stay inferred.

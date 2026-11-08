@@ -1,0 +1,31 @@
+{
+  "exe": "cdchk.exe",
+  "map": "cd_check_screen.map",
+  "name": "cd_check_screen",
+  "run": {
+    "command": "cdchk.exe > cdchk.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cdchk.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_check_screen.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_check_screen_main.c"
+    }
+  ]
+}
