@@ -20380,3 +20380,64 @@ temporary `-od` recipe.
   0x2b308`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The angle_step module at 0x21f40
+
+- Observation: the original body at `0x21f40` holds 87 instructions and 215
+  bytes up to the `ret 8` at `0x22014`.  The next function starts at `0x22018`,
+  so the store record keeps the 216-byte extent and sets no function size.  The
+  identity check uses 87 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21f40 --count 87` and
+  `tools/rebuild/functions/0x21f40.json`.
+- Observation: the function has a frame.  The first argument arrives in `eax`;
+  the two float arguments take the stack slots `[ebp + 0xc]` and `[ebp + 0x10]`,
+  and the callee cleans them with `ret 8`.
+  Evidence: the prologue at `0x21f40` through `0x21f47` and the `ret 8` at
+  `0x22014`.
+- Observation: the function makes no direct call, no relocation slot targets
+  the address, and the store call graph holds no edge to it.  The function sits
+  between `motion_update` at `0x21e6c` and `angle_approach` at `0x22018`, and
+  it compares against the same pi and 2 pi values as the sibling.
+  Evidence: `python3 tools/le.py calls STARTH.EXE 0x21f40`, the relocation
+  scan, and the constants at module linear `0x100d58`, `0x100d5c`, and
+  `0x100d60`, which hold 3.14159274, 6.28318548, and -6.28318548.
+- Observation: the function moves `*value` toward the target by one fixed step.
+  When the absolute difference is at least pi, the offset takes the other sign,
+  so the value takes the short path around the circle.  A value within one step
+  of the target snaps to the target.
+  Evidence: the two compares at `0x21f4d` and `0x21f5a`, the two
+  large-difference branches at `0x21f64` and `0x21f91`, and the snap block at
+  `0x21fbe` through `0x21fd8`.
+- Observation: the function then wraps the value into the range zero to 2 pi.  A
+  negative value gains 2 pi, and a value of 2 pi or more loses 2 pi.
+  Evidence: the wrap block at `0x21fda` through `0x2200e`.
+- Inference: the fixed-step angle move next to `angle_approach` supports the
+  name `angle_step`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the data flow above and the sibling module at `0x22018`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The three constants arrive through globals, because the harness
+  image does not load the constant segment.  The shared `fpu_stub.asm` supplies
+  the FPU run-time symbols and the float-used marker.
+  Evidence: `tools/rebuild/angle_step.c` and
+  `tools/rebuild/modules/angle_step.json`.
+- Observation: the harness holds the three angle constants.  The nine paths
+  cover the equal value, the small positive and negative differences, the two
+  large-difference short paths, the overshoot snap, the lower and upper wrap,
+  and the exact zero result.  The output holds the markers `0` through `8` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/angle_step_main.c`,
+  `python3 tools/rebuild/harness.py run --module angle_step`, and
+  `work/rebuild/astp.txt`.
+- Observation: the identity check compares 87 instructions.  The rebuilt module
+  holds 7 of 87 instructions, 7 of 206 bytes, and 0 of 10 relocation slots
+  equal.  The identity check stays open because V2 saves the frame first, keeps
+  the value pointer in a register, and orders the snap and wrap blocks in
+  another shape.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21f40 --count 87 --rebuilt work/rebuild/astp.exe
+  --rebuilt-map work/rebuild/angle_step.map --rebuilt-symbol angle_step_` and
+  `python3 tools/rebuild/run.py run --function 0x21f40`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.

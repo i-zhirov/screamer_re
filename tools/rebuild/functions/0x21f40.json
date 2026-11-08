@@ -1,9 +1,103 @@
 {
   "address": "0x21f40",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 87,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x21f40 holds 87 instructions and 215 bytes up to the ret 8 at 0x22014; the next function starts at 0x22018, so the store record keeps the 216-byte extent and sets no function size; the identity check uses 87 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument arrives in eax; the two float arguments make the Watcom compiler pass the remaining arguments on the stack, so the callee cleans them with ret 8"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no direct call and no relocation points at the address; the function sits between motion_update at 0x21e6c and angle_approach at 0x22018, and it uses the same pi and 2 pi constants at object-3 offsets 0xd58, 0xd5c, and 0xd60, so the module takes the section The timing and filter layer"
+    },
+    {
+      "kind": "note",
+      "text": "the function moves the value at *value toward the target by one fixed step; when the absolute difference is at least pi, the offset takes the other sign, so the value takes the short path around the circle; a value within one step of the target snaps to the target"
+    },
+    {
+      "kind": "note",
+      "text": "the function then wraps the value into the range zero to 2 pi; a negative value gains 2 pi; a value of 2 pi or more loses 2 pi"
+    },
+    {
+      "kind": "note",
+      "text": "the fixed-step angle move next to angle_approach supports the name angle_step; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original compares against the three float constants in the constant segment, so the harness passes them through globals; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three angle constants; the nine paths cover the equal value, the small positive and negative differences, the two large-difference short paths, the overshoot snap, the lower and upper wrap, and the exact zero result; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 7 of 87 instructions, 7 of 206 bytes, and 0 of 10 relocation slots equal; the identity check stays open because V2 saves the frame first, keeps the value pointer in a register, and orders the snap and wrap blocks in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x21f40 --count 87"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x21f40 --count 87 --rebuilt work/rebuild/astp.exe --rebuilt-map work/rebuild/angle_step.map --rebuilt-symbol angle_step_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module angle_step"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x21f40"
+    },
+    {
+      "kind": "finding",
+      "text": "The angle_step module at 0x21f40"
+    }
+  ],
+  "implementation": "c",
+  "module": "angle_step",
+  "name": "angle_step",
   "notes": [],
   "object_offset": "0x11f40",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 206,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 87,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x21f40",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:0ab218ddbc2a330c58af9ab48d5adf39102e8212128631592ed326da32b2d2ab",
+    "source_digest": "sha256:23d3ad09eb394700e6d33ba05bb6e114cf9b9a60334e5cc678a830f51008769c",
+    "tool": "run.py"
+  },
+  "role": "moves an angle toward a target by one fixed step along the short path and wraps the result into the range zero to 2 pi",
+  "section": "The timing and filter layer",
   "size": 216,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "angle_step_"
 }
