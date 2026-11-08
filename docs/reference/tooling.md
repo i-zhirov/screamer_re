@@ -630,8 +630,10 @@ The files:
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
 | `oracle.py` | compare two function bodies with the fixup slots and the direct branch targets normalized |
 | `image_compare.py` | compare a rebuilt whole image with the original by region and by byte |
-| `view.py` | render the self-contained status page of the store, including the language column, the chip marker, and the detail line |
+| `view.py` | render the self-contained status page of the store: the board, the table, the address-space map, the treemap, and the call graph |
 | `docs.py` | render the `program-map.md` tables and check the drift |
+| `callgraph.py` | build the named call graph from the store and the original executable, and check the drift |
+| `callgraph.json` | the direct call edges between named records |
 | `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
 
 ```sh
@@ -643,8 +645,23 @@ python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
+python3 tools/rebuild/callgraph.py build
+python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
 ```
+
+`view.py html` writes five views. The board groups the records by the
+program-map section. The table lists one row per record. The map places each
+function on an axis of the module address space and groups the functions by
+section. The treemap sizes each section and function by the byte span. The call
+graph places the named functions in columns by call depth. The five views share
+the filters, the selection, and the detail pane.
+
+`callgraph.py build` scans the body of each named record and resolves each
+direct call target to the record that starts at or before it. `check` writes
+nothing and exits 1 when `callgraph.json` differs from the scan. The view reads
+the committed file, so it needs no game image. Run `callgraph.py build` after a
+record gains a name or moves.
 
 The seed unions four candidate sources: the `funcs` prologue scan, the direct
 call targets of the verified and rebuilt roots, the entry jump at `0x300f8`,

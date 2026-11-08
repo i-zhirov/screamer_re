@@ -78,6 +78,7 @@ TOOLS = (
     "rebuild/image_compare.py",
     "rebuild/view.py",
     "rebuild/docs.py",
+    "rebuild/callgraph.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -869,11 +870,23 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
         result.returncode == 0,
         last_line(result.stdout) or last_line(result.stderr),
     )
-    result = run([sys.executable, "tools/rebuild/docs.py", "check"])
+    docs_result = run([sys.executable, "tools/rebuild/docs.py", "check"])
+    callgraph_result = run(
+        [
+            sys.executable,
+            "tools/rebuild/callgraph.py",
+            "check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
+    drift_result = docs_result
+    if docs_result.returncode == 0:
+        drift_result = callgraph_result
     checks.check(
-        "stage 12: the program-map tables hold no drift",
-        result.returncode == 0,
-        last_line(result.stdout) or last_line(result.stderr),
+        "stage 12: the program-map tables and the call graph hold no drift",
+        docs_result.returncode == 0 and callgraph_result.returncode == 0,
+        last_line(drift_result.stdout) or last_line(drift_result.stderr),
     )
     page = work_dir / "status.html"
     result = run(
