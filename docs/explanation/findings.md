@@ -17963,3 +17963,74 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name,
   the decoder name `pcx_decode`, and the global names in the harness stay
   inferred.
+
+## The terrain_contact_update module at 0x1cbac
+
+- Observation: the original body at `0x1cbac` holds 81 instructions and 297
+  bytes up to the `ret` at `0x1ccd4`.  The next function starts at `0x1ccd8`,
+  so the store record keeps the 300-byte extent and sets no separate function
+  size.  The identity check uses 81 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1cbac --count 81` and
+  `tools/rebuild/functions/0x1cbac.json`.
+- Observation: the only direct caller is `object_prepare` at `0x1c79c` through
+  the call at `0x1c7c4`.  `object_prepare` runs on each car record from
+  `car_setup` at `0x142ec`, `race_simulation_update` at `0x2003c`, and
+  `object_update_all` at `0x2786c`.  The record therefore takes the section
+  `object_prepare callees`.
+  Evidence: the call sweep for the target `0x1cbac`; the calls at `0x14957`,
+  `0x20148`, and `0x27931`; and the block at `0x1c79c` through `0x1c7c9`.
+- Observation: the function publishes the world position from
+  `+0x258 + +0x454` through the global `0x8038` and from `+0x260 + +0x45c`
+  through the global `0x8040`.  It then calls the map collision check at
+  `0x11c00` with the argument 0.
+  Evidence: the loads, the adds, and the call at `0x1cbb4` through `0x1cbeb`.
+- Observation: on a hit, the ground height `+0x238` takes the global `0xc72c`.
+  The surface direction in the globals `0xc734` and `0xc73c` is rotated by the
+  heading `+0x4bc` plus the object-3 constant at offset `0xb04`, which is
+  `-pi/2`, through the helper at `0x2218c`.  The point scales by the object-3
+  constant at `0xb08`, which is `pi`, and divides by the object-3 constant at
+  `0xb0c`, which is `46080.0`, into `+0x23c` and `+0x244`.  Each value adds the
+  object-3 constant at `0xb10`, which is `2*pi`, while it stays negative.
+  Evidence: the blocks at `0x1cbf8` through `0x1ccac` and the data at object-3
+  offsets `0xb04` through `0xb10`.
+- Observation: on a clear cell, when the speed `+0x418` passes the object-3
+  constant at `0xb14`, which is `3000.0`, the function stores zero at `+0x418`.
+  Evidence: the block at `0x1ccae` through `0x1ccc5` and the data at object-3
+  offset `0xb14`.
+- Inference: `object_transform` at `0x1cd44` reads `+0x238` into `+0x49c` and
+  adds `+0x23c` to `+0x314` and `+0x244` to `+0x31c`.  Thus `+0x238` is the
+  ground height and `+0x23c` and `+0x244` are the terrain pitch and roll.  The
+  caller, these fields, and the constants support the name
+  `terrain_contact_update`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call graph, the blocks at `0x1cda0` through `0x1ce2d`, and the
+  data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no float-to-integer conversion and calls no math
+  routine, so the shared `fpu_stub.asm` supplies the FPU run-time symbols and
+  the float-used marker.  The five constants arrive through globals, because
+  the minimal image does not load the constant segment.
+  Evidence: `tools/rebuild/terrain_contact_update.c` and
+  `tools/rebuild/modules/terrain_contact_update.json`.
+- Observation: the harness holds the object record, the position and height
+  fields, the two terrain angles, the speed, the five constants, the two map
+  globals, and the two callee stubs.  The six paths cover the no-hit path at
+  the `3000.0` boundary, the no-hit path above and below the boundary, the hit
+  path with positive point values, the hit path with negative values after one
+  `2*pi` add, and the two-field normalization order.  The output holds the
+  markers `0` through `5` and `D`.
+  Evidence: `tools/rebuild/terrain_contact_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module terrain_contact_update`, and
+  `work/rebuild/tcu.txt`.
+- Observation: the rebuilt body holds 81 decoded instructions and 299 bytes.
+  The identity check stays open at 23 of 81 instructions and 11 of 297 bytes,
+  because V2 saves `ecx` and `edx` first, keeps the object in `ecx`, addresses
+  the globals as near data offsets, and saves the two angle fields to local
+  slots.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1cbac --count 81 --rebuilt work/rebuild/tcu.exe
+  --rebuilt-map work/rebuild/terrain_contact_update.map --rebuilt-symbol
+  terrain_contact_update_` and
+  `python3 tools/rebuild/run.py run --function 0x1cbac`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
