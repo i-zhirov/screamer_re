@@ -23143,3 +23143,56 @@ temporary `-od` recipe.
   cache_resource_` and `python3 tools/rebuild/run.py run --function 0x2f062`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 53 instructions.
+
+## The lzw_init module at 0x4d360
+
+- Observation: the original body holds 32 instructions and 153 bytes.  The body
+  starts at `0x4d360` and ends at the `ret` at `0x4d3f8`.  The next function
+  `lzw_expand` starts at `0x4d3fc`, so the store record keeps the 156-byte
+  extent and sets no separate function size.  The identity check uses 32
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d360 --count 32` and
+  `tools/rebuild/functions/0x4d360.json`.
+- Observation: the only direct caller is `member_open` at `0x4c128`.  That
+  function allocates the 0x8490-byte decoder context through `memory_alloc` at
+  `0x30050`, loads the context in `eax`, and calls this function at `0x4c2e3`.
+  The same decoder layer holds `lzw_expand` at `0x4d3fc`, `lzw_block` at
+  `0x4d4c4`, and `lzw_bit_read` at `0x4d844`.
+  Evidence: the disassembly of `member_open`, the call site at `0x4c2e3`, and
+  the program-map records of the decoder layer.
+- Observation: the context arrives in `eax` and returns in `eax`.  The function
+  writes the four width masks 0x1ff, 0x3ff, 0x7ff, and 0xfff at `+0x8074`,
+  `+0x8078`, `+0x807c`, and `+0x8080`.  It clears the character stack count at
+  `+0x4064`, copies that count to the bit position at `+0x406c`, clears the
+  state at `+0x404c`, and sets the code width at `+0x4068` to 9, the width
+  threshold at `+0x4060` to 0x200, and the next free entry at `+0x405c` to
+  0x102.
+  Evidence: the stores at `0x4d36d` through `0x4d3f1`.
+- Inference: the caller, the decoder layer, and the field set support the name
+  `lzw_init`.  The original has no symbol, so the module records the name with
+  the confidence `inferred`.
+  Evidence: the call site above and the field set.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x4d360` through `0x4d367` and
+  `tools/rebuild/modules/lzw_init.json`.
+- Observation: the harness holds two 0x8490-byte decoder contexts filled with
+  the sentinel 0x5a.  The four paths cover the set fields and the return value,
+  the clear and the copy of the stack count, the second context, and the
+  neighbour cells that keep the sentinel.  The output holds the markers `0`
+  through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/lzw_init_main.c`, `python3 tools/rebuild/harness.py
+  run --module lzw_init`, and `work/rebuild/lzwinit.txt`.
+- Observation: the rebuilt body holds 22 instructions and 112 bytes.  The
+  compiler drops the saved-context reloads, keeps the context in `eax`, and
+  saves `edx` after the frame.  The identity check stays open at 17 of 32
+  instructions, 26 of 149 decoded bytes, and 0 of 3 relocation slots, because
+  the diff window decodes the following harness code after the rebuilt `ret`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d360 --count 32 --rebuilt work/rebuild/lzwinit.exe
+  --rebuilt-map work/rebuild/lzw_init.map --rebuilt-symbol lzw_init_` and
+  `python3 tools/rebuild/run.py run --function 0x4d360`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 32 instructions.

@@ -1,9 +1,103 @@
 {
   "address": "0x4d360",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4d360 holds 32 instructions and 153 bytes up to the ret at 0x4d3f8; the next function lzw_expand starts at 0x4d3fc, so the store record keeps the 156-byte extent and sets no separate function size; the identity check uses 32 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is member_open at 0x4c128; that function allocates the 0x8490-byte decoder context through memory_alloc at 0x30050, loads the context in eax, and calls this function at 0x4c2e3; the decoder layer holds lzw_expand at 0x4d3fc, lzw_block at 0x4d4c4, and lzw_bit_read at 0x4d844; these facts support the name lzw_init and the section The graphics decoders; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the context arrives in eax and returns in eax; the function writes the four width masks 0x1ff, 0x3ff, 0x7ff, and 0xfff at +0x8074, +0x8078, +0x807c, and +0x8080; it clears the character stack count at +0x4064, copies that count to the bit position at +0x406c, clears the state at +0x404c, sets the code width at +0x4068 to 9, the width threshold at +0x4060 to 0x200, and the next free entry at +0x405c to 0x102"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds two 0x8490-byte decoder contexts filled with the sentinel 0x5a; the four paths cover the set fields and the return value, the clear and the copy of the stack count, the second context, and the neighbour cells that keep the sentinel; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 22 instructions and 112 bytes; the compiler drops the saved-context reloads, keeps the context in eax, and saves edx after the frame; the identity check stays open at 17 of 32 instructions, 26 of 149 decoded bytes, and 0 of 3 relocation slots, because the diff window decodes the following harness code after the rebuilt ret; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The lzw_init module at 0x4d360"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d360 --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d360 --count 32 --rebuilt work/rebuild/lzwinit.exe --rebuilt-map work/rebuild/lzw_init.map --rebuilt-symbol lzw_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module lzw_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4d360"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/lzw_init.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/lzw_init_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/lzw_init.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "lzw_init",
+  "name": "lzw_init",
   "notes": [],
   "object_offset": "0x3d360",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 26,
+        "bytes_total": 149,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d360",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:1877ccbf891cd0a610ae52239567ddb04dd8af2d15bfae636acd741bae8ef2ae",
+    "source_digest": "sha256:616d1b85fc9eac9bd8b0157af1f0148ffd54b0e3bdb9cc7ad472db239ad6c19e",
+    "tool": "run.py"
+  },
+  "role": "initializes the LZW decoder context fields before an expansion",
+  "section": "The graphics decoders",
   "size": 156,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "lzw_init_"
 }
