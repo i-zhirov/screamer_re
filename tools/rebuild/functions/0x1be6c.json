@@ -1,9 +1,95 @@
 {
   "address": "0x1be6c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 54,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at `0x1be6c` holds 54 instructions and 203 bytes up to the `ret` at `0x1bf36`; the next function starts at `0x1bf38` after the two padding bytes at `0x1bf37`, so the record keeps the 204-byte extent and sets no function size; the identity check uses 54 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds `%s\\config\\choice.dat` from the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the file with the mode `wb` through `fopen` at `0xc5fe5`, and returns at once when the handle is zero"
+    },
+    {
+      "kind": "note",
+      "text": "on a successful open it copies the race context pointer `DAT_00002dec` fields at offsets `+0x08`, `+0x18`, `+0x28`, `+0x38`, `+0x48`, and `+0x1c` to the record at `DAT_00203c4` offsets `+0x0c`, `+0x10`, `+0x14`, `+0x438`, `+0x43c`, and `+0x45c`; it then copies the option globals `DAT_001d2a4`, `DAT_001d2a8`, `DAT_001d2c0`, `DAT_001d2bc`, and `DAT_001d2c4` to the record offsets `+0x450`, `+0x430`, `+0x448`, `+0x444`, and `+0x44c`"
+    },
+    {
+      "kind": "note",
+      "text": "the function writes the 0x460-byte record at `DAT_00203c4` through `fwrite` at `0xc6387` with the count 1 and the element count 0x460, and closes the handle through `fclose` at `0xc6245`; the file at object-3 offset `0xaa3` and the sibling module `choice_load` at `0x1bbc8` support the name `choice_save`"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct callers are `race_cleanup` at `0x2a1b0`, which calls at `0x2a1b9`, and `loading_screen` at `0x2a364`, which calls at `0x2a54a` as a tail call; both call the function at the end of their work, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with `-of+`; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the race context, the record, the five option globals, and the four file stubs; the three paths cover the success copy, the failed open that leaves the record unchanged, and a second success with other values; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 33 of 54 instructions and 1 of 31 relocation slots equal; the identity check stays open because V2 keeps the handle in a register, uses another register for the copied values, and builds the write arguments in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1be6c --count 54"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1be6c --count 54 --rebuilt work/rebuild/chcsave.exe --rebuilt-map work/rebuild/choice_save.map --rebuilt-symbol choice_save_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1be6c"
+    },
+    {
+      "kind": "finding",
+      "text": "The choice_save module at 0x1be6c"
+    }
+  ],
+  "implementation": "c",
+  "module": "choice_save",
+  "name": "choice_save",
   "notes": [],
   "object_offset": "0xbe6c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 199,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 33,
+        "instructions_total": 54,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1be6c",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:e4707007ef8a8bb75292dfc3a5c8a5c626b7813f876506e54ea509043c96f605",
+    "source_digest": "sha256:37bafb50a51b223223e6f83277f63c5ef501a90278c2da5a37fb6b27d6a69c4e",
+    "tool": "run.py"
+  },
+  "role": "writes the choice record to config\\choice.dat: it copies the live race context and the option globals into the record, writes 0x460 bytes, and closes the file",
+  "section": "Program functions",
   "size": 204,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "choice_save_"
 }

@@ -1729,7 +1729,7 @@ audio tracks.  The game plays the tracks through the CD audio path.
 
 - The game wrote `CONFIG/CHOICE.DAT` during a probe, and the file holds 1120
   bytes,
-  the value `0x460`.  That is the exact size that `config_save` at `0x1BE6C`
+  the value `0x460`.  That is the exact size that `choice_save` at `0x1BE6C`
   writes, the structure at `DAT_001203C4`, so the menu state address is the
   module
   address `0x1203C4` and the run-time address `0x1E23C4`.
@@ -20768,3 +20768,63 @@ temporary `-od` recipe.
   0x1ff70`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The choice_save module at 0x1be6c
+
+- Observation: the original body at `0x1be6c` holds 54 instructions and 203
+  bytes up to the `ret` at `0x1bf36`.  The next function starts at `0x1bf38`
+  after the two padding bytes at `0x1bf37`, so the record keeps the 204-byte
+  extent and sets no function size.  The identity check uses 54 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1be6c --count 54` and
+  `tools/rebuild/functions/0x1be6c.json`.
+- Observation: the function builds `%s\config\choice.dat` from the base path at
+  `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the file with the mode
+  `wb` through `fopen` at `0xc5fe5`, and returns at once when the handle is
+  zero.  The format string sits at object-3 offset `0xa99` and the mode at
+  `0xaae`.
+  Evidence: the prologue at `0x1be75` through `0x1be9f` and the strings at
+  object-3 offsets `0xa99` and `0xaae`.
+- Observation: on a successful open the function copies the race context
+  pointer `DAT_00002dec` fields at `+0x08`, `+0x18`, `+0x28`, `+0x38`, `+0x48`,
+  and `+0x1c` to the record at `DAT_00203c4` offsets `+0x0c`, `+0x10`, `+0x14`,
+  `+0x438`, `+0x43c`, and `+0x45c`.  It then copies the option globals
+  `DAT_001d2a4`, `DAT_001d2a8`, `DAT_001d2c0`, `DAT_001d2bc`, and
+  `DAT_001d2c4` to the record offsets `+0x450`, `+0x430`, `+0x448`, `+0x444`,
+  and `+0x44c`.
+  Evidence: the block at `0x1bea5` through `0x1bf0c`.
+- Observation: the function writes the 0x460-byte record at `DAT_00203c4`
+  through `fwrite` at `0xc6387` with the element size 1 and the element count
+  0x460, and closes the handle through `fclose` at `0xc6245`.
+  Evidence: the block at `0x1bf11` through `0x1bf2b`.
+- Observation: the only direct callers are `race_cleanup` at `0x2a1b0`, which
+  calls at `0x2a1b9`, and `loading_screen` at `0x2a364`, which calls at
+  `0x2a54a` as a tail call.
+  Evidence: the scan of the direct call targets and the two call sites.
+- Inference: the file `choice.dat` and the sibling module `choice_load` at
+  `0x1bbc8` support the name `choice_save`.  Both callers run the function at
+  the end of their work.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the `choice_load` record and the two callers.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/choice_save.c` and the module recipe.
+- Observation: the harness holds the base path, the race context, the record,
+  the five option globals, and the four file stubs.  The three paths cover the
+  success copy, the failed open that leaves the record unchanged, and a second
+  success with other values.  The output holds the markers `0` through `2` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/choice_save_main.c`, `python3
+  tools/rebuild/harness.py run --module choice_save`, and
+  `work/rebuild/chs_out.txt`.
+- Observation: the rebuilt body holds 33 of 54 instructions and 1 of 31
+  relocation slots equal.  The identity check stays open because V2 keeps the
+  handle in a register, uses another register for the copied values, and builds
+  the write arguments in another order.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1be6c --count 54 --rebuilt work/rebuild/chcsave.exe
+  --rebuilt-map work/rebuild/choice_save.map --rebuilt-symbol choice_save_` and
+  `python3 tools/rebuild/run.py run --function 0x1be6c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the stub names in the harness stay inferred.
