@@ -499,7 +499,7 @@ reproduce the original bytes.
 | `0x11410` | `object_chunk_find` (done) | 163 | 63 | 1 | 0 |
 | `0x81fd0` | `basis_rotation_build` (done) | 162 | 57 | 0 | 0 |
 | `0x202c0` | `replay_view_update` (done) | 160 | 37 | 11 | 0 |
-| `0x4c850` | unnamed | 159 | 58 | 1 | 0 |
+| `0x4c850` | `screen_mode_set` (done) | 159 | 58 | 1 | 0 |
 | `0x4c3e6` | unnamed | 159 | 49 | 4 | 0 |
 | `0x1aec4` | unnamed | 159 | 52 | 1 | 0 |
 | `0x12424` | unnamed | 155 | 56 | 0 | 0 |
@@ -520,7 +520,7 @@ This table starts Phase U.
 
 ## Position
 
-Three hundred and seven modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -678,5 +678,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `basis_rotation_mirror` at `0x82074`, and the Phase U module
 `object_chunk_find` at `0x11410`, and the Phase U module
 `basis_rotation_build` at `0x81fd0`, and the Phase U module
-`replay_view_update` at `0x202c0`.
-The next unnamed function is `0x4c850`.
+`replay_view_update` at `0x202c0`, and the Phase U module
+`screen_mode_set` at `0x4c850`.
+The next unnamed function is `0x4c3e6`.

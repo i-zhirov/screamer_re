@@ -22810,3 +22810,74 @@ temporary `-od` recipe.
   0x202c0`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The screen_mode_set module at 0x4c850
+
+- Observation: the original body at `0x4c850` holds 58 instructions and 159
+  bytes up to the `ret` at `0x4c8ee`.  The next recorded function starts at
+  `0x4c8f0`, so the store record keeps the 160-byte extent and sets no separate
+  function size.  The identity check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c850 --count
+  58` and `tools/rebuild/functions/0x4c850.json`.
+- Observation: the function takes three register arguments: the width in
+  `eax`, the height in `edx`, and the third value in `ebx`.  It spills them to
+  the frame, stores the geometry fields `+0x14` through `+0x48` of the record
+  at the pointer `PTR_DAT_0008a844`, and calls the selector setup at
+  `0x8bc7c`.
+  Evidence: the body at `0x4c850` through `0x4c8ee`.
+- Observation: the record field `+0x10` holds the color that `race_data_load`
+  at `0x131a8` copies from the first `TRACK_DATA` value.  This function starts
+  at `+0x14`, so the two functions fill different fields of the same record.
+  Evidence: the `race_data_load` module and the store fields at `0x4c883`
+  through `0x4c8e3`.
+- Observation: the five direct callers are `race_data_load` at `0x131a8`,
+  `player_view_setup` at `0x19ae8`, `view_transition_update` at `0x19f00`,
+  `quit_confirm_screen` at `0x219ec`, and `menu_space_init` at `0x29d08`.  The
+  callers pass the mode `0x140` by `0x190` with the value `0x104` or a
+  computed height, and they already use the callee name `screen_mode_set`.
+  Evidence: the five module sources and the call sites.
+- Observation: the function forms the doubled width `2 * width` and the
+  incremented height `height + 1`.  It stores the signed halves with the
+  arithmetic shift, so a negative input rounds toward negative infinity.  It
+  stores the 16.16 fixed-point values `value << 16`.  The field `+0x2c` holds
+  the doubled width divided by two with the signed division, so a negative
+  input truncates toward zero.
+  Evidence: the shifts at `0x4c890`, `0x4c898`, `0x4c8b4`, and `0x4c8cf`.
+- Observation: the only direct call is the selector setup at `0x8bc7c`.  That
+  function saves the segment registers, reads the descriptor table with `sgdt`,
+  reloads the flat data and `FS` selectors, and patches the selector immediates
+  in six helper blocks.
+  Evidence: the body at `0x8bc7c` through `0x8bcef`.
+- Inference: the five callers, the geometry fields, and the split from the color
+  field support the name `screen_mode_set`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call sites and the data flow above.
+- Observation: the original has the EBP frame and spills the three register
+  arguments, so the module builds with `-of+`.  The function uses no
+  floating-point instruction, so the module needs no FPU stub.
+  Evidence: the prologue at `0x4c850` through `0x4c85c` and
+  `tools/rebuild/modules/screen_mode_set.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness assigns the values at run time and uses no initialized
+  static data.
+  Evidence: `tools/rebuild/screen_mode_set_main.c`.
+- Observation: the harness holds two screen mode records, the record pointer,
+  and the selector setup stub.  The four paths cover the race mode, the menu
+  value, the negative width, height, and value, and the second record pointer.
+  The output holds the markers `0` through `3` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/screen_mode_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module screen_mode_set`, and
+  `work/rebuild/smset.txt`.
+- Observation: the rebuilt body holds 58 decoded instructions and 152 bytes in
+  the identity window.  The identity check stays open at 20 of 58 instructions
+  and 9 of 152 bytes.  The rebuilt C keeps the record pointer in `ecx`, folds
+  the half computations, and uses the standard Watcom register arguments.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c850 --count 58 --rebuilt work/rebuild/smset.exe
+  --rebuilt-map work/rebuild/screen_mode_set.map --rebuilt-symbol
+  screen_mode_set_` and `python3 tools/rebuild/run.py run --function 0x4c850`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
