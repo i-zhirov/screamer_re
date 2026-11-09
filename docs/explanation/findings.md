@@ -21272,3 +21272,73 @@ temporary `-od` recipe.
   0x4cb4c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The sound_variant_select module at 0x24a84
+
+- Observation: the original body at `0x24a84` holds 58 instructions and 194
+  bytes up to the `ret` at `0x24b45`.  Two `mov eax, eax` pad bytes follow the
+  `ret`, and the next function starts at `0x24b48`, so the record keeps the
+  196-byte extent and sets no separate function size.  The identity check uses
+  58 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24a84 --count 58` and
+  `tools/rebuild/functions/0x24a84.json`.
+- Observation: the argument in EAX points at a sound-queue record.  The field
+  +0x00 holds the effect index and the field +0x04 holds the variant mode.  The
+  mode dispatches through the jump table at `0x24a74` with the four targets
+  `0x24aa2`, `0x24abc`, `0x24ad6`, and `0x24af0`, and a mode above 3 skips the
+  switch.
+  Evidence: the jump-table fixups at `0x24a74` through `0x24a80` and the case
+  blocks at `0x24aa2` through `0x24afa`.
+- Observation: the table at object 3 offset `0x1fb4` holds 0x1b effects and
+  three sample ids per effect, each entry 0xc bytes.  The value -1 marks a
+  missing sample id.  The modes 0, 1, and 2 read the three fixed ids directly,
+  and the mode 3 calls `0x24b48`, which rotates through the three ids and skips
+  the -1 entries.
+  Evidence: the table read at `0x24ab0`, `0x24aca`, and `0x24ae4`, the call at
+  `0x24af5`, and the table content at object 3 offset `0x1fb4`.
+- Observation: when `0x19064` is zero, the function clamps the result to the
+  sample count at `0x19068`: a value at or above the count falls back to the
+  first sample id, and a still-too-high value becomes -1.  A non-zero
+  `0x19064` skips the clamp.  The init at `0x24600` sets the two globals.
+  Evidence: the clamp at `0x24afd` through `0x24b36` and the init at
+  `0x246b6` and `0x24702`.
+- Observation: the two direct callers are the queue resolver at `0x24a28`,
+  with the call site at `0x24a35`, which passes the head queue record at
+  `0x19080` and then resolves the result through `0x1f718`, and the player at
+  `0x247ac`, with the call site at `0x247d9`, which builds a two-field stack
+  record.  `race_intro_update` at `0x20db7` calls `0x247ac` with the mode 0,
+  and `race_frame_update` drives `0x24880`, which calls `0x24a28` at
+  `0x248d7`.  The two caller sections support the name `sound_variant_select`
+  with the confidence `inferred`, and the record takes the section Program
+  functions.
+  Evidence: the call sweep for `0x24a84`, the call at `0x248d7`, and the call
+  at `0x20db7`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub, and the module uses no assembly.  The rebuild uses an if-else chain for
+  the mode, because the V2 jump table at the start of the code object faults in
+  the harness.
+  Evidence: `tools/rebuild/sound_variant_select.c` and the module recipe.
+- Observation: the harness fills the 27-effect table, the quality flag, the
+  sample count, and the rotation counters at run time.  The seven paths cover
+  the three fixed variants, the high-quality skip, the fallback to the first
+  sample id, the fallback to -1, the sub-limit value, the rotating walk 40, 60,
+  and 40 over the -1 entry, and the all -1 effect.  The output holds the markers
+  `0` through `6` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_variant_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_variant_select`,
+  `work/rebuild/svsel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x24a84`.
+- Observation: the identity check at 58 instructions holds 11 of 58
+  instructions, 8 of 166 bytes, and 0 of 16 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, keeps the
+  entry pointer, the effect, and the result in other registers, reads the table
+  with one multiply, and uses the if-else chain instead of the jump table.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24a84 --count 58 --rebuilt work/rebuild/svsel.exe
+  --rebuilt-map work/rebuild/sound_variant_select.map --rebuilt-symbol
+  sound_variant_select_` and `python3 tools/rebuild/run.py run --function
+  0x24a84`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

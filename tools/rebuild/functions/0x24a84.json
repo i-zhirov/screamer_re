@@ -1,9 +1,91 @@
 {
   "address": "0x24a84",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24a84 holds 58 instructions and 194 bytes up to the ret at 0x24b45; the two mov eax,eax pad bytes follow the ret, and the next function starts at 0x24b48, so the record keeps the 196-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the argument in EAX points at a sound-queue record; +0x00 holds the effect index and +0x04 holds the variant mode; the mode dispatches through the jump table at 0x24a74 with the four targets 0x24aa2, 0x24abc, 0x24ad6, and 0x24af0; a mode above 3 skips the switch"
+    },
+    {
+      "kind": "note",
+      "text": "the table at object 3 offset 0x1fb4 holds 0x1b effects and three sample ids per effect, each entry 0xc bytes; the value -1 marks a missing sample id; the modes 0, 1, and 2 read the three fixed ids directly and the mode 3 calls 0x24b48, which rotates through the three ids and skips -1"
+    },
+    {
+      "kind": "note",
+      "text": "when 0x19064 is zero the function clamps the result to the sample count at 0x19068: a value at or above the count falls back to the first sample id, and a still-too-high value becomes -1; the init at 0x24600 sets the two globals, and a non-zero 0x19064 skips the clamp"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are the queue resolver at 0x24a28, with the call site at 0x24a35, which passes the head queue record at 0x19080 and then resolves the result through 0x1f718, and the player at 0x247ac, with the call site at 0x247d9, which builds a two-field stack record; race_intro_update at 0x20db7 calls 0x247ac with the mode 0 and race_frame_update drives 0x24880, which calls 0x24a28 at 0x248d7, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly; the rebuild uses an if-else chain, because the V2 jump table at the start of the code object faults in the harness"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 27-effect table, the quality flag, the sample count, and the rotation counters filled at run time; the seven paths cover the three fixed variants, the high-quality skip, the fallback to the first sample id, the fallback to -1, the sub-limit value, the rotating walk 40, 60, and 40 over the -1 entry, and the all -1 effect; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24a84 --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24a84 --count 58 --rebuilt work/rebuild/svsel.exe --rebuilt-map work/rebuild/sound_variant_select.map --rebuilt-symbol sound_variant_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24a84"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_variant_select module at 0x24a84"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_variant_select",
+  "name": "sound_variant_select",
   "notes": [],
   "object_offset": "0x14a84",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 166,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24a84",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:12bdc6b63f03a0245e3a98c8d35f803a504d57248cebc8c73d287d5bacc26e83",
+    "source_digest": "sha256:b329b63349c81e90e15d3d29ece792529c7cbc7cd67d22f6812b4893c4e929af",
+    "tool": "run.py"
+  },
+  "role": "selects the sample variant of a sound effect entry from the table at object 3 offset 0x1fb4, with the fixed variants 0, 1, and 2 or the rotating variant through 0x24b48, and clamps the result to the sample count at 0x19068",
+  "section": "Program functions",
   "size": 196,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_variant_select_"
 }

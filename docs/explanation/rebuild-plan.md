@@ -466,7 +466,7 @@ reproduce the original bytes.
 | `0x11304` | `object_unload` (done) | 196 | 56 | 4 | 0 |
 | `0x21da8` | `view_fade_out` (done) | 195 | 63 | 7 | 25 |
 | `0x4cb4c` | `spatial_grid_relocate` (done) | 194 | 75 | 0 | 0 |
-| `0x24a84` | unnamed | 194 | 58 | 1 | 0 |
+| `0x24a84` | `sound_variant_select` (done) | 194 | 58 | 1 | 0 |
 | `0x11c00` | unnamed | 193 | 64 | 1 | 0 |
 | `0x2dff4` | unnamed | 191 | 67 | 3 | 0 |
 | `0x27e08` | unnamed | 190 | 55 | 9 | 21 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred eighty-four modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred eighty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -624,5 +624,5 @@ module `func_11230` at `0x11230`, and the Phase T module `cockpit_load` at
 `0x4d3fc`, and the Phase T module `volume_bar_draw` at `0x23dfc`, and the
 Phase T module `object_unload` at `0x11304`, and the Phase T module
 `view_fade_out` at `0x21da8`, and the Phase T module `spatial_grid_relocate`
-at `0x4cb4c`.
-The next unnamed function is `0x24a84`.
+at `0x4cb4c`, and the Phase T module `sound_variant_select` at `0x24a84`.
+The next unnamed function is `0x11c00`.
