@@ -482,7 +482,41 @@ reproduce the original bytes.
 | `0x2497c` | `sound_queue_promote` (done) | 170 | 61 | 0 | 5 |
 | `0x12378` | `player_nearby_mark` (done) | 170 | 57 | 0 | 0 |
 
-This table starts Phase T.
+This table completes Phase T.
+
+### Phase U: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x12e18` | unnamed | 169 | 54 | 7 | 0 |
+| `0x1ce38` | unnamed | 165 | 45 | 2 | 6 |
+| `0x17c6c` | unnamed | 165 | 45 | 2 | 6 |
+| `0x1b198` | unnamed | 164 | 48 | 6 | 0 |
+| `0x82074` | unnamed | 163 | 58 | 0 | 0 |
+| `0x11410` | unnamed | 163 | 63 | 1 | 0 |
+| `0x81fd0` | unnamed | 162 | 57 | 0 | 0 |
+| `0x202c0` | unnamed | 160 | 37 | 11 | 0 |
+| `0x4c850` | unnamed | 159 | 58 | 1 | 0 |
+| `0x4c3e6` | unnamed | 159 | 49 | 4 | 0 |
+| `0x1aec4` | unnamed | 159 | 52 | 1 | 0 |
+| `0x12424` | unnamed | 155 | 56 | 0 | 0 |
+| `0x2f062` | unnamed | 154 | 53 | 2 | 0 |
+| `0x4d360` | unnamed | 153 | 32 | 0 | 0 |
+| `0x24b48` | unnamed | 152 | 47 | 0 | 0 |
+| `0x24880` | unnamed | 152 | 48 | 5 | 6 |
+| `0x222e0` | unnamed | 150 | 49 | 1 | 24 |
+| `0x1f108` | unnamed | 147 | 45 | 2 | 6 |
+| `0x12c0c` | unnamed | 145 | 49 | 2 | 0 |
+| `0x8a958` | unnamed | 144 | 58 | 0 | 0 |
+| `0x11568` | unnamed | 144 | 53 | 2 | 0 |
+| `0x1eed8` | unnamed | 142 | 54 | 3 | 0 |
+| `0x1e670` | unnamed | 142 | 52 | 0 | 36 |
+| `0x4d098` | unnamed | 139 | 40 | 3 | 0 |
+
+This table starts Phase U.
 
 ## Position
 
