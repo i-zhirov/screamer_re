@@ -219,8 +219,8 @@ current host.
   `credits_fade_out` at `0x27e08`, and the Phase T module
   `race_finish_time_update` at `0x20f98`, and the Phase T module
   `replay_buffer_init` at `0x22c88`, and the Phase T module `cd_check` at
-  `0x157b8`;
-  thirty modules are verified, one is matching, and two hundred and sixty-one
+  `0x157b8`, and the Phase T module `replay_playback_start` at `0x14d2c`;
+  thirty modules are verified, one is matching, and two hundred and sixty-two
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

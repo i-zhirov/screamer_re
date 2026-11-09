@@ -16727,8 +16727,86 @@ temporary `-od` recipe.
   --original-address 0x1eae0 --count 112 --rebuilt work/rebuild/trst.exe
   --rebuilt-map work/rebuild/traffic_step.map --rebuilt-symbol traffic_step_`
   and `python3 tools/rebuild/run.py run --function 0x1eae0`.
-- Limit: the original has no symbol name for this function.  The module name and
-  the callee names in the harness stay inferred.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
+## The replay_playback_start module at 0x14d2c
+
+- Observation: the original body at `0x14d2c` holds 58 instructions and 180
+  bytes up to the early `ret` at `0x14ddf`.  The full body continues through the
+  shared epilogue at `0x14e1d` to the next function at `0x14e20`, so the record
+  keeps the 244-byte extent and sets no separate function size.  The identity
+  check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x14d2c --count 58` and
+  `tools/rebuild/functions/0x14d2c.json`.
+- Observation: the only direct caller at `0x12ed4` is `game_mode_4_start` at
+  `0x12e18`.  That function runs after the ghost load at `0x1ba4c`.  It loads
+  the ghost index `DAT_0018ed4`, flips the low bit with `xor dl, 1`, and passes
+  the playback block `0x18ed8` in `eax` and the flipped index in `edx`.  So a
+  call selects the other of the two ghost records.  The records sit at `0x18e8c`
+  with a stride of `0x24`.
+  Evidence: the call at `0x12ed4`, the argument loads at `0x12ec1` through
+  `0x12ecf`, and the record fill at `0x22c88`.
+- Observation: the first argument points to the playback block.  The block holds
+  the entry index at `+0x00`, the ghost record pointer at `+0x08`, and the
+  active flag at `+0x0c`.  The ghost record holds the index at `+0x04`, the
+  active flag at `+0x0c`, and the model index at `+0x18`.
+  Evidence: the body at `0x14d34` through `0x14e16`.
+- Observation: the function selects the record `0x18e8c + index * 0x24` and
+  stores it at block `+0x08`.  A zero record active flag goes at once to the
+  playback start.  Otherwise a non-zero block flag runs the object release at
+  `0x11714` and the shared release at `0x11230`, and the function returns at
+  once on a non-zero result or a result above zero.
+  Evidence: the branches at `0x14d5c`, `0x14d6c`, and `0x14d88`.
+- Observation: the function loads the object named by the model entry
+  `0xd25c + record model * 0x40` through `0x11060`.  A non-zero result returns
+  at once.  On success the function takes the slot through `0x11660` and sets
+  the block flag to one.
+  Evidence: the block at `0x14daf` through `0x14df5`.
+- Observation: every path calls `path_playback_update` at `0x23038` with the
+  block and the flag 1.  The function then reloads the record from block
+  `+0x08`, clears the record index at `+0x04`, and returns zero.
+  Evidence: the block at `0x14dfc` through `0x14e16`.
+- Observation: the release at `0x11714` clears the object slot and returns 12
+  on a used entry.  The shared release at `0x11230` returns the release result
+  or -1.  The load at `0x11060` searches the object list at `0x6530` by name.
+  The acquire at `0x11660` returns 13 on a used entry.  The playback update at
+  `0x23038` walks the recorded view path.
+  Evidence: the bodies at `0x11714`, `0x11230`, `0x11060`, `0x11660`, and
+  `0x23038`.
+- Inference: the caller in `game_mode_4_start`, the ghost records, the playback
+  block, and the object table support the name `replay_playback_start`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the caller at `0x12e18` and the sibling modules `func_11230` and
+  `path_playback_update`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/replay_playback_start.c` and the module recipe.
+- Observation: the harness holds the three-record ghost array, the playback
+  block, and five callee stubs.  The seven paths cover the inactive record, the
+  zero block flag, the release result 12, the shared result 5, the load result
+  7, the shared result -1 with a load, and the index 1 stride.  Every path
+  checks the recorded arguments, the block flag, and the record index.  The
+  output holds the markers `0` through `6` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/replay_playback_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_playback_start`,
+  `work/rebuild/rplstart.txt`, and `python3 tools/rebuild/run.py run --function
+  0x14d2c`.
+- Observation: the identity check at 58 instructions holds 16 of 58
+  instructions, 4 of 180 bytes, and 0 of 13 relocation slots.  The identity
+  check stays open because V2 saves the frame first, keeps the record and the
+  block in registers, uses `imul` for the 0x24 stride, and folds the shared
+  epilogue differently.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x14d2c --count 58 --rebuilt work/rebuild/rplstart.exe
+  --rebuilt-map work/rebuild/replay_playback_start.map --rebuilt-symbol
+  replay_playback_start_` and `python3 tools/rebuild/run.py run --function
+  0x14d2c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
 - Limit: the original reads the record pointer from the stack before the first
   scan on the limit 0 path.  The rebuilt module starts the pointer at the first
   record, so that undefined path is stable.

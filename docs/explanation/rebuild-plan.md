@@ -473,7 +473,7 @@ reproduce the original bytes.
 | `0x20f98` | `race_finish_time_update` (done) | 189 | 55 | 8 | 0 |
 | `0x22c88` | `replay_buffer_init` (done) | 188 | 58 | 2 | 0 |
 | `0x157b8` | `cd_check` (done) | 185 | 57 | 5 | 0 |
-| `0x14d2c` | unnamed | 180 | 58 | 3 | 0 |
+| `0x14d2c` | `replay_playback_start` (done) | 180 | 58 | 3 | 0 |
 | `0x10ed4` | unnamed | 180 | 62 | 1 | 0 |
 | `0x1e700` | unnamed | 179 | 65 | 0 | 45 |
 | `0x126e4` | unnamed | 178 | 60 | 0 | 0 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred ninety-one modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred ninety-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -630,5 +630,5 @@ the Phase T module `map_collision_check` at `0x11c00`, and the Phase T module
 `credits_fade_out` at `0x27e08`, and the Phase T module
 `race_finish_time_update` at `0x20f98`, and the Phase T module
 `replay_buffer_init` at `0x22c88`, and the Phase T module `cd_check` at
-`0x157b8`.
-The next unnamed function is `0x14d2c`.
+`0x157b8`, and the Phase T module `replay_playback_start` at `0x14d2c`.
+The next unnamed function is `0x10ed4`.
