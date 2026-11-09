@@ -21019,3 +21019,61 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x1b23c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The volume_bar_draw module at 0x23dfc
+
+- Observation: the original body at `0x23dfc` holds 63 instructions and 199
+  bytes up to the `ret` at `0x23ec2`.  The next function starts at `0x23ed0`,
+  so the store record keeps the 212-byte extent and sets no separate function
+  size.  The identity check uses 63 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23dfc --count 63` and
+  `tools/rebuild/functions/0x23dfc.json`.
+- Observation: the only direct caller is `options_screen` at `0x2195b`.  It
+  calls the function for the selected audio row and passes the volume value in
+  eax and the label pointer in edx.  The label table at object-3 offset
+  `0x1f74` holds `CD`, `FX`, and `MU`, and the rebuilt `options_screen` module
+  already calls the function `volume_bar_draw`.
+  Evidence: the call site `0x2195b`, the caller block at `0x2193c` through
+  `0x2195b`, and `tools/rebuild/options_screen.c`.
+- Observation: the function divides the value by 1024 to get the tick count,
+  sets the clip rectangle to the full screen `(0, 0x280, 0, 0x190)`, draws the
+  label at `(0x80, 0x8a)` with the font 5 and the color 3, and draws each tick
+  as a vertical line at `x = 0xaa + index * 6` from `y` `0x8a` to `y` `0x94`.
+  The tick color comes from the table at object-3 offset `0x1fa4` in groups of
+  ten and goes to the byte at object-3 offset `0x55b`.
+  Evidence: the blocks at `0x23e0c` through `0x23eb9` and the data at object-3
+  offsets `0x1f74`, `0x1f80`, and `0x1fa4`.
+- Inference: the caller, the three audio labels, the colored ticks, and the
+  `options_screen` call name identify the function as a volume bar drawer.  The
+  record keeps the name `volume_bar_draw` with the confidence `inferred` and
+  the section `race_loop callees`.
+  Evidence: the call graph and the data references above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/volume_bar_draw.c` and the module recipe.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the color table arrives through a global that the harness fills at
+  run time.
+  Evidence: the zero color value of the first harness run, and
+  `tools/rebuild/volume_bar_draw_main.c`.
+- Observation: the harness holds the clip rectangle, the color byte, the color
+  table, the text sink, and the line sink.  The eleven paths cover the zero
+  count, the truncation below 1024, one tick, the group colors at ticks 10, 20,
+  and 30, the negative count, and the label pass-through.  The output holds the
+  markers `0` through `9`, `a`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/volume_bar_draw_main.c`,
+  `python3 tools/rebuild/harness.py run --module volume_bar_draw`,
+  `work/rebuild/volbar.txt`, and `python3 tools/rebuild/run.py run --function
+  0x23dfc`.
+- Observation: the rebuilt body holds 16 of 63 instructions and 10 of 199
+  bytes equal.  The identity check stays open because V2 saves the EBP frame
+  first, keeps the index and the count in registers, and builds the color and
+  tick blocks in another shape.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23dfc --count 63 --rebuilt work/rebuild/volbar.exe
+  --rebuilt-map work/rebuild/volbar.map --rebuilt-symbol volume_bar_draw_` and
+  `python3 tools/rebuild/run.py run --function 0x23dfc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

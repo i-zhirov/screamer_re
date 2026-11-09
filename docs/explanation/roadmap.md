@@ -209,8 +209,9 @@ current host.
   the Phase T module `race_frame_update` at `0x1ff70`, and the Phase T module
   `choice_save` at `0x1be6c`, and the Phase T module `func_11230` at `0x11230`,
   and the Phase T module `cockpit_load` at `0x1b23c`, and the Phase T module
-  `lzw_expand` at `0x4d3fc`;
-  thirty modules are verified, one is matching, and two hundred and fifty
+  `lzw_expand` at `0x4d3fc`, and the Phase T module `volume_bar_draw` at
+  `0x23dfc`;
+  thirty modules are verified, one is matching, and two hundred and fifty-one
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
