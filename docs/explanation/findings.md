@@ -21543,3 +21543,68 @@ temporary `-od` recipe.
   credits_fade_out_` and `python3 tools/rebuild/run.py run --function 0x27e08`.
 - Limit: the original has no symbol name for this function.  The module name
   and the two helper names in the harness stay inferred.
+
+## The race_finish_time_update module at 0x20f98
+
+- Observation: the original body at `0x20f98` holds 55 instructions and 189
+  bytes up to the `ret` at `0x21054`.  The next function starts at `0x21058`
+  after three padding bytes, so the record keeps the 192-byte extent and sets
+  no separate function size.  The identity check uses 55 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20f98 --count 55` and
+  `tools/rebuild/functions/0x20f98.json`.
+- Observation: the only direct caller at `0x2002e` is `race_frame_update` at
+  `0x1ff70`.  It runs the function after `race_finish_laps_update` at `0x20ec8`
+  and before `race_finish_update` at `0x21058`.  No named function sits between
+  the frame update and the target, so the function takes the `Program
+  functions` section.
+  Evidence: the call sweep for `0x20f98` and the caller body at `0x1ff70`.
+- Observation: the gate is bit 4 of `DAT_00118e1c`.  `race_clock_update` at
+  `0x18a14` sets the bit at `0x18b45` when the time limit expires, so the
+  function is the time-limit finish handler.
+  Evidence: the `test` at `0x20f9d` and the `or byte ptr [0x18e1c], 0x10` at
+  `0x18b45`.
+- Observation: the function releases the sound handle `DAT_00100e8` through
+  `0x1f880` and pushes the effect `0x19` with the subtype 3 and the value 0
+  through `0x247fc`.  The mode `DAT_0011d260` then selects the finish handler:
+  `0x24070` for 1, `0x24078` for 2, `0x24080` for 4, `0x24068` for `0x10`,
+  `0x24098` for `0x20`, and `0x24090` for `0x40`.  The mode 4 handler at
+  `0x24080` sets the player slot `DAT_000ffa4` to 2.  The other five handlers
+  are empty stubs.
+  Evidence: the block at `0x20faa` through `0x2101a` and the stub bodies at
+  `0x24068`, `0x24070`, `0x24078`, `0x24080`, `0x24090`, and `0x24098`.
+- Observation: the function sets `DAT_0011df0` to 1, clears the finish timer
+  `DAT_00118e28`, and clears bits 0, 1, 2, 4, 11, and 12 of the control word
+  `DAT_00118e1c`.  It then sets bits 2 and 12 with the value `0x1004`, so the
+  finish delay at `0x21058` runs on the next frame.
+  Evidence: the mask `0xffffe7e8` and the set value `0x1004` at `0x2102f`
+  through `0x2104a`.
+- Observation: the caller, the time-limit gate, the effect push, and the
+  per-mode finish handlers support the name `race_finish_time_update`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the sibling record at `0x20ec8` and the call sweep for `0x20f98`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/race_finish_time_update.c` and the module recipe.
+- Observation: the harness holds the control word, the finish timer, the sound
+  handle, the player slot, the mode, and the state flag.  The eight paths cover
+  the clear gate, the six mode handlers, and the default mode.  The output
+  holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/race_finish_time_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_time_update`,
+  `work/rebuild/rftime.txt`, and `python3 tools/rebuild/run.py run --function
+  0x20f98`.
+- Observation: the identity check at 55 instructions holds 14 of 55
+  instructions, 38 of 189 bytes, and 3 of 14 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, emits the mode
+  switch as an if chain in another order, forms the mask and the set value with
+  another sequence, and loads the globals through near data operands.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20f98 --count 55 --rebuilt work/rebuild/rftime.exe
+  --rebuilt-map work/rebuild/race_finish_time_update.map --rebuilt-symbol
+  race_finish_time_update_` and `python3 tools/rebuild/run.py run --function
+  0x20f98`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

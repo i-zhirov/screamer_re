@@ -470,7 +470,7 @@ reproduce the original bytes.
 | `0x11c00` | `map_collision_check` (done) | 193 | 64 | 1 | 0 |
 | `0x2dff4` | `screen_object_lists_init` (done) | 191 | 67 | 3 | 0 |
 | `0x27e08` | `credits_fade_out` (done) | 190 | 55 | 9 | 21 |
-| `0x20f98` | unnamed | 189 | 55 | 8 | 0 |
+| `0x20f98` | `race_finish_time_update` (done) | 189 | 55 | 8 | 0 |
 | `0x22c88` | unnamed | 188 | 58 | 2 | 0 |
 | `0x157b8` | unnamed | 185 | 57 | 5 | 0 |
 | `0x14d2c` | unnamed | 180 | 58 | 3 | 0 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred eighty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred eighty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -627,5 +627,6 @@ Phase T module `object_unload` at `0x11304`, and the Phase T module
 at `0x4cb4c`, and the Phase T module `sound_variant_select` at `0x24a84`, and
 the Phase T module `map_collision_check` at `0x11c00`, and the Phase T module
 `screen_object_lists_init` at `0x2dff4`, and the Phase T module
-`credits_fade_out` at `0x27e08`.
-The next unnamed function is `0x20f98`.
+`credits_fade_out` at `0x27e08`, and the Phase T module
+`race_finish_time_update` at `0x20f98`.
+The next unnamed function is `0x22c88`.
