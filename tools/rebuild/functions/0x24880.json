@@ -1,9 +1,111 @@
 {
   "address": "0x24880",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 48,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24880 holds 48 instructions and 152 bytes up to the ret at 0x24917; the next record starts at 0x24918, so the store record keeps the 152-byte extent and sets no separate function size; the identity check uses 48 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20024 is race_frame_update at 0x1ff70; the frame runs the update after race_intro_update and before race_finish_laps_update; the caller chain, the sound effect queue at DAT_0019080, and the callees support the name sound_queue_update and the section Program functions; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the flag DAT_001d2c8 gates the update; the status DAT_00119070 holds the playing sound or -1; with the status -1 the update adds the frame delta DAT_00118e08 to the timer DAT_0011907c; an empty queue, whose head effect DAT_00119080 holds -1, returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "otherwise the update calls sound_queue_promote at 0x2497c; when the timer stays below the head delay DAT_00119088 it returns; it then starts the head entry through 0x24a28, stores the new status, and on a -1 result pops the queue through 0x24918 and clears the timer"
+    },
+    {
+      "kind": "note",
+      "text": "with a playing sound the update calls 0x1f834 with the table id DAT_00119074 and the status; a zero result keeps the queue, and a non-zero result pops the queue through 0x24918 and clears the timer"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds the float add and the float compare, so the shared fpu_stub.asm supplies the FPU run-time symbols; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the flag, the frame delta, the timer, the status, the table id, the head delay, and the queue head; the eight paths cover the clear flag, the empty queue, the timer below the delay, the start that returns a sound, the start that returns -1, the zero check result, the non-zero check result, and the timer at the delay; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_queue_update module at 0x24880"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24880 --count 48"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24880 --count 48 --rebuilt work/rebuild/squpdate.exe --rebuilt-map work/rebuild/sound_queue_update.map --rebuilt-symbol sound_queue_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_queue_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24880"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_queue_update.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 48 decoded instructions and 167 bytes; the identity check stays open at 7 of 48 instructions and 13 of 152 bytes, and 0 of 24 relocation slots match, because V2 saves the frame pointer first, keeps the status in edx, uses the small data offsets of the harness, and lays out the start and the pop in another shape; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_queue_update",
+  "name": "sound_queue_update",
   "notes": [],
   "object_offset": "0x14880",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 152,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 48,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24880",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:2885ae182fa1eb794e53f59f717559cae3f2291cfe6efcf676d3806a487ec148",
+    "source_digest": "sha256:192f5dff28b73222ba76b59906dec73e309730796bba9d82e9277c6e46eb258c",
+    "tool": "run.py"
+  },
+  "role": "updates the sound effect queue and starts or pops the head entry",
+  "section": "Program functions",
   "size": 152,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_queue_update_"
 }

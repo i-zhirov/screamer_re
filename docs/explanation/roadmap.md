@@ -240,8 +240,9 @@ current host.
   `traffic_nearby_mark` at `0x12424`, and the Phase U module
   `cache_resource` at `0x2f062`, and the Phase U module
   `lzw_init` at `0x4d360`, and the Phase U module
-  `sound_variant_next` at `0x24b48`;
-  thirty modules are verified, one is matching, and two hundred and eighty-four
+  `sound_variant_next` at `0x24b48`, and the Phase U module
+  `sound_queue_update` at `0x24880`;
+  thirty modules are verified, one is matching, and two hundred and eighty-five
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

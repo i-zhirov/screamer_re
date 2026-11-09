@@ -23249,3 +23249,65 @@ temporary `-od` recipe.
   0x24b48`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 47 instructions.
+
+## The sound_queue_update module at 0x24880
+
+- Observation: the original body at `0x24880` holds 48 instructions and 152
+  bytes up to the `ret` at `0x24917`.  The next record starts at `0x24918`, so
+  the store record keeps the 152-byte extent and sets no separate function
+  size.  The identity check uses 48 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24880 --count 48` and
+  `tools/rebuild/functions/0x24880.json`.
+- Observation: the only direct caller at `0x20024` is `race_frame_update` at
+  `0x1ff70`.  The frame runs the update after `race_intro_update` and before
+  `race_finish_laps_update`.  The caller chain, the sound effect queue at
+  `DAT_0019080`, and the callees support the name `sound_queue_update` and the
+  section Program functions.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call site at `0x20024`, the `race_frame_update` record, and the
+  queue at `DAT_0019080`.
+- Observation: the flag `DAT_001d2c8` gates the update.  The status
+  `DAT_00119070` holds the playing sound or -1.  With the status -1 the update
+  adds the frame delta `DAT_00118e08` to the timer `DAT_0011907c`.  An empty
+  queue, whose head effect `DAT_00119080` holds -1, returns at once.
+  Evidence: the gate at `0x24888`, the add at `0x248a0` through `0x248b2`, and
+  the empty-queue return at `0x248b8`.
+- Observation: otherwise the update calls `sound_queue_promote` at `0x2497c`.
+  When the timer stays below the head delay `DAT_00119088` it returns.  It then
+  starts the head entry through `0x24a28`, stores the new status, and on a -1
+  result pops the queue through `0x24918` and clears the timer.
+  Evidence: the call at `0x248bc`, the compare at `0x248c1` through `0x248d0`,
+  the start at `0x248d2` through `0x248dc`, and the pop at `0x248e5` through
+  `0x248f2`.
+- Observation: with a playing sound the update calls `0x1f834` with the table
+  id `DAT_00119074` and the status.  A zero result keeps the queue, and a
+  non-zero result pops the queue through `0x24918` and clears the timer.
+  Evidence: the call at `0x248fb` and the branch at `0x24900` through `0x2490b`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds the float add and the float compare, so the
+  shared `fpu_stub.asm` supplies the FPU run-time symbols.  The module uses no
+  assembly.
+  Evidence: `tools/rebuild/sound_queue_update.c` and the module recipe.
+- Observation: the harness holds the flag, the frame delta, the timer, the
+  status, the table id, the head delay, and the queue head.  The eight paths
+  cover the clear flag, the empty queue, the timer below the delay, the start
+  that returns a sound, the start that returns -1, the zero check result, the
+  non-zero check result, and the timer at the delay.  The output holds the
+  markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_queue_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_queue_update`,
+  `work/rebuild/squpd.txt`, and `python3 tools/rebuild/run.py run --function
+  0x24880`.
+- Observation: the rebuilt body holds 48 instructions and 167 bytes.  The
+  identity check stays open at 7 of 48 instructions, 13 of 152 bytes, and 0 of
+  24 relocation slots, because V2 saves the frame pointer first, keeps the
+  status in `edx`, uses the small data offsets of the harness, and lays out the
+  start and the pop in another shape.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24880 --count 48 --rebuilt work/rebuild/squpdate.exe
+  --rebuilt-map work/rebuild/sound_queue_update.map --rebuilt-symbol
+  sound_queue_update_` and `python3 tools/rebuild/run.py run --function
+  0x24880`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 48 instructions.
