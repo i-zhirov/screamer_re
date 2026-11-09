@@ -1,0 +1,42 @@
+{
+  "exe": "sqprom.exe",
+  "map": "sound_queue_promote.map",
+  "name": "sound_queue_promote",
+  "run": {
+    "command": "sqprom.exe > sqprom.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "b",
+      "D"
+    ],
+    "output": "sqprom.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_queue_promote.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_queue_promote_main.c"
+    }
+  ]
+}

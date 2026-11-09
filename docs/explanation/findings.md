@@ -22145,3 +22145,68 @@ temporary `-od` recipe.
   0x1bfd4`.
 - Limit: the original has no symbol name for this function.  The module name and
   the callee names in the harness stay inferred.
+
+## The sound_queue_promote module at 0x2497c
+
+- Observation: the original body at `0x2497c` holds 61 instructions and 170
+  bytes up to the `ret` at `0x24a25`.  The next record starts at `0x24a28`, so
+  the record keeps the 172-byte extent and sets no separate function size.  The
+  identity check uses 61 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2497c --count 61` and
+  `tools/rebuild/functions/0x2497c.json`.
+- Observation: the only direct caller at `0x248bc` is the sound queue update at
+  `0x24880`.  The update is the only caller of `race_frame_update` at `0x1ff70`
+  through the call at `0x20024`.  The update accumulates the frame delta
+  `DAT_00118e08` into the timer `DAT_0011907c`, calls this function, and then
+  compares the timer with the head delay `DAT_00119088`.  The record takes the
+  section `Program functions`.
+  Evidence: the call site at `0x248bc`, the update at `0x24880`, and the call
+  site at `0x20024`.
+- Observation: the sound effect queue starts at `DAT_0019080`.  Each entry holds
+  the effect index at `+0x00`, the variant mode at `+0x04`, the delay at
+  `+0x08`, and one more field at `+0x0c`.  The first entry holds the terminator
+  -1 at `+0x00`.  The enqueue at `0x247fc` writes the three fields, and the
+  callers pass the delays 0.0, 0.2, 0.5, and 0.7.
+  Evidence: the enqueue at `0x247fc` and the call sites at `0x24c9e`, `0x24d09`,
+  and `0x24d57`.
+- Observation: the function finds the entry with the smallest delay that stays
+  below the 0.01 threshold `0x3c23d70a`.  The search starts at the head entry.
+  When no delay is below the threshold, the head stays selected.  The function
+  then swaps the selected entry with the head entry.  The three head fields and
+  the three selected fields change, and the field at `+0x0c` stays.
+  Evidence: the loop at `0x2499d` through `0x249c9` and the swap at `0x249cb`
+  through `0x24a1e`.
+- Inference: the delay select, the swap with the head, and the caller support
+  the name `sound_queue_promote`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the queue at `DAT_0019080` and the update at `0x24880`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no conversion to an integer and calls no math
+  routine, so the shared `fpu_stub.asm` supplies the FPU run-time symbols and the
+  float-used marker.
+  Evidence: `tools/rebuild/sound_queue_promote.c` and the module recipe.
+- Observation: the harness holds the eight-entry queue.  Each path fills the
+  head, the selected entry, and the terminator.  The twelve paths cover the empty
+  queue, the self swap, the head select, the later select, the delay above the
+  threshold, the two ready entries, the 0.01 boundary, the negative delay, the
+  pad field, the equal zero delays, the zero with a later negative delay, and the
+  two zero delays behind the head.  The output holds the markers `0` through
+  `9`, `a`, `b`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_queue_promote_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_queue_promote`,
+  `work/rebuild/sqprom.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2497c`.
+- Observation: the rebuilt function holds 44 decoded instructions and 102
+  bytes.  The identity check window holds 61 instructions and 159 bytes and
+  stays open at 26 of 61 instructions and 7 of 159 bytes.  V2 saves `ebp` first,
+  keeps the head, the selected entry, and the cursor in registers, copies the
+  three head fields with a register swap, and decodes the following code after
+  the rebuilt `ret`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2497c --count 61 --rebuilt work/rebuild/sqprom.exe
+  --rebuilt-map work/rebuild/sound_queue_promote.map --rebuilt-symbol
+  sound_queue_promote_` and `python3 tools/rebuild/run.py run --function
+  0x2497c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the callee names in the harness stay inferred.
