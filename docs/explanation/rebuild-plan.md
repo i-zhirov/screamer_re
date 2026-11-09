@@ -448,7 +448,41 @@ reproduce the original bytes.
 | `0x1814c` | `player_car_surface_effect_update` (done) | 208 | 56 | 1 | 0 |
 | `0x4c5c7` | `stream_seek` (done) | 206 | 72 | 1 | 0 |
 
-This table starts Phase S.
+This table completes Phase S.
+
+### Phase T: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1ff70` | unnamed | 204 | 47 | 19 | 0 |
+| `0x1be6c` | unnamed | 203 | 54 | 4 | 0 |
+| `0x11230` | unnamed | 202 | 71 | 2 | 0 |
+| `0x1b23c` | unnamed | 200 | 57 | 9 | 0 |
+| `0x4d3fc` | unnamed | 199 | 54 | 2 | 0 |
+| `0x23dfc` | unnamed | 199 | 63 | 2 | 0 |
+| `0x11304` | unnamed | 196 | 56 | 4 | 0 |
+| `0x21da8` | unnamed | 195 | 63 | 7 | 25 |
+| `0x4cb4c` | unnamed | 194 | 75 | 0 | 0 |
+| `0x24a84` | unnamed | 194 | 58 | 1 | 0 |
+| `0x11c00` | unnamed | 193 | 64 | 1 | 0 |
+| `0x2dff4` | unnamed | 191 | 67 | 3 | 0 |
+| `0x27e08` | unnamed | 190 | 55 | 9 | 21 |
+| `0x20f98` | unnamed | 189 | 55 | 8 | 0 |
+| `0x22c88` | unnamed | 188 | 58 | 2 | 0 |
+| `0x157b8` | unnamed | 185 | 57 | 5 | 0 |
+| `0x14d2c` | unnamed | 180 | 58 | 3 | 0 |
+| `0x10ed4` | unnamed | 180 | 62 | 1 | 0 |
+| `0x1e700` | unnamed | 179 | 65 | 0 | 45 |
+| `0x126e4` | unnamed | 178 | 60 | 0 | 0 |
+| `0x114b4` | unnamed | 178 | 68 | 0 | 0 |
+| `0x1bfd4` | unnamed | 171 | 46 | 2 | 0 |
+| `0x2497c` | unnamed | 170 | 61 | 0 | 5 |
+| `0x12378` | unnamed | 170 | 57 | 0 | 0 |
+
+This table starts Phase T.
 
 ## Position
 
