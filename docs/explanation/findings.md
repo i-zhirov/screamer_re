@@ -21675,3 +21675,65 @@ temporary `-od` recipe.
   0x22c88`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The cd_check module at 0x157b8
+
+- Observation: the original body at `0x157b8` holds 57 instructions and 185
+  bytes up to the `ret` at `0x15870`.  The next function starts at `0x15874`, so
+  the record keeps the 188-byte extent and sets no separate function size.  The
+  identity check uses 57 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x157b8 --count 57` and
+  `tools/rebuild/functions/0x157b8.json`.
+- Observation: the only direct caller is `cd_check_screen` at `0x15874`.  It
+  calls this function at `0x1587a` and returns at once on success, and it calls
+  this function at `0x15955` inside the insert-CD wait loop.  The caller is in
+  the `race_loop callees` chain, so the record takes that section.
+  Evidence: the call sites at `0x1587a` and `0x15955`, the finding "The
+  cd_check_screen module at 0x15874", and `tools/rebuild/functions/0x15874.json`.
+- Observation: the function gets the real-mode CD driver response through
+  `0x26014`.  That helper checks the driver segment at `0x1668c`, builds the
+  request at `0x166a4`, runs `0x25f24` through the DPMI INT 31h call, and
+  returns the response at `0x166a4` plus `0x40`.  A zero response returns 1.
+  Evidence: the call at `0x157c8` and the body at `0x26014` through `0x26067`.
+- Observation: the function builds four field pointers at offsets `8`, `0x28`,
+  `0x13e`, and `0x23e` of the response.  It compares each field with the text at
+  object-3 offsets `0x67e`, `0x681`, `0x68a`, and `0x68e`.  The texts are `PC`,
+  `SCREAMER`, `VIE`, and `SCREAMER`.  The compare at `0xc21f2` is
+  case-insensitive and length-limited to 2, 8, 3, and 8 bytes.
+  Evidence: the blocks at `0x157e1` through `0x1585f`, the fixup targets at
+  object-3 offsets `0x67e`, `0x681`, `0x68a`, and `0x68e`, and the compare body
+  at `0xc21f2`.
+- Observation: a failed compare stops the chain and returns 1.  A full match
+  returns 0.  The caller treats 0 as the correct Screamer CD.
+  Evidence: the jumps to `0x15861` and the caller test at `0x1587a`.
+- Inference: the caller and the four fixed texts support the name `cd_check`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the caller at `0x15874` names the callee `cd_check`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/cd_check.c` and the module recipe.
+- Observation: the harness holds the response buffer, the four text cells, the
+  driver stub, and the compare stub.  The eight paths cover the null response,
+  the full match, the four single-field mismatches, the lower-case match, and
+  the longer correct prefix.  The harness fills the four text cells at run time,
+  because the initialized data pages of the minimal image stay zero.  The output
+  holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cd_check_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_check`,
+  `work/rebuild/cdcheck.txt`, and `python3 tools/rebuild/run.py run --function
+  0x157b8`.
+- Observation: the identity check at 57 instructions holds 30 of 57
+  instructions, 4 of 167 bytes, and 0 of 9 relocation slots.  The identity check
+  stays open because V2 saves the frame first, keeps the response in `eax`, the
+  two small field pointers in `esi` and `edi`, and the two large field pointers
+  in stack slots, uses `lea` for the two small offsets, and passes the four text
+  cells as near data operands.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x157b8 --count 57 --rebuilt work/rebuild/cdcheck.exe
+  --rebuilt-map work/rebuild/cdcheck.map --rebuilt-symbol cd_check_` and
+  `python3 tools/rebuild/run.py run --function 0x157b8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

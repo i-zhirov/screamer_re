@@ -1,9 +1,103 @@
 {
   "address": "0x157b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 57,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x157b8 holds 57 instructions and 185 bytes up to the ret at 0x15870; the next function starts at 0x15874, so the store record keeps the 188-byte extent and sets no separate function size; the identity check uses 57 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is cd_check_screen at 0x15874; it calls this function at 0x1587a and returns at once on success, and it calls this function at 0x15955 inside the insert-CD wait loop; the caller is in the race_loop callees chain, so the module takes the section race_loop callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function gets the real-mode CD driver response through 0x26014; that helper checks the driver segment at 0x1668c, builds the request at 0x166a4, runs 0x25f24, and returns the response at 0x166a4 plus 0x40; a zero response returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds four field pointers at offsets 8, 0x28, 0x13e, and 0x23e of the response, and it compares them with the texts at object-3 offsets 0x67e, 0x681, 0x68a, and 0x68e; the texts are PC, SCREAMER, VIE, and SCREAMER, and the compare at 0xc21f2 is case-insensitive and length-limited to 2, 8, 3, and 8 bytes"
+    },
+    {
+      "kind": "note",
+      "text": "a failed compare stops the chain and returns 1; a full match returns 0; the caller treats 0 as the correct Screamer CD"
+    },
+    {
+      "kind": "note",
+      "text": "the caller and the four fixed texts support the name cd_check; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the response buffer, the four text cells, the driver stub, and the compare stub; the eight paths cover the null response, the full match, the four single-field mismatches, the lower-case match, and the longer correct prefix; the text cells are filled at run time because the initialized data pages stay zero; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 57 instructions holds 30 of 57 instructions, 4 of 167 bytes, and 0 of 9 relocation slots; the identity check stays open because V2 saves the frame first, keeps the response in eax, the two small field pointers in esi and edi, and the two large field pointers in stack slots, uses lea for the two small offsets, and passes the four text cells as near data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x157b8 --count 57"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x157b8 --count 57 --rebuilt work/rebuild/cdcheck.exe --rebuilt-map work/rebuild/cdcheck.map --rebuilt-symbol cd_check_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_check"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x157b8"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_check module at 0x157b8"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_check",
+  "name": "cd_check",
   "notes": [],
   "object_offset": "0x57b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 167,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 30,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x157b8",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:f1c5247d3bfc093df244847a3aa303757380ff286cbb7687b6c93c37a02f0592",
+    "source_digest": "sha256:a2d6a79f9a4bff4a898959d133b54e566e30f1dafdc448b7cd0a452521544598",
+    "tool": "run.py"
+  },
+  "role": "Reads the real-mode CD driver response, compares four fields with PC, SCREAMER, VIE, and SCREAMER, and returns 0 when the correct Screamer CD is present.",
+  "section": "race_loop callees",
   "size": 188,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_check_"
 }
