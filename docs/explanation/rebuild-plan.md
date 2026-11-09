@@ -511,7 +511,7 @@ reproduce the original bytes.
 | `0x1f108` | `traffic_body_point_place` (done) | 147 | 45 | 2 | 6 |
 | `0x12c0c` | `game_mode_1_start` (done) | 145 | 49 | 2 | 0 |
 | `0x8a958` | `sound_source_update` (done) | 144 | 58 | 0 | 0 |
-| `0x11568` | unnamed | 144 | 53 | 2 | 0 |
+| `0x11568` | `object_list_link` (done) | 144 | 53 | 2 | 0 |
 | `0x1eed8` | unnamed | 142 | 54 | 3 | 0 |
 | `0x1e670` | unnamed | 142 | 52 | 0 | 36 |
 | `0x4d098` | unnamed | 139 | 40 | 3 | 0 |
@@ -520,7 +520,7 @@ This table starts Phase U.
 
 ## Position
 
-Three hundred and nineteen modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and twenty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -690,5 +690,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `curve_speed` at `0x222e0`, and the Phase U module
 `traffic_body_point_place` at `0x1f108`, and the Phase U module
 `game_mode_1_start` at `0x12c0c`, and the Phase U module
-`sound_source_update` at `0x8a958`.
-The next unnamed function is `0x11568`.
+`sound_source_update` at `0x8a958`, and the Phase U module
+`object_list_link` at `0x11568`.
+The next unnamed function is `0x1eed8`.

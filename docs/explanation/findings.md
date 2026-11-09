@@ -23588,3 +23588,59 @@ temporary `-od` recipe.
   0x8a958`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 58 instructions.
+
+## The object_list_link module at 0x11568
+
+- Observation: the original body at `0x11568` holds 53 instructions and 144
+  bytes up to the `ret` at `0x115f7`.  The next function starts at `0x115f8`,
+  so the store record keeps the 144-byte extent and sets no separate function
+  size.  The identity check uses 53 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11568 --count 53` and
+  `tools/rebuild/functions/0x11568.json`.
+- Observation: the two direct callers at `0x12b92` and `0x2ae3e` are
+  `race_session_start` at `0x128e0` and `menu_objects_init` at `0x2aab8`.
+  Both pass the object table `0x6530` in `eax` and the list `0x6350` in `edx`.
+  The record takes the name `object_list_link` with the confidence `inferred`
+  and the section Resource loader.
+  Evidence: the calls at `0x12b92` and `0x2ae3e`, and the records of the two
+  callers.
+- Observation: the table holds `0x78` records of `0x1c` bytes.  A record holds
+  the name at `+0x00`, the block object at `+0x0c`, the chunk table at `+0x10`,
+  the file record at `+0x14`, and one slot word at `+0x18`.  A zero file record
+  marks a free slot.
+  Evidence: the field loads at `0x1159b` and `0x115c8`, and the stride at
+  `0x11589` through `0x11598`.
+- Observation: the function walks the table from index 0 to index `0x77`.  For
+  an active record it takes a list slot through `0x11660` with the record index
+  and ignores the result.  It then reads the block byte at `+5` and tests bit
+  `0x80`.  A clear bit keeps the plain slot.  A set bit tags the slot through
+  `0x11850` and returns at once on a non-zero result.  The function returns zero
+  at the end.
+  Evidence: the calls at `0x115b1` and `0x115dc`, the test at `0x115cb`
+  through `0x115d1`, and the returns at `0x115eb` through `0x115f0`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.  The two callee names stay local to the harness.
+  Evidence: the prologue at `0x11568` and the module recipe.
+- Observation: the harness holds the `0x78`-record table, one block per record,
+  the list, and two callee stubs.  The stubs record their arguments and return a
+  scripted value.  The nine paths cover the empty table, the clear block bit,
+  the set block bit, the skipped free record, the record index 5, the tag result
+  14, the slot result 13, the last record `0x77`, and the file value `0x100`
+  with the block value `0x7f`.  The output holds the markers `0` through `8` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_list_link_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_list_link`,
+  `work/rebuild/ollink.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11568`.
+- Observation: the rebuilt body holds 11 of 53 instructions equal and 3 of 137
+  bytes equal.  The identity check stays open because V2 saves the registers in
+  another order, keeps the table and the list in registers, and folds the loop
+  and the epilogue in another shape.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11568 --count 53 --rebuilt work/rebuild/ollink.exe
+  --rebuilt-map work/rebuild/object_list_link.map --rebuilt-symbol
+  object_list_link_` and `python3 tools/rebuild/run.py run --function 0x11568`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 53 instructions.
