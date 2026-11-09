@@ -242,8 +242,9 @@ current host.
   `lzw_init` at `0x4d360`, and the Phase U module
   `sound_variant_next` at `0x24b48`, and the Phase U module
   `sound_queue_update` at `0x24880`, and the Phase U module
-  `curve_speed` at `0x222e0`;
-  thirty modules are verified, one is matching, and two hundred and eighty-six
+  `curve_speed` at `0x222e0`, and the Phase U module
+  `traffic_body_point_place` at `0x1f108`;
+  thirty modules are verified, one is matching, and two hundred and eighty-seven
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

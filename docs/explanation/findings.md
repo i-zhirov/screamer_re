@@ -23371,3 +23371,71 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x222e0`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 49 instructions.
+
+## The traffic_body_point_place module at 0x1f108
+
+- Observation: the original body at `0x1f108` holds 45 instructions and 147
+  bytes up to the `ret` at `0x1f19a`.  Five pad bytes follow the `ret`, and the
+  next function starts at `0x1f1a0`, so the store record keeps the 152-byte
+  extent and sets no separate function size.  The identity check uses 45
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f108 --count 45` and
+  `tools/rebuild/functions/0x1f108.json`.
+- Observation: the only direct caller at `0x20257` is the traffic view group at
+  `0x201d0`.  That group walks the `0x2a8`-byte traffic records at
+  `DAT_00113cd8` while the index stays below the count `DAT_00115218`.  It
+  first runs this record update on each record and then runs
+  `traffic_object_link` at `0x1ef68`.  The frame update at `0x1ff70` selects
+  the group through the mode byte `DAT_0011d260` bit `0x10`, so the record
+  takes the section The vehicle state chain.
+  Evidence: the call at `0x20257`, the disassembly of `0x201d0` through
+  `0x202bc`, and the record of `traffic_object_link` at `0x1ef68`.
+- Observation: the function rotates the two local traffic body points at
+  `+0x274` and `+0x280` by the negative heading at `+0x4c` through the rotation
+  helper at `0x2218c`.  The helper takes the output point in `eax`, the input
+  point in `edx`, and the angle as a float on the stack.  The function then
+  adds the traffic world position at `+0x3c` and `+0x44` to the two results.
+  It stores the two world traffic points at `+0x28c` and `+0x298`.  A point
+  holds x at `+0x00`, y at `+0x04`, and z at `+0x08`, and the function writes
+  only x and z because the comparison uses the ground plane.
+  Evidence: the blocks at `0x1f108` through `0x1f19a` and
+  `tools/rebuild/traffic_body_point_place.c`.
+- Observation: `traffic_collision_pass` at `0x175dc` compares the two player
+  body points against the traffic points at `+0x28c` and `+0x294`.  The traffic
+  radius sits at `+0x2a4`, after the second 12-byte point.  The points, the
+  traffic caller, and the adjacent `body_point_place` at `0x1ce38` and
+  `player_body_point_place` at `0x17c6c` modules support the name
+  `traffic_body_point_place`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the record of `traffic_collision_pass` at `0x175dc` and the two
+  adjacent module records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses only the `fld`, `fchs`, and `fstp` instructions,
+  so it calls no math routine and needs no truncating stub.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  The module uses no assembly implementation.
+  Evidence: the FPU blocks at `0x1f118` through `0x1f155` and the module
+  recipe.
+- Observation: the harness holds the traffic record with the two local points,
+  the heading, the world position, the two world points, and the rotation stub.
+  The six paths cover the two call pointers and the negated heading, the
+  heading +0.0 and -0.0, the heading -2.0, the x and z offsets on both points,
+  and the heading 2.5.  The output holds the markers `0` through `5` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/traffic_body_point_place_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_body_point_place`,
+  `work/rebuild/tbpp.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f108`.
+- Observation: the rebuilt body holds 45 decoded instructions and 153 bytes in
+  the identity window.  The identity check stays open at 8 of 45 instructions,
+  6 of 147 bytes, and 0 of 5 relocation slots, because V2 saves ecx and edx,
+  keeps the record in ecx, forms the two point pointers with `lea`, and orders
+  the prologue and the tail stores in another shape.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f108 --count 45 --rebuilt work/rebuild/tbpp.exe
+  --rebuilt-map work/rebuild/traffic_body_point_place.map --rebuilt-symbol
+  traffic_body_point_place_` and `python3 tools/rebuild/run.py run --function
+  0x1f108`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 45 instructions.
