@@ -1,0 +1,31 @@
+{
+  "exe": "tmrk.exe",
+  "map": "track_marker_load.map",
+  "name": "track_marker_load",
+  "run": {
+    "command": "tmrk.exe > tmrk.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "tmrk.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_marker_load.c",
+      "flags": [
+        "-of+",
+        "-dTRACK_MARKER_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_marker_load_main.c"
+    }
+  ]
+}

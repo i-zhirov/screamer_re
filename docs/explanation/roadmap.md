@@ -228,8 +228,9 @@ current host.
   `player_nearby_mark` at `0x12378`, and the Phase U module
   `game_mode_4_start` at `0x12e18`, and the Phase U module
   `body_point_place` at `0x1ce38`, and the Phase U module
-  `player_body_point_place` at `0x17c6c`;
-  thirty modules are verified, one is matching, and two hundred and seventy-two
+  `player_body_point_place` at `0x17c6c`, and the Phase U module
+  `track_marker_load` at `0x1b198`;
+  thirty modules are verified, one is matching, and two hundred and seventy-three
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

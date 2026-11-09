@@ -22477,3 +22477,73 @@ temporary `-od` recipe.
   0x17c6c`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The track_marker_load module at 0x1b198
+
+- Observation: the original body at `0x1b198` holds 48 instructions and 164
+  bytes up to the `ret` at `0x1b23b`.  The next function starts at `0x1b23c`,
+  so the store record keeps the 164-byte extent and sets no separate function
+  size.  The identity check uses 48 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1b198 --count
+  48`.
+- Observation: the two direct callers at `0x1510c` and `0x15140` sit in the
+  track resource loader at `0x150f4`.  The first call passes the level prefix
+  `DAT_0011d294` in `edx` and the track node table `0x7250` in `ebx`.  The
+  second call builds the `%ssla` name from the format at object-3 offset `0x62d`
+  and passes the SLA marker table `0x7890` in `ebx`.  The loader runs from
+  `race_data_load` at `0x131a8`, which calls it at `0x133ba`, so the record
+  takes the section `Resource loader`.
+  Evidence: the calls at `0x1510c` and `0x15140`, the mode gate at `0x15116`,
+  and the call at `0x133ba`.
+- Observation: the function builds the container path `%s\data\%s.dat` from the
+  base path at `DAT_00107f44` and the first argument through `sprintf` at
+  `0x4d32c`.  The format string sits at object-3 offset `0x972`.  It builds the
+  member name `%s.mrk` from the second argument with the format at object-3
+  offset `0x981`.
+  Evidence: the two `sprintf` calls at `0x1b1c3` and `0x1b1e0` and the strings
+  at object-3 offsets `0x972` and `0x981`.
+- Observation: the function opens the member with the mode `rb` at object-3
+  offset `0x988` through `fopen` at `0x4c08d`.  A failed open returns 0.
+  Otherwise it reads a four-byte count through `stream_read` at `0x4c4e5`,
+  reads `count * 0x20` bytes into the third argument, closes the stream through
+  `stream_close` at `0x4c38d`, and returns the count.
+  Evidence: the block at `0x1b1e8` through `0x1b23b`.
+- Inference: the `.mrk` members hold the 0x20-byte track node records, the
+  destination `0x7250` is the track node table with the count at `0x7ed0`, and
+  the sibling `spline_load` module at `0x1af70` loads the `.spl` members the
+  same way.  These facts support the name `track_marker_load`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the loader at `0x150f4`, the records at `0x1821c` and `0x1db94`,
+  and the module `spline_load`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and the module uses no assembly.
+  Evidence: the prologue at `0x1b198` through `0x1b1a2` and
+  `tools/rebuild/modules/track_marker_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `TRACK_MARKER_LOAD_HARNESS` and the
+  function builds the three constant texts in local buffers.
+  Evidence: `tools/rebuild/track_marker_load.c` and the module build flags.
+- Observation: the harness holds the base path, the simulated container member,
+  the two name arguments, the marker table, and the four stubs.  The four paths
+  cover the three-marker table, the empty table, the failed open, and the
+  one-marker table.  The output holds the markers `0` through `3` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/track_marker_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module track_marker_load`,
+  `work/rebuild/tmrk.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1b198`.
+- Observation: the rebuilt body holds 48 decoded instructions and 143 bytes in
+  the identity window.  The identity check stays open at 11 of 48 instructions
+  and 8 of 143 bytes.  The harness build fills the three local format buffers
+  in the function body, V2 saves the frame and the registers in another order,
+  and V2 keeps the arguments in registers.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b198 --count 48 --rebuilt work/rebuild/tmrk.exe
+  --rebuilt-map work/rebuild/track_marker_load.map --rebuilt-symbol
+  track_marker_load_` and `python3 tools/rebuild/run.py run --function
+  0x1b198`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
