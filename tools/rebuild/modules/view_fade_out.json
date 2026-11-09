@@ -1,0 +1,36 @@
+{
+  "exe": "vfdout.exe",
+  "map": "view_fade_out.map",
+  "name": "view_fade_out",
+  "run": {
+    "command": "vfdout.exe > vfdout.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "vfdout.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "view_fade_out.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "view_fade_out_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "view_fade_out_main.c"
+    }
+  ]
+}

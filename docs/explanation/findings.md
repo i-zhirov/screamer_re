@@ -21137,3 +21137,75 @@ temporary `-od` recipe.
   object_unload_` and `python3 tools/rebuild/run.py run --function 0x11304`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The view_fade_out module at 0x21da8
+
+- Observation: the original body at `0x21da8` holds 63 instructions and 195
+  bytes up to the `ret` at `0x21e6a`.  One padding byte at `0x21e6b` follows
+  the `ret`, and the next function starts at `0x21e6c`, so the record keeps the
+  196-byte extent and sets no separate function size.  The identity check uses
+  63 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x21da8 --count 63` and
+  `tools/rebuild/functions/0x21da8.json`.
+- Observation: the function has two direct callers.  The default path of
+  `race_session_start` at `0x128e0` calls it at `0x12a66` with
+  `[ebp - 0x14] ^ 1`, and `race_session_run` at `0x1fd70` calls it at `0x1fefd`
+  with 1 before the cleanup at `0x156a8`.
+  Evidence: the call sites at `0x12a66` and `0x1fefd`, and
+  `python3 tools/le.py disasm STARTH.EXE 0x1fee4 --count 20`.
+- Observation: the three operands at `0x21dc9`, `0x21dde`, and `0x21df3` are
+  relocations to object 3 at the offsets `0x1d2c0`, `0x1d2bc`, and `0x1d2c4`.
+  The object-3 tail past the seven loaded pages is writable uninitialized data,
+  so the cells start at zero and hold the current view offsets.
+  Evidence: the `relocations()` result for the three slots and
+  `python3 tools/le.py info STARTH.EXE`.
+- Observation: a non-zero argument scales the three offsets by
+  `1 - fraction`, truncates each one toward zero through the helper at
+  `0x4d9f4`, and calls `view_move` at `0x1f94c` with the order `0x1d2c0`,
+  `0x1d2bc`, and `0x1d2c4`.  The function then calls `video_present` at
+  `0x27ec8` with the scale `1 - fraction` and the offset 0.
+  Evidence: the blocks at `0x21dc0` through `0x21e2f`.
+- Observation: the next fraction comes from the phase delta at `0x1fa04`
+  between the saved phase `DAT_000007f9` and the current phase.  The low 16
+  bits scale by the double 0.01 at object-3 offset `0xd41` and the double 2.0
+  at object-3 offset `0xd49`.  The loop repeats while 1.0 is at least the
+  fraction, and the final present uses the scale 0 and the offset 0.
+  Evidence: the blocks at `0x21e26` through `0x21e6a`, and the doubles at the
+  linear addresses `0x100d41` and `0x100d49`.
+- Inference: the two callers, the view offsets, the screen fade, and the phase
+  delta support the name `view_fade_out`.  The callers sit in two sections, so
+  the record takes the section `Program functions` and the confidence
+  `inferred`.
+  Evidence: `tools/rebuild/view_fade_out.c`, the call graph, and the record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function truncates through `0x4d9f4`, so the local
+  `view_fade_out_fpu.asm` makes `__CHP` truncate toward zero.  The module uses
+  no assembly body.  The two doubles arrive through the globals
+  `view_fade_out_rate` and `view_fade_out_step`, because the minimal image does
+  not load the constant segment.
+  Evidence: `tools/rebuild/view_fade_out.c`, `tools/rebuild/view_fade_out_fpu.asm`,
+  and the module recipe.
+- Observation: the harness holds the phase counter, the three view offsets,
+  and the three callee stubs.  The six paths cover the non-zero argument, the
+  zero argument, the negative offsets, the exact fraction 1.0, the delta above
+  `0xffff`, and the one-step exit.  Every path checks the saved start value,
+  the current value, the present offset, and the final zero present.  The
+  output holds the markers `0` through `5` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/view_fade_out_main.c`,
+  `python3 tools/rebuild/harness.py run --module view_fade_out`,
+  `work/rebuild/vfdout.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x21da8`.
+- Observation: the identity check at 63 instructions holds 10 of 63
+  instructions and 9 of 191 bytes equal, and 0 of 14 relocation slots.  The
+  rebuilt body holds 189 bytes.  The identity check stays open because V2 saves
+  the frame first, keeps the flag in `esi` and the start phase in `ecx`,
+  computes `1 - fraction` once into a local, and loads the two doubles through
+  near data operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x21da8 --count 63 --rebuilt work/rebuild/vfdout.exe
+  --rebuilt-map work/rebuild/view_fade_out.map --rebuilt-symbol view_fade_out_`
+  and `python3 tools/rebuild/run.py run --function 0x21da8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
