@@ -23710,3 +23710,63 @@ temporary `-od` recipe.
   0x1eed8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The func_1e670 module at 0x1e670
+
+- Observation: the original body at `0x1e670` holds 52 instructions and 142
+  bytes up to the `ret 4` at `0x1e6fb`.  The next function starts at `0x1e700`
+  after the padding bytes at `0x1e6fe`, so the store record keeps the 144-byte
+  extent and sets no separate function size.  The identity check uses 52
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e670 --count 52` and
+  `tools/rebuild/functions/0x1e670.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x1e670`, so the function has no known caller.  The sibling at
+  `0x1e700` evaluates the same basis in three dimensions and writes the three
+  components.  The sibling at `0x1e7b4` evaluates the same basis in two
+  dimensions and writes the position and the forward tangent.  This function
+  thus samples the two-dimensional position alone.  The relation is weak, so
+  the name stays the weak fallback `func_1e670`.
+  Evidence: the scan for direct calls, data references, and relocation targets
+  and the records of `0x1e700` and `0x1e7b4`.
+- Observation: the function takes the output pointer in `eax`, the three
+  control points in `edx`, and the fraction on the stack.  It computes the
+  basis weights
+  `w0 = 0.5 * (1 - t)^2`, `w2 = 0.5 * t^2`, and `w1 = 1 - (w0 + w2)` over the
+  points at offsets `0`, `0xc`, and `0x18`.  It writes the sampled position to
+  `+0x00` and `+0x04`, and it leaves the third component of each point unread.
+  Evidence: the body at `0x1e67c` through `0x1e6f7` and the two stores at
+  `0x1e6d1` and `0x1e6f5`.
+- Observation: the double 0.5 sits at object-3 offset `0xb9c`.  It arrives
+  through a global, because the minimal image does not load the constant
+  segment.  The original has the EBP frame, so the module builds with `-of+`.
+  The module uses the shared `fpu_stub.asm`, because it needs no truncation and
+  no math helper.
+  Evidence: the `fmul` at `0x1e68c` and `0x1e69a` and the module recipe.
+- Inference: the record keeps the weak name `func_1e670`, because no caller and
+  no data reference support a stronger name.  The record takes the section The
+  vehicle state chain with the spline family, because the two sibling samplers
+  hold the same curve role.
+  Evidence: the sibling records `0x1e700` and `0x1e7b4` and the data flow
+  above.
+- Observation: the harness holds the three control points at the three-float
+  stride, the two-float output, and the basis scale.  The seven paths cover the
+  x and y axes, the mid fraction, the end fraction, the negative first point,
+  the three-point blend, and the positive first point.  The output holds the
+  markers `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_1e670_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_1e670`,
+  `work/rebuild/func1e6.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1e670`.
+- Observation: the rebuilt body holds 11 of 52 instructions equal, 13 of 141
+  bytes equal, and 0 of 7 relocation slots.  The identity check stays open
+  because V2 uses a shorter frame, fuses the two `(1 - t)` factors into one
+  `fmul st(0)`, keeps the output pointer in `eax` and the input pointer in
+  `edx` without frame slots, and reads the basis constant through a near data
+  operand.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e670 --count 52 --rebuilt work/rebuild/func1e6.exe
+  --rebuilt-map work/rebuild/func_1e670.map --rebuilt-symbol func_1e670_` and
+  `python3 tools/rebuild/run.py run --function 0x1e670`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays the weak fallback and inferred.
