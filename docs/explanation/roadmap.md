@@ -235,8 +235,9 @@ current host.
   `basis_rotation_build` at `0x81fd0`, and the Phase U module
   `replay_view_update` at `0x202c0`, and the Phase U module
   `screen_mode_set` at `0x4c850`, and the Phase U module
-  `alfile_load` at `0x4c3e6`;
-  thirty modules are verified, one is matching, and two hundred and seventy-nine
+  `alfile_load` at `0x4c3e6`, and the Phase U module
+  `car_camera_select` at `0x1aec4`;
+  thirty modules are verified, one is matching, and two hundred and eighty
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -429,7 +430,7 @@ The plan follows the size order, starting with the smallest functions.
     `camera_project` at `0x82c14`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and seventy-nine open rebuilds).
+    hundred and eighty open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

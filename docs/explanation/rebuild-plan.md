@@ -501,7 +501,7 @@ reproduce the original bytes.
 | `0x202c0` | `replay_view_update` (done) | 160 | 37 | 11 | 0 |
 | `0x4c850` | `screen_mode_set` (done) | 159 | 58 | 1 | 0 |
 | `0x4c3e6` | `alfile_load` (done) | 159 | 49 | 4 | 0 |
-| `0x1aec4` | unnamed | 159 | 52 | 1 | 0 |
+| `0x1aec4` | `car_camera_select` (done) | 159 | 52 | 1 | 0 |
 | `0x12424` | unnamed | 155 | 56 | 0 | 0 |
 | `0x2f062` | unnamed | 154 | 53 | 2 | 0 |
 | `0x4d360` | unnamed | 153 | 32 | 0 | 0 |
@@ -520,7 +520,7 @@ This table starts Phase U.
 
 ## Position
 
-Three hundred and nine modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and ten modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -680,5 +680,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `basis_rotation_build` at `0x81fd0`, and the Phase U module
 `replay_view_update` at `0x202c0`, and the Phase U module
 `screen_mode_set` at `0x4c850`, and the Phase U module
-`alfile_load` at `0x4c3e6`.
-The next unnamed function is `0x1aec4`.
+`alfile_load` at `0x4c3e6`, and the Phase U module
+`car_camera_select` at `0x1aec4`.
+The next unnamed function is `0x12424`.

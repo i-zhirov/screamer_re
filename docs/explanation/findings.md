@@ -22953,3 +22953,67 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x4c3e6`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The car_camera_select module at 0x1aec4
+
+- Observation: the plan row records a 159-byte body of 52 instructions, 1
+  call, and 0 FPU instructions.  The body starts at `0x1aec4` and ends at the
+  `ret` at `0x1af62`.  The store record keeps the 172-byte extent and sets no
+  separate function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1aec4 --count 52` and
+  `tools/rebuild/functions/0x1aec4.json`.
+- Observation: the only direct call site is at `0x19ee2` in the view mode
+  dispatch at `0x19e78`.  The dispatch table at `0x19e50` sends the render
+  mode 8 to this function and passes the view buffer in `eax`.  The player
+  update at `0x19ab0` and `player_view_setup` at `0x19ae8` both call the
+  dispatch, so the module takes the section `player_view_setup callees`.
+  Evidence: the table at `0x19e50`, the branch at `0x19edf` through
+  `0x19ee7`, and the calls at `0x19ab8` and `0x19e3f`.
+- Observation: the function runs `car_camera` at `0x1a930` on every
+  0x590-byte car record at `DAT_00110ab8` up to the count `DAT_0010f8ec`.
+  The loop counts in the global `DAT_0010634c`.
+  Evidence: the loop at `0x1aed2` through `0x1af01` and the call at
+  `0x1aefc`.
+- Observation: after the loop, a nonzero flag at `+0x564` of the active car
+  record `DAT_00110a18` and a different candidate `DAT_0010a1c` commit the
+  candidate to the active index.  The flag is the changed-target marker that
+  `car_camera` sets at `0x1af22`.
+  Evidence: the block at `0x1af03` through `0x1af26` and the write at
+  `0x1af22` of `car_camera`.
+- Observation: the function copies the 0x98-byte view block at `+0x4f8` of
+  the active car record into the view buffer.  The original inlines the copy
+  as a `movsd` and `movsb` sequence, so the module uses `memcpy` with the
+  same constant size.
+  Evidence: the copy at `0x1af28` through `0x1af59`.
+- Inference: the view mode dispatch, the render mode 8, the per-car camera
+  loop, and the selected view block support the name `car_camera_select`.
+  `player_view_setup` cycles the candidate index over the car records for the
+  chosen view slot 4, so the module records the name with the confidence
+  `inferred`.
+  Evidence: the call graph, the data flow above, and
+  `tools/rebuild/player_view_setup.c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x1aec4` through `0x1aed2` and
+  `tools/rebuild/modules/car_camera_select.json`.
+- Observation: the harness holds three 0x590-byte car records, the record
+  count, the two camera indices, the `car_camera` stub, and the `memcpy`
+  stub.  The five paths cover the switch, the zero flag, the equal index, the
+  zero count, and the copy length.  The output holds the markers `0` through
+  `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/car_camera_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module car_camera_select`, and
+  `work/rebuild/ccsel.txt`.
+- Observation: the rebuilt body holds 52 decoded instructions.  The identity
+  check stays open at 12 of 52 instructions and 15 of 159 bytes.  V2 sets the
+  frame first, keeps the view pointer in `ecx`, folds the address
+  computation, and calls the harness `memcpy` stub.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1aec4 --count 52 --rebuilt work/rebuild/ccsel.exe
+  --rebuilt-map work/rebuild/car_camera_select.map --rebuilt-symbol
+  car_camera_select_` and `python3 tools/rebuild/run.py run --function
+  0x1aec4`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 52 instructions.

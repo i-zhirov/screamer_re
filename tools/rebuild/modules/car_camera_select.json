@@ -1,0 +1,31 @@
+{
+  "exe": "ccsel.exe",
+  "map": "car_camera_select.map",
+  "name": "car_camera_select",
+  "run": {
+    "command": "ccsel.exe > ccsel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "ccsel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_camera_select.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_camera_select_main.c"
+    }
+  ]
+}
