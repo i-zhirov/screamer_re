@@ -1,0 +1,30 @@
+{
+  "exe": "cres.exe",
+  "map": "cache_resource.map",
+  "name": "cache_resource",
+  "run": {
+    "command": "cres.exe > cres.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "cres.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cache_resource.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cache_resource_main.c"
+    }
+  ]
+}

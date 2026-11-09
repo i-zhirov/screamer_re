@@ -23079,3 +23079,67 @@ temporary `-od` recipe.
   0x12424`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 56 instructions.
+
+## The cache_resource module at 0x2f062
+
+- Observation: the original body holds 53 instructions and 154 bytes.  The body
+  starts at `0x2f062` and ends at the `ret 4` at `0x2f0f9`.  The next function
+  starts at `0x2f0fc`, so the store record keeps the 154-byte extent and sets
+  no separate function size.  The identity check uses 53 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f062 --count 53` and
+  `tools/rebuild/functions/0x2f062.json`.
+- Observation: the two direct callers are `resource_get` at `0x2eed0` and
+  `resource_read` at `0x2efc2`.  Each caller passes the resource, the record,
+  the allocation result, the name, and the size as the last step of the load
+  path.  The allocators `dos_memory_alloc` at `0x2f0fc` and `memory_alloc` at
+  `0x2f172` supply the allocation result.
+  Evidence: the call sites in `resource_get.c` and `resource_read.c`, and the
+  program-map records of the four functions.
+- Observation: the function takes five arguments.  The resource structure
+  arrives in `eax`, the record in `edx`, the allocation result in `ebx`, the
+  name in `ecx`, and the size on the stack.  The resource holds the record
+  array at `+0x00`, the count at `+0x04`, the status at `+0x0c`, and the name
+  buffer at `+0x10`.  The record holds the name at `+0x00`, the allocation
+  result at `+0x0c`, and the requested size at `+0x14`.
+  Evidence: the prologue at `0x2f062` through `0x2f076`, the loads and stores
+  at `0x2f079` through `0x2f0f9`, and the resource_read finding.
+- Observation: a null record array at `resource + 0x00` or a null allocation
+  result is the failure path.  The function sets the status to 1, copies the
+  name to `resource + 0x10` through `sprintf` at `0x4d32c`, and returns 0.
+  Otherwise it stores the allocation result at `record + 0x0c`, the size at
+  `record + 0x14`, and the name at `record + 0x00`.  Then it clears the status
+  to 0, increments the count, and returns the allocation result.
+  Evidence: the compare at `0x2f07c`, the branch at `0x2f085`, the two
+  `sprintf` calls at `0x2f0a2` and `0x2f0d3`, and the result stores at
+  `0x2f0eb`.
+- Inference: the callers, the record layout, and the data flow support the name
+  `cache_resource`.  The original has no symbol, so the module records the name
+  with the confidence `inferred`.
+  Evidence: the two call sites and the record layout above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction.  It calls
+  `sprintf` twice, and the harness supplies that function, so the module needs
+  no FPU stub and no assembly.
+  Evidence: the prologue at `0x2f062` through `0x2f067` and
+  `tools/rebuild/modules/cache_resource.json`.
+- Observation: the harness holds the resource structure, one record, and a
+  `sprintf` stub that records its buffer, its format, and its name argument.
+  The four paths cover the null record array, the null allocation result, the
+  first cache, and the second cache with another record pointer and size.  The
+  output holds the markers `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cache_resource_main.c`,
+  `python3 tools/rebuild/harness.py run --module cache_resource`, and
+  `work/rebuild/cres.txt`.
+- Observation: the rebuilt body holds 33 instructions and 88 bytes.  The shared
+  toolchain keeps the resource in `esi`, the name in `eax`, and the record in
+  `edx`, merges the two identical format literals into one, and reads the size
+  from the frame argument at `ebp + 8`.  The identity check window holds 53
+  instructions and stays open at 12 of 53 instructions and 4 of 139 decoded
+  bytes, because the diff window decodes the following code after the rebuilt
+  `ret 4`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f062 --count 53 --rebuilt work/rebuild/cres.exe
+  --rebuilt-map work/rebuild/cache_resource.map --rebuilt-symbol
+  cache_resource_` and `python3 tools/rebuild/run.py run --function 0x2f062`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 53 instructions.
