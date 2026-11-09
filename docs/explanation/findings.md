@@ -21209,3 +21209,66 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x21da8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The spatial_grid_relocate module at 0x4cb4c
+
+- Observation: the original body at `0x4cb4c` holds 75 instructions and 194
+  bytes up to the `ret` at `0x4cc0d`.  Two `mov eax, eax` pad bytes follow the
+  `ret`, and the next function starts at `0x4cc10`, so the record keeps the
+  196-byte extent and sets no separate function size.  The identity check uses
+  75 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cb4c --count 75` and
+  `tools/rebuild/functions/0x4cb4c.json`.
+- Observation: the function has one direct caller.  The loader at `0x4cae4`
+  builds the `%s.MMP` member name from `DAT_002154c`, loads the member into the
+  resource `DAT_0021468` through `0x4c3e6`, copies the resource pointer into
+  `DAT_00102fa4` at `0x4cb39`, and calls this function at `0x4cb3e`.  The copy
+  is the last store before the call.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cae4 --count 90` and the
+  call site at `0x4cb3e`.
+- Observation: the region at the base holds a pointer tree with three levels.
+  The first level has 0x100 row pointers.  A row has 0x100 cell pointers.  A
+  cell has five pointer slots.  A row pointer or a cell pointer equal to -1 is
+  empty.  A cell slot equal to 0 is empty.
+  Evidence: the blocks at `0x4cb74` through `0x4cbfd`.
+- Observation: the function adds the region base to every row pointer that is
+  not -1, to every cell pointer that is not -1, and to every cell slot that is
+  not 0.  The -1 sentinel and the zero slot stay unchanged.  The function then
+  writes the same base back to `DAT_00102fa4`.
+  Evidence: the blocks at `0x4cb8b` through `0x4cbfd` and the store at
+  `0x4cbff`.
+- Inference: the collision checks at `0x11c00` and `0x120c0` and the radar draw
+  at `0x1057c` read the same grid through `DAT_00102fa4`, so the tree is the
+  spatial grid of the track.  The loader sits in the resource loader, so the
+  record names the function `spatial_grid_relocate` with the confidence
+  `inferred` and the section `Resource loader`.
+  Evidence: `tools/rebuild/collision_cell_test.c`, the call graph, and the
+  record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/spatial_grid_relocate.c` and the module recipe.
+- Observation: the harness holds the grid region, the row table, three row
+  arrays, and three cells with three extra fields.  The four paths cover the
+  full tree, the empty grid, a row with no cells, and one cell with zero,
+  non-zero, and -1 slots.  Every path checks the sentinels, the zero slots, the
+  extra fields, and the unchanged base.  The output holds the markers `0`
+  through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/spatial_grid_relocate_main.c`,
+  `python3 tools/rebuild/harness.py run --module spatial_grid_relocate`,
+  `work/rebuild/sgridrel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4cb4c`.
+- Observation: the identity check at 75 instructions holds 20 of 75
+  instructions, 15 of 172 bytes, and 0 of 5 relocation slots.  The rebuilt
+  function body is shorter, so the 75-instruction sweep continues past its
+  `ret` into the following harness stub.  The identity check stays open because
+  V2 saves the frame first, keeps the base and the cursors in other registers,
+  and indexes the three loops instead of walking the moving cursors.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cb4c --count 75 --rebuilt work/rebuild/sgridrel.exe
+  --rebuilt-map work/rebuild/spatial_grid_relocate.map --rebuilt-symbol
+  spatial_grid_relocate_` and `python3 tools/rebuild/run.py run --function
+  0x4cb4c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

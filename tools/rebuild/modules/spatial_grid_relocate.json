@@ -1,0 +1,30 @@
+{
+  "exe": "sgridrel.exe",
+  "map": "spatial_grid_relocate.map",
+  "name": "spatial_grid_relocate",
+  "run": {
+    "command": "sgridrel.exe > sgridrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "sgridrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "spatial_grid_relocate.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "spatial_grid_relocate_main.c"
+    }
+  ]
+}

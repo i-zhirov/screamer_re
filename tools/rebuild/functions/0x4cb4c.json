@@ -1,9 +1,87 @@
 {
   "address": "0x4cb4c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 75,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cb4c holds 75 instructions and 194 bytes up to the ret at 0x4cc0d; the next function starts at 0x4cc10 after the two mov eax,eax pad bytes, so the store record keeps the 196-byte extent and sets no separate function size; the identity check uses 75 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the loader at 0x4cae4; it builds the %s.MMP member name from DAT_002154c, loads the member into DAT_0021468, copies the resource pointer into DAT_00102fa4 at 0x4cb39, and calls this function at 0x4cb3e"
+    },
+    {
+      "kind": "note",
+      "text": "the function adds the region base to three levels of the pointer tree: every row pointer that is not -1, every cell pointer that is not -1, and every one of the five cell slots that is not 0; the -1 sentinel and the zero slot stay unchanged, and the function writes the same base back to DAT_00102fa4"
+    },
+    {
+      "kind": "note",
+      "text": "the collision checks at 0x11c00 and 0x120c0 and the radar draw at 0x1057c read the same grid through DAT_00102fa4, so the record takes the section Resource loader, where the member loader sits; the grid has 0x100 rows, 0x100 cells per row, and five pointer slots per cell"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the grid region, the row table, three row arrays, and three cells with extra fields; the four paths cover the full tree, the empty grid, a row with no cells, and one cell with zero, non-zero, and -1 slots; every path checks the sentinels, the zero slots, the extra fields, and the unchanged base; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cb4c --count 75"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cb4c --count 75 --rebuilt work/rebuild/sgridrel.exe --rebuilt-map work/rebuild/spatial_grid_relocate.map --rebuilt-symbol spatial_grid_relocate_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cb4c"
+    },
+    {
+      "kind": "finding",
+      "text": "The spatial_grid_relocate module at 0x4cb4c"
+    }
+  ],
+  "implementation": "c",
+  "module": "spatial_grid_relocate",
+  "name": "spatial_grid_relocate",
   "notes": [],
   "object_offset": "0x3cb4c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 172,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 75,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cb4c",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:4cadc899c0db7b61662688476bed41c2238fd61eb240b0bc55271825d6ba1765",
+    "source_digest": "sha256:8a30ef0320da8ca71c32dd0935308f1ac29c088ce10340e491ad5b0ad8e38e04",
+    "tool": "run.py"
+  },
+  "role": "adds the loaded region base to the row, cell, and slot pointers of the spatial grid at DAT_00102fa4",
+  "section": "Resource loader",
   "size": 196,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "spatial_grid_relocate_"
 }
