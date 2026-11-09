@@ -1,9 +1,99 @@
 {
   "address": "0x1eed8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 54,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1eed8 holds 54 instructions and 142 bytes up to the ret at 0x1ef65; the next function starts at 0x1ef68 after the two padding bytes at 0x1ef66, so the store record keeps the 144-byte extent and sets no separate function size; the identity check uses 54 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1ebbb is traffic_step at 0x1eae0; the caller runs this function before it scans the traffic records for the finished field, so the function drains the incoming traffic events and the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the dequeue helper at 0xc739c copies a twelve-byte header and returns a pointer to the payload; the header holds the owner at +0x04 and the car index at +0x08; the owner must equal the race signature at 0x1521c, and the local player index at 0x1d250 selects the record to skip"
+    },
+    {
+      "kind": "note",
+      "text": "a matching event takes the 0x2a8-byte traffic record at 0x13cd8 with the header index; the copy helper at 0xc8208 moves the 0x4c payload bytes to record offset +0x14, the function sets the finished field at +0x60 to one, and it stores the index in the state field at +0x00"
+    },
+    {
+      "kind": "note",
+      "text": "a rejected event runs the queue helper at 0xc76f0 once; the function returns to the dequeue helper and ends when it returns zero"
+    },
+    {
+      "kind": "note",
+      "text": "the race signature, the player index, the traffic record, and the sibling traffic_step module support the name traffic_event_read; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly; the three callee names stay local to the harness"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds four 0x2a8-byte traffic records, the race signature, the player index, and three callee stubs with a scripted dequeue; the eight paths cover the empty queue, the matching event, the foreign owner, the local player index, a reject then an accept, the records 0 and 3, and two accepts; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1eed8 --count 54"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1eed8 --count 54 --rebuilt work/rebuild/tevrd.exe --rebuilt-map work/rebuild/traffic_event_read.map --rebuilt-symbol traffic_event_read_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1eed8"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_event_read module at 0x1eed8"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 11 of 54 instructions equal, 7 of 142 bytes equal, and 0 of 14 relocation slots; the identity check stays open because V2 saves the frame first, keeps the header and the record in registers, folds the stride into imul, and reads the data through near operands; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_event_read",
+  "name": "traffic_event_read",
   "notes": [],
   "object_offset": "0xeed8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 142,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 54,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1eed8",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:209322304022425b9d5a341b963543f260d6e6e124675420ea2cac0d973f0df8",
+    "source_digest": "sha256:ae7686eaf7d09175f8b815d1206152feec253ce25f9968e351610655503a6322",
+    "tool": "run.py"
+  },
+  "role": "Reads the queued traffic events and copies each matching payload into its traffic record.",
+  "section": "The vehicle state chain",
   "size": 144,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_event_read_"
 }

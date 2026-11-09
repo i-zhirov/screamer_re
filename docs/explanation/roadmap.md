@@ -246,8 +246,9 @@ current host.
   `traffic_body_point_place` at `0x1f108`, and the Phase U module
   `game_mode_1_start` at `0x12c0c`, and the Phase U module
   `sound_source_update` at `0x8a958`, and the Phase U module
-  `object_list_link` at `0x11568`;
-  thirty modules are verified, one is matching, and two hundred and ninety
+  `object_list_link` at `0x11568`, and the Phase U module
+  `traffic_event_read` at `0x1eed8`;
+  thirty modules are verified, one is matching, and two hundred and ninety-one
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

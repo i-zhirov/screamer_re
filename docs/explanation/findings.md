@@ -23644,3 +23644,69 @@ temporary `-od` recipe.
   object_list_link_` and `python3 tools/rebuild/run.py run --function 0x11568`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 53 instructions.
+
+## The traffic_event_read module at 0x1eed8
+
+- Observation: the original body at `0x1eed8` holds 54 instructions and 142
+  bytes up to the `ret` at `0x1ef65`.  The next function starts at `0x1ef68`
+  after two padding bytes at `0x1ef66`, so the store record keeps the 144-byte
+  extent and sets no separate function size.  The identity check uses 54
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1eed8 --count 54` and
+  `tools/rebuild/functions/0x1eed8.json`.
+- Observation: the only direct caller at `0x1ebbb` is `traffic_step` at
+  `0x1eae0`.  The caller runs this function before it scans the traffic records
+  for the finished field at `+0x60`, so the function drains the incoming
+  traffic events.  The record takes the section The vehicle state chain.
+  Evidence: the call at `0x1ebbb`, the scan at `0x1ebff` through `0x1ec25`, and
+  the record of `0x1eae0`.
+- Observation: the dequeue helper at `0xc739c` copies a twelve-byte header to
+  the local buffer at `[ebp-0x60]` and returns a payload pointer at `[ebp-8]`.
+  The header holds the owner at `+0x04` and the car index at `+0x08`.  The
+  owner must equal the race signature at `0x1521c`, and the local player index
+  at `0x1d250` selects the record to skip.
+  Evidence: the call at `0x1eeeb`, the compare at `0x1ef00` through `0x1ef0d`,
+  and the race signature finding for `0x128e0`.
+- Observation: a matching event computes the 0x2a8-byte traffic record at
+  `0x13cd8` with the header index, copies the 0x4c payload bytes to record
+  offset `+0x14` through the copy helper at `0xc8208`, sets the finished field
+  at `+0x60` to one, and stores the index in the state field at `+0x00`.
+  Evidence: the stride at `0x1ef0f` through `0x1ef2c`, the copy call at
+  `0x1ef3c`, and the stores at `0x1ef47` and `0x1ef54`.
+- Observation: a rejected event runs the queue helper at `0xc76f0` once.  The
+  function returns to the dequeue helper and ends when the helper returns zero.
+  Evidence: the reject branch at `0x1ef58` and the loop at `0x1eee1` through
+  `0x1ef5d`.
+- Inference: the race signature, the player index, the traffic record, and the
+  sibling `traffic_step` module support the name `traffic_event_read`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.  The three callee names stay local to the
+  harness.
+  Evidence: the prologue at `0x1eed8` and the module recipe.
+- Observation: the harness holds four 0x2a8-byte traffic records, the race
+  signature, the player index, and three callee stubs with a scripted dequeue.
+  The eight paths cover the empty queue, the matching event, the foreign owner,
+  the local player index, a reject then an accept, the records 0 and 3, and two
+  accepts.  The output holds the markers `0` through `7` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/traffic_event_read_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_event_read`,
+  `work/rebuild/tevrd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1eed8`.
+- Observation: the rebuilt body holds 11 of 54 instructions equal, 7 of 142
+  bytes equal, and 0 of 14 relocation slots.  The identity check stays open
+  because V2 saves the frame first, keeps the header and the record in
+  registers, folds the stride into `imul`, and reads the data through near
+  operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1eed8 --count 54 --rebuilt work/rebuild/tevrd.exe
+  --rebuilt-map work/rebuild/traffic_event_read.map --rebuilt-symbol
+  traffic_event_read_` and `python3 tools/rebuild/run.py run --function
+  0x1eed8`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
