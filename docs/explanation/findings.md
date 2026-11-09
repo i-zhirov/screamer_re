@@ -22881,3 +22881,75 @@ temporary `-od` recipe.
   screen_mode_set_` and `python3 tools/rebuild/run.py run --function 0x4c850`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The alfile_load module at 0x4c3e6
+
+- Observation: the original body at `0x4c3e6` holds 49 instructions and 159
+  bytes up to the `ret 4` at `0x4c484`.  The next record starts at `0x4c485`,
+  so the store record keeps the 159-byte extent and sets no separate function
+  size.  The identity check uses 49 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c3e6 --count
+  49` and `tools/rebuild/functions/0x4c3e6.json`.
+- Observation: the only direct caller is the loader at `0x4cae4`.  It builds
+  the `%s.MMP` member name from `DAT_002154c`, opens the member with the empty
+  path at object-3 offset `0x7fb4`, and calls this function at `0x4cb20`.  It
+  passes the stream, the path, the name, the out cell `DAT_0021468`, and the
+  resource head `DAT_0021574`.  After the call it copies the resource pointer
+  to `DAT_00102fa4` and runs the spatial grid relocate at `0x4cb4c`.
+  Evidence: the body at `0x4cae4` through `0x4cb49` and
+  `tools/rebuild/functions/0x4cb4c.json`.
+- Observation: the function opens the member through `fopen` at `0x4c08d`
+  with the mode `rb` at object-3 offset `0x16b1`.  A failed open returns -1
+  and leaves the out cell unchanged.
+  Evidence: the call at `0x4c40b` and the branch at `0x4c410` through
+  `0x4c41b`.
+- Observation: the function gets the `ALFILE` resource at object-3 offset
+  `0x16b4` of the member size plus 4 through `resource_get` at `0x2eed0` with
+  the resource head, and it stores the result in the out cell.  A zero result
+  sets the stream state at `+0xac` to 3 and returns -1.
+  Evidence: the call at `0x4c42e`, the store at `0x4c438`, and the block at
+  `0x4c442` through `0x4c456`.
+- Observation: the member size sits at `stream + 0x70`.  The resource request
+  adds 4 bytes.  The read count does not.  The function reads the member into
+  the resource through `stream_read` at `0x4c4e5`, closes the stream through
+  `stream_close` at `0x4c38d`, and returns 0.
+  Evidence: the reads at `0x4c420` and `0x4c45b`, the call at `0x4c466`, and
+  the call at `0x4c46e`.
+- Inference: the `ALFILE` resource name, the `.MMP` member name, and the single
+  caller support the name `alfile_load`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the strings at object-3 offsets `0x16b1` and `0x16b4`, the caller
+  at `0x4cae4`, and the data flow above.
+- Observation: the original has the EBP frame and spills the four register
+  arguments, so the module builds with `-of+`.  The function uses no
+  floating-point instruction, so the module needs no FPU stub, and the module
+  uses no assembly.
+  Evidence: the prologue at `0x4c3e6` through `0x4c3fa` and
+  `tools/rebuild/modules/alfile_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `ALFILE_LOAD_HARNESS` and the function
+  builds the two constant texts in local buffers.  The default build keeps the
+  literals of the original.
+  Evidence: `tools/rebuild/alfile_load.c`.
+- Observation: the harness holds the stream record, the path and name
+  arguments, the resource head, the resource buffer, and the out cell.  The
+  four paths cover the full path with the member size `0x40`, the failed open,
+  the zero resource with the state 3, and the zero size with the resource size
+  4.  The output holds the markers `0` through `3` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/alfile_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module alfile_load`, and
+  `work/rebuild/alfload.txt`.
+- Observation: the rebuilt body holds 49 decoded instructions and 155 bytes in
+  the identity window.  The identity check stays open at 20 of 49 instructions,
+  5 of 155 bytes, and 0 of 5 relocation slots.  The harness build builds the
+  two constant texts in the body, and V2 saves the frame first, keeps the
+  stream in `esi` and the out cell in `edi`, and uses another local layout.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c3e6 --count 49 --rebuilt work/rebuild/alfload.exe
+  --rebuilt-map work/rebuild/alfile.map --rebuilt-symbol alfile_load_` and
+  `python3 tools/rebuild/run.py run --function 0x4c3e6`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
