@@ -22210,3 +22210,66 @@ temporary `-od` recipe.
   0x2497c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the callee names in the harness stay inferred.
+
+## The player_nearby_mark module at 0x12378
+
+- Observation: the original body at `0x12378` holds 57 instructions and 170
+  bytes up to the `ret` at `0x12421`.  Two `mov eax,eax` pad bytes follow at
+  `0x12422`, and the next record starts at `0x12424`, so the record keeps the
+  172-byte extent and sets no separate function size.  The identity check uses
+  57 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12378 --count 57` and
+  `tools/rebuild/functions/0x12378.json`.
+- Observation: the only direct caller at `0x15b28` is the player effect group at
+  `0x15b08`.  The group calls the player group at `0x17c6c`, then this function,
+  then `car_proximity_pass` at `0x17408`, then `opponent_start` at `0x124c0`,
+  all with the same player object in `eax`.  The player update at `0x2003c` runs
+  the effect group.  The record takes the section `The vehicle state chain`.
+  Evidence: the call site at `0x15b28`, the group at `0x15b08`, and the update
+  at `0x2003c`.
+- Observation: the function clears the nearby mask at `+0x104`, then scans every
+  0x590-byte car record at `DAT_00110ab8` from index 0 up to the count
+  `DAT_0010f8ec`.  The player object holds its two position fields at `+0x4b0`
+  and `+0x4b8`.  The car record holds the physics gate at `+0x414` and the two
+  position fields at `+0x498` and `+0x4a0`.  A record with a set gate whose
+  position stays within 1500 units of the player on both axes sets its index bit
+  in the mask.
+  Evidence: the loop at `0x123a7` through `0x12418` and the mask write at
+  `0x12408`.
+- Inference: `car_proximity_pass` reads the mask at `+0x104`, so this function
+  marks the car records that the pass then tests.  The sibling marker
+  `car_nearby_mark` at `0x126e4` builds the per-car mask at `+0x0c` with the
+  same gate and the same 1500-unit bound.  The player scan, the mask, and the
+  caller support the name `player_nearby_mark`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the mask read in `car_proximity_pass` at `0x17408` and the sibling
+  body at `0x126e4`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct call,
+  so it needs no FPU stub and no assembly.
+  Evidence: `tools/rebuild/player_nearby_mark.c` and the module recipe.
+- Observation: the harness holds four car records, the record count, and one
+  player object.  The player object holds the mask at `+0x104` and the position
+  at `+0x4b0` and `+0x4b8`.  The ten paths cover no record, the clear physics
+  gate, the 2000-unit x and z skips, the near record, the two index bits from
+  index 0, the exact 1500-unit boundary, the negative delta of 1499, the clear
+  gate at index 0 with a near record at index 1, and the near x with z 1500 at
+  index 0 beside a near record at index 1.  The output holds the markers `0`
+  through `9` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_nearby_mark_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_nearby_mark`,
+  `work/rebuild/pnear.txt`, and `python3 tools/rebuild/run.py run --function
+  0x12378`.
+- Observation: the rebuilt function holds 39 decoded instructions and 127
+  bytes.  The identity check window holds 57 instructions and 170 bytes and
+  stays open at 12 of 57 instructions and 14 of 170 bytes.  V2 saves `ebp`
+  first, moves the player pointer to `edx`, the record pointer to `ebx`, and the
+  index to `esi`, and calls a local absolute helper in place of the inline sign
+  extend.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12378 --count 57 --rebuilt work/rebuild/pnear.exe
+  --rebuilt-map work/rebuild/player_nearby_mark.map --rebuilt-symbol
+  player_nearby_mark_` and `python3 tools/rebuild/run.py run --function
+  0x12378`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the helper name in the harness stay inferred.
