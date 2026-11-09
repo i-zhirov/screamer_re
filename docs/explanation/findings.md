@@ -20890,3 +20890,79 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x11230`.
 - Limit: the original has no symbol name for this function.  The module name
   and the two callee names in the harness stay inferred.
+
+## The cockpit_load module at 0x1b23c
+
+- Observation: the original body at `0x1b23c` holds 57 instructions and 200
+  bytes up to the `ret` at `0x1b303`.  The next function `controls_load` starts
+  at `0x1b304`, so the store record keeps the 200-byte extent and sets no
+  separate function size.  The identity check uses 57 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b23c --count 57` and
+  `tools/rebuild/functions/0x1b23c.json`.
+- Observation: the two direct callers are `race_data_load` at `0x131a8` and
+  `player_car_init` at `0x136cc`.  `race_data_load` calls the function at
+  `0x134d9`, `0x134e8`, and `0x134f7` with the names `impres_`, `implet_`, and
+  `cdfront` and the out cells `0x18f10`, `0x18f18`, and `0x18f14`.
+  `player_car_init` calls the function at `0x1374b` and builds the cockpit name
+  `COCK%s%c` from the car file name tail and the animation letter, then passes
+  the name in `eax` and the out cell `0x18f0c` in `edx`.
+  Evidence: the calls at `0x134d9` through `0x134f7` and `0x1374b`, and the
+  section "The player_car_init module at 0x136cc".
+- Observation: the function builds the container path `%s\gfx\game.dat` from the
+  base path `DAT_00007f44` through `sprintf` at `0x4d32c`.  The format string
+  sits at object-3 offset 0x98b.
+  Evidence: the reads at linear 0x10098b and the call at `0x1b261`.
+- Observation: the function builds the member name `%s%c.pkc` from the name and
+  the letter `H` (0x48) through `sprintf` at `0x4d32c`.  The format string sits
+  at object-3 offset 0x99b.  The path buffer holds 0x64 bytes and the member
+  buffer holds 0x64 bytes.
+  Evidence: the reads at linear 0x10099b, the call at `0x1b280`, and the frame
+  slots at `0x1b24d` through `0x1b2b0`.
+- Observation: the function opens the member with the mode `rb` at object-3
+  offset 0x9a4 through `fopen` at `0x4c08d`.  A failed open runs the file error
+  report at `0x4bf88`, and the function continues.  The stream record holds the
+  member size at `+0x70`, so `stream_status` at `0x4c7e0` returns it.
+  Evidence: the calls at `0x1b291`, `0x1b2a0`, and `0x1b2ab`, and the
+  `stream_status` record at `0x4c7e0`.
+- Observation: the function gets the `COCKPIT` resource at object-3 offset
+  0x9a7 of the member size through `resource_get` at `0x2eed0` with the resource
+  head `DAT_000062ac`, and stores the result in the out cell.  A zero result
+  runs the memory error report at `0x2edad`.  The function reads the member into
+  the resource through `stream_read` at `0x4c4e5` and closes the stream through
+  `stream_close` at `0x4c38d`.
+  Evidence: the calls at `0x1b2c0`, `0x1b2d7`, `0x1b2ea`, and `0x1b2f5`.
+- Inference: the `.pkc` member, the `COCKPIT` resource, and the two callers
+  support the name `cockpit_load`.  The resource tag names the file group, so
+  the name follows the sibling loaders `material_load`, `font_load`, and
+  `object_load`.  The original has no symbol, so the record keeps the name with
+  the confidence `inferred`.
+  Evidence: the callers at `0x131a8` and `0x136cc` and the resource name at
+  object-3 offset 0x9a7.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/cockpit_load.c` and the module recipe.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `COCKPIT_LOAD_HARNESS` and the function
+  builds the constant texts in local buffers.
+  Evidence: `tools/rebuild/cockpit_load.c` and
+  `tools/rebuild/modules/cockpit_load.json`.
+- Observation: the harness holds the base path, the resource handle, the
+  resource buffer, and the out cell.  The five paths cover the normal path, the
+  failed open, the zero resource, the second base name, and the zero size.  The
+  output holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cockpit_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module cockpit_load`,
+  `work/rebuild/ckpt.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1b23c`.
+- Observation: the rebuilt body holds 13 of 57 instructions and 8 of 165 bytes
+  equal, and 0 of 7 relocation slots.  The identity check stays open because the
+  harness build fills the four constant buffers in the function body, and V2
+  saves the frame first and keeps the stream in a local.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b23c --count 57 --rebuilt work/rebuild/ckptload.exe
+  --rebuilt-map work/rebuild/cockpit_load.map --rebuilt-symbol cockpit_load_`
+  and `python3 tools/rebuild/run.py run --function 0x1b23c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
