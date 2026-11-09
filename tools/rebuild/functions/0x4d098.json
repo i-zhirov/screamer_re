@@ -1,9 +1,95 @@
 {
   "address": "0x4d098",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 40,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the function-body sweep at 0x4d098 holds 40 instructions and 139 bytes up to the conditional ret 4 at 0x4d120, so the identity check uses 40 instructions; the code continues after the ret 4 at 0x4d123 to the last ret 4 at 0x4d20e, and the next function starts at 0x4d214 after the padding bytes at 0x4d211, so the store record keeps the 380-byte extent and sets no separate function size; the rebuilt module covers the whole body"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are material_load at 0x4cd9c: it calls the function at 0x4cdf3 with mode 2 to learn the pixel count and at 0x4cebb with mode 3 to decode the image; the function builds the member name from the two argument texts and returns the width times the height, so the record takes the name pcx_decode and the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the path in eax, the member name in edx, the output pointer in ebx, and the palette buffer in ecx; the mode arrives on the stack; it opens the member through fopen at 0x4c08d with the mode rb at object-3 offset 0x1760, reads the 0x80-byte PCX header through stream_read at 0x4c4e5, and computes the pixel count as (xmax - xmin + 1) * (ymax - ymin + 1)"
+    },
+    {
+      "kind": "note",
+      "text": "in mode 2 the function closes the stream through stream_close at 0x4c38d and returns the pixel count, so the caller learns the decoded size; in mode 1 the function gets the PCX resource at object-3 offset 0x1763 of the pixel-count size through resource_get at 0x2eed0, stores the pointer in the output slot, and returns -1 when the resource is zero; in every other mode the output slot already holds the destination pointer"
+    },
+    {
+      "kind": "note",
+      "text": "the function decodes the RLE runs into the destination: a byte with the mask 0xc0 equal to 0xc0 repeats the next byte byte & 0x3f times; it then reads the 0x300-byte palette into the palette buffer, closes the stream, and returns 0; a failed open returns -2; the failed resource path returns -1 without a close, which the rebuild keeps"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so it needs no FPU stub; DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines PCX_DECODE_HARNESS and the function builds the two constant texts in local buffers"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two argument texts, the PCX member image, the destination buffer, the palette buffer, the output slot, and a stub for every call target; the five paths cover the mode 3 decode, the mode 2 size, the mode 1 resource allocation, the failed open return -2, and the zero resource return -1; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d098 --count 40"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d098 --count 40 --rebuilt work/rebuild/pcxdec.exe --rebuilt-map work/rebuild/pcx_decode.map --rebuilt-symbol pcx_decode_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4d098"
+    },
+    {
+      "kind": "finding",
+      "text": "The pcx_decode module at 0x4d098"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 105 instructions and 340 bytes up to the ret 4; the identity check uses the 40-instruction body sweep, so it compares the first 40 instructions; it stays open at 8 of 40 instructions and 8 of 139 bytes, because the harness build adds the two local constant buffers, V2 saves the frame with push esi and push edi and keeps the output pointer in edi, and V2 extends the signed header words to int in a different order; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "pcx_decode",
+  "name": "pcx_decode",
   "notes": [],
   "object_offset": "0x3d098",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 139,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d098",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:f5e0f3795121f99fbedfad9680c83680bfbf1aa41479349f19f7907c68176efd",
+    "source_digest": "sha256:6b17fff91993b3a31ab3f3952fc70ce261a78d635f2e383921ad961bad09c460",
+    "tool": "run.py"
+  },
+  "role": "Decodes a PCX image from the PCX resource container through the mode 1 allocate, the mode 2 size, and the mode 3 decode paths.",
+  "section": "Resource loader",
   "size": 380,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "pcx_decode_"
 }

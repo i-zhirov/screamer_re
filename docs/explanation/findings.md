@@ -23770,3 +23770,75 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x1e670`.
 - Limit: the original has no symbol name for this function.  The module name
   stays the weak fallback and inferred.
+
+## The pcx_decode module at 0x4d098
+
+- Observation: the function-body sweep at `0x4d098` holds 40 instructions and
+  139 bytes up to the conditional `ret 4` at `0x4d120`.  The code continues at
+  `0x4d123` and ends at the last `ret 4` at `0x4d20e`, so the whole body holds
+  109 instructions and 377 bytes.  The next function starts at `0x4d214` after
+  the padding bytes at `0x4d211`, so the store record keeps the 380-byte extent
+  and sets no separate function size.  The identity check uses 40 instructions,
+  because the body sweep stops at the first `ret`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d098 --count 109` and
+  `tools/rebuild/functions/0x4d098.json`.
+- Observation: the two direct callers are `material_load` at `0x4cd9c`: it calls
+  the function at `0x4cdf3` with mode 2 to learn the pixel count and at
+  `0x4cebb` with mode 3 to decode the image.  The function builds the member
+  name from the two argument texts and returns the width times the height, so
+  the name `pcx_decode` and the section Resource loader are supported.
+  Evidence: the two calls and the record of `0x4cd9c`.
+- Observation: the function takes the path in `eax`, the member name in `edx`,
+  the output pointer in `ebx`, and the palette buffer in `ecx`.  The mode
+  arrives on the stack.  It opens the member through `fopen` at `0x4c08d` with
+  the mode `rb` at object-3 offset `0x1760`, reads the 0x80-byte PCX header
+  through `stream_read` at `0x4c4e5`, and computes the pixel count as
+  `(xmax - xmin + 1) * (ymax - ymin + 1)`.
+  Evidence: the body at `0x4d0b0` through `0x4d102`.
+- Observation: in mode 2 the function closes the stream through `stream_close`
+  at `0x4c38d` and returns the pixel count.  In mode 1 it gets the `PCX`
+  resource at object-3 offset `0x1763` of the pixel-count size through
+  `resource_get` at `0x2eed0`, stores the pointer in the output slot, and
+  returns -1 when the resource is zero.  In every other mode the output slot
+  already holds the destination pointer.
+  Evidence: the mode checks at `0x4d105` and `0x4d123` and the resource call at
+  `0x4d139`.
+- Observation: the function decodes the RLE runs into the destination.  A byte
+  with the mask `0xc0` equal to `0xc0` repeats the next byte
+  `byte & 0x3f` times.  It then reads the 0x300-byte palette into the palette
+  buffer, closes the stream, and returns 0.  A failed open returns -2.  The
+  failed resource path returns -1 without a close.
+  Evidence: the loop at `0x4d160` through `0x4d1e5`, the palette read at
+  `0x4d1ea`, the close at `0x4d203`, and the two early returns at `0x4d120`
+  and `0x4d155`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub.  DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `PCX_DECODE_HARNESS` and the function
+  builds the two constant texts in local buffers.
+  Evidence: the prologue at `0x4d098` and the module recipe.
+- Observation: the harness holds the two argument texts, the PCX member image,
+  the destination buffer, the palette buffer, the output slot, and a stub for
+  every call target.  The five paths cover the mode 3 decode, the mode 2 size,
+  the mode 1 resource allocation, the failed open return -2, and the zero
+  resource return -1.  The output holds the markers `0` through `4` and `D`,
+  and the behavior check passes.
+  Evidence: `tools/rebuild/pcx_decode_main.c`,
+  `python3 tools/rebuild/harness.py run --module pcx_decode`,
+  `work/rebuild/pcxdec.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4d098`.
+- Observation: the rebuilt body holds 105 instructions and 340 bytes up to the
+  `ret 4`.  The identity check uses the 40-instruction body sweep, so it
+  compares the first 40 instructions.  It stays open at 8 of 40 instructions
+  and 8 of 139 bytes, because the harness build adds the two local constant
+  buffers, V2 saves the frame with `push esi` and `push edi` and keeps the
+  output pointer in `edi`, and V2 extends the signed header words to int in a
+  different order.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d098 --count 40 --rebuilt work/rebuild/pcxdec.exe
+  --rebuilt-map work/rebuild/pcx_decode.map --rebuilt-symbol pcx_decode_` and
+  `python3 tools/rebuild/run.py run --function 0x4d098`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check covers only the first 40 instructions,
+  because the body sweep stops at the first `ret`.

@@ -1,0 +1,32 @@
+{
+  "exe": "pcxdec.exe",
+  "map": "pcx_decode.map",
+  "name": "pcx_decode",
+  "run": {
+    "command": "pcxdec.exe > pcxdec.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "pcxdec.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "pcx_decode.c",
+      "flags": [
+        "-of+",
+        "-dPCX_DECODE_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "pcx_decode_main.c"
+    }
+  ]
+}
