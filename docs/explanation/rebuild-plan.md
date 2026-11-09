@@ -461,7 +461,7 @@ reproduce the original bytes.
 | `0x1be6c` | `choice_save` (done) | 203 | 54 | 4 | 0 |
 | `0x11230` | `func_11230` (done) | 202 | 71 | 2 | 0 |
 | `0x1b23c` | `cockpit_load` (done) | 200 | 57 | 9 | 0 |
-| `0x4d3fc` | unnamed | 199 | 54 | 2 | 0 |
+| `0x4d3fc` | `lzw_expand` (done) | 199 | 54 | 2 | 0 |
 | `0x23dfc` | unnamed | 199 | 63 | 2 | 0 |
 | `0x11304` | unnamed | 196 | 56 | 4 | 0 |
 | `0x21da8` | unnamed | 195 | 63 | 7 | 25 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred seventy-nine modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred eighty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -620,5 +620,6 @@ and `camera_pose_build` at `0x1a144`, and
 `stream_seek` at `0x4c5c7`, and the Phase T module `race_frame_update` at
 `0x1ff70`, and the Phase T module `choice_save` at `0x1be6c`, and the Phase T
 module `func_11230` at `0x11230`, and the Phase T module `cockpit_load` at
-`0x1b23c`.
-The next unnamed function is `0x4d3fc`.
+`0x1b23c`, and the Phase T module `lzw_expand` at
+`0x4d3fc`.
+The next unnamed function is `0x23dfc`.

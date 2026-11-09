@@ -208,8 +208,9 @@ current host.
   `stream_seek` at `0x4c5c7`, and
   the Phase T module `race_frame_update` at `0x1ff70`, and the Phase T module
   `choice_save` at `0x1be6c`, and the Phase T module `func_11230` at `0x11230`,
-  and the Phase T module `cockpit_load` at `0x1b23c`;
-  thirty modules are verified, one is matching, and two hundred and forty-nine
+  and the Phase T module `cockpit_load` at `0x1b23c`, and the Phase T module
+  `lzw_expand` at `0x4d3fc`;
+  thirty modules are verified, one is matching, and two hundred and fifty
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -402,7 +403,7 @@ The plan follows the size order, starting with the smallest functions.
     `camera_project` at `0x82c14`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and forty-nine open rebuilds).
+    hundred and fifty open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

@@ -18850,6 +18850,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
 
+## The lzw_expand module at 0x4d3fc
+
+- Observation: the original body at `0x4d3fc` holds 54 instructions and 199
+  bytes up to the `ret 4` at `0x4d4c0`.  The next function starts at `0x4d4c4`,
+  so the store record keeps the 200-byte extent and sets no separate function
+  size.  The identity check uses 54 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d3fc --count 54` and
+  `tools/rebuild/functions/0x4d3fc.json`.
+- Observation: the two direct callers are `member_open` at `0x4c128`, which
+  calls the function at `0x4c360` with the output buffer at `stream + 0x1c` and
+  the count member size plus one, and `stream_read` at `0x4c4e5`, which calls
+  the function at `0x4c555` with the output buffer at `stream + 0xb0`.
+  Evidence: the call sites `0x4c360` and `0x4c555` of
+  `tools/rebuild/callgraph.json`.
+- Observation: the context holds the input position at `+0x4040`, the input
+  size at `+0x4044`, the output limit at `+0x4048`, the state at `+0x404c`,
+  the output position at `+0x4070`, the 0x400-byte bit buffer at `+0x8086`,
+  the output buffer pointer at `+0x8488`, and the stream handle at `+0x848c`.
+  Evidence: the operand offsets of the disassembly of `0x4d3fc`.
+- Observation: the function stores the handle, the output buffer, the input
+  size, and the output limit in the context, clears the output position, and
+  reads the first input block when the state is zero.  The read count is the
+  smaller of the input size and `0x400`.  The function then loops on
+  `lzw_block` at `0x4d4c4` until the block decoder returns 0, and returns the
+  output position.
+  Evidence: the blocks at `0x4d40f` through `0x4d4c0`.
+- Inference: the reference table in `docs/reference/file-formats.md` names the
+  address `lzw_expand`, so the record keeps the name with the confidence
+  `inferred`.  The original has no symbol for the function.
+  Evidence: the table row for `0x4d3fc` in `docs/reference/file-formats.md`.
+- Observation: the harness holds the 0x8490-byte decoder context, two output
+  buffers, the `fread` stub, and the `lzw_block` stub.  The nine paths cover
+  the set fields and the one read, the `0x400` clamp, a short read, a nonzero
+  state, the loop count, the returned output position, the zero input size,
+  the second output buffer, and the output limit that does not steer the read
+  count.  The output holds the markers `0` through `8` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/lzw_expand_main.c`,
+  `python3 tools/rebuild/harness.py run --module lzw_expand`, and
+  `work/rebuild/lzwexp.txt`.
+- Observation: the rebuilt body holds 18 of 54 instructions and 15 of 199
+  bytes equal, and 0 of 10 relocation slots.  The identity check stays open
+  because V2 saves the EBP frame first and builds the reset, clamp, and loop
+  blocks in another shape, and the rebuilt body is shorter than 54
+  instructions so the compare window reaches the harness code.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d3fc --count 54 --rebuilt work/rebuild/lzwexp.exe
+  --rebuilt-map work/rebuild/lzw_expand.map --rebuilt-symbol lzw_expand_` and
+  `python3 tools/rebuild/run.py run --function 0x4d3fc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
+
 ## The lzw_block module at 0x4d4c4
 
 - Observation: the original body at `0x4d4c4` holds 73 instructions and 290
