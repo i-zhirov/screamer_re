@@ -20703,3 +20703,68 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x4c5c7`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The race_frame_update module at 0x1ff70
+
+- Observation: the original body at `0x1ff70` holds 47 instructions and 204
+  bytes up to the `ret` at `0x2003b`.  The next function starts at `0x2003c`,
+  so the store record keeps the 204-byte extent and the identity check uses 47
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ff70 --count 47` and
+  `tools/rebuild/functions/0x1ff70.json`.
+- Observation: the only direct caller at `0x1ff54` is the frame loop at
+  `0x1ff14`.  The race session driver at `0x1fd70` calls that loop at `0x1fdb5`
+  and `0x1fe7a`.  The neighbouring records call this function the frame update
+  at `0x1ff70`, and the callees take the section `Program functions`.
+  Evidence: the sweep of every candidate function start for a call to
+  `0x1ff70`, the block at `0x1ff14` through `0x1ff6d`, and
+  `tools/rebuild/functions/0x1fd70.json`.
+- Observation: the input byte `DAT_00118e1c` bit 0x20 sets the exit state
+  `DAT_00118e18` to 1.  The input byte `DAT_00118e1d` bit 4 sets it to -1, and
+  bit 2 calls the wait helper at `0x1f8dc` and clears `DAT_00118e6c`.  A
+  non-zero exit state returns at once.
+  Evidence: the block at `0x1ff75` through `0x1ffb8`.
+- Observation: the frame runs `timing_update` at `0x22df8`, the view groups at
+  `0x202c0`, `0x20360`, `0x203c4`, `race_simulation_update` at `0x2003c`, and
+  `traffic_simulation_update` at `0x201d0`, `ai_update` at `0x205c4`,
+  `opponent_update` at `0x20954` with 0, `camera_update` at `0x8ac78` with
+  object 0x109a0, and `sound_effects_update` at `0x81ab0` with the driver
+  0x6350.
+  Evidence: the call block at `0x1ffbe` through `0x1fffc`.
+- Observation: the two video swaps at `0x1075f` and `0x107a1` run only when the
+  byte `DAT_0011d274` holds bit 0x10 or bit 0x20.  The frame then runs
+  `race_hud_draw` at `0x23420`, `race_intro_update` at `0x20d20`, the handler at
+  `0x24880`, `race_finish_laps_update` at `0x20ec8`, the handler at `0x20f98`,
+  and `race_finish_update` at `0x21058`.
+  Evidence: the block at `0x1fffc` through `0x2003b`.
+- Inference: the caller chain and the neighbouring records that call this
+  function the frame update at `0x1ff70` support the name `race_frame_update`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the call graph and the sections above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/race_frame_update.c` and the module recipe.
+- Observation: the harness holds the two input bytes, the exit state, the
+  replay byte, and the video flags.  The nineteen callee stubs append one
+  marker to a trace, and the three stubs with arguments record the argument.
+  The ten paths cover the input bit 0x20, the input bit 4, the wait branch, the
+  pre-set state, the three video flag paths, the two input bits, the wait branch
+  with a pre-set state, and the clear-flag full frame.  The output holds the
+  markers `0` through `9` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/race_frame_update_main.c`, `python3
+  tools/rebuild/harness.py run --module race_frame_update`, and
+  `work/rebuild/rfu_out.txt`.
+- Observation: the rebuilt body holds 15 of 47 instructions, 18 of 204 bytes,
+  and 0 of 19 relocation slots equal.  The identity check stays open because V2
+  saves the frame first, keeps the state in a register, uses other call
+  addresses for the harness stubs, and places the byte tests in another shape.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ff70 --count 47 --rebuilt work/rebuild/rfu.exe
+  --rebuilt-map work/rebuild/race_frame_update.map --rebuilt-symbol
+  race_frame_update_` and `python3 tools/rebuild/run.py run --function
+  0x1ff70`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
