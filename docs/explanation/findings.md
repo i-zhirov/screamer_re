@@ -22414,3 +22414,66 @@ temporary `-od` recipe.
   0x1ce38`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The player_body_point_place module at 0x17c6c
+
+- Observation: the original body at `0x17c6c` holds 45 instructions and 165
+  bytes up to the `ret` at `0x17d10`.  The next function starts at `0x17d14`,
+  so the store record keeps the 168-byte extent and sets no separate function
+  size.  The identity check uses 45 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x17c6c --count
+  45`.
+- Observation: the three player groups at `0x15b08`, `0x15b44`, and `0x15b80`
+  call this function first at `0x15b14`, `0x15b50`, and `0x15b8c`.  The player
+  group at `0x15b08` then calls `player_nearby_mark` at `0x12378`,
+  `car_proximity_pass` at `0x17408`, and `opponent_start` at `0x124c0`.  The
+  player update at `0x2003c` calls the group at `0x20154`, so the record takes
+  the section `The vehicle state chain`.
+  Evidence: the calls at `0x15b14`, `0x15b50`, and `0x15b8c`, and the call at
+  `0x20154`.
+- Observation: the function rotates the two local player body points at
+  `+0x514` and `+0x520` by the negative heading at `+0x4cc` through the
+  rotation helper at `0x2218c`.  It then adds the player world position at
+  `+0x4b0` and `+0x4b8` and stores the two player body points at `+0x52c` and
+  `+0x538`.  A point holds x at `+0x00`, y at `+0x04`, and z at `+0x08`.  The
+  function writes only x and z, because the comparison uses the ground plane.
+  `car_proximity_pass` at `0x17408` and `opponent_avoid_player` at `0x1e414`
+  read these two points.
+  Evidence: the block at `0x17c76` through `0x17d06` and the records at
+  `0x17408` and `0x1e414`.
+- Inference: the player body points at `+0x52c` and `+0x538`, the player group
+  caller, and the adjacent `body_point_place` module at `0x1ce38` support the
+  name `player_body_point_place`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the callers at `0x15b14`, `0x15b50`, and `0x15b8c`, and the module
+  `body_point_place`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses only the `fld`, `fchs`, and `fstp` instructions,
+  so it calls no math routine and needs no truncating stub.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: the block at `0x17c7c` through `0x17c84` and
+  `tools/rebuild/modules/player_body_point_place.json`.
+- Observation: the harness holds the player record with the two local points,
+  the heading, the world position, the two world points, and the rotation stub.
+  The six paths cover the two call pointers and the negated heading, the
+  heading `+0.0` and `-0.0`, the heading `-2.0`, the x and z offsets on both
+  points, and the heading `2.5`.  The output holds the markers `0` through `5`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_body_point_place_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_body_point_place`,
+  `work/rebuild/pbpp.txt`, and `python3 tools/rebuild/run.py run --function
+  0x17c6c`.
+- Observation: the rebuilt body holds 45 decoded instructions and 174 bytes in
+  the identity window.  The identity check stays open at 8 of 45 instructions
+  and 12 of 165 bytes.  V2 saves `ebp` first, saves `ecx` and `edx`, keeps the
+  player in `ecx`, forms the two point pointers with `lea`, and orders the tail
+  stores in another shape.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x17c6c --count 45 --rebuilt work/rebuild/pbpp.exe
+  --rebuilt-map work/rebuild/player_body_point_place.map --rebuilt-symbol
+  player_body_point_place_` and `python3 tools/rebuild/run.py run --function
+  0x17c6c`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
