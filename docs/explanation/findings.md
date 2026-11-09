@@ -20828,3 +20828,65 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x1be6c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the stub names in the harness stay inferred.
+
+## The func_11230 module at 0x11230
+
+- Observation: the original body at `0x11230` holds 71 instructions and 202
+  bytes up to the `ret` at `0x112f9`.  The shared epilogue at `0x112fc`
+  continues the body to the next entry at `0x11304`, so the record keeps the
+  212-byte extent and sets no separate function size.  The identity check uses
+  71 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11230 --count 71` and
+  `tools/rebuild/functions/0x11230.json`.
+- Observation: the only direct caller at `0x14d9c` is the replay playback setup
+  at `0x14d2c`, which `game_mode_4_start` at `0x12e18` calls at `0x12ed4`
+  after the ghost load at `0x1ba4c`.  The setup passes the object-list table
+  `0x6530` in `eax` and the playback block `0x18ed8` in `edx`, and the block
+  holds the entry index at `+0x00`.
+  Evidence: the call at `0x12ed4`, the argument loads at `0x12ec1` through
+  `0x12ecf`, and the body at `0x14d2c` through `0x14d9c`.
+- Observation: the table holds 0x78 records of 0x1c bytes.  The function
+  compares the handle at `+0x14` of the selected record with the handle at
+  `+0x14` of every record.  A match on another index marks the handle as shared
+  and stops the scan, because the body jumps to the flag test after it sets the
+  flag.  The fields `+0x0c`, `+0x10`, and `+0x18` do not take part in the
+  compare.
+  Evidence: the loop at `0x11246` through `0x11292`.
+- Observation: a shared handle runs the one-handle release at `0x11148`; any
+  other handle runs the two-handle release at `0x111b4`.  A non-zero release
+  result is returned, and a zero result becomes -1 for a shared handle and 0
+  otherwise.
+  Evidence: the two call sites at `0x112b3` and `0x112e2` and the return paths
+  at `0x112c7` through `0x112fc`.
+- Inference: the original has no symbol, and the only caller at `0x14d2c` is
+  also unnamed.  The playback block, the ghost records at `0x18e8c`, and the
+  replay-mode caller support the section The replay records, but they do not
+  give a recovered name, so the record keeps the weak fallback name
+  `func_11230` with the confidence `inferred`.
+  Evidence: the caller at `0x12e18`, the `replay_load_atk` record at
+  `0x1ba4c`, and the ghost record at `DAT_0018e8c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/func_11230.c` and the module recipe.
+- Observation: the harness holds the 0x78-record table and the two release
+  stubs.  The nine paths cover a distinct handle, a shared handle from a later
+  and an earlier index, a shared handle at the last index, the non-zero release
+  results, the self match, and an equal field at `+0x0c` with a distinct
+  handle.  Every path checks the selected record keeps its values.  The output
+  holds the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/func_11230_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_11230`,
+  `work/rebuild/f11230.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11230`.
+- Observation: the rebuilt body holds 12 of 71 instructions and 4 of 202 bytes
+  equal, and 0 of 13 relocation slots.  The identity check stays open because
+  V2 saves the frame first, keeps the table pointer in `esi` and the index in a
+  register, uses `imul` for the 0x1c stride, and tests the self match in another
+  shape.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11230 --count 71 --rebuilt work/rebuild/f11230.exe
+  --rebuilt-map work/rebuild/func_11230.map --rebuilt-symbol func_11230_` and
+  `python3 tools/rebuild/run.py run --function 0x11230`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two callee names in the harness stay inferred.

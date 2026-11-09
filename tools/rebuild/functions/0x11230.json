@@ -1,9 +1,95 @@
 {
   "address": "0x11230",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 71,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11230 holds 71 instructions and 202 bytes up to the ret at 0x112f9; the shared epilogue at 0x112fc continues the body to the next entry at 0x11304, so the store record keeps the 212-byte extent and sets no separate function size; the identity check uses 71 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x14d9c is the replay playback setup at 0x14d2c, which game_mode_4_start at 0x12e18 calls at 0x12ed4 after the ghost load at 0x1ba4c; the setup passes the object-list table 0x6530 in eax and the playback block 0x18ed8 in edx, and the block holds the entry index at +0x00; the playback block, the ghost records at 0x18e8c, and the caller support the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the table holds 0x78 records of 0x1c bytes; the function compares the handle at +0x14 of the selected record with the handle at +0x14 of every record; a match on another index marks the handle as shared and stops the scan; the record fields at +0x0c, +0x10, and +0x18 do not take part in the compare"
+    },
+    {
+      "kind": "note",
+      "text": "a shared handle runs the one-handle release at 0x11148; any other handle runs the two-handle release at 0x111b4; a non-zero release result is returned, and a zero result becomes -1 for a shared handle and 0 otherwise"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol, and the only caller is the unnamed setup at 0x14d2c, so the record keeps the weak fallback name func_11230 with the confidence inferred; the two callee names in the harness stay harness-local"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x78-record table and the two release stubs; the nine paths cover a distinct handle, a shared handle from a later and an earlier index, a shared handle at the last index, the non-zero release results, the self match, and an equal field at +0x0c with a distinct handle; every path checks the selected record keeps its values; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 12 of 71 instructions and 4 of 202 bytes equal, and 0 of 13 relocation slots; the identity check stays open because V2 saves the frame first, keeps the table pointer in esi and the index in a register, uses imul for the 0x1c stride, and tests the self match in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11230 --count 71"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11230 --count 71 --rebuilt work/rebuild/f11230.exe --rebuilt-map work/rebuild/func_11230.map --rebuilt-symbol func_11230_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11230"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_11230 module at 0x11230"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_11230",
+  "name": "func_11230",
   "notes": [],
   "object_offset": "0x1230",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 202,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 71,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11230",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:e145dc966c02fe9397578e1d8974b8f37d3551238d871dfe22e9a6c491abe885",
+    "source_digest": "sha256:7b1affd2f0ab94060ddce8973992650736047874f926c864b7ab2eff66e89320",
+    "tool": "run.py"
+  },
+  "role": "releases the object-list entry selected by the playback index: a handle at +0x14 shared with another entry runs the one-handle release, and any other handle runs the two-handle release",
+  "section": "The replay records",
   "size": 212,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_11230_"
 }

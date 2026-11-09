@@ -1,0 +1,35 @@
+{
+  "exe": "f11230.exe",
+  "map": "func_11230.map",
+  "name": "func_11230",
+  "run": {
+    "command": "f11230.exe > f11230.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "f11230.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_11230.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_11230_main.c"
+    }
+  ]
+}
