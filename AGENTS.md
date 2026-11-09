@@ -165,10 +165,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 327 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 323 checks.
+about 8 minutes plus the Ghidra import and reports 351 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 347 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 312 checks.  Both flags report 308 checks and take about 16
+run reports 336 checks.  Both flags report 332 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -338,8 +338,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 327 checks in the `cross-check` shell.  `--skip-cross`
-  gives 323 checks, `--skip-runtime` gives 312 checks, and both flags give 308
+- The full check reports 351 checks in the `cross-check` shell.  `--skip-cross`
+  gives 347 checks, `--skip-runtime` gives 336 checks, and both flags give 332
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - Stage 12 checks the program-map tables and the call graph for drift.  The
