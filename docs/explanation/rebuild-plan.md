@@ -505,7 +505,7 @@ reproduce the original bytes.
 | `0x12424` | `traffic_nearby_mark` (done) | 155 | 56 | 0 | 0 |
 | `0x2f062` | `cache_resource` (done) | 154 | 53 | 2 | 0 |
 | `0x4d360` | `lzw_init` (done) | 153 | 32 | 0 | 0 |
-| `0x24b48` | unnamed | 152 | 47 | 0 | 0 |
+| `0x24b48` | `sound_variant_next` (done) | 152 | 47 | 0 | 0 |
 | `0x24880` | unnamed | 152 | 48 | 5 | 6 |
 | `0x222e0` | unnamed | 150 | 49 | 1 | 24 |
 | `0x1f108` | unnamed | 147 | 45 | 2 | 6 |
@@ -520,7 +520,7 @@ This table starts Phase U.
 
 ## Position
 
-Three hundred and thirteen modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and fourteen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -684,5 +684,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `car_camera_select` at `0x1aec4`, and the Phase U module
 `traffic_nearby_mark` at `0x12424`, and the Phase U module
 `cache_resource` at `0x2f062`, and the Phase U module
-`lzw_init` at `0x4d360`.
-The next unnamed function is `0x24b48`.
+`lzw_init` at `0x4d360`, and the Phase U module
+`sound_variant_next` at `0x24b48`.
+The next unnamed function is `0x24880`.

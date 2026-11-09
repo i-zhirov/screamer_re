@@ -1,0 +1,30 @@
+{
+  "exe": "svnext.exe",
+  "map": "sound_variant_next.map",
+  "name": "sound_variant_next",
+  "run": {
+    "command": "svnext.exe > svnext.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "svnext.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_variant_next.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_variant_next_main.c"
+    }
+  ]
+}

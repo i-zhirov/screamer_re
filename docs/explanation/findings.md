@@ -23196,3 +23196,56 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x4d360`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 32 instructions.
+
+## The sound_variant_next module at 0x24b48
+
+- Observation: the original body at `0x24b48` holds 47 instructions and 152
+  bytes up to the `ret` at `0x24bdf`.  The zero-quality return path is out of
+  line at `0x24be0` through the `ret` at `0x24bfa`.  The next function starts
+  at `0x24bfc`, so the store record keeps the 180-byte extent and sets no
+  separate function size.  The identity check uses 47 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24b48 --count 47` and
+  `tools/rebuild/functions/0x24b48.json`.
+- Observation: the only direct caller is `sound_variant_select` at `0x24a84`,
+  which calls this function at `0x24af5` for the variant mode 3 and resolves
+  the result through the sound queue.  The table at object 3 offset `0x1fb4`
+  holds 0x1b effects and three sample ids per effect, each entry 0xc bytes.  The
+  value -1 marks a missing sample id.  The caller and the table support the name
+  `sound_variant_next` and the section Program functions.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call at `0x24af5`, the `sound_variant_select` record, and the
+  table at object 3 offset `0x1fb4`.
+- Observation: the effect index arrives in `eax`.  When `0x19064` is zero, the
+  function returns the first sample id of the effect and leaves the counter
+  unchanged.  Otherwise it advances the counter array at `0x191c0` with the wrap
+  2 to 0, reads the table at `0x1fb4`, and skips the -1 entries.  After three
+  all -1 entries it returns the last table value.
+  Evidence: the reads at `0x24b55` and `0x24b6a` through `0x24b83`, the table
+  read at `0x24ba3`, and the fallback at `0x24be0` through `0x24bec`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x24b48` through `0x24b52` and
+  `tools/rebuild/modules/sound_variant_next.json`.
+- Observation: the harness holds the 27-effect table, the quality flag, and the
+  rotation counters.  The four paths cover the zero-quality return and the
+  unchanged counter, the wrap walk 10, 20, 30, and 10, the skip of the -1 entry
+  in 40, 60, and 40, and the all -1 effect.  The output holds the markers `0`
+  through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_variant_next_main.c`, `python3
+  tools/rebuild/harness.py run --module sound_variant_next`, and
+  `work/rebuild/svnext.txt`.
+- Observation: the rebuilt body holds 44 instructions and 112 bytes.  The
+  identity window uses 47 instructions, so it decodes the following harness code
+  after the rebuilt `ret`.  The identity check stays open at 12 of 47
+  instructions, 5 of 128 bytes, and 1 of 15 relocation slots, because V2 saves
+  the EBP frame first, keeps the effect in `edx`, uses `imul` for the 0xc-byte
+  entry, and builds the loop and the zero-quality return in another shape.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24b48 --count 47 --rebuilt work/rebuild/svnext.exe
+  --rebuilt-map work/rebuild/sound_variant_next.map --rebuilt-symbol
+  sound_variant_next_` and `python3 tools/rebuild/run.py run --function
+  0x24b48`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 47 instructions.
