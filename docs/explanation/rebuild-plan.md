@@ -495,7 +495,7 @@ reproduce the original bytes.
 | `0x1ce38` | `body_point_place` (done) | 165 | 45 | 2 | 6 |
 | `0x17c6c` | `player_body_point_place` (done) | 165 | 45 | 2 | 6 |
 | `0x1b198` | `track_marker_load` (done) | 164 | 48 | 6 | 0 |
-| `0x82074` | unnamed | 163 | 58 | 0 | 0 |
+| `0x82074` | `basis_rotation_mirror` (done) | 163 | 58 | 0 | 0 |
 | `0x11410` | unnamed | 163 | 63 | 1 | 0 |
 | `0x81fd0` | unnamed | 162 | 57 | 0 | 0 |
 | `0x202c0` | unnamed | 160 | 37 | 11 | 0 |
@@ -520,7 +520,7 @@ This table starts Phase U.
 
 ## Position
 
-Three hundred and three modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -674,5 +674,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `game_mode_4_start` at `0x12e18`, and the Phase U module
 `body_point_place` at `0x1ce38`, and the Phase U module
 `player_body_point_place` at `0x17c6c`, and the Phase U module
-`track_marker_load` at `0x1b198`.
-The next unnamed function is `0x82074`.
+`track_marker_load` at `0x1b198`, and the Phase U module
+`basis_rotation_mirror` at `0x82074`.
+The next unnamed function is `0x11410`.

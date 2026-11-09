@@ -22547,3 +22547,65 @@ temporary `-od` recipe.
   0x1b198`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The basis_rotation_mirror module at 0x82074
+
+- Observation: the original body at `0x82074` holds 58 instructions and 163
+  bytes up to the `ret` at `0x82116`.  The next recorded function starts at
+  `0x82258`, so the store record keeps the 484-byte extent and sets no separate
+  function size.  The identity check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x82074 --count
+  58` and `tools/rebuild/functions/0x82074.json`.
+- Observation: the only direct caller at `0x8b6c7` is `basis_transform_build`
+  at `0x8b610`.  It passes the destination pointer in `edx`, the three cosine
+  values in `ecx`, `ebx`, and `ebp`, and the three sine values in `esi`, `edi`,
+  and `eax`.  The caller runs this function on the complement angles `0x7ff -
+  angle`, so the result is the inverse basis.  The caller sits in the
+  `object_update_all` group, so the record takes the section `object_update_all
+  callees`.
+  Evidence: the call at `0x8b6c7`, the register loads at `0x8b67b` through
+  `0x8b6c1`, and the finding "The basis_transform_build module at 0x8b610".
+- Observation: the function builds the nine Q14 dwords of the 3x3 matrix at
+  `+0x00` through `+0x20`.  It multiplies two Q14 values, sums the two
+  products, and shifts the sum to the right by 14 with the arithmetic shift.
+  It shifts the two inner products `c0 * c1` and `c0 * s1` before the outer
+  product.  The negative sums round toward negative infinity.
+  Evidence: the blocks at `0x8207b` through `0x82110`.
+- Inference: the sibling builder at `0x81fd0` builds the forward basis.  The
+  existing `basis_transform_build` module names this caller-side function
+  `basis_rotation_mirror`.  The record keeps that name with the confidence
+  `inferred`.  The original has no symbol.
+  Evidence: the sibling at `0x81fd0`, the module `basis_transform_build`, and
+  the calls at `0x8b664` and `0x8b6c7`.
+- Observation: the original has no EBP frame, so the module builds without
+  `-of+`.  The function uses no floating-point instruction and calls no
+  function, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x82074` through `0x82079` and
+  `tools/rebuild/modules/basis_rotation_mirror.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness assigns the expected values at run time and uses no
+  initialized static data.
+  Evidence: `tools/rebuild/basis_rotation_mirror_main.c`.
+- Observation: the harness holds the one 9-dword matrix and one 9-dword
+  expected block.  The five paths cover the unity values, the mixed positive
+  and negative values, the small values with the negative arithmetic shift, the
+  table limits, and the large values that reach the 32-bit product range.  The
+  output holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/basis_rotation_mirror_main.c`,
+  `python3 tools/rebuild/harness.py run --module basis_rotation_mirror`, and
+  `work/rebuild/brotmir.txt`.
+- Observation: the rebuilt body holds 58 decoded instructions and 162 bytes in
+  the identity window.  The identity check stays open at 8 of 58 instructions
+  and 4 of 162 bytes.  The rebuilt C uses the standard Watcom calling
+  convention, takes the arguments from the stack, saves `esi`, `edi`, and
+  `ebp`, and keeps the destination in `eax`.  The original takes the arguments
+  from the registers and the saved stack slots.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x82074 --count 58 --rebuilt work/rebuild/brotmir.exe
+  --rebuilt-map work/rebuild/basis_rotation_mirror.map --rebuilt-symbol
+  basis_rotation_mirror_` and `python3 tools/rebuild/run.py run --function
+  0x82074`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
