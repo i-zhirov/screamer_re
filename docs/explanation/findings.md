@@ -23517,3 +23517,74 @@ temporary `-od` recipe.
   0x12c0c`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 49 instructions.
+
+## The sound_source_update module at 0x8a958
+
+- Observation: the original body at `0x8a958` holds 58 instructions and 144
+  bytes up to the `ret` at `0x8a9e7`.  The next function starts at `0x8a9e8`,
+  so the store record keeps the 144-byte extent and sets no separate function
+  size.  The identity check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8a958 --count 58` and
+  `tools/rebuild/functions/0x8a958.json`.
+- Observation: the source update runs in the shared sound service body.
+  `sound_update` at `0x81a70` and `sound_effects_update` at `0x81ab0` store the
+  list head at `0x7451c`.  The body calls this function at `0x81ac6`, reads the
+  active count `0x72488`, and runs the mix prepare at `0x8aa60`.  The caller
+  passes the output cursor in `edi` and ignores the returned register.  The
+  record takes the name `sound_source_update` with the confidence `inferred`
+  and the section Program functions.
+  Evidence: the call at `0x81ac6`, the reads at `0x81acb` and `0x81ad8`, and
+  the records of `sound_update` and `sound_effects_update`.
+- Observation: the list head at `0x7451c` points to an array of source pointers
+  that ends at a null pointer.  The function skips an entry whose bit
+  `0x40000000` is set, because that source already sits in the frame list.
+  Evidence: the `lodsd` and the mask test at `0x8a9cf` through `0x8a9d9`.
+- Observation: the world rectangle at `0x72d94` culls the ground plane.  The
+  function compares the source x at `+0x08` with the rectangle range at `+0x00`
+  and `+0x0c`, and the source z at `+0x10` with the second range at `+0x08` and
+  `+0x14`.  The source y at `+0x0c` takes no part in the cull.
+  Evidence: the loads at `0x8a970` through `0x8a976` and the compares at
+  `0x8a979` through `0x8a991`.
+- Observation: for a kept source the function forms the squared distance to the
+  camera position at `0x7a7ac + 0x0c`, `+0x10`, and `+0x14`.  It shifts the
+  64-bit sum right by two and truncates the result to 32 bits.  A value below
+  the limit `0x284af100` appends one 8-byte record, the shifted sum and the
+  source pointer with the bit `0x40000000` set.  The signed compare also keeps
+  a value with the high bit set.
+  Evidence: the subtracts at `0x8a993` through `0x8a999`, the products and the
+  shift at `0x8a99f` through `0x8a9b5`, and the compare at `0x8a9be` through
+  `0x8a9c3`.
+- Observation: at the null end the function adds the number of appended records
+  to the active count `0x72488` and returns the start of the output.  The
+  original divides the byte length by eight, so the rebuild divides the dword
+  count by two.
+  Evidence: the tail at `0x8a9db` through `0x8a9e7` and
+  `tools/rebuild/sound_source_update.c`.
+- Observation: the original has no EBP frame and no call.  The function uses no
+  floating-point instruction, so the module builds in C without `-of+`, without
+  an FPU stub, and without assembly.  The rebuild forms the signed 32x32
+  product and the 64-bit sum with 32-bit arithmetic, because the harness links
+  no 64-bit runtime helper.
+  Evidence: the prologue at `0x8a958` and the module recipe.
+- Observation: the harness holds the source list, the eight source records, the
+  camera, the world rectangle, the active count, and the output array.  The
+  nine paths cover the -1 list head, the bit `0x40000000` skip, the four
+  rectangle sides, the far source, the signed truncation, the camera offset,
+  the count accumulation, the null list, and the exact limit.  The output holds
+  the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_source_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_source_update`,
+  `work/rebuild/ssupd.txt`, and `python3 tools/rebuild/run.py run --function
+  0x8a958`.
+- Observation: the rebuilt body holds 58 decoded instructions and 168 bytes in
+  the identity window.  The identity check stays open at 7 of 58 instructions
+  and 3 of 144 bytes, because V2 saves the registers, uses the register calling
+  convention for the static helpers, and keeps the output cursor in `esi`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8a958 --count 58 --rebuilt work/rebuild/ssupd.exe
+  --rebuilt-map work/rebuild/sound_source_update.map --rebuilt-symbol
+  sound_source_update_` and `python3 tools/rebuild/run.py run --function
+  0x8a958`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 58 instructions.

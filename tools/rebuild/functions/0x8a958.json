@@ -1,9 +1,115 @@
 {
   "address": "0x8a958",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8a958 holds 58 instructions and 144 bytes up to the ret at 0x8a9e7; the next function starts at 0x8a9e8, so the store record keeps the 144-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the source update runs in the shared sound service body: sound_update at 0x81a70 and sound_effects_update at 0x81ab0 store the list head at 0x7451c, the body calls this function at 0x81ac6, reads the active count 0x72488, and runs the mix prepare at 0x8aa60; the caller passes the output cursor in edi and ignores the returned register; the record takes the name sound_source_update with the confidence inferred and the section Program functions, and the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the list head at 0x7451c points to an array of source pointers that ends at a null pointer; an entry whose bit 0x40000000 is set is skipped, because that source already sits in the frame list"
+    },
+    {
+      "kind": "note",
+      "text": "the world rectangle at 0x72d94 culls the ground plane: the function compares the source x at +0x08 with the rectangle range at +0x00 and +0x0c, and the source z at +0x10 with the second range at +0x08 and +0x14; the source y at +0x0c takes no part in the cull"
+    },
+    {
+      "kind": "note",
+      "text": "for a kept source the function forms the squared distance to the camera position at 0x7a7ac + 0x0c, +0x10, and +0x14, shifts the 64-bit sum right by two, and truncates the result to 32 bits; a value below the limit 0x284af100 appends one 8-byte record to the output, the shifted sum and the source pointer with the bit 0x40000000 set; the signed compare also keeps a value with the high bit set"
+    },
+    {
+      "kind": "note",
+      "text": "at the null end the function adds the number of appended records to the active count 0x72488 and returns the start of the output; the original divides the byte length by eight, so the rebuild divides the dword count by two"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the function uses no floating-point instruction and calls no function, so it needs no FPU stub and no assembly; the rebuild forms the signed 32x32 product and the 64-bit sum with 32-bit arithmetic, because the harness links no 64-bit runtime helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the source list, the eight source records, the camera, the world rectangle, the active count, and the output array; the nine paths cover the -1 list head, the bit 0x40000000 skip, the four rectangle sides, the far source, the signed truncation, the camera offset, the count accumulation, the null list, and the exact limit; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 58 decoded instructions and 168 bytes in the identity window; the identity check stays open at 7 of 58 instructions and 3 of 144 bytes, because V2 saves the registers, uses the register calling convention for the static helpers, and keeps the output cursor in esi; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8a958 --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8a958 --count 58 --rebuilt work/rebuild/ssupd.exe --rebuilt-map work/rebuild/sound_source_update.map --rebuilt-symbol sound_source_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_source_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8a958"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_source_update module at 0x8a958"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_source_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_source_update",
+  "name": "sound_source_update",
   "notes": [],
   "object_offset": "0x7a958",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 144,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8a958",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:af87d59596a1d20bc54f92b85ed5c64c747e9b74ae909f4b45f7346263a184f6",
+    "source_digest": "sha256:401f2d1935fc358adb70998e14749a8c3002c2ccea9042fb13e41e3d2f77af51",
+    "tool": "run.py"
+  },
+  "role": "Updates the active sound source list for the frame: it walks the source list, culls the sources outside the world rectangle or beyond the distance limit, appends the visible source records, and raises the active count.",
+  "section": "Program functions",
   "size": 144,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_source_update_"
 }
