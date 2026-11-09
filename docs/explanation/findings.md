@@ -21608,3 +21608,70 @@ temporary `-od` recipe.
   0x20f98`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The replay_buffer_init module at 0x22c88
+
+- Observation: the original body at `0x22c88` holds 58 instructions and 188
+  bytes up to the `ret` at `0x22d43`.  The next function starts at `0x22d44`,
+  so the record keeps the 188-byte extent and sets no separate function size.
+  The identity check uses 58 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22c88 --count 58` and
+  `tools/rebuild/functions/0x22c88.json`.
+- Observation: the only direct caller at `0x12e74` is `game_mode_4_start` at
+  `0x12e18`.  It loads the `ATTACK_RES` resource with the size `0x1f400`, calls
+  this function, and frees the resource name through `0x2f326`.  The replay
+  loader at `0x1ba4c` and the replay writer at `0x1b974` read and write the two
+  `0x24`-byte ghost records this function prepares, so the function takes the
+  `The replay records` section.
+  Evidence: the caller body at `0x12e44` through `0x12e88` and the sibling
+  records at `0x1b974` and `0x1ba4c`.
+- Observation: the function asks `0x2f709` for the largest single memory block.
+  That helper returns the larger of the DOS block at `0x2f66c` and the heap
+  block at `0x2f5ae`.  The function divides the block by `0x28`, the size of one
+  keyframe, and stores the count at `DAT_0018e8c`.
+  Evidence: the calls at `0x22c96` and `0x22ca8` and the divide at `0x22ca8`.
+- Observation: a count below `0xc8` clears `DAT_0018eac`, `DAT_0018ebc`,
+  `DAT_0018e98`, and `DAT_0018ed0` and returns 0.  A count at or above `0xc8`
+  loads the `ATTACK` resource at object-3 offset `0xdb3` through `0x2eed0` with
+  the block size and stores the pointer at `DAT_0018eac`.
+  Evidence: the block at `0x22cb6` through `0x22cef` and the string `ATTACK` at
+  object-3 offset `0xdb3`.
+- Observation: a zero resource pointer takes the clear path.  Otherwise the
+  function sets the index `DAT_0018ed4` and the cell `DAT_0018ee4` to 0, halves
+  the count, stores the half at `DAT_0018e8c` and `DAT_0018eb0`, sets the active
+  flags `DAT_0018ebc` and `DAT_0018e98` to 1, and stores the second keyframe
+  pointer `DAT_0018ed0` one half times `0x28` past the resource pointer.  It
+  returns 1.
+  Evidence: the block at `0x22cf1` through `0x22d3b`.
+- Inference: the caller, the `ATTACK` resource, the keyframe size `0x28`, and
+  the two ghost records support the name `replay_buffer_init`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the caller at `0x12e18` and the two sibling records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/replay_buffer_init.c` and the module recipe.
+- Observation: the harness holds the two ghost records, the index, the cell
+  `DAT_0018ee4`, the context pointer, the `ATTACK` name cell, and the two callee
+  stubs.  The six paths cover the count 199 below the gate, the count 200 with
+  the load, the count 200 with the failed load, the counts 201 and 203 with the
+  truncation, and the count 1000 with the scale.  The output holds the markers
+  `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/replay_buffer_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_buffer_init`,
+  `work/rebuild/rplinit.txt`, and `python3 tools/rebuild/run.py run --function
+  0x22c88`.
+- Observation: the identity check at 58 instructions holds 20 of 58
+  instructions, 13 of 188 bytes, and 2 of 31 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, keeps the
+  count, the half, and the buffer in other registers, uses `imul` for the
+  keyframe stride instead of the shift and add chain, and loads the globals
+  through near data operands.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22c88 --count 58 --rebuilt work/rebuild/rplinit.exe
+  --rebuilt-map work/rebuild/replay_buffer_init.map --rebuilt-symbol
+  replay_buffer_init_` and `python3 tools/rebuild/run.py run --function
+  0x22c88`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.

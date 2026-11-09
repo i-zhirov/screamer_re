@@ -1,9 +1,103 @@
 {
   "address": "0x22c88",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22c88 holds 58 instructions and 188 bytes up to the ret at 0x22d43; the next function starts at 0x22d44, so the store record keeps the 188-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x12e74 is game_mode_4_start at 0x12e18; it loads the ATTACK_RES resource with the size 0x1f400, calls this function, and frees the resource name through 0x2f326; the replay loader at 0x1ba4c and the writer at 0x1b974 read and write the two 0x24-byte ghost records this function prepares, so the module takes the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the function asks 0x2f709 for the largest single memory block; that helper returns the larger of the DOS block at 0x2f66c and the heap block at 0x2f5ae; the block divided by 0x28, the keyframe size, lands at DAT_0018e8c"
+    },
+    {
+      "kind": "note",
+      "text": "a count below 0xc8 clears DAT_0018eac, DAT_0018ebc, DAT_0018e98, and DAT_0018ed0 and returns 0; a count at or above 0xc8 loads the ATTACK resource at object-3 offset 0xdb3 through 0x2eed0 with the block size and stores the pointer at DAT_0018eac"
+    },
+    {
+      "kind": "note",
+      "text": "a zero resource pointer takes the clear path; otherwise the function sets the index DAT_0018ed4 and the cell DAT_0018ee4 to 0, halves the count, stores the half at DAT_0018e8c and DAT_0018eb0, sets the active flags DAT_0018ebc and DAT_0018e98 to 1, and stores the second keyframe pointer DAT_0018ed0 one half times 0x28 past the resource pointer; it returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the ATTACK resource, the keyframe size 0x28, and the two ghost records support the name replay_buffer_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two ghost records, the index, the cell DAT_0018ee4, the context pointer, the ATTACK name cell, and the two callee stubs; the six paths cover the count 199 below the gate, the count 200 with the load, the count 200 with the failed load, the counts 201 and 203 with the truncation, and the count 1000 with the scale; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 58 instructions holds 20 of 58 instructions, 13 of 188 bytes, and 2 of 31 relocation slots; the identity check stays open because V2 saves the frame in another order, keeps the count, the half, and the buffer in other registers, uses imul for the keyframe stride instead of the shift and add chain, and loads the globals through near data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22c88 --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22c88 --count 58 --rebuilt work/rebuild/rplinit.exe --rebuilt-map work/rebuild/replay_buffer_init.map --rebuilt-symbol replay_buffer_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_buffer_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22c88"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_buffer_init module at 0x22c88"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_buffer_init",
+  "name": "replay_buffer_init",
   "notes": [],
   "object_offset": "0x12c88",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 188,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22c88",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:79856b82b8eb01d26fddde5c4a118fe81f33976b6c5b06b4fe945af76ca599d3",
+    "source_digest": "sha256:def7b928dfe42599679ebb6f3bdb4359b24830df8dbef46145257b16fdf610d1",
+    "tool": "run.py"
+  },
+  "role": "asks for the largest memory block, loads the ATTACK keyframe buffer, and fills the two replay ghost records with the half count, the active flags, and the keyframe pointers",
+  "section": "The replay records",
   "size": 188,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_buffer_init_"
 }
