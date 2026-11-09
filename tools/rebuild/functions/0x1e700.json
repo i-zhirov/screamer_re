@@ -1,9 +1,91 @@
 {
   "address": "0x1e700",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 65,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1e700 holds 65 instructions and 179 bytes up to the ret 4 at 0x1e7b0; the next function starts at 0x1e7b4, so the store record keeps the 180-byte extent and sets no function size; the identity check uses 65 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "no direct call, no data reference, and no LE relocation target reaches 0x1e700, so the function has no known caller; the sibling at 0x1e7b4 evaluates the same basis in two dimensions and writes the position and the forward tangent, and the sibling at 0x1e914 evaluates the same basis in three dimensions and also writes the tangent; this function thus samples the three-dimensional position alone"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the output pointer in eax, the three control points in edx, and the fraction on the stack; it computes the basis weights w0 = 0.5 * (1 - t)^2, w2 = 0.5 * t^2, and w1 = 1 - (w0 + w2) over the points at offsets 0, 0xc, and 0x18 and writes the sampled position to +0x00, +0x04, and +0x08"
+    },
+    {
+      "kind": "note",
+      "text": "the double 0.5 sits at object-3 offset 0xba4 and arrives through a global, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+; the module uses the shared fpu_stub.asm, because it needs no truncation and no math helper"
+    },
+    {
+      "kind": "note",
+      "text": "the record keeps the weak name func_1e700, because no caller and no data reference support a stronger name; the record takes the section The vehicle state chain with the spline family, because the two sibling samplers hold the same curve role"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1e700 --count 65"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1e700 --count 65 --rebuilt work/rebuild/func1e0.exe --rebuilt-map work/rebuild/func_1e700.map --rebuilt-symbol func_1e700_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1e700"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three control points at the three-float stride, the three-float output, and the basis scale; the seven paths cover the x, y, and z axes, the mid fraction, the end fraction, the negative first point, and the positive first point; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 48 instructions and 130 bytes up to the ret 4 at 0x1007f; the identity check uses the declared count 65, so the rebuilt range continues past the ret 4 into the harness code; the check stays open at 11 of 65 instructions and 13 of 177 bytes, because V2 does not save the two arguments in the frame, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), and places the basis constant in the local data; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_1e700 module at 0x1e700"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_1e700",
+  "name": "func_1e700",
   "notes": [],
   "object_offset": "0xe700",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 177,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 65,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1e700",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:fcddada95ad689a855f84f29a2a2a1f9712247cd80927b12b3adf4d59a933c4a",
+    "source_digest": "sha256:81151eb6efd221e839fa1902e5a8b9e07c6782b591dd7c1295325bd64c695760",
+    "tool": "run.py"
+  },
+  "role": "evaluates a uniform quadratic B-spline in three dimensions and writes the sampled position",
+  "section": "The vehicle state chain",
   "size": 180,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_1e700_"
 }

@@ -15409,6 +15409,68 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The func_1e700 module at 0x1e700
+
+- Observation: the original body at `0x1e700` holds 65 instructions and 179
+  bytes up to the `ret 4` at `0x1e7b0`.  The next function starts at `0x1e7b4`,
+  so the store record keeps the 180-byte extent and sets no function size.  The
+  record sets the instruction count 65.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1e700 --count 65` and
+  `tools/rebuild/functions/0x1e700.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x1e700`.  The function has no known caller.
+  Evidence: the scan of every `E8` call in object 1, the scan of the literal
+  `0x1e700` and `0xe700` in the image, and the scan of the fixup targets.
+- Observation: the sibling at `0x1e7b4` evaluates the same uniform quadratic
+  basis in two dimensions and writes the position and the forward tangent.  The
+  sibling at `0x1e914` evaluates the same basis in three dimensions and also
+  writes the tangent.  This function writes the three-dimensional position
+  alone.  The three functions thus form the spline sampler family.
+  Evidence: the constant pairs `0xbac`/`0xbb4` and `0xbb8`/`0xbc0` of the
+  siblings, the constant `0xba4` of this function, and the two sibling records.
+- Observation: the function takes the output pointer in `eax`, the three
+  control points in `edx`, and the fraction on the stack.  It computes the
+  basis weights `w0 = 0.5 * (1 - t)^2`, `w2 = 0.5 * t^2`, and
+  `w1 = 1 - (w0 + w2)` over the points at offsets 0, `0xc`, and `0x18`.
+  Evidence: the block at `0x1e706` through `0x1e73d`.
+- Observation: the output at `+0x00`, `+0x04`, and `+0x08` holds the sampled
+  position.  The function writes no tangent component.
+  Evidence: the blocks at `0x1e740` through `0x1e7aa`.
+- Observation: the double 0.5 sits at object-3 offset `0xba4`.  The constant
+  arrives through a global, because the minimal image does not load the
+  constant segment.  The original has the EBP frame, so the module builds with
+  `-of+`.  The module uses the shared FPU stub, because it needs no truncation
+  and no math helper.
+  Evidence: the fixup targets at `0x1e71c` and `0x1e72a`, the value at
+  object-3 offset `0xba4`, and `tools/rebuild/modules/func_1e700.json`.
+- Inference: the name stays the weak fallback `func_1e700`, because no caller
+  and no data reference support a stronger name.  The record takes the section
+  `The vehicle state chain` with the spline family, because the two sibling
+  samplers hold the same curve role.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the three control points at the three-float
+  stride, the three-float output, and the basis scale.  The seven paths cover
+  the x, y, and z axes, the mid fraction, the end fraction, the negative first
+  point, and the positive first point.  The output holds the markers `0`
+  through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_1e700_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_1e700`, and
+  `work/rebuild/func1e0.txt`.
+- Observation: the rebuilt function holds 48 instructions and 130 bytes up to
+  the `ret 4` at `0x1007f`.  The identity check uses the declared count 65, so
+  the rebuilt range continues past the `ret 4` into the harness code.  The
+  check stays open at 11 of 65 instructions and 13 of 177 bytes, because V2
+  does not save the two arguments in the frame, uses a shorter frame, fuses the
+  two `(1 - t)` factors into one `fmul st(0)`, and places the basis constant in
+  the local data.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1e700 --count 65 --rebuilt work/rebuild/func1e0.exe
+  --rebuilt-map work/rebuild/func_1e700.map --rebuilt-symbol func_1e700_` and
+  `python3 tools/rebuild/run.py run --function 0x1e700`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The path_playback_update module at 0x23038
 
 - Observation: the original body at `0x23038` holds 148 instructions and 437
