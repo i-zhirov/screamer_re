@@ -22073,3 +22073,75 @@ temporary `-od` recipe.
   object_request_` and `python3 tools/rebuild/run.py run --function 0x114b4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+
+## The point_height_probe module at 0x1bfd4
+
+- Observation: the original body at `0x1bfd4` holds 46 instructions up to the
+  `ret` at `0x1c07e`.  A second block at `0x1c080` holds the hit path, and the
+  full body ends at the `ret` at `0x1c0aa`.  The next record starts at
+  `0x1c0ac`, so the record keeps the 216-byte extent and sets no separate
+  function size.  The identity check uses 46 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1bfd4 --count 46` and
+  `tools/rebuild/functions/0x1bfd4.json`.
+- Observation: the only direct caller at `0x11dd5` is `collision_cell_test` at
+  `0x11ccc`.  That function has a mode branch.  The mode 1 branch calls the
+  plain hit probe at `0x1c0ac` at `0x11e55`, and every other mode calls this
+  function.  The caller walks the collision records of a spatial cell and
+  probes three points ten units apart.  The record takes the section
+  `The vehicle state chain`.
+  Evidence: the call site at `0x11dd5`, the sibling call at `0x11e55`, and the
+  `collision_cell_test` record.
+- Observation: the global `DAT_000c740` holds the collision shape,
+  `DAT_000c744` holds the current collision record, and `DAT_000c748` holds the
+  object.  The shape holds the x base at `+0x00`, the height base at `+0x04`,
+  the y base at `+0x08`, the entry count at `+0x14`, the vertex array offset at
+  `+0x1c`, and the entry index table offset at `+0x28`.
+  Evidence: the prologue at `0x1bfd4` through `0x1c001`.
+- Observation: the function builds the entry index table at `DAT_000c724` and
+  the vertex array base at `DAT_000c71c`.  It loops over the entry count.  Each
+  unsigned short in the index table selects one polygon entry.  A vertex count
+  word of 4 selects `quad_point_test` at `0x1c03c`.  Any other count selects
+  `tri_point_test` at `0x1c032`.  The callee takes the polygon entry and the
+  current record.
+  Evidence: the blocks at `0x1c006` through `0x1c03c`.
+- Observation: a hit with a zero edge divisor at entry `+0x18` moves to the next
+  entry.  A hit with a non-zero divisor stores the three entry words into
+  `DAT_000c734`, `DAT_000c738`, and `DAT_000c73c`.  It then stores the surface
+  height into `DAT_000c72c` and returns 1.  The height is the shape height base
+  plus the truncated quotient of the negated point dot product and the divisor.
+  A full sweep returns 0.
+  Evidence: the blocks at `0x1c043` through `0x1c07e` and `0x1c080` through
+  `0x1c0aa`.
+- Inference: the hit path, the surface height, and the surface direction support
+  the name `point_height_probe`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the caller at `0x11ccc` and the `terrain_contact_update` record that
+  consumes `DAT_000c72c`, `DAT_000c734`, and `DAT_000c73c`.
+- Observation: the original uses no EBP frame, so the module builds without
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and no assembly.
+  Evidence: `tools/rebuild/point_height_probe.c` and the module recipe.
+- Observation: the harness holds one shape block with the entry index table and
+  up to three polygon entries, one object, one record, and the two callee
+  stubs.  The eight paths cover the tri miss, the quad hit, the zero-divisor
+  skip, the two misses, the signed division, the count word 5, the three-entry
+  sweep, and the two zero-divisor hits.  Every path checks the return value, the
+  callee arguments, and the stored globals.  The output holds the markers `0`
+  through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/point_height_probe_main.c`,
+  `python3 tools/rebuild/harness.py run --module point_height_probe`,
+  `work/rebuild/phprobe.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1bfd4`.
+- Observation: the identity check at 46 instructions holds 9 of 46 instructions
+  and 17 of 154 bytes.  The identity check stays open because V2 uses a register
+  prologue, computes the entry pointer from a byte offset, orders the hit block
+  in another shape, and reads the globals through near data addresses.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1bfd4 --count 46 --rebuilt work/rebuild/phprobe.exe
+  --rebuilt-map work/rebuild/point_height_probe.map --rebuilt-symbol
+  point_height_probe_` and `python3 tools/rebuild/run.py run --function
+  0x1bfd4`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the callee names in the harness stay inferred.
