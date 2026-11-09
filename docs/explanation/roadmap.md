@@ -230,8 +230,9 @@ current host.
   `body_point_place` at `0x1ce38`, and the Phase U module
   `player_body_point_place` at `0x17c6c`, and the Phase U module
   `track_marker_load` at `0x1b198`, and the Phase U module
-  `basis_rotation_mirror` at `0x82074`;
-  thirty modules are verified, one is matching, and two hundred and seventy-four
+  `basis_rotation_mirror` at `0x82074`, and the Phase U module
+  `object_chunk_find` at `0x11410`;
+  thirty modules are verified, one is matching, and two hundred and seventy-five
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -424,7 +425,7 @@ The plan follows the size order, starting with the smallest functions.
     `camera_project` at `0x82c14`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and seventy-four open rebuilds).
+    hundred and seventy-five open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

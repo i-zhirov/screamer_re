@@ -22609,3 +22609,77 @@ temporary `-od` recipe.
   0x82074`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The object_chunk_find module at 0x11410
+
+- Observation: the original body at `0x11410` holds 63 instructions and 163
+  bytes up to the `ret` at `0x114b2`.  The next function starts at `0x114b4`,
+  so the store record keeps the 164-byte extent and sets no separate function
+  size.  The identity check uses 63 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11410 --count
+  63` and `tools/rebuild/functions/0x11410.json`.
+- Observation: the direct callers pass the object table at `0x6530` in `ebx`,
+  the name in `eax`, and a position block in `edx`.  The callers are the
+  wrapper at `0x113c8`, `player_car_init` at `0x136cc`, `car_setup` at
+  `0x142ec`, and the unnamed function at `0x14970`.  The position block holds
+  the object table slot at `+0x00` and takes the chunk index at `+0x04`.
+  Evidence: the call sites `0x113fb`, `0x1389d`, `0x138b5`, `0x138cd`,
+  `0x138e5`, `0x13a88`, `0x13ac2`, `0x14448`, `0x14460`, `0x14478`, `0x14490`,
+  `0x14544`, `0x1457b`, `0x14ad9`, and `0x14b10`.
+- Observation: the names at object-3 offsets 0x58c, 0x592, and 0x59b are
+  `fauto`, `MV_mauto`, and `rauto`; the names at 0x5e3, 0x5e9, and 0x5f2 are
+  the same three names in the `car_setup` path; the names at 0x1d5c through
+  0x1d78 are the wheel names `flx`, `fli`, `blx`, `rli`, `frx`, `fri`, `brx`,
+  and `rri`.
+  Evidence: the string dump at those object-3 offsets and the argument loads
+  at the call sites above.
+- Observation: a record holds the block object at `+0x0c`, the chunk table at
+  `+0x10`, the file record at `+0x14`, and one reserved word at `+0x18`.  The
+  file record holds the chunk count at `+0x14` and the chunk offset table at
+  `+0x18`, one 32-bit file-relative offset per chunk.  A chunk holds its name
+  at `+0x68`.
+  Evidence: the loads at `0x11421` through `0x11465` and the sibling records
+  `object_request`, `object_duplicate`, and `object_load`.
+- Observation: the function selects the record of the position slot, walks the
+  chunk table, and compares each chunk name with the wanted name through the
+  case-insensitive compare at `0x4d9ba`.  A match stores the chunk index at
+  position `+0x04` and returns 0.  A missing name copies the name to the
+  scratch buffer `DAT_00007fe8` and returns 7.
+  Evidence: the loop at `0x11442` through `0x11484`, the compare call at
+  `0x11470`, and the word copy at `0x11486` through `0x114a8`.
+- Inference: the callers pass the car body and wheel part names, and the found
+  index selects a 0x20-byte chunk from the chunk table at record `+0x10`, so
+  the record keeps the name `object_chunk_find` with the confidence `inferred`.
+  The original has no symbol.
+  Evidence: the call sites after the compare, for example `0x138ea` through
+  `0x13916`, and the `.3dx` chunk layout finding.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction and calls no helper
+  other than the compare, so it needs no FPU stub.
+  Evidence: the prologue at `0x11410` through `0x11415` and
+  `tools/rebuild/modules/object_chunk_find.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness assigns every text at run time and uses no initialized
+  static data.
+  Evidence: `tools/rebuild/object_chunk_find_main.c`.
+- Observation: the harness holds the 0x78-record object table, two simulated
+  file records with their chunk offset tables, and the scratch buffer.  The
+  seven paths cover the first, the second, and the third chunk, the missing
+  name with the copied name and the unchanged index, the zero count, the
+  case-insensitive match, and the position slot 5.  The output holds the
+  markers `0` through `6` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_chunk_find_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_chunk_find`, and
+  `work/rebuild/objchf.txt`.
+- Observation: the rebuilt body holds 63 decoded instructions and 142 bytes in
+  the identity window.  The identity check stays open at 15 of 63 instructions
+  and 3 of 142 bytes.  The rebuilt C uses the standard Watcom calling
+  convention, takes the arguments from the stack, and inlines the compare.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11410 --count 63 --rebuilt work/rebuild/objchf.exe
+  --rebuilt-map work/rebuild/object_chunk_find.map --rebuilt-symbol
+  object_chunk_find_` and `python3 tools/rebuild/run.py run --function 0x11410`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
