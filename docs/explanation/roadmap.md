@@ -214,8 +214,9 @@ current host.
   module `view_fade_out` at `0x21da8`, and the Phase T module
   `spatial_grid_relocate` at `0x4cb4c`, and the Phase T module
   `sound_variant_select` at `0x24a84`, and the Phase T module
-  `map_collision_check` at `0x11c00`;
-  thirty modules are verified, one is matching, and two hundred and fifty-six
+  `map_collision_check` at `0x11c00`, and the Phase T module
+  `screen_object_lists_init` at `0x2dff4`;
+  thirty modules are verified, one is matching, and two hundred and fifty-seven
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

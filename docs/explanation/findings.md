@@ -21411,3 +21411,74 @@ temporary `-od` recipe.
   0x11c00`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee name in the harness stay inferred.
+
+## The screen_object_lists_init module at 0x2dff4
+
+- Observation: the original body at `0x2dff4` holds 67 instructions and 191
+  bytes up to the `ret` at `0x2e0b2`.  The next function starts at `0x2e0b4`,
+  so the record keeps the 192-byte extent and sets no separate function size.
+  The identity check uses 67 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2dff4 --count 67` and
+  `tools/rebuild/functions/0x2dff4.json`.
+- Observation: the function walks three tables in object 3.  The first loop
+  resets the 0x50 map object records at object-3 offset `0x1db78` (linear
+  `0x11db78`), stride 0x64, through the helper at `0x2b450`.  The helper
+  receives the record in `eax` and the index in `edx`; it stores the index in
+  the first field, sets the object field `+0x08` to -1, and binds the object
+  slot at `0x1d2d0 + index * 8`.  The module `menu_text_update` at `0x29918`
+  and the module `map_object_place` at `0x2b044` read and fill the same
+  records.
+  Evidence: the loop at `0x2dffd` through `0x2e033`, the helper body at
+  `0x2b450`, and the relocation at slot `0x2e02a` (object 3, offset `0x1db78`).
+- Observation: the second loop binds the 0xe car display records at object-3
+  offset `0x1d550` (linear `0x11d550`), stride 0x44, and the third loop binds
+  the 0xc track display records at object-3 offset `0x1d908` (linear
+  `0x11d908`), stride 0x34.  Both loops call the helper at `0x11850` with the
+  object-list table `0x6530` in `eax`, the list state `0x6350` in `edx`, and
+  the record in `ebx`.  The helper reads the record index and binds the record
+  into the display list.
+  Evidence: the two loops at `0x2e035` through `0x2e0aa`, the helper body at
+  `0x11850`, and the relocations at the slots `0x2e053`, `0x2e05b`, `0x2e062`,
+  `0x2e092`, `0x2e09a`, and `0x2e0a1`.
+- Observation: the eight direct callers are `menu_frame` at `0x29f80` (call at
+  `0x2a19b`), `menu_objects_init` at `0x2aab8` (call at `0x2b037`),
+  `car_select_screen` at `0x2bedc` (call at `0x2bff3`), `track_select_screen`
+  at `0x2c188` (call at `0x2c295`), `name_entry_screen` at `0x2c430` (call at
+  `0x2c5e8`), `championship_screen_init` at `0x2c7a8` (call at `0x2c7e5`),
+  `race_records_screen_init` at `0x2c954` (call at `0x2c9a2`), and
+  `net_race_lobby_init` at `0x2ca40` (call at `0x2ca6f`).
+  Every caller runs the function while it prepares a menu or a race screen,
+  and the car and the track select screens fill the record values after the
+  call.  The callers sit in the `frame_update callees` and the
+  `race_frame callees` sections, so the function takes the section
+  `Program functions` and the name `screen_object_lists_init` with the
+  confidence `inferred`.
+  Evidence: the call sweep for `0x2dff4`, the eight caller records, and the
+  call graph edges to `0x2dff4`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no
+  FPU stub, and the module uses no assembly.
+  Evidence: `tools/rebuild/screen_object_lists_init.c` and the module recipe.
+- Observation: the harness holds the three object record tables and the two
+  callee stubs.  The three paths cover the 0x50 map object records with the
+  record pointer and the index, the 0xe car records and the 0xc track records
+  with the record pointer, the table `0x6530`, and the name `0x6350`, and a
+  second run that doubles the counts.  The output holds the markers `0`, `1`,
+  `2`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/screen_object_lists_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module screen_object_lists_init`,
+  `work/rebuild/scolinit.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2dff4`.
+- Observation: the identity check at 67 instructions holds 12 of 67
+  instructions, 8 of 191 bytes, and 0 of 21 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, keeps the loop
+  bounds and the record pointers in registers, folds the record stride with
+  `imul`, and reaches the constants through near data addresses.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2dff4 --count 67 --rebuilt work/rebuild/scolinit.exe
+  --rebuilt-map work/rebuild/screen_object_lists_init.map --rebuilt-symbol
+  screen_object_lists_init_` and `python3 tools/rebuild/run.py run --function
+  0x2dff4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two callee names in the harness stay inferred.
