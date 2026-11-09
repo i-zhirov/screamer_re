@@ -23311,3 +23311,63 @@ temporary `-od` recipe.
   0x24880`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 48 instructions.
+
+## The curve_speed module at 0x222e0
+
+- Observation: the original body at `0x222e0` holds 49 instructions and 150
+  bytes up to the `ret 4` at `0x22373`.  The two pad bytes at `0x22376` follow
+  the `ret`, and the next record starts at `0x22378`, so the store record keeps
+  the 152-byte extent and sets no separate function size.  The identity check
+  uses 49 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x222e0 --count 49` and
+  `tools/rebuild/functions/0x222e0.json`.
+- Observation: the two direct callers are `object_revolution_step` at
+  `0x1d30c`, with the call site at `0x1d33d`, and `opponent_path_update` at
+  `0x20b1c`, with the call site at `0x20b35`.  Both pass a pointer in eax and
+  a float fraction on the stack and divide a frame step by the result.  The
+  function serves the spline family of the vehicle state chain, so the record
+  takes the section The vehicle state chain.
+  Evidence: the two call sites and the two caller records.
+- Observation: the pointer addresses three two-dimensional control points at a
+  12-byte stride.  The function forms the interpolated chord
+  dx = (P0x - 2 * P1x + P2x) * t + P1x - P0x and
+  dy = (P0y - 2 * P1y + P2y) * t + P1y - P0y.  The length is the magnitude of
+  the quadratic curve derivative at the fraction, so the module names the
+  function `curve_speed`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the block at `0x222e9` through `0x2234d` and
+  `tools/rebuild/curve_speed.c`.
+- Observation: the float 2.0 sits at object-3 offset `0xd78` and arrives
+  through a global, because the minimal image does not load the constant
+  segment.  A zero length returns 1.0 through the test of the `0x7fffffff`
+  mask, because the callers divide by the result.
+  Evidence: the `fmul` at `0x222ef` and `0x22317`, and the test at `0x22355`.
+- Observation: the original calls the square-root wrapper at `0x22bec`.  The
+  local `curve_speed_fpu.asm` supplies `sqrt_` from the hardware and the FPU
+  run-time symbols.  The original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no assembly implementation.
+  Evidence: the call at `0x2234d`, `tools/rebuild/curve_speed_fpu.asm`, and the
+  module recipe.
+- Observation: the harness holds the three control points, the float 2.0 scale,
+  and the fraction of each path.  The eight paths cover the zero guard, the
+  fraction 0, the fraction 1, the x axis, the y axis, the 2.0 scale, the
+  negative component, and the diagonal.  The output holds the markers `0`
+  through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/curve_speed_main.c`,
+  `python3 tools/rebuild/harness.py run --module curve_speed`,
+  `work/rebuild/curve.txt`, and `python3 tools/rebuild/run.py run --function
+  0x222e0`.
+- Observation: the rebuilt body holds 40 instructions and 117 bytes up to the
+  `ret 4` at `0x10074`.  The identity window uses 49 instructions, so it
+  decodes the square-root stub after the rebuilt `ret`.  The identity check
+  stays open at 3 of 49 instructions, 7 of 134 bytes, and 0 of 4 relocation
+  slots, because V2 pushes edx after the frame and uses another frame offset,
+  places the 2.0 scale in the local data, and routes the zero result through a
+  second local.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x222e0 --count 49 --rebuilt work/rebuild/curve.exe
+  --rebuilt-map work/rebuild/curve_speed.map --rebuilt-symbol curve_speed_`
+  and `python3 tools/rebuild/run.py run --function 0x222e0`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 49 instructions.
