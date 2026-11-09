@@ -1,9 +1,95 @@
 {
   "address": "0x11304",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 56,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11304 holds 56 instructions and 196 bytes up to the ret at 0x113c7; the next function starts at 0x113c8, so the body fills the whole 196-byte extent and the record sets no separate function size; the identity check uses 56 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers pass the object-list table 0x6530 in eax; race_end at 0x279a4 calls it at 0x279e0, and race_cleanup at 0x2a1b0 calls it at 0x2a1e1"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the name 3D_HEADER at object-3 offset 0x3d4 and the name 3D_BLKOBJ at object-3 offset 0x3de from the resource list at DAT_0000801c; a non-zero result runs the memory error report at 0x2edad with the same list"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the 0x78 records of 0x1c bytes at the argument: the field +0x14, the field +0x0c, and the field +0x10 become 0, and the field +0x18 becomes -1; the function returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "object_load at 0x10bfc loads the same two resources into the same list and clears the same table fields, so the pairing names the function object_unload with the confidence inferred and the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x78-record table, the resource list pointer, and the three stubs; the four paths cover the two successes, each free failure, and the two free failures; every path checks the two names, the list, and the whole cleared table; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11304 --count 56"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11304 --count 56 --rebuilt work/rebuild/objunld.exe --rebuilt-map work/rebuild/object_unload.map --rebuilt-symbol object_unload_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11304"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_unload module at 0x11304"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 56 instructions holds 20 of 56 instructions, 13 of 184 bytes, and 2 of 13 relocation slots; the rebuilt function body itself holds 34 instructions and 117 bytes, so the 56-instruction sweep continues past its ret into the following harness stub; the identity check stays open because V2 saves the frame first, keeps the table in ecx, uses imul for the 0x1c stride, and clears the four fields through one base register; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_unload",
+  "name": "object_unload",
   "notes": [],
   "object_offset": "0x1304",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 184,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 56,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11304",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:af7a117127c11efd0f553f9d2465f850c0aafe4b0348f0bfa2a9b6185eab80fe",
+    "source_digest": "sha256:29c418d9ac8576bf2b2816a35c68e24d5675c46ec9e7c9b900e1be5894b891ec",
+    "tool": "run.py"
+  },
+  "role": "frees the 3D_HEADER and 3D_BLKOBJ object resources and clears the 0x78-record object table",
+  "section": "Resource loader",
   "size": 196,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_unload_"
 }

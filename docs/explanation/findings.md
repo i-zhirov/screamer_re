@@ -21077,3 +21077,63 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x23dfc`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The object_unload module at 0x11304
+
+- Observation: the original body at `0x11304` holds 56 instructions and 196
+  bytes up to the `ret` at `0x113c7`.  The next function starts at `0x113c8`,
+  so the body fills the whole 196-byte extent and the record sets no separate
+  function size.  The identity check uses 56 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11304 --count 56` and
+  `tools/rebuild/functions/0x11304.json`.
+- Observation: the function has two direct callers.  `race_end` at `0x279a4`
+  calls it at `0x279e0`, and `race_cleanup` at `0x2a1b0` calls it at
+  `0x2a1e1`.  Both callers pass the object-list table `0x6530` in `eax`.
+  Evidence: `python3 tools/le.py calls STARTH.EXE 0x279a4` and
+  `python3 tools/le.py calls STARTH.EXE 0x2a1b0`.
+- Observation: the two immediate operands are relocations to object 3, not
+  plain integers.  The slots at `0x1130f` and `0x1132c` point to object-3
+  offsets `0x3d4` and `0x3de`.  The data at those offsets holds the names
+  `3D_HEADER` and `3D_BLKOBJ`.
+  Evidence: the `relocations()` result for the two slots and the data at
+  linear `0x1003d4` and `0x1003de`.
+- Observation: the function frees the two object resources from the list at
+  `DAT_0000801c` through `resource_free_name` at `0x2f326`.  A non-zero result
+  runs `memory_error_report` at `0x2edad` with the same list.  The function
+  then clears the 0x78 records of 0x1c bytes at the argument: it clears the
+  field `+0x14`, the field `+0x0c`, and the field `+0x10`, and it sets the
+  field `+0x18` to -1.  It returns 0.
+  Evidence: the blocks at `0x1130e` through `0x113c1`.
+- Inference: `object_load` at `0x10bfc` loads the same two resources from the
+  same list and clears the same table fields.  The free step and the table
+  clear release the object store, so the record names the function
+  `object_unload` with the confidence `inferred` and the section
+  `Resource loader`.
+  Evidence: the call graph, `tools/rebuild/object_load.c`, and the record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no
+  FPU stub.  The module uses no assembly.
+  Evidence: `tools/rebuild/object_unload.c` and the module recipe.
+- Observation: the harness holds the 0x78-record table, the resource list
+  pointer, and the three stubs.  The four paths cover the two successes, the
+  failure of each free, and the failure of both frees.  Every path checks the
+  two names, the list, and the whole cleared table.  The output holds the
+  markers `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_unload_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_unload`,
+  `work/rebuild/objunld.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11304`.
+- Observation: the identity check at 56 instructions holds 20 of 56
+  instructions, 13 of 184 bytes, and 2 of 13 relocation slots.  The rebuilt
+  function body itself holds 34 instructions and 117 bytes, so the
+  56-instruction sweep continues past its `ret` into the following harness
+  stub.  The identity check stays open because V2 saves the frame first, keeps
+  the table in `ecx`, uses `imul` for the 0x1c stride, and clears the four
+  fields through one base register.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11304 --count 56 --rebuilt work/rebuild/objunld.exe
+  --rebuilt-map work/rebuild/object_unload.map --rebuilt-symbol
+  object_unload_` and `python3 tools/rebuild/run.py run --function 0x11304`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.

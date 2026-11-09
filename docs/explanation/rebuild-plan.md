@@ -463,7 +463,7 @@ reproduce the original bytes.
 | `0x1b23c` | `cockpit_load` (done) | 200 | 57 | 9 | 0 |
 | `0x4d3fc` | `lzw_expand` (done) | 199 | 54 | 2 | 0 |
 | `0x23dfc` | `volume_bar_draw` (done) | 199 | 63 | 2 | 0 |
-| `0x11304` | unnamed | 196 | 56 | 4 | 0 |
+| `0x11304` | `object_unload` (done) | 196 | 56 | 4 | 0 |
 | `0x21da8` | unnamed | 195 | 63 | 7 | 25 |
 | `0x4cb4c` | unnamed | 194 | 75 | 0 | 0 |
 | `0x24a84` | unnamed | 194 | 58 | 1 | 0 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred eighty-one modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred eighty-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -621,5 +621,6 @@ and `camera_pose_build` at `0x1a144`, and
 `0x1ff70`, and the Phase T module `choice_save` at `0x1be6c`, and the Phase T
 module `func_11230` at `0x11230`, and the Phase T module `cockpit_load` at
 `0x1b23c`, and the Phase T module `lzw_expand` at
-`0x4d3fc`, and the Phase T module `volume_bar_draw` at `0x23dfc`.
-The next unnamed function is `0x11304`.
+`0x4d3fc`, and the Phase T module `volume_bar_draw` at `0x23dfc`, and the
+Phase T module `object_unload` at `0x11304`.
+The next unnamed function is `0x21da8`.
