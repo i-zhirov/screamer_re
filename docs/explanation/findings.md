@@ -22355,3 +22355,62 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`, and the
   tail below `0x12ec1` is outside that window.
+
+## The body_point_place module at 0x1ce38
+
+- Observation: the original body at `0x1ce38` holds 45 instructions and 165
+  bytes up to the `ret` at `0x1cedc`.  The next function starts at `0x1cee0`,
+  so the store record keeps the 168-byte extent and sets no separate function
+  size.  The identity check uses 45 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ce38 --count
+  45`.
+- Observation: the only direct caller at `0x1c7bc` is `object_prepare` at
+  `0x1c79c`, which runs the step when the state at `+0x414` is set.
+  `object_prepare` is a callee of `object_update_all` at `0x2786c`, so the
+  record takes the section `object_prepare callees`, like the adjacent
+  preparation steps `track_progress_update` at `0x1db94` and
+  `terrain_contact_update` at `0x1cbac`.
+  Evidence: the call at `0x1c7bc` and the records at `0x1db94` and `0x1cbac`.
+- Observation: the function rotates the two local body points at `+0x41c` and
+  `+0x428` by the negative heading at `+0x4a8` through the rotation helper at
+  `0x2218c`.  It then adds the car world position at `+0x498` and `+0x4a0` and
+  stores the two world body points at `+0x434` and `+0x440`.  A point holds x
+  at `+0x00`, y at `+0x04`, and z at `+0x08`.  The function writes only x and
+  z, because `car_collision_pass` at `0x1d00c` compares the ground plane.
+  Evidence: the block at `0x1ce42` through `0x1ced2` and
+  `tools/rebuild/car_collision_pass.c`.
+- Inference: the two body points at `+0x434` and `+0x440`, the caller
+  `object_prepare`, and the adjacent body-point modules support the name
+  `body_point_place`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the caller at `0x1c7bc` and `car_collision_pass` at `0x1d00c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses only the `fld`, `fchs`, and `fstp` instructions,
+  so it calls no math routine and needs no truncating stub.  The shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: the block at `0x1ce45` through `0x1ce50` and
+  `tools/rebuild/modules/body_point_place.json`.
+- Observation: the harness holds the car record with the two local points, the
+  heading, the world position, the two world points, and the rotation stub.
+  The six paths cover the two call pointers and the negated heading, the
+  heading `+0.0` and `-0.0`, the heading `-2.0`, the x and z offsets on both
+  points, and the heading `2.5`.  The output holds the markers `0` through `5`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/body_point_place_main.c`,
+  `python3 tools/rebuild/harness.py run --module body_point_place`,
+  `work/rebuild/bpp.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1ce38`.
+- Observation: the rebuilt body holds 45 decoded instructions and 174 bytes in
+  the identity window.  The identity check stays open at 8 of 45 instructions
+  and 13 of 165 bytes.  V2 saves `ecx` and `edx` first, keeps the object in
+  `ecx`, forms the two point pointers with `lea`, and orders the tail stores in
+  another shape.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ce38 --count 45 --rebuilt work/rebuild/bpp.exe
+  --rebuilt-map work/rebuild/body_point_place.map --rebuilt-symbol
+  body_point_place_` and `python3 tools/rebuild/run.py run --function
+  0x1ce38`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
