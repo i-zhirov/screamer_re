@@ -14729,6 +14729,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The car_nearby_mark module at 0x126e4
+
+- Observation: the original body at `0x126e4` holds 60 instructions and 178
+  bytes up to the `ret` at `0x12795`.  The next function starts at `0x127a0`, so
+  the store record keeps the 188-byte extent and sets no function size.  The
+  identity check uses 60 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x126e4 --count 60` and
+  `tools/rebuild/functions/0x126e4.json`.
+- Observation: the only direct caller at `0x1c7f4` is the unnamed per-object
+  step at `0x1c7d0`.  That step calls this function in `eax`, then runs
+  `car_collision_pass` at `0x1d00c`, then runs `opponent_avoid_player` at
+  `0x1e414`.  The object update at `0x2003c` runs the step on each 0x590-byte
+  car record at `DAT_00110ab8` after `object_prepare`.  The record therefore
+  takes the section `object update callees`.
+  Evidence: the call at `0x1c7f4`, the block at `0x1c7d0` through `0x1c80c`,
+  and the loop at `0x20168` through `0x20187`.
+- Observation: the function clears the mask at `+0x0c`, reads the record number
+  at `+0x00`, and starts the scan at the next record up to the count
+  `DAT_0010f8ec`.  A candidate with a zero physics gate at `+0x414` is skipped.
+  A candidate whose position at `+0x498` or `+0x4a0` differs by 1500 units or
+  more on either axis is skipped.  A nearby candidate sets its index bit in the
+  mask.
+  Evidence: the block at `0x126ec` through `0x1278e`.
+- Observation: `car_collision_pass` at `0x1d00c` reads the same mask at
+  `+0x0c`, and `car_proximity_pass` reads the player mask at `+0x104` that the
+  sibling marker at `0x12378` builds.  This function thus marks the later car
+  records that the collision pass then tests.
+  Evidence: the mask read at `0x1d17d` and the sibling marker at `0x12378`.
+- Inference: the caller step, the mask consumer, and the two-axis range test
+  support the name `car_nearby_mark`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct call,
+  so the module uses no FPU stub and no assembly.
+  Evidence: `tools/rebuild/car_nearby_mark.c` and the module recipe.
+- Observation: the harness holds five car records and the record count.  The
+  eleven paths cover the cleared mask with no later record, the clear physics
+  gate, the out-of-range x and z, the near candidate, the start after the own
+  record, the two marks, the exact 1500 boundary, the negative delta, and the
+  mixed near and far pair.  The output holds the markers `0` through `9` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/car_nearby_mark_main.c`,
+  `python3 tools/rebuild/harness.py run --module car_nearby_mark`,
+  `work/rebuild/carnear.txt`, and `python3 tools/rebuild/run.py run --function
+  0x126e4`.
+- Observation: the identity check at 60 instructions holds 7 of 60
+  instructions, 4 of 178 bytes, and 0 of 7 relocation slots.  The identity check
+  stays open because V2 saves the frame first, keeps the record pointer and the
+  index in registers, calls a local absolute helper in place of the inline sign
+  extend, and uses another loop layout.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x126e4 --count 60 --rebuilt work/rebuild/carnear.exe
+  --rebuilt-map work/rebuild/car_nearby_mark.map --rebuilt-symbol
+  car_nearby_mark_` and `python3 tools/rebuild/run.py run --function 0x126e4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The car_collision_pass module at 0x1d00c
 
 - Observation: the original body at `0x1d00c` holds 144 instructions and 497

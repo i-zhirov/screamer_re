@@ -476,7 +476,7 @@ reproduce the original bytes.
 | `0x14d2c` | `replay_playback_start` (done) | 180 | 58 | 3 | 0 |
 | `0x10ed4` | `object_duplicate` (done) | 180 | 62 | 1 | 0 |
 | `0x1e700` | `func_1e700` (done) | 179 | 65 | 0 | 45 |
-| `0x126e4` | unnamed | 178 | 60 | 0 | 0 |
+| `0x126e4` | `car_nearby_mark` (done) | 178 | 60 | 0 | 0 |
 | `0x114b4` | unnamed | 178 | 68 | 0 | 0 |
 | `0x1bfd4` | unnamed | 171 | 46 | 2 | 0 |
 | `0x2497c` | unnamed | 170 | 61 | 0 | 5 |
@@ -486,7 +486,7 @@ This table starts Phase T.
 
 ## Position
 
-Two hundred ninety-four modules carry a recipe and a result: the twelve Phase A modules,
+Two hundred ninety-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -632,5 +632,6 @@ the Phase T module `map_collision_check` at `0x11c00`, and the Phase T module
 `replay_buffer_init` at `0x22c88`, and the Phase T module `cd_check` at
 `0x157b8`, and the Phase T module `replay_playback_start` at `0x14d2c`, and the
 Phase T module `object_duplicate` at `0x10ed4`, and the Phase T module
-`func_1e700` at `0x1e700`.
-The next unnamed function is `0x126e4`.
+`func_1e700` at `0x1e700`, and the Phase T module `car_nearby_mark` at
+`0x126e4`.
+The next unnamed function is `0x114b4`.
