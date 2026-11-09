@@ -1,0 +1,31 @@
+{
+  "exe": "rview.exe",
+  "map": "replay_view_update.map",
+  "name": "replay_view_update",
+  "run": {
+    "command": "rview.exe > rview.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rview.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_view_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_view_update_main.c"
+    }
+  ]
+}

@@ -22746,3 +22746,67 @@ temporary `-od` recipe.
   0x81fd0`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The replay_view_update module at 0x202c0
+
+- Observation: the original body at `0x202c0` holds 37 instructions and 160
+  bytes up to the `ret` at `0x2035f`.  The next recorded function starts at
+  `0x20360`, so the store record keeps the 160-byte extent and sets no separate
+  function size.  The identity check uses 37 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x202c0 --count
+  37` and `tools/rebuild/functions/0x202c0.json`.
+- Observation: the only direct caller is the race frame update at `0x1ff70`.
+  It calls this view group at `0x1ffc3`.  The group runs when the input flag
+  `DAT_00118e1d` bit 0 is set and the mode byte `DAT_0011d260` bit 4 is set.
+  The mode 4 handler at `0x12e18` starts the ATTACK_RES replay session, so the
+  group belongs to the replay race.  The frame update calls the function
+  directly, so the record takes the section `Program functions`.
+  Evidence: the call at `0x1ffc3`, the gates at `0x202c4` and `0x202d1`, the
+  frame update, and the `game_mode_4_start` record at `0x12e18`.
+- Observation: the function calls `race_position_update` at `0x20428` first.
+  It calls `player_car_view_update` at `0x16f34` on the player object
+  `0xf91c`.  It forms the ghost record `0x18e8c + DAT_00118ed4 * 0x24` and
+  passes it to `path_keyframe_append` at `0x231f0`.  It calls
+  `path_playback_update` at `0x23038` with the playback block `0x18ed8` and the
+  second argument 0.
+  Evidence: the blocks at `0x202de` through `0x20318`.
+- Observation: the function then runs the physics group at `0x15a80`, the
+  effect group at `0x15bac`, the step group at `0x15ab8`, the opponent group at
+  `0x15b80`, `player_update` at `0x19ab0`, `player_car_link` at `0x15c1c`,
+  and `path_playback_apply` at `0x23328` with the playback block.  The player
+  calls receive the fixed player object `0xf91c`.
+  Evidence: the blocks at `0x2031c` through `0x20359`.
+- Inference: the mode 4 handler, the keyframe append, the playback block, and
+  the ghost record support the name `replay_view_update`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction and calls no
+  function that needs an FPU stub.
+  Evidence: the prologue at `0x202c0` through `0x202c2` and
+  `tools/rebuild/modules/replay_view_update.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness assigns the values at run time and uses no initialized
+  static data.
+  Evidence: `tools/rebuild/replay_view_update_main.c`.
+- Observation: the harness holds the two gate bytes, the ghost index, the ghost
+  record array, the playback block, and the eleven callee stubs.  The five
+  paths cover the clear input gate, the clear mode gate, the ghost index 0, 1,
+  and 2, and the extra mode bits.  The output holds the markers `0` through `4`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/replay_view_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_view_update`, and
+  `work/rebuild/rview.txt`.
+- Observation: the rebuilt body holds 37 decoded instructions and 160 bytes in
+  the identity window.  The identity check stays open at 14 of 37 instructions
+  and 31 of 160 bytes.  The rebuilt C uses the standard Watcom calling
+  convention, saves the frame pointer first, and places the arguments on the
+  stack.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x202c0 --count 37 --rebuilt work/rebuild/rview.exe
+  --rebuilt-map work/rebuild/replay_view_update.map --rebuilt-symbol
+  replay_view_update_` and `python3 tools/rebuild/run.py run --function
+  0x202c0`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
