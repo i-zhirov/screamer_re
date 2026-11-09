@@ -1,9 +1,91 @@
 {
   "address": "0x11c00",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 64,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11c00 holds 64 instructions and 193 bytes up to the ret at 0x11cc0; the normal exit jumps to the second epilogue at 0x11cc1, which returns 0; the next function starts at 0x11ccc, so the record keeps the 204-byte extent and sets no function size; the identity check uses 64 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the three-by-three cell neighborhood of the spatial grid at DAT_00102fa4; it reads the world position from DAT_00108038 and DAT_00108040, adds the map bias 0x100000 to each axis, and divides each sum by the cell size 0x2000; the table at object 3 offset 0x1cf0 holds nine 0xc-byte records with the column offset first, an unused field, and the row offset third"
+    },
+    {
+      "kind": "note",
+      "text": "a row pointer or a cell pointer of -1 marks an empty slot, so the scan skips it; the row slot address lands in DAT_00108030 and the cell slot address lands in DAT_00108034, where the callee collision_cell_test at 0x11ccc reads it; a non-zero result reports the hit and returns 1, and the scan returns 0 after the nine slots"
+    },
+    {
+      "kind": "note",
+      "text": "the callers are wheel_contact_update at 0x11a30, body_point_collision_detect at 0x11e74, terrain_contact_update at 0x1cbac, car_collision_response at 0x17828, opponent_route_setup at 0x1517c, and ai_update at 0x205c4; they publish the world position through the two globals and read the contact back, so the record takes the section The vehicle state chain; track_nearest_node at 0x120c0 scans the same grid with the same bias and the same cell size; the record keeps the name map_collision_check with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the spatial grid, three rows, the nine offset records, the two slot globals, the world position, and the collision_cell_test stub; the nine paths cover the empty grid, a row with no cell, the centre miss, the centre hit, the right cell, the mode passthrough, the row-plus-one cell, the row-minus-one and column-minus-one cell, and the row-minus-one and column-plus-one cell; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 64 instructions holds 13 of 64 instructions, 9 of 184 bytes, and 0 of 17 relocation slots; the identity check stays open because V2 saves the frame in another order, keeps the loop index in edx and the position terms in registers and locals, folds the cell offset with imul instead of the lea, sub, and shl chain of the original, and reaches both return values along one shared epilogue; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11c00 --count 64"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11c00 --count 64 --rebuilt work/rebuild/mcolchck.exe --rebuilt-map work/rebuild/map_collision_check.map --rebuilt-symbol map_collision_check_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11c00"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_collision_check module at 0x11c00"
+    }
+  ],
+  "implementation": "c",
+  "module": "map_collision_check",
+  "name": "map_collision_check",
   "notes": [],
   "object_offset": "0x1c00",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 184,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 64,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11c00",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:928572b5082a0caa08a28b0fb2883b5853c341b8a6212001e9048b83e1d0ec01",
+    "source_digest": "sha256:9fadd025b2d5e7bc9c91da09f72f4912d16e0190508496c8e883296b7eee5b32",
+    "tool": "run.py"
+  },
+  "role": "walks the three-by-three cell neighborhood of the spatial grid at DAT_00102fa4 and reports the first cell whose collision_cell_test at 0x11ccc finds a contact",
+  "section": "The vehicle state chain",
   "size": 204,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_collision_check_"
 }

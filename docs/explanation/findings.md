@@ -21342,3 +21342,72 @@ temporary `-od` recipe.
   0x24a84`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The map_collision_check module at 0x11c00
+
+- Observation: the original body at `0x11c00` holds 64 instructions and 193
+  bytes up to the `ret` at `0x11cc0`.  The normal exit jumps to the second
+  epilogue at `0x11cc1`, which returns 0.  The next function starts at
+  `0x11ccc`, so the record keeps the 204-byte extent and sets no separate
+  function size.  The identity check uses 64 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11c00 --count 64` and
+  `tools/rebuild/functions/0x11c00.json`.
+- Observation: the function walks the three-by-three cell neighborhood of the
+  spatial grid at `DAT_00102fa4`.  It reads the world position from
+  `DAT_00108038` and `DAT_00108040`, adds the map bias 0x100000 to each axis,
+  and divides each sum by the cell size 0x2000.  The table at object 3 offset
+  `0x1cf0` holds nine 0xc-byte records.  The first field is the column offset,
+  the second field is unused, and the third field is the row offset.  The nine
+  records cover the full neighborhood.
+  Evidence: the reads at `0x11c0e` through `0x11c2b`, the table reads at
+  `0x11c48` through `0x11c93`, and the table bytes at object 3 offset `0x1cf0`.
+- Observation: a row pointer or a cell pointer equal to -1 marks an empty slot,
+  so the scan skips it.  The row slot address lands in `DAT_00108030` and the
+  cell slot address lands in `DAT_00108034`.  The callee `collision_cell_test`
+  at `0x11ccc` reads the cell slot from `DAT_00108034`.  The function calls the
+  callee with the mode from `eax`, returns 1 on a non-zero result, and returns 0
+  after the nine slots.
+  Evidence: the loop at `0x11c35` through `0x11cc1` and the
+  `collision_cell_test` record.
+- Observation: the callers are `wheel_contact_update` at `0x11a30`,
+  `body_point_collision_detect` at `0x11e74`, `terrain_contact_update` at
+  `0x1cbac`, `car_collision_response` at `0x17828`,
+  `opponent_route_setup` at `0x1517c`, and `ai_update` at `0x205c4`.  They
+  publish the world position through
+  the two globals and read the contact back, so the function takes the section
+  `The vehicle state chain` and the name `map_collision_check` with the
+  confidence `inferred`.  `track_nearest_node` at `0x120c0` scans the same grid
+  with the same bias and the same cell size.
+  Evidence: the call sweep for `0x11c00`, the `wheel_contact_update` record, and
+  the `track_nearest_node` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub, and the module uses no assembly.
+  Evidence: `tools/rebuild/map_collision_check.c` and the module recipe.
+- Observation: the harness holds the spatial grid, three rows, the nine offset
+  records, the two slot globals, the world position, and the
+  `collision_cell_test` stub.  The harness fills the offset table at run time,
+  because the minimal image does not load the initialized data segment.  The
+  nine paths cover the empty grid, a row with no cell, the centre miss, the
+  centre hit, the right cell, the mode passthrough, the row-plus-one cell, the
+  row-minus-one and column-minus-one cell, and the row-minus-one and
+  column-plus-one cell.  The output holds the markers `0` through `8` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/map_collision_check_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_collision_check`,
+  `work/rebuild/mcolchck.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x11c00`.
+- Observation: the identity check at 64 instructions holds 13 of 64
+  instructions, 9 of 184 bytes, and 0 of 17 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, keeps the loop
+  index in `edx` and the position terms in registers and locals, folds the cell
+  offset with `imul` instead of the `lea`, `sub`, and `shl` chain of the
+  original, and reaches both return values along one shared epilogue.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11c00 --count 64 --rebuilt work/rebuild/mcolchck.exe
+  --rebuilt-map work/rebuild/map_collision_check.map --rebuilt-symbol
+  map_collision_check_` and `python3 tools/rebuild/run.py run --function
+  0x11c00`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee name in the harness stay inferred.
