@@ -22273,3 +22273,85 @@ temporary `-od` recipe.
   0x12378`.
 - Limit: the original has no symbol name for this function.  The module name and
   the helper name in the harness stay inferred.
+
+## The game_mode_4_start module at 0x12e18
+
+- Observation: the original body at `0x12e18` holds 54 instructions and 169
+  bytes up to the first `ret` at `0x12ec0`.  That `ret` is the error return of
+  the ghost loader.  The full body continues through the shared epilogue at
+  `0x12f46` to the `ret` at `0x12f4e`.  One `nop` pad byte follows at
+  `0x12f4f`, and the next entry `game_mode_100_start` starts at `0x12f50`, so
+  the record keeps the 312-byte extent and sets no separate function size.  The
+  identity check uses 54 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12e18 --count 54` and
+  `tools/rebuild/functions/0x12e18.json`.
+- Observation: the only direct caller is the game mode dispatch in
+  `race_session_start` at `0x128e0`, which sends the mode 4 to this function
+  through the call at `0x129d8`.  The caller takes the section
+  `The timing and filter layer`, so the record takes the same section.  The
+  caller and the program map already hold the name `game_mode_4_start` with the
+  confidence `inferred`.
+  Evidence: the dispatch at `0x12968`, the call at `0x129d8`, and the mode 4 row
+  of the dispatch table in `docs/reference/program-map.md`.
+- Observation: the function loads the player car through `player_car_init` at
+  `0x136cc` with the object pointer `0xf91c` and the load flag.  A non-zero
+  result returns at once.  The function then runs `scene_setup` at `0x15984`
+  with the load flag.
+  Evidence: the calls at `0x12e2e` and `0x12e47`.
+- Observation: when the load flag is set, the function loads the `ATTACK_RES`
+  resource through `resource_get` at `0x2eed0` with the object-3 name at offset
+  `0x465` and the size `0x1f400`.  A zero result reports the fault through
+  `memory_error_report` at `0x2edad`.  The function then runs
+  `replay_buffer_init` at `0x22c88` and frees the second `ATTACK_RES` name at
+  object-3 offset `0x470` through `resource_free_name` at `0x2f326`.
+  Evidence: the calls at `0x12e61`, `0x12e6f`, `0x12e74`, and `0x12e83`, and the
+  two strings at object-3 offsets `0x465` and `0x470`.
+- Observation: the function copies the player index `DAT_0011d2a0` to
+  `DAT_0018ec8` and `DAT_0018ea4`.  When the replay flag `DAT_0011d264` is set,
+  it loads the ghost record through `replay_load_atk` at `0x1ba4c` with the map
+  name `DAT_0011d294`, and a non-zero result returns at once.  It then starts
+  the playback through `replay_playback_start` at `0x14d2c` with the playback
+  block `DAT_0018ed8` and the flipped ghost index `DAT_0018ed4 ^ 1`, and sets
+  `DAT_001100a4` to 1.  A clear flag sets that cell to 0.
+  Evidence: the block at `0x12e88` through `0x12ee1`.
+- Observation: the tail clears `DAT_0018eb4` and `DAT_0018e90`, sets
+  `DAT_0000cf40` to 1, sets `DAT_0018e98` and `DAT_0018ebc` to 1 when each is
+  set, and loads the player car again through `player_car_init` with the zero
+  load flag.  A non-zero result returns at once, and the success path returns 0.
+  Evidence: the block at `0x12ee7` through `0x12f4e`.
+- Inference: the mode 4 dispatch, the `ATTACK_RES` resource, the replay buffer,
+  the ghost load, the playback start, and the second car load support the name
+  `game_mode_4_start`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the caller at `0x129d8` and the sibling modules `replay_load_atk`,
+  `replay_playback_start`, and `replay_buffer_init`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and no assembly.
+  Evidence: `tools/rebuild/game_mode_4_start.c` and the module recipe.
+- Observation: the harness holds the archive pointer, the player index, the
+  replay flag, the map name, the playback block, the ghost index, the state
+  cells, and the eight callee stubs.  The nine paths cover the zero load flag,
+  the set load flag with a non-null resource, the set load flag with a null
+  resource, the set replay flag with a failed ghost load, the set replay flag
+  with a zero ghost load and the ghost index 0, the two set flag cells, the
+  failed second car load, the ghost index 1, and the failed first car load.  The
+  output holds the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/game_mode_4_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module game_mode_4_start`,
+  `work/rebuild/gm4.txt`, and `python3 tools/rebuild/run.py run --function
+  0x12e18`.
+- Observation: the rebuilt module holds 54 decoded instructions and 215 bytes
+  in the identity window.  The identity check stays open at 16 of 54
+  instructions and 18 of 169 bytes.  V2 saves the frame first, keeps the load
+  flag and the result in registers, passes the data pointers as near offsets,
+  and orders the tail stores in another shape.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12e18 --count 54 --rebuilt work/rebuild/gm4.exe
+  --rebuilt-map work/rebuild/game_mode_4_start.map --rebuilt-symbol
+  game_mode_4_start_` and `python3 tools/rebuild/run.py run --function
+  0x12e18`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`, and the
+  tail below `0x12ec1` is outside that window.

@@ -225,8 +225,9 @@ current host.
   `0x126e4`, and the Phase T module `object_request` at `0x114b4`, and the
   Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
   `sound_queue_promote` at `0x2497c`, and the Phase T module
-  `player_nearby_mark` at `0x12378`;
-  thirty modules are verified, one is matching, and two hundred and sixty-nine
+  `player_nearby_mark` at `0x12378`, and the Phase U module
+  `game_mode_4_start` at `0x12e18`;
+  thirty modules are verified, one is matching, and two hundred and seventy
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
