@@ -21482,3 +21482,64 @@ temporary `-od` recipe.
   0x2dff4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the two callee names in the harness stay inferred.
+
+## The credits_fade_out module at 0x27e08
+
+- Observation: the original body at `0x27e08` holds 55 instructions and 190
+  bytes up to the `ret` at `0x27ec5`.  The next function starts at `0x27ec8`
+  after two padding bytes, so the record keeps the 192-byte extent and sets no
+  separate function size.  The identity check uses 55 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27e08 --count 55` and
+  `tools/rebuild/functions/0x27e08.json`.
+- Observation: the only direct caller at `0x27a53` is `hud_update` at
+  `0x27a34`.  It runs the function when bit 1 of the session state
+  `DAT_0011ce44` is set, so the function is the second credits overlay.
+  `race_loop` at `0x27700` runs `object_update_all` until the session state
+  reaches 4, and this function sets the state 4 when the fade reaches zero.
+  The caller sits in the `object_update_all callees` section, so the function
+  takes that section and the name `credits_fade_out` with the confidence
+  `inferred`.
+  Evidence: the call sweep for `0x27e08`, the body of `hud_update`, the
+  `race_loop` loop test on `DAT_0011ce44`, and the `mov` to `DAT_0011ce44` at
+  `0x27e45`.
+- Observation: the function decreases the fade level `DAT_0011d224` by the
+  frame delta `DAT_00118e04`.  A new level below zero presents the black screen
+  with the scale 0 and the offset 0 through `video_present` at `0x27ec8`, moves
+  the view to zero through `view_move` at `0x1f94c`, and sets the session
+  state `DAT_0011ce44` to 4.
+  Evidence: the compare at `0x27e26` through `0x27e2f` and the fall-through
+  block at `0x27e31` through `0x27e4f`.
+- Observation: a new level at or above zero scales the three view offsets
+  `DAT_0011d2c0`, `DAT_0011d2bc`, and `DAT_0011d2c4` by the new fade level,
+  truncates each value toward zero through the Watcom helper at `0x4d9f4`, and
+  calls `view_move` in the order `1d2c0`, `1d2bc`, `1d2c4`.  It passes the
+  scaled `1d2bc` value to the mouse helper at `0x1f8b4` and presents the screen
+  with the new fade level as the scale and 0 as the offset.
+  Evidence: the block at `0x27e51` through `0x27ebb` and the four `call
+  0x4d9f4` sites.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function truncates through `0x4d9f4`, so the local
+  `credits_fade_out_fpu.asm` makes `__CHP` truncate toward zero, and the module
+  uses no assembly body.
+  Evidence: `tools/rebuild/credits_fade_out.c` and the module recipe.
+- Observation: the harness holds the frame delta, the fade level, the three
+  view offsets, the session state, and the three callee stubs.  The four paths
+  cover the positive fade, the fade that reaches zero, the fade below zero with
+  the state 4, and the negative offsets that truncate toward zero.  The output
+  holds the markers `0`, `1`, `2`, `3`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/credits_fade_out_main.c`,
+  `python3 tools/rebuild/harness.py run --module credits_fade_out`,
+  `work/rebuild/cfadeout.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x27e08`.
+- Observation: the identity check at 55 instructions holds 11 of 55
+  instructions, 39 of 171 bytes, and 2 of 14 relocation slots.  The identity
+  check stays open because V2 saves the frame in another order, keeps the fade
+  level in a local, truncates through its own `__CHP` stub, and loads the
+  globals through near data operands.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27e08 --count 55 --rebuilt work/rebuild/cfadeout.exe
+  --rebuilt-map work/rebuild/credits_fade_out.map --rebuilt-symbol
+  credits_fade_out_` and `python3 tools/rebuild/run.py run --function 0x27e08`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the two helper names in the harness stay inferred.
