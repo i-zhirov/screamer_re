@@ -23017,3 +23017,65 @@ temporary `-od` recipe.
   0x1aec4`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 52 instructions.
+
+## The traffic_nearby_mark module at 0x12424
+
+- Observation: the plan row records a 155-byte body of 56 instructions, 0
+  calls, and 0 FPU instructions.  The body starts at `0x12424` and ends at the
+  `ret` at `0x124be`.  The next function starts at `0x124c0`, so the store
+  record keeps the 156-byte extent and sets no separate function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12424 --count 56` and
+  `tools/rebuild/functions/0x12424.json`.
+- Observation: the only direct caller at `0x15b64` is the traffic effect group
+  at `0x15b44`.  That group calls this function, then
+  `traffic_collision_pass` at `0x175dc`, then `opponent_start` at `0x124c0` on
+  the player object at object-3 offset `0xf91c`.  The traffic view group at
+  `0x201d0` runs the effect group at `0x20268`, so the record takes the section
+  `The vehicle state chain`.
+  Evidence: the block at `0x15b44` through `0x15b7c`, the block at `0x201d0`
+  through `0x202bc`, and the `traffic_collision_pass` finding.
+- Observation: the function clears the nearby mask at `+0x104`, then scans the
+  0x2a8-byte traffic records at `DAT_00113cd8` with the fixed loop bound 8.  A
+  record with a negative first field is skipped.  The player object holds its
+  position at `+0x4b0` and `+0x4b8` and the traffic record holds its position at
+  `+0x3c` and `+0x44`.  A record within 1500 units of the player on both axes
+  sets its index bit in the mask.
+  Evidence: the loop at `0x12453` through `0x124b5`, the bound compare at
+  `0x12453`, and the mask write at `0x124a5`.
+- Observation: `traffic_collision_pass` reads the mask at `+0x104`, so this
+  function marks the traffic records that the pass then tests.  The sibling
+  markers `player_nearby_mark` at `0x12378` and `car_nearby_mark` at `0x126e4`
+  build the same kind of mask for the car records.
+  Evidence: the mask read at `0x17627` and the two sibling records.
+- Inference: the traffic table, the mask, and the caller support the name
+  `traffic_nearby_mark`.  The original has no symbol, so the module records the
+  name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction and no direct call,
+  so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x12424` through `0x1242e` and
+  `tools/rebuild/modules/traffic_nearby_mark.json`.
+- Observation: the harness holds nine traffic records and one player object
+  with the mask at `+0x104` and the position at `+0x4b0` and `+0x4b8`.  The
+  nine paths cover the inactive set, the 2000-unit x and z skips, the near
+  record, the two index bits from index 0, the exact 1500-unit boundary, the
+  negative delta of 1499, the last slot at index 7, and a near record at index
+  8 past the fixed count 8.  The output holds the markers `0` through `8` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/traffic_nearby_mark_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_nearby_mark`, and
+  `work/rebuild/tnear.txt`.
+- Observation: the rebuilt body holds 56 decoded instructions and 168 bytes.
+  The identity check stays open at 9 of 56 instructions and 7 of 155 bytes.
+  V2 saves `ebp` first, moves the player pointer to `edx`, keeps the record
+  pointer in `ebx` and the index in `esi`, reads the record state with a memory
+  compare, and calls a local absolute helper in place of the inline sign
+  extend.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12424 --count 56 --rebuilt work/rebuild/tnear.exe
+  --rebuilt-map work/rebuild/traffic_nearby_mark.map --rebuilt-symbol
+  traffic_nearby_mark_` and `python3 tools/rebuild/run.py run --function
+  0x12424`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 56 instructions.
