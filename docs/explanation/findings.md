@@ -22009,3 +22009,67 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x157b8`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
+
+## The object_request module at 0x114b4
+
+- Observation: the original body at `0x114b4` holds 68 instructions and 178
+  bytes up to the `ret` at `0x11565`.  The next function starts at `0x11568`, so
+  the record keeps the 180-byte extent and sets no separate function size.  The
+  identity check uses 68 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x114b4 --count 68` and
+  `tools/rebuild/functions/0x114b4.json`.
+- Observation: the only direct caller at `0x110a4` is the unnamed object loader
+  wrapper at `0x11060`.  That wrapper searches the object table by name through
+  the case-insensitive compare at `0x4d9ba`, makes one more instance of an
+  existing object through `object_duplicate` at `0x10ed4`, and otherwise calls
+  this function and then `object_load` at `0x10bfc`.  The table is the
+  0x78-record object table at object-3 offset `0x6530`.  The caller is in the
+  resource layer, so the record takes the `Resource loader` section.
+  Evidence: the call sites at `0x11080`, `0x110a4`, and `0x11092`, the compare
+  body at `0x4d9ba`, and the sibling records at `0x10bfc`, `0x10ed4`, and
+  `0x11304`.
+- Observation: the first argument is the 0x78-record object table at object-3
+  offset `0x6530` with 0x1c-byte records.  The second argument points to the
+  name string.  The third argument points to the output slot index.  A record
+  holds the name at `+0x00`, the block object at `+0x0c`, the chunk table at
+  `+0x10`, the file record at `+0x14`, and one reserved word at `+0x18`.  A zero
+  file record marks a free slot, and the value 1 marks a record that waits for
+  the loader.
+  Evidence: the block at `0x114c5` through `0x114e7` and the
+  `object_duplicate` finding.
+- Observation: the function clears the output index and scans the table from
+  index 0.  The first record with a zero file record takes the input name at
+  `+0x00` and the value 1 at `+0x14`, so `object_load` then loads the named
+  object.  The function returns 0.  A full table copies the name to the scratch
+  buffer `DAT_00007fe8` and returns 8.
+  Evidence: the blocks at `0x114e9` through `0x1151f` and `0x11521` through
+  `0x1155e`.
+- Inference: the caller, the object table, the load flag, and the pairing with
+  `object_load` support the name `object_request`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the caller at `0x11060` and the sibling records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct call,
+  so it needs no FPU stub and no assembly.
+  Evidence: `tools/rebuild/object_request.c` and the module recipe.
+- Observation: the harness holds the 0x78-record object table and the scratch
+  buffer.  The six paths cover the free slot 0, the busy slot 0, the full table,
+  the name copy stop, the two busy slots, and the last free slot `0x77`.  Every
+  path checks the output index, the name, and the file record.  The output holds
+  the markers `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_request_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_request`,
+  `work/rebuild/objreq.txt`, and `python3 tools/rebuild/run.py run --function
+  0x114b4`.
+- Observation: the identity check at 68 instructions holds 13 of 68
+  instructions, 8 of 178 bytes, and 0 of 8 relocation slots.  The identity check
+  stays open because V2 saves the frame first, keeps the name, the table, and
+  the slot index in registers, builds the inline string copy in another order,
+  and uses another scan loop and another return layout.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x114b4 --count 68 --rebuilt work/rebuild/objreq.exe
+  --rebuilt-map work/rebuild/object_request.map --rebuilt-symbol
+  object_request_` and `python3 tools/rebuild/run.py run --function 0x114b4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
