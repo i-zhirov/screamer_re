@@ -1,0 +1,28 @@
+{
+  "exe": "brotbld.exe",
+  "map": "basis_rotation_build.map",
+  "name": "basis_rotation_build",
+  "run": {
+    "command": "brotbld.exe > brotbld.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "brotbld.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "basis_rotation_build.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "basis_rotation_build_main.c"
+    }
+  ]
+}

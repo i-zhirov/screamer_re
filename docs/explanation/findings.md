@@ -22683,3 +22683,66 @@ temporary `-od` recipe.
   object_chunk_find_` and `python3 tools/rebuild/run.py run --function 0x11410`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check window stops at the first `ret`.
+
+## The basis_rotation_build module at 0x81fd0
+
+- Observation: the original body at `0x81fd0` holds 57 instructions and 162
+  bytes up to the `ret` at `0x82071`.  The next recorded function starts at
+  `0x82074`, so the store record keeps the 164-byte extent and sets no separate
+  function size.  The identity check uses 57 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x81fd0 --count
+  57` and `tools/rebuild/functions/0x81fd0.json`.
+- Observation: the only direct caller at `0x8b664` is `basis_transform_build`
+  at `0x8b610`.  It passes the destination pointer in `edx`, the three cosine
+  values in `ecx`, `ebx`, and `ebp`, and the three sine values in `esi`, `edi`,
+  and `eax`.  The caller runs this function on the real angles, so the result
+  is the forward basis at object `+0x18`.  The second call at `0x8b6c7` runs
+  the sibling at `0x82074` on the complement angles and builds the inverse
+  basis at object `+0x48`.  The caller sits in the `object_update_all` group,
+  so the record takes the section `object_update_all callees`.
+  Evidence: the call at `0x8b664`, the register loads at `0x8b618` through
+  `0x8b65e`, and the finding "The basis_transform_build module at 0x8b610".
+- Observation: the function builds the nine Q14 dwords of the 3x3 matrix at
+  `+0x00` through `+0x20`.  It shifts the two inner products `c0 * c1` and
+  `c0 * s1` before the outer product, so the two stages match the original.
+  Some elements negate the sum before the shift, and the arithmetic shift
+  rounds toward negative infinity.  The element at `+0x1c` holds `-c0` without
+  a shift.
+  Evidence: the blocks at `0x81fd7` through `0x8206b`.
+- Inference: the sibling builder at `0x82074` is the
+  `basis_rotation_mirror` module.  It builds the complement basis from the same
+  register layout.  This builder keeps the name `basis_rotation_build` with the
+  confidence `inferred`.  The original has no symbol.
+  Evidence: the sibling at `0x82074`, the module `basis_rotation_mirror`, and
+  the calls at `0x8b664` and `0x8b6c7`.
+- Observation: the original has no EBP frame.  It spills `c2` and `s2` with
+  `push`, uses `ebp` as the destination pointer, and does not restore `ebp`, so
+  the module builds without `-of+`.  The function uses no floating-point
+  instruction and calls no function, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x81fd0` through `0x81fd5` and
+  `tools/rebuild/modules/basis_rotation_build.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness assigns the expected values at run time and uses no
+  initialized static data.
+  Evidence: `tools/rebuild/basis_rotation_build_main.c`.
+- Observation: the harness holds one 9-dword matrix and one 9-dword expected
+  block.  The five paths cover the unity values, the mixed positive and
+  negative values, the small values with the negative arithmetic shift, the
+  table limits, and the large values that reach the 32-bit product range.  The
+  output holds the markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/basis_rotation_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module basis_rotation_build`, and
+  `work/rebuild/brotbld.txt`.
+- Observation: the rebuilt body holds 57 decoded instructions and 171 bytes in
+  the identity window.  The identity check stays open at 21 of 57 instructions
+  and 3 of 162 bytes.  The rebuilt C uses the standard Watcom calling
+  convention, takes the arguments from the stack, and keeps the destination in
+  `edi`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81fd0 --count 57 --rebuilt work/rebuild/brotbld.exe
+  --rebuilt-map work/rebuild/basis_rotation_build.map --rebuilt-symbol
+  basis_rotation_build_` and `python3 tools/rebuild/run.py run --function
+  0x81fd0`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check window stops at the first `ret`.
