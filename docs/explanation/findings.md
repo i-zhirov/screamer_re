@@ -23439,3 +23439,81 @@ temporary `-od` recipe.
   0x1f108`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check uses 45 instructions.
+
+## The game_mode_1_start module at 0x12c0c
+
+- Observation: the original body at `0x12c0c` holds 49 instructions and 145
+  bytes up to the early `ret` at `0x12c9c`.  That `ret` is the player car load
+  error return.  The full body continues through the shared epilogue at
+  `0x12d00` to the `ret` at `0x12d08`.  Three pad bytes follow the `ret`, and
+  the next function starts at `0x12d0c`, so the store record keeps the 256-byte
+  extent and sets no separate function size.  The identity check uses 49
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x12c0c --count 49` and
+  `tools/rebuild/functions/0x12c0c.json`.
+- Observation: the only direct caller is the game mode dispatch in
+  `race_session_start` at `0x128e0`, which sends the modes 1 and 2 to this
+  function.  The caller takes the section The timing and filter layer, so this
+  module takes the same section.  The caller and the program map already hold
+  the name `game_mode_1_start` with the confidence `inferred`.
+  Evidence: the mode table in `docs/reference/program-map.md`, the disassembly
+  of `0x128e0`, and the record of `race_session_start`.
+- Observation: the function clears the car slot counter `DAT_0000f8f0` and the
+  shared car counter `DAT_0000634c`.  It stores the car count `DAT_0000f8ec`
+  plus one at `DAT_0000cf40` and copies the car count to `DAT_001100a4`.
+  Evidence: the stores at `0x12c1a` through `0x12c38` and
+  `tools/rebuild/game_mode_1_start.c`.
+- Observation: the car loop walks the car count `DAT_0000f8ec`.  For each
+  `0x590`-byte car record at `DAT_00010ab8` it calls `car_setup` at `0x142ec`
+  with the record, the index, and the mode argument.  A non-zero result
+  returns at once.
+  Evidence: the loop at `0x12c45` through `0x12c76` and the record of
+  `car_setup` at `0x142ec`.
+- Observation: after the car loop the function loads the player car through
+  `player_car_init` at `0x136cc` with the object pointer `0xf91c` and the mode
+  argument.  A non-zero result returns at once.  It then runs `scene_setup` at
+  `0x15984` with the mode argument.
+  Evidence: the calls at `0x12c83` and `0x12ca0` and the records of the two
+  callees.
+- Observation: the replay flag `DAT_0018e30` and the control flag
+  `DAT_0000cf54` select the tail.  When either flag is set, a set replay flag
+  prepares the frame buffer through `0x22c30` with a non-zero mode argument,
+  loads the replay name `DAT_0001d278` through `replay_load` at `0x1b840` with
+  the flag 1, and runs `0x22db8`.  When both flags are clear, a non-zero mode
+  argument prepares the frame buffer, and the function runs `0x22d88`.  The
+  success path returns 0.
+  Evidence: the blocks at `0x12ca5` through `0x12d08`, the record of
+  `replay_load` at `0x1b840`, and the record of `race_session_run`.
+- Observation: the three callees at `0x22c30`, `0x22d88`, and `0x22db8` hold no
+  store record, so the module and the harness use the weak fallback names
+  `func_22c30`, `func_22d88`, and `func_22db8`.  The three names stay
+  harness-local.
+  Evidence: the store listing and the disassembly of the three addresses.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and no assembly.
+  Evidence: the prologue at `0x12c11` and the module recipe.
+- Observation: the harness holds the car count, the car records, the three
+  start cells, the two replay flags, the frame buffer cell, the replay name
+  buffer, and the seven callee stubs.  The nine paths cover the normal two-car
+  start, the two car failures, the player car failure, the set replay flag with
+  the mode, the set replay flag with the mode 0, the control flag alone, both
+  flags clear with the mode 0, and the zero car count.  The output holds the
+  markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/game_mode_1_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module game_mode_1_start`,
+  `work/rebuild/gm1.txt`, and `python3 tools/rebuild/run.py run --function
+  0x12c0c`.
+- Observation: the rebuilt body holds 49 decoded instructions and 179 bytes in
+  the identity window.  The identity check stays open at 14 of 49 instructions
+  and 13 of 145 bytes, because V2 saves the frame pointer first, keeps the mode
+  argument in `ecx`, orders the start stores in another shape, and returns
+  through a shared epilogue.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x12c0c --count 49 --rebuilt work/rebuild/gm1.exe
+  --rebuilt-map work/rebuild/game_mode_1_start.map --rebuilt-symbol
+  game_mode_1_start_` and `python3 tools/rebuild/run.py run --function
+  0x12c0c`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The identity check uses 49 instructions.

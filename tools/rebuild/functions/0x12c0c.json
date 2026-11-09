@@ -1,9 +1,119 @@
 {
   "address": "0x12c0c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 49,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x12c0c holds 49 instructions and 145 bytes up to the early ret at 0x12c9c; that ret is the player car load error return, the full body continues through the shared epilogue at 0x12d00 to the ret at 0x12d08, and the next function starts at 0x12d0c after three pad bytes, so the store record keeps the 256-byte extent and sets no separate function size; the identity check uses 49 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the game mode dispatch in race_session_start at 0x128e0, which sends the modes 1 and 2 to this function; the caller takes the section The timing and filter layer, so this module takes the same section; the caller and the program map already hold the name game_mode_1_start with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the car slot counter DAT_0000f8f0 and the shared car counter DAT_0000634c, stores the car count DAT_0000f8ec plus one at DAT_0000cf40, and copies the car count to DAT_001100a4"
+    },
+    {
+      "kind": "note",
+      "text": "the car loop walks the car count DAT_0000f8ec; for each 0x590-byte car record at DAT_00010ab8 it calls car_setup at 0x142ec with the record, the index, and the mode argument, and a non-zero result returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "after the car loop the function loads the player car through player_car_init at 0x136cc with the object pointer 0xf91c and the mode argument; a non-zero result returns at once; it then runs scene_setup at 0x15984 with the mode argument"
+    },
+    {
+      "kind": "note",
+      "text": "the replay flag DAT_0018e30 and the control flag DAT_0000cf54 select the tail; when either flag is set, a set replay flag prepares the frame buffer through 0x22c30 with a non-zero mode argument, loads the replay name DAT_0001d278 through replay_load at 0x1b840 with the flag 1, and runs 0x22db8; when both flags are clear, a non-zero mode argument prepares the frame buffer, and the function runs 0x22d88; the success path returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 1 and 2 dispatch, the car loop, the replay load, and the program map support the name game_mode_1_start; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the car count, the car records, the three start cells, the two replay flags, the frame buffer cell, the replay name buffer, and the seven callee stubs; the nine paths cover the normal two-car start, the two car failures, the player car failure, the set replay flag with the mode, the set replay flag with the mode 0, the control flag alone, both flags clear with the mode 0, and the zero car count; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 49 decoded instructions and 179 bytes in the identity window; the identity check stays open at 14 of 49 instructions and 13 of 145 bytes, because V2 saves the frame pointer first, keeps the mode argument in ecx, orders the start stores in another shape, and returns through a shared epilogue; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x12c0c --count 49"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x12c0c --count 49 --rebuilt work/rebuild/gm1.exe --rebuilt-map work/rebuild/game_mode_1_start.map --rebuilt-symbol game_mode_1_start_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module game_mode_1_start"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x12c0c"
+    },
+    {
+      "kind": "finding",
+      "text": "The game_mode_1_start module at 0x12c0c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/game_mode_1_start.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/game_mode_1_start_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/game_mode_1_start.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "game_mode_1_start",
+  "name": "game_mode_1_start",
   "notes": [],
   "object_offset": "0x2c0c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 145,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 49,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x12c0c",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:5f13325cf99003382f477204132bdaf8db801e1170d9ecb4e139e9252af50eac",
+    "source_digest": "sha256:3c4e8b6b3600759098ff9d6367e98c0e62160c70b8598a891e92991649fb0332",
+    "tool": "run.py"
+  },
+  "role": "starts the race session for the modes 1 and 2: it stores the car count, prepares every car record, loads the player car, runs the scene setup, and selects the replay or the clear path",
+  "section": "The timing and filter layer",
   "size": 256,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "game_mode_1_start_"
 }
