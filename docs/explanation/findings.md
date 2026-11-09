@@ -16811,6 +16811,79 @@ temporary `-od` recipe.
   scan on the limit 0 path.  The rebuilt module starts the pointer at the first
   record, so that undefined path is stable.
 
+## The object_duplicate module at 0x10ed4
+
+- Observation: the original body at `0x10ed4` holds 62 instructions and 180
+  bytes up to the early `ret` at `0x10f87`.  The full body continues through the
+  shared epilogue at `0x11056` to the next function at `0x11060`, so the record
+  keeps the 396-byte extent and sets no separate function size.  The identity
+  check uses 62 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10ed4 --count 62` and
+  `tools/rebuild/functions/0x10ed4.json`.
+- Observation: the two direct callers are `menu_objects_init` at `0x2aab8`,
+  call site `0x2ab43`, and the object loader at `0x11060`, call site `0x11092`.
+  `menu_objects_init` makes 79 copies of the object in slot 0 into the 8-byte
+  slots at `DAT_001d2d0`.  The loader makes one more instance when the named
+  object already exists.
+  Evidence: the calls at `0x2ab43` and `0x11092`, the loop at `0x2ab18`
+  through `0x2ab48`, and `tools/rebuild/functions/0x2aab8.json`.
+- Observation: the first argument is the 0x78-record object table at `0x6530`
+  with 0x1c-byte records.  The second argument points to the output slot index.
+  The third argument points to the source slot index.
+  Evidence: the call argument loads at `0x2ab2d` through `0x2ab43` and the
+  record stride at `0x10ef4` through `0x10f03`.
+- Observation: a record holds the name at `+0x00`, the block object at
+  `+0x0c`, the chunk table at `+0x10`, the shared file record at `+0x14`, and
+  one reserved word at `+0x18`.  A zero file record marks a free slot.
+  Evidence: the sibling `object_load` module at `0x10bfc` and the field reads
+  at `0x10f03` and `0x10f36` through `0x10f39`.
+- Observation: the function clears the output index and scans the table from
+  index 0.  The first record with a zero file record is the new slot.  A full
+  table returns 8.
+  Evidence: the block at `0x10ee6` through `0x10f1d`.
+- Observation: the function reads the object count at `+0x14` of the source
+  file record and requests the `3D_BLKOBJ` resource at object-3 offset `0x3ca`
+  with the size `count * 0x20 + 0x60` through `resource_get` at `0x2eed0`.  It
+  stores the result in the new record at `+0x0c`.  A zero result returns 6.
+  Evidence: the block at `0x10f22` through `0x10f87` and the data at object-3
+  offset `0x3ca`.
+- Observation: on success the function initializes the new block from the
+  source file index through `object_init_from_file` at `0x4cc10`, copies the
+  source name to the new record, stores the chunk table `block + 0x40` at
+  `+0x10`, shares the file record at `+0x14`, and returns 0.
+  Evidence: the block at `0x10f88` through `0x11054`.
+- Inference: the two callers, the object table, the block object, and the
+  shared file record support the name `object_duplicate`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the callers at `0x2aab8` and `0x11060` and the sibling modules
+  `object_load` and `object_unload`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/object_duplicate.c` and the module recipe.
+- Observation: the harness holds the 0x78-record object table, one source
+  block, one file record, and two callee stubs.  The six paths cover the free
+  slot 0, the busy slot 0, the zero allocation, the full table, the zero count,
+  and the name copy stop.  Every path checks the recorded arguments, the block,
+  the name, the chunk table, and the shared file record.  The output holds the
+  markers `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_duplicate_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_duplicate`,
+  `work/rebuild/objdup.txt`, and `python3 tools/rebuild/run.py run --function
+  0x10ed4`.
+- Observation: the identity check at 62 instructions holds 19 of 62
+  instructions, 12 of 179 bytes, and 0 of 9 relocation slots.  The identity
+  check stays open because V2 saves the frame first, keeps the table and the two
+  index pointers in registers, uses `imul` for the 0x1c stride, and folds the
+  scan and the epilogue differently.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x10ed4 --count 62 --rebuilt work/rebuild/objdup.exe
+  --rebuilt-map work/rebuild/object_duplicate.map --rebuilt-symbol
+  object_duplicate_` and `python3 tools/rebuild/run.py run --function 0x10ed4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The opponent_curve_eval module at 0x22378
 
 - Observation: the original body at `0x22378` holds 121 instructions and 353
