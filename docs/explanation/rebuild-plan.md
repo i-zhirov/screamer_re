@@ -582,13 +582,13 @@ reproduce the original bytes.
 | `0x4c485` | `member_load` (done) | 96 | 32 | 3 | 0 |
 | `0x2369c` | `race_gauges` (done) | 96 | 32 | 1 | 0 |
 | `0x2254c` | `angle_in_arc` (done) | 95 | 34 | 0 | 18 |
-| `0x83500` | unnamed | 93 | 39 | 0 | 0 |
+| `0x83500` | `array_sort` (done) | 93 | 39 | 0 | 0 |
 
 This table starts Phase W.
 
 ## Position
 
-Three hundred and seventy modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and seventy-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -809,5 +809,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `traffic_record_init` at `0x14970`, and the Phase W module
 `member_load` at `0x4c485`, and the Phase W module
 `race_gauges` at `0x2369c`, and the Phase W module
-`angle_in_arc` at `0x2254c`.
-The next unnamed function is `0x83500`.
+`angle_in_arc` at `0x2254c`, and the Phase W module
+`array_sort` at `0x83500`.
+The next unnamed function is `0x150f4`.

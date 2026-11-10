@@ -26910,3 +26910,62 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x2254c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The array_sort module at 0x83500
+
+- Observation: the original body at `0x83500` holds 39 instructions and 93
+  bytes up to the `ret` at `0x8355c`.  The next store record starts at
+  `0x835c0`, so the record keeps the 192-byte extent and sets no separate
+  function size.  The identity check uses 39 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x83500 --count 39` and
+  `tools/rebuild/functions/0x83500.json`.
+- Observation: the three direct call sites are `0x81af0` in
+  `sound_effects_update` at `0x81ab0`, and `0x8af64` and `0x8af9a` in
+  `sound_frame_prepare` at `0x8af08`.  Every caller puts the array base in EDI,
+  the element count in EAX, and the element size 4 in EDX before the call.  The
+  array at `0x45790` and the array at `0x7a6e4` belong to the sound code, so the
+  record takes the section object_update_all callees.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81ac0 --count 40` and the
+  same command at `0x8af30`.
+- Observation: the function sorts an array of signed dwords in place in
+  ascending order.  It takes the element at the middle of the range as the
+  pivot and swaps it to the start.  It moves every element below the pivot to
+  the front part of the range and keeps the pivot at the start.  It processes
+  the start part first, and it keeps the end part on the machine stack for
+  later.
+  Evidence: the blocks at `0x83520` through `0x8355c`, and a trace of the same
+  states.
+- Observation: the original writes the entry ESP into the immediate of the
+  `cmp esp, 0xaaaabbbb` at `0x8354d`.  The relocation at `0x83502` targets
+  object 1 offset `0x7354f`, which is the immediate itself.  The test at the
+  end of a range therefore compares ESP with the entry value.  An equal value
+  means the machine stack holds no pending end part, and the function returns.
+  Evidence: the relocation table and
+  `python3 tools/le.py disasm STARTH.EXE 0x83500 --count 39`.
+- Observation: the original has no symbol, so the data flow supports the name
+  `array_sort`.  The record keeps the name with the confidence `inferred`.
+  Evidence: the callers and the record of `0x83500`.
+- Observation: the original saves no register, has no EBP frame, calls no
+  function, and uses no floating-point instruction.  The module uses no
+  assembly implementation.
+  Evidence: the prologue at `0x83500` and
+  `tools/rebuild/modules/array_sort.json`.
+- Observation: the harness holds one work buffer with a guard dword after each
+  input.  It runs eight paths: ascending, descending, negative values,
+  duplicate values, a single element, a pair, an empty array, and a larger
+  mixed array.  The output holds the markers `0` through `7` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/array_sort_main.c`,
+  `python3 tools/rebuild/harness.py run --module array_sort`, and
+  `work/rebuild/arrsrt.txt`.
+- Observation: the rebuilt C function recurses on the two parts of each range.
+  The identity check stays open at 9 of 39 instructions equal, 0 of 91 bytes
+  equal, and 0 of 1 relocation slot equal.  V2 emits a frame prologue, saves
+  registers, and forms the recursion in place of the explicit machine-stack
+  loop.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x83500 --count 39 --rebuilt work/rebuild/arrsrt.exe
+  --rebuilt-map work/rebuild/array_sort.map --rebuilt-symbol array_sort_` and
+  `python3 tools/rebuild/run.py run --function 0x83500`.
+- Limit: the original has no symbol name for this function.  The name
+  `array_sort` and the harness field names stay inferred.
