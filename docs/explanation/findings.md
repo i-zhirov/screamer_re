@@ -24650,3 +24650,74 @@ temporary `-od` recipe.
   0x130a0`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The shade_rect module at 0x25d28
+
+- Observation: the original body at `0x25d28` holds 41 instructions and 125
+  bytes up to the `ret` at `0x25da4`.  The next record starts at `0x25db0`, so
+  the store record keeps the 136-byte extent and sets no separate function size.
+  The identity check uses 41 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25d28 --count 41` and
+  `tools/rebuild/functions/0x25d28.json`.
+- Observation: the four arguments arrive in the Watcom register order.  `eax`
+  holds the x, `edx` holds the y, `ebx` holds the width, and `ecx` holds the
+  height.  `options_screen` passes the full screen `0x280` by `0x190` at
+  `0x2134c`, and `race_records_screen` passes the rectangle (0x60, 0x48, 0x1c4,
+  0x140) at `0x2d4cc`.  `race_radar` clears its panel and
+  `quit_confirm_screen` fills the screen through the same function.
+  Evidence: the argument stores at `0x2134c` through `0x21358`, the stores at
+  `0x2d4cc` through `0x2d4db`, and the `options_screen`, `race_records_screen`,
+  `race_radar`, and `quit_confirm_screen` records.
+- Observation: the function rounds the x and the width down to a multiple of
+  four.  It forms the destination from the framebuffer pointer
+  `DAT_00121528`, the y times the 0x280 row stride, and the x.  The word count
+  is the width divided by four and the row stride is 0x280 minus the width.  The
+  two cells `0x15d20` and `0x15d24` hold the word count and the row stride; the
+  function reads and writes only those cells, so they are spill slots.
+  Evidence: the block at `0x25d29` through `0x25d66` and the reloads at
+  `0x25d9a` and `0x25da0`.
+- Observation: the inner loop replaces four adjacent pixels with the 0x100-byte
+  table entries at `DAT_0015d1c`, and the outer loop steps the height rows.  The
+  table base is 0x100-aligned, so the original sets the low byte of the table
+  pointer to the pixel and reads the entry at once.
+  Evidence: the loop at `0x25d70` through `0x25d92` and the two `mov al, [eax]`
+  and `mov bl, [ebx]` reads at `0x25d75`, `0x25d77`, `0x25d84`, and `0x25d86`.
+- Observation: `palette_shade_build` at `0x258d0` sets `DAT_0015d1c` to the
+  `0x1cc00` table, which is the 0.75 shade map of the palette, so the rectangle
+  is dimmed to 75 percent.
+  Evidence: the store at `0x258f7`, the read at `0x25d53`, and the
+  `palette_shade_build` record.
+- Inference: the four-argument rectangle, the framebuffer walk, and the shade
+  table read support the name `shade_rect`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.  The function is a
+  shared framebuffer primitive, so the record takes the section Program
+  functions.
+  Evidence: the data flow above and the caller records.
+- Observation: the original uses `pushal` and `popal` and has no EBP frame.  The
+  function holds no floating-point instruction and calls no function, so the
+  module needs no FPU stub and no assembly.  The module builds with `-of+`.
+  Evidence: `tools/rebuild/shade_rect.c` and
+  `tools/rebuild/modules/shade_rect.json`.
+- Observation: the behavior check passes.  The harness holds the framebuffer
+  pointer, the shade table pointer, an 8-row framebuffer, and a 0x100-byte
+  table.  It runs six paths: the rectangle (4, 1, 8, 2) with a stride, the
+  rectangle (3, 2, 15, 1) with the x and width masks, the full width (0, 0,
+  0x280, 3) with a zero stride, the one-word rows (0x27c, 4, 4, 4), the double
+  application of the full width, and the identity table.  The output holds the
+  markers `0` through `5` and `D`.
+  Evidence: `tools/rebuild/shade_rect_main.c`,
+  `python3 tools/rebuild/harness.py run --module shade_rect`,
+  `work/rebuild/shrect.txt`, and `python3 tools/rebuild/run.py run --function
+  0x25d28`.
+- Observation: the rebuilt body holds 41 instructions and 120 bytes in the
+  identity window.  The identity check stays open at 19 of 41 instructions, 9 of
+  120 bytes, and 0 of 9 relocation slots.  V2 saves the frame pointer first,
+  uses `movzx` for the table index, forms the destination in another order, and
+  keeps the spill values in locals and the frame.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25d28 --count 41 --rebuilt work/rebuild/shrect.exe
+  --rebuilt-map work/rebuild/shade_rect.map --rebuilt-symbol shade_rect_` and
+  `python3 tools/rebuild/run.py run --function 0x25d28`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

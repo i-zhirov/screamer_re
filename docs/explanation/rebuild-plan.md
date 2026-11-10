@@ -538,7 +538,7 @@ reproduce the original bytes.
 | `0x247fc` | `sound_enqueue` (done) | 132 | 45 | 0 | 0 |
 | `0x2471c` | `sound_reset` (done) | 132 | 45 | 0 | 0 |
 | `0x130a0` | `game_mode_40_start` (done) | 127 | 44 | 2 | 0 |
-| `0x25d28` | unnamed | 125 | 41 | 0 | 0 |
+| `0x25d28` | `shade_rect` (done) | 125 | 41 | 0 | 0 |
 | `0x221fc` | unnamed | 124 | 42 | 4 | 18 |
 | `0x24c4c` | unnamed | 122 | 36 | 1 | 8 |
 | `0x4d260` | unnamed | 121 | 40 | 3 | 16 |
@@ -554,7 +554,7 @@ This table starts Phase V.
 
 ## Position
 
-Three hundred and thirty-six modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and thirty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -741,5 +741,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `cd_audio_volume_set` at `0x265b4`, and the Phase V module
 `sound_enqueue` at `0x247fc`, and the Phase V module
 `sound_reset` at `0x2471c`, and the Phase V module
-`game_mode_40_start` at `0x130a0`.
-The next unnamed function is `0x25d28`.
+`game_mode_40_start` at `0x130a0`, and the Phase V module
+`shade_rect` at `0x25d28`.
+The next unnamed function is `0x221fc`.
