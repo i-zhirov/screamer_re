@@ -530,7 +530,7 @@ reproduce the original bytes.
 | `0x160a4` | `player_throttle_update` (done) | 136 | 38 | 0 | 3 |
 | `0x2414c` | `race_finish_overlay_2` (done) | 135 | 39 | 4 | 0 |
 | `0x240c4` | `race_finish_overlay_1` (done) | 135 | 39 | 4 | 0 |
-| `0x1ec7c` | unnamed | 134 | 44 | 2 | 0 |
+| `0x1ec7c` | `traffic_reset` (done) | 134 | 44 | 2 | 0 |
 | `0x19e78` | unnamed | 134 | 41 | 6 | 0 |
 | `0x226bc` | unnamed | 133 | 48 | 1 | 25 |
 | `0x13120` | unnamed | 133 | 44 | 2 | 0 |
@@ -554,7 +554,7 @@ This table starts Phase V.
 
 ## Position
 
-Three hundred and twenty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and twenty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -733,5 +733,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `func_11714` at `0x11714`, and the Phase V module
 `player_throttle_update` at `0x160a4`, and the Phase V module
 `race_finish_overlay_2` at `0x2414c`, and the Phase V module
-`race_finish_overlay_1` at `0x240c4`.
-The next unnamed function is `0x1ec7c`.
+`race_finish_overlay_1` at `0x240c4`, and the Phase V module
+`traffic_reset` at `0x1ec7c`.
+The next unnamed function is `0x19e78`.

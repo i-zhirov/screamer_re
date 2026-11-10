@@ -254,8 +254,9 @@ current host.
   `func_11714` at `0x11714`, and the Phase V module
   `player_throttle_update` at `0x160a4`, and the Phase V module
   `race_finish_overlay_2` at `0x2414c`, and the Phase V module
-  `race_finish_overlay_1` at `0x240c4`;
-  thirty modules are verified, one is matching, and two hundred and ninety-eight
+  `race_finish_overlay_1` at `0x240c4`, and the Phase V module
+  `traffic_reset` at `0x1ec7c`;
+  thirty modules are verified, one is matching, and two hundred and ninety-nine
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

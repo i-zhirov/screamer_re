@@ -15191,6 +15191,67 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The traffic_reset module at 0x1ec7c
+
+- Observation: the original body at `0x1ec7c` holds 44 instructions and 134
+  bytes up to the `ret` at `0x1ed01`.  The next function starts at `0x1ed04`, so
+  the store record keeps the 136-byte extent and sets no separate function size.
+  The identity check uses 44 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ec7c --count 44` and
+  `tools/rebuild/functions/0x1ec7c.json`.
+- Observation: `traffic_step` at `0x1eae0` calls this function at `0x1eb27` at
+  the start of the wait and at `0x1eb64` after each timeout.  The function
+  therefore resets the traffic table.
+  Evidence: the calls at `0x1eb27` and `0x1eb64`, and the record of `0x1eae0`.
+- Observation: the function loads the player object at object-3 offset `0xf91c`
+  in `eax` and calls `player_state_snapshot` at `0x1ed04`.  It stores `-1` at
+  the state field `+0x00` of the player traffic record, and it clears the shared
+  counter at object-3 offset `0x634c`.
+  Evidence: the block at `0x1ec83` through `0x1ecb8`.
+- Observation: the traffic record is 0x2a8 bytes, the player index is the global
+  at object-3 offset `0x1d250`, and the record count is the global at object-3
+  offset `0x15218`.
+  Evidence: the address `((index * 5) << 3) << 4` at `0x1ec93` through
+  `0x1ecb1` and the loads at `0x1ecc0` and `0x1eccf`.
+- Observation: the loop skips the player index.  For each other record it calls
+  `0xc7478` with the record `0x10100`, the size `0xc`, the name `0x1010c`, the
+  value `0x74`, and the counter.  It repeats the call until the call returns a
+  non-zero value.
+  Evidence: the pushes at `0x1ecdf` through `0x1ece9` and the retry branch at
+  `0x1ecf8`.
+- Observation: the callee at `0xc7478` reads five arguments.  It stores a new id
+  at the first argument and returns 0 when every slot is full.  The original has
+  no name for the callee, so the module names it `traffic_register` with the
+  confidence `inferred`.
+  Evidence: the callee frame at `0xc7478` through `0xc750d` and the call sites at
+  `0x1ecee`, `0x2df52`, `0xc8099`, and `0xc8117`.
+- Inference: the caller `traffic_step`, the player state save, and the traffic
+  records support the name `traffic_reset`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/modules/traffic_reset.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The five paths cover the zero count, the player-index
+  skip, the two register calls with the shadow record and the four values, the
+  retry after two zero returns, and the last-index skip.
+  Evidence: `python3 tools/rebuild/harness.py run --module traffic_reset` and
+  `work/rebuild/trfcrst.txt`.
+- Observation: the rebuilt module holds 33 instructions and 116 bytes up to the
+  `ret` at `0x10073`.  The identity window decodes 44 instructions and includes
+  the two harness stubs after the module.  The identity check stays open at 10
+  of 44 instructions and 8 of 134 bytes, because V2 saves the frame first,
+  multiplies the record stride with `imul`, keeps the call arguments in
+  registers, and places the stubs after the module.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ec7c --count 44 --rebuilt work/rebuild/trfcrst.exe
+  --rebuilt-map work/rebuild/traffic_reset.map --rebuilt-symbol traffic_reset_`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee name stay inferred.
+
 ## The player_state_snapshot module at 0x1ed04
 
 - Observation: the original body at `0x1ed04` holds 115 instructions and 465

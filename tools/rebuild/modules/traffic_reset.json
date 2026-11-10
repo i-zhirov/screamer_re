@@ -1,0 +1,31 @@
+{
+  "exe": "trfcrst.exe",
+  "map": "traffic_reset.map",
+  "name": "traffic_reset",
+  "run": {
+    "command": "trfcrst.exe > trfcrst.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "trfcrst.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_reset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_reset_main.c"
+    }
+  ]
+}
