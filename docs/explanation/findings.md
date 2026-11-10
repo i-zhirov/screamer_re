@@ -26235,3 +26235,60 @@ temporary `-od` recipe.
   0x22278`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The object_list_release_all module at 0x115f8
+
+- Observation: the original body at `0x115f8` holds 40 instructions and 101
+  bytes up to the `ret` at `0x1165c`.  The next function starts at `0x11660`, so
+  the store record keeps the 104-byte extent and sets no separate function size.
+  The identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x115f8 --count 40` and
+  `tools/rebuild/functions/0x115f8.json`.
+- Observation: `race_end` at `0x279a4`, `race_cleanup` at `0x2a1b0`, and
+  `race_data_release` at `0x156a8` call the pass with the object table `0x6530`
+  and the list `0x6350` during the shutdown of a race.  `race_data_release`
+  already names the call `object_list_release_all`.  The shared table and list
+  match `object_list_link` at `0x11568`, so the record takes the name
+  `object_list_release_all` with the confidence `inferred` and the section
+  Resource loader.
+  Evidence: the calls at `0x279d6`, `0x2a1d2`, and `0x156d6`, the module
+  `race_data_release`, and the record of `0x11568`.
+- Observation: the table holds `0x78` records of `0x1c` bytes.  A record holds
+  the name at `+0x00`, the block object at `+0x0c`, the chunk table at `+0x10`,
+  the file record at `+0x14`, and one slot word at `+0x18`.  A zero file record
+  marks a free slot.
+  Evidence: the field load at `0x1162b`, the stride at `0x11619` through
+  `0x11628`, and the layout of `object_list_link`.
+- Observation: the function walks the table from index 0 to index `0x77`.  For
+  an active record it calls the slot release at `0x11714` with the table, the
+  list, and the record index.  A non-zero result returns at once.  The function
+  returns zero after the last record.
+  Evidence: the loop at `0x11613` through `0x11617`, the call at `0x11641`, and
+  the returns at `0x11650` through `0x11657`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.  The callee name stays local to the harness.
+  Evidence: the prologue at `0x115f8` and
+  `tools/rebuild/modules/object_list_release_all.json`.
+- Observation: the harness holds the `0x78`-record table, the list, and one
+  callee stub that records its arguments and returns a scripted value.  The nine
+  paths cover the empty table, one active record, two active records, the record
+  index 5, the early `0x0c` result, the `7` result at the second active record,
+  the last record `0x77`, and the file value `0x100`.  The output holds the
+  markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_list_release_all_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_list_release_all`, and
+  `work/rebuild/olrel.txt`.
+- Observation: the rebuilt body holds 9 of 40 instructions equal, 2 of 88 bytes
+  equal, and 0 of 2 relocation slots equal.  The identity check stays open
+  because V2 keeps the table and the list in `esi` and `edi`, uses `imul` for
+  the `0x1c` stride, keeps the loop index in `ecx`, and turns the assignment
+  into a direct compare.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x115f8 --count 40 --rebuilt work/rebuild/olrel.exe
+  --rebuilt-map work/rebuild/object_list_release_all.map --rebuilt-symbol
+  object_list_release_all_` and `python3 tools/rebuild/run.py run --function
+  0x115f8`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.
