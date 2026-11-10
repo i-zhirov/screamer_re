@@ -1,0 +1,36 @@
+{
+  "exe": "tbpp.exe",
+  "map": "traffic_body_point_place.map",
+  "name": "traffic_body_point_place",
+  "run": {
+    "command": "tbpp.exe > tbpp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "tbpp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_body_point_place.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_body_point_place_main.c"
+    }
+  ]
+}

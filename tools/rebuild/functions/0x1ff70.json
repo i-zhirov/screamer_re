@@ -1,9 +1,99 @@
 {
   "address": "0x1ff70",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 47,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ff70 holds 47 instructions and 204 bytes up to the ret at 0x2003b; the next function starts at 0x2003c, so the store record keeps the 204-byte extent; the identity check uses 47 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1ff54 is the frame loop at 0x1ff14; the race session driver at 0x1fd70 calls that loop at 0x1fdb5 and 0x1fe7a; the neighbouring records call this function the frame update at 0x1ff70, and the callees take the section Program functions, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the input byte DAT_00118e1c bit 0x20 sets the exit state DAT_00118e18 to 1; the input byte DAT_00118e1d bit 4 sets it to -1; bit 2 calls the wait helper at 0x1f8dc and clears DAT_00118e6c; a non-zero exit state returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "the frame runs timing_update at 0x22df8, the view groups at 0x202c0, 0x20360, 0x203c4, race_simulation_update at 0x2003c, and traffic_simulation_update at 0x201d0, ai_update at 0x205c4, opponent_update at 0x20954 with 0, camera_update at 0x8ac78 with object 0x109a0, and sound_effects_update at 0x81ab0 with the driver 0x6350"
+    },
+    {
+      "kind": "note",
+      "text": "the two video swaps at 0x1075f and 0x107a1 run only when the byte DAT_0011d274 holds bit 0x10 or bit 0x20; the frame then runs race_hud_draw at 0x23420, race_intro_update at 0x20d20, the handler at 0x24880, race_finish_laps_update at 0x20ec8, the handler at 0x20f98, and race_finish_update at 0x21058"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain and the neighbouring records that call this function the frame update at 0x1ff70 support the name race_frame_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two input bytes, the exit state, the replay byte, and the video flags; the nineteen callee stubs append one marker to a trace, and the three stubs with arguments record the argument; the ten paths cover the input bit 0x20, the input bit 4, the wait branch, the pre-set state, the three video flag paths, the two input bits, the wait branch with a pre-set state, and the clear-flag full frame; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 15 of 47 instructions and 0 of 19 relocation slots equal; the identity check stays open because V2 saves the frame first, keeps the state in a register, uses other call addresses for the harness stubs, and places the byte tests in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ff70 --count 47"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ff70 --count 47 --rebuilt work/rebuild/rfu.exe --rebuilt-map work/rebuild/race_frame_update.map --rebuilt-symbol race_frame_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ff70"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_frame_update module at 0x1ff70"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_frame_update",
+  "name": "race_frame_update",
   "notes": [],
   "object_offset": "0xff70",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 204,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 47,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ff70",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:2b932fcc23096f7d22b62e2b126dfc83454be7e325c1bbc0c66f7756b3b7fa71",
+    "source_digest": "sha256:ee92a072e9b9b2f4e7e57cd76166f0fada8ef9b90f2bcf166609651bc7b44ac0",
+    "tool": "run.py"
+  },
+  "role": "runs one race frame: gates on the input flags and the exit state, then calls the timing, the five view groups, the AI, the opponents, the camera, the sound, the two video swaps, the HUD, the intro, the transitions, and the finish updates",
+  "section": "Program functions",
   "size": 204,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_frame_update_"
 }

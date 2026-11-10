@@ -1,0 +1,37 @@
+{
+  "exe": "func1e0.exe",
+  "map": "func_1e700.map",
+  "name": "func_1e700",
+  "run": {
+    "command": "func1e0.exe > func1e0.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "func1e0.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_1e700.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_1e700_main.c"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "exe": "moselect.exe",
+  "map": "map_object_line_select.map",
+  "name": "map_object_line_select",
+  "run": {
+    "command": "moselect.exe > moselect.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "moselect.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_line_select.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_line_select_main.c"
+    }
+  ]
+}

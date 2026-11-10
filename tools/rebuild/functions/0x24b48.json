@@ -1,9 +1,103 @@
 {
   "address": "0x24b48",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 47,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24b48 holds 47 instructions and 152 bytes up to the ret at 0x24bdf; the zero-quality return path is out of line at 0x24be0 through the ret at 0x24bfa; the next function starts at 0x24bfc, so the store record keeps the 180-byte extent and sets no separate function size; the identity check uses 47 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_variant_select at 0x24a84; that function calls this function for the variant mode 3 at 0x24af5 and resolves the result through the sound queue; the table at object 3 offset 0x1fb4 holds 0x1b effects and three sample ids per effect, and the value -1 marks a missing sample id; these facts support the name sound_variant_next and the section Program functions; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the effect index arrives in eax; when 0x19064 is zero the function returns the first sample id of the effect and leaves the counter unchanged; otherwise it advances the counter array at 0x191c0 with the wrap 2 to 0, reads the 0xc-byte entry of the table at 0x1fb4, and skips the -1 entries; after three all -1 entries it returns the last table value"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 27-effect table, the quality flag, and the rotation counters; the four paths cover the zero-quality return and the unchanged counter, the wrap walk 10, 20, 30, and 10, the skip of the -1 entry in 40, 60, and 40, and the all -1 effect; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 44 instructions and 112 bytes; the identity window uses 47 instructions, so it decodes the following harness code after the rebuilt ret; the identity check stays open at 12 of 47 instructions, 5 of 128 bytes, and 1 of 15 relocation slots, because V2 saves the EBP frame first, keeps the effect in edx, uses imul for the 0xc-byte entry, and builds the loop and the zero-quality return in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_variant_next module at 0x24b48"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24b48 --count 47"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24b48 --count 47 --rebuilt work/rebuild/svnext.exe --rebuilt-map work/rebuild/sound_variant_next.map --rebuilt-symbol sound_variant_next_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_variant_next"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24b48"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_variant_next.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_variant_next_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_variant_next.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_variant_next",
+  "name": "sound_variant_next",
   "notes": [],
   "object_offset": "0x14b48",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 128,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 47,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24b48",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:c24af5c44e98b7ab05ceca820791f1ff534dedb1caf7f4d834133c3def46810b",
+    "source_digest": "sha256:dd4370859c2389380aad74575acc97224b90892773c5e33bd3ddc2e433bb16ff",
+    "tool": "run.py"
+  },
+  "role": "returns the next sample id of a sound effect and skips the -1 entries",
+  "section": "Program functions",
   "size": 180,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_variant_next_"
 }

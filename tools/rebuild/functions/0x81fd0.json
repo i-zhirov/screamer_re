@@ -1,9 +1,111 @@
 {
   "address": "0x81fd0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 57,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x81fd0 holds 57 instructions and 162 bytes up to the ret at 0x82071; the next recorded function starts at 0x82074, so the store record keeps the 164-byte extent and sets no separate function size; the identity check uses 57 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x8b664 is basis_transform_build at 0x8b610; it passes the destination pointer in edx, the three cosine values in ecx, ebx, and ebp, and the three sine values in esi, edi, and eax; the caller runs this function on the real angles, so the result is the forward basis at object +0x18; the second call at 0x8b6c7 runs the sibling at 0x82074 on the complement angles and builds the inverse basis at object +0x48; the caller sits in the object_update_all group, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the nine Q14 dwords of the 3x3 matrix at +0x00 through +0x20; it shifts the two inner products c0*c1 and c0*s1 before the outer product; some elements negate the sum before the shift, and the arithmetic shift rounds toward negative infinity; the element at +0x1c holds -c0 without a shift"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling builder at 0x82074 is the basis_rotation_mirror module; it builds the complement basis from the same register layout; this builder keeps the name basis_rotation_build with the confidence inferred; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame; it spills c2 and s2 with push, uses ebp as the destination pointer, and does not restore ebp, so the module builds without -of+; the function uses no floating-point instruction and calls no function, so it needs no FPU stub; the rebuilt C uses the standard Watcom calling convention, so the identity check differs in the prologue and in the register use"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness assigns the expected values at run time and uses no initialized static data"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one 9-dword matrix and one 9-dword expected block; the five paths cover the unity values, the mixed positive and negative values, the small values with the negative arithmetic shift, the table limits, and the large values that reach the 32-bit product range; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 57 decoded instructions and 171 bytes in the identity window; the identity check stays open at 21 of 57 instructions and 3 of 162 bytes, because the rebuilt C uses the standard Watcom calling convention, takes the arguments from the stack, and keeps the destination in edi; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x81fd0 --count 57"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x81fd0 --count 57 --rebuilt work/rebuild/brotbld.exe --rebuilt-map work/rebuild/basis_rotation_build.map --rebuilt-symbol basis_rotation_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module basis_rotation_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x81fd0"
+    },
+    {
+      "kind": "finding",
+      "text": "The basis_rotation_build module at 0x81fd0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_rotation_build.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_rotation_build_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/basis_rotation_build.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "basis_rotation_build",
+  "name": "basis_rotation_build",
   "notes": [],
   "object_offset": "0x71fd0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 162,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81fd0",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:d293320a4ab15d3f394039ffa633296c298ff09329806271dfff476a53a6e992",
+    "source_digest": "sha256:17a4826db43321cdfe31b0fddcf2c62432da49eb783c1063c19661e7b209047e",
+    "tool": "run.py"
+  },
+  "role": "Builds the nine Q14 dwords of the forward 3x3 rotation basis from three cosine and three sine values.",
+  "section": "object_update_all callees",
   "size": 164,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "basis_rotation_build_"
 }

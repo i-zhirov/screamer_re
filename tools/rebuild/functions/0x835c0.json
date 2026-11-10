@@ -1,9 +1,115 @@
 {
   "address": "0x835c0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 56,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the plan row records a 225-byte body of 56 instructions; the 56th instruction is the ret at 0x836a0, so the identity check uses 56 instructions; the store record keeps the 236-byte extent, which reaches the next record at 0x836ac, and it sets no separate function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only caller is sound_effects_update at 0x81ab0; it calls the function in the per-frame event path, after the event helper at 0x8a8d8, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the helper at 0x8a8d8 sets the source pointer at 0x7446c from the event record; the setup at 0x83560 patches the twelve immediate values of this function from the view basis at view + 0x118; the on-disk value 0xaaaabbbb is the linker fill value, so the original patches its own code; the rebuild reads the twelve values from the event_matrix global"
+    },
+    {
+      "kind": "note",
+      "text": "the source is a list of 6-byte records with the signed short x, y, and z values; the list ends at the signed short x value 0x7fff"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the camera-space point from the 3x3 basis and the three translations with the Q14 shift; it stores the three dwords at 0x4f308 with a 12-byte stride; a positive third value stores the clipped point 0x10001000, and a non-positive third value scales the first two values through the table at 0x3badc and stores the packed 16-bit pair at the ES destination from the selector at 0x2149c with a 6-byte stride"
+    },
+    {
+      "kind": "note",
+      "text": "the caller path, the event source list, the camera basis, and the point and screen outputs support the name sound_event_transform; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub; the flat harness models the ES destination with a byte pointer"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the source list, the point list, the ES destination, the projection table, the screen bias, and the twelve basis values; the seven paths cover the positive third value, the zero and negative table index, the 6-byte and 12-byte strides, the off-diagonal basis, the two sides of the compare, and the end marker at the first record; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 56 instructions and 204 bytes in the identity window; the identity check stays open at 9 of 56 instructions, 1 of 204 bytes, and 0 of 20 relocation slots, because the C reads the basis from memory, keeps the point cursor in a register, and stores the screen value through a pointer; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x835c0 --count 56"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x835c0 --count 56 --rebuilt work/rebuild/sevtx.exe --rebuilt-map work/rebuild/sound_event_transform.map --rebuilt-symbol sound_event_transform_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_event_transform"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x835c0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_event_transform.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_event_transform_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_event_transform.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_event_transform module at 0x835c0"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_event_transform",
+  "name": "sound_event_transform",
   "notes": [],
   "object_offset": "0x735c0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 204,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 56,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x835c0",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:5cb6db0493fd1c8c7743ce0ae66c91dc4660c0af930281aeae0f07100a6e7e8c",
+    "source_digest": "sha256:d99a21d1a37d7ced1ee0d100ca942e31e129e90c45e9d2c912c77e74b619279b",
+    "tool": "run.py"
+  },
+  "role": "Transforms the event source points into camera space and packs their screen coordinates.",
+  "section": "object_update_all callees",
   "size": 236,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_event_transform_"
 }

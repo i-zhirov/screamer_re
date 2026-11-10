@@ -1,0 +1,30 @@
+{
+  "exe": "sevtx.exe",
+  "map": "sound_event_transform.map",
+  "name": "sound_event_transform",
+  "run": {
+    "command": "sevtx.exe > sevtx.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "sevtx.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_event_transform.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_event_transform_main.c"
+    }
+  ]
+}

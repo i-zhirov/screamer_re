@@ -1,9 +1,119 @@
 {
   "address": "0x202c0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 37,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x202c0 holds 37 instructions and 160 bytes up to the ret at 0x2035f; the next recorded function starts at 0x20360, so the store record keeps the 160-byte extent and sets no separate function size; the identity check uses 37 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the race frame update at 0x1ff70; it selects this view group when the mode byte DAT_0011d260 holds bit 4; the mode 4 handler at 0x12e18 starts the ATTACK_RES replay session, so the group belongs to the replay race; the frame update calls the function directly, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the two gates require input flag DAT_00118e1d bit 0 and mode byte bit 4; the function returns before any call when either gate is clear"
+    },
+    {
+      "kind": "note",
+      "text": "the group calls race_position_update at 0x20428, player_car_view_update at 0x16f34 with the player object 0xf91c, path_keyframe_append at 0x231f0 with the player object and the ghost record 0x18e8c plus the index DAT_00118ed4 times 0x24, and path_playback_update at 0x23038 with the playback block 0x18ed8 and zero"
+    },
+    {
+      "kind": "note",
+      "text": "the group then runs the physics group at 0x15a80, the effect group at 0x15bac, the step group at 0x15ab8, the opponent group at 0x15b80, player_update at 0x19ab0, player_car_link at 0x15c1c, and path_playback_apply at 0x23328 with the playback block, all on the player object 0xf91c"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 4 handler, the keyframe append, the playback block, and the ghost record support the name replay_view_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame; the function uses no floating-point instruction and calls no function that needs an FPU stub; the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness assigns the values at run time and uses no initialized static data"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two gate bytes, the ghost index, the ghost record array, the playback block, and the eleven callee stubs; the five paths cover the clear input gate, the clear mode gate, the ghost index 0, 1, and 2, and the extra mode bits; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 37 decoded instructions and 160 bytes in the identity window; the identity check stays open at 14 of 37 instructions and 31 of 160 bytes, because the rebuilt C uses the standard Watcom calling convention, saves the frame pointer first, and places the arguments on the stack; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x202c0 --count 37"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x202c0 --count 37 --rebuilt work/rebuild/rview.exe --rebuilt-map work/rebuild/replay_view_update.map --rebuilt-symbol replay_view_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_view_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x202c0"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_view_update module at 0x202c0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_view_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_view_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/replay_view_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_view_update",
+  "name": "replay_view_update",
   "notes": [],
   "object_offset": "0x102c0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 160,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x202c0",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:e9672c52981f59fd9d7dddd6626d28859d08965e4c3f3ef73bfb549a9038aca6",
+    "source_digest": "sha256:54c1e19c762664123c49461ee34200ecf84b1536f2405c16289175e6c7d0c4e7",
+    "tool": "run.py"
+  },
+  "role": "runs the replay view group for game mode 4: gates on the input flag and the mode bit, records the player keyframe, updates and applies the ghost playback, and runs the player groups",
+  "section": "Program functions",
   "size": 160,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_view_update_"
 }

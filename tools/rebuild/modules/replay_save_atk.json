@@ -1,0 +1,31 @@
+{
+  "exe": "atksave.exe",
+  "map": "replay_save_atk.map",
+  "name": "replay_save_atk",
+  "run": {
+    "command": "atksave.exe > atksave.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "atksave.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_save_atk.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_save_atk_main.c"
+    }
+  ]
+}

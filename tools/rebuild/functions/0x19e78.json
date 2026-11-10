@@ -1,9 +1,102 @@
 {
   "address": "0x19e78",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x19e78 holds 41 instructions and 134 bytes up to the ret at 0x19efd; the next function starts at 0x19f00, so the store record keeps the 136-byte extent and sets no separate function size; the identity check uses 41 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the player update at 0x19ab0, which calls this function at 0x19ac2 on the player view object DAT_00110a20 after player_view_setup at 0x19ae8; player_view_setup writes the render mode at view field +0x88 from the chosen view slot, and the car camera at 0x1a930 also starts the renderer at 0x19e78"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the render mode at view field +0x88 and rejects a value above 9 with an unsigned compare; the jump table at 0x19e50 selects the camera routine for each mode: 0 player_cockpit_camera, 1 player_view_orbit with mode 1, 3 player_route_camera, 6 player_view_orbit with mode 2, 8 car_camera_select, and 9 player_view_orbit with mode 0; the modes 2, 4, 5, and 7 start no routine"
+    },
+    {
+      "kind": "note",
+      "text": "every camera routine except car_camera_select takes the player object at object-3 offset 0xf91c in eax and the view object in edx; player_view_orbit also takes the orbit mode in ebx; car_camera_select takes the view object in eax"
+    },
+    {
+      "kind": "note",
+      "text": "the render mode field, the jump table, and the four camera routines support the name view_mode_dispatch; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x19e78 --count 41"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x19e78"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x19e78 --count 41 --rebuilt work/rebuild/vmdisp.exe --rebuilt-map work/rebuild/view_mode_dispatch.map --rebuilt-symbol view_mode_dispatch_"
+    },
+    {
+      "kind": "finding",
+      "text": "The view_mode_dispatch module at 0x19e78"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/view_mode_dispatch.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/view_mode_dispatch_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/view_mode_dispatch.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 41 decoded instructions in the identity window and 111 bytes; the identity check stays open at 12 of 41 instructions and 6 of 111 bytes, because V2 forms the dispatch as a compare tree instead of the jump table at 0x19e50, keeps the view pointer in a register, and saves the frame first; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "view_mode_dispatch",
+  "name": "view_mode_dispatch",
   "notes": [],
   "object_offset": "0x9e78",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 111,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 41,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19e78",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:579456edac3aa4e517b8974a4a3767f3c85fb442f798c92759407d92f29a3c05",
+    "source_digest": "sha256:2204ab7784905feb1f4b11b8b28559787d133abaf492d159c63dfaa35d26e20c",
+    "tool": "run.py"
+  },
+  "role": "Selects the camera routine from the view render mode: it starts the cockpit camera, the orbit camera, the route camera, or the car camera select.",
+  "section": "player_view_setup callees",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "view_mode_dispatch_"
 }

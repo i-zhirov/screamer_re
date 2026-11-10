@@ -1,9 +1,103 @@
 {
   "address": "0x8affc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 74,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8affc holds 74 instructions and 234 bytes up to the ret at 0x8b0e5; the next function starts at 0x8b0e8; the next recorded function starts at 0x8b1d4, so the store record keeps the 472-byte extent and sets no separate function size; the identity check uses 74 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x8af35 is the per-source frame prepare at 0x8af08; that helper runs on the per-frame path of sound_effects_update at 0x81ab0, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the context record holds the frame table base at +0x00, the frame index at +0x08, the voice record at +0x0c, the current object at +0x14, the frame table entry pointer at +0xb4, the table base at +0xb8, and the source record at +0xc8; the function resets the source distance identifier, points the frame table entry at table + index * 4 + 0x18, takes the object offset from that entry, and stores the object in the context and in the voice record"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies six dwords from the source record at +0x08 through +0x1c to the voice record at +0x10 through +0x24; it runs the flag helper at 0x8afb2; a non-negative sample offset at 0x74528 runs the view helper at 0x8afa0 and the pose copy at 0x8afc4; a negative offset runs the index transform at 0x8b610 on the six copied dwords"
+    },
+    {
+      "kind": "note",
+      "text": "the function composes four Q14 matrices through matrix_compose at 0x82258: the context block +0x48 with the voice block +0x28 to +0xa0, the camera basis +0x48 with the result +0xa0 to +0x118, the context block +0x78 with the camera basis +0x18 to +0xd0, and the voice block +0x58 with the result +0xd0 to +0x148; it then calls sound_source_frame_select at 0x8b1d4 with the context"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the per-source loop, the source record copy, and the frame select call support the name sound_source_frame_prepare; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame setup and saves ebp because it uses the register as the voice pointer, so the module needs no -of+; the original uses no floating-point instruction and calls no FPU helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame table, the frame index, the voice record, the context record, the source record, the sample offset, the camera record, and the six callee stubs; the three paths cover the index 0 with a non-negative offset, the index 1 with a negative offset, and the index 2; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 74 instructions and 234 bytes; the identity check stays open at 21 of 74 instructions, 13 of 234 bytes, and 0 of 8 relocation slots, because V2 saves the registers first, uses another prologue order, keeps the values in other registers, and addresses the camera through a local; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8affc --count 74"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8affc --count 74 --rebuilt work/rebuild/ssfprep.exe --rebuilt-map work/rebuild/sound_source_frame_prepare.map --rebuilt-symbol sound_source_frame_prepare_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_source_frame_prepare"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8affc"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_source_frame_prepare module at 0x8affc"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_source_frame_prepare",
+  "name": "sound_source_frame_prepare",
   "notes": [],
   "object_offset": "0x7affc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 234,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 74,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8affc",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:bb3c12b6c4a32b5c84d07815d8772327e81d2bb196dee67b68e8db8b4b03331b",
+    "source_digest": "sha256:6a1453933233191554b6d9257328a0d9f44513663e2ae62adab0996b2969b003",
+    "tool": "run.py"
+  },
+  "role": "Prepares the per-source frame transform, composes the voice matrices, and selects the sound source frame.",
+  "section": "object_update_all callees",
   "size": 472,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_source_frame_prepare_"
 }

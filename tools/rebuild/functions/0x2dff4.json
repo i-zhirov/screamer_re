@@ -1,9 +1,103 @@
 {
   "address": "0x2dff4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 67,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2dff4 holds 67 instructions and 191 bytes up to the ret at 0x2e0b2; the next function starts at 0x2e0b4, so the store record keeps the 192-byte extent and sets no separate function size; the identity check uses 67 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks three tables in object 3; the first loop resets the 0x50 map object records at object-3 offset 0x1db78 (linear 0x11db78), stride 0x64, through the helper map_object_record_init at 0x2b450 with the record and the index; the helper stores the index in the first field, sets the object field +0x08 to -1, and binds the object slot"
+    },
+    {
+      "kind": "note",
+      "text": "the second loop binds the 0xe car display records at object-3 offset 0x1d550 (linear 0x11d550), stride 0x44, and the third loop binds the 0xc track display records at object-3 offset 0x1d908 (linear 0x11d908), stride 0x34; both call object_list_bind at 0x11850 with the object-list table 0x6530, the list state 0x6350, and the record"
+    },
+    {
+      "kind": "note",
+      "text": "the eight direct callers are menu_frame at 0x29f80 (call at 0x2a19b), menu_objects_init at 0x2aab8 (call at 0x2b037), car_select_screen at 0x2bedc (call at 0x2bff3), track_select_screen at 0x2c188 (call at 0x2c295), name_entry_screen at 0x2c430 (call at 0x2c5e8), championship_screen_init at 0x2c7a8 (call at 0x2c7e5), race_records_screen_init at 0x2c954 (call at 0x2c9a2), and net_race_lobby_init at 0x2ca40 (call at 0x2ca6f); every caller runs the function while it prepares a menu or a race screen, and the car and track select screens fill the record values after the call; the callers sit in the frame_update callees and the race_frame callees sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the three object record lists, the shared bind helper, and the eight screen callers support the name screen_object_lists_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three object record tables and the two callee stubs; the three paths cover the 0x50 map object records with the record pointer and the index, the 0xe car records and the 0xc track records with the record pointer, the table 0x6530, and the name 0x6350, and a second run that doubles the counts; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 67 instructions holds 12 of 67 instructions, 8 of 191 bytes, and 0 of 21 relocation slots; the identity check stays open because V2 saves the frame in another order, keeps the loop bounds and the record pointers in registers, folds the record stride with imul, and reaches the constants through near data addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol name for this function; the module name and the two callee names in the harness stay inferred"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2dff4 --count 67"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2dff4 --count 67 --rebuilt work/rebuild/scolinit.exe --rebuilt-map work/rebuild/screen_object_lists_init.map --rebuilt-symbol screen_object_lists_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module screen_object_lists_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2dff4"
+    },
+    {
+      "kind": "finding",
+      "text": "The screen_object_lists_init module at 0x2dff4"
+    }
+  ],
+  "implementation": "c",
+  "module": "screen_object_lists_init",
+  "name": "screen_object_lists_init",
   "notes": [],
   "object_offset": "0x1dff4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 191,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 67,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2dff4",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:fe582a7c004fc250f44fde49f6960c630ee501f8d393b7a63e5199e3da984831",
+    "source_digest": "sha256:3082d0bfc790c3d349e34a15a6341c9f8f9a8d4355b0ad3bf0593ebffe45bd53",
+    "tool": "run.py"
+  },
+  "role": "resets the map object records and rebinds the car, track, and map display lists for a screen",
+  "section": "Program functions",
   "size": 192,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "screen_object_lists_init_"
 }

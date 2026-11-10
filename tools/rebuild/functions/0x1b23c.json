@@ -1,9 +1,107 @@
 {
   "address": "0x1b23c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 57,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1b23c holds 57 instructions and 200 bytes up to the ret at 0x1b303; the next function controls_load starts at 0x1b304, so the store record keeps the 200-byte extent and sets no separate function size; the identity check uses 57 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are race_data_load at 0x131a8, which calls the function at 0x134d9, 0x134e8, and 0x134f7 with the names 0x544 impres_, 0x54c implet_, and 0x554 cdfront and the out cells 0x18f10, 0x18f18, and 0x18f14, and player_car_init at 0x136cc, which calls the function at 0x1374b with the cockpit name COCK%s%c and the out cell 0x18f0c; the .pkc member, the COCKPIT resource, and the two callers support the name cockpit_load and the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the container path %s\\gfx\\game.dat from the base path DAT_00007f44 through sprintf at 0x4d32c; the format string sits at object-3 offset 0x98b"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member name %s%c.pkc from the name and the letter H (0x48) through sprintf at 0x4d32c; the format string sits at object-3 offset 0x99b; the path buffer holds 0x64 bytes and the member buffer holds 0x64 bytes"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member with the mode rb at object-3 offset 0x9a4 through fopen at 0x4c08d; a failed open runs the file error report at 0x4bf88 and the function continues; the stream record holds the member size at +0x70, so stream_status at 0x4c7e0 returns it"
+    },
+    {
+      "kind": "note",
+      "text": "the function gets the COCKPIT resource at object-3 offset 0x9a7 of the member size through resource_get at 0x2eed0 with the resource head DAT_000062ac, stores the result in the out cell, and runs the memory error report at 0x2edad when the result is zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the member into the resource through stream_read at 0x4c4e5 and closes the stream through stream_close at 0x4c38d; the .pkc member, the COCKPIT resource, and the two callers support the name cockpit_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines COCKPIT_LOAD_HARNESS and the function builds the constant texts in local buffers"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the resource handle, the resource buffer, and the out cell; the five paths cover the normal path, the failed open, the zero resource, the second base name, and the zero size; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 13 of 57 instructions and 8 of 165 bytes equal, and 0 of 7 relocation slots; the identity check stays open because the harness build fills the four constant buffers in the function body, and V2 saves the frame first and keeps the stream in a local; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1b23c --count 57"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1b23c --count 57 --rebuilt work/rebuild/ckptload.exe --rebuilt-map work/rebuild/cockpit_load.map --rebuilt-symbol cockpit_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1b23c"
+    },
+    {
+      "kind": "finding",
+      "text": "The cockpit_load module at 0x1b23c"
+    }
+  ],
+  "implementation": "c",
+  "module": "cockpit_load",
+  "name": "cockpit_load",
   "notes": [],
   "object_offset": "0xb23c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 165,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b23c",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:315f90fdde63d32dec9907dc5c77bda7d9245dbdab0126f609aca4422f465d50",
+    "source_digest": "sha256:ce203e699755f9299966c5ba1229189b54ad3f6f130f334faa0b93f69548fbd9",
+    "tool": "run.py"
+  },
+  "role": "loads the cockpit %s%c.pkc member from the %s\\gfx\\game.dat container into the COCKPIT resource and stores the resource pointer in the out cell",
+  "section": "Resource loader",
   "size": 200,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cockpit_load_"
 }

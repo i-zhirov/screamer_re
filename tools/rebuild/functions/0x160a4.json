@@ -1,9 +1,99 @@
 {
   "address": "0x160a4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 38,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x160a4 holds 38 instructions and 136 bytes on the first path up to the ret at 0x1612b; the second path runs from 0x1612c to the ret at 0x1614f, so the body reaches 172 bytes; the next function starts at 0x16150, so the store record keeps the 172-byte extent and sets no separate function size; the identity check uses 38 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the player update group at 0x15a80, which runs this function at 0x15aa4 before player_brake_update at 0x16150 and player_steering_update at 0x1629c; the group runs on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function keeps the throttle +0x144 only when it is not negative, the fields +0x4f4, +0x148, +0x110, and +0x170 stay clear, and the control byte DAT_00118e1d bit 0x40 is clear; the tests of +0x4f4 and +0x110 mask the sign bit 0x7fffffff; the sign of the axis DAT_00119880 must then equal the centre DAT_001197ec"
+    },
+    {
+      "kind": "note",
+      "text": "when every gate passes, the throttle takes the absolute axis over 1023.0 at DAT_00100710; any other input clears the throttle to zero; the sibling player_brake_update at 0x16150 forms the brake value in the same shape; the original has no symbol, so the record keeps the name player_throttle_update with the confidence inferred"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x160a4 --count 38"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x160a4 --count 38 --rebuilt work/rebuild/pthrtl.exe --rebuilt-map work/rebuild/player_throttle_update.map --rebuilt-symbol player_throttle_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x160a4"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_throttle_update module at 0x160a4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_throttle_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_throttle_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_throttle_update.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the throttle axis and its centre sign, the control byte, and the 1023.0 scale; the eleven paths cover the direct path, the negative axis, the zero axis, the negative throttle, the four state fields, the control bit, the sign mismatch, and the sign-only masks with the control byte 0xbf; the output holds the markers 0 through 9, A, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 38 decoded instructions and 134 bytes in the identity window; the identity check stays open at 6 of 38 instructions and 18 of 134 bytes, and 0 of 6 relocation slots, because V2 keeps the object in edx and ecx, saves esi, loads the harness globals from fixed addresses, and builds the sign select in another shape; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_throttle_update",
+  "name": "player_throttle_update",
   "notes": [],
   "object_offset": "0x60a4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 134,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 38,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x160a4",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:0574694ef935d72fe0e4966da3be42680bcb64c668247080bcfd7bc4cc44b9ab",
+    "source_digest": "sha256:bb908c4824df7dc5e02757e277617d110600c77dfda7a00771532db836ddf7de",
+    "tool": "run.py"
+  },
+  "role": "Forms the throttle from the pedal axis, keeps it only when the state gates and the axis sign pass, and clears it otherwise.",
+  "section": "The vehicle state chain",
   "size": 172,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_throttle_update_"
 }

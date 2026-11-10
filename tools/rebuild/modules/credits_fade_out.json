@@ -1,0 +1,34 @@
+{
+  "exe": "cfadeout.exe",
+  "map": "credits_fade_out.map",
+  "name": "credits_fade_out",
+  "run": {
+    "command": "cfadeout.exe > cfadeout.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "cfadeout.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "credits_fade_out.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "credits_fade_out_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "credits_fade_out_main.c"
+    }
+  ]
+}

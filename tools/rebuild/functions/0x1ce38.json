@@ -1,9 +1,107 @@
 {
   "address": "0x1ce38",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 45,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ce38 holds 45 instructions and 165 bytes up to the ret at 0x1cedc; the next function starts at 0x1cee0, so the store record keeps the 168-byte extent and sets no separate function size; the identity check uses 45 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1c7bc is object_prepare at 0x1c79c, which runs this step when the state at +0x414 is set; object_prepare is a callee of object_update_all at 0x2786c, so the record takes the section object_prepare callees, like the adjacent preparation steps track_progress_update at 0x1db94 and terrain_contact_update at 0x1cbac"
+    },
+    {
+      "kind": "note",
+      "text": "the function rotates the two local body points at +0x41c and +0x428 by the negative heading at +0x4a8 through the rotation helper at 0x2218c, adds the car world position at +0x498 and +0x4a0, and stores the two world body points at +0x434 and +0x440; a point holds x at +0x00, y at +0x04, and z at +0x08, and the function writes only x and z because the collision pass at 0x1d00c compares the ground plane"
+    },
+    {
+      "kind": "note",
+      "text": "the two body points at +0x434 and +0x440, the caller object_prepare, and the adjacent body-point modules support the name body_point_place; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses only the fld, fchs, and fstp instructions, so it calls no math routine and needs no truncating stub; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the car record with the two local points, the heading, the world position, the two world points, and the rotation stub; the six paths cover the two call pointers and the negated heading, the heading +0.0 and -0.0, the heading -2.0, the x and z offsets on both points, and the heading 2.5; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 45 decoded instructions and 174 bytes in the identity window; the identity check stays open at 8 of 45 instructions and 13 of 165 bytes, because V2 saves ecx and edx first, keeps the object in ecx, forms the two point pointers with lea, and orders the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ce38 --count 45"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ce38 --count 45 --rebuilt work/rebuild/bpp.exe --rebuilt-map work/rebuild/body_point_place.map --rebuilt-symbol body_point_place_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module body_point_place"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ce38"
+    },
+    {
+      "kind": "finding",
+      "text": "The body_point_place module at 0x1ce38"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/body_point_place.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/body_point_place_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/body_point_place.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "body_point_place",
+  "name": "body_point_place",
   "notes": [],
   "object_offset": "0xce38",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 165,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 45,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ce38",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:40c8a2328ae807f4894d98a544527724f504f8b2361958d2ed7308333dc4cfd2",
+    "source_digest": "sha256:9d0815c1e6040d910e0e44d539e42c88696c8beee4e5284d81699afd8bccb43c",
+    "tool": "run.py"
+  },
+  "role": "rotates the two local body points at +0x41c and +0x428 by the negative heading and adds the car world position, so the world body points at +0x434 and +0x440 take the two contact positions",
+  "section": "object_prepare callees",
   "size": 168,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "body_point_place_"
 }

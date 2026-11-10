@@ -1,9 +1,119 @@
 {
   "address": "0x2218c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 38,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2218c holds 38 instructions and 112 bytes up to the ret 4 at 0x221f8; the next record starts at 0x221fc, so the store record keeps the 112-byte extent and sets no separate function size; the identity check uses 38 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two arguments arrive in the Watcom register order: eax holds the output point and edx holds the input point; the float angle makes the compiler pass the remaining argument on the stack, so the callee cleans it with ret 4"
+    },
+    {
+      "kind": "note",
+      "text": "the point holds three integers at +0x00, +0x04, and +0x08; the function computes the two products of the x and z values with the cosine and the sine, truncates the sum and the difference into +0x00 and +0x08, and leaves the y value at +0x04; the helper at 0x4d9f4 sets the truncate rounding mode before each store; a point uses x and z for the ground plane and y for the height, so the function turns the ground-plane pair about the vertical y axis"
+    },
+    {
+      "kind": "note",
+      "text": "the integer helper at 0x2218c turns the (x, z) pair, the float helper at 0x22278 turns the same pair with float fields, and point_rotate_x at 0x221fc turns the (y, z) pair, so the three functions form the integer and float forms of the point rotation"
+    },
+    {
+      "kind": "note",
+      "text": "the 15 named caller records hold 24 call sites: wheel_contact_update at 0x11a30, collision_cell_test at 0x11ccc, body_point_collision_detect at 0x11e74, player_segment_update at 0x11f98, opponent_route_setup at 0x1517c, player_steering_update at 0x1629c, player_body_point_place at 0x17c6c, player_car_wheel_effect_update at 0x19980, terrain_contact_update at 0x1cbac, body_point_place at 0x1ce38, object_collision at 0x1e00c, traffic_body_point_place at 0x1f108, ai_update at 0x205c4, sound_emitter_update at 0x21b9c, and race_radar at 0x23a94; one more call site at 0x22519 sits in the unnamed record at 0x224dc; the callers span several sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the ground-plane rotation, the float counterpart at 0x22278, and the x-axis counterpart at 0x221fc support the name point_rotate_y; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls cos through 0x4da66 and sin through 0x4da72, and it truncates through 0x4d9f4; the harness links no math library, so the local point_rotate_y_fpu.asm supplies cos and sin and makes __CHP truncate toward zero; the original has the EBP frame, so the module builds with -of+; the module uses no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one input point and one output point, both with three integers; the six paths cover the angle 0, the angle 0.5 on (100, 200, 300), the angle 1.0 on (-100, -200, 300), the angle -0.75 on (10, -20, 30), the angle 1.5 on (0x1000, -0x800, 0x400), and the distinct y value -999; every path checks the input point, the middle output value, and the two rotated values; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 of 38 instructions, 8 of 93 bytes, and 0 of 0 relocation slots equal; V2 saves ebx, ecx, and esi, keeps the output point in ecx and the input point in edx, reorders the prologue, and sizes the frame smaller; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2218c --count 38"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2218c --count 38 --rebuilt work/rebuild/pry.exe --rebuilt-map work/rebuild/point_rotate_y.map --rebuilt-symbol point_rotate_y_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module point_rotate_y"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2218c"
+    },
+    {
+      "kind": "finding",
+      "text": "The point_rotate_y module at 0x2218c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_y.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_y_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_y_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/point_rotate_y.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "point_rotate_y",
+  "name": "point_rotate_y",
   "notes": [],
   "object_offset": "0x1218c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 93,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 38,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2218c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:fcd1b5c7881e9ab9813acd8c531cb207f49ae11d21abfe5279d7fccfd7482032",
+    "source_digest": "sha256:aa350612467ae2b07b89b128e74c7ab597d0293550af34e2e5c3f5bfc12467f9",
+    "tool": "run.py"
+  },
+  "role": "Rotates the x and z components of an integer point about the y axis by an angle and leaves the y component.",
+  "section": "Program functions",
   "size": 112,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "point_rotate_y_"
 }

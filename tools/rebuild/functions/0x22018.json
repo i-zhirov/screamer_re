@@ -1,9 +1,103 @@
 {
   "address": "0x22018",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 93,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22018 holds 93 instructions and 257 bytes up to the ret 8 at 0x22116; the next function starts at 0x2211c, so the store record keeps the 260-byte extent and sets no separate function size; the identity check uses 93 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument arrives in eax; the float argument makes the Watcom compiler pass the remaining arguments on the stack, so the callee cleans them with ret 8"
+    },
+    {
+      "kind": "note",
+      "text": "two functions call this function; view_transition_update at 0x19f00 calls it at 0x19fa0, 0x19faf, and 0x19fbe, and player_view_orbit at 0x1a3b8 calls it at 0x1a55e, 0x1a574, and 0x1a58a; they pass the angle deltas and the player angles; the function sits next to filter_update at 0x22b80 and timing_update at 0x22df8, so the module takes the section The timing and filter layer"
+    },
+    {
+      "kind": "note",
+      "text": "the function moves the value at *value toward the target with the coefficient DAT_0010cf08[step]; the first compare sends an equal value straight to the wrap; when the absolute difference is at least pi, the function shifts the difference by one full turn, so the value takes the short path"
+    },
+    {
+      "kind": "note",
+      "text": "the function then wraps the value into the range zero to 2 pi; a negative value gains 2 pi; a value of 2 pi or more loses 2 pi; the wrap also runs when the value equals the target"
+    },
+    {
+      "kind": "note",
+      "text": "the wrapped one-pole angle filter supports the name angle_approach; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original compares against the three float constants in the constant segment, so the harness passes them through globals; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the coefficient table and the three angle constants; the nine paths cover the equal value, the small positive and negative differences, the two large-difference short paths, the lower and upper wrap, the equal value above one turn, and the exact zero result; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 19 of 93 instructions and 10 of 246 bytes equal; the identity check stays open because the V2 compiler saves the frame first, keeps the value pointer in edx, uses a local difference cell, and orders the two sign branches in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22018 --count 93"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22018 --count 93 --rebuilt work/rebuild/aang.exe --rebuilt-map work/rebuild/angle_approach.map --rebuilt-symbol angle_approach_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module angle_approach"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22018"
+    },
+    {
+      "kind": "finding",
+      "text": "The angle_approach module at 0x22018"
+    }
+  ],
+  "implementation": "c",
+  "module": "angle_approach",
+  "name": "angle_approach",
   "notes": [],
   "object_offset": "0x12018",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 246,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 93,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22018",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:8eabd5cb2a9452a5efab541fecde1d03f398d712c0ec17e6c1e469746c74277f",
+    "source_digest": "sha256:3f0b0be3cef4d4d272458275b538b0de373f52124242a0bbcb45f8082398a1ad",
+    "tool": "run.py"
+  },
+  "role": "moves an angle toward a target along the short path with the one-pole coefficient table and wraps the result into the range zero to 2 pi",
+  "section": "The timing and filter layer",
   "size": 260,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "angle_approach_"
 }

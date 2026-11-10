@@ -1,9 +1,103 @@
 {
   "address": "0x2c954",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 65,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2c954 holds 65 instructions and 235 bytes up to the ret at 0x2ca3e; the next function starts at 0x2ca40, so the store record keeps the 236-byte extent and sets no separate function size; the identity check uses 65 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2becc is case 6 of the state init dispatcher at 0x2be94; the jump table at linear 0x2be70 maps the state 6 to 0x2becc; the matching state 6 update at 0x295fb calls race_records_screen at 0x2d4b8, and race_state_update at 0x29564 is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the menu index DAT_0011fb60, the row DAT_0011fb08[index], and the base DAT_00102de8[index], and stores the dword at base + row * 16 + 0xc in DAT_0012098c; it sets DAT_00120380 at 8.0, DAT_0011fac8 at 1, and DAT_00120378 at 1.5, and runs the init at 0x2dff4"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member load<track + 1>H.pcx from the format at object-3 offset 0x11a2 and the letter H, loads it from gfx\\graf.dat at object-3 offset 0x11af into DAT_0011fad0 with the palette DAT_0010cf5c through pcx_load at 0x1b5a4, and runs the cleanup at 0x15150 on a non-zero result"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets DAT_00118e08 at 0.08 and DAT_000007f9 at 8, builds the palette shades through 0x258d0, presents the buffer with the scale 0 and the offset 0 through 0x27ec8, copies 0x3e800 bytes to DAT_00121528 through 0x8c150, fills the screen through 0x2aa98, presents again, and clears the highlight row DAT_00120990"
+    },
+    {
+      "kind": "note",
+      "text": "the state 6 caller, the selected track DAT_0012098c, the load member, and the shared init tail with championship_screen_init support the name race_records_screen_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and uses no floating-point instruction, so the module builds with -of+ and links only the shared fpu_stub.asm float run-time support"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the menu index, the entry table, the base table, the three track records, the two buffers, the palette, the format, and the archive; the three paths cover the track 5 with the member load6H.pcx, the track 9 with the member load10H.pcx and the failed load cleanup, and the track 99 with the member load100H.pcx; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 17 of 65 instructions, 16 of 235 bytes, and 0 of 33 relocation slots equal; the identity check stays open because V2 saves the frame pointer first, orders the pushes differently, and reaches the data through near addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2c954 --count 65"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2c954 --count 65 --rebuilt work/rebuild/rrsi.exe --rebuilt-map work/rebuild/race_records_screen_init.map --rebuilt-symbol race_records_screen_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_records_screen_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2c954"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_records_screen_init module at 0x2c954"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_records_screen_init",
+  "name": "race_records_screen_init",
   "notes": [],
   "object_offset": "0x1c954",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 235,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 65,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2c954",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:7abb6ea89634c55f2263c8be361b2605c443a1a469c6cf9c43d6277b9c17a851",
+    "source_digest": "sha256:4b6208033f504b60a12a3e8f979a0557da39f0cba37e224ca7b0c8fc26ed4fae",
+    "tool": "run.py"
+  },
+  "role": "loads the selected track loading screen, builds the palette and the video buffers, and clears the highlight row for the race records screen",
+  "section": "race_frame callees",
   "size": 236,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_records_screen_init_"
 }

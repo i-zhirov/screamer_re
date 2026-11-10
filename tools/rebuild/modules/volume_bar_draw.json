@@ -1,0 +1,37 @@
+{
+  "exe": "volbar.exe",
+  "map": "volbar.map",
+  "name": "volume_bar_draw",
+  "run": {
+    "command": "volbar.exe > volbar.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "D"
+    ],
+    "output": "volbar.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "volume_bar_draw.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "volume_bar_draw_main.c"
+    }
+  ]
+}

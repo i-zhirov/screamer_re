@@ -1,9 +1,111 @@
 {
   "address": "0x221fc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 42,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x221fc holds 42 instructions and 124 bytes up to the ret 4 at 0x22275; the next record starts at 0x22278, so the store record keeps the 124-byte extent and sets no separate function size; the identity check uses 42 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two arguments arrive in the Watcom register order: eax holds the output point and edx holds the input point; the float angle makes the compiler pass the remaining argument on the stack, so the callee cleans it with ret 4"
+    },
+    {
+      "kind": "note",
+      "text": "the point holds three integers at +0x00, +0x04, and +0x08; the function copies the x value and turns the y and z pair by the angle; the helper at 0x2218c turns the x and z pair, and the float helper at 0x22278 turns the x and z pair with float fields, so the three functions form the integer and float forms of the point rotation"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is player_car_wheel_effect_update at 0x19980, with the call site at 0x19a01; it first turns the slot pair by the negated heading plus the yaw through the helper at 0x2218c, and then it turns the result by the pitch through this function into the slot position at +0x0c, +0x10, and +0x14; the caller runs in the vehicle state chain, so the record takes the section The vehicle state chain; the data flow supports the name point_rotate_x; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls cos through the Watcom helper at 0x4da66 and sin through 0x4da72; this harness links no math library, so the local point_rotate_x_fpu.asm supplies cos and sin from the hardware; the original truncates through the helper at 0x4d9f4, so the stub also makes __CHP truncate toward zero; the original has the EBP frame, so the module builds with -of+; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one input point and one output point; the six paths cover the angle 0 with the unchanged input, the angle 0.5 on (100, 200, 300), the angle 1.0 on (-100, -200, 300), the angle -0.75 on (10, -20, 30), the angle 1.5 on (0x1000, -0x800, 0x400), and the distinct x value -999; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 42 instructions in the identity window and 104 bytes up to the ret 4; the identity check stays open at 9 of 42 instructions, 9 of 104 bytes, and 0 of 0 relocation slots, because V2 saves ebx, ecx, and esi, keeps the two pointers in registers, computes the two trig values in another order, and uses the frame more tightly; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x221fc --count 42"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x221fc --count 42 --rebuilt work/rebuild/prx.exe --rebuilt-map work/rebuild/point_rotate_x.map --rebuilt-symbol point_rotate_x_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module point_rotate_x"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x221fc"
+    },
+    {
+      "kind": "finding",
+      "text": "The point_rotate_x module at 0x221fc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_x.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_x_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_rotate_x_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/point_rotate_x.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "point_rotate_x",
+  "name": "point_rotate_x",
   "notes": [],
   "object_offset": "0x121fc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 104,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 42,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x221fc",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:638d293f75529a6a8c27f97b2f8950b7f98b7bd98fefa15fdda37698f6d83035",
+    "source_digest": "sha256:aa26b4ae42f982db68453d4f16999aee48d542d31f677d19094337b280c2fbf2",
+    "tool": "run.py"
+  },
+  "role": "Rotates the y and z components of an integer point about the x axis by an angle and copies the x component.",
+  "section": "The vehicle state chain",
   "size": 124,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "point_rotate_x_"
 }

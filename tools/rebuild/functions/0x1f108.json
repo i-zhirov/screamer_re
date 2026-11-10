@@ -1,9 +1,107 @@
 {
   "address": "0x1f108",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 45,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f108 holds 45 instructions and 147 bytes up to the ret at 0x1f19a; five pad bytes follow the ret and the next function starts at 0x1f1a0, so the store record keeps the 152-byte extent and sets no separate function size; the identity check uses 45 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20257 is the traffic view group at 0x201d0, which walks the 0x2a8-byte traffic records at DAT_00113cd8 while the index stays below the count DAT_00115218 and first runs this record update on each record; the frame update at 0x1ff70 selects the group through the mode byte DAT_0011d260 bit 0x10, so the module takes the section The vehicle state chain, like the sibling traffic_object_link at 0x1ef68"
+    },
+    {
+      "kind": "note",
+      "text": "the function rotates the two local traffic body points at +0x274 and +0x280 by the negative heading at +0x4c through the rotation helper at 0x2218c, adds the traffic world position at +0x3c and +0x44, and stores the two world traffic points at +0x28c and +0x298; a point holds x at +0x00, y at +0x04, and z at +0x08, and the function writes only x and z because the comparison uses the ground plane"
+    },
+    {
+      "kind": "note",
+      "text": "traffic_collision_pass at 0x175dc compares the two player body points against the traffic points at +0x28c and +0x294, and the traffic radius sits at +0x2a4 after the second 12-byte point; the two points, the traffic caller, and the adjacent body_point_place at 0x1ce38 and player_body_point_place at 0x17c6c modules support the name traffic_body_point_place; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses only the fld, fchs, and fstp instructions, so it calls no math routine and needs no truncating stub; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the traffic record with the two local points, the heading, the world position, the two world points, and the rotation stub; the six paths cover the two call pointers and the negated heading, the heading +0.0 and -0.0, the heading -2.0, the x and z offsets on both points, and the heading 2.5; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f108 --count 45"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f108 --count 45 --rebuilt work/rebuild/tbpp.exe --rebuilt-map work/rebuild/traffic_body_point_place.map --rebuilt-symbol traffic_body_point_place_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module traffic_body_point_place"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f108"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_body_point_place module at 0x1f108"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_body_point_place.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_body_point_place_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/traffic_body_point_place.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 45 decoded instructions and 153 bytes in the identity window; the identity check stays open at 8 of 45 instructions and 6 of 147 bytes, and 0 of 5 relocation slots, because V2 saves ecx and edx, keeps the record in ecx, forms the two point pointers with lea, and orders the prologue and the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_body_point_place",
+  "name": "traffic_body_point_place",
   "notes": [],
   "object_offset": "0xf108",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 147,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 45,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f108",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:e35d68e6f2e10e597967ad192327e95b6411f0db3f7675dac796c94bea630554",
+    "source_digest": "sha256:ffcf2fbb06a826dbf1019a07b90ffb41e6569b6d475c5768099c31eb8a9e1bd2",
+    "tool": "run.py"
+  },
+  "role": "rotates the two local traffic body points at +0x274 and +0x280 by the negative heading and adds the traffic world position, so the traffic points at +0x28c and +0x298 take the two contact positions",
+  "section": "The vehicle state chain",
   "size": 152,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_body_point_place_"
 }

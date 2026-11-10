@@ -1,0 +1,29 @@
+{
+  "exe": "scolinit.exe",
+  "map": "screen_object_lists_init.map",
+  "name": "screen_object_lists_init",
+  "run": {
+    "command": "scolinit.exe > scolinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "scolinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "screen_object_lists_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "screen_object_lists_init_main.c"
+    }
+  ]
+}

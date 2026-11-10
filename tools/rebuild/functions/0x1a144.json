@@ -1,9 +1,99 @@
 {
   "address": "0x1a144",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 63,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1a144 continues past the fall-through ret at 0x1a21e; the plan row counts 63 instructions and 219 bytes to that ret, and the else branch runs from 0x1a21f to the ret at 0x1a2b8, so the complete body holds 103 instructions and 373 bytes; the next function starts at 0x1a2bc, so the store record keeps the 376-byte extent and sets no function size; the identity check uses the plan count 63"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x19ad6 is player_update at 0x19ab0; it runs this function as the fourth step on the player view object DAT_00110a20 after view_transition_update at 0x19f00; the function writes the camera pose at DAT_00109a0, and camera_update at 0x8ac78 reads the pose through basis_transform_build at 0x8b610, so the record takes the section player_update callees"
+    },
+    {
+      "kind": "note",
+      "text": "the view object holds the base position at +0x00, +0x04, and +0x08, the position delta at +0x24, +0x28, and +0x2c, the base angles at +0x30, +0x34, and +0x38, the angle delta at +0x3c, +0x40, and +0x44, and the transition flag +0x58; view_transition_update forms the two deltas and sets the flag"
+    },
+    {
+      "kind": "note",
+      "text": "when the flag +0x58 is set, the angle takes the base plus the delta and the position takes the base plus the delta; when the flag is clear, both take the base alone; the scale 1024.0 at object-3 offset 0x8f8 and the divisor pi at object-3 offset 0x8fc convert the angle to the table index, and the mask 0x7ff wraps the index"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain, the camera pose at DAT_00109a0, and the basis transform at 0x8b610 support the name camera_pose_build; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncating helper at 0x4d9f4; this harness links no math library, so the local camera_pose_build_fpu.asm makes __CHP truncate toward zero; the two constants arrive through globals, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one view object, the camera pose, and the two float constants; the four paths cover the flag set with the base plus the delta and the two pi wrap, the flag clear with the unused delta, the 1.0 and -1.0 truncation toward zero, and the flag clear with the zero position; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 8 of 63 instructions, 17 of 219 bytes, and 1 of 27 relocation slots equal; the identity check stays open because V2 orders the prologue differently, keeps the view pointer in edx, and folds the two branches; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1a144 --count 63"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1a144 --count 63 --rebuilt work/rebuild/campose.exe --rebuilt-map work/rebuild/camera_pose_build.map --rebuilt-symbol camera_pose_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module camera_pose_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1a144"
+    },
+    {
+      "kind": "finding",
+      "text": "The camera_pose_build module at 0x1a144"
+    }
+  ],
+  "implementation": "c",
+  "module": "camera_pose_build",
+  "name": "camera_pose_build",
   "notes": [],
   "object_offset": "0xa144",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 219,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 63,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1a144",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:5459e6fe0666c82a9972e4b4a8d1ae17e3ef507b2ad5f33906b0e05897e4f0f0",
+    "source_digest": "sha256:92722ae30885050109cd789d3a5feb2c05335a02b15f52b88917a55e24bdda3a",
+    "tool": "run.py"
+  },
+  "role": "builds the camera pose from the player view object, converting the three angles to the 11-bit table indices and adding the transition deltas when the flag +0x58 is set",
+  "section": "player_update callees",
   "size": 376,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "camera_pose_build_"
 }

@@ -1,0 +1,36 @@
+{
+  "exe": "rfu.exe",
+  "map": "race_frame_update.map",
+  "name": "race_frame_update",
+  "run": {
+    "command": "rfu.exe > rfu_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "rfu_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_frame_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_frame_update_main.c"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "exe": "shrect.exe",
+  "map": "shade_rect.map",
+  "name": "shade_rect",
+  "run": {
+    "command": "shrect.exe > shrect.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "shrect.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "shade_rect.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "shade_rect_main.c"
+    }
+  ]
+}

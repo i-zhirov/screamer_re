@@ -1,9 +1,119 @@
 {
   "address": "0x4c3e6",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 49,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c3e6 holds 49 instructions and 159 bytes up to the ret 4 at 0x4c484; the next record starts at 0x4c485, so the store record keeps the 159-byte extent and sets no separate function size; the identity check uses 49 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the loader at 0x4cae4; it builds the %s.MMP member name from DAT_002154c, opens the member with the empty path at object-3 offset 0x7fb4, and calls this function at 0x4cb20 with the stream, the path, the name, the out cell DAT_0021468, and the resource head DAT_0021574; after the call it copies the resource pointer to DAT_00102fa4 and runs the spatial grid relocate at 0x4cb4c"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member through fopen at 0x4c08d with the mode rb at object-3 offset 0x16b1; a failed open returns -1 and leaves the out cell unchanged"
+    },
+    {
+      "kind": "note",
+      "text": "the function gets the ALFILE resource at object-3 offset 0x16b4 of the member size plus 4 through resource_get at 0x2eed0 with the resource head and stores the result in the out cell; a zero result sets the stream state at +0xac to 3 and returns -1"
+    },
+    {
+      "kind": "note",
+      "text": "the member size sits at stream + 0x70; the resource request adds 4 bytes and the read count does not; the function reads the member into the resource through stream_read at 0x4c4e5, closes the stream through stream_close at 0x4c38d, and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the ALFILE resource name, the .MMP member name, and the single caller support the name alfile_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and spills the four register arguments, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines ALFILE_LOAD_HARNESS and the function builds the two constant texts in local buffers; the default build keeps the literals of the original"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the stream record, the path and name arguments, the resource head, the resource buffer, and the out cell; the four paths cover the full path with the member size 0x40, the failed open, the zero resource with the state 3, and the zero size with the resource size 4; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 49 decoded instructions and 155 bytes in the identity window; the identity check stays open at 20 of 49 instructions, 5 of 155 bytes, and 0 of 5 relocation slots, because the harness build builds the two constant texts in the body and V2 saves the frame first, keeps the stream in esi and the out cell in edi, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c3e6 --count 49"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c3e6 --count 49 --rebuilt work/rebuild/alfload.exe --rebuilt-map work/rebuild/alfile.map --rebuilt-symbol alfile_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module alfile_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c3e6"
+    },
+    {
+      "kind": "finding",
+      "text": "The alfile_load module at 0x4c3e6"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/alfile_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/alfile_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/alfile_load.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "alfile_load",
+  "name": "alfile_load",
   "notes": [],
   "object_offset": "0x3c3e6",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 155,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 49,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c3e6",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:af44e70715c15aff05fcd91d4127843ce1315433454f9608b1c8f6fa407c842d",
+    "source_digest": "sha256:42bb6edd6e2cfbc87622a46fe18a9f89d799585aec6e1629c3ec735370857f69",
+    "tool": "run.py"
+  },
+  "role": "loads a member file into the ALFILE resource through the stream helpers and returns -1 on a failed open or a zero resource",
+  "section": "Resource loader",
   "size": 159,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "alfile_load_"
 }

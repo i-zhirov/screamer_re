@@ -1,9 +1,99 @@
 {
   "address": "0x1b974",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 67,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1b974 holds 67 instructions and 213 bytes up to the ret at 0x1ba48; the next function starts at 0x1ba4c, so the store record keeps the 216-byte extent and sets no separate function size; the identity check uses 67 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1fde4 is race_session_run at 0x1fd70; it calls this function with the map name DAT_0011d294 when bit 3 of DAT_0018e1d is set; the sibling loader at 0x1ba4c reads the same %s\\replays\\%s.atk member and the same 0x24-byte ghost record, so the record takes the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the function selects the 0x24-byte ghost record at DAT_0018e8c through the index DAT_0018ed4; it builds the member name %s\\replays\\%s.atk from the base path buffer DAT_00007edc and the name through sprintf at 0x4d32c; the format string sits at object-3 offset 0xa22 and the mode string wb at object-3 offset 0xa34; the function opens the member through fopen at 0xc5fe5 and returns 0x16 when the open fails"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the record field at +0x04 into +0x08, clears the float field at +0x1c from the zero float at object-3 offset 0x100a8, stores the index at +0x10, and stores DAT_001d274 at +0x14; it writes one 0x24-byte header through fwrite at 0xc6387; when the active field at +0x0c is not zero, it writes records of 0x28 bytes from the keyframe pointer at +0x20; the count comes from the record field at +0x08; it closes the stream through fclose at 0xc6245 and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the .atk member, the ghost record layout, the sibling loader at 0x1ba4c, and the caller at 0x1fd70 support the name replay_save_atk; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original copies the zero float at object-3 offset 0x100a8, so the harness passes that cell through the global DAT_00100a8; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the replay name, the four ghost records, the index DAT_0018ed4, the flag cell DAT_001d274, the zero float, and the member image; the five paths cover the failed open, slot 0 with the active flag and eleven keyframes, the clear active flag, the zero frame count, and slot 1; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 23 of 67 instructions, 9 of 202 bytes, and 0 of 17 relocation slots equal; the identity check stays open because V2 saves the frame pointer first, keeps the record in esi, keeps the stream in edi, uses imul for the record address, and passes the data pointers as near offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1b974 --count 67"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1b974 --count 67 --rebuilt work/rebuild/atksave.exe --rebuilt-map work/rebuild/replay_save_atk.map --rebuilt-symbol replay_save_atk_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_save_atk"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1b974"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_save_atk module at 0x1b974"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_save_atk",
+  "name": "replay_save_atk",
   "notes": [],
   "object_offset": "0xb974",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 202,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 23,
+        "instructions_total": 67,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b974",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:c51cfd380447ba82748cda3493d9b53c16da2ba0b79154cc6dabdc13552ab452",
+    "source_digest": "sha256:633273a11cd8db9cc923f67ce1b64d2757a9cc8ba5ce449868cd8c62fcb39dcb",
+    "tool": "run.py"
+  },
+  "role": "writes the %s\\replays\\%s.atk ghost record and the keyframe records when the active flag is set",
+  "section": "The replay records",
   "size": 216,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_save_atk_"
 }

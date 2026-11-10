@@ -1,0 +1,26 @@
+{
+  "exe": "btbuild.exe",
+  "map": "basis_transform_build.map",
+  "name": "basis_transform_build",
+  "run": {
+    "command": "btbuild.exe > btbuild.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "btbuild.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "basis_transform_build.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "basis_transform_build_main.c"
+    }
+  ]
+}

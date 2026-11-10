@@ -1,9 +1,99 @@
 {
   "address": "0x201d0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 66,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x201d0 holds 66 instructions and 237 bytes up to the ret at 0x202bc; the next function starts at 0x202c0, so the store record keeps the 240-byte extent and sets no separate function size; the identity check uses 66 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1ffd7 is the frame update at 0x1ff70; it runs the five view groups in order, and the mode byte DAT_0011d260 bit 0x10 selects this group; no named function sits between the frame update and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when bit 0 of DAT_00118e1d is clear or when bit 0x10 of DAT_0011d260 is clear; it then runs player_car_view_update at 0x16f34, the player physics group at 0x15a80, the effect group at 0x15bac, and the step group at 0x15ab8 on the player object at object-3 offset 0xf91c, and traffic_step at 0x1eae0 with the retry limit 3"
+    },
+    {
+      "kind": "note",
+      "text": "the first loop walks the 0x2a8-byte traffic records at DAT_00113cd8 while the index DAT_0000634c stays below the count DAT_00115218, and it runs the record update at 0x1f108 on each record; the group then runs race_position_update at 0x20428, the traffic effect group at 0x15b44, player_update at 0x19ab0, and player_car_link at 0x15c1c; the second loop walks the same records and runs traffic_object_link at 0x1ef68 on each record"
+    },
+    {
+      "kind": "note",
+      "text": "the two gates, the player steps, the traffic step, and the two record loops support the name traffic_simulation_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and uses no floating-point instruction, so the module builds with -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two gate bytes, the traffic count, the shared counter, two traffic records, and the eleven callee stubs; the five paths cover the clear input gate, the clear mode bit, the zero count, one record, and two records; the step stub checks the retry limit 3; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 17 of 66 instructions, 12 of 237 bytes, and 0 of 30 relocation slots equal; the identity check stays open because V2 saves the frame pointer first, keeps the loop counters in other slots, and builds the record address with imul; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x201d0 --count 66"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x201d0 --count 66 --rebuilt work/rebuild/tsim.exe --rebuilt-map work/rebuild/traffic_simulation_update.map --rebuilt-symbol traffic_simulation_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module traffic_simulation_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x201d0"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_simulation_update module at 0x201d0"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_simulation_update",
+  "name": "traffic_simulation_update",
   "notes": [],
   "object_offset": "0x101d0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 237,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 66,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x201d0",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:a0849e8a52eec7c8fd8a089e16c7898b835e7f76f4a8eab13a9f1d6b0c8d6a4c",
+    "source_digest": "sha256:2260be911655cf695bb3a505f0aeb619324ad87eb07136d13ab1e4ebd5e9646e",
+    "tool": "run.py"
+  },
+  "role": "runs the player car view, physics, effect, and step groups, steps the traffic, updates and links every traffic record, and updates the race position for the traffic mode",
+  "section": "Program functions",
   "size": 240,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_simulation_update_"
 }

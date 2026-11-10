@@ -1,0 +1,28 @@
+{
+  "exe": "brotmir.exe",
+  "map": "basis_rotation_mirror.map",
+  "name": "basis_rotation_mirror",
+  "run": {
+    "command": "brotmir.exe > brotmir.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "brotmir.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "basis_rotation_mirror.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "basis_rotation_mirror_main.c"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "exe": "gm10.exe",
+  "map": "game_mode_10_start.map",
+  "name": "game_mode_10_start",
+  "run": {
+    "command": "gm10.exe > gm10.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "gm10.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "game_mode_10_start.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "game_mode_10_start_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "game_mode_10_start_main.c"
+    }
+  ]
+}

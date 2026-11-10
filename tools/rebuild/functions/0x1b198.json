@@ -1,9 +1,103 @@
 {
   "address": "0x1b198",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 48,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1b198 holds 48 instructions and 164 bytes up to the ret at 0x1b23b; the next function starts at 0x1b23c, so the store record keeps the 164-byte extent and sets no separate function size; the identity check uses 48 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x1510c and 0x15140 sit in the track resource loader at 0x150f4; the first passes the level prefix at DAT_0011d294 in edx and the track node table 0x7250 in ebx, and the second passes the SLA name %ssla and the marker table 0x7890; race_data_load at 0x131a8 calls the loader at 0x133ba, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the container path %s\\data\\%s.dat from the base path at DAT_00107f44 and the first argument through sprintf at 0x4d32c; the format string sits at object-3 offset 0x972; it builds the member name %s.mrk from the second argument with the format at object-3 offset 0x981"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member with the mode rb at object-3 offset 0x988 through fopen at 0x4c08d; a failed open returns 0; otherwise it reads a four-byte count through stream_read at 0x4c4e5, reads count * 0x20 bytes into the third argument, closes the stream through stream_close at 0x4c38d, and returns the count"
+    },
+    {
+      "kind": "note",
+      "text": "the .mrk members hold the 0x20-byte track node records, the destination 0x7250 is the track node table with the count at 0x7ed0, and the sibling spline_load module at 0x1af70 loads the .spl members the same way; these facts support the name track_marker_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines TRACK_MARKER_LOAD_HARNESS and the function builds the three constant texts in local buffers"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the base path, the simulated container member, the two name arguments, the marker table, and the four stubs; the four paths cover the three-marker table, the empty table, the failed open, and the one-marker table; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 48 decoded instructions and 143 bytes in the identity window; the identity check stays open at 11 of 48 instructions and 8 of 143 bytes, because the harness build fills the three local format buffers in the function body, V2 saves the frame and the registers in another order, and V2 keeps the arguments in registers; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1b198 --count 48"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1b198 --count 48 --rebuilt work/rebuild/tmrk.exe --rebuilt-map work/rebuild/track_marker_load.map --rebuilt-symbol track_marker_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module track_marker_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1b198"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_marker_load module at 0x1b198"
+    }
+  ],
+  "implementation": "c",
+  "module": "track_marker_load",
+  "name": "track_marker_load",
   "notes": [],
   "object_offset": "0xb198",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 143,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 48,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1b198",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:ea27084113b3f08ab6d9464ff887c1e68e68d2fb3d6878e4ebae446a9f40304d",
+    "source_digest": "sha256:dd8536e3885a512393cd2ee3f7b3a5825490fa37ba4050a27ff722a6485aed35",
+    "tool": "run.py"
+  },
+  "role": "loads the %s.mrk marker member from the %s\\data\\%s.dat container, returns the four-byte marker count, and reads the count * 0x20-byte marker records into the out table",
+  "section": "Resource loader",
   "size": 164,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_marker_load_"
 }

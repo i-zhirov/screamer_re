@@ -1,9 +1,115 @@
 {
   "address": "0x1bfd4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 46,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1bfd4 holds 46 instructions up to the ret at 0x1c07e; a second block at 0x1c080 holds the hit path and the full body ends at the ret at 0x1c0aa; the next record starts at 0x1c0ac, so the store record keeps the 216-byte extent and sets no separate function size; the identity check uses 46 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x11dd5 is collision_cell_test at 0x11ccc; that function has a mode branch, and the mode 1 branch calls the plain hit probe at 0x1c0ac at 0x11e55 while every other mode calls this function; the caller walks the collision records of a spatial cell and probes three points ten units apart, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the global DAT_000c740 holds the collision shape, DAT_000c744 holds the current collision record, and DAT_000c748 holds the object; the shape holds the x base at +0x00, the height base at +0x04, the y base at +0x08, the entry count at +0x14, the vertex array offset at +0x1c, and the entry index table offset at +0x28"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the entry index table at DAT_000c724 and the vertex array base at DAT_000c71c, then loops over the entry count; each unsigned short in the index table selects one polygon entry; a vertex count word of 4 selects quad_point_test and any other count selects tri_point_test; the callee takes the polygon entry and the current record"
+    },
+    {
+      "kind": "note",
+      "text": "a hit with a zero edge divisor at entry +0x18 moves to the next entry; a hit with a non-zero divisor stores the three entry words into DAT_000c734, DAT_000c738, and DAT_000c73c, stores the surface height into DAT_000c72c, and returns 1; the height is the shape height base plus the truncated quotient of the negated point dot product and the divisor; a full sweep returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the hit path, the surface height, and the surface direction support the name point_height_probe; the original has no symbol, so the record keeps the name with the confidence inferred; the callee names in the harness stay harness-local"
+    },
+    {
+      "kind": "note",
+      "text": "the original uses no EBP frame, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one shape block with the entry index table and up to three polygon entries, one object, one record, and the two callee stubs; the eight paths cover the tri miss, the quad hit, the zero-divisor skip, the two misses, the signed division, the count word 5, the three-entry sweep, and the two zero-divisor hits; every path checks the return value, the callee arguments, and the stored globals; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The point_height_probe module at 0x1bfd4"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1bfd4 --count 46"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1bfd4 --count 46 --rebuilt work/rebuild/phprobe.exe --rebuilt-map work/rebuild/point_height_probe.map --rebuilt-symbol point_height_probe_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module point_height_probe"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1bfd4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_height_probe.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/point_height_probe_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/point_height_probe.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 46 decoded instructions and 154 bytes; the identity check stays open at 9 of 46 instructions and 17 of 154 bytes, because V2 uses a register prologue, computes the entry pointer from a byte offset, orders the hit block in another shape, and reads the globals through near data addresses; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "point_height_probe",
+  "name": "point_height_probe",
   "notes": [],
   "object_offset": "0xbfd4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 154,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 46,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1bfd4",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:d90a72cccb8cdeeda7ab5c7fa71ac9b91f41739e565e4fc7f862059ca8e70994",
+    "source_digest": "sha256:2b729deeda1a99e04743a2b0cb4ee352ac16cbb73a4ec2cda19170dc0536d924",
+    "tool": "run.py"
+  },
+  "role": "probes the test point against the polygon entries of a collision shape, then stores the surface height and direction on a hit, and returns 0 when no entry hits",
+  "section": "The vehicle state chain",
   "size": 216,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "point_height_probe_"
 }

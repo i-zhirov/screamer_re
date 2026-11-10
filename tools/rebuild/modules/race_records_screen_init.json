@@ -1,0 +1,33 @@
+{
+  "exe": "rrsi.exe",
+  "map": "race_records_screen_init.map",
+  "name": "race_records_screen_init",
+  "run": {
+    "command": "rrsi.exe > rrsi.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rrsi.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_records_screen_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_records_screen_init_main.c"
+    }
+  ]
+}

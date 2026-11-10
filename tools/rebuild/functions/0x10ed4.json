@@ -1,9 +1,111 @@
 {
   "address": "0x10ed4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 62,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x10ed4 holds 62 instructions and 180 bytes up to the early ret at 0x10f87; the full body continues through the shared epilogue at 0x11056 to the next function at 0x11060, so the store record keeps the 396-byte extent and sets no separate function size; the identity check uses 62 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are menu_objects_init at 0x2aab8, call site 0x2ab43, which makes 79 copies of the object in slot 0 into the 8-byte slots at DAT_001d2d0, and the object loader at 0x11060, call site 0x11092, which makes one more instance when the named object already exists"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument is the 0x78-record object table at 0x6530 with 0x1c-byte records; the second argument points to the output slot index; the third argument points to the source slot index"
+    },
+    {
+      "kind": "note",
+      "text": "a record holds the name at +0x00, the block object at +0x0c, the chunk table at +0x10, the shared file record at +0x14, and one reserved word at +0x18; a zero file record marks a free slot"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the output index and scans the table from index 0; the first record with a zero file record is the new slot; a full table returns 8"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the object count at +0x14 of the source file record and requests the 3D_BLKOBJ resource at object-3 offset 0x3ca with the size count * 0x20 + 0x60 through resource_get at 0x2eed0; a zero result returns 6"
+    },
+    {
+      "kind": "note",
+      "text": "on success the function initializes the new block from the source file index through object_init_from_file at 0x4cc10, copies the source name to the new record, stores the chunk table block + 0x40 at +0x10, shares the file record at +0x14, and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the callers, the object table, the block object, and the shared file record support the name object_duplicate; the original has no symbol, so the record keeps the name with the confidence inferred; the callee names in the harness stay harness-local"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x78-record object table, one source block, one file record, and two callee stubs; the six paths cover the free slot 0, the busy slot 0, the zero allocation, the full table, the zero count, and the name copy stop; every path checks the recorded arguments, the block, the name, the chunk table, and the shared file record; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 62 instructions holds 19 of 62 instructions, 12 of 179 bytes, and 0 of 9 relocation slots; the identity check stays open because V2 saves the frame first, keeps the table and the two index pointers in registers, uses imul for the 0x1c stride, and folds the scan and the epilogue differently; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x10ed4 --count 62"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x10ed4 --count 62 --rebuilt work/rebuild/objdup.exe --rebuilt-map work/rebuild/object_duplicate.map --rebuilt-symbol object_duplicate_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module object_duplicate"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x10ed4"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_duplicate module at 0x10ed4"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_duplicate",
+  "name": "object_duplicate",
   "notes": [],
   "object_offset": "0xed4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 179,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 62,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10ed4",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:e0135244615ad79dca9706323869ead82aac869b09231fd31c7b40cb624417ef",
+    "source_digest": "sha256:4c16272f8841153150a88fdda48a418b85862d9d1fe48ce5e049f354fc37cf0f",
+    "tool": "run.py"
+  },
+  "role": "creates one more instance of an existing object in a free slot",
+  "section": "Resource loader",
   "size": 396,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_duplicate_"
 }

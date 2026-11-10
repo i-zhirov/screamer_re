@@ -1,9 +1,99 @@
 {
   "address": "0x1814c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 56,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1814c holds 56 instructions and 208 bytes up to the ret at 0x1821b; the next function starts at 0x1821c, so the store record keeps the 208-byte extent and sets no separate function size; the identity check uses 56 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15bc8 is the player car step group at 0x15bac; it runs this function after the suspension update at 0x168b4 and the skid update at 0x17d14 and before the reset update at 0x18528, the spin update at 0x188b8, the wheel effect update at 0x19980, and the car sound update at 0x242bc; no named function sits between the group and the target, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the state at +0x148 gates the surface selection; when the state is zero, the track node value at +0x66c selects the effect control word at +0x7b0 and the effect scale at object-1 offset 0xb26d8: 0 gives 0 and 0.002, 1 gives 0x8000 and 0.03, and 2 gives 0xff00 and 0.03; the cornering update at 0x16ca0 sets the effect state to 2 through 0x19478 only when the control word is zero"
+    },
+    {
+      "kind": "note",
+      "text": "when the node value at +0x66c differs from the previous value at +0x58c, the function starts a sound through 0x1f764 with the handle at +0x7cc and the sample index from the table at object-3 offset 0x1d7c; the car index at object-3 offset 0xff88 selects the entry, and the race mode 0xc at object-3 offset 0x1d2a0 selects the second pair; the table holds 3, 7, 10, and 11"
+    },
+    {
+      "kind": "note",
+      "text": "the caller position, the track node value, the effect control word, the effect scale, and the surface sound support the name player_car_surface_effect_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the module stores the float scale as the literal bit pattern, so it uses no FPU instruction and no constant segment, and it uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the player object, the four sound table entries, the car index, the race mode, the effect scale, and the sound stub; the ten paths cover the clear state, the three node values, the default value, the previous-value gates, the race mode 0xc pairs, the car index 1, and the state gate; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 56 instructions; the rebuilt module holds 10 of 56 instructions and 0 of 16 relocation slots equal; the identity check stays open because V2 saves the frame pointer first, keeps the values in registers, orders the switch cases in another shape, and uses absolute data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1814c --count 56"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1814c --count 56 --rebuilt work/rebuild/pcsfx.exe --rebuilt-map work/rebuild/player_car_surface_effect_update.map --rebuilt-symbol player_car_surface_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_surface_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1814c"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_surface_effect_update module at 0x1814c"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_surface_effect_update",
+  "name": "player_car_surface_effect_update",
   "notes": [],
   "object_offset": "0x814c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 208,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 56,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1814c",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:57feafc46506370fdf794344c5fb2ffaf3e663b3ce2f35be161a7b9bcfdd7d98",
+    "source_digest": "sha256:4ff77a0816d4ce7d1dae0bfdd7ca720f9ab0d66f71f7ebbf1145b9d4f508348d",
+    "tool": "run.py"
+  },
+  "role": "selects the surface effect control and scale from the track node value and starts the surface sound when the node value changes",
+  "section": "The vehicle state chain",
   "size": 208,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_surface_effect_update_"
 }

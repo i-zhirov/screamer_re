@@ -1,9 +1,111 @@
 {
   "address": "0x265b4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 43,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x265b4 holds 43 instructions and 132 bytes up to the ret at 0x26637; the shared guard tail at 0x26638, the helper 0x26640, and the next recorded function at 0x2666c give the 184-byte extent; the store record keeps that extent and sets no separate function size; the identity check uses 43 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is view_move at 0x1f94c, which calls this function at 0x1f984 with the same shifted view value in eax and edx; the caller takes the section motion_update callees, so this module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the two state guards test bit 0 of DAT_0016669e and bit 0 of DAT_00166684; a repeated left and right pair returns at once, so the driver sees no duplicate request"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the request header at DAT_001666a4: the length 0x1a, the subunit DAT_00166680, the command 0x0c (IOCTL output), the transfer count 9, and the payload subfunction 3 at +0x40; the output channels 0 and 1 take the input sources 0 and 1 and the volumes from the low bytes of the arguments, a zero value rises to 1, and the two extra channels stay zero"
+    },
+    {
+      "kind": "note",
+      "text": "the request runs through 0x25f24, which submits the block through the DPMI INT 31h call at 0x25f44; the command table and the audio channel control layout support the name cd_audio_volume_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two state flags, the two saved volume cells, the device byte, the request buffer, and the submit stub; the ten paths cover the two guards, the normal pair, the duplicate pair, the changed right value, the zero clamp, the low-byte values 0x34 and 0xCD, the zero low bytes, the device byte 0x77, and the equal pair; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 43 decoded instructions and 146 bytes; the identity check stays open at 12 of 43 instructions, 13 of 132 bytes, and 0 of 13 relocation slots, because V2 saves the registers in another order, keeps the request pointer in a register, forms the clamped volumes with shifts and ors, and orders the tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x265b4 --count 43"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x265b4 --count 43 --rebuilt work/rebuild/cdvol.exe --rebuilt-map work/rebuild/cd_audio_volume_set.map --rebuilt-symbol cd_audio_volume_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_volume_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x265b4"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_volume_set module at 0x265b4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_volume_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_volume_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_volume_set.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_volume_set",
+  "name": "cd_audio_volume_set",
   "notes": [],
   "object_offset": "0x165b4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 132,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 43,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x265b4",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:e39d097dc533a60a23f146fba404f0f2c48aa54a7d11e47d3814c555a88ea237",
+    "source_digest": "sha256:e6d85e44ea797b29ef2aee09f57f9df38fe7fa89c5858891fb27bcbd15af709e",
+    "tool": "run.py"
+  },
+  "role": "Sets the two CD audio output channel volumes through the MSCDEX audio channel control request at DAT_001666a4.",
+  "section": "motion_update callees",
   "size": 184,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_volume_set_"
 }

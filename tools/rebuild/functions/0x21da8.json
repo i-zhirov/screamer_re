@@ -1,9 +1,95 @@
 {
   "address": "0x21da8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 63,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x21da8 holds 63 instructions and 195 bytes up to the ret at 0x21e6a; one padding byte at 0x21e6b follows the ret and the next function starts at 0x21e6c, so the record keeps the 196-byte extent and sets no separate function size; the identity check uses 63 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x12a66 and 0x1fefd are the default path of race_session_start at 0x128e0 with the value `[ebp - 0x14] ^ 1` and race_session_run at 0x1fd70 with 1; the race_session_run caller runs the function before the cleanup at 0x156a8; the callers sit in two sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function saves the phase counter DAT_000007f9 and starts the fraction at zero; each step takes the three view offsets DAT_001d2c0, DAT_001d2bc, and DAT_001d2c4 on a non-zero argument, scales each one by `1 - fraction`, truncates toward zero through the helper at 0x4d9f4, and calls view_move at 0x1f94c with the order 1d2c0, 1d2bc, 1d2c4"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls video_present at 0x27ec8 with the scale `1 - fraction` and the offset 0; the phase delta at 0x1fa04 between the saved phase and the current phase scales its low 16 bits by the double 0.01 at object-3 offset 0xd41 and the double 2.0 at object-3 offset 0xd49 to form the next fraction; the loop repeats while 1.0 is at least the fraction, and the final present uses the scale 0 and the offset 0"
+    },
+    {
+      "kind": "note",
+      "text": "the two callers, the view offsets, the screen fade, and the phase delta support the name view_fade_out; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function truncates through 0x4d9f4, so the local view_fade_out_fpu.asm makes __CHP truncate toward zero, and the module uses no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the phase counter, the three view offsets, and the three callee stubs; the six paths cover the non-zero argument, the zero argument, the negative offsets, the exact fraction 1.0, the delta above 0xffff, and the one-step exit; every path checks the saved start value, the current value, the present offset, and the final zero present; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x21da8 --count 63"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x21da8 --count 63 --rebuilt work/rebuild/vfdout.exe --rebuilt-map work/rebuild/view_fade_out.map --rebuilt-symbol view_fade_out_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x21da8"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 63 instructions holds 10 of 63 instructions and 9 of 191 bytes equal, and 0 of 14 relocation slots; the rebuilt body holds 189 bytes; the identity check stays open because V2 saves ebp first, keeps the flag in esi and the start phase in ecx, computes `1 - fraction` once into a local, and loads the two doubles through near data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The view_fade_out module at 0x21da8"
+    }
+  ],
+  "implementation": "c",
+  "module": "view_fade_out",
+  "name": "view_fade_out",
   "notes": [],
   "object_offset": "0x11da8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 191,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 63,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x21da8",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:90e45e9b96b5ce2c4fab57e5d1edafb488d095c0869eeaf2a4c113e574c4081f",
+    "source_digest": "sha256:d04d345de9497fb6a1f960054ab2d06159fc1c316ca21f4277b381fe8d0f7d8a",
+    "tool": "run.py"
+  },
+  "role": "fades the screen out over the phase counter and slides the view from the three view offsets to zero",
+  "section": "Program functions",
   "size": 196,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "view_fade_out_"
 }

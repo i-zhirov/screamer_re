@@ -1,9 +1,107 @@
 {
   "address": "0x12378",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 57,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x12378 holds 57 instructions and 170 bytes up to the ret at 0x12421; the next record starts at 0x12424 after two mov eax,eax pad bytes at 0x12422, so the store record keeps the 172-byte extent and sets no separate function size; the identity check uses 57 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15b28 is the player effect group at 0x15b08; that group calls the player group at 0x17c6c, then this function, then car_proximity_pass at 0x17408, then opponent_start at 0x124c0, all with the same player object in eax; the player update at 0x2003c runs the effect group, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the nearby mask at +0x104, then scans every 0x590-byte car record at DAT_00110ab8 from index 0 up to the count DAT_0010f8ec; the player object holds its position at +0x4b0 and +0x4b8 and the car record holds the physics gate at +0x414 and its position at +0x498 and +0x4a0; a record with a set gate within 1500 units of the player on both axes sets its index bit in the mask"
+    },
+    {
+      "kind": "note",
+      "text": "car_proximity_pass reads the mask at +0x104, so this function marks the car records that the pass then tests; the sibling marker car_nearby_mark at 0x126e4 builds the per-car mask at +0x0c with the same gate and the same 1500-unit bound; the player scan, the mask, and the caller support the name player_nearby_mark; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds four car records, the record count, and one player object with the mask at +0x104 and the position at +0x4b0 and +0x4b8; the ten paths cover no record, the clear physics gate, the 2000-unit x and z skips, the near record, the two index bits from index 0, the exact 1500-unit boundary, the negative delta of 1499, the clear gate at index 0 with a near record at index 1, and the near x with z 1500 at index 0 beside a near record at index 1; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_nearby_mark module at 0x12378"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x12378 --count 57"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x12378 --count 57 --rebuilt work/rebuild/pnear.exe --rebuilt-map work/rebuild/player_nearby_mark.map --rebuilt-symbol player_nearby_mark_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_nearby_mark"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x12378"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_nearby_mark.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_nearby_mark_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_nearby_mark.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 39 decoded instructions and 127 bytes; the identity check window holds 57 instructions and 170 bytes and stays open at 12 of 57 instructions and 14 of 170 bytes, because V2 saves ebp first, moves the player pointer to edx, the record pointer to ebx, and the index to esi, calls a local absolute helper in place of the inline sign extend, and decodes the following code after the rebuilt ret; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_nearby_mark",
+  "name": "player_nearby_mark",
   "notes": [],
   "object_offset": "0x2378",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 170,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 57,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x12378",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:3fb61b333a75d585e7c43cc72dd27f818a7f8bfb5543b63078cbab46f6216630",
+    "source_digest": "sha256:e1d64055c40fdd3247cda4f83d2eb0095ccc04c374bb3a0676b813cb2e47d52b",
+    "tool": "run.py"
+  },
+  "role": "marks the car records within 1500 units of the player object in the nearby mask at +0x104",
+  "section": "The vehicle state chain",
   "size": 172,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_nearby_mark_"
 }

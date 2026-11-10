@@ -1,9 +1,115 @@
 {
   "address": "0x1aec4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 52,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1aec4 holds 52 instructions and 159 bytes up to the ret at 0x1af62; the next function starts at 0x1af70, so the store record keeps the 172-byte extent and sets no separate function size; the identity check uses 52 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct call site at 0x19ee2 is the view mode dispatch at 0x19e78; the dispatch table at 0x19e50 sends the render mode 8 to this function and passes the view buffer in eax; the player update at 0x19ab0 and player_view_setup at 0x19ae8 both call the dispatch, so the module takes the section player_view_setup callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs car_camera at 0x1a930 on every 0x590-byte car record at DAT_00110ab8 up to the count DAT_0010f8ec and counts in the global DAT_0010634c"
+    },
+    {
+      "kind": "note",
+      "text": "after the loop, a nonzero flag at +0x564 of the active car record DAT_00110a18 and a different candidate DAT_0010a1c commit the candidate to the active index; the flag is the changed-target marker that car_camera sets at 0x1af22"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the 0x98-byte view block at +0x4f8 of the active car record into the view buffer; the original inlines the copy as a movsd and movsb sequence, so the module uses memcpy with the same constant size"
+    },
+    {
+      "kind": "note",
+      "text": "the view mode dispatch, the render mode 8, the per-car camera loop, and the selected view block support the name car_camera_select; player_view_setup cycles the candidate index over the car records for the chosen view slot 4, so the module records the name with the confidence inferred; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds three 0x590-byte car records, the record count, the two camera indices, the car_camera stub, and the memcpy stub; the five paths cover the switch, the zero flag, the equal index, the zero count, and the copy length; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1aec4 --count 52"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1aec4 --count 52 --rebuilt work/rebuild/ccsel.exe --rebuilt-map work/rebuild/car_camera_select.map --rebuilt-symbol car_camera_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module car_camera_select"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1aec4"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_camera_select module at 0x1aec4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/car_camera_select.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/car_camera_select_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/car_camera_select.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 52 decoded instructions; the identity check stays open at 12 of 52 instructions and 15 of 159 bytes, because V2 sets the frame first, keeps the view pointer in ecx, folds the address computation, and calls the harness memcpy stub; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "car_camera_select",
+  "name": "car_camera_select",
   "notes": [],
   "object_offset": "0xaec4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 159,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 52,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1aec4",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:6915587490fd5770d6920418f164dce3e5529961571fe2f796717c20434f2ac6",
+    "source_digest": "sha256:f4da00215b04f864f50fe8a321ecd2a9e833cb89e14886963c9fcd126cbb8330",
+    "tool": "run.py"
+  },
+  "role": "updates every car camera, commits the candidate camera index to the active index, and copies the selected car view block into the view buffer",
+  "section": "player_view_setup callees",
   "size": 172,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_camera_select_"
 }

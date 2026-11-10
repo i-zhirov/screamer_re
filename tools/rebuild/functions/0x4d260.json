@@ -1,9 +1,115 @@
 {
   "address": "0x4d260",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 40,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4d260 holds 40 instructions and 121 bytes up to the ret at 0x4d2d8; three pad bytes follow the ret, and the next record starts at 0x4d2dc, so the store record keeps the 124-byte extent and sets no separate function size; the identity check uses 40 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes no argument; it reads the table pointer at 0xc55f4 and calls the inverse cosine helper at 0xc5e42 and the truncation helper at 0x4d9f4"
+    },
+    {
+      "kind": "note",
+      "text": "the loop walks the value from -1.0 to 1.0 with the step 1/256; for each value it forms the inverse cosine, scales it by the double constant 40.42535442040344 at object-3 offset 0x176f, rounds the product to a float, truncates it through 0x4d9f4, and stores it at the slot (int)(value * 256.0) through the table pointer at 0xc55f4; the double index scale 256.0 sits at object-3 offset 0x1777; the table holds 513 entries from index -256 to index 256; the value 0 maps to 63, the value -1 maps to 127, and the value 1 maps to 0"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is stream_layer_init at 0x4c810, with the call site at 0x4c834; that function first builds the reciprocal table at 0x4d214 and the row offset table at 0x4d2dc, then builds this table, then loads the perspective table at 0x4cf94 and the visibility table at 0x4d030; the caller sits in the section The TABS table loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the helper at 0xc5e42 forms atan2(sqrt(1 - x * x), x) with fpatan and then subtracts the value from pi / 2, so the routine is the inverse cosine; the table maps a cosine to an angle, so the record takes the name acos_table_build; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original truncates through the Watcom helper at 0x4d9f4, so the local FPU stub makes __CHP truncate toward zero; the original calls the inverse cosine helper, so the local FPU stub supplies acos from the hardware; the harness does not load the constant segment, so the two scale values and the table pointer arrive through globals that the harness sets at run time; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the table pointer, the 513-entry table, the two scale globals, and the two start and step globals; the seven paths cover the full scan, the middle entry 63, the ends 127 and 0, the entries at index 128, -128, 64, and -192; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 40 instructions and 122 bytes; the identity check stays open at 5 of 40 instructions, 5 of 121 bytes, and 0 of 5 relocation slots, because V2 saves ebx, ecx, and edx, keeps the value in a frame slot, computes the index with another constant reference, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d260 --count 40"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d260 --count 40 --rebuilt work/rebuild/acostb.exe --rebuilt-map work/rebuild/acos_table_build.map --rebuilt-symbol acos_table_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module acos_table_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4d260"
+    },
+    {
+      "kind": "finding",
+      "text": "The acos_table_build module at 0x4d260"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/acos_table_build.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/acos_table_build_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/acos_table_build_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/acos_table_build.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "acos_table_build",
+  "name": "acos_table_build",
   "notes": [],
   "object_offset": "0x3d260",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 121,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d260",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:205eeed2c143be8d5c2470f95198ab16a03ad42f9cabf202a89dac6b4e244c29",
+    "source_digest": "sha256:d94aae86bfe16b694864243427b97b77ec284b4150861562ac457d62f914d0e6",
+    "tool": "run.py"
+  },
+  "role": "Builds the 513-entry inverse-cosine table from index -256 to 256.",
+  "section": "The TABS table loaders",
   "size": 124,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "acos_table_build_"
 }

@@ -1,9 +1,111 @@
 {
   "address": "0x25d28",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 41,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25d28 holds 41 instructions and 125 bytes up to the ret at 0x25da4; the next record starts at 0x25db0, so the store record keeps the 136-byte extent and sets no separate function size; the identity check uses 41 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the four arguments arrive in the Watcom register order: eax holds the x, edx holds the y, ebx holds the width, and ecx holds the height; options_screen passes the full screen 0x280 by 0x190 at 0x2134c, race_records_screen passes the rectangle (0x60, 0x48, 0x1c4, 0x140) at 0x2d4cc, and race_radar and quit_confirm_screen call the same function"
+    },
+    {
+      "kind": "note",
+      "text": "the function rounds the x and the width down to a multiple of four, forms the destination from the framebuffer pointer DAT_00121528, the y times the 0x280 stride, and the x, and walks the height rows; the cells 0x15d20 and 0x15d24 hold the word count and the row stride and the function only reads and writes them, so they are spill slots"
+    },
+    {
+      "kind": "note",
+      "text": "the inner loop replaces four adjacent pixels with the 0x100-byte table entries at DAT_0015d1c; palette_shade_build at 0x258d0 sets DAT_0015d1c to the 0x1cc00 table, which is the 0.75 shade map, so the rectangle is dimmed to 75 percent"
+    },
+    {
+      "kind": "note",
+      "text": "the four-argument rectangle, the framebuffer walk, and the shade table read support the name shade_rect; the original has no symbol, so the record keeps the name with the confidence inferred; the function is a shared framebuffer primitive, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original uses pushal and popal and has no EBP frame; the function holds no floating-point instruction and calls no function, so the module needs no FPU stub and no assembly; the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the framebuffer pointer, the shade table pointer, an 8-row framebuffer, and a 0x100-byte table; the six paths cover the rectangle (4, 1, 8, 2) with a stride, the rectangle (3, 2, 15, 1) with the x and width masks, the full width (0, 0, 0x280, 3) with a zero stride, the one-word rows (0x27c, 4, 4, 4), the double application of the full width, and the identity table; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 41 instructions and 120 bytes in the identity window; the identity check stays open at 19 of 41 instructions, 9 of 120 bytes, and 0 of 9 relocation slots, because V2 saves the frame pointer first, uses movzx for the table index, forms the destination in another order, and keeps the spill values in locals and the frame; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25d28 --count 41"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25d28 --count 41 --rebuilt work/rebuild/shrect.exe --rebuilt-map work/rebuild/shade_rect.map --rebuilt-symbol shade_rect_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module shade_rect"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25d28"
+    },
+    {
+      "kind": "finding",
+      "text": "The shade_rect module at 0x25d28"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/shade_rect.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/shade_rect_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/shade_rect.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "shade_rect",
+  "name": "shade_rect",
   "notes": [],
   "object_offset": "0x15d28",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 120,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 19,
+        "instructions_total": 41,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25d28",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:2459e065bf544ecbeef4f801513c122975492311362ec043db8bcdf834351f8a",
+    "source_digest": "sha256:c9c58dee7704a5be0972cda6a4b6cd323200c32e93df8c9e9cb46214ed0b77eb",
+    "tool": "run.py"
+  },
+  "role": "Applies the 0.75 shade map to every pixel of an aligned framebuffer rectangle.",
+  "section": "Program functions",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "shade_rect_"
 }

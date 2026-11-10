@@ -1,9 +1,99 @@
 {
   "address": "0x20f98",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 55,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x20f98 holds 55 instructions and 189 bytes up to the ret at 0x21054; the next function starts at 0x21058 after three padding bytes, so the store record keeps the 192-byte extent and sets no separate function size; the identity check uses 55 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x2002e is the frame update at 0x1ff70; it runs this function after the sibling handler race_finish_laps_update at 0x20ec8 and before race_finish_update at 0x21058; no named function sits between the frame update and the target, so the module takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the gate is bit 4 of DAT_00118e1c; race_clock_update at 0x18a14 sets the bit at 0x18b45 when the time limit expires, so the function runs after the clock reaches zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function releases the sound handle DAT_00100e8 through 0x1f880 and pushes the effect 0x19 with the subtype 3 and the value 0 through 0x247fc; the mode DAT_0011d260 selects the finish handler: 0x24070 for 1, 0x24078 for 2, 0x24080 for 4, 0x24068 for 0x10, 0x24098 for 0x20, and 0x24090 for 0x40; the mode 4 handler at 0x24080 sets the player slot DAT_000ffa4 to 2, and the other five handlers are empty stubs"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets DAT_0011df0 to 1, clears the finish timer DAT_00118e28, and clears bits 0, 1, 2, 4, 11, and 12 of the control word DAT_00118e1c; it then sets bits 2 and 12 with the value 0x1004, so the finish delay at 0x21058 runs on the next frame"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the time-limit gate, the effect push, and the per-mode finish handlers support the name race_finish_time_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control word, the finish timer, the sound handle, the player slot, the mode, and the state flag; the eight paths cover the clear gate, the six mode handlers, and the default mode; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x20f98 --count 55"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x20f98 --count 55 --rebuilt work/rebuild/rftime.exe --rebuilt-map work/rebuild/race_finish_time_update.map --rebuilt-symbol race_finish_time_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_time_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x20f98"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_time_update module at 0x20f98"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_time_update",
+  "name": "race_finish_time_update",
   "notes": [],
   "object_offset": "0x10f98",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 38,
+        "bytes_total": 189,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 55,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x20f98",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:c2dfa07da00032e2b5c69d06aa73d22fa7d00a2155708b21b5f4c691f095b537",
+    "source_digest": "sha256:ed179e5bf7c3e2a2ae4fc4c7f3644f95121db9349c970265bf1fccb6d7a1eeb5",
+    "tool": "run.py"
+  },
+  "role": "releases the sound handle, queues the finish effect, runs the mode finish handler, and starts the finish delay after the time limit expires",
+  "section": "Program functions",
   "size": 192,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_time_update_"
 }

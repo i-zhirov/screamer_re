@@ -1,9 +1,107 @@
 {
   "address": "0x12424",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 56,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x12424 holds 56 instructions and 155 bytes up to the ret at 0x124be; the next function starts at 0x124c0, so the store record keeps the 156-byte extent and sets no separate function size; the identity check uses 56 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15b64 is the traffic effect group at 0x15b44; that group calls this function, then the traffic collision pass at 0x175dc, then the opponent start at 0x124c0, all with the same player object in eax; the traffic view group at 0x201d0 runs the effect group at 0x20268, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the nearby mask at +0x104, then scans the 0x2a8-byte traffic records at DAT_00113cd8 with the fixed loop bound 8; the player object holds its two position fields at +0x4b0 and +0x4b8 and the traffic record holds its state at +0 and its two position fields at +0x3c and +0x44; a record with a nonnegative state within 1500 units of the player on both axes sets its index bit in the mask"
+    },
+    {
+      "kind": "note",
+      "text": "traffic_collision_pass reads the mask at +0x104, so this function marks the traffic records that the pass then tests; the sibling markers player_nearby_mark at 0x12378 and car_nearby_mark at 0x126e4 build the same kind of mask for the car records; the traffic table, the mask, and the caller support the name traffic_nearby_mark; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds nine traffic records and one player object with the mask at +0x104 and the position at +0x4b0 and +0x4b8; the nine paths cover the inactive set, the 2000-unit x and z skips, the near record, the two index bits from index 0, the exact 1500-unit boundary, the negative delta of 1499, the last slot at index 7, and a near record at index 8 past the fixed count 8; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_nearby_mark module at 0x12424"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x12424 --count 56"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x12424 --count 56 --rebuilt work/rebuild/tnear.exe --rebuilt-map work/rebuild/traffic_nearby_mark.map --rebuilt-symbol traffic_nearby_mark_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module traffic_nearby_mark"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x12424"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_nearby_mark.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_nearby_mark_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/traffic_nearby_mark.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 56 decoded instructions and 168 bytes; the identity check window holds 56 instructions and 155 bytes and stays open at 9 of 56 instructions and 7 of 155 bytes, because V2 saves ebp first, moves the player pointer to edx, keeps the record pointer in ebx and the index in esi, reads the record state with a memory compare, and calls a local absolute helper in place of the inline sign extend; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_nearby_mark",
+  "name": "traffic_nearby_mark",
   "notes": [],
   "object_offset": "0x2424",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 155,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 56,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x12424",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:2fec55eae60b9a4fefdaf7b7e388921ac7a09fdef23aba245e27b90543eae390",
+    "source_digest": "sha256:023fe8a1d40a06a48604c1450af1f2f3e7c1ae2dbfeda3a1b8b474e540aaa100",
+    "tool": "run.py"
+  },
+  "role": "marks the traffic records within 1500 units of the player object in the nearby mask at +0x104",
+  "section": "The vehicle state chain",
   "size": 156,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_nearby_mark_"
 }

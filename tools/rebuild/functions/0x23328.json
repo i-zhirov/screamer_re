@@ -1,9 +1,115 @@
 {
   "address": "0x23328",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 71,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x23328 holds 71 instructions and 248 bytes up to the ret at 0x2341f; the next function starts at 0x23420, so the store record keeps the 248-byte extent and sets no separate function size; the identity check uses 71 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x20358 is the replay view group at 0x202c0; that group updates the playback block at object-3 offset 0x18ed8 through path_playback_update at 0x23038 and then calls this function with the same block; the frame update at 0x1ff70 selects the view group through the mode byte, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the argument points to the playback block; the field at +0x00 selects the 28-byte entry of the object table DAT_0010653c, and entry field 0 is the display object; the field at +0x08 points to the playback state, and the flag at +0x0c of that state gates the write; the function returns at once when the global DAT_0011d264 is zero or when the state flag is zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the sampled view to the display object: +0x10, +0x14, and +0x18 go to +0x08, +0x0c, and +0x10, the angles +0x1c, +0x20, and +0x24 scale by 1024.0 and divide by pi, truncate toward zero, mask with 0x7ff, and go to +0x14, +0x18, and +0x1c, +0x28 goes to +0x20, and +0x2c goes to +0x3c"
+    },
+    {
+      "kind": "note",
+      "text": "the caller position in the replay view group, the shared playback block, the object table, and the sibling traffic_object_link at 0x1ef68 support the name path_playback_apply; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the truncate helper at 0x4d9f4 before each fistp; this harness links no math library, so the local path_playback_apply_fpu.asm makes __CHP truncate toward zero; the constants 1024.0 and pi arrive through the globals DAT_00100dc8 and DAT_00100dcc, because the minimal image does not load the constant segment; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the playback block, the playback state, the object table, four display objects, the enable flag, and the two float constants; the five paths cover the full path, the zero enable flag, the zero state flag, the negative and large angles, and the active state -1 on slot 1; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23328 --count 71"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23328 --count 71 --rebuilt work/rebuild/papply.exe --rebuilt-map work/rebuild/path_playback_apply.map --rebuilt-symbol path_playback_apply_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module path_playback_apply"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23328"
+    },
+    {
+      "kind": "finding",
+      "text": "The path_playback_apply module at 0x23328"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/path_playback_apply.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/path_playback_apply_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/path_playback_apply_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/path_playback_apply.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 238 bytes and 71 decoded instructions; the identity check stays open at 14 of 71 instructions and 20 of 238 bytes because V2 saves the frame first, keeps the view in edx and the object in ecx, uses imul for the object address, and reads the enable flag through a near data address; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "path_playback_apply",
+  "name": "path_playback_apply",
   "notes": [],
   "object_offset": "0x13328",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 20,
+        "bytes_total": 238,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 71,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23328",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:f67bcf41a48d06c87cf247edbd031853d74bd48800663badd7c4b8e6d8714eea",
+    "source_digest": "sha256:a67a6a3609920969ef3ccccbf72df626f54259f42ff1f764a3c111770b526095",
+    "tool": "run.py"
+  },
+  "role": "applies the recorded playback view to the display object of the view slot: it copies the position, the three scaled angles, and the two recorded fields",
+  "section": "The vehicle state chain",
   "size": 248,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "path_playback_apply_"
 }

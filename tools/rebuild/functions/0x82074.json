@@ -1,9 +1,107 @@
 {
   "address": "0x82074",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x82074 holds 58 instructions and 163 bytes up to the ret at 0x82116; the next recorded function starts at 0x82258, so the store record keeps the 484-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x8b6c7 is basis_transform_build at 0x8b610; it passes the destination pointer in edx, the three cosine values in ecx, ebx, and ebp, and the three sine values in esi, edi, and eax; the caller runs this function on the complement angles 0x7ff - angle, so the result is the inverse basis; the caller sits in the object_update_all group, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the nine Q14 dwords of the 3x3 matrix at +0x00 through +0x20; it multiplies two Q14 values, sums the two products, and shifts the sum to the right by 14 with the arithmetic shift; it shifts the two inner products c0 * c1 and c0 * s1 before the outer product; the negative sums round toward negative infinity"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling builder at 0x81fd0 builds the forward basis; the existing basis_transform_build module names this caller-side function basis_rotation_mirror, so the record keeps that name with the confidence inferred; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the function uses no floating-point instruction and calls no function, so it needs no FPU stub; the rebuilt C uses the standard Watcom calling convention, so the identity check differs in the prologue and in the register use"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the one 9-dword matrix and one 9-dword expected block; the five paths cover the unity values, the mixed positive and negative values, the small values with the negative arithmetic shift, the table limits, and the large values that reach the 32-bit product range; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 58 decoded instructions and 162 bytes in the identity window; the identity check stays open at 8 of 58 instructions and 4 of 162 bytes, because the rebuilt C uses the standard Watcom calling convention, takes the arguments from the stack, saves esi, edi, and ebp, and keeps the destination in eax, while the original takes the arguments from the registers and the saved stack slots; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x82074 --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x82074 --count 58 --rebuilt work/rebuild/brotmir.exe --rebuilt-map work/rebuild/basis_rotation_mirror.map --rebuilt-symbol basis_rotation_mirror_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module basis_rotation_mirror"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x82074"
+    },
+    {
+      "kind": "finding",
+      "text": "The basis_rotation_mirror module at 0x82074"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_rotation_mirror.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_rotation_mirror_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/basis_rotation_mirror.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "basis_rotation_mirror",
+  "name": "basis_rotation_mirror",
   "notes": [],
   "object_offset": "0x72074",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 162,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x82074",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:dc0df22a876a2f963de1be1128907c2ab3f62770c07e336e13805104445d5918",
+    "source_digest": "sha256:2651cf08979359b67616cfb8c6fb2f912c6c7f58597b8f4946d4ef0b0a1c3718",
+    "tool": "run.py"
+  },
+  "role": "Builds the nine Q14 dwords of the inverse 3x3 basis from the three cosine and three sine values of the complement angles.",
+  "section": "object_update_all callees",
   "size": 484,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "basis_rotation_mirror_"
 }

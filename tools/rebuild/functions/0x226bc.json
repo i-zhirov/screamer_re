@@ -1,9 +1,119 @@
 {
   "address": "0x226bc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 48,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x226bc holds 48 instructions and 133 bytes up to the ret 0xc at 0x22741; the three pad bytes at 0x22741 to 0x22743 and the next function spline_interpolate at 0x22744 give the 136-byte extent; the candidate record at 0x226bd sits on the push ebp of the same prologue, so the store keeps the 1-byte extent to that record; the identity check uses 48 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is object_revolution_step at 0x1d30c, with the call site at 0x1d542; it passes the x, y, and z values at +0x264, +0x268, and +0x26c and stores the result at +0x27c; the caller sits in the section The vehicle state chain, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the first instruction push eax reserves one stack slot, so the three arguments sit at [ebp + 0xc], [ebp + 0x10], and [ebp + 0x14]; the function reads the first and the third argument and ignores the second; the callee cleans the three arguments with ret 0xc"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms abs(asin(x)) through the Watcom inverse-sine helper at 0xc5e42; when z is above zero it adds pi / 2, otherwise it subtracts the angle from 5 pi / 2; it then wraps the value into the range zero to 2 pi, and a value of 2 pi or more loses 2 pi"
+    },
+    {
+      "kind": "note",
+      "text": "the four constants at object-3 offsets 0xd94, 0xd98, 0xd9c, and 0xda0 are pi / 2, 5 pi / 2, 2 pi, and -2 pi; they arrive through globals, because the harness image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the direction input and the angle result support the name direction_angle; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the local direction_angle_fpu.asm stub supplies asin_ from the hardware, because the harness links no math library and does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the four angle constants; the nine paths cover x zero with both z signs, x plus and minus 0.5 with both z signs, x 0.25 with both z signs, and x 0.125 with the negative z; the middle argument carries a non-zero value on one path; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 15 of 48 instructions, 40 of 131 bytes, and 1 of 8 relocation slots equal; the identity check stays open because V2 puts the frame before the reserved slot, calls the local asin and fabs stubs instead of the original helper and the inline fabs, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x226bc --count 48"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x226bc --count 48 --rebuilt work/rebuild/dirang.exe --rebuilt-map work/rebuild/direction_angle.map --rebuilt-symbol direction_angle_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module direction_angle"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x226bc"
+    },
+    {
+      "kind": "finding",
+      "text": "The direction_angle module at 0x226bc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/direction_angle.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/direction_angle_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/direction_angle_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/direction_angle.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "direction_angle",
+  "name": "direction_angle",
   "notes": [],
   "object_offset": "0x126bc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 40,
+        "bytes_total": 131,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 48,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x226bc",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:75d562d4e42145496a6d0691d0a8f5450a79c29fb75f7625c374f864e40e3e7c",
+    "source_digest": "sha256:c28f1f20b110cfadf1fe91dffdb0b83bc33e605a13203b7fef15541d769e0d07",
+    "tool": "run.py"
+  },
+  "role": "Returns an angle in the range zero to 2 pi from the x component and the sign of the z component of a direction, and ignores the y component.",
+  "section": "The vehicle state chain",
   "size": 1,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "direction_angle_"
 }

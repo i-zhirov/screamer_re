@@ -1,9 +1,107 @@
 {
   "address": "0x1ec7c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 44,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ec7c holds 44 instructions and 134 bytes up to the ret at 0x1ed01; the next function starts at 0x1ed04, so the store record keeps the 136-byte extent and sets no separate function size; the identity check uses 44 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is traffic_step at 0x1eae0, which calls this function at 0x1eb27 at the start of the wait and at 0x1eb64 after each timeout; the function saves the player state and re-registers the traffic records, so the caller uses it to reset the traffic table"
+    },
+    {
+      "kind": "note",
+      "text": "the function loads the player object at object-3 offset 0xf91c in eax and calls player_state_snapshot at 0x1ed04; it stores -1 at the state field +0x00 of the player traffic record at object-3 offset 0x13cd8 plus the player index at object-3 offset 0x1d250 times 0x2a8, and clears the shared counter at object-3 offset 0x634c"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the counter below the record count at object-3 offset 0x15218 and skips the player index; for each other record it calls 0xc7478 with the record 0x10100, the size 0xc, the name 0x1010c, the value 0x74, and the counter, and it repeats the call until the call returns a non-zero value"
+    },
+    {
+      "kind": "note",
+      "text": "traffic_step uses the function to reset the traffic table, and the saved player state and the traffic records support the name traffic_reset; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the callee at 0xc7478 has no record and no name; it reads five arguments, stores the new id at the first argument, and returns 0 when every slot is full and 1 on success; the module names it traffic_register with the confidence inferred, and the harness holds the stub"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt module holds 33 instructions and 116 bytes up to the ret at 0x10073; the identity window decodes 44 instructions and includes the two harness stubs after the module; the identity check stays open at 10 of 44 instructions and 8 of 134 bytes, because V2 saves the frame first, multiplies the record stride with imul, keeps the call arguments in registers, and places the stubs after the module; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ec7c --count 44"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ec7c"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ec7c --count 44 --rebuilt work/rebuild/trfcrst.exe --rebuilt-map work/rebuild/traffic_reset.map --rebuilt-symbol traffic_reset_"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_reset module at 0x1ec7c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_reset.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_reset_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/traffic_reset.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_reset",
+  "name": "traffic_reset",
   "notes": [],
   "object_offset": "0xec7c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 134,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 44,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ec7c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:a7dc4847ce8a268e7336fb874ddb5f07556305ecb9b2f70c32f16afe7b3ca5be",
+    "source_digest": "sha256:2d47894a9b71c4a980512240220d80c12114f4b52f57d71147d2deea515606b3",
+    "tool": "run.py"
+  },
+  "role": "Resets the traffic table: it saves the player state, closes the player traffic record, and re-registers every other traffic record.",
+  "section": "The vehicle state chain",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_reset_"
 }

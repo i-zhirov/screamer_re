@@ -1,9 +1,111 @@
 {
   "address": "0x24c4c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 36,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24c4c holds 36 instructions and 122 bytes up to the ret 4 at 0x24cc3; two pad bytes follow the ret, and the next record starts at 0x24cc8, so the store record keeps the 124-byte extent and sets no separate function size; the identity check uses 36 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two integer arguments arrive in the Watcom register order: eax holds the enable signal and edx holds the effect index; the float limit makes the compiler pass the remaining argument on the stack, so the callee cleans it with ret 4"
+    },
+    {
+      "kind": "note",
+      "text": "the array at DAT_001922c holds one float timer per effect; the function adds the frame delta DAT_00118e08 to the timer of the effect; when the timer reaches the limit, the function enqueues the effect through sound_enqueue at 0x247fc with the variant mode 3 and the delay 0.7, then latches the timer at -1; a latched timer returns at once, so the effect fires one time per enabled period; a clear enable signal resets the timer to 0, so the next enabled period starts a new delay"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is car_sound_update at 0x242bc, with the call sites at 0x2438f, 0x243cb, 0x2443e, 0x2446e, 0x244b2, and 0x245a5; the caller gates the effects by the engine speed, the gear latch, the mode byte, the pitch term, the car records, and the frame timer; the sound functions sit in the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the array index, the frame delta, the enqueue, and the latch support the name sound_effect_delay; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function needs no math helper and no truncation, so the shared fpu_stub.asm supplies the FPU run-time symbols; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame delta and the per-effect timer array with one extra sentinel entry; the eight paths cover the clear enable signal, the latched timer, the timer below the limit, the timer that reaches the limit, the timer that passes the limit, the effect 0 with its neighbour, the re-arm by a clear signal, and the limit 0 at the timer 0; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 36 instructions and 108 bytes; the identity check window holds 36 instructions and 108 bytes and stays open at 10 of 36 instructions, 15 of 108 bytes, and 0 of 11 relocation slots, because V2 saves ebx and ecx, keeps the effect index and the array pointer in registers, uses another branch shape for the enable signal, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24c4c --count 36"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24c4c --count 36 --rebuilt work/rebuild/sedelay.exe --rebuilt-map work/rebuild/sound_effect_delay.map --rebuilt-symbol sound_effect_delay_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_effect_delay"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24c4c"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_effect_delay module at 0x24c4c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_delay.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_delay_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_effect_delay.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_effect_delay",
+  "name": "sound_effect_delay",
   "notes": [],
   "object_offset": "0x14c4c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 108,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 36,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24c4c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:14809cc15f8221211a13042c99fe38da2fe561e425586d3f5d3244603888a7db",
+    "source_digest": "sha256:7d12890a94de02b41913c0decbdde406ab2aadf0ab0c219ff625cc8f8a120f4c",
+    "tool": "run.py"
+  },
+  "role": "Adds the frame delta to a per-effect timer and enqueues the effect one time when the timer reaches the limit.",
+  "section": "Program functions",
   "size": 124,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_effect_delay_"
 }

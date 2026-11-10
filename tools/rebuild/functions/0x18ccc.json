@@ -1,9 +1,99 @@
 {
   "address": "0x18ccc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 69,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x18ccc holds 69 instructions and 226 bytes up to the ret at 0x18dad; the next function starts at 0x18db0, so the store record keeps the 228-byte extent and sets no separate function size; the identity check uses 69 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x15c7e is player_car_link at 0x15c1c; the caller passes the player object at object-3 offset 0xf91c in eax and runs on the vehicle state chain, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the horizontal difference from the world reference DAT_00110a20 and DAT_00110a28 to the object position at +0x4b0 and +0x4b8 and takes the square root at 0x22bec of the summed squares"
+    },
+    {
+      "kind": "note",
+      "text": "the two normalized ratios scale the screen limit 20.0 at object-3 offset 0x854; the function stores the truncation of the object position minus the scaled ratio at +0x118 and +0x120 and stores the height +0x4b4 - 20 at +0x11c"
+    },
+    {
+      "kind": "note",
+      "text": "the player object, the world reference, the screen limit, and the caller support the name player_screen_offset; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls sqrt at 0x22bec and the truncating helper at 0x4d9f4; the local player_screen_offset_fpu.asm supplies sqrt and makes __CHP truncate toward zero; the original has the EBP frame, so the module builds with -of+"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x18ccc --count 69"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x18ccc --count 69 --rebuilt work/rebuild/pscrnofs.exe --rebuilt-map work/rebuild/player_screen_offset.map --rebuilt-symbol player_screen_offset_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_screen_offset"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x18ccc"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_screen_offset module at 0x18ccc"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the world reference, the screen limit, and one player record; the six paths cover the positive x offset, the second horizontal axis, the negative fractional truncation, the positive fractional truncation from a non-zero record position, the negative x difference, and the limit 10.0; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 69 instructions and 225 bytes; the identity check stays open at 12 of 69 instructions, 5 of 225 bytes, and 2 of 9 relocation slots, because V2 keeps the frame first, keeps the object in edx, keeps the world value in a register, and emits the two ratio computations in another order; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_screen_offset",
+  "name": "player_screen_offset",
   "notes": [],
   "object_offset": "0x8ccc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 225,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 69,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18ccc",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:2809af9866669d3d1f32e61e62c276a75ba225fe6187b8b3897385df292236b8",
+    "source_digest": "sha256:44766b22d941c1a301d8271a91c1200989e3f8a22c22b0a02c41d4085be0c01c",
+    "tool": "run.py"
+  },
+  "role": "Projects the world reference position onto the player object and stores the two truncated screen offsets and the height offset.",
+  "section": "The vehicle state chain",
   "size": 228,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_screen_offset_"
 }

@@ -1,9 +1,111 @@
 {
   "address": "0x222e0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 49,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x222e0 holds 49 instructions and 150 bytes up to the ret 4 at 0x22373; the two pad bytes at 0x22376 and the next record at 0x22378 give the 152-byte extent, so the record keeps the 152-byte extent and sets no separate function size; the identity check uses 49 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are object_revolution_step at 0x1d30c, with the call site at 0x1d33d, and opponent_path_update at 0x20b1c, with the call site at 0x20b35; both pass a pointer in eax and a float fraction on the stack and divide a frame step by the result; the callers sit in the section The vehicle state chain and the section object_update_all callees, and the function serves the spline family of the vehicle state chain, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the pointer addresses three two-dimensional control points at a 12-byte stride; the function forms the interpolated chord dx = (P0x - 2 * P1x + P2x) * t + P1x - P0x and dy = (P0y - 2 * P1y + P2y) * t + P1y - P0y; the length is the magnitude of the quadratic curve derivative at the fraction, so the module names the function curve_speed with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "a zero length returns 1.0 through the test of the 0x7fffffff mask, because the callers divide by the result; the float 2.0 sits at object-3 offset 0xd78 and arrives through a global, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the original calls the square-root wrapper at 0x22bec, so the local curve_speed_fpu.asm supplies sqrt_ from the hardware and the FPU run-time symbols; the original has the EBP frame, so the module builds with -of+; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three control points, the float 2.0 scale, and the fraction of each path; the eight paths cover the zero guard, the fraction 0, the fraction 1, the x axis, the y axis, the 2.0 scale, the negative component, and the diagonal; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The curve_speed module at 0x222e0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x222e0 --count 49"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x222e0 --count 49 --rebuilt work/rebuild/curve.exe --rebuilt-map work/rebuild/curve_speed.map --rebuilt-symbol curve_speed_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module curve_speed"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x222e0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/curve_speed.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/curve_speed_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/curve_speed_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/curve_speed.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 40 instructions and 117 bytes up to the ret 4 at 0x10074; the identity window uses 49 instructions, so it decodes the square-root stub after the rebuilt ret; the identity check stays open at 3 of 49 instructions, 7 of 134 bytes, and 0 of 4 relocation slots, because V2 pushes edx after the frame and uses another frame offset, places the 2.0 scale in the local data, and routes the zero result through a second local; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "curve_speed",
+  "name": "curve_speed",
   "notes": [],
   "object_offset": "0x122e0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 134,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 49,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x222e0",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:4844dc823f4a1be63340bba0feecc0a2630483a8e79dc86833f7e52abf285399",
+    "source_digest": "sha256:5053ff50554f43b890a68f2083675a8b1f78fc455331ab26cf211d2740699d6b",
+    "tool": "run.py"
+  },
+  "role": "returns the length of the quadratic curve chord at a fraction",
+  "section": "The vehicle state chain",
   "size": 152,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "curve_speed_"
 }

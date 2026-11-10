@@ -1,9 +1,103 @@
 {
   "address": "0x15378",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 70,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15378 holds 70 instructions and 229 bytes up to the ret at 0x1545c; the next function starts at 0x15460, so the store record keeps the 232-byte extent and sets no separate function size; the identity check uses 70 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x13564 is race_track_load at 0x13540, which race_session_start at 0x128e0 calls at 0x1294e; the caller passes the load value and drops a non-zero result, so the record takes the section race_session_start callees"
+    },
+    {
+      "kind": "note",
+      "text": "the difficulty flag DAT_0011d2b8 below 1 stores the clear flag DAT_0010cf58 and returns 0 at once; a value of 1 or more stores the set flag and walks the DAT_0010f178 opponent records of 0xbc bytes at DAT_0010f180"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero load value loads the opponent object first through the object table at 0x6530 and the slot at record + 0x18; a non-zero result returns at once"
+    },
+    {
+      "kind": "note",
+      "text": "for every record the function copies the track field at +0x10 to the path field at +0x44, takes the state entry at DAT_0010f174 + track * 0x24 + 0x20 into +0x48, clears +0x4c and +0x50, and sets the sound field at +0x38 to -1; after the loop it runs opponent_update at 0x20954 with 1 and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the opponent record array, the load path, and the closing update support the name opponent_records_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original uses no floating-point instruction and calls no FPU helper"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15378 --count 70"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15378 --count 70 --rebuilt work/rebuild/oprecini.exe --rebuilt-map work/rebuild/opponent_records_init.map --rebuilt-symbol opponent_records_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module opponent_records_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15378"
+    },
+    {
+      "kind": "finding",
+      "text": "The opponent_records_init module at 0x15378"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the difficulty flag, the active flag, the record count, the opponent record array, the state base, the object table, and the two callee stubs; the four paths cover the clear difficulty flag, the zero load value, the non-zero load value with one load per record and the slot at record + 0x18, and a failing second load that returns 7 before the update; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 70 instructions and 218 bytes; the identity check stays open at 17 of 70 instructions, 15 of 218 bytes, and 0 of 21 relocation slots, because V2 puts the frame first, saves five registers, keeps the record in a register, multiplies with imul, and uses another branch layout; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_records_init",
+  "name": "opponent_records_init",
   "notes": [],
   "object_offset": "0x5378",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 218,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 70,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15378",
+    "date": "2026-11-08",
+    "fingerprint": "sha256:3ebf68e30307c7cad1d4c20e84c1616c69070ae73749f0d669206c8a23eec099",
+    "source_digest": "sha256:7bb9122788147bf9711875499cb41701819199245e3b2313c7cefb2a5db22180",
+    "tool": "run.py"
+  },
+  "role": "Stores the opponent active flag, loads each opponent object on the load path, and initializes the path, state, and sound fields of every opponent record.",
+  "section": "race_session_start callees",
   "size": 232,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_records_init_"
 }

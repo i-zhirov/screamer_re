@@ -1,9 +1,99 @@
 {
   "address": "0x114b4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 68,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x114b4 holds 68 instructions and 178 bytes up to the ret at 0x11565; the next function starts at 0x11568, so the store record keeps the 180-byte extent and sets no separate function size; the identity check uses 68 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x110a4 is the unnamed object loader wrapper at 0x11060; that wrapper searches the object table by name through the case-insensitive compare at 0x4d9ba, makes one more instance of an existing object through object_duplicate at 0x10ed4, and otherwise calls this function and then object_load at 0x10bfc"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument is the 0x78-record object table at object-3 offset 0x6530 with 0x1c-byte records; the second argument points to the name string; the third argument points to the output slot index; a record holds the name at +0x00, the block object at +0x0c, the chunk table at +0x10, the file record at +0x14, and one reserved word at +0x18; a zero file record marks a free slot and the value 1 marks a record that waits for the loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the output index and scans the table from index 0; the first record with a zero file record takes the input name at +0x00 and the value 1 at +0x14, so object_load then loads the named object, and the function returns 0; a full table copies the name to the scratch buffer DAT_00007fe8 and returns 8"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the object table, the load flag, and the pairing with object_load support the name object_request; the original has no symbol, so the record keeps the name with the confidence inferred; the callee names in the harness stay harness-local"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x78-record object table and the scratch buffer; the six paths cover the free slot 0, the busy slot 0, the full table, the name copy stop, the two busy slots, and the last free slot 0x77; every path checks the output index, the name, and the file record; the output holds the markers 0 through 5 and D"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_request module at 0x114b4"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x114b4 --count 68"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x114b4 --count 68 --rebuilt work/rebuild/objreq.exe --rebuilt-map work/rebuild/object_request.map --rebuilt-symbol object_request_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module object_request"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x114b4"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt function holds 68 decoded instructions and 180 bytes; the identity check stays open at 13 of 68 instructions, 8 of 178 bytes, and 0 of 8 relocation slots, because V2 saves the frame first, keeps the name, the table, and the slot index in registers, builds the inline string copy in another order, and uses another scan loop and another return layout; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_request",
+  "name": "object_request",
   "notes": [],
   "object_offset": "0x14b4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 178,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 68,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x114b4",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:45723af17406d8f2280e58ce8bc03c43d8b45e22d3340d07be1db86f7c263d4f",
+    "source_digest": "sha256:f27f6b204620eaba1020d605e508b1953364daa8a9880540167b4bbe02bc0ee2",
+    "tool": "run.py"
+  },
+  "role": "reserves the first free record of the object table, stores the object name, and marks the record for the loader; returns 0, or 8 when the table is full",
+  "section": "Resource loader",
   "size": 180,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_request_"
 }

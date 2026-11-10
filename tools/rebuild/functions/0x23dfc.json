@@ -1,9 +1,83 @@
 {
   "address": "0x23dfc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 63,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x23dfc holds 63 instructions and 199 bytes up to the ret at 0x23ec2; the next function starts at 0x23ed0, so the store record keeps the 212-byte extent and sets no separate function size; the identity check uses 63 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is options_screen at 0x2195b; it calls the function for the selected audio row with the volume value in eax and the label pointer in edx; the label table at object-3 offset 0x1f74 holds CD, FX, and MU, so the caller and the rebuilt options_screen module name the function volume_bar_draw with the confidence inferred and the section race_loop callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function divides the value by 1024 to get the tick count, sets the clip rectangle to the full screen (0, 0x280, 0, 0x190), draws the label at (0x80, 0x8a) with the font 5 and the color 3, and draws each tick as a vertical line at x = 0xaa + index * 6 from y 0x8a to y 0x94; the tick color comes from the table at object-3 offset 0x1fa4 in groups of ten and goes to the byte at object-3 offset 0x55b"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the clip rectangle, the color byte, the color table, the text sink, and the line sink; the color table is filled at run time, because the minimal image leaves the initialized data pages zero; the eleven paths cover the zero count, the truncation below 1024, one tick, the group colors at ticks 10, 20, and 30, the negative count, and the label pass-through; the output holds the markers 0 through 9, a, and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23dfc --count 63"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23dfc --count 63 --rebuilt work/rebuild/volbar.exe --rebuilt-map work/rebuild/volbar.map --rebuilt-symbol volume_bar_draw_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23dfc"
+    },
+    {
+      "kind": "finding",
+      "text": "The volume_bar_draw module at 0x23dfc"
+    }
+  ],
+  "implementation": "c",
+  "module": "volume_bar_draw",
+  "name": "volume_bar_draw",
   "notes": [],
   "object_offset": "0x13dfc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 199,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 63,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23dfc",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:0e917f3670a0b765decd371f659cf1c27fa5f003ce3ea4da077a9ddb27ceee20",
+    "source_digest": "sha256:68d20a74e939f45c5707269ec227af8282069e7927dc090605bf4cb49e30eb61",
+    "tool": "run.py"
+  },
+  "role": "draws a labeled volume bar: the label on the top row and a row of colored ticks that shows the value in steps of 1024",
+  "section": "race_loop callees",
   "size": 212,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "volume_bar_draw_"
 }

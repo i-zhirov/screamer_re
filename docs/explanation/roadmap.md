@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: two hundred twenty-one named modules are rebuilt with the harness and the
+  progress: two hundred forty-two named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -181,8 +181,100 @@ current host.
   `replay_load_atk` at `0x1ba4c`, and
   `replay_save` at `0x1b738`, and
   `player_segment_apply` at `0x16b98`, and
-  `sprite_load` at `0x257b0`;
-  thirty modules are verified, one is matching, and two hundred and twenty-one
+  `sprite_load` at `0x257b0`, and
+  `angle_approach` at `0x22018`, and
+  `player_cockpit_camera` at `0x1a2bc`, and
+  `game_mode_10_start` at `0x12d0c`, and
+  `path_playback_apply` at `0x23328`, and
+  `tri_point_test` at `0x1c38a`, and
+  `sound_source_collect` at `0x833a4`, and
+  `scene_setup` at `0x15984`, and
+  `traffic_simulation_update` at `0x201d0`, and
+  `race_records_screen_init` at `0x2c954`, and
+  `sound_source_frame_prepare` at `0x8affc`, and
+  `opponent_records_init` at `0x15378`, and
+  `player_screen_offset` at `0x18ccc`, and
+  `member_open` at `0x4c128`, and
+  `sound_event_transform` at `0x835c0`, and
+  `name_entry_update` at `0x2ce84`, and
+  `net_race_lobby_init` at `0x2ca40`, and
+  `basis_transform_build` at `0x8b610`, and
+  `camera_pose_build` at `0x1a144`, and
+  `map_object_line_select` at `0x2b308`, and
+  `angle_step` at `0x21f40`, and
+  `replay_save_atk` at `0x1b974`, and
+  `race_finish_laps_update` at `0x20ec8`, and
+  `player_car_surface_effect_update` at `0x1814c`, and
+  `stream_seek` at `0x4c5c7`, and
+  the Phase T module `race_frame_update` at `0x1ff70`, and the Phase T module
+  `choice_save` at `0x1be6c`, and the Phase T module `func_11230` at `0x11230`,
+  and the Phase T module `cockpit_load` at `0x1b23c`, and the Phase T module
+  `lzw_expand` at `0x4d3fc`, and the Phase T module `volume_bar_draw` at
+  `0x23dfc`, and the Phase T module `object_unload` at `0x11304`, and the Phase T
+  module `view_fade_out` at `0x21da8`, and the Phase T module
+  `spatial_grid_relocate` at `0x4cb4c`, and the Phase T module
+  `sound_variant_select` at `0x24a84`, and the Phase T module
+  `map_collision_check` at `0x11c00`, and the Phase T module
+  `screen_object_lists_init` at `0x2dff4`, and the Phase T module
+  `credits_fade_out` at `0x27e08`, and the Phase T module
+  `race_finish_time_update` at `0x20f98`, and the Phase T module
+  `replay_buffer_init` at `0x22c88`, and the Phase T module `cd_check` at
+  `0x157b8`, and the Phase T module `replay_playback_start` at `0x14d2c`, and
+  the Phase T module `object_duplicate` at `0x10ed4`, and the Phase T module
+  `func_1e700` at `0x1e700`, and the Phase T module `car_nearby_mark` at
+  `0x126e4`, and the Phase T module `object_request` at `0x114b4`, and the
+  Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
+  `sound_queue_promote` at `0x2497c`, and the Phase T module
+  `player_nearby_mark` at `0x12378`, and the Phase U module
+  `game_mode_4_start` at `0x12e18`, and the Phase U module
+  `body_point_place` at `0x1ce38`, and the Phase U module
+  `player_body_point_place` at `0x17c6c`, and the Phase U module
+  `track_marker_load` at `0x1b198`, and the Phase U module
+  `basis_rotation_mirror` at `0x82074`, and the Phase U module
+  `object_chunk_find` at `0x11410`, and the Phase U module
+  `basis_rotation_build` at `0x81fd0`, and the Phase U module
+  `replay_view_update` at `0x202c0`, and the Phase U module
+  `screen_mode_set` at `0x4c850`, and the Phase U module
+  `alfile_load` at `0x4c3e6`, and the Phase U module
+  `car_camera_select` at `0x1aec4`, and the Phase U module
+  `traffic_nearby_mark` at `0x12424`, and the Phase U module
+  `cache_resource` at `0x2f062`, and the Phase U module
+  `lzw_init` at `0x4d360`, and the Phase U module
+  `sound_variant_next` at `0x24b48`, and the Phase U module
+  `sound_queue_update` at `0x24880`, and the Phase U module
+  `curve_speed` at `0x222e0`, and the Phase U module
+  `traffic_body_point_place` at `0x1f108`, and the Phase U module
+  `game_mode_1_start` at `0x12c0c`, and the Phase U module
+  `sound_source_update` at `0x8a958`, and the Phase U module
+  `object_list_link` at `0x11568`, and the Phase U module
+  `traffic_event_read` at `0x1eed8`, and the Phase U module
+  `func_1e670` at `0x1e670`, and the Phase U module
+  `pcx_decode` at `0x4d098`, and the Phase V module
+  `func_118e8` at `0x118e8`, and the Phase V module
+  `func_11714` at `0x11714`, and the Phase V module
+  `player_throttle_update` at `0x160a4`, and the Phase V module
+  `race_finish_overlay_2` at `0x2414c`, and the Phase V module
+  `race_finish_overlay_1` at `0x240c4`, and the Phase V module
+  `traffic_reset` at `0x1ec7c`, and the Phase V module
+  `view_mode_dispatch` at `0x19e78`, and the Phase V module
+  `direction_angle` at `0x226bc`, and the Phase V module
+  `game_mode_20_start` at `0x13120`, and the Phase V module
+  `cd_audio_volume_set` at `0x265b4`, and the Phase V module
+  `sound_enqueue` at `0x247fc`, and the Phase V module
+  `sound_reset` at `0x2471c`, and the Phase V module
+  `game_mode_40_start` at `0x130a0`, and the Phase V module
+  `shade_rect` at `0x25d28`, and the Phase V module
+  `point_rotate_x` at `0x221fc`, and the Phase V module
+  `sound_effect_delay` at `0x24c4c`, and the Phase V module
+  `acos_table_build` at `0x4d260`, and the Phase V module
+  `point_hit_probe` at `0x1c0ac`, and the Phase V module
+  `race_finish_ghost_update` at `0x23f50`, and the Phase V module
+  `race_data_release` at `0x156a8`, and the Phase V module
+  `video_selector_setup` at `0x8bc7c`, and the Phase V module
+  `bios_tick_reset` at `0x1f990`, and the Phase V module
+  `mouse_release_wait` at `0x1f8dc`, and the Phase V module
+  `point_rotate_y` at `0x2218c`;
+  thirty modules are verified, one is matching, and three hundred and seventeen
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
@@ -375,7 +467,7 @@ The plan follows the size order, starting with the smallest functions.
     `camera_project` at `0x82c14`
     are done;
     the result is thirty verified modules, one matching module, and two
-    hundred and fifteen open rebuilds).
+    hundred and eighty open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

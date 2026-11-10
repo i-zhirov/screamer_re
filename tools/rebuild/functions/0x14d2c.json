@@ -1,9 +1,107 @@
 {
   "address": "0x14d2c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 58,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x14d2c holds 58 instructions and 180 bytes up to the early ret at 0x14ddf; the full body continues through the shared epilogue at 0x14e1d to the next function at 0x14e20, so the store record keeps the 244-byte extent and sets no separate function size; the identity check uses 58 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x12ed4 is game_mode_4_start at 0x12e18, which runs after the ghost load at 0x1ba4c; it loads the ghost index DAT_0018ed4, flips the low bit with xor dl, 1, and passes the playback block 0x18ed8 in eax and the flipped index in edx, so a call selects the other of the two ghost records; the records sit at 0x18e8c with a stride of 0x24"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument points to the playback block: the entry index at +0x00, the ghost record pointer at +0x08, and the active flag at +0x0c; the ghost record holds the index at +0x04, the active flag at +0x0c, and the model index at +0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the function selects the record 0x18e8c + index * 0x24 and stores it at block +0x08; a zero record active flag goes at once to the playback start; otherwise a non-zero block flag runs the object release at 0x11714 and the shared release at 0x11230 and returns at once on a non-zero result or a result above zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function loads the object named by the model entry 0xd25c + record model * 0x40 through 0x11060, returns at once on a non-zero result, otherwise takes the slot through 0x11660 and sets the block flag to one"
+    },
+    {
+      "kind": "note",
+      "text": "every path calls path_playback_update at 0x23038 with the block and the flag 1, reloads the record from block +0x08, clears the record index at +0x04, and returns zero"
+    },
+    {
+      "kind": "note",
+      "text": "the caller at game_mode_4_start, the ghost records, the playback block, and the object table support the name replay_playback_start; the original has no symbol, so the record keeps the name with the confidence inferred; the callee names in the harness stay harness-local"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three-record ghost array, the playback block, and five callee stubs; the seven paths cover the inactive record, the zero block flag, the release result 12, the shared result 5, the load result 7, the shared result -1 with a load, and the index 1 stride; every path checks the recorded arguments, the block flag, and the record index; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check at 58 instructions holds 16 of 58 instructions, 4 of 180 bytes, and 0 of 13 relocation slots; the identity check stays open because V2 saves the frame first, keeps the record and the block in registers, uses imul for the 0x24 stride, and folds the shared epilogue differently; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x14d2c --count 58"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x14d2c --count 58 --rebuilt work/rebuild/rplstart.exe --rebuilt-map work/rebuild/replay_playback_start.map --rebuilt-symbol replay_playback_start_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_playback_start"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x14d2c"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_playback_start module at 0x14d2c"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_playback_start",
+  "name": "replay_playback_start",
   "notes": [],
   "object_offset": "0x4d2c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 180,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 58,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x14d2c",
+    "date": "2026-11-09",
+    "fingerprint": "sha256:813a8f053b7672b9f74b1baf7f2304b66d2d1c70430812bfe214ed85510211fc",
+    "source_digest": "sha256:71677d552fe8c7ea7c3ec0796a61b42988bcd4fedf2d887859e7bfcbddc5e202",
+    "tool": "run.py"
+  },
+  "role": "sets up the selected ghost record, releases the old object, loads the record object, and starts the replay playback",
+  "section": "The replay records",
   "size": 244,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_playback_start_"
 }

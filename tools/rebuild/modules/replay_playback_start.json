@@ -1,0 +1,33 @@
+{
+  "exe": "rplstart.exe",
+  "map": "replay_playback_start.map",
+  "name": "replay_playback_start",
+  "run": {
+    "command": "rplstart.exe > rplstart.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "rplstart.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_playback_start.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_playback_start_main.c"
+    }
+  ]
+}

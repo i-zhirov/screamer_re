@@ -1,0 +1,37 @@
+{
+  "exe": "acostb.exe",
+  "map": "acos_table_build.map",
+  "name": "acos_table_build",
+  "run": {
+    "command": "acostb.exe > acostb.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "acostb.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "acos_table_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "acos_table_build_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "acos_table_build_main.c"
+    }
+  ]
+}
