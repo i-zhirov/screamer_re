@@ -25850,3 +25850,76 @@ temporary `-od` recipe.
   0x24cc8`.
 - Limit: the original has no symbol name for this function.  The module name and
   the array and frame-delta globals stay inferred.
+
+## The race_menu_handler module at 0x2a214
+
+- Observation: the dispatch head at `0x2a214` holds 31 instructions and 103
+  bytes up to the default `ret` at `0x2a27a`.  The next record starts at
+  `0x2a364`, so the store record keeps the 336-byte extent and sets no separate
+  function size.  The identity check uses 31 instructions.  The case blocks
+  after the head hold 75 more instructions and 13 calls, so the full body holds
+  106 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2a214 --count 31` and
+  `tools/rebuild/functions/0x2a214.json`.
+- Observation: the function reads the context dword at `0x2dec` and its field
+  `+0x18`.  A value 3 moves to 4, so the menu skips the value 3.  It then reads
+  the mode word `DAT_001d260` and the counter `DAT_00203c8`.  The switch selects
+  these paths:
+  - mode 1 runs `loading_screen` with the table `DAT_000021e4` at the context
+    field `+0x28`, the counter plus one, and the context value, then
+    `menu_space_init`, `menu_frame`, and `race_record_save` with the track index
+    `DAT_00203bc`.
+  - mode 4 runs `sprintf` with `DAT_00000ff5`, `DAT_00007edc`, and the counter
+    plus one, then the member check at `0xd1d44`, then `loading_screen` with the
+    screen 0, the counter plus one, and the context value, then
+    `menu_space_init` and `menu_frame`.
+  - mode 0x10 runs `race_results_screen` at `0x2a558`.
+  - mode 0x20 and mode 0x40 run `loading_screen` with the screen 0, the counter
+    plus one, and the context value, then `menu_space_init` and `menu_frame`.
+  - every other mode runs no path.
+  Evidence: the blocks at `0x2a226` through `0x2a363`, the call sites at
+  `0x2a294`, `0x2a299`, `0x2a29e`, `0x2a2a8`, `0x2a2c7`, `0x2a2d5`,
+  `0x2a2fc`, `0x2a301`, `0x2a306`, `0x2a31b`, `0x2a320`, `0x2a325`, and
+  `0x2a335`, and the relocation targets `0x1002dec`, `0x1001d260`,
+  `0x100203c8`, `0x100203bc`, `0x100021e4`, `0x10000ff5`, and `0x10007edc`.
+- Observation: the member check clears `DAT_001d264` when it returns -1 and the
+  flag is set.  A clear flag or a successful check keeps the flag.
+  Evidence: the block at `0x2a2d5` through `0x2a2ea`.
+- Observation: the direct callers are `net_race_screen` at `0x2908b` and
+  `net_race_lobby` at `0x2dcf9`.  Both functions belong to the race-frame group,
+  so the record takes the section `race_frame callees`.
+  Evidence: the call sites at `0x2908b` and `0x2dcf9`, and the records of
+  `0x28ba4` and `0x2d7c4`.
+- Inference: the mode switch, the menu calls, the results screen, and the
+  record save support the name `race_menu_handler`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the earlier findings "The net_race_screen
+  function extent" and "The race_results_screen module at 0x2a558".
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point operation, so the module needs no
+  FPU stub.  The module uses no assembly implementation.
+  Evidence: the prologue at `0x2a214` and
+  `tools/rebuild/modules/race_menu_handler.json`.
+- Observation: the harness holds the context record, the mode word, the
+  counter, the track index, the member flag, and the menu table.  The eight
+  paths cover an unlisted mode, the mode 1 path, the value 3 move to 4, the mode
+  4 path with a failing member check, the mode 4 path with a successful member
+  check, the mode 0x10 path, the mode 0x20 path, and the mode 0x40 path.  The
+  output holds the markers `0` through `7` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/race_menu_handler_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_menu_handler`, and
+  `work/rebuild/rmenuh.txt`.
+- Observation: the diff reports 4 of 31 instructions, 9 of 103 bytes, and 0 of
+  8 relocation slots equal.  The identity check stays open because V2 saves
+  `ebp` first, keeps the context value in `ebx`, orders the 0x20 case before the
+  0x40 case, uses short branches and another branch layout, and reserves a
+  0x144-byte frame.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2a214 --count 31 --rebuilt work/rebuild/rmenuh.exe
+  --rebuilt-map work/rebuild/race_menu_handler.map --rebuilt-symbol
+  race_menu_handler_` and `python3 tools/rebuild/run.py run --function
+  0x2a214`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the mode, counter, track, and context globals stay inferred.
