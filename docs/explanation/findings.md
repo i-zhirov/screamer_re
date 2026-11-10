@@ -17807,6 +17807,70 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
 
+## The player_throttle_update module at 0x160a4
+
+- Observation: the original body at `0x160a4` holds 38 instructions and 136
+  bytes on the first path up to the `ret` at `0x1612b`.  The second path runs
+  from `0x1612c` to the `ret` at `0x1614f`, so the body reaches 172 bytes.  The
+  next function starts at `0x16150`, so the store record keeps the 172-byte
+  extent and sets no separate function size.  The identity check uses 38
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x160a4 --count 38` and
+  `tools/rebuild/functions/0x160a4.json`.
+- Observation: the only direct caller is the player update group at `0x15a80`.
+  It calls this function at `0x15aa4` before `player_brake_update` at `0x16150`
+  and `player_steering_update` at `0x1629c`.  The group runs on the player
+  object at object-3 offset `0xf91c`, so the record takes the section The
+  vehicle state chain.
+  Evidence: the block at `0x15a80` through `0x15ab4`.
+- Observation: the function keeps the throttle `+0x144` only when it is not
+  negative.  The fields `+0x4f4`, `+0x148`, `+0x110`, and `+0x170` must stay
+  clear, and the control byte `DAT_00118e1d` bit `0x40` must be clear.  The
+  tests of `+0x4f4` and `+0x110` mask the sign bit `0x7fffffff`, so a sign-only
+  value counts as zero.  The sign of the axis `DAT_00119880` must then equal
+  the centre `DAT_001197ec`.
+  Evidence: the block at `0x160a4` through `0x16118`.
+- Observation: when every gate passes, the throttle takes the absolute axis
+  over 1023.0 at `DAT_00100710`.  Any other input clears the throttle to zero.
+  The sibling `player_brake_update` at `0x16150` forms the brake value in the
+  same shape.
+  Evidence: the block at `0x1611a` through `0x1614f`, and the constants at
+  object-3 offsets `0x710` and `0x714`.
+- Inference: the pedal axis, the 1023.0 scale, the throttle `+0x144`, and the
+  sibling brake step support the name `player_throttle_update`.  The caller
+  notes and the program map already call `0x160a4` the throttle step.  The
+  original has no symbol, so the record keeps the name with the confidence
+  inferred.
+  Evidence: the call graph and the data flow above.
+- Observation: the minimal harness image does not load the constant segment,
+  so the 1023.0 scale, the axis, the centre, and the control byte arrive
+  through globals.  The original has the EBP frame, so the module builds with
+  `-of+`.  The float code needs the shared `fpu_stub.asm`.
+  Evidence: `tools/rebuild/player_throttle_update.c` and
+  `tools/rebuild/modules/player_throttle_update.json`.
+- Observation: the behavior check passes.  The harness holds the player
+  object, the throttle axis and its centre sign, the control byte, and the
+  1023.0 scale.  It prints the markers `0` through `9`, `A`, and `D`.  The
+  eleven paths cover the direct path, the negative axis, the zero axis, the
+  negative throttle, the four state fields, the control bit, the sign
+  mismatch, and the sign-only masks with the control byte `0xbf`.
+  Evidence: `tools/rebuild/player_throttle_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_throttle_update`, and
+  `work/rebuild/pthrtl.txt`.
+- Observation: the rebuilt module holds 38 decoded instructions and 134 bytes
+  in the identity window.  The identity check stays open at 6 of 38
+  instructions and 18 of 134 bytes, and 0 of 6 relocation slots, because V2
+  keeps the object in `edx` and `ecx`, saves `esi`, loads the harness globals
+  from fixed addresses, and builds the sign select in another shape.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x160a4 --count 38 --rebuilt work/rebuild/pthrtl.exe
+  --rebuilt-map work/rebuild/player_throttle_update.map --rebuilt-symbol
+  player_throttle_update_` and `python3 tools/rebuild/run.py run --function
+  0x160a4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
+
 ## The stream_read_text module at 0x4c695
 
 - Observation: the original body at `0x4c695` holds 106 instructions and 331
