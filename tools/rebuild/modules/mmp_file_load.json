@@ -1,0 +1,31 @@
+{
+  "exe": "mmpfile.exe",
+  "map": "mmp_file_load.map",
+  "name": "mmp_file_load",
+  "run": {
+    "command": "mmpfile.exe > mmpfile.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "mmpfile.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "mmp_file_load.c",
+      "flags": [
+        "-of+",
+        "-dMMP_FILE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "mmp_file_load_main.c"
+    }
+  ]
+}

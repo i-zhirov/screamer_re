@@ -25981,3 +25981,67 @@ temporary `-od` recipe.
   0x8a9e8`.
 - Limit: the original has no symbol name for this function.  The module name and
   the patch slots stay inferred.
+
+## The mmp_file_load module at 0x4cae4
+
+- Observation: the body at `0x4cae4` holds 32 instructions and 102 bytes up to
+  the `ret` at `0x4cb49`.  The next function `spatial_grid_relocate` starts at
+  `0x4cb4c` after the two pad bytes, so the store record keeps the 104-byte
+  extent and sets no separate function size.  The identity check uses 32
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cae4 --count 32` and
+  `tools/rebuild/functions/0x4cae4.json`.
+- Observation: the only direct caller is the block at `0x4c97e` in the wrapper
+  at `0x4c94c`.  The wrapper copies its argument to `DAT_002154c`, calls
+  `unr_file_load` at `0x4c98c`, and then calls this function for the `%s.MMP`
+  member.  `race_data_load` at `0x131a8` calls the wrapper after the
+  `material_load` call at `0x4cd9c`.  The level data loads `MAP1.UNR` before
+  `MAP1.MMP`, so the record takes the section Resource loader.
+  Evidence: the call at `0x4c97e`, the wrapper at `0x4c94c` through `0x4c988`,
+  the call at `0x13347`, and the finding "The unr_file_load module at 0x4c98c".
+- Observation: the function builds the member name `%s.MMP` from
+  `DAT_002154c` through `sprintf` at `0x4d32c`.  The format string sits at
+  object-3 offset `0x16e9`.  Then the function calls `alfile_load` at
+  `0x4c3e6` with the local stream at `ebp - 0xf8`, the empty path at object-3
+  offset `0x7fb4`, the name at `ebp - 0x44`, the out cell `DAT_0021468`, and
+  the resource head `DAT_0021574`.
+  Evidence: the blocks at `0x4caf0` through `0x4cb25`, the strings at object-3
+  offsets `0x16e9` and `0x7fb4`, and the finding "The alfile_load module at
+  0x4c3e6".
+- Observation: a non-zero `alfile_load` result runs the file error report at
+  `0x4bf88` with the same stream.  Then the function copies the out cell to the
+  grid base `DAT_00102fa4` and runs the spatial grid relocate at `0x4cb4c`.
+  The copy runs on both the success path and the failure path.
+  Evidence: the branch at `0x4cb25` through `0x4cb34`, the stores at `0x4cb34`
+  through `0x4cb39`, and the call at `0x4cb3e`.
+- Inference: the `%s.MMP` member, the out cell, the grid base, and the wrapper
+  caller support the name `mmp_file_load`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/mmp_file_load.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module needs
+  no FPU stub.  The module uses no assembly implementation.
+  Evidence: the prologue at `0x4cae4` through `0x4caea` and
+  `tools/rebuild/modules/mmp_file_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `MMP_FILE_LOAD_HARNESS` and the function
+  builds the two constant texts in local buffers.  The harness holds the four
+  module globals and a stub for every call target.  The four paths cover the
+  successful load, the failed load, the name `MENU`, and the empty name.  The
+  output holds the markers `0` through `3` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/mmp_file_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module mmp_file_load`, and
+  `work/rebuild/mmpfile.txt`.
+- Observation: the diff reports 10 of 32 instructions, 7 of 87 bytes, and 0 of 8
+  relocation slots equal.  The rebuilt body holds 87 bytes against the 102-byte
+  original body, because V2 saves the frame first, builds the harness constant
+  texts in local slots, and passes the `%s.MMP` variable argument on the stack.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cae4 --count 32 --rebuilt work/rebuild/mmpfile.exe
+  --rebuilt-map work/rebuild/mmp_file_load.map --rebuilt-symbol
+  mmp_file_load_` and `python3 tools/rebuild/run.py run --function 0x4cae4`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the empty path stay inferred.
