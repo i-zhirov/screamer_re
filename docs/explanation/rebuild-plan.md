@@ -569,7 +569,7 @@ reproduce the original bytes.
 | `0x2a214` | `race_menu_handler` (done) | 103 | 31 | 0 | 0 |
 | `0x8a9e8` | `camera_basis_patch` (done) | 102 | 25 | 0 | 0 |
 | `0x4cae4` | `mmp_file_load` (done) | 102 | 32 | 4 | 0 |
-| `0x2f4ee` | unnamed | 102 | 40 | 2 | 0 |
+| `0x2f4ee` | `func_2f4ee` (done) | 102 | 40 | 2 | 0 |
 | `0x24600` | unnamed | 101 | 35 | 2 | 0 |
 | `0x22278` | unnamed | 101 | 36 | 2 | 18 |
 | `0x115f8` | unnamed | 101 | 40 | 1 | 0 |
@@ -589,7 +589,7 @@ This table starts Phase W.
 ## Position
 ## Position
 
-Three hundred and fifty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and fifty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -797,5 +797,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `sound_effect_repeat` at `0x24cc8`, and the Phase W module
 `race_menu_handler` at `0x2a214`, and the Phase W module
 `camera_basis_patch` at `0x8a9e8`, and the Phase W module
-`mmp_file_load` at `0x4cae4`.
-The next unnamed function is `0x2f4ee`.
+`mmp_file_load` at `0x4cae4`, and the Phase W module
+`func_2f4ee` at `0x2f4ee`.
+The next unnamed function is `0x24600`.

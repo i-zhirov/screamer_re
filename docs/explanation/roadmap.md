@@ -283,9 +283,10 @@ current host.
   `sound_effect_repeat` at `0x24cc8`, and the Phase W module
   `race_menu_handler` at `0x2a214`, and the Phase W module
   `camera_basis_patch` at `0x8a9e8`, and the Phase W module
-  `mmp_file_load` at `0x4cae4`;
+  `mmp_file_load` at `0x4cae4`, and the Phase W module
+  `func_2f4ee` at `0x2f4ee`;
   thirty modules are verified, one is matching, and three hundred and
-  twenty-seven rebuilds hold the recorded difference; the `video_fill`,
+  twenty-eight rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

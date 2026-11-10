@@ -26045,3 +26045,56 @@ temporary `-od` recipe.
   mmp_file_load_` and `python3 tools/rebuild/run.py run --function 0x4cae4`.
 - Limit: the original has no symbol name for this function.  The module name and
   the empty path stay inferred.
+
+## The func_2f4ee module at 0x2f4ee
+
+- Observation: the body at `0x2f4ee` holds 40 instructions and 102 bytes up to
+  the `ret` at `0x2f553`.  The next function starts at `0x2f554`, so the store
+  record keeps the 102-byte extent and sets no separate function size.  The
+  identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f4ee --count 40` and
+  `tools/rebuild/functions/0x2f4ee.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x2f4ee`.  Ghidra reports no reference and no function at the
+  address, and the loop scan finds the same.  The sibling functions at
+  `0x2f326` and `0x2f470` show the layout: the record array at `+0x00`, the
+  count at `+0x04`, the limit at `+0x08`, and the status at `+0x0c`; each
+  0x1c-byte record holds the allocation result at `+0x0c`, the address cell at
+  `+0x10`, the requested size at `+0x14`, and the free flag at `+0x18`.
+  Evidence: the relocation scan, `tools/ghidra/FindReferences.java` on
+  `0x2f4ee`, and `tools/rebuild/resource_free.c`.
+- Observation: the function walks the 0x1c-byte records up to the count at
+  `+0x04`, releases the allocation result at `+0x0c` through the run-time
+  `free` at `0xd2008`, zeroes `count * 0x1c` bytes through `memset` at
+  `0xd1ec0`, and sets the count at `+0x04` to 0.  The record array, the limit,
+  and the status stay in place.
+  Evidence: the loop at `0x2f519` through `0x2f52c`, the calls at `0x2f527`
+  and `0x2f53c`, and the store at `0x2f544`.
+- Inference: the record layout and the sibling `resource_free` family support
+  the section The resource layer.  The original has no caller and no data
+  reference, so the record keeps the weak name `func_2f4ee`.
+  Evidence: `tools/rebuild/modules/func_2f4ee.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module needs
+  no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x2f4ee` through `0x2f4f6` and
+  `tools/rebuild/modules/func_2f4ee.json`.
+- Observation: the harness holds the resource record, four 0x1c-byte record
+  slots, and the `free` and `memset` stubs.  The four paths cover the count 3
+  with three allocation results, the count 0, the count 1, and the count 2
+  with a null and a set allocation result.  The output holds the markers `0`
+  through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_2f4ee_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_2f4ee`, and
+  `work/rebuild/func2f4.txt`.
+- Observation: the diff reports 9 of 40 instructions, 2 of 102 bytes, and 0 of
+  5 relocation slots equal.  The rebuilt body alone holds 61 bytes against the
+  102-byte original body, because V2 keeps the resource in `ecx`, folds the
+  loop increment, and reaches the array through one base load.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f4ee --count 40 --rebuilt work/rebuild/func2f4.exe
+  --rebuilt-map work/rebuild/func_2f4ee.map --rebuilt-symbol func_2f4ee_` and
+  `python3 tools/rebuild/run.py run --function 0x2f4ee`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.
