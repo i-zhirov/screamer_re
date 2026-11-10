@@ -26554,3 +26554,75 @@ temporary `-od` recipe.
   sla_view_update_` and `python3 tools/rebuild/run.py run --function 0x203c4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The cng_view_update module at 0x20360
+
+- Observation: the original body at `0x20360` holds 23 instructions and 98
+  bytes up to the `ret` at `0x203c1`.  Two padding bytes at `0x203c2` precede
+  the next function at `0x203c4`, so the store record keeps the 100-byte extent
+  and sets no separate function size.  The identity check uses 23 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x20360 --count 23` and
+  `tools/rebuild/functions/0x20360.json`.
+- Observation: the only direct caller is the race frame update at `0x1ff70`, at
+  the call site `0x1ffc8`.  The frame update calls the five view groups in order
+  and selects this group when bit `0x20` of the mode byte `DAT_0011d260` is
+  set.  The record takes the section `Program functions`.
+  Evidence: the call at `0x1ffc8`, the dispatch at `0x1ffc3` through `0x1ffd7`,
+  and the finding "The race_frame_update module at 0x1ff70".
+- Observation: the two gates require input flag `DAT_00118e1d` bit 0 and mode
+  byte `DAT_0011d260` bit `0x20`.  The function returns before any call when
+  either gate is clear.
+  Evidence: the tests at `0x20363` and `0x2036c` and the two jumps to
+  `0x203c0`.
+- Observation: the game mode `0x20` start at `0x13120` clears the started flag
+  of the opponent records, and the spline loader at `0x14fb8` builds the `CNG`
+  member only for the mode `0x20`.  The mode `0x20` is therefore the CNG mode.
+  Evidence: the finding "The game_mode_20_start module at 0x13120" and the
+  finding "The spline_table_load module at 0x14fb8".
+- Observation: the group calls the helper at `0x18b60` with the player object
+  `0xf91c`.  The helper adds `1.0` to the score float at `+0x790` when the
+  started opponent counter at `+0x7b8` rises above the stored count at
+  `+0x7bc`, and `opponent_start` at `0x124c0` increments the same counter.
+  Evidence: the block at `0x18b64` through `0x18ba1` and the finding "The
+  opponent_start module at 0x124c0".
+- Observation: the group then calls `player_car_view_update` at `0x16f34`, the
+  physics group at `0x15a80`, the effect group at `0x15bac`, the step group at
+  `0x15ab8`, the opponent group at `0x15b80`, `player_update` at `0x19ab0`,
+  and `player_car_link` at `0x15c1c`, all on the same player object.
+  Evidence: the calls at `0x2037a` through `0x203bb`.
+- Inference: the CNG mode gate, the opponent score helper, and the player
+  object support the name `cng_view_update`.  The name pairs with the sibling
+  `sla_view_update` at `0x203c4` and the `CNG` member suffix.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the gate at `0x2036c`, the helper at `0x18b60`, and the finding
+  "The spline_table_load module at 0x14fb8".
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it needs no FPU
+  stub, and the module uses no assembly.
+  Evidence: the prologue at `0x20360` and
+  `tools/rebuild/modules/cng_view_update.json`.
+- Observation: the harness holds the two gate bytes and the eight callee stubs.
+  Every player stub checks the fixed player pointer `0xf91c`.  The five paths
+  cover the clear input gate, the clear mode gate, the mode `0x20` path, the
+  extra mode bit, and the extra input bits.  The output holds the markers `0`
+  through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cng_view_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module cng_view_update`, and
+  `work/rebuild/cngview.txt`.
+- Observation: the harness builds the expected sequence with an if-chain,
+  because the V2 compiler places a `switch` jump table outside the code object
+  and the run reaches offset `1`.  The fault matches the finding "The
+  error_report jump table at run time".
+  Evidence: `tools/rebuild/cng_view_update_main.c` and the finding "The
+  error_report jump table at run time".
+- Observation: the rebuilt body holds 21 of 23 instructions equal, 58 of 98
+  bytes equal, and 2 of 9 relocation slots equal.  The identity check stays
+  open because V2 appends the `mov esp, ebp` frame restore before `pop ebp`, so
+  the last two instruction slots shift.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x20360 --count 23 --rebuilt work/rebuild/cngview.exe
+  --rebuilt-map work/rebuild/cng_view_update.map --rebuilt-symbol
+  cng_view_update_` and `python3 tools/rebuild/run.py run --function 0x20360`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

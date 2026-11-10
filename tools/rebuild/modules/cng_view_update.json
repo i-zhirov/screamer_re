@@ -1,0 +1,31 @@
+{
+  "exe": "cngview.exe",
+  "map": "cng_view_update.map",
+  "name": "cng_view_update",
+  "run": {
+    "command": "cngview.exe > cngview.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cngview.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cng_view_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cng_view_update_main.c"
+    }
+  ]
+}
