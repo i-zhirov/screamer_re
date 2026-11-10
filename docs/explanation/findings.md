@@ -24721,3 +24721,74 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x25d28`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The point_rotate_x module at 0x221fc
+
+- Observation: the original body at `0x221fc` holds 42 instructions and 124
+  bytes up to the `ret 4` at `0x22275`.  The next record starts at `0x22278`, so
+  the store record keeps the 124-byte extent and sets no separate function size.
+  The identity check uses 42 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x221fc --count 42` and
+  `tools/rebuild/functions/0x221fc.json`.
+- Observation: the two arguments arrive in the Watcom register order.  `eax`
+  holds the output point and `edx` holds the input point.  The float angle makes
+  the compiler pass the remaining argument on the stack, so the callee cleans it
+  with `ret 4`.
+  Evidence: the stores at `0x22202` and `0x22205`, the read of `[ebp + 8]` at
+  `0x22208`, and the `ret 4` at `0x22275`.
+- Observation: the point holds three integers at `+0x00`, `+0x04`, and `+0x08`.
+  The function copies the x value, computes the two products of the y and z
+  values with the cosine and the sine, and truncates the sum and the difference
+  into `+0x04` and `+0x08`.  The helper at 0x4d9f4 sets the truncate rounding
+  mode before each store.  The helper at 0x2218c turns the x and z pair, and the
+  float helper at 0x22278 turns the x and z pair with float fields, so the three
+  functions form the integer and float forms of the point rotation.
+  Evidence: the block at `0x2222a` through `0x2226f` and the bodies at
+  `0x2218c` and `0x22278`.
+- Observation: the original calls `cos` through the Watcom helper at 0x4da66
+  and `sin` through 0x4da72.
+  Evidence: the calls at `0x22211` and `0x22222`, and the `fcos` and `fsin` at
+  `0x4da26` and `0x4da30`.
+- Observation: the only direct caller is `player_car_wheel_effect_update` at
+  0x19980, with the call site at 0x19a01.  That function first turns the slot
+  pair by the negated heading plus the yaw through the helper at 0x2218c, and
+  then it turns the result by the pitch through this function into the slot
+  position at `+0x0c`, `+0x10`, and `+0x14`.  The caller runs in the vehicle
+  state chain.
+  Evidence: the calls at `0x199e7` and `0x19a01`, and the
+  `player_car_wheel_effect_update` record.
+- Inference: the copied x value, the rotated y and z pair, and the caller that
+  passes the pitch support the name `point_rotate_x`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.  The
+  function serves the wheel effect rotation of the vehicle state chain, so the
+  record takes the section The vehicle state chain.
+  Evidence: the data flow above and the caller record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original calls `cos`, `sin`, and the truncating helper at 0x4d9f4,
+  so the local `point_rotate_x_fpu.asm` supplies `cos`, `sin`, and the truncating
+  `__CHP` from the hardware.  The module uses no assembly implementation.
+  Evidence: `tools/rebuild/point_rotate_x.c`,
+  `tools/rebuild/point_rotate_x_fpu.asm`, and
+  `tools/rebuild/modules/point_rotate_x.json`.
+- Observation: the behavior check passes.  The harness holds one input point
+  and one output point.  It runs six paths: the angle 0 with the unchanged
+  input, the angle 0.5 on (100, 200, 300), the angle 1.0 on (-100, -200, 300),
+  the angle -0.75 on (10, -20, 30), the angle 1.5 on (0x1000, -0x800, 0x400),
+  and the distinct x value -999.  The output holds the markers `0` through `5`
+  and `D`.
+  Evidence: `tools/rebuild/point_rotate_x_main.c`,
+  `python3 tools/rebuild/harness.py run --module point_rotate_x`,
+  `work/rebuild/prx.txt`, and `python3 tools/rebuild/run.py run --function
+  0x221fc`.
+- Observation: the rebuilt body holds 42 instructions and 104 bytes in the
+  identity window.  The identity check stays open at 9 of 42 instructions, 9 of
+  104 bytes, and 0 of 0 relocation slots.  V2 saves `ebx`, `ecx`, and `esi`,
+  keeps the two pointers in registers, computes the two trig values in another
+  order, and uses the frame more tightly.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x221fc --count 42 --rebuilt work/rebuild/prx.exe
+  --rebuilt-map work/rebuild/point_rotate_x.map --rebuilt-symbol
+  point_rotate_x_` and `python3 tools/rebuild/run.py run --function 0x221fc`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
