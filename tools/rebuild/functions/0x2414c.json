@@ -1,9 +1,102 @@
 {
   "address": "0x2414c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2414c holds 39 instructions and 135 bytes up to the ret at 0x241d2; the next function starts at 0x241d4 after the one padding byte at 0x241d3, so the store record keeps the 136-byte extent and sets no separate function size; the identity check uses 39 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_update at 0x21058; during the finish delay it switches on the mode DAT_0011d260 and calls the overlay at 0x240c4 for mode 1, this function for mode 2, 0x241d4 for mode 4, 0x240a0 for mode 0x10, 0x24264 for mode 0x20, and 0x2420c for mode 0x40; the caller sits in the frame update path, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "when bit 8 of DAT_00118e1d is set, the function draws the text pointer DAT_00118fc0 at y 0x3e with the font 2; it then formats the car table strings DAT_00118f94[DAT_0010ffa4] and DAT_00118f94[0] with the format %s %s at object-3 offset 0xe56, draws the line at y 0x5a, and draws the zero clock text 00:00:00 at object-3 offset 0x1f98 at y 0x78; the overlay at 0x240c4 holds the same body and reads the copy of the format at offset 0xe50"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 2 selection, the car table, the format, and the clock text support the name race_finish_overlay_2; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2414c --count 39"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2414c"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_overlay_2 module at 0x2414c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_overlay_2.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_overlay_2_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_overlay_2.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte, the top text pointer, the player slot, the five-entry car table, the %s %s format, and the zero clock text; the four paths cover the clear control bit with the slot 2, the set control bit with the slot 0, the set control bit with the slot 3, and the clear control bit with the slot 1; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 39 decoded instructions and 135 bytes in the identity window; the identity check stays open at 25 of 39 instructions, 38 of 135 bytes, and 2 of 10 relocation slots, because V2 saves the frame pointer first, sizes the local buffer 0x10c, keeps the y and font values in other registers across the sprintf call, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2414c --count 39 --rebuilt work/rebuild/rfovl2.exe --rebuilt-map work/rebuild/race_finish_overlay_2.map --rebuilt-symbol race_finish_overlay_2_"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_overlay_2",
+  "name": "race_finish_overlay_2",
   "notes": [],
   "object_offset": "0x1414c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 38,
+        "bytes_total": 135,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 25,
+        "instructions_total": 39,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2414c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:6d2525e848bfa14df5c43fd940ebd9469252f042c529590f00e2f43fe915dd51",
+    "source_digest": "sha256:f6cc45aa9fca6100dce7951fb5e2054ada4f1fc55462f0ac84ca89ec407b9596",
+    "tool": "run.py"
+  },
+  "role": "Draws the mode 2 finish overlay: the two car table strings and the zero clock, with the mode text when the control bit is set.",
+  "section": "Program functions",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_overlay_2_"
 }
