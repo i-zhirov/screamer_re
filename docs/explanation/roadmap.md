@@ -289,9 +289,10 @@ current host.
   `point_rotate_y_float` at `0x22278`, and the Phase W module
   `object_list_release_all` at `0x115f8`, and the Phase W module
   `menu_line_value_next` at `0x298b4`, and the Phase W module
-  `sound_frame_prepare` at `0x8af08`;
+  `sound_frame_prepare` at `0x8af08`, and the Phase W module
+  `sound_queue_pop` at `0x24918`;
   thirty modules are verified, one is matching, and three hundred and
-  thirty-three rebuilds hold the recorded difference; the `video_fill`,
+  thirty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

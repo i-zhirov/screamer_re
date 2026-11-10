@@ -1,9 +1,111 @@
 {
   "address": "0x24918",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 36,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24918 holds 36 instructions and 98 bytes up to the ret at 0x24979; two padding bytes at 0x2497a precede the next function at 0x2497c, so the store record keeps the 100-byte extent and sets no separate function size; the identity check uses 36 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct call sites are 0x248e7 and 0x24906 in sound_queue_update at 0x24880; the update runs in the per-frame path of race_frame_update at 0x1ff70, and the neighbour record sound_queue_promote at 0x2497c holds the same queue; the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the status DAT_00119070 holds the playing sound or -1, and the sound effect queue starts at DAT_0019080; each entry holds the effect index at +0x00, the variant mode at +0x04, the delay at +0x08, and one more field at +0x0c; the first entry holds the terminator -1 at +0x00"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears the status to -1 and shifts every entry down by one slot until it copies the terminator; the shift copies only the three head fields, so the field at +0x0c stays with the slot; the shift removes the head entry of the queue"
+    },
+    {
+      "kind": "note",
+      "text": "the queue layout, the two pop sites, and the neighbour record sound_queue_promote support the name sound_queue_pop; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original holds the float load and store of the delay copy, and V2 copies the float as an integer; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the status and the eight-entry queue; the five paths cover the empty queue, one entry before the terminator, three entries, the pad field, and the exit marker; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 11 of 36 decoded instructions, 6 of 98 bytes, and 0 of 8 relocation slots equal; the identity check stays open because V2 keeps the loop pointer in a local, uses a compact prologue, and copies the three fields with integer moves; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24918 --count 36"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24918 --count 36 --rebuilt work/rebuild/sqpop.exe --rebuilt-map work/rebuild/sound_queue_pop.map --rebuilt-symbol sound_queue_pop_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_queue_pop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24918"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_queue_pop module at 0x24918"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_pop.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_pop_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_queue_pop.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_queue_pop",
+  "name": "sound_queue_pop",
   "notes": [],
   "object_offset": "0x14918",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 98,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 36,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24918",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:53df419badc79d44aa54733d52cd097fead1bb61ff306f3981f00c87b1d208a4",
+    "source_digest": "sha256:6631a0ff36f66020d859a6c523a7b6410583200f5112586ef55c1e0edf38f9b5",
+    "tool": "run.py"
+  },
+  "role": "Pops the head entry of the sound effect queue.",
+  "section": "Program functions",
   "size": 100,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_queue_pop_"
 }

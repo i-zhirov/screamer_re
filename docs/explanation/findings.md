@@ -26431,3 +26431,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name,
   the second path helper name `sub_8b0e8`, and the field names in the harness
   stay inferred.
+
+## The sound_queue_pop module at 0x24918
+
+- Observation: the original body at `0x24918` holds 36 instructions and 98
+  bytes up to the `ret` at `0x24979`.  Two padding bytes at `0x2497a` precede
+  the next function at `0x2497c`, so the store record keeps the 100-byte
+  extent and sets no separate function size.  The identity check uses 36
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24918 --count 36` and
+  `tools/rebuild/functions/0x24918.json`.
+- Observation: the two direct call sites are `0x248e7` and `0x24906` in
+  `sound_queue_update` at `0x24880`.  The update runs in the per-frame path of
+  `race_frame_update` at `0x1ff70`, and the neighbour record
+  `sound_queue_promote` at `0x2497c` holds the same queue.  The record takes
+  the section `Program functions`.
+  Evidence: `python3 tools/le.py calls STARTH.EXE 0x24880`, the call at
+  `0x20024`, and the finding "The sound_queue_update module at 0x24880".
+- Observation: the status `DAT_00119070` holds the playing sound or `-1`, and
+  the sound effect queue starts at `DAT_0019080`.  Each entry holds the effect
+  index at `+0x00`, the variant mode at `+0x04`, the delay at `+0x08`, and one
+  more field at `+0x0c`.  The first entry holds the terminator `-1` at
+  `+0x00`.
+  Evidence: the stores and loads at `0x2492a` through `0x24972`, the queue
+  layout in `tools/rebuild/sound_queue_promote.c`, and the finding "The
+  sound_queue_promote module at 0x2497c".
+- Observation: the function clears the status to `-1` and shifts every entry
+  down by one slot until it copies the terminator.  The shift copies only the
+  three head fields, so the field at `+0x0c` stays with the slot.  The shift
+  removes the head entry of the queue.
+  Evidence: the status store at `0x2492a`, the field copies at `0x2494d`
+  through `0x24969`, and the terminator test at `0x2496f`.
+- Observation: the queue layout, the two pop sites, and the neighbour record
+  `sound_queue_promote` support the name `sound_queue_pop`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/sound_queue_update.c` and
+  `tools/rebuild/sound_queue_promote.c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original holds the float load and store of the delay copy, and
+  V2 copies the float as an integer.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x24918`, the `fld` and `fstp` at `0x24963` and
+  `0x24969`, and `tools/rebuild/sound_queue_pop.c`.
+- Observation: the harness holds the status and the eight-entry queue.  The
+  five paths cover the empty queue, one entry before the terminator, three
+  entries, the pad field, and the exit marker.  The output holds the markers
+  `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_queue_pop_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_queue_pop`, and
+  `work/rebuild/sqpop.txt`.
+- Observation: the rebuilt body holds 11 of 36 decoded instructions, 6 of 98
+  bytes, and 0 of 8 relocation slots equal.  The identity check stays open
+  because V2 keeps the loop pointer in a local, uses a compact prologue, and
+  copies the three fields with integer moves.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24918 --count 36 --rebuilt work/rebuild/sqpop.exe
+  --rebuilt-map work/rebuild/sound_queue_pop.map --rebuilt-symbol
+  sound_queue_pop_` and `python3 tools/rebuild/run.py run --function 0x24918`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
