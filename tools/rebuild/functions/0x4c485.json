@@ -1,9 +1,115 @@
 {
   "address": "0x4c485",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c485 holds 32 instructions and 96 bytes up to the ret at 0x4c4e4; the next function starts at 0x4c4e5, so the store record keeps the 96-byte extent and sets no separate function size; the identity check uses 32 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers pass a stream record in eax, the member path in edx, the member name in ebx, and the destination buffer in ecx; the caller at 0x4cf3c builds the %s.COL palette name and loads it into the palette buffer, and the caller at 0x25aac loads a member into the engine buffer at DAT_000bdd20; both callers use the same register order as fopen, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function opens the member through fopen at 0x4c08d with the mode rb at object-3 offset 0x16bb; a failed open returns -1 and calls no other helper"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the member size bytes from stream + 0x70 into the destination buffer through stream_read at 0x4c4e5, closes the stream through stream_close at 0x4c38d, and returns 0; the function uses no resource layer and no out cell, so it loads a raw member into the caller buffer"
+    },
+    {
+      "kind": "note",
+      "text": "the %s.COL and engine member callers, the raw destination buffer, and the three stream helpers support the name member_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and spills the four register arguments, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines MEMBER_LOAD_HARNESS and the function builds the rb text in a local buffer; the default build keeps the literal of the original"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the stream record, the path and name arguments, the destination buffer, and the three helper stubs; the four paths cover the full member size 0x40, the failed open, the zero size, and the size 0x1234 from stream + 0x70; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 of 32 instructions equal, 2 of 92 bytes equal, and 0 of 4 relocation slots equal; the identity check stays open because V2 saves ebp first, keeps the stream in esi and the destination in edi, builds the rb text as an immediate word in the harness build, and shares one return path; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c485 --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c485 --count 32 --rebuilt work/rebuild/memload.exe --rebuilt-map work/rebuild/member_load.map --rebuilt-symbol member_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module member_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c485"
+    },
+    {
+      "kind": "finding",
+      "text": "The member_load module at 0x4c485"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/member_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/member_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/member_load.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "member_load",
+  "name": "member_load",
   "notes": [],
   "object_offset": "0x3c485",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 92,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c485",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:879e9796fd498e2e016ac632482a22661afceac78dca57684bfadd581e5cdd03",
+    "source_digest": "sha256:e979304344c22fb2a7622042e8bdc98c146ed199ef11f90e5aa4927f250787b2",
+    "tool": "run.py"
+  },
+  "role": "loads a member file into a caller-supplied buffer through the stream helpers and returns -1 on a failed open",
+  "section": "Resource loader",
   "size": 96,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "member_load_"
 }

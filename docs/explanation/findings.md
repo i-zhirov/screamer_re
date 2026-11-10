@@ -26710,3 +26710,64 @@ temporary `-od` recipe.
   0x14970`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The member_load module at 0x4c485
+
+- Observation: `member_load` at `0x4c485` holds 32 instructions and 96 bytes
+  up to the `ret` at `0x4c4e4`.  The next function starts at `0x4c4e5`, so the
+  store record keeps the 96-byte extent and sets no separate function size.
+  The identity check uses 32 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4c485 --count 32` and
+  `tools/rebuild/functions/0x4c485.json`.
+- Observation: the two direct callers pass a stream record in `eax`, the member
+  path in `edx`, the member name in `ebx`, and the destination buffer in `ecx`.
+  The caller at `0x4cf3c` builds the `%s.COL` palette name and loads it into
+  the palette buffer.  The caller at `0x25aac` loads a member into the engine
+  buffer `DAT_000bdd20`.
+  Evidence: the call sites `0x4cf73` and `0x25ad2`.
+- Observation: the function opens the member through `fopen` at `0x4c08d` with
+  the mode `rb` at object-3 offset `0x16bb`.  A failed open returns -1 and
+  calls no other helper.
+  Evidence: the block at `0x4c49c` through `0x4c4ba`.
+- Observation: the function reads the member size bytes from `stream + 0x70`
+  into the destination buffer through `stream_read` at `0x4c4e5`, closes the
+  stream through `stream_close` at `0x4c38d`, and returns 0.  The function uses
+  no resource layer and no out cell, so it loads a raw member into the caller
+  buffer.
+  Evidence: the block at `0x4c4bc` through `0x4c4d5`.
+- Inference: the `%s.COL` and engine member callers, the raw destination
+  buffer, and the three stream helpers support the name `member_load`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the two callers, the three helper calls, and the record.
+- Observation: the original has the EBP frame and spills the four register
+  arguments, so the module builds with `-of+`.  The function uses no
+  floating-point instruction, so it links no FPU stub, and the module uses no
+  assembly.
+  Evidence: the prologue at `0x4c485` and
+  `tools/rebuild/modules/member_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness build defines `MEMBER_LOAD_HARNESS` and the function
+  builds the `rb` text in a local buffer.  The default build keeps the literal
+  of the original.
+  Evidence: `tools/rebuild/member_load.c`.
+- Observation: the harness holds the stream record, the path and name
+  arguments, the destination buffer, and the three helper stubs.  The four
+  paths cover the full member size 0x40, the failed open, the zero size, and
+  the size 0x1234 from `stream + 0x70`.  The output holds the markers `0`
+  through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/member_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module member_load`, and
+  `work/rebuild/memload.txt`.
+- Observation: the rebuilt body holds 9 of 32 instructions equal, 2 of 92
+  bytes equal, and 0 of 4 relocation slots equal.  The identity check stays
+  open because V2 saves `ebp` first, keeps the stream in `esi` and the
+  destination in `edi`, builds the `rb` text as an immediate word in the
+  harness build, and shares one return path.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c485 --count 32 --rebuilt work/rebuild/memload.exe
+  --rebuilt-map work/rebuild/member_load.map --rebuilt-symbol member_load_`
+  and `python3 tools/rebuild/run.py run --function 0x4c485`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
