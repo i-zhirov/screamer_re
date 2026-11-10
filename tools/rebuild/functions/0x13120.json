@@ -1,9 +1,110 @@
 {
   "address": "0x13120",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x13120 holds 44 instructions and 133 bytes up to the ret at 0x131a4; the three pad bytes at 0x131a5 through 0x131a7 and the next function race_data_load at 0x131a8 give the 136-byte extent; the store record keeps that extent and sets no separate function size; the identity check uses 44 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the game mode dispatch in race_session_start at 0x128e0; it sends the mode 0x20 to this function through the call at 0x12a37 and passes the mode in eax; the caller takes the section The timing and filter layer, so this module takes the same section; the caller and the program map already hold the name game_mode_20_start with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the opponent records at DAT_0010d700; the count DAT_0010d6f8 sets the end of the walk and each record is 0x40 bytes; the function clears the started flag at record offset 0x3c, which opponent_start at 0x124c0 sets with the run flag +0x38"
+    },
+    {
+      "kind": "note",
+      "text": "the function clears DAT_001100d4, sets DAT_0000cf40 to 1, and clears DAT_001100a4; it then loads the player car through player_car_init at 0x136cc with the object pointer 0xf91c and the mode argument; a non-zero result returns at once; otherwise the function runs scene_setup at 0x15984 with the mode argument and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 0x20 dispatch, the opponent record array, and the player car and scene setup support the name game_mode_20_start; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the opponent count, the opponent records, the three state cells, and the two callee stubs; the nine paths cover the count 2, the count 0, the count 1 with the mode 0, the count 3 with the mode -1, the two car load failures, the count 0 with a failed car load, the mode 0x100, and the count 4; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 31 instructions and 93 bytes; the identity check stays open at 9 of 31 instructions, 7 of 93 bytes, and 0 of 0 relocation slots, because V2 uses a shorter body, saves the frame pointer first, keeps the mode in ecx, and walks the records with an index and a scaled compare instead of a pointer end; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x13120 --count 44"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x13120 --count 44 --rebuilt work/rebuild/gm20.exe --rebuilt-map work/rebuild/game_mode_20_start.map --rebuilt-symbol game_mode_20_start_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module game_mode_20_start"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x13120"
+    },
+    {
+      "kind": "finding",
+      "text": "The game_mode_20_start module at 0x13120"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/game_mode_20_start.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/game_mode_20_start_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/game_mode_20_start.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "game_mode_20_start",
+  "name": "game_mode_20_start",
   "notes": [],
   "object_offset": "0x3120",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 93,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 31,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x13120",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:75f484e6e5bc1c0f424a181d2145c10dc9bab4df1a8378c24ce38b7b5cf4fe31",
+    "source_digest": "sha256:6d1aeb5caaca3902b5d8c07165f14f2a7ce338af192e21614488eb5faad63195",
+    "tool": "run.py"
+  },
+  "role": "Starts the game mode 0x20 session: it clears the started flag of every opponent record, clears the state cells, loads the player car, and runs the scene setup.",
+  "section": "The timing and filter layer",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "game_mode_20_start_"
 }

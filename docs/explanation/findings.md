@@ -24343,3 +24343,60 @@ temporary `-od` recipe.
   direction_angle_` and `python3 tools/rebuild/run.py run --function 0x226bc`.
 - Limit: the original has no symbol name for this function.  The module name
   and the section stay inferred.
+
+## The game_mode_20_start module at 0x13120
+
+- Observation: the original body at `0x13120` holds 44 instructions and 133
+  bytes up to the `ret` at `0x131a4`.  The three pad bytes at `0x131a5` to
+  `0x131a7` and the next function `race_data_load` at `0x131a8` give the
+  136-byte extent.  The store record keeps that extent and sets no separate
+  function size.  The identity check uses 44 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x13120 --count 44` and
+  `tools/rebuild/functions/0x13120.json`.
+- Observation: the only direct caller at `0x12a37` is the game mode dispatch in
+  `race_session_start` at `0x128e0`.  It sends the mode 0x20 to this function
+  and passes the mode in `eax`.  The caller takes the section The timing and
+  filter layer, so the record takes the same section.
+  Evidence: the block at `0x12a34` through `0x12a3f`, the dispatch table at
+  `0x12996` through `0x12a37`, and the record of `0x128e0`.
+- Observation: the function walks the opponent records at `DAT_0010d700`.  The
+  count `DAT_0010d6f8` sets the end of the walk, and each record is 0x40 bytes.
+  The function clears the started flag at record offset 0x3c.  The nearby
+  record start at `0x124c0` sets that flag with the run flag at +0x38, so the
+  records are the opponent cars.
+  Evidence: the loop at `0x1312c` through `0x1315e` and the block at `0x12641`
+  through `0x126d4`.
+- Observation: the function clears `DAT_001100d4`, sets `DAT_0000cf40` to 1, and
+  clears `DAT_001100a4`.  It then loads the player car through
+  `player_car_init` at `0x136cc` with the object pointer `0xf91c` and the mode
+  argument.  A non-zero result returns at once.  Otherwise the function runs
+  `scene_setup` at `0x15984` with the mode argument and returns 0.
+  Evidence: the blocks at `0x13160` through `0x1319c`.
+- Inference: the mode 0x20 dispatch, the opponent record array, and the player
+  car and scene setup support the name `game_mode_20_start`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the caller and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and no assembly.
+  Evidence: `tools/rebuild/modules/game_mode_20_start.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The nine paths cover the count 2, the count 0, the count
+  1 with the mode 0, the count 3 with the mode -1, the two car load failures,
+  the count 0 with a failed car load, the mode 0x100, and the count 4.  The
+  start path also checks that the other record bytes keep their value.
+  Evidence: `python3 tools/rebuild/harness.py run --module game_mode_20_start`
+  and `work/rebuild/gm20.txt`.
+- Observation: the rebuilt body holds 31 instructions and 93 bytes.  The
+  identity check stays open at 9 of 31 instructions, 7 of 93 bytes, and 0 of 0
+  relocation slots, because V2 uses a shorter body, saves the frame pointer
+  first, keeps the mode in `ecx`, and walks the records with an index and a
+  scaled compare instead of a pointer end.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x13120 --count 44 --rebuilt work/rebuild/gm20.exe
+  --rebuilt-map work/rebuild/game_mode_20_start.map --rebuilt-symbol
+  game_mode_20_start_` and `python3 tools/rebuild/run.py run --function
+  0x13120`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the section stay inferred.
