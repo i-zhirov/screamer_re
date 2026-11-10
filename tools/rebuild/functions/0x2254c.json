@@ -1,9 +1,110 @@
 {
   "address": "0x2254c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original head at 0x2254c holds 34 instructions and 95 bytes up to the ret 0x10 at 0x225a8; the body continues through the blocks at 0x225ab and 0x225f1 to the final ret 0x10 at 0x22660, so the next function starts at 0x22664 after the three padding bytes at 0x22661; the store record keeps the 280-byte extent and sets no separate function size; the identity check uses 34 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function has no direct caller and no reference in the object-1 code or the relocation table; the nearest named functions point_rotation_flags at 0x224dc and direction_angle at 0x226bc belong to The vehicle state chain, so the record takes the same section; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the four float arguments arrive on the stack at [ebp+8], [ebp+0xc], [ebp+0x10], and [ebp+0x14], so the callee cleans them with ret 0x10; a positive fourth argument reduces the test angle from above by 2 pi while it is larger than 2 pi, and a zero or negative fourth argument raises the test angle by 2 pi while it is below zero; the function then returns 1 when the test angle lies strictly inside the forward arc from the first boundary to the second boundary for a positive direction, or from the second boundary to the first boundary otherwise; an arc with equal boundaries contains only that angle"
+    },
+    {
+      "kind": "note",
+      "text": "the float 2 pi and -2 pi sit at object-3 offsets 0xd84 and 0xd88; they arrive through globals, because the minimal image does not load the constant segment; the two comparisons use the constants directly and call no helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two turn constants as globals and runs ten paths: the positive direction inside, before, inside the wrapped arc, and in the wrapped gap, the two-turn reduction, the negative direction outside and inside the forward arc, the wrapped reverse arc, the upward turn, and the zero-length arc; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt head holds 32 of 34 instructions equal, 62 of 95 bytes equal, and 2 of 2 relocation slots equal; the identity check stays open because V2 places the shared return-zero block within the short branch range, so the two return-zero jumps are 2 bytes instead of 6, and V2 jumps to a shared epilogue in place of the inline pop ebp and ret 0x10; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker; the module uses no assembly implementation"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2254c --count 34"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2254c --count 34 --rebuilt work/rebuild/arc.exe --rebuilt-map work/rebuild/angle_in_arc.map --rebuilt-symbol angle_in_arc_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module angle_in_arc"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module angle_in_arc"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2254c"
+    },
+    {
+      "kind": "finding",
+      "text": "The angle_in_arc module at 0x2254c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/angle_in_arc.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/angle_in_arc_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/angle_in_arc.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "angle_in_arc",
+  "name": "angle_in_arc",
   "notes": [],
   "object_offset": "0x1254c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 62,
+        "bytes_total": 95,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 32,
+        "instructions_total": 34,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2254c",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:20c2822427d2c8142e15b2b80b796e54e7c4ccb5d231e55fe74b83c7d48b44ab",
+    "source_digest": "sha256:553c6061c1ea62dd2bd135a915982b10e8947fc27c6d067468c7817780529909",
+    "tool": "run.py"
+  },
+  "role": "Returns 1 when an angle lies inside the forward arc between two boundary angles, with the direction sign selecting the arc order.",
+  "section": "The vehicle state chain",
   "size": 280,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "angle_in_arc_"
 }

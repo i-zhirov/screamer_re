@@ -26847,3 +26847,66 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x2369c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The angle_in_arc module at 0x2254c
+
+- Observation: the original head at `0x2254c` holds 34 instructions and 95
+  bytes up to the `ret 0x10` at `0x225a8`.  The body continues through the
+  blocks at `0x225ab` and `0x225f1` to the final `ret 0x10` at `0x22660`, so
+  the next function starts at `0x22664` after the three padding bytes at
+  `0x22661`.  The store record keeps the 280-byte extent and sets no separate
+  function size.  The identity check uses 34 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2254c --count 34` and
+  `tools/rebuild/functions/0x2254c.json`.
+- Observation: the function has no direct caller.  The object-1 code holds no
+  `call` to `0x2254c`, and the relocation table holds no reference to object 1
+  offset `0x1254c`.  The nearest named functions `point_rotation_flags` at
+  `0x224dc` and `direction_angle` at `0x226bc` belong to The vehicle state
+  chain, so the record takes the same section.
+  Evidence: the `call` scan of object 1, the relocation table, and the records
+  of `0x224dc` and `0x226bc`.
+- Observation: the four float arguments arrive on the stack at `[ebp+8]`,
+  `[ebp+0xc]`, `[ebp+0x10]`, and `[ebp+0x14]`, so the callee cleans them with
+  `ret 0x10`.  A positive fourth argument reduces the test angle from above by
+  2 pi while it is larger than 2 pi.  A zero or negative fourth argument raises
+  the test angle by 2 pi while it is below zero.  The function then returns 1
+  when the test angle lies strictly inside the forward arc from the first
+  boundary to the second boundary for a positive direction, or from the second
+  boundary to the first boundary otherwise.  An arc with equal boundaries
+  contains only that angle.
+  Evidence: the blocks at `0x2254c` through `0x22660`.
+- Observation: the float 2 pi and -2 pi sit at object-3 offsets `0xd84` and
+  `0xd88`.  They arrive through globals, because the minimal image does not
+  load the constant segment.  The comparisons call no helper, so the shared
+  `fpu_stub.asm` supplies the FPU run-time symbols and the float-used marker.
+  Evidence: `tools/rebuild/angle_in_arc.c` and
+  `tools/rebuild/modules/angle_in_arc.json`.
+- Observation: the function has no symbol, so the two boundary angles, the test
+  angle, and the direction sign support the name `angle_in_arc`.  The record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow and the record of `0x2254c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The module uses no assembly implementation.
+  Evidence: the prologue at `0x2254c` and
+  `tools/rebuild/modules/angle_in_arc.json`.
+- Observation: the harness holds the two turn constants as globals and runs ten
+  paths: the positive direction inside, before, inside the wrapped arc, and in
+  the wrapped gap, the two-turn reduction, the negative direction outside and
+  inside the forward arc, the wrapped reverse arc, the upward turn, and the
+  zero-length arc.  The output holds the markers `0` through `9` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/angle_in_arc_main.c`,
+  `python3 tools/rebuild/harness.py run --module angle_in_arc`, and
+  `work/rebuild/arc.txt`.
+- Observation: the rebuilt head holds 32 of 34 instructions equal, 62 of 95
+  bytes equal, and 2 of 2 relocation slots equal.  The identity check stays
+  open because V2 places the shared return-zero block within the short branch
+  range, so the two return-zero jumps are 2 bytes instead of 6.  V2 also jumps
+  to a shared epilogue in place of the inline `pop ebp` and `ret 0x10`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2254c --count 34 --rebuilt work/rebuild/arc.exe
+  --rebuilt-map work/rebuild/angle_in_arc.map --rebuilt-symbol angle_in_arc_`
+  and `python3 tools/rebuild/run.py run --function 0x2254c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
