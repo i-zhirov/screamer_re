@@ -25250,3 +25250,65 @@ temporary `-od` recipe.
   bios_tick_reset_` and `python3 tools/rebuild/run.py run --function 0x1f990`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The mouse_release_wait module at 0x1f8dc
+
+- Observation: the original body at `0x1f8dc` holds 37 instructions and 112
+  bytes up to the `ret` at `0x1f94b`.  The next function starts at `0x1f94c`,
+  so the store record keeps the 112-byte extent and sets no separate function
+  size.  The identity check uses 37 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f8dc --count 37` and
+  `tools/rebuild/functions/0x1f8dc.json`.
+- Observation: the two direct callers are `race_frame_update` at `0x1ff70` and
+  `race_end` at `0x279a4`.  The frame update calls this function at `0x1ffa6`
+  when bit 2 of the input byte `DAT_00118e1d` is set, and then clears
+  `DAT_00118e6c`.  The race end calls this function at `0x279b3` after the
+  mouse write at `0x1f8b4`.  The callers sit in two sections, so the record
+  takes the section Program functions.
+  Evidence: the sweep of every candidate function start and every call site,
+  the branch at `0x1ff9b`, and the call at `0x279b3`.
+- Observation: the setup word `DAT_00008058` gates the drain.  When the word is
+  zero, the function skips the drain.  Otherwise it counts the active mouse
+  button slots through `0xca915`.  While a slot is active it tests the slot
+  through `0xca815` and releases each pressed slot through `0xca3c9`.  The
+  index advances on each turn and the phase counter `DAT_000007f9` is saved at
+  the end of each turn.
+  Evidence: the test at `0x1f8e4`, the loop at `0x1f8f2`, the calls at
+  `0x1f8f7`, `0x1f908`, and `0x1f919`, and the save at `0x1f929`.
+- Observation: the function then waits through the phase delta at `0x1fa04`.
+  The wait ends when the low 16 bits of the delta between the saved phase and
+  the current phase reach `0x1e`.
+  Evidence: the loop at `0x1f92e` through `0x1f944`.
+- Inference: the input drain and the phase wait support the name
+  `mouse_release_wait`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the drain, the wait, and the two callers.
+- Observation: the original has the EBP frame and one local, so the module
+  builds with `-of+`.  The function uses no floating-point instruction, so the
+  module needs no FPU stub, and it uses no assembly body.
+  Evidence: `tools/rebuild/mouse_release_wait.c` and the module recipe.
+- Observation: the harness holds the setup word, the device handle, and the
+  phase counter.  The three mouse stubs record the call count, the handle, and
+  the slot index.  The phase stub records the two arguments and returns the
+  scripted delta.  The five paths cover the zero setup word, one pressed slot,
+  a free first slot and a pressed second slot, the slot test 10 with three wait
+  steps, and three active counts.  Every path checks the call counts, the last
+  slot index, the saved phase, and the stub handles.  The output holds the
+  markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/mouse_release_wait_main.c`,
+  `python3 tools/rebuild/harness.py run --module mouse_release_wait`,
+  `work/rebuild/mrw_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f8dc`.
+- Observation: the rebuilt body holds 11 of 37 instructions, 2 of 111 bytes,
+  and 1 of 12 relocation slots equal.  V2 keeps the index in `ecx` and the
+  saved phase in `ebx` instead of the original stack locals, orders the
+  prologue as `push ebp` then `push ebx`, `push ecx`, `push edx`, and reaches
+  the globals and the stubs at other offsets.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f8dc --count 37 --rebuilt work/rebuild/mrw.exe
+  --rebuilt-map work/rebuild/mouse_release_wait.map --rebuilt-symbol
+  mouse_release_wait_` and `python3 tools/rebuild/run.py run --function
+  0x1f8dc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the section stay inferred.
