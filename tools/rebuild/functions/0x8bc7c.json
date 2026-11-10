@@ -1,9 +1,115 @@
 {
   "address": "0x8bc7c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 33,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8bc7c holds 33 instructions and 116 bytes up to the ret at 0x8bcef; the next recorded function starts at 0x8bd54, so the store record keeps the 216-byte extent and sets no separate function size; the identity check uses 33 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is screen_mode_set at 0x4c850 with the call site at 0x4c8e6; the caller writes the screen mode record and then calls this function, and it already uses the callee name video_selector_setup; the caller sits in the section Subsystem initialisation, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the original saves all general registers and the ds, es, fs, and gs segment registers, sets ds from the selector at cs:[0x214d4], reads the global descriptor table register with sgdt into 0x7bcf8, and moves the table base from 0x7bcfa to 0x21480"
+    },
+    {
+      "kind": "note",
+      "text": "the function loads the fs selector from 0x21490, rounds the same dword down to a multiple of eight, adds the rounded value and the constant 2 to the table base, and stores the descriptor address at 0x7bcf0"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls six selector patch blocks at 0xdbca0, 0xd68a0, 0xdcbc0, 0xd1d24, 0xda7b8, and 0xccde0; each block reads the word at 0x7a7c4 and patches the selector immediates of its code region at four sites"
+    },
+    {
+      "kind": "note",
+      "text": "the tail copies the dword at 0x214ec to 0x73664 and 0x7abd3; the caller, the descriptor read, and the selector patches support the name video_selector_setup; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the flat target keeps one data segment, so the rebuild omits the segment register loads and reads the table base from the model global DAT_0007bcfa; the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the table base, the fs selector, the three output globals, the source dword, the copy target, and the six patch stubs; the three paths cover the base store, the rounded selector 0x1f, the zero selector, and the two copies; every path checks the call count, the call order, the base store, the descriptor, and the copies; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 4 of 33 instructions, 8 of 116 bytes, and 2 of 17 relocation slots equal; the rebuilt prologue saves edx instead of all registers and the segment registers, the rebuild omits the sgdt and the segment loads, and the minimal image places the globals and the call stubs at other offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The video_selector_setup module at 0x8bc7c"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8bc7c --count 33"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8bc7c --count 33 --rebuilt work/rebuild/vsel.exe --rebuilt-map work/rebuild/video_selector_setup.map --rebuilt-symbol video_selector_setup_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module video_selector_setup"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8bc7c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/video_selector_setup.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/video_selector_setup_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/video_selector_setup.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "video_selector_setup",
+  "name": "video_selector_setup",
   "notes": [],
   "object_offset": "0x7bc7c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 116,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 33,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8bc7c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:8986f837430565ae5477b46c44e9cf0abf067c03aafc4fa527678c3ca7ea0858",
+    "source_digest": "sha256:5b965ba7055eb853ffb5ae8c3bffc64f6cad0726d36afcd30b70931a55055bd1",
+    "tool": "run.py"
+  },
+  "role": "Sets up the data selectors from the global descriptor table and patches the selector immediates before a screen mode change.",
+  "section": "Subsystem initialisation",
   "size": 216,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "video_selector_setup_"
 }

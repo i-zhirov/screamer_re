@@ -25124,3 +25124,70 @@ temporary `-od` recipe.
   race_data_release_` and `python3 tools/rebuild/run.py run --function 0x156a8`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The video_selector_setup module at 0x8bc7c
+
+- Observation: the original body at `0x8bc7c` holds 33 instructions and 116
+  bytes up to the `ret` at `0x8bcef`.  The next recorded function starts at
+  `0x8bd54`, so the store record keeps the 216-byte extent and sets no separate
+  function size.  The identity check uses 33 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8bc7c --count 33` and
+  `tools/rebuild/functions/0x8bc7c.json`.
+- Observation: the only direct caller is `screen_mode_set` at `0x4c850` with the
+  call site at `0x4c8e6`.  It writes the screen mode record and then calls this
+  function.  The caller sits in the section `Subsystem initialisation`, so the
+  record takes that section.  The caller already uses the name
+  `video_selector_setup` for the callee.
+  Evidence: the call site and the `screen_mode_set` record.
+- Observation: the original saves all general registers and the `ds`, `es`,
+  `fs`, and `gs` segment registers.  It sets `ds` from the selector at
+  `cs:[0x214d4]` and reads the global descriptor table register with `sgdt`
+  into `0x7bcf8`.
+  Evidence: the prologue at `0x8bc7c` through `0x8bc8b`.
+- Observation: the function moves the table base from `0x7bcfa` to `0x21480`.
+  It loads the `fs` selector from `0x21490` and rounds the same dword down to a
+  multiple of eight.  It adds the rounded value and the constant 2 to the base
+  and stores the descriptor address at `0x7bcf0`.
+  Evidence: the body at `0x8bc92` through `0x8bcb5`.
+- Observation: the function calls six selector patch blocks at `0xdbca0`,
+  `0xd68a0`, `0xdcbc0`, `0xd1d24`, `0xda7b8`, and `0xccde0`.  Each block reads
+  the word at `0x7a7c4` and patches the selector immediates of its code region
+  at four sites.
+  Evidence: the calls from `0x8bcba` to `0x8bcd3` and the bodies of the six
+  blocks.
+- Observation: the tail copies the dword at `0x214ec` to `0x73664` and
+  `0x7abd3`.
+  Evidence: the stores at `0x8bcd8` through `0x8bce2`.
+- Inference: the caller, the descriptor read, and the selector patches support
+  the name `video_selector_setup`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the `screen_mode_set` record.
+- Observation: the flat target keeps one data segment, so the rebuild omits the
+  segment register loads and reads the table base from the model global
+  `DAT_0007bcfa`.  The original has no EBP frame and uses no floating-point
+  instruction, so the module builds without `-of+` and links no FPU stub.
+  Evidence: `tools/rebuild/video_selector_setup.c` and
+  `tools/rebuild/modules/video_selector_setup.json`.
+- Observation: the behavior check passes.  The harness holds the table base, the
+  `fs` selector, the three output globals, the source dword, the copy target,
+  and the six patch stubs.  It runs three paths: the base store, the rounded
+  selector `0x1f`, the zero selector, and the two copies.  Every path checks the
+  call count, the call order, the base store, the descriptor, and the copies.
+  The output holds the markers `0` through `2` and `D`.
+  Evidence: `tools/rebuild/video_selector_setup_main.c`,
+  `python3 tools/rebuild/harness.py run --module video_selector_setup`,
+  `work/rebuild/vsel.txt`, and `python3 tools/rebuild/run.py run --function
+  0x8bc7c`.
+- Observation: the rebuilt body holds 4 of 33 instructions, 8 of 116 bytes, and
+  2 of 17 relocation slots equal.  The rebuilt prologue saves `edx` instead of
+  all registers and the segment registers.  The rebuild omits the `sgdt` and the
+  segment loads.  The minimal image places the globals and the call stubs at
+  other offsets.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8bc7c --count 33 --rebuilt work/rebuild/vsel.exe
+  --rebuilt-map work/rebuild/video_selector_setup.map --rebuilt-symbol
+  video_selector_setup_` and `python3 tools/rebuild/run.py run --function
+  0x8bc7c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

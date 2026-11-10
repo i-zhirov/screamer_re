@@ -269,8 +269,9 @@ current host.
   `acos_table_build` at `0x4d260`, and the Phase V module
   `point_hit_probe` at `0x1c0ac`, and the Phase V module
   `race_finish_ghost_update` at `0x23f50`, and the Phase V module
-  `race_data_release` at `0x156a8`;
-  thirty modules are verified, one is matching, and three hundred and thirteen
+  `race_data_release` at `0x156a8`, and the Phase V module
+  `video_selector_setup` at `0x8bc7c`;
+  thirty modules are verified, one is matching, and three hundred and fourteen
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
