@@ -26771,3 +26771,79 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x4c485`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The race_gauges module at 0x2369c
+
+- Observation: the dispatch head at `0x2369c` holds 32 instructions and 96 bytes
+  up to the default `ret` at `0x236fb`.  The next record starts at `0x2392c`, so
+  the store record keeps the 656-byte extent and sets no separate function size.
+  The identity check uses 32 instructions.  The two case blocks after the head
+  hold the rest of the body.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2369c --count 32` and
+  `tools/rebuild/functions/0x2369c.json`.
+- Observation: the only direct caller is `race_hud_draw` at `0x234c5`, which
+  calls the function as the gauge panel after the five view groups.
+  `race_hud_draw` belongs to the Program functions section, so the record takes
+  the same section.
+  Evidence: the call site `0x234c5` and the record of `0x23420`.
+- Observation: the function sets the four draw globals at object-3 offsets
+  `0x56c`, `0x570`, `0x574`, and `0x578` to 0, 0x280, 0, and 0x190 through
+  `edx`, `ebx`, and `esi`.  It then blits the `implet_` resource at `0x18f18`
+  into the video buffer at `0x21528` through the span copier at `0x102b0`.  The
+  copier copies a positive span and moves the destination on a negative span.
+  Evidence: the block at `0x236aa` through `0x236d9`.
+- Observation: mode 1 blits the COCK image at `0x18f0c` and sets the byte
+  `0x55b` to 0xff.  It filters the angle `0x100b8` from the phase `0xfe28` and
+  the divisor `0xfd9c` with the scale 4.084070563316345 through the one-pole
+  filter at `0x22b80` at the index 0x5a, and it draws the marker at `0x18f24`
+  with the radius `0x18f1c` and the bias 2.  It filters the angle `0x100bc`
+  from the speed `0x100c4` and the divisor `0xfda0` with the scale
+  3.612831652164459, clamps the result to that scale, and draws the marker at
+  `0x18f30`.  It then stores the table pair `0x18f3c` and the frame base
+  `0x18f20` into `0x1cb18`, `0x1cb1c`, and `0x1cb20` at the index `0x100c8`,
+  and it draws the active objects through `0x25af0`.
+  Evidence: the block at `0x236fc` through `0x23813`.
+- Observation: mode 2 blits the cdfront image at `0x18f10` and sets the byte
+  `0x55b` to 0x75.  It formats the counter from the phase `0xfe28` and the tick
+  0.017 with the format at `0xe02`, and it draws the text at 0x21e, 0x176 with
+  the font 2 and the color 7.  It formats the index `0x100c8` with the format at
+  `0xe08`, and it draws the text at 0x260, 0x176 with the font 2 and the color
+  1.  It then filters the angle `0x100bc` from the speed `0x100c4` with the
+  float pi at `0xe24`, clamps the result to the double pi at `0xe28`, and draws
+  the marker at the local point 0x10f, 0xa8 with the radius 0x1e and the bias 2.
+  Evidence: the block at `0x2381c` through `0x2392b`.
+- Observation: the caller name `race_gauges`, the two gauge markers, and the two
+  cockpit blits support the name `race_gauges`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the caller, the two marker calls, the two blits, and the record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The integer conversion calls the truncate helper at `0x4d9f4`, so
+  the module links a truncating `__CHP` stub.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x2369c`, the call at `0x23838`, and
+  `tools/rebuild/modules/race_gauges.json`.
+- Observation: the constants 4.084070563316345, 3.612831652164459, 0.017, the
+  float pi, and the double pi arrive through globals, because the minimal image
+  does not load the constant segment.
+  Evidence: `tools/rebuild/race_gauges.c` and
+  `tools/rebuild/race_gauges_main.c`.
+- Observation: the harness holds the two cockpit pointers, the video buffer, the
+  two gauge points, the gauge table, the angle cells, the mode, the speed, the
+  index, and the phase.  It stubs the blit, the filter, the marker, the object
+  list, the sprintf, and the text draw.  The six paths cover mode 0, mode 1, the
+  side clamp, mode 2, the pi clamp, and the negative counter truncation.  The
+  output holds the markers `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/race_gauges_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_gauges`, and
+  `work/rebuild/racegau.txt`.
+- Observation: the rebuilt head holds 12 of 32 instructions equal, 10 of 96
+  bytes equal, and 0 of 16 relocation slots equal.  The identity check stays
+  open because V2 saves `ebp` first, stores the draw globals as immediates, and
+  places the mode test after the first blit.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2369c --count 32 --rebuilt work/rebuild/racegau.exe
+  --rebuilt-map work/rebuild/race_gauges.map --rebuilt-symbol race_gauges_`
+  and `python3 tools/rebuild/run.py run --function 0x2369c`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.

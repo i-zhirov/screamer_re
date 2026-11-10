@@ -580,7 +580,7 @@ reproduce the original bytes.
 | `0x20360` | `cng_view_update` (done) | 98 | 23 | 8 | 0 |
 | `0x14970` | `traffic_record_init` (done) | 98 | 37 | 1 | 0 |
 | `0x4c485` | `member_load` (done) | 96 | 32 | 3 | 0 |
-| `0x2369c` | unnamed | 96 | 32 | 1 | 0 |
+| `0x2369c` | `race_gauges` (done) | 96 | 32 | 1 | 0 |
 | `0x2254c` | unnamed | 95 | 34 | 0 | 18 |
 | `0x83500` | unnamed | 93 | 39 | 0 | 0 |
 
@@ -588,7 +588,7 @@ This table starts Phase W.
 
 ## Position
 
-Three hundred and sixty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and sixty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -807,5 +807,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `sla_view_update` at `0x203c4`, and the Phase W module
 `cng_view_update` at `0x20360`, and the Phase W module
 `traffic_record_init` at `0x14970`, and the Phase W module
-`member_load` at `0x4c485`.
-The next unnamed function is `0x2369c`.
+`member_load` at `0x4c485`, and the Phase W module
+`race_gauges` at `0x2369c`.
+The next unnamed function is `0x2254c`.

@@ -294,9 +294,10 @@ current host.
   `sla_view_update` at `0x203c4`, and the Phase W module
   `cng_view_update` at `0x20360`, and the Phase W module
   `traffic_record_init` at `0x14970`, and the Phase W module
-  `member_load` at `0x4c485`;
+  `member_load` at `0x4c485`, and the Phase W module
+  `race_gauges` at `0x2369c`;
   thirty modules are verified, one is matching, and three hundred and
-  thirty-eight rebuilds hold the recorded difference; the `video_fill`,
+  thirty-nine rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

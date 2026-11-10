@@ -1,9 +1,127 @@
 {
   "address": "0x2369c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the dispatch head at 0x2369c holds 32 instructions and 96 bytes up to the default ret at 0x236fb; the next record starts at 0x2392c, so the store record keeps the 656-byte extent and sets no separate function size; the identity check uses 32 instructions; the two case blocks after the head hold the rest of the body"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_hud_draw at 0x234c5, which calls the function as the gauge panel after the five view groups; race_hud_draw belongs to the Program functions section, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function sets the four draw globals at object-3 offsets 0x56c, 0x570, 0x574, and 0x578 to 0, 0x280, 0, and 0x190 through edx, ebx, and esi, and blits the implet_ resource at 0x18f18 into the video buffer at 0x21528 through the span copier at 0x102b0; the copier copies a positive span and moves the destination on a negative span"
+    },
+    {
+      "kind": "note",
+      "text": "mode 1 blits the COCK image at 0x18f0c, sets the byte 0x55b to 0xff, filters the angle 0x100b8 from the phase 0xfe28 and the divisor 0xfd9c with the scale 4.084070563316345 through the one-pole filter at 0x22b80 at the index 0x5a, draws the marker at 0x18f24 with the radius 0x18f1c and the bias 2, filters the angle 0x100bc from the speed 0x100c4 and the divisor 0xfda0 with the scale 3.612831652164459 and clamps it to that scale, draws the marker at 0x18f30, stores the table pair 0x18f3c and the frame base 0x18f20 into 0x1cb18, 0x1cb1c, and 0x1cb20 at the index 0x100c8, and draws the active objects through 0x25af0"
+    },
+    {
+      "kind": "note",
+      "text": "mode 2 blits the cdfront image at 0x18f10, sets the byte 0x55b to 0x75, formats the counter from the phase 0xfe28 and the tick 0.017 with the format at 0xe02, draws it at 0x21e, 0x176 with the font 2 and the color 7, formats the index 0x100c8 with the format at 0xe08, draws it at 0x260, 0x176 with the font 2 and the color 1, filters the angle 0x100bc from the speed 0x100c4 with the float pi at 0xe24 and clamps it to the double pi at 0xe28, and draws the marker at the local point 0x10f, 0xa8 with the radius 0x1e and the bias 2"
+    },
+    {
+      "kind": "note",
+      "text": "the caller name race_gauges, the two gauge markers, and the two cockpit blits support the name race_gauges; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the integer conversion calls the truncate helper at 0x4d9f4, so the module links a truncating __CHP stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the constants 4.084070563316345, 3.612831652164459, 0.017, the float pi, and the double pi arrive through globals, because the minimal image does not load the constant segment"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two cockpit pointers, the video buffer, the two gauge points, the gauge table, the angle cells, the mode, the speed, the index, and the phase, and it stubs the blit, the filter, the marker, the object list, the sprintf, and the text draw; the six paths cover mode 0, mode 1, the side clamp, mode 2, the pi clamp, and the negative counter truncation"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt head holds 12 of 32 instructions equal, 10 of 96 bytes equal, and 0 of 16 relocation slots equal; the identity check stays open because V2 saves ebp first, stores the draw globals as immediates, and places the mode test after the first blit; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2369c --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2369c --count 32 --rebuilt work/rebuild/racegau.exe --rebuilt-map work/rebuild/race_gauges.map --rebuilt-symbol race_gauges_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module race_gauges"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_gauges"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2369c"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_gauges module at 0x2369c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_gauges.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_gauges_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_gauges_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_gauges.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_gauges",
+  "name": "race_gauges",
   "notes": [],
   "object_offset": "0x1369c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 96,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2369c",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:e927c7f3af281e3a4cd0dae9398ebc20e4a797003be61ec3fdd0ec05f2b69544",
+    "source_digest": "sha256:10b2c65193dd7c7422eb51136e6a3d648d16e893eeb2097fd1619bc65bf558f4",
+    "tool": "run.py"
+  },
+  "role": "draws the cockpit gauge panel with the mode-selected cockpit image, the filtered gauge angles, and the active object list",
+  "section": "Program functions",
   "size": 656,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_gauges_"
 }
