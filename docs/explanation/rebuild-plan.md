@@ -576,7 +576,7 @@ reproduce the original bytes.
 | `0x298b4` | `menu_line_value_next` (done) | 100 | 30 | 1 | 3 |
 | `0x8af08` | `sound_frame_prepare` (done) | 98 | 22 | 3 | 0 |
 | `0x24918` | `sound_queue_pop` (done) | 98 | 36 | 0 | 2 |
-| `0x203c4` | unnamed | 98 | 23 | 8 | 0 |
+| `0x203c4` | `sla_view_update` (done) | 98 | 23 | 8 | 0 |
 | `0x20360` | unnamed | 98 | 23 | 8 | 0 |
 | `0x14970` | unnamed | 98 | 37 | 1 | 0 |
 | `0x4c485` | unnamed | 96 | 32 | 3 | 0 |
@@ -588,7 +588,7 @@ This table starts Phase W.
 
 ## Position
 
-Three hundred and sixty-four modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and sixty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -803,5 +803,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `object_list_release_all` at `0x115f8`, and the Phase W module
 `menu_line_value_next` at `0x298b4`, and the Phase W module
 `sound_frame_prepare` at `0x8af08`, and the Phase W module
-`sound_queue_pop` at `0x24918`.
-The next unnamed function is `0x203c4`.
+`sound_queue_pop` at `0x24918`, and the Phase W module
+`sla_view_update` at `0x203c4`.
+The next unnamed function is `0x20360`.

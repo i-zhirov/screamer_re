@@ -26491,3 +26491,66 @@ temporary `-od` recipe.
   sound_queue_pop_` and `python3 tools/rebuild/run.py run --function 0x24918`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The sla_view_update module at 0x203c4
+
+- Observation: the original body at `0x203c4` holds 23 instructions and 98
+  bytes up to the `ret` at `0x20425`.  Two padding bytes at `0x20426` precede
+  the next function at `0x20428`, so the store record keeps the 100-byte extent
+  and sets no separate function size.  The identity check uses 23 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x203c4 --count 23` and
+  `tools/rebuild/functions/0x203c4.json`.
+- Observation: the only direct caller is the race frame update at `0x1ff70`, at
+  the call site `0x1ffcd`.  The frame update calls the five view groups in
+  order and selects this group when bit `0x40` of the mode byte `DAT_0011d260`
+  is set.  The record takes the section `Program functions`.
+  Evidence: the call at `0x1ffcd`, the dispatch at `0x1ffc3` through `0x1ffd7`,
+  and the finding "The race_frame_update module at 0x1ff70".
+- Observation: the two gates require input flag `DAT_00118e1d` bit 0 and mode
+  byte `DAT_0011d260` bit `0x40`.  The function returns before any call when
+  either gate is clear.
+  Evidence: the tests at `0x203c7` and `0x203d0` and the two jumps to
+  `0x20424`.
+- Observation: the group calls `sla_marker_check` at `0x18ba8` with the player
+  object `0xf91c`, then `player_car_view_update` at `0x16f34`, the physics
+  group at `0x15a80`, the effect group at `0x15bac`, the step group at
+  `0x15ab8`, the opponent group at `0x15b80`, `player_update` at `0x19ab0`,
+  and `player_car_link` at `0x15c1c`, all on the same player object.
+  Evidence: the calls at `0x203de` through `0x2041f` and the finding "The
+  sla_marker_check module at 0x18ba8".
+- Inference: the SLA marker check, the mode `0x40` gate, and the player object
+  support the name `sla_view_update`.  The mode `0x40` is the SLA mode.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the finding "The sla_marker_check module at 0x18ba8" and the gate at
+  `0x203d0`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it needs no FPU
+  stub, and the module uses no assembly.
+  Evidence: the prologue at `0x203c4` and
+  `tools/rebuild/modules/sla_view_update.json`.
+- Observation: the harness holds the two gate bytes and the eight callee stubs.
+  Every player stub checks the fixed player pointer `0xf91c`.  The five paths
+  cover the clear input gate, the clear mode gate, the mode `0x40` path, the
+  extra mode bit, and the extra input bits.  The output holds the markers `0`
+  through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sla_view_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module sla_view_update`, and
+  `work/rebuild/slaview.txt`.
+- Observation: the harness builds the expected sequence with an if-chain,
+  because the V2 compiler places a `switch` jump table outside the code object
+  and the run reaches offset `1`.  The fault matches the finding "The
+  error_report jump table at run time".
+  Evidence: the first run dump at `1A0:00000001` and
+  `tools/rebuild/sla_view_update_main.c`.
+- Observation: the rebuilt body holds 21 of 23 instructions equal, 58 of 98
+  bytes equal, and 2 of 9 relocation slots equal.  The identity check stays
+  open because V2 appends the `mov esp, ebp` frame restore before `pop ebp`, so
+  the last two instruction slots shift.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x203c4 --count 23 --rebuilt work/rebuild/slaview.exe
+  --rebuilt-map work/rebuild/sla_view_update.map --rebuilt-symbol
+  sla_view_update_` and `python3 tools/rebuild/run.py run --function 0x203c4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
