@@ -548,13 +548,13 @@ reproduce the original bytes.
 | `0x8bc7c` | `video_selector_setup` (done) | 116 | 33 | 6 | 0 |
 | `0x1f990` | `bios_tick_reset` (done) | 115 | 34 | 3 | 0 |
 | `0x1f8dc` | `mouse_release_wait` (done) | 112 | 37 | 4 | 0 |
-| `0x2218c` | unnamed | 111 | 38 | 4 | 18 |
+| `0x2218c` | `point_rotate_y` (done) | 111 | 38 | 4 | 18 |
 
 This table starts Phase V.
 
 ## Position
 
-Three hundred and forty-six modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and forty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -751,5 +751,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `race_data_release` at `0x156a8`, and the Phase V module
 `video_selector_setup` at `0x8bc7c`, and the Phase V module
 `bios_tick_reset` at `0x1f990`, and the Phase V module
-`mouse_release_wait` at `0x1f8dc`.
-The next unnamed function is `0x2218c`.
+`mouse_release_wait` at `0x1f8dc`, and the Phase V module
+`point_rotate_y` at `0x2218c`.
+The next unnamed function is `0x262fc`.
