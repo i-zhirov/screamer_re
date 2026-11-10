@@ -571,7 +571,7 @@ reproduce the original bytes.
 | `0x4cae4` | `mmp_file_load` (done) | 102 | 32 | 4 | 0 |
 | `0x2f4ee` | `func_2f4ee` (done) | 102 | 40 | 2 | 0 |
 | `0x24600` | `sound_effect_list_init` (done) | 101 | 35 | 2 | 0 |
-| `0x22278` | unnamed | 101 | 36 | 2 | 18 |
+| `0x22278` | `point_rotate_y_float` (done) | 101 | 36 | 2 | 18 |
 | `0x115f8` | unnamed | 101 | 40 | 1 | 0 |
 | `0x298b4` | unnamed | 100 | 30 | 1 | 3 |
 | `0x8af08` | unnamed | 98 | 22 | 3 | 0 |
@@ -588,7 +588,7 @@ This table starts Phase W.
 
 ## Position
 
-Three hundred and fifty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and sixty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -798,5 +798,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `camera_basis_patch` at `0x8a9e8`, and the Phase W module
 `mmp_file_load` at `0x4cae4`, and the Phase W module
 `func_2f4ee` at `0x2f4ee`, and the Phase W module
-`sound_effect_list_init` at `0x24600`.
-The next unnamed function is `0x22278`.
+`sound_effect_list_init` at `0x24600`, and the Phase W module
+`point_rotate_y_float` at `0x22278`.
+The next unnamed function is `0x115f8`.

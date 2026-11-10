@@ -26168,3 +26168,70 @@ temporary `-od` recipe.
   the end of the function.
   Evidence: `tools/rebuild/functions/0x24600.json` and the `count` field of the
   record.
+
+## The point_rotate_y_float module at 0x22278
+
+- Observation: the original body at `0x22278` holds 36 instructions and 101
+  bytes up to the `ret 4` at `0x222da`.  The next record starts at `0x222e0`, so
+  the store record keeps the 104-byte extent and sets no separate function size.
+  The identity check uses 36 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22278 --count 36` and
+  `tools/rebuild/functions/0x22278.json`.
+- Observation: the two arguments arrive in the Watcom register order: `eax`
+  holds the output point and `edx` holds the input point.  The float angle makes
+  the compiler pass the remaining argument on the stack, so the callee cleans it
+  with `ret 4`.
+  Evidence: the prologue at `0x22278` through `0x22281`, the float load at
+  `0x22284`, and the `ret 4` at `0x222da`.
+- Observation: the point holds float fields at `+0x00` and `+0x08`, and the
+  middle value at `+0x04` stays unchanged.  The function stores
+  `in.x * cos + in.z * sin` into `+0x00` and `in.z * cos - in.x * sin` into
+  `+0x08`.  A point uses x and z for the ground plane and y for the height, so
+  the function turns the ground-plane pair about the vertical y axis.
+  Evidence: the float loads at `0x222a9`, `0x222b2`, `0x222c1`, and `0x222ca`,
+  the multiplies at `0x222ac`, `0x222b4`, `0x222c4`, and `0x222cc`, and the
+  stores at `0x222bc` and `0x222d4`.
+- Inference: the integer helper at `0x2218c` turns the same (x, z) pair with
+  integer fields, and `point_rotate_x` at `0x221fc` turns the (y, z) pair, so
+  the three functions form the integer and float forms of the point rotation.
+  The data flow supports the name `point_rotate_y_float`.  The original has no
+  symbol name, so the record keeps the name with the confidence `inferred`.
+  Evidence: `docs/reference/program-map.md` and
+  `tools/rebuild/functions/0x2218c.json`.
+- Observation: the code object holds no direct call to `0x22278` and no dword
+  reference to it.  The record therefore takes the section Program functions
+  with the point-rotation family.
+  Evidence: a scan of every page of object 1 for the `call` encoding and the
+  dword value `0x00022278`.
+- Observation: the original calls `cos` through the Watcom helper at `0x4da66`
+  and `sin` through `0x4da72`.  This harness links no math library, so the local
+  `point_rotate_y_float_fpu.asm` supplies `cos` and `sin` from the hardware.
+  The function converts no value to an integer, so it needs no `__CHP` stub.
+  The original has the EBP frame, so the module builds with `-of+`.  The module
+  uses no assembly implementation.
+  Evidence: the calls at `0x2228d` and `0x2229e`, the helper bodies at
+  `0x4da66`, `0x4da72`, `0x4da26`, and `0x4da30`, and
+  `tools/rebuild/modules/point_rotate_y_float.json`.
+- Observation: the harness holds one input point and one output point, both with
+  three floats.  The six paths cover the angle 0 with the unchanged input, the
+  angle 0.5 on (100, 200, 300), the angle 1.0 on (-100, -200, 300), the angle
+  -0.75 on (10, -20, 30), the angle 1.5 on (0x1000, -0x800, 0x400), and the
+  distinct middle value -999.  Every path checks the input point, the unchanged
+  middle output value, and the two rotated values.  The output holds the markers
+  `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/point_rotate_y_float_main.c`,
+  `python3 tools/rebuild/harness.py run --module point_rotate_y_float`, and
+  `work/rebuild/prf.txt`.
+- Observation: the rebuilt body holds 36 instructions in the identity window and
+  83 bytes up to the `ret 4`.  The identity check stays open at 8 of 36
+  instructions, 8 of 83 bytes, and 0 of 0 relocation slots, because V2 keeps the
+  input point in `edx` and the output point in `ecx`, saves `ebx` and `esi`,
+  uses a smaller frame, and builds the two trig products in another order.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22278 --count 36 --rebuilt work/rebuild/prf.exe
+  --rebuilt-map work/rebuild/point_rotate_y_float.map --rebuilt-symbol
+  point_rotate_y_float_` and `python3 tools/rebuild/run.py run --function
+  0x22278`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.

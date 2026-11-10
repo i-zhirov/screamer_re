@@ -1,0 +1,36 @@
+{
+  "exe": "prf.exe",
+  "map": "point_rotate_y_float.map",
+  "name": "point_rotate_y_float",
+  "run": {
+    "command": "prf.exe > prf.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "prf.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_y_float.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "point_rotate_y_float_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_y_float_main.c"
+    }
+  ]
+}
