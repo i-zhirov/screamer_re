@@ -25191,3 +25191,62 @@ temporary `-od` recipe.
   0x8bc7c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The bios_tick_reset module at 0x1f990
+
+- Observation: the original body at `0x1f990` holds 34 instructions and 115
+  bytes up to the `ret` at `0x1fa02`.  A padding byte at `0x1fa03` precedes the
+  next function at `0x1fa04`, so the store record keeps the 116-byte extent and
+  sets no separate function size.  The identity check uses 34 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f990 --count 34` and
+  `tools/rebuild/functions/0x1f990.json`.
+- Observation: the function holds no direct caller and no data reference.  A
+  sweep of every candidate function start and every direct call site finds no
+  call to `0x1f990`.  The record infers the name from the body and the data
+  globals, and the confidence stays `inferred`.
+  Evidence: the prologue sweep, the direct call sweep, and the data reference
+  sweep of STARTH.EXE.
+- Observation: the body clears the register block EAX at `0xcf18` and fills the
+  segment set at `0xcf34` through `dpmi_fill_regs` at `0x4bf23`.  It then calls
+  `dpmi_call` at `0x4bf4b` with the vector `0x1a` and the same register block as
+  the argument and the result.
+  Evidence: the stores at `0x1f9aa`, the call at `0x1f9b0`, and the call at
+  `0x1f9bc`.
+- Observation: the register block maps EAX at offset 0, EBX at 4, ECX at 8, and
+  EDX at `0xc`.  With EAX 0 the first INT 1Ah call uses AH=0 and returns the
+  tick count in CX:DX.  The function saves the low word from EDX at `0xcf24`.
+  Evidence: the block layout of `dpmi_call` and the save at `0x1f9c1`.
+- Observation: the function then writes EAX `0x100`, ECX 0, and EDX 0 and calls
+  INT 1Ah with AH=1, which sets the tick count to zero.  It returns the saved
+  low word.  The BIOS timer service and the reset request support the name
+  `bios_tick_reset`.
+  Evidence: the stores at `0x1f9d6` through `0x1f9e2`, the call at `0x1f9f4`,
+  and the return at `0x1f9f9`.
+- Observation: the original has the EBP frame and one local, so the module
+  builds with `-of+`.  The function uses no floating-point instruction, so the
+  module needs no FPU stub, and it uses no assembly body.
+  Evidence: `tools/rebuild/bios_tick_reset.c` and
+  `tools/rebuild/modules/bios_tick_reset.json`.
+- Observation: the harness holds the register block and the segment set.  The
+  `dpmi_fill_regs` stub checks the segment pointer, and the `dpmi_call` stub
+  scripts the two INT 1Ah requests.  The three paths cover the CX:DX values
+  `0x4455:0x6677`, `0x1234:0xffff`, and `0:0`.  Every path checks the call
+  count, the argument addresses, the first EAX 0, the second EAX `0x100`, the
+  saved result, the zero set request, and the final block values.  The output
+  holds the markers `0` through `2` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/bios_tick_reset_main.c`,
+  `python3 tools/rebuild/harness.py run --module bios_tick_reset`,
+  `work/rebuild/btr_out.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f990`.
+- Observation: the rebuilt body holds 20 of 34 instructions, 25 of 115 bytes,
+  and 0 of 14 relocation slots equal.  V2 saves the frame pointer first and adds
+  a `push esi`, clears EAX before the fill call, keeps the saved word in `esi`,
+  and uses a direct store for EAX `0x100`.  The globals and the call stubs sit
+  at other offsets.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f990 --count 34 --rebuilt work/rebuild/btr.exe
+  --rebuilt-map work/rebuild/bios_tick_reset.map --rebuilt-symbol
+  bios_tick_reset_` and `python3 tools/rebuild/run.py run --function 0x1f990`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

@@ -546,7 +546,7 @@ reproduce the original bytes.
 | `0x23f50` | `race_finish_ghost_update` (done) | 117 | 32 | 1 | 3 |
 | `0x156a8` | `race_data_release` (done) | 117 | 29 | 14 | 0 |
 | `0x8bc7c` | `video_selector_setup` (done) | 116 | 33 | 6 | 0 |
-| `0x1f990` | unnamed | 115 | 34 | 3 | 0 |
+| `0x1f990` | `bios_tick_reset` (done) | 115 | 34 | 3 | 0 |
 | `0x1f8dc` | unnamed | 112 | 37 | 4 | 0 |
 | `0x2218c` | unnamed | 111 | 38 | 4 | 18 |
 
@@ -554,7 +554,7 @@ This table starts Phase V.
 
 ## Position
 
-Three hundred and forty-four modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and forty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -749,5 +749,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `point_hit_probe` at `0x1c0ac`, and the Phase V module
 `race_finish_ghost_update` at `0x23f50`, and the Phase V module
 `race_data_release` at `0x156a8`, and the Phase V module
-`video_selector_setup` at `0x8bc7c`.
-The next unnamed function is `0x1f990`.
+`video_selector_setup` at `0x8bc7c`, and the Phase V module
+`bios_tick_reset` at `0x1f990`.
+The next unnamed function is `0x1f8dc`.

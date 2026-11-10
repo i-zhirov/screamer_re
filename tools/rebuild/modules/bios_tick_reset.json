@@ -1,0 +1,29 @@
+{
+  "exe": "btr.exe",
+  "map": "bios_tick_reset.map",
+  "name": "bios_tick_reset",
+  "run": {
+    "command": "btr.exe > btr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "btr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "bios_tick_reset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "bios_tick_reset_main.c"
+    }
+  ]
+}

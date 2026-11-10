@@ -1,9 +1,111 @@
 {
   "address": "0x1f990",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 34,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f990 holds 34 instructions and 115 bytes up to the ret at 0x1fa02; a padding byte at 0x1fa03 precedes the next function at 0x1fa04, so the store record keeps the 116-byte extent and sets no separate function size; the identity check uses 34 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function holds no direct caller and no data reference; a sweep of every candidate function start and every direct call site finds no call to 0x1f990, so the record infers the name from the body and the data globals; the confidence stays inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the body clears the register block EAX at 0xcf18 and fills the segment set at 0xcf34 through dpmi_fill_regs at 0x4bf23; it then calls dpmi_call at 0x4bf4b with vector 0x1a and the same register block as the argument and the result"
+    },
+    {
+      "kind": "note",
+      "text": "the register block maps EAX at offset 0, EBX at 4, ECX at 8, and EDX at 0xc; with EAX 0 the first INT 1Ah call uses AH=0 and returns the tick count in CX:DX; the function saves the low word from EDX at 0xcf24"
+    },
+    {
+      "kind": "note",
+      "text": "the function then writes EAX 0x100, ECX 0, and EDX 0 and calls INT 1Ah with AH=1, which sets the tick count to zero; it returns the saved low word; the BIOS timer service and the reset request support the name bios_tick_reset"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and one local, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and it uses no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the register block and the segment set; the dpmi_fill_regs stub checks the segment pointer, and the dpmi_call stub scripts the two INT 1Ah requests; the three paths cover the CX:DX values 0x4455:0x6677, 0x1234:0xffff, and 0:0; every path checks the call count, the argument addresses, the first EAX 0, the second EAX 0x100, the saved result, the zero set request, and the final block values; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 20 of 34 instructions, 25 of 115 bytes, and 0 of 14 relocation slots equal; V2 saves the frame pointer first and adds a push esi, clears EAX before the fill call, keeps the saved word in esi, and uses a direct store for EAX 0x100; the globals and the call stubs sit at other offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The bios_tick_reset module at 0x1f990"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f990 --count 34"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f990 --count 34 --rebuilt work/rebuild/btr.exe --rebuilt-map work/rebuild/bios_tick_reset.map --rebuilt-symbol bios_tick_reset_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module bios_tick_reset"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f990"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/bios_tick_reset.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/bios_tick_reset_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/bios_tick_reset.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "bios_tick_reset",
+  "name": "bios_tick_reset",
   "notes": [],
   "object_offset": "0xf990",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 115,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 20,
+        "instructions_total": 34,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f990",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:eac4df7929d3c30d3bec057d203a6c3a35478244aaff2547c93b70f6804ecb8c",
+    "source_digest": "sha256:23d72a32798967d1071b1cfeb73f634d943ccb08bbbafd37adfbd773da54ba80",
+    "tool": "run.py"
+  },
+  "role": "Reads the BIOS tick count through INT 1Ah AH=0, returns its low word, and sets the tick count to zero through INT 1Ah AH=1.",
+  "section": "Subsystem initialisation",
   "size": 116,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "bios_tick_reset_"
 }
