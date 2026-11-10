@@ -1,0 +1,34 @@
+{
+  "exe": "objlook.exe",
+  "map": "object_lookup.map",
+  "name": "object_lookup",
+  "run": {
+    "command": "objlook.exe > objlook.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "objlook.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_lookup.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_lookup_main.c"
+    }
+  ]
+}

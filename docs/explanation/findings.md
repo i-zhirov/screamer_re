@@ -25590,3 +25590,69 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x2211c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The object_lookup module at 0x110d0
+
+- Observation: the original body at `0x110d0` holds 40 instructions and 110
+  bytes up to the early `ret` at `0x1113d`.  The full body continues through the
+  failure return at `0x1113e` to the `ret` at `0x11144`.  The next function
+  starts at `0x11148`, so the store record keeps the 120-byte extent and sets no
+  separate function size.  The identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x110d0 --count 40` and
+  `tools/rebuild/functions/0x110d0.json`.
+- Observation: the arguments arrive in the Watcom register order.  `eax` holds
+  the object table at object-3 offset `0x6530`, `edx` holds the wanted name, and
+  `ebx` holds the output slot pointer.  The prologue saves the three arguments
+  in local cells, so the function uses no stack argument.
+  Evidence: the stores at `0x110d7`, `0x110da`, and `0x110dd` and the reads of
+  the three local cells.
+- Observation: the only direct caller at `0x11080` is the unnamed object loader
+  wrapper at `0x11060`.  The wrapper looks the name up, makes one more instance
+  through `object_duplicate` at `0x10ed4`, and otherwise calls `object_request`
+  at `0x114b4` and `object_load` at `0x10bfc`.  The rebuilt
+  `opponent_records_init` module already calls this function as `object_lookup`.
+  Evidence: the call at `0x11080`, the finding "The opponent_records_init
+  module at 0x15378", and `tools/rebuild/opponent_records_init.c`.
+- Observation: a record holds the name at `+0x00`, the block object at `+0x0c`,
+  the chunk table at `+0x10`, the file record at `+0x14`, and one reserved word
+  at `+0x18`.  A zero file record marks a free slot.
+  Evidence: the check of `[eax + 0x14]` at `0x11105` and the record layout of
+  `object_duplicate` and `object_request`.
+- Observation: the function walks the `0x78` records of `0x1c` bytes and skips a
+  free slot.  For a busy slot it compares the record name with the wanted name
+  through the case-insensitive compare at `0x4d9ba`.  A match stores the index in
+  the output slot and returns 1.  A missing name returns 0 and leaves the output
+  slot unchanged.
+  Evidence: the loop at `0x110e0` through `0x11134`, the compare call at
+  `0x11123`, and the failure return at `0x1113e`.
+- Inference: the object table, the name search, and the index output support the
+  name `object_lookup`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.  The function sits in the section Resource
+  loader.
+  Evidence: the data flow above and the caller `opponent_records_init`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it needs no FPU
+  stub.  The harness supplies the case-insensitive compare as `stricmp`.  The
+  module uses no assembly body.
+  Evidence: the prologue at `0x110d0` and
+  `tools/rebuild/modules/object_lookup.json`.
+- Observation: the harness holds the `0x78`-record object table.  The eight paths
+  cover the busy record 0, the busy record 5, the free record 2, the
+  case-insensitive match, the missing name, the last slot `0x77`, the free record
+  before the busy record, and the empty name.  Every path checks the result and
+  the slot.  The output holds the markers `0` through `7` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/object_lookup_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_lookup`, and
+  `work/rebuild/objlook.txt`.
+- Observation: the diff reports 6 of 40 instructions and 0 of 81 bytes equal,
+  and 0 of 0 relocation slots.  V2 saves `ebp`, `ecx`, and `esi`, keeps the
+  table and the name in registers, uses `imul` for the `0x1c` stride, folds the
+  loop increment, and places the failure return in the common epilogue.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x110d0 --count 40 --rebuilt work/rebuild/objlook.exe
+  --rebuilt-map work/rebuild/object_lookup.map --rebuilt-symbol object_lookup_`
+  and `python3 tools/rebuild/run.py run --function 0x110d0`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

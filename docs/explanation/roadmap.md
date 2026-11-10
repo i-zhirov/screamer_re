@@ -276,9 +276,10 @@ current host.
   `point_rotate_y` at `0x2218c`, and the Phase W module
   `cd_audio_table_build` at `0x262fc`, and the Phase W module
   `point_rotation_flags` at `0x224dc`, and the Phase W module
-  `angle_filter` at `0x2211c`;
-  thirty modules are verified, one is matching, and three hundred and twenty
-  rebuilds hold the recorded difference; the `video_fill`,
+  `angle_filter` at `0x2211c`, and the Phase W module
+  `object_lookup` at `0x110d0`;
+  thirty modules are verified, one is matching, and three hundred and
+  twenty-one rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
