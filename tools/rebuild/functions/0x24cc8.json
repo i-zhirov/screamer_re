@@ -1,9 +1,111 @@
 {
   "address": "0x24cc8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 33,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24cc8 holds 33 instructions and 104 bytes up to the ret 4 at 0x24d2d; the next record starts at 0x24d30, so the store record keeps the 104-byte extent and sets no separate function size; the identity check uses 33 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two integer arguments arrive in the Watcom register order: eax holds the enable signal and edx holds the effect index; the float limit makes the compiler pass the remaining argument on the stack, so the callee cleans it with ret 4"
+    },
+    {
+      "kind": "note",
+      "text": "the array at DAT_001922c holds one float timer per effect; the function adds the frame delta DAT_00118e08 to the timer of the effect; when the timer reaches the limit, the function enqueues the effect through sound_enqueue at 0x247fc with the variant mode 3 and the delay 0.7, then restarts the timer at 0; a restarted timer can reach the limit again, so the effect repeats at each limit crossing; the sibling sound_effect_delay at 0x24c4c latches the timer at -1 after one firing, and this function holds no latch and no negative-timer early return; a clear enable signal resets the timer to 0 and enqueues nothing"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is car_sound_update at 0x242bc, with the call sites at 0x2430e, 0x24337, and 0x245cb; the sound functions sit in the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the array index, the frame delta, the enqueue, and the restart support the name sound_effect_repeat; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses the x87 stack for the add and the compare, so the module links the shared fpu_stub.asm for __8087, __init_387_emulator, and _fltused_; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame delta and the per-effect timer array with one extra sentinel entry; the eight paths cover the clear enable signal, the timer below the limit, the timer that reaches the limit, the timer that passes the limit, the effect 0 with its neighbour, the two repeated firing calls, the negative timer, and the limit 0 at the timer 0; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 13 of 33 instructions, 4 of 95 bytes, and 1 of 7 relocation slots equal; the identity check stays open because V2 saves ebp first, keeps the effect index and the scaled array pointer in registers, tests the enable signal in eax, uses another branch shape for the limit compare, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24cc8 --count 33"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24cc8 --count 33 --rebuilt work/rebuild/srepeat.exe --rebuilt-map work/rebuild/sound_effect_repeat.map --rebuilt-symbol sound_effect_repeat_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_effect_repeat"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24cc8"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_effect_repeat module at 0x24cc8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_repeat.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_repeat_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_effect_repeat.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_effect_repeat",
+  "name": "sound_effect_repeat",
   "notes": [],
   "object_offset": "0x14cc8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 95,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 33,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24cc8",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:0621e34e80ba3cdbba2e10ff90af51c471271e3cd18f9a939a7485beca292035",
+    "source_digest": "sha256:f39803e3c06071d55426c312f409bde775d9450ead5383ed215322b2c1dc7e25",
+    "tool": "run.py"
+  },
+  "role": "Adds the frame delta to a per-effect timer and enqueues the effect each time the timer reaches the limit, then restarts the timer.",
+  "section": "Program functions",
   "size": 104,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_effect_repeat_"
 }

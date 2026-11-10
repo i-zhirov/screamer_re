@@ -25785,3 +25785,68 @@ temporary `-od` recipe.
   0x1960c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the two step globals stay inferred.
+
+## The sound_effect_repeat module at 0x24cc8
+
+- Observation: the original body at `0x24cc8` holds 33 instructions and 104
+  bytes up to the `ret 4` at `0x24d2d`.  The next record starts at `0x24d30`, so
+  the store record keeps the 104-byte extent and sets no separate function size.
+  The identity check uses 33 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24cc8 --count 33` and
+  `tools/rebuild/functions/0x24cc8.json`.
+- Observation: the two integer arguments arrive in the Watcom register order.
+  `eax` holds the enable signal and `edx` holds the effect index.  The float
+  limit makes the compiler pass the remaining argument on the stack, so the
+  callee cleans it with `ret 4`.
+  Evidence: the prologue at `0x24ccf` and `0x24cd2`, the compare at `0x24cf4`,
+  and the `ret 4` at `0x24d2d`.
+- Observation: the array at `DAT_001922c` holds one float timer per effect.  The
+  function adds the frame delta `DAT_00118e08` to the timer of the effect.  When
+  the timer reaches the limit, the function enqueues the effect through
+  `sound_enqueue` at `0x247fc` with the variant mode 3 and the delay 0.7, then
+  restarts the timer at 0.  A restarted timer can reach the limit again, so the
+  effect repeats at each limit crossing.  The sibling `sound_effect_delay` at
+  `0x24c4c` latches the timer at -1 after one firing.  This function holds no
+  latch and no negative-timer early return.  A clear enable signal resets the
+  timer to 0 and enqueues nothing.
+  Evidence: the block at `0x24cd5` through `0x24d27`, the relocation targets
+  `0x1008e08` and `0x11922c`, and the finding "The sound_effect_delay module at
+  0x24c4c".
+- Observation: the only direct caller is `car_sound_update` at `0x242bc`, with
+  the call sites at `0x2430e`, `0x24337`, and `0x245cb`.  The sound functions
+  sit in the section `Program functions`.
+  Evidence: the call sites at `0x2430e`, `0x24337`, and `0x245cb`, and the
+  `car_sound_update` record.
+- Inference: the array index, the frame delta, the enqueue, and the restart
+  support the name `sound_effect_repeat`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the sibling `sound_effect_delay` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses the x87 stack for the add and the compare, so the
+  module links the shared `fpu_stub.asm` for `__8087`,
+  `__init_387_emulator`, and `_fltused_`.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x24cc8` and
+  `tools/rebuild/modules/sound_effect_repeat.json`.
+- Observation: the harness holds the frame delta and the per-effect timer array
+  with one extra sentinel entry.  The eight paths cover the clear enable signal,
+  the timer below the limit, the timer that reaches the limit, the timer that
+  passes the limit, the effect 0 with its neighbour, the two repeated firing
+  calls, the negative timer, and the limit 0 at the timer 0.  The output holds
+  the markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_effect_repeat_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_effect_repeat`, and
+  `work/rebuild/srepeat.txt`.
+- Observation: the diff reports 13 of 33 instructions, 4 of 95 bytes, and 1 of
+  7 relocation slots equal.  The identity check stays open because V2 saves
+  `ebp` first, keeps the effect index and the scaled array pointer in registers,
+  tests the enable signal in `eax`, uses another branch shape for the limit
+  compare, and restores the stack with `lea`.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24cc8 --count 33 --rebuilt work/rebuild/srepeat.exe
+  --rebuilt-map work/rebuild/sound_effect_repeat.map --rebuilt-symbol
+  sound_effect_repeat_` and `python3 tools/rebuild/run.py run --function
+  0x24cc8`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the array and frame-delta globals stay inferred.

@@ -279,9 +279,10 @@ current host.
   `angle_filter` at `0x2211c`, and the Phase W module
   `object_lookup` at `0x110d0`, and the Phase W module
   `map_object_progress_sum` at `0x2b3e5`, and the Phase W module
-  `track_timer_update` at `0x1960c`;
+  `track_timer_update` at `0x1960c`, and the Phase W module
+  `sound_effect_repeat` at `0x24cc8`;
   thirty modules are verified, one is matching, and three hundred and
-  twenty-three rebuilds hold the recorded difference; the `video_fill`,
+  twenty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
