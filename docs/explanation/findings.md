@@ -24209,3 +24209,72 @@ temporary `-od` recipe.
   0x240c4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The view_mode_dispatch module at 0x19e78
+
+- Observation: the original body at `0x19e78` holds 41 instructions and 134
+  bytes up to the `ret` at `0x19efd`.  The next function starts at `0x19f00`, so
+  the store record keeps the 136-byte extent and sets no separate function size.
+  The identity check uses 41 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19e78 --count 41` and
+  `tools/rebuild/functions/0x19e78.json`.
+- Observation: the only direct caller is the player update at `0x19ab0`, which
+  calls this function at `0x19ac2` on the player view object `DAT_00110a20`
+  after `player_view_setup` at `0x19ae8`.  `player_view_setup` writes the render
+  mode at view field `+0x88` from the chosen view slot, and the car camera at
+  `0x1a930` also starts the renderer at `0x19e78`, so the record takes the
+  section `player_view_setup callees`.
+  Evidence: the calls at `0x19ac2` and `0x19c80`, the write of the mode at the
+  block `0x19ae8` through `0x19e4c`, and the record of `0x19ab0`.
+- Observation: the function reads the render mode at view field `+0x88`.  A
+  value above 9 takes the default path and returns, because the compare at
+  `0x19e8c` is unsigned.  The jump table at `0x19e50` selects the camera routine
+  for each mode:
+  - mode 0 starts `player_cockpit_camera` at `0x1a2bc`
+  - mode 1 starts `player_view_orbit` at `0x1a3b8` with the orbit mode 1
+  - mode 2 starts no routine
+  - mode 3 starts `player_route_camera` at `0x1a630`
+  - mode 4 starts no routine
+  - mode 5 starts no routine
+  - mode 6 starts `player_view_orbit` at `0x1a3b8` with the orbit mode 2
+  - mode 7 starts no routine
+  - mode 8 starts `car_camera_select` at `0x1aec4`
+  - mode 9 starts `player_view_orbit` at `0x1a3b8` with the orbit mode 0
+  Evidence: the dispatch table at `0x19e50` and the block at `0x19e78` through
+  `0x19efd`.
+- Observation: every camera routine except `car_camera_select` takes the player
+  object at object-3 offset `0xf91c` in `eax` and the view object in `edx`.
+  `player_view_orbit` also takes the orbit mode in `ebx`.  `car_camera_select`
+  takes the view object in `eax`.  The case for the mode 0 sets no `ebx`, and
+  the three orbit cases set the `ebx` values 1, 2, and 0.
+  Evidence: the loads at `0x19e99` through `0x19ef3` and the records of
+  `0x1a2bc`, `0x1a3b8`, `0x1a630`, and `0x1aec4`.
+- Inference: the render mode field, the jump table, and the four camera routines
+  support the name `view_mode_dispatch`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct data
+  reference beyond the mode field, so the module uses no FPU stub and no
+  assembly.
+  Evidence: `tools/rebuild/modules/view_mode_dispatch.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9`, `A`, and `D`.  The eleven paths cover the six selected modes, the
+  four modes that start no routine, and the mode 10 that the unsigned compare
+  rejects.  Each selected path checks the routine, the call count, the player
+  object `0xf91c`, the view pointer, and the orbit mode.
+  Evidence: `python3 tools/rebuild/harness.py run --module view_mode_dispatch`
+  and `work/rebuild/vmdisp.txt`.
+- Observation: the rebuilt module holds 41 decoded instructions and 111 bytes in
+  the identity window.  The identity check stays open at 12 of 41 instructions,
+  6 of 111 bytes, and 0 of 6 relocation slots, because V2 forms the dispatch as
+  a compare tree instead of the jump table at `0x19e50`, keeps the view pointer
+  in a register, and saves the frame first.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19e78 --count 41 --rebuilt work/rebuild/vmdisp.exe
+  --rebuilt-map work/rebuild/view_mode_dispatch.map --rebuilt-symbol
+  view_mode_dispatch_` and `python3 tools/rebuild/run.py run --function
+  0x19e78`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the section stay inferred.
