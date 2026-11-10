@@ -25526,3 +25526,67 @@ temporary `-od` recipe.
   0x224dc`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The angle_filter module at 0x2211c
+
+- Observation: the original body at `0x2211c` holds 41 instructions and 110
+  bytes up to the `ret 8` at `0x22187`.  The next function starts at `0x2218c`,
+  so the store record keeps the 112-byte extent and sets no separate function
+  size.  The identity check uses 41 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2211c --count 41` and
+  `tools/rebuild/functions/0x2211c.json`.
+- Observation: the first argument arrives in `eax`; the float target makes the
+  Watcom compiler pass the remaining arguments on the stack, so the callee
+  cleans them with `ret 8`.  The `push edx` in the prologue saves the second
+  register.
+  Evidence: the store at `0x22123`, the reads of `[ebp + 0xc]` and
+  `[ebp + 0x10]`, and the `ret 8` at `0x22187`.
+- Observation: the only direct caller is `player_car_skid_update` at `0x17d14`,
+  which calls the function at `0x18085` with the shake value and the step
+  `0x5a` to filter the value into `+0x128`.  A sweep of 688 candidate function
+  starts finds no other call site.
+  Evidence: the call at `0x18085`, the finding "The player_car_skid_update
+  module at 0x17d14", and the sweep of the candidate function starts.
+- Observation: the function moves the value at `*value` toward the target with
+  the coefficient `DAT_0010cf08[step]`.  When the absolute difference is below
+  pi/2, it takes the sine of the offset; otherwise it takes the offset directly.
+  The pi/2 constant is the double at object-3 offset `0xd70`; the `fabs` and the
+  branch run at `0x2212e` through `0x2213f`.
+  Evidence: the blocks at `0x22126` through `0x22181` and the fixups at
+  `0x22138` and `0x22142`.
+- Observation: the function sits between `angle_approach` at `0x22018` and
+  `point_rotate_y` at `0x2218c` and shares the coefficient table and the
+  constant segment with the angle filters, so the module takes the section The
+  timing and filter layer.
+  Evidence: the neighbors `0x22018` and `0x2218c` and the fixups to object 3.
+- Inference: the moved value with the sine correction supports the name
+  `angle_filter`.  The original has no symbol, so the record keeps the name with
+  the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The coefficient table pointer `DAT_0010cf08` and the pi/2 constant
+  `DAT_0010d70` arrive through globals, because the harness image does not load
+  the constant segment.  The local `angle_filter_fpu.asm` supplies the sine and
+  the absolute value from the hardware and the FPU run-time symbols.  The module
+  uses no assembly body.
+  Evidence: the prologue at `0x2211c` and
+  `tools/rebuild/modules/angle_filter.json`.
+- Observation: the harness holds the coefficient table and the pi/2 constant.
+  The nine paths cover the small positive and negative offsets, the two large
+  offsets, the offset near pi/2, the coefficient above one, the equal value, the
+  large offset with the coefficient above one, and the negative result.  The
+  output holds the markers `0` through `8` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/angle_filter_main.c`,
+  `python3 tools/rebuild/harness.py run --module angle_filter`, and
+  `work/rebuild/anflt.txt`.
+- Observation: the rebuilt body holds 5 of 41 instructions and 2 of 106 bytes
+  equal, and 0 of 6 relocation slots equal.  V2 saves `ebp`, `ecx`, and `edx`,
+  keeps the value pointer in `edx`, uses another local slot order, and orders
+  the two branches in another shape.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2211c --count 41 --rebuilt work/rebuild/anflt.exe
+  --rebuilt-map work/rebuild/angle_filter.map --rebuilt-symbol angle_filter_`
+  and `python3 tools/rebuild/run.py run --function 0x2211c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

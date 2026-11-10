@@ -561,7 +561,7 @@ reproduce the original bytes.
 | --- | --- | --- | --- | --- | --- |
 | `0x262fc` | `cd_audio_table_build` (done) | 110 | 34 | 3 | 0 |
 | `0x224dc` | `point_rotation_flags` (done) | 110 | 41 | 1 | 2 |
-| `0x2211c` | unnamed | 110 | 41 | 1 | 17 |
+| `0x2211c` | `angle_filter` (done) | 110 | 41 | 1 | 17 |
 | `0x110d0` | unnamed | 110 | 40 | 1 | 0 |
 | `0x2b3e5` | unnamed | 107 | 39 | 0 | 4 |
 | `0x1960c` | unnamed | 105 | 32 | 1 | 6 |
@@ -589,7 +589,7 @@ This table starts Phase W.
 ## Position
 ## Position
 
-Three hundred and forty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and fifty modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -789,5 +789,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `mouse_release_wait` at `0x1f8dc`, and the Phase V module
 `point_rotate_y` at `0x2218c`, and the Phase W module
 `cd_audio_table_build` at `0x262fc`, and the Phase W module
-`point_rotation_flags` at `0x224dc`.
-The next unnamed function is `0x2211c`.
+`point_rotation_flags` at `0x224dc`, and the Phase W module
+`angle_filter` at `0x2211c`.
+The next unnamed function is `0x110d0`.
