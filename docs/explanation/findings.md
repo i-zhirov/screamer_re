@@ -24923,3 +24923,72 @@ temporary `-od` recipe.
   acos_table_build_` and `python3 tools/rebuild/run.py run --function 0x4d260`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The point_hit_probe module at 0x1c0ac
+
+- Observation: the original body at `0x1c0ac` holds 32 instructions and 120
+  bytes up to the first `ret` at `0x1c123`.  The loop tail runs past that `ret`
+  through the second `ret` at `0x1c13a`.  The next record starts at `0x1c13c`,
+  so the store record keeps the 144-byte extent and sets no separate function
+  size.  The identity check uses 32 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1c0ac --count 32` and
+  `tools/rebuild/functions/0x1c0ac.json`.
+- Observation: the only direct caller at `0x11e55` is `collision_cell_test` at
+  `0x11ccc`.  That function has a mode branch.  The mode 1 branch calls this
+  plain hit probe at `0x11e55`.  Every other mode calls `point_height_probe` at
+  `0x1bfd4`.  The caller walks the collision records of a spatial cell and
+  probes three points ten units apart.
+  Evidence: the `call 0x1c0ac` at `0x11e55`, the call at `0x11dd5`, and the
+  `collision_cell_test` and `point_height_probe` records.
+- Observation: the global `DAT_000c740` holds the collision shape, the global
+  `DAT_000c744` holds the current collision record, and the global `DAT_000c748`
+  holds the object.  The shape holds the x base at `+0x00`, the height base at
+  `+0x04`, the y base at `+0x08`, the entry count at `+0x14`, the vertex array
+  offset at `+0x1c`, and the entry index table offset at `+0x28`.
+  Evidence: the reads at `0x1c0ad` through `0x1c0d2`.
+- Observation: the function builds the entry index table at `DAT_000c724` and
+  the vertex array base at `DAT_000c71c`, then loops over the entry count.  Each
+  unsigned short in the index table selects one polygon entry.  A vertex count
+  word of 4 selects `quad_point_test` and any other count selects
+  `tri_point_test`.  The callee takes the polygon entry and the current record.
+  Evidence: the loop at `0x1c0de` through `0x1c135` and the two calls at
+  `0x1c10a` and `0x1c114`.
+- Observation: a hit returns 1 at once and stores no height and no direction.
+  A full sweep returns 0.  The body is the plain form of `point_height_probe`,
+  which also stores the surface height and direction on a hit.
+  Evidence: the `popal` and `mov eax, 1` at `0x1c11d` and the `popal` and
+  `sub eax, eax` at `0x1c137`, and the `point_height_probe` record.
+- Inference: the caller, the shape walk, and the sibling `point_height_probe`
+  support the name `point_hit_probe`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.  The caller walks the collision
+  records, so the record takes the section The vehicle state chain.
+  Evidence: the data flow above and the caller record.
+- Observation: the original uses no EBP frame.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.  The
+  module builds without `-of+`.
+  Evidence: `tools/rebuild/point_hit_probe.c` and
+  `tools/rebuild/modules/point_hit_probe.json`.
+- Observation: the behavior check passes.  The harness holds one shape block
+  with the entry index table and up to three polygon entries, one object, one
+  record, and the two callee stubs.  It runs eight paths: the tri miss, the quad
+  hit, the tri then tri hit, the tri then quad miss, the miss miss hit, the
+  count word 5, the quad then quad hit, and the quad then tri miss.  Every path
+  checks the return value, the callee arguments, and the stored globals.  The
+  output holds the markers `0` through `7` and `D`.
+  Evidence: `tools/rebuild/point_hit_probe_main.c`,
+  `python3 tools/rebuild/harness.py run --module point_hit_probe`,
+  `work/rebuild/hitprobe.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1c0ac`.
+- Observation: the rebuilt body holds 45 instructions and 133 bytes.  The
+  identity window holds 32 instructions and 113 bytes.  The identity check
+  stays open at 3 of 113 bytes, 9 of 32 instructions, and 0 of 16 relocation
+  slots.  V2 saves `ebx`, `ecx`, `edx`, and `esi` in its prologue, keeps the
+  shape base in `ebx`, reads the globals through near data addresses, forms the
+  entry pointer with a scaled index, and keeps the loop index in `ecx`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1c0ac --count 32 --rebuilt work/rebuild/hitprobe.exe
+  --rebuilt-map work/rebuild/point_hit_probe.map --rebuilt-symbol
+  point_hit_probe_` and `python3 tools/rebuild/run.py run --function 0x1c0ac`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

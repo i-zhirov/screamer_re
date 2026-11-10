@@ -1,0 +1,31 @@
+{
+  "exe": "hitprobe.exe",
+  "map": "point_hit_probe.map",
+  "name": "point_hit_probe",
+  "run": {
+    "command": "hitprobe.exe > hitprobe.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "hitprobe.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_hit_probe.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_hit_probe_main.c"
+    }
+  ]
+}
