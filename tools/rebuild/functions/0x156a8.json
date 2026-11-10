@@ -1,9 +1,114 @@
 {
   "address": "0x156a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x156a8 holds 29 instructions and 117 bytes up to the ret at 0x1571c; the next function starts at 0x15720, so the store record keeps the 120-byte extent and sets no separate function size; the identity check uses 29 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_session_run at 0x1fd70 with the call site at 0x1ff02; it calls the function after the fade-out at 0x21da8, so the function releases the race data at the end of a session; the caller sits in the section race_frame callees, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the function resets the mouse pointer through 0x1f8b4 with 0, stops the music bank record at DAT_000062b0 through 0x2fe68, and frees the COCKPIT resource from the archive DAT_000062ac through 0x2f326"
+    },
+    {
+      "kind": "note",
+      "text": "the function releases the object list at 0x6350 for the table at 0x6530 through 0x115f8, unloads the object table at 0x6530 through 0x11304, and frees the MATERIALS, OBJ_LST, and UNR_FILE resources through 0x4cf2c"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees SOUND_FX through 0x1f6f8, TEXT through 0x1b58c, SPRITES through 0x258b8, FONTS through 0x25640, REPLAY through 0x22d44, ATTACK through 0x22d64, and GAMESPLINE through 0x1b180; the replay helper clears DAT_0018e5c and the attack helper clears DAT_0018ed0 and DAT_0018eac"
+    },
+    {
+      "kind": "note",
+      "text": "the tail clears the CD flag DAT_000166ac and stops the CD audio through 0x264ec; the caller, the resource frees, and the symmetric race_data_load at 0x131a8 support the name race_data_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive context, the music record, the list, the object table, the CD flag, and the fourteen callee stubs; the three paths cover the full sequence, the repeat run with sentinels, and the sentinel flag and record; every path checks the call order, the arguments, and the clear flag; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 21 of 29 instructions and 45 of 117 bytes equal, and 4 of 8 relocation slots equal; V2 saves the frame pointer before edx and restores the stack with lea, and the minimal image places the data addresses and the name pointer at other offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_data_release module at 0x156a8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x156a8 --count 29"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x156a8 --count 29 --rebuilt work/rebuild/rdrel.exe --rebuilt-map work/rebuild/race_data_release.map --rebuilt-symbol race_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x156a8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_data_release.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_data_release",
+  "name": "race_data_release",
   "notes": [],
   "object_offset": "0x56a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 45,
+        "bytes_total": 117,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 29,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x156a8",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:817654a36cb161ada908d0cc57433d52fa058124584d464508a8419bf728a95b",
+    "source_digest": "sha256:f679e9bb278df1f94e32b18e11b35a2d5823abf6fa7639c528154b02ed6e1728",
+    "tool": "run.py"
+  },
+  "role": "Releases the race data resources and resets state at the end of a race session.",
+  "section": "race_frame callees",
   "size": 120,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_data_release_"
 }

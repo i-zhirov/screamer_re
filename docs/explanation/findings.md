@@ -25054,3 +25054,73 @@ temporary `-od` recipe.
   0x23f50`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The race_data_release module at 0x156a8
+
+- Observation: the original body at `0x156a8` holds 29 instructions and 117
+  bytes up to the `ret` at `0x1571c`.  The next function starts at `0x15720`,
+  so the store record keeps the 120-byte extent and sets no separate function
+  size.  The identity check uses 29 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x156a8 --count 29` and
+  `tools/rebuild/functions/0x156a8.json`.
+- Observation: the only direct caller is `race_session_run` at `0x1fd70` with
+  the call site at `0x1ff02`.  It calls the function after the fade-out at
+  `0x21da8`, so the function releases the race data at the end of a session.
+  The caller sits in the section `race_frame callees`, so the record takes that
+  section.
+  Evidence: the call sweep for `0x156a8` and the `race_session_run` record.
+- Observation: the function calls 14 targets in order.  It resets the mouse
+  pointer through `0x1f8b4` with 0, stops the music bank record at
+  `DAT_000062b0` through `0x2fe68`, and frees the `COCKPIT` resource from the
+  archive `DAT_000062ac` through `0x2f326`.
+  Evidence: the calls at `0x156ae`, `0x156bd`, and `0x156c7`, and the
+  `COCKPIT` string at object-3 offset `0x666`.
+- Observation: the function releases the object list at `0x6350` for the table
+  at `0x6530` through `0x115f8`.  It unloads the object table at `0x6530`
+  through `0x11304`.  It frees the `MATERIALS`, `OBJ_LST`, and `UNR_FILE`
+  resources through `0x4cf2c`.
+  Evidence: the calls at `0x156d6`, `0x156e0`, and `0x156e5`, and the three
+  strings at object-3 offsets `0x1711`, `0x171b`, and `0x1723`.
+- Observation: the function frees `SOUND_FX`, `TEXT`, `SPRITES`, `FONTS`,
+  `REPLAY`, `ATTACK`, and `GAMESPLINE` through `0x1f6f8`, `0x1b58c`,
+  `0x258b8`, `0x25640`, `0x22d44`, `0x22d64`, and `0x1b180`.  The helpers at
+  `0x22d44` and `0x22d64` also clear `DAT_0018e5c`, `DAT_0018ed0`, and
+  `DAT_0018eac`.
+  Evidence: the calls from `0x156ea` to `0x1570a` and the name strings at
+  object-3 offsets `0xbf1`, `0x9ea`, `0xec7`, `0xea4`, `0xdba`, `0xdc1`, and
+  `0x967`.
+- Observation: the tail clears the CD flag `DAT_000166ac` and stops the CD
+  audio through `0x264ec`.
+  Evidence: the stores and the calls at `0x1570f` and `0x15715`.
+- Inference: the caller, the resource frees, and the symmetric
+  `race_data_load` at `0x131a8` support the name `race_data_release`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and the `race_data_load` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so it needs no FPU
+  stub and no assembly body.
+  Evidence: `tools/rebuild/race_data_release.c` and
+  `tools/rebuild/modules/race_data_release.json`.
+- Observation: the behavior check passes.  The harness holds the archive
+  context, the music record, the list, the object table, the CD flag, and the
+  fourteen callee stubs.  It runs three paths: the full sequence, the repeat
+  run with sentinels, and the sentinel flag and record.  Every path checks the
+  call order, the arguments, and the clear flag.  The output holds the markers
+  `0` through `2` and `D`.
+  Evidence: `tools/rebuild/race_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_data_release`,
+  `work/rebuild/rdrel.txt`, and `python3 tools/rebuild/run.py run --function
+  0x156a8`.
+- Observation: the rebuilt body holds 21 of 29 instructions and 45 of 117
+  bytes equal.  The identity check stays open at 4 of 8 relocation slots,
+  because V2 saves the frame pointer before `edx` and restores the stack with
+  `lea`, and the minimal image places the data addresses and the name pointer
+  at other offsets.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x156a8 --count 29 --rebuilt work/rebuild/rdrel.exe
+  --rebuilt-map work/rebuild/race_data_release.map --rebuilt-symbol
+  race_data_release_` and `python3 tools/rebuild/run.py run --function 0x156a8`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
