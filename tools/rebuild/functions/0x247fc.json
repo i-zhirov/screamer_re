@@ -1,9 +1,115 @@
 {
   "address": "0x247fc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 45,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x247fc holds 45 instructions and 132 bytes up to the ret 4 at 0x2487d; the next record starts at 0x24880, so the store record keeps the 132-byte extent and sets no separate function size; the identity check uses 45 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the callers pass the effect index in eax, the variant mode in edx, and the delay as a float on the stack, because the Watcom compiler passes a floating-point argument on the stack; the callee cleans the delay with ret 4"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are player_car_reset_update at 0x18528 with the call site at 0x18569, player_lap_progress_update at 0x194a0 with 0x19545, race_lap_complete at 0x19678 with 0x197bc and 0x19819, race_finish_time_update at 0x20f98 with 0x20fc0, the unnamed sound steps at 0x23ed8, 0x23f14, 0x23f50, 0x23fc8, and 0x2401c, and the sound effect timers at 0x24c4c, 0x24cc8, and 0x24d30; the caller list and the sibling queue functions support the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the two flags DAT_001d2c8 and DAT_00008058 gate the enqueue; the sound effect queue starts at DAT_0019080; each entry holds the effect index at +0x00, the variant mode at +0x04, the delay at +0x08, and one more field at +0x0c; the effect index -1 ends the queue"
+    },
+    {
+      "kind": "note",
+      "text": "the function scans the queue for the same effect index; a found entry returns at once, so the queue holds at most one entry per effect; otherwise the scan stops at the terminator, writes the effect, the mode, and the delay, and writes the terminator -1 to the next entry; the field at +0x0c stays"
+    },
+    {
+      "kind": "note",
+      "text": "the caller list, the queue at DAT_0019080, and the write of the three entry fields support the name sound_enqueue; the callers already declare that name; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the rebuilt function holds no floating-point instruction, because it only moves the delay bits; the harness uses the shared fpu_stub.asm, because the float values pass through the harness; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two gates and the eight-entry queue; the ten paths cover the two gates, the empty queue, the forced terminator, the duplicate at the head, the duplicate in the middle, the insert in the second and third slots, the kept pad field, the copied delay bits, and the effect 0; the output holds the markers 0 through 9 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 30 instructions and 78 bytes; the identity check window holds 45 instructions and 116 bytes and stays open at 12 of 45 instructions, 3 of 116 bytes, and 0 of 9 relocation slots, because V2 pushes the frame first, keeps the queue pointer and the effect in registers, folds the insert flag into a constant, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x247fc --count 45"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x247fc --count 45 --rebuilt work/rebuild/senq.exe --rebuilt-map work/rebuild/sound_enqueue.map --rebuilt-symbol sound_enqueue_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_enqueue"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x247fc"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_enqueue module at 0x247fc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_enqueue.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_enqueue_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_enqueue.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_enqueue",
+  "name": "sound_enqueue",
   "notes": [],
   "object_offset": "0x147fc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 116,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 45,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x247fc",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:8693e1dd353697bfd3ee9782052572895c1da06550e37e4f150c43b934343fd1",
+    "source_digest": "sha256:add71f59c736213f47534e8f0bf8393cfda98183e03f7009cad356f170751149",
+    "tool": "run.py"
+  },
+  "role": "Enqueues a sound effect, its mode, and its delay into the queue at DAT_0019080 when the effect is absent.",
+  "section": "Program functions",
   "size": 132,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_enqueue_"
 }

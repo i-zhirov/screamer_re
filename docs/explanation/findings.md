@@ -24462,3 +24462,72 @@ temporary `-od` recipe.
   0x265b4`.
 - Limit: the original has no symbol name for this function.  The module name
   and the section stay inferred.
+
+## The sound_enqueue module at 0x247fc
+
+- Observation: the original body at `0x247fc` holds 45 instructions and 132
+  bytes up to the `ret 4` at `0x2487d`.  The next record starts at `0x24880`, so
+  the store record keeps the 132-byte extent and sets no separate function
+  size.  The identity check uses 45 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x247fc --count 45` and
+  `tools/rebuild/functions/0x247fc.json`.
+- Observation: the callers pass the effect index in `eax`, the variant mode in
+  `edx`, and the delay as a float on the stack, because the Watcom compiler
+  passes a floating-point argument on the stack.  The callee cleans the delay
+  with `ret 4`.
+  Evidence: the prologue at `0x247fc` through `0x24807` and the delay read at
+  `0x24865`.
+- Observation: the direct callers are `player_car_reset_update` at `0x18528`
+  with the call site at `0x18569`, `player_lap_progress_update` at `0x194a0`
+  with `0x19545`, `race_lap_complete` at `0x19678` with `0x197bc` and `0x19819`,
+  `race_finish_time_update` at `0x20f98` with `0x20fc0`, the unnamed sound steps
+  at `0x23ed8`, `0x23f14`, `0x23f50`, `0x23fc8`, and `0x2401c`, and the sound
+  effect timers at `0x24c4c`, `0x24cc8`, and `0x24d30`.  The caller list and the
+  sibling queue functions support the section `Program functions`.
+  Evidence: the call sweep for `0x247fc` and the call sites above.
+- Observation: the two flags `DAT_001d2c8` and `DAT_00008058` gate the
+  enqueue.  The sound effect queue starts at `DAT_0019080`.  Each entry holds
+  the effect index at +0x00, the variant mode at +0x04, the delay at +0x08, and
+  one more field at +0x0c.  The effect index -1 ends the queue.
+  Evidence: the gate at `0x2480a` through `0x2481a` and the queue base at
+  `0x2481c`.
+- Observation: the function scans the queue for the same effect index.  A found
+  entry returns at once, so the queue holds at most one entry per effect.
+  Otherwise the scan stops at the terminator, writes the effect, the mode, and
+  the delay, and writes the terminator -1 to the next entry.  The field at
+  +0x0c stays.
+  Evidence: the scan at `0x2482a` through `0x2484c`, the insert at `0x24854`
+  through `0x24871`, and the terminator write at `0x24871`.
+- Inference: the caller list, the queue at `DAT_0019080`, and the write of the
+  three entry fields support the name `sound_enqueue`.  The callers already
+  declare that name.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the call sites above and the queue at `DAT_0019080`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The rebuilt function holds no floating-point instruction, because it
+  only moves the delay bits.  The harness uses the shared `fpu_stub.asm`,
+  because the float values pass through the harness.  The module uses no
+  assembly.
+  Evidence: `tools/rebuild/sound_enqueue.c` and
+  `tools/rebuild/modules/sound_enqueue.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The ten paths cover the two gates, the empty queue, the
+  forced terminator, the duplicate at the head, the duplicate in the middle, the
+  insert in the second and third slots, the kept pad field, the copied delay
+  bits, and the effect 0.
+  Evidence: `tools/rebuild/sound_enqueue_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_enqueue`,
+  `work/rebuild/senq.txt`, and `python3 tools/rebuild/run.py run --function
+  0x247fc`.
+- Observation: the rebuilt body holds 30 instructions and 78 bytes.  The
+  identity check window holds 45 instructions and 116 bytes and stays open at
+  12 of 45 instructions, 3 of 116 bytes, and 0 of 9 relocation slots.  V2 pushes
+  the frame first, keeps the queue pointer and the effect in registers, folds
+  the insert flag into a constant, and restores the stack with `lea`.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x247fc --count 45 --rebuilt work/rebuild/senq.exe
+  --rebuilt-map work/rebuild/sound_enqueue.map --rebuilt-symbol
+  sound_enqueue_` and `python3 tools/rebuild/run.py run --function 0x247fc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callers stay inferred.
