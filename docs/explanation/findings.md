@@ -22748,7 +22748,7 @@ temporary `-od` recipe.
 - Observation: the direct callers pass the object table at `0x6530` in `ebx`,
   the name in `eax`, and a position block in `edx`.  The callers are the
   wrapper at `0x113c8`, `player_car_init` at `0x136cc`, `car_setup` at
-  `0x142ec`, and the unnamed function at `0x14970`.  The position block holds
+  `0x142ec`, and `traffic_record_init` at `0x14970`.  The position block holds
   the object table slot at `+0x00` and takes the chunk index at `+0x04`.
   Evidence: the call sites `0x113fb`, `0x1389d`, `0x138b5`, `0x138cd`,
   `0x138e5`, `0x13a88`, `0x13ac2`, `0x14448`, `0x14460`, `0x14478`, `0x14490`,
@@ -26624,5 +26624,89 @@ temporary `-od` recipe.
   --original-address 0x20360 --count 23 --rebuilt work/rebuild/cngview.exe
   --rebuilt-map work/rebuild/cng_view_update.map --rebuilt-symbol
   cng_view_update_` and `python3 tools/rebuild/run.py run --function 0x20360`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the field names in the harness stay inferred.
+
+## The traffic_record_init module at 0x14970
+
+- Observation: the original body at `0x14970` holds 37 instructions and 98
+  bytes up to the early `ret` at `0x149d1`.  The success path continues at
+  `0x149d2` through the `ret` at `0x14d2b`, and the next function starts at
+  `0x14d2c`, so the store record keeps the 956-byte extent and sets no
+  separate function size.  The identity check uses 37 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x14970 --count 37` and
+  `tools/rebuild/functions/0x14970.json`.
+- Observation: the only direct caller is `game_mode_10_start` at `0x12d0c`.
+  That function prepares every traffic record through this function at the
+  call site `0x12ed4` with the shared counter `DAT_0000634c` and returns the
+  first non-zero result.  The record takes the section The timing and filter
+  layer.
+  Evidence: the record of `0x12d0c` and the finding "The
+  game_mode_10_start module at 0x12d0c".
+- Observation: the model index at `+0x1c` selects the 0x40-byte model record
+  at `0xd25c + model * 0x40`.  A value above 0xc returns -1, and a negative
+  flag at `+0x00` returns 0 before any call.  The function loads the model
+  object through `0x11060` into the slot at `+0x64`, and then loads the
+  `SHADOW` object at `0x5fc` into the slot at `+0x6c`.  A non-zero result
+  returns at once.
+  Evidence: the blocks at `0x1497d` through `0x149fa`.
+- Observation: the block object of the model slot takes the model record
+  field at `+0x0c` at block offset `+0x20`.  The object table sits at
+  `0x6530` with 0x1c-byte records: the block object pointer is at `+0x0c` and
+  the chunk table pointer is at `+0x10`.
+  Evidence: the block at `0x149fb` through `0x14a20` and the finding "The
+  object_chunk_find module at 0x11410".
+- Observation: the function walks four wheels with stride 0x54 from `+0x8c`.
+  Each wheel holds the edge value at `+0x00`, the range value at `+0x08`, the
+  first position block at `+0x2c`, and the second position block at `+0x34`.
+  A position block holds the object slot at `+0x00` and takes the chunk index
+  at `+0x04`.
+  Evidence: the loop at `0x14a58` through `0x14c5b`.
+- Observation: for each wheel the function finds the two chunk names at
+  `0x1d5c + index * 8` and `0x1d60 + index * 8` through `0x11410`.  The names
+  hold the wheel pairs `flx`/`fli`, `blx`/`rli`, `frx`/`fri`, and
+  `brx`/`rri`.  The first chunk fields at `+0x14` and `+0x1c` fill the wheel
+  edge and range.  The edge copies to the bound block at
+  `0x1c4 + index * 0x2c`, and the range takes 150 on an odd wheel or -250 on
+  an even wheel.
+  Evidence: the calls at `0x14ad9` and `0x14b10`, the chunk reads at
+  `0x14b15` through `0x14bf0`, and the four bound blocks.
+- Observation: the last block forms the center at `+0x27c` as the first rear
+  range plus a quarter of the difference, the center at `+0x288` as the second
+  rear range plus a quarter of the opposite difference, and the span at
+  `+0x2a4` as the absolute half difference.  It clears the words at `+0x274`,
+  `+0x280`, and `+0x18` and returns zero.
+  Evidence: the block at `0x14c60` through `0x14d2b`.
+- Inference: the traffic record init in `game_mode_10_start`, the model and
+  `SHADOW` loads, the four wheel chunk pairs, and the 0x2a8-byte record
+  support the name `traffic_record_init`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller, the data flow, and the record size that matches the
+  clear at `0x12da2` in `game_mode_10_start`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so it links no FPU
+  stub, and the module uses no assembly.
+  Evidence: the prologue at `0x14970` and
+  `tools/rebuild/modules/traffic_record_init.json`.
+- Observation: the harness holds the 0x2a8-byte record, the object table at
+  `DAT_00006530`, the model table at `DAT_0000d25c`, one block object, eight
+  chunk records, and the two callee stubs.  The six paths cover the normal
+  model 3, the negative flags, the model 13 failure, the first load failure,
+  the second load failure, and the model 12 boundary.  The output holds the
+  markers `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/traffic_record_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module traffic_record_init`, and
+  `work/rebuild/trafinit.txt`.
+- Observation: the rebuilt body holds 12 of 37 instructions equal, 0 of 98
+  bytes equal, and 0 of 4 relocation slots equal.  The identity check stays
+  open because V2 saves the frame and the registers first, keeps the record in
+  `esi`, moves the model test before the load, uses `imul` for the object table
+  stride, and calls the callees with stack arguments.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x14970 --count 37 --rebuilt work/rebuild/trafinit.exe
+  --rebuilt-map work/rebuild/traffic_record_init.map --rebuilt-symbol
+  traffic_record_init_` and `python3 tools/rebuild/run.py run --function
+  0x14970`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.

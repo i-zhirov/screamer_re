@@ -1,0 +1,32 @@
+{
+  "exe": "trafinit.exe",
+  "map": "traffic_record_init.map",
+  "name": "traffic_record_init",
+  "run": {
+    "command": "trafinit.exe > trafinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "trafinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_record_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_record_init_main.c"
+    }
+  ]
+}

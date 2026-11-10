@@ -1,9 +1,115 @@
 {
   "address": "0x14970",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 37,
+  "evidence": [
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x14970 --count 37"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x14970 --count 37 --rebuilt work/rebuild/trafinit.exe --rebuilt-map work/rebuild/traffic_record_init.map --rebuilt-symbol traffic_record_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module traffic_record_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x14970"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_record_init module at 0x14970"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_record_init.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_record_init_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/traffic_record_init.json"
+    },
+    {
+      "kind": "note",
+      "text": "the original body at 0x14970 holds 37 instructions and 98 bytes up to the early ret at 0x149d1; the success path continues at 0x149d2 through the ret at 0x14d2b, and the next function starts at 0x14d2c, so the store record keeps the 956-byte extent and sets no separate function size; the identity check uses 37 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is game_mode_10_start at 0x12d0c, which prepares every traffic record through this function with the shared counter DAT_0000634c and returns the first non-zero result; the caller takes the section The timing and filter layer, so this module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function first loads the model object named by the 0x40-byte model record at 0xd25c + model * 0x40 through 0x11060 into the slot at +0x64, and then loads SHADOW at 0x5fc into the slot at +0x6c; a non-zero result returns at once; the block object of the model slot takes the model record field at +0x0c at block offset +0x20"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks four wheels with stride 0x54 from +0x8c and finds the two chunk names at 0x1d5c + index * 8 and 0x1d60 + index * 8 through 0x11410; the chunk fields at +0x14 and +0x1c of the first chunk fill the wheel edge at +0x00 and range at +0x08, the edge copies to the bound block at +0x1c4 + index * 0x2c, and the range takes 150 on an odd wheel or -250 on an even wheel"
+    },
+    {
+      "kind": "note",
+      "text": "the last block forms the center at +0x27c as the first rear range plus a quarter of the difference, the center at +0x288 as the second rear range plus a quarter of the opposite difference, the span at +0x2a4 as the absolute half difference, and clears the words at +0x274, +0x280, and +0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the traffic record init in game_mode_10_start, the model and SHADOW loads, the four wheel chunk pairs, and the 0x2a8-byte record support the name traffic_record_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction and links no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x2a8-byte record, the object table at DAT_00006530, the model table at DAT_0000d25c, one block object, eight chunk records, and the two callee stubs; the six paths cover the normal model 3, the negative flags, the model 13 failure, the first load failure, the second load failure, and the model 12 boundary; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 12 of 37 instructions equal, 0 of 98 bytes equal, and 0 of 4 relocation slots equal; the identity check stays open because V2 saves the frame and the registers first, keeps the record in esi, moves the model test before the load, uses imul for the object table stride, and calls the callees with stack arguments; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "traffic_record_init",
+  "name": "traffic_record_init",
   "notes": [],
   "object_offset": "0x4970",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 98,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 12,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x14970",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:b3481b94ab988c33edb822afaf34b5d69716db9a2b28f28e3b011f94be281964",
+    "source_digest": "sha256:75d4d89ca044c7d4da104b4ad94c58137afe84301d2efd9c876fef2cb9d3e78d",
+    "tool": "run.py"
+  },
+  "role": "initializes a traffic record: loads the model and SHADOW objects, finds the four wheel chunk pairs, fills the wheel and bound fields, and forms the two center values and the span",
+  "section": "The timing and filter layer",
   "size": 956,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "traffic_record_init_"
 }
