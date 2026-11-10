@@ -24992,3 +24992,65 @@ temporary `-od` recipe.
   point_hit_probe_` and `python3 tools/rebuild/run.py run --function 0x1c0ac`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The race_finish_ghost_update module at 0x23f50
+
+- Observation: the original body at `0x23f50` holds 32 instructions and 117
+  bytes up to and including the `ret` at `0x23fc4`.  The next function starts at `0x23fc8`, so
+  the store record keeps the 120-byte extent and sets no separate function size.
+  The identity check uses 32 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23f50 --count 32` and
+  `tools/rebuild/functions/0x23f50.json`.
+- Observation: the only direct caller is `race_finish_laps_update` at `0x20ec8`
+  with the call site at `0x20f37`.  That function selects one finish
+  handler from the mode byte `DAT_0011d260`.  This handler runs on mode 4, and
+  the handler sits in the section `Program functions`.
+  Evidence: the dispatch tree at `0x20f08` through `0x20f5d` and the call sweep
+  for `0x23f50`.
+- Observation: when the replay flag `DAT_001d264` is set, the function selects
+  the ghost record `DAT_0018e8c` plus the index `DAT_0018ed4` exclusive-or 1
+  times `0x24`.  It compares the clock `DAT_00100a8` with the ghost time at
+  `+0x1c` and writes the position 1 or 2 to `DAT_000ffa4`.
+  Evidence: the compare block at `0x23f54` through `0x23f88` and the replay
+  branch of `race_position_update` at `0x2055c` through `0x205c0`.
+- Observation: position 1 sets bit 3 of the control byte `DAT_0018e1d` and
+  enqueues the effect `0xb` with the variant mode 3 and the delay 0.  Any other
+  position enqueues the effect `0xc` with the mode 3 and the delay 0.  The
+  enqueue goes through `sound_enqueue` at `0x247fc`.
+  Evidence: the block at `0x23f8d` through `0x23fc4` and the `sound_enqueue`
+  record.
+- Inference: the caller, the repeated ghost compare, and the win or lose effects
+  support the name `race_finish_ghost_update`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.  The caller sits in
+  the frame path, so the record takes the section `Program functions`.
+  Evidence: the data flow above and the caller record.
+- Observation: the original has the EBP frame, so the module builds with `-of+`.
+  The function uses the floating-point compare, so the recipe adds the shared
+  `fpu_stub.asm`.  The module uses no assembly body.
+  Evidence: `tools/rebuild/race_finish_ghost_update.c` and
+  `tools/rebuild/modules/race_finish_ghost_update.json`.
+- Observation: the behavior check passes.  The harness holds the replay flag,
+  the replay index, the clock, the position, the control byte, two ghost
+  records, and the `sound_enqueue` stub.  It runs seven paths: the two
+  flag-zero positions, the clock above, below, and equal to the other ghost
+  time, the other-record select, and the index 1 select.  Every path checks the
+  call count, the effect, the mode 3, and the delay 0.  The output holds the
+  markers `0` through `6` and `D`.
+  Evidence: `tools/rebuild/race_finish_ghost_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_ghost_update`,
+  `work/rebuild/rfgupd.txt`, and `python3 tools/rebuild/run.py run --function
+  0x23f50`.
+- Observation: the rebuilt body holds 31 instructions and 103 bytes.  The
+  identity window holds 32 instructions and 105 bytes.  The identity check
+  stays open at 15 of 105 bytes, 8 of 32 instructions, and 1 of 11 relocation
+  slots.  V2 pushes the frame pointer first, keeps the ghost index in `eax`,
+  forms the record address with `imul`, folds the bit set into `or byte ptr`,
+  and restores the stack with `lea`.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23f50 --count 32 --rebuilt work/rebuild/rfgupd.exe
+  --rebuilt-map work/rebuild/race_finish_ghost_update.map --rebuilt-symbol
+  race_finish_ghost_update_` and `python3 tools/rebuild/run.py run --function
+  0x23f50`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

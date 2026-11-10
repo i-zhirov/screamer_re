@@ -1,0 +1,37 @@
+{
+  "exe": "rfgupd.exe",
+  "map": "race_finish_ghost_update.map",
+  "name": "race_finish_ghost_update",
+  "run": {
+    "command": "rfgupd.exe > rfgupd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "rfgupd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_ghost_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_ghost_update_main.c"
+    }
+  ]
+}

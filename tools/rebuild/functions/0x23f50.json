@@ -1,9 +1,111 @@
 {
   "address": "0x23f50",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x23f50 holds 32 instructions and 117 bytes up to and including the ret at 0x23fc4; the next function starts at 0x23fc8, so the store record keeps the 120-byte extent and sets no separate function size; the identity check uses 32 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_laps_update at 0x20ec8 with the call site at 0x20f37; it selects this finish handler from the mode byte DAT_0011d260 on mode 4; the handler sits in the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "when the replay flag DAT_001d264 is set, the function selects the ghost record DAT_0018e8c plus the index DAT_0018ed4^1 times 0x24, compares the clock DAT_00100a8 with the ghost time at +0x1c, and writes the position 1 or 2 to DAT_000ffa4"
+    },
+    {
+      "kind": "note",
+      "text": "position 1 sets bit 3 of the control byte DAT_0018e1d and enqueues the effect 0xb with the variant mode 3 and the delay 0; any other position enqueues the effect 0xc; the enqueue goes through sound_enqueue at 0x247fc"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the repeated ghost compare, and the win or lose effects support the name race_finish_ghost_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses the floating-point compare, so the recipe adds the shared fpu_stub.asm; the module uses no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the replay flag, the replay index, the clock, the position, the control byte, two ghost records, and the sound_enqueue stub; the seven paths cover the two flag-zero positions, the clock above, below, and equal to the other ghost time, the other-record select, and the index 1 select; every path checks the call count, the effect, the mode 3, and the delay 0; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 31 instructions and 103 bytes; the identity window holds 32 instructions and 105 bytes and stays open at 15 of 105 bytes, 8 of 32 instructions, and 1 of 11 relocation slots, because V2 pushes the frame pointer first, keeps the ghost index in eax, forms the record address with imul, folds the bit set into or byte ptr, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_ghost_update module at 0x23f50"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23f50 --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23f50 --count 32 --rebuilt work/rebuild/rfgupd.exe --rebuilt-map work/rebuild/race_finish_ghost_update.map --rebuilt-symbol race_finish_ghost_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_ghost_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23f50"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_ghost_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_ghost_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_ghost_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_ghost_update",
+  "name": "race_finish_ghost_update",
   "notes": [],
   "object_offset": "0x13f50",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 105,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23f50",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:91c654035508bf6d950842f4882b64a8dc80520a6700936b3d2dd3cd79d37a8d",
+    "source_digest": "sha256:3f938b1d658d062f3666eac16b5c7472c2208beba6bc8d7d620d64a4fc6e7b02",
+    "tool": "run.py"
+  },
+  "role": "Recomputes the race position from the replay ghost record and enqueues the win or lose finish effect.",
+  "section": "Program functions",
   "size": 120,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_ghost_update_"
 }
