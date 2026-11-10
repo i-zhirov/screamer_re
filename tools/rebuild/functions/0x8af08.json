@@ -1,9 +1,111 @@
 {
   "address": "0x8af08",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8af08 holds 22 instructions and 98 bytes up to the first ret at 0x8af69; the function has a second path that ends at the ret at 0x8af9f; the next recorded function starts at 0x8afa0, so the store record keeps the 152-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the per-frame loop of sound_effects_update at 0x81ab0; the caller uses the name sound_frame_prepare for the call at 0x8af08; the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the voice context at 0x74454 holds the frame table base at +0x00, the voice count at +0x04, the frame index at +0x08, the voice record at +0x0c, and the source record at +0xc8; sound_voice_setup at 0x8adac writes the voice count"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls sound_voice_setup at 0x8adac, clears the frame index, takes the voice count as the loop count, and points the voice record at 0x7453c; bit 0x40000000 of the source record selects the near helper at 0x8b0e8, and the clear bit selects sound_source_frame_prepare at 0x8affc; the first path advances the source record by 0x20; both paths advance the voice record by 0x1f4 and increment the frame index for each voice; the function then calls the voice mix at 0x83500 with the table 0x7a6e4 and the voice count"
+    },
+    {
+      "kind": "note",
+      "text": "the source record marks a near emitter, so the near path skips the per-source record advance; the name sound_frame_prepare is inferred from the caller, and the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the original uses no floating-point instruction, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the voice context and the four callee stubs; the four paths cover one far voice, three far voices with a preset frame index, two near voices, and one near voice with a preset frame index and frame table base; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 3 of 22 decoded instructions, 7 of 90 bytes, and 0 of 10 relocation slots equal; the identity check stays open because V2 saves ecx and edx, keeps the context in edx, reads the near flag as a byte test, keeps the loop count in ecx, and puts the near path first while the original puts the far path first; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8af08 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8af08 --count 22 --rebuilt work/rebuild/sfp.exe --rebuilt-map work/rebuild/sound_frame_prepare.map --rebuilt-symbol sound_frame_prepare_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_frame_prepare"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8af08"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_frame_prepare module at 0x8af08"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_frame_prepare.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_frame_prepare_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_frame_prepare.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_frame_prepare",
+  "name": "sound_frame_prepare",
   "notes": [],
   "object_offset": "0x7af08",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 90,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8af08",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:3d4bcd051c4790ad613f5ba845e8566f36019ad7d8d1f12486581b94f186c332",
+    "source_digest": "sha256:425f03d3a7e90cda7b54f505c954166b727e1becc5f00c62079773a9ae9a36d9",
+    "tool": "run.py"
+  },
+  "role": "Prepares the voice frames of the current source and mixes the voices.",
+  "section": "object_update_all callees",
   "size": 152,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_frame_prepare_"
 }

@@ -26366,3 +26366,68 @@ temporary `-od` recipe.
   0x298b4`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The sound_frame_prepare module at 0x8af08
+
+- Observation: the original body at `0x8af08` holds 22 instructions and 98
+  bytes up to the first `ret` at `0x8af69`.  The function has a second path
+  that ends at the `ret` at `0x8af9f`.  The next recorded function starts at
+  `0x8afa0`, so the store record keeps the 152-byte extent and sets no separate
+  function size.  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8af08 --count 22` and
+  `tools/rebuild/functions/0x8af08.json`.
+- Observation: the only direct caller is the per-frame loop of
+  `sound_effects_update` at `0x81ab0`, at the call site `0x81b11`.  The
+  `sound_effects_update` module uses the name `sound_frame_prepare` for this
+  call.  The record takes the section `object_update_all callees`.
+  Evidence: the call at `0x81b11`, `tools/rebuild/sound_effects_update.c`, and
+  the finding "The sound_effects_update module at 0x81ab0".
+- Observation: the voice context at `0x74454` holds the frame table base at
+  `+0x00`, the voice count at `+0x04`, the frame index at `+0x08`, the voice
+  record at `+0x0c`, and the source record at `+0xc8`.  `sound_voice_setup` at
+  `0x8adac` writes the voice count.
+  Evidence: the stores at `0x8af15` through `0x8af1b`, the reads at `0x8af22`
+  and `0x8af5f`, and the finding "The sound_voice_setup module at 0x8adac".
+- Observation: the function calls `sound_voice_setup`, clears the frame index,
+  takes the voice count as the loop count, and points the voice record at
+  `0x7453c`.  A set bit `0x40000000` of the source record selects the near
+  helper at `0x8b0e8`.  A clear bit selects `sound_source_frame_prepare` at
+  `0x8affc`.  The first path advances the source record by `0x20`.  Both paths
+  advance the voice record by `0x1f4` and increment the frame index for each
+  voice.  The function then calls the voice mix at `0x83500` with the table
+  `0x7a6e4` and the voice count.
+  Evidence: the calls at `0x8af08`, `0x8af35`, `0x8af64`, `0x8af72`, and
+  `0x8af9a`, the flag test at `0x8af22`, and the finding "The
+  sound_source_frame_prepare module at 0x8affc".
+- Observation: the source record marks a near emitter, so the second path
+  skips the per-source record advance.  The name `sound_frame_prepare` is
+  inferred from the caller, and the original has no symbol.
+  Evidence: the second path at `0x8af6c` through `0x8af9f` and the declaration
+  in `tools/rebuild/sound_effects_update.c`.
+- Observation: the original has no EBP frame, so the module builds without
+  `-of+`.  The original uses no floating-point instruction, so the module
+  needs no FPU stub.
+  Evidence: the prologue at `0x8af08` and the code at `0x8af08` through
+  `0x8af9f`.
+- Observation: the harness holds the voice context and the four callee stubs.
+  The four paths cover one far voice, three far voices with a preset frame
+  index, two near voices, and one near voice with a preset frame index and
+  frame table base.  The output holds the markers `0` through `3` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/sound_frame_prepare_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_frame_prepare`, and
+  `work/rebuild/sfp.txt`.
+- Observation: the rebuilt body holds 3 of 22 decoded instructions, 7 of 90
+  bytes, and 0 of 10 relocation slots equal.  The identity check stays open
+  because V2 saves `ecx` and `edx`, keeps the context in `edx`, reads the near
+  flag as a byte test, keeps the loop count in `ecx`, and puts the near path
+  first while the original puts the far path first.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8af08 --count 22 --rebuilt work/rebuild/sfp.exe
+  --rebuilt-map work/rebuild/sound_frame_prepare.map --rebuilt-symbol
+  sound_frame_prepare_` and `python3 tools/rebuild/run.py run --function
+  0x8af08`.
+- Limit: the original has no symbol name for this function.  The module name,
+  the second path helper name `sub_8b0e8`, and the field names in the harness
+  stay inferred.

@@ -1,0 +1,27 @@
+{
+  "exe": "sfp.exe",
+  "map": "sound_frame_prepare.map",
+  "name": "sound_frame_prepare",
+  "run": {
+    "command": "sfp.exe > sfp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "sfp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_frame_prepare.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_frame_prepare_main.c"
+    }
+  ]
+}
