@@ -24792,3 +24792,65 @@ temporary `-od` recipe.
   point_rotate_x_` and `python3 tools/rebuild/run.py run --function 0x221fc`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The sound_effect_delay module at 0x24c4c
+
+- Observation: the original body at `0x24c4c` holds 36 instructions and 122
+  bytes up to the `ret 4` at `0x24cc3`.  Two pad bytes follow the `ret`, and the
+  next record starts at `0x24cc8`, so the store record keeps the 124-byte extent
+  and sets no separate function size.  The identity check uses 36 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24c4c --count 36` and
+  `tools/rebuild/functions/0x24c4c.json`.
+- Observation: the two integer arguments arrive in the Watcom register order.
+  `eax` holds the enable signal and `edx` holds the effect index.  The float
+  limit makes the compiler pass the remaining argument on the stack, so the
+  callee cleans it with `ret 4`.
+  Evidence: the stores at `0x24c52` and `0x24c55`, the read of `[ebp + 8]` at
+  `0x24c89`, and the `ret 4` at `0x24cc3`.
+- Observation: the array at `DAT_001922c` holds one float timer per effect.
+  The function adds the frame delta `DAT_00118e08` to the timer of the effect.
+  When the timer reaches the limit, the function enqueues the effect through
+  `sound_enqueue` at 0x247fc with the variant mode 3 and the delay 0.7, then
+  latches the timer at -1.  A latched timer returns at once, so the effect fires
+  one time per enabled period.  A clear enable signal resets the timer to 0, so
+  the next enabled period starts a new delay.
+  Evidence: the block at `0x24c58` through `0x24cbe`, the array at `0x1922c`,
+  the delta at `0x18e08`, the call at `0x24c9e`, and the enqueue at `0x247fc`.
+- Observation: the only direct caller is `car_sound_update` at 0x242bc, with the
+  call sites at `0x2438f`, `0x243cb`, `0x2443e`, `0x2446e`, `0x244b2`, and
+  `0x245a5`.  That function gates the effects by the engine speed, the gear
+  latch, the mode byte, the pitch term, the car records, and the frame timer.
+  The sound functions sit in the section Program functions.
+  Evidence: the call sweep for `0x24c4c` and the `car_sound_update` record.
+- Inference: the array index, the frame delta, the enqueue, and the latch
+  support the name `sound_effect_delay`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the caller record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function needs no math helper and no truncation, so the shared
+  `fpu_stub.asm` supplies the FPU run-time symbols.  The module uses no
+  assembly implementation.
+  Evidence: `tools/rebuild/sound_effect_delay.c` and
+  `tools/rebuild/modules/sound_effect_delay.json`.
+- Observation: the behavior check passes.  The harness holds the frame delta and
+  the per-effect timer array with one extra sentinel entry.  It runs eight
+  paths: the clear enable signal, the latched timer, the timer below the limit,
+  the timer that reaches the limit, the timer that passes the limit, the effect
+  0 with its neighbour, the re-arm by a clear signal, and the limit 0 at the
+  timer 0.  The output holds the markers `0` through `7` and `D`.
+  Evidence: `tools/rebuild/sound_effect_delay_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_effect_delay`,
+  `work/rebuild/sedelay.txt`, and `python3 tools/rebuild/run.py run --function
+  0x24c4c`.
+- Observation: the rebuilt body holds 36 instructions and 108 bytes in the
+  identity window.  The identity check stays open at 10 of 36 instructions, 15
+  of 108 bytes, and 0 of 11 relocation slots.  V2 saves `ebx` and `ecx`, keeps
+  the effect index and the array pointer in registers, uses another branch shape
+  for the enable signal, and restores the stack with `lea`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24c4c --count 36 --rebuilt work/rebuild/sedelay.exe
+  --rebuilt-map work/rebuild/sound_effect_delay.map --rebuilt-symbol
+  sound_effect_delay_` and `python3 tools/rebuild/run.py run --function 0x24c4c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
