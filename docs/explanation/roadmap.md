@@ -260,8 +260,9 @@ current host.
   `direction_angle` at `0x226bc`, and the Phase V module
   `game_mode_20_start` at `0x13120`, and the Phase V module
   `cd_audio_volume_set` at `0x265b4`, and the Phase V module
-  `sound_enqueue` at `0x247fc`;
-  thirty modules are verified, one is matching, and three hundred and four
+  `sound_enqueue` at `0x247fc`, and the Phase V module
+  `sound_reset` at `0x2471c`;
+  thirty modules are verified, one is matching, and three hundred and five
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

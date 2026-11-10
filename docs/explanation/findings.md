@@ -24531,3 +24531,60 @@ temporary `-od` recipe.
   sound_enqueue_` and `python3 tools/rebuild/run.py run --function 0x247fc`.
 - Limit: the original has no symbol name for this function.  The module name
   and the callers stay inferred.
+
+## The sound_reset module at 0x2471c
+
+- Observation: the original body at `0x2471c` holds 45 instructions and 132
+  bytes up to the `ret` at `0x2479f`.  The next record starts at `0x247a0`, so
+  the store record keeps the 132-byte extent and sets no separate function size.
+  The identity check uses 45 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2471c --count 45` and
+  `tools/rebuild/functions/0x2471c.json`.
+- Observation: the only direct caller is `race_session_start` at `0x128e0` with
+  the call site at `0x12abb`.  The caller runs the function after `video_fill`
+  and before the table lookup in the frame setup.  The caller sits in The timing
+  and filter layer, but the function resets the sound state, so the record takes
+  the section Program functions.
+  Evidence: the call at `0x12abb` and the `race_session_start` record.
+- Observation: the status `DAT_00119070` holds the playing sound or -1, the timer
+  `DAT_0011907c` holds the elapsed time, and the queue head `DAT_00119080` holds
+  the first queued effect or -1.  The `sound_queue_update` record at `0x24880`
+  reads the same three globals.
+  Evidence: the stores at `0x24732` through `0x2473e` and the reads at `0x24895`
+  through `0x248ac`.
+- Observation: the function writes -1 to the status, the timer bits `0x3f333333`
+  to the timer, and -1 to the queue head.  It clears the 27-entry array at
+  `0x1922c` and fills the 27-entry rotation counters at `0x191c0`.  A set bit 1
+  of `DAT_000007fd` selects the low bit, and a clear bit 1 selects 2.
+  `sound_variant_next` at `0x24b48` reads the same counters.
+  Evidence: the first loop at `0x24744` through `0x24761`, the second loop at
+  `0x24763` through `0x24796`, and the counter read at `0x24b55`.
+- Inference: the sound state globals, the two 27-entry sound arrays, and the
+  caller support the name `sound_reset`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the globals above and the caller at `0x12abb`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub and no assembly.  The timer holds its bits in an
+  integer, because the original moves the bits and links no float symbol.
+  Evidence: `tools/rebuild/sound_reset.c` and
+  `tools/rebuild/modules/sound_reset.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `4` and `D`.  The five paths cover the clear bit 1, the counter 2, the
+  counter 3, the counter 1, and a second call.
+  Evidence: `tools/rebuild/sound_reset_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_reset`,
+  `work/rebuild/sreset.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2471c`.
+- Observation: the rebuilt body holds 45 decoded instructions and 136 bytes.
+  The identity check stays open at 13 of 45 instructions, 6 of 132 bytes, and 0
+  of 17 relocation slots.  V2 pushes the frame first, keeps the status value in
+  `eax`, stores the timer as an immediate, keeps the index in `eax`, uses `shl`
+  for the array stride, and restores the stack with `lea`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2471c --count 45 --rebuilt work/rebuild/sreset.exe
+  --rebuilt-map work/rebuild/sound_reset.map --rebuilt-symbol sound_reset_` and
+  `python3 tools/rebuild/run.py run --function 0x2471c`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.
