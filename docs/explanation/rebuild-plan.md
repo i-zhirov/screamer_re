@@ -516,8 +516,43 @@ reproduce the original bytes.
 | `0x1e670` | `func_1e670` (done) | 142 | 52 | 0 | 36 |
 | `0x4d098` | `pcx_decode` (done) | 139 | 40 | 3 | 0 |
 
-This table starts Phase U.
+This table completes Phase U.
 
+### Phase V: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x118e8` | unnamed | 139 | 46 | 1 | 5 |
+| `0x11714` | unnamed | 139 | 49 | 0 | 0 |
+| `0x160a4` | unnamed | 136 | 38 | 0 | 3 |
+| `0x2414c` | unnamed | 135 | 39 | 4 | 0 |
+| `0x240c4` | unnamed | 135 | 39 | 4 | 0 |
+| `0x1ec7c` | unnamed | 134 | 44 | 2 | 0 |
+| `0x19e78` | unnamed | 134 | 41 | 6 | 0 |
+| `0x226bc` | unnamed | 133 | 48 | 1 | 25 |
+| `0x13120` | unnamed | 133 | 44 | 2 | 0 |
+| `0x265b4` | unnamed | 132 | 43 | 1 | 0 |
+| `0x247fc` | unnamed | 132 | 45 | 0 | 0 |
+| `0x2471c` | unnamed | 132 | 45 | 0 | 0 |
+| `0x130a0` | unnamed | 127 | 44 | 2 | 0 |
+| `0x25d28` | unnamed | 125 | 41 | 0 | 0 |
+| `0x221fc` | unnamed | 124 | 42 | 4 | 18 |
+| `0x24c4c` | unnamed | 122 | 36 | 1 | 8 |
+| `0x4d260` | unnamed | 121 | 40 | 3 | 16 |
+| `0x1c0ac` | unnamed | 120 | 32 | 2 | 0 |
+| `0x23f50` | unnamed | 117 | 32 | 1 | 3 |
+| `0x156a8` | unnamed | 117 | 29 | 14 | 0 |
+| `0x8bc7c` | unnamed | 116 | 33 | 6 | 0 |
+| `0x1f990` | unnamed | 115 | 34 | 3 | 0 |
+| `0x1f8dc` | unnamed | 112 | 37 | 4 | 0 |
+| `0x2218c` | unnamed | 111 | 38 | 4 | 18 |
+
+This table starts Phase V.
+
+## Position
 ## Position
 
 Three hundred and twenty-three modules carry a recipe and a result: the twelve Phase A modules,
