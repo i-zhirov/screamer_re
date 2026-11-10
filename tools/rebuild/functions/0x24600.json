@@ -1,9 +1,107 @@
 {
   "address": "0x24600",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 35,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24600 holds 35 instructions and 101 bytes up to the ret at 0x24664; the out-of-line continuation at 0x24665 runs on the common epilogue at 0x24710, and the next function starts at 0x2471c, so the store record keeps the 284-byte extent and sets no separate function size; the identity check uses the first 35 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the caller scene_setup at 0x15984 calls the function at 0x15a5f after it loads the SFXSBASE and level lists; the function loads the SOUND_FX members SPFXBASE and SPFXFULL of the type GEN into the 0x24-byte records at DAT_0015224; the record index is DAT_00018d84 at object-3 offset 0x18d84, and the list texts sit at object-3 offsets 0xe78 through 0xea0"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns when the state DAT_0001d2c8 is zero; it probes memory_available at 0x2f8ca and clears the state when the memory is below 3000000 with the mode 4 at DAT_0001d260, or when the memory is below 400000; it saves the index at DAT_0001906c, loads SPFXBASE, sets the row count at DAT_00019068, loads SPFXFULL when the memory is above 1900000 with the full flag DAT_00019064, and adds the total to DAT_00018d84; sound_variant_select at 0x24a84 reads the full flag and the row count"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the SOUND_FX list texts, and the sample table support the name sound_effect_list_init; the related sound_bank_load at 0x1f2e0 sits in the section The sound loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the state, the mode, the index, the three output cells, the arena, the 0x24-byte table, and the memory and list stubs; the seven paths cover the disabled state, the low memory with the mode 4, the low memory with another mode, the full two-list load, the base-only load, the memory boundaries, and the second low memory; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 6 of 35 instructions, 10 of 97 bytes, and 0 of 6 relocation slots equal; the identity check stays open because the harness build fills the four list texts at the function start and V2 lays out the prologue and the branches in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24600 --count 35"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24600 --count 35 --rebuilt work/rebuild/sfxlist.exe --rebuilt-map work/rebuild/sound_effect_list_init.map --rebuilt-symbol sound_effect_list_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_effect_list_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24600"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_effect_list_init module at 0x24600"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_list_init.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_list_init_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_effect_list_init.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_effect_list_init",
+  "name": "sound_effect_list_init",
   "notes": [],
   "object_offset": "0x14600",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 97,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 35,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24600",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:c8447c8954a484a065d2452d3a3bb85cc347b821f4b8098d895017b7749625da",
+    "source_digest": "sha256:77cf86d0f66c85265b67987c5e8d480977932a0cba817b37c22749df6821aa0b",
+    "tool": "run.py"
+  },
+  "role": "loads the player sound effect lists into the sample table and sets the sample count, the start index, and the full-quality flag",
+  "section": "The sound loaders",
   "size": 284,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_effect_list_init_"
 }

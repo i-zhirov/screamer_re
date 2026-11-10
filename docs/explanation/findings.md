@@ -26098,3 +26098,73 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x2f4ee`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The sound_effect_list_init module at 0x24600
+
+- Observation: the first basic block at `0x24600` holds 35 instructions and 101
+  bytes up to the `ret` at `0x24664`.  The out-of-line continuation at `0x24665`
+  runs on the common epilogue at `0x24710`, and the next function starts at
+  `0x2471c`.  The store record therefore keeps the 284-byte extent and sets no
+  separate function size.  The identity check uses the first 35 instructions,
+  because `le.function_body` stops at the first `ret`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24600 --count 90` and
+  `tools/rebuild/functions/0x24600.json`.
+- Observation: `scene_setup` at `0x15984` calls the function at `0x15a5f` after
+  it loads the `SFXSBASE` and level lists.  The function loads the `SOUND_FX`
+  members `SPFXBASE` and `SPFXFULL` of the type `GEN` into the 0x24-byte records
+  at `DAT_0015224`.  The record index is `DAT_00018d84`, and the list texts sit
+  at object-3 offsets `0xe78` through `0xea0`.
+  Evidence: the call at `0x15a5f`, the two `list_file_load` calls at `0x24693`
+  and `0x246ed`, and the string bytes at object-3 offset `0xe78`.
+- Observation: the function returns when the state `DAT_0001d2c8` is zero.  It
+  probes `memory_available` at `0x2f8ca` and clears the state in two cases: the
+  memory is below 3000000 and the mode `DAT_0001d260` is 4, or the memory is
+  below 400000.
+  Evidence: the calls at `0x2461d` and `0x24646`, the compares at `0x24622` and
+  `0x2464b`, and the branches at `0x24612`, `0x24627`, `0x24630`, and
+  `0x24650`.
+- Observation: the function saves the index at `DAT_0001906c`, loads `SPFXBASE`,
+  and sets the row count at `DAT_00019068`.  When the memory is above 1900000, it
+  loads `SPFXFULL` after the first rows, sets the full flag `DAT_00019064` to 1,
+  and adds the second row count.  Otherwise it clears the flag.  It then adds the
+  total row count to `DAT_00018d84`.  `sound_variant_select` at `0x24a84` reads
+  the full flag and the row count.
+  Evidence: the stores at `0x24671`, `0x246b6`, `0x246f9`, `0x24702`, and
+  `0x2470a`, the compare at `0x246a5`, and the clamp at `0x24afd`.
+- Inference: the caller, the `SOUND_FX` list texts, and the sample table support
+  the name `sound_effect_list_init`.  The related `sound_bank_load` at `0x1f2e0`
+  sits in the section The sound loaders, so the record takes that section.  The
+  original has no symbol name, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: `tools/rebuild/modules/sound_effect_list_init.json`,
+  `tools/rebuild/scene_setup.c`, and `docs/reference/program-map.md`.
+- Observation: the original has the EBP frame, so the module builds with `-of+`.
+  The function holds no floating-point instruction, so the module needs no FPU
+  stub, and the module uses no assembly.
+  Evidence: the prologue at `0x24600` through `0x24608` and
+  `tools/rebuild/modules/sound_effect_list_init.json`.
+- Observation: the harness holds the state, the mode, the index, the three
+  output cells, the arena, the 0x24-byte table, and the memory and list stubs.
+  The seven paths cover the disabled state, the low memory with the mode 4, the
+  low memory with another mode, the full two-list load, the base-only load, the
+  memory boundaries, and the second low memory.  The output holds the markers `0`
+  through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_effect_list_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_effect_list_init`, and
+  `work/rebuild/sfxlist.txt`.
+- Observation: the diff reports 6 of 35 instructions, 10 of 97 bytes, and 0 of 6
+  relocation slots equal.  The identity check stays open because the harness
+  build fills the four list texts at the function start, and V2 lays out the
+  prologue and the branches in another shape.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24600 --count 35 --rebuilt work/rebuild/sfxlist.exe
+  --rebuilt-map work/rebuild/sound_effect_list_init.map --rebuilt-symbol
+  sound_effect_list_init_` and `python3 tools/rebuild/run.py run --function
+  0x24600`.
+- Limit: the plan row counts the first basic block only.  The full function is
+  284 bytes and 89 instructions, and the identity window stays at 35
+  instructions, as the record contract states for a body sweep that runs past
+  the end of the function.
+  Evidence: `tools/rebuild/functions/0x24600.json` and the `count` field of the
+  record.
