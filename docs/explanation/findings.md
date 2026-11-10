@@ -25718,3 +25718,70 @@ temporary `-od` recipe.
   0x2b3e5`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The track_timer_update module at 0x1960c
+
+- Observation: the original body at `0x1960c` holds 32 instructions and 105
+  bytes up to the `ret` at `0x19674`.  Three pad bytes follow the `ret`, and the
+  next record starts at `0x19678`, so the store record keeps the 108-byte extent
+  and sets no separate function size.  The identity check uses 32 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1960c --count 32` and
+  `tools/rebuild/functions/0x1960c.json`.
+- Observation: the only direct callers are `player_lap_progress_update` at
+  `0x194a0` with the call sites at `0x1955c` and `0x19592`.  That function runs
+  in the vehicle state chain after `player_track_node_update` at `0x1821c`, and
+  it names the callee `track_timer_update`.  The record takes the section `The
+  vehicle state chain`.
+  Evidence: the call sites at `0x1955c` and `0x19592`, the
+  `player_lap_progress_update` record, and the finding "The
+  player_lap_progress_update module at 0x194a0".
+- Observation: the function returns at once when the race position at `0x11d2b0`
+  plus one equals the lap index at `+0x684`.  Otherwise it divides the timer at
+  `+0x790` by the divisor 5.0 at object-3 offset `0x8b4`, adds the integer step,
+  and clears the effect timer index `0x16` through `0x24d7c`.
+  Evidence: the block at `0x19616` through `0x1966b` and the relocation targets
+  `0x1008b4` and `0x11922c`.
+- Observation: the mode byte `DAT_0011d260` selects the step.  The bits `0x60`
+  read the global at object-3 offset `0xcf50`, and the clear bits read the
+  global at object-3 offset `0xcf4c`.  The two globals have no other reference
+  in the image.  The minimal harness image does not load the constant segment,
+  so the module reads the divisor and the two steps from the globals
+  `track_timer_divisor`, `track_timer_step_mode`, and
+  `track_timer_step_default`.
+  Evidence: the relocations at `0x19641`, `0x19651`, and `0x19658`, the bytes
+  at `0x1008b4`, and the relocation sweep for the two step globals.
+- Inference: `player_lap_progress_update` already names the callee
+  `track_timer_update`.  The timer field, the two step globals, and the effect
+  timer clear support the name.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the caller record and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses the x87 stack for the divide and the
+  integer-to-float add, so the module links the shared `fpu_stub.asm` for
+  `__8087`, `__init_387_emulator`, and `_fltused_`.  The module uses no
+  assembly implementation.
+  Evidence: the prologue at `0x1960c` and
+  `tools/rebuild/modules/track_timer_update.json`.
+- Observation: the harness holds the object, the race position, the mode byte,
+  the divisor, the two steps, and the effect timer stub.  The nine paths cover
+  the early return, the default step, the mode `0x60`, the mode bits `0x20` and
+  `0x40`, the mode bit `0x10` alone, the negative step, the mode `0x50`, and
+  the repeated calls with an early return.  The harness compares the float bit
+  patterns through a union, because an FPU literal memory operand reads the
+  constant pool at a low address.  The output holds the markers `0` through `8`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/track_timer_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module track_timer_update`, and
+  `work/rebuild/ttu.txt`.
+- Observation: the diff reports 4 of 32 instructions, 8 of 105 bytes, and 0 of
+  11 relocation slots equal.  The identity check stays open because V2 saves
+  `ebp` first, keeps the object in `eax` and the step in a local, selects the
+  step with two memory loads, and divides with the divisor in the FPU stack.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1960c --count 32 --rebuilt work/rebuild/ttu.exe
+  --rebuilt-map work/rebuild/track_timer_update.map --rebuilt-symbol
+  track_timer_update_` and `python3 tools/rebuild/run.py run --function
+  0x1960c`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the two step globals stay inferred.

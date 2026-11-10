@@ -1,0 +1,39 @@
+{
+  "exe": "ttu.exe",
+  "map": "track_timer_update.map",
+  "name": "track_timer_update",
+  "run": {
+    "command": "ttu.exe > ttu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "ttu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_timer_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_timer_update_main.c"
+    }
+  ]
+}

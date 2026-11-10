@@ -564,7 +564,7 @@ reproduce the original bytes.
 | `0x2211c` | `angle_filter` (done) | 110 | 41 | 1 | 17 |
 | `0x110d0` | `object_lookup` (done) | 110 | 40 | 1 | 0 |
 | `0x2b3e5` | `map_object_progress_sum` (done) | 107 | 39 | 0 | 4 |
-| `0x1960c` | unnamed | 105 | 32 | 1 | 6 |
+| `0x1960c` | `track_timer_update` (done) | 105 | 32 | 1 | 6 |
 | `0x24cc8` | unnamed | 104 | 33 | 1 | 5 |
 | `0x2a214` | unnamed | 103 | 31 | 0 | 0 |
 | `0x8a9e8` | unnamed | 102 | 25 | 0 | 0 |
@@ -589,7 +589,7 @@ This table starts Phase W.
 ## Position
 ## Position
 
-Three hundred and fifty-two modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and fifty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -792,5 +792,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `point_rotation_flags` at `0x224dc`, and the Phase W module
 `angle_filter` at `0x2211c`, and the Phase W module
 `object_lookup` at `0x110d0`, and the Phase W module
-`map_object_progress_sum` at `0x2b3e5`.
-The next unnamed function is `0x1960c`.
+`map_object_progress_sum` at `0x2b3e5`, and the Phase W module
+`track_timer_update` at `0x1960c`.
+The next unnamed function is `0x24cc8`.
