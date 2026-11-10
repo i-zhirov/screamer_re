@@ -1,0 +1,107 @@
+{
+  "address": "0x2b3e4",
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 40,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2b3e4 holds 40 instructions and 108 bytes up to the ret at 0x2b44f; the next function starts at 0x2b450; the candidate record at 0x2b3e5 sits on the push edx of the same prologue, so the store keeps the 1-byte extent to that record; the identity check uses 40 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x50 map object records at DAT_001db78, stride 0x64; a record with the field +0x08 equal to -1 holds no object and the function skips it; for a busy record the function adds the progress value +0x58 to a float total and returns the total"
+    },
+    {
+      "kind": "note",
+      "text": "map_object_place at 0x2b044 sets the progress +0x58 to 1.0, map_object_update at 0x2b9cc decays it, and map_object_finish at 0x2b494 resets it to zero; the sum over the active records therefore measures the remaining menu animation; the name map_object_progress_sum is inferred and the section is race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the original pushes eax, edx, edi, and ebp and uses the EBP frame, so the module builds with -of+; the function makes no call; it uses the x87 stack for the float add, so the module links the shared fpu_stub.asm for __8087, __init_387_emulator, and _fltused_"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 0x50 records; the six paths cover every record free, every record busy with the progress 1.0, one busy record, three busy records with the progress 0.5, 0.25, and 1.0 and a free record with the progress 9.0, every record busy with the progress index, and two busy records with the progress -1.5 and 2.0; every expected sum is an exact binary value, so the harness compares exactly; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the harness computes no progress with an FPU literal memory operand, because this toolchain reads the constant pool of such an operand at a low address; the module itself reads the progress from the record, so it holds no FPU literal"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 4 of 40 instructions, 2 of 90 bytes, and 0 of 5 relocation slots equal; the identity check stays open because V2 pushes the frame pointer first, keeps the total in [ebp-0xc], drops the return temp, and computes the 0x64 stride with imul; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2b3e4 --count 40"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b3e4 --count 40 --rebuilt work/rebuild/mops.exe --rebuilt-map work/rebuild/map_object_progress_sum.map --rebuilt-symbol map_object_progress_sum_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_object_progress_sum"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2b3e4"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_object_progress_sum module at 0x2b3e4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_object_progress_sum.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_object_progress_sum_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/map_object_progress_sum.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "map_object_progress_sum",
+  "name": "map_object_progress_sum",
+  "notes": [],
+  "object_offset": "0x1b3e4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 90,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b3e4",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:9c12e373f336772a01a0af535656ae38964b5c003427200e2dadd201ea0a9ec9",
+    "source_digest": "sha256:ec782e943a9fddfc9649024dd98f4a14ab69ba7b852e5d45ddaa6ba0e9d6d19f",
+    "tool": "run.py"
+  },
+  "role": "sums the progress of the active map object records and returns the total",
+  "section": "race_frame callees",
+  "size": 1,
+  "status": "rebuilt",
+  "symbol": "map_object_progress_sum_"
+}

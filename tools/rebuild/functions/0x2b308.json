@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2b308 holds 66 instructions and 218 bytes up to the ret at 0x2b3e1; the store record keeps the 221-byte extent and sets no function size; the identity check uses 66 instructions"
+      "text": "the original body at 0x2b308 holds 66 instructions and 218 bytes up to the ret at 0x2b3e1; the next record starts at 0x2b3e4, so the store record keeps the 220-byte extent and sets no function size; the identity check uses 66 instructions"
     },
     {
       "kind": "note",
@@ -89,7 +89,7 @@
   },
   "role": "selects the map object line with the given code by clearing the animation flag on the matching records and setting it on the other records",
   "section": "race_frame callees",
-  "size": 221,
+  "size": 220,
   "status": "rebuilt",
   "symbol": "map_object_line_select_"
 }

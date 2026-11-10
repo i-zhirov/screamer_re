@@ -278,7 +278,7 @@ current host.
   `point_rotation_flags` at `0x224dc`, and the Phase W module
   `angle_filter` at `0x2211c`, and the Phase W module
   `object_lookup` at `0x110d0`, and the Phase W module
-  `map_object_progress_sum` at `0x2b3e5`, and the Phase W module
+  `map_object_progress_sum` at `0x2b3e4`, and the Phase W module
   `track_timer_update` at `0x1960c`, and the Phase W module
   `sound_effect_repeat` at `0x24cc8`, and the Phase W module
   `race_menu_handler` at `0x2a214`, and the Phase W module
@@ -287,9 +287,10 @@ current host.
   `func_2f4ee` at `0x2f4ee`, and the Phase W module
   `sound_effect_list_init` at `0x24600`, and the Phase W module
   `point_rotate_y_float` at `0x22278`, and the Phase W module
-  `object_list_release_all` at `0x115f8`;
+  `object_list_release_all` at `0x115f8`, and the Phase W module
+  `menu_line_value_next` at `0x298b4`;
   thirty modules are verified, one is matching, and three hundred and
-  thirty-one rebuilds hold the recorded difference; the `video_fill`,
+  thirty-two rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

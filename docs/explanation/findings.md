@@ -20782,8 +20782,9 @@ temporary `-od` recipe.
 ## The map_object_line_select module at 0x2b308
 
 - Observation: the original body at `0x2b308` holds 66 instructions and 218
-  bytes up to the `ret` at `0x2b3e1`.  The store record keeps the 221-byte
-  extent and sets no function size.  The identity check uses 66 instructions.
+  bytes up to the `ret` at `0x2b3e1`.  The next record starts at `0x2b3e4`, so
+  the store record keeps the 220-byte extent and sets no function size.  The
+  identity check uses 66 instructions.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b308 --count 66` and
   `tools/rebuild/functions/0x2b308.json`.
 - Observation: the two direct callers are `menu_text_update` at `0x29918` and
@@ -25657,14 +25658,23 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
 
-## The map_object_progress_sum module at 0x2b3e5
+## The map_object_progress_sum module at 0x2b3e4
 
-- Observation: the original body at `0x2b3e5` holds 39 instructions and 107
-  bytes up to the `ret` at `0x2b44f`.  The next function starts at `0x2b450`, so
-  the store record keeps the 107-byte extent and sets no separate function size.
-  The identity check uses 39 instructions.
-  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b3e5 --count 39` and
-  `tools/rebuild/functions/0x2b3e5.json`.
+- Observation: the original body at `0x2b3e4` holds 40 instructions and 108
+  bytes up to the `ret` at `0x2b44f`.  The next function starts at `0x2b450`.
+  The candidate record at `0x2b3e5` sits on the `push edx` of the same prologue,
+  so the store keeps the 1-byte extent on this record and the 107-byte extent on
+  `0x2b3e5`.  The identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b3e4 --count 40` and
+  `tools/rebuild/functions/0x2b3e4.json`.
+- Observation: the `menu_line_value_next` caller at `0x298b4` calls the body at
+  `0x2b3e4`.  The prologue scan reports the candidate `0x2b3e5`, because the
+  first save pushes `eax` and the scan does not treat `eax` as a register save.
+  The record therefore sits at the true start `0x2b3e4`, and the candidate
+  `0x2b3e5` stays an unknown record.  The shape is the same as
+  `direction_angle` at `0x226bc` with the candidate `0x226bd`.
+  Evidence: the call at `0x298b9`, the disassembly from `0x2b3e4`, and the
+  records of `0x226bc` and `0x226bd`.
 - Observation: the function walks the `0x50` map object records at `DAT_001db78`
   with the stride `0x64`.  A record with the field `+0x08` equal to -1 holds no
   object, and the function skips it.  For a busy record the function adds the
@@ -25683,12 +25693,12 @@ temporary `-od` recipe.
   symbol, so the record keeps the name with the confidence `inferred`.  The
   function sits in the section race_frame callees.
   Evidence: the data flow above and the three record writers.
-- Observation: the original pushes `edx`, `edi`, and `ebp` and uses the EBP
-  frame, so the module builds with `-of+`.  The function makes no call.  It uses
-  the x87 stack for the float add, so the module links the shared
+- Observation: the original pushes `eax`, `edx`, `edi`, and `ebp` and uses the
+  EBP frame, so the module builds with `-of+`.  The function makes no call.  It
+  uses the x87 stack for the float add, so the module links the shared
   `fpu_stub.asm` for `__8087`, `__init_387_emulator`, and `_fltused_`.  The
   module uses no assembly body.
-  Evidence: the prologue at `0x2b3e5` and
+  Evidence: the prologue at `0x2b3e4` and
   `tools/rebuild/modules/map_object_progress_sum.json`.
 - Observation: the harness holds the `0x50` records.  The six paths cover every
   record free, every record busy with the progress 1.0, one busy record, three
@@ -25707,15 +25717,16 @@ temporary `-od` recipe.
   progress `index` passed.
   Evidence: the failed path with `fmul dword ptr [4]` and the passing path with
   the conversion of the index.
-- Observation: the diff reports 6 of 39 instructions, 5 of 88 bytes, and 0 of 5
-  relocation slots equal.  V2 keeps the total in `[ebp - 0xc]`, drops the
-  return temp at `[ebp - 4]`, and computes the `0x64` stride with `imul`.  The
-  build and behavior checks pass, so the store records `rebuilt`.
+- Observation: the diff reports 4 of 40 instructions, 2 of 90 bytes, and 0 of 5
+  relocation slots equal.  V2 pushes the frame pointer first, keeps the total in
+  `[ebp - 0xc]`, drops the return temp at `[ebp - 4]`, and computes the `0x64`
+  stride with `imul`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x2b3e5 --count 39 --rebuilt work/rebuild/mops.exe
+  --original-address 0x2b3e4 --count 40 --rebuilt work/rebuild/mops.exe
   --rebuilt-map work/rebuild/map_object_progress_sum.map --rebuilt-symbol
   map_object_progress_sum_` and `python3 tools/rebuild/run.py run --function
-  0x2b3e5`.
+  0x2b3e4`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
 
@@ -26290,5 +26301,68 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/object_list_release_all.map --rebuilt-symbol
   object_list_release_all_` and `python3 tools/rebuild/run.py run --function
   0x115f8`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.
+
+## The menu_line_value_next module at 0x298b4
+
+- Observation: the original body at `0x298b4` holds 30 instructions and 100
+  bytes up to the `ret` at `0x29917`.  The next function starts at `0x29918`, so
+  the store record keeps the 100-byte extent and sets no separate function size.
+  The identity check uses 30 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x298b4 --count 30` and
+  `tools/rebuild/functions/0x298b4.json`.
+- Observation: the only direct caller is at `0x28ec6`.  The call is case `0x4d2`
+  of `net_race_screen` at `0x28ba4`.  The case calls this function and then
+  `table_lookup` at `0x1f718` with 2.
+  Evidence: the direct call sweep for `0x298b4`, the case table of
+  `net_race_screen`, and the calls at `0x28ec6` and `0x28ed0`.
+- Observation: the function calls `map_object_progress_sum` at `0x2b3e4` and
+  returns at once when the sum is not zero.  Otherwise it reads the menu index
+  `DAT_0011fb60`, the selected line `DAT_001fb08[index]`, and the line table
+  `DAT_00102de8[index]`.  It increments the value index at `+0x08` and resets it
+  to zero when it exceeds the value count at `+0x0c`.  It then sets the overlay
+  word `DAT_0011fac0` to 1.
+  Evidence: the call at `0x298b9`, the compare at `0x298c0` through `0x298c5`,
+  the address blocks at `0x298c7` through `0x29903`, and the store at
+  `0x2990a`.
+- Observation: a line record holds the first string offset at `+0x00`, the item
+  id at `+0x04`, the value index at `+0x08`, and the value count at `+0x0c`.
+  `menu_text_update` at `0x29918` reads the value index as the second string
+  offset and the value count as the highest value, so the increment selects the
+  next value of the selected menu line.  The progress sum measures the remaining
+  menu animation, so the function waits for the animation to finish.
+  Evidence: the string index at `0x29a27` through `0x29aaf` and the finding "The
+  menu_text_update module at 0x29918".
+- Inference: the caller, the line record, the value index, the progress sum, and
+  the overlay word support the name `menu_line_value_next`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.  The
+  function sits in the section race_frame callees.
+  Evidence: the data flow above and the caller `net_race_screen`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses the x87 stack only for the zero compare, so the
+  module links the shared `fpu_stub.asm`.  The module uses no assembly body.
+  Evidence: the prologue at `0x298b4` and
+  `tools/rebuild/modules/menu_line_value_next.json`.
+- Observation: the harness holds the menu index, the selected-line table, the
+  two line tables, and the overlay word.  The `map_object_progress_sum` stub
+  returns the configured float.  The eight paths cover a non-zero sum, the
+  increment, the wrap above the count, the equal count, the second menu, the
+  negative sum, the zero count, and the negative zero.  The output holds the
+  markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/menu_line_value_next_main.c`,
+  `python3 tools/rebuild/harness.py run --module menu_line_value_next`, and
+  `work/rebuild/mlvn.txt`.
+- Observation: the rebuilt body holds 15 of 30 instructions, 18 of 85 bytes, and
+  1 of 9 relocation slots equal.  The identity check stays open because V2
+  pushes the registers in another order, keeps the line pointer in `eax`, folds
+  the increment into a load, an `inc`, and a store, and reaches the line table
+  through near addresses.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x298b4 --count 30 --rebuilt work/rebuild/mlvn.exe
+  --rebuilt-map work/rebuild/menu_line_value_next.map --rebuilt-symbol
+  menu_line_value_next_` and `python3 tools/rebuild/run.py run --function
+  0x298b4`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.

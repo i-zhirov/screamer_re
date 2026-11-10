@@ -1,9 +1,10 @@
 /* The rebuilt `map_object_progress_sum` module.
  *
- * The original sits at linear 0x2b3e5 in STARTH.EXE and holds 39 instructions
- * and 107 bytes up to the `ret` at 0x2b44f.  The next function starts at
- * 0x2b450, so the store record keeps the 107-byte extent and sets no separate
- * function size.  The identity check uses 39 instructions.
+ * The original sits at linear 0x2b3e4 in STARTH.EXE and holds 40 instructions
+ * and 108 bytes up to the `ret` at 0x2b44f.  The next function starts at
+ * 0x2b450.  The candidate record at 0x2b3e5 sits on the `push edx` of the same
+ * prologue, so the store keeps the 1-byte extent to that record.  The identity
+ * check uses 40 instructions.
  *
  * The function walks the 0x50 map object records at `DAT_001db78`, each 0x64
  * bytes long.  A record with the field `+0x08` equal to -1 holds no object, so
