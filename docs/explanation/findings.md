@@ -23842,3 +23842,67 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The identity check covers only the first 40 instructions,
   because the body sweep stops at the first `ret`.
+
+## The func_118e8 module at 0x118e8
+
+- Observation: the original body at `0x118e8` holds 46 instructions and 139
+  bytes up to the `ret 4` at `0x11970`.  The next function starts at `0x11974`
+  after the one padding byte at `0x11973`, so the store record keeps the
+  140-byte extent and sets no separate function size.  The identity check uses
+  46 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x118e8 --count 46` and
+  `tools/rebuild/functions/0x118e8.json`.
+- Observation: the only direct caller is at `0x19a77` in
+  `player_car_wheel_effect_update` at `0x19980`.  The caller passes the object
+  list at `0x6530` in `eax`, the effect slot in `edx`, and the frame delta on
+  the stack.  The effect group runs the caller on the player object at object-3
+  offset `0xf91c`, so the record takes the section The vehicle state chain.
+  Evidence: the call sweep for `0x118e8`, the block at `0x19a5d` through
+  `0x19a9c`, and the record of `0x19980`.
+- Observation: the function reads the object index from the first int of the
+  effect slot.  The index selects one `0x1c`-byte entry of the object list at
+  object-3 offset `0x6530` (linear `0x106530`).  The file record at entry
+  `+0x14` marks a free entry.  The block object pointer sits at entry `+0x0c`,
+  and the frame counter sits at object `+0x20`.
+  Evidence: the body at `0x118f6` through `0x11914`.
+- Observation: the function adds the delta times `65535.0` to the frame
+  counter and truncates the sum toward zero.  The scale maps a normalized delta
+  onto the 16-bit frame units.  A sum below `0x10000` stores the sum and
+  returns 0.  A sum at or above `0x10000` stores the sum minus `0x10000` and
+  returns -1, so the caller clears the slot flag and releases the object
+  through `0x11850`.  A free entry returns `0x11`.
+  Evidence: the block at `0x11911` through `0x1196b`.
+- Observation: the scale `65535.0` sits at object-3 offset `0x3e8` (linear
+  `0x1003e8`) and reaches the body through an LE fixup at `0x1191c`.  It
+  arrives through a global, because the original reads the fixed address.  The
+  original calls the truncating helper at `0x4d9f4`, so the local
+  `func_118e8_fpu.asm` makes `__CHP` truncate toward zero.  The original has
+  the EBP frame, so the module builds with `-of+`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d9f4 --count 12`, the
+  fixup at `0x1191c`, and the module recipe.
+- Inference: the only caller and the object list support the frame-advance
+  role.  No name reaches the function, so the record keeps the weak fallback
+  `func_118e8` with the confidence `inferred`.
+  Evidence: the call sweep and the object list layout above.
+- Observation: the harness holds the two-entry object list, the two block
+  objects, the effect-slot index, the frame delta, and the frame scale.  The
+  seven paths cover the full advance to 65535, the free entry, the wrap from
+  frame one, the positive truncation at the delta 0.5, the second list entry,
+  the negative truncation, and the zero delta.  The output holds the markers
+  `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_118e8_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_118e8`,
+  `work/rebuild/f118e8.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x118e8`.
+- Observation: the rebuilt body holds 4 of 46 instructions equal, 4 of 127
+  bytes equal, and 0 of 2 relocation slots.  The identity check stays open
+  because V2 saves only `ebp`, uses `imul` for the `0x1c` stride, spills the
+  frame to the stack for `fild`, calls `__CHP` through a near relative call,
+  and shares the two return paths.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x118e8 --count 46 --rebuilt work/rebuild/f118e8.exe
+  --rebuilt-map work/rebuild/func_118e8.map --rebuilt-symbol func_118e8_` and
+  `python3 tools/rebuild/run.py run --function 0x118e8`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays the weak fallback and inferred.

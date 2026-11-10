@@ -249,8 +249,9 @@ current host.
   `object_list_link` at `0x11568`, and the Phase U module
   `traffic_event_read` at `0x1eed8`, and the Phase U module
   `func_1e670` at `0x1e670`, and the Phase U module
-  `pcx_decode` at `0x4d098`;
-  thirty modules are verified, one is matching, and two hundred and ninety-three
+  `pcx_decode` at `0x4d098`, and the Phase V module
+  `func_118e8` at `0x118e8`;
+  thirty modules are verified, one is matching, and two hundred and ninety-four
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
