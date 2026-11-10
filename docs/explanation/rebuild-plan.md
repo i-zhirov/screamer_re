@@ -526,7 +526,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x118e8` | `func_118e8` (done) | 139 | 46 | 1 | 5 |
-| `0x11714` | unnamed | 139 | 49 | 0 | 0 |
+| `0x11714` | `func_11714` (done) | 139 | 49 | 0 | 0 |
 | `0x160a4` | unnamed | 136 | 38 | 0 | 3 |
 | `0x2414c` | unnamed | 135 | 39 | 4 | 0 |
 | `0x240c4` | unnamed | 135 | 39 | 4 | 0 |
@@ -554,7 +554,7 @@ This table starts Phase V.
 
 ## Position
 
-Three hundred and twenty-four modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and twenty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -729,5 +729,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `traffic_event_read` at `0x1eed8`, and the Phase U module
 `func_1e670` at `0x1e670`, and the Phase U module
 `pcx_decode` at `0x4d098`, and the Phase V module
-`func_118e8` at `0x118e8`.
-The next unnamed function is `0x11714`.
+`func_118e8` at `0x118e8`, and the Phase V module
+`func_11714` at `0x11714`.
+The next unnamed function is `0x160a4`.

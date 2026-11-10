@@ -1,9 +1,103 @@
 {
   "address": "0x11714",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 49,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11714 holds 49 instructions and 139 bytes up to the ret at 0x1179e; the next function starts at 0x117a0 after the one padding byte at 0x1179f, so the store record keeps the 140-byte extent and sets no separate function size; the identity check uses 49 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers at 0x11641 and 0x14d7d are the release-all pass at 0x115f8 and replay_playback_start at 0x14d2c; the release-all pass is called by race_end at 0x279a4, race_cleanup at 0x2a1b0, and an unnamed reset pass at 0x156a8; every caller passes the object table 0x6530 in eax, the list 0x6350 in edx, and the entry index address in ebx; the shared table and list match object_list_link at 0x11568, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the table holds 0x78 records of 0x1c bytes; a record holds the name at +0x00, the block object at +0x0c, the chunk table at +0x10, the file record at +0x14, and one slot word at +0x18; a slot word of -1 marks a free slot"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the entry index from the index address; an entry with slot -1 returns 0xc and changes nothing; otherwise the function writes -1 to list[slot] when list[slot + 1] is non-zero and writes 0 when it is zero; the function then clears the entry slot to -1 and returns 0; the acquire at 0x11660 uses the same list"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol and no name reaches the function, so the record keeps the weak fallback func_11714 with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds four 0x1c-byte records, eight list values, and one entry index; the seven paths cover the free entry, the non-zero next value, the zero next value, the second record, the last record, the slot 6, and the negative next value; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 49 instructions equal, 2 of 139 bytes equal, and 0 of 5 relocation slots; the identity check stays open because V2 saves no edi and esi, uses imul for the 0x1c stride, keeps the table and the index in registers, folds the two list stores into one sete and dec pair, and omits the EBP frame spill; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11714 --count 49"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11714 --count 49 --rebuilt work/rebuild/f11714.exe --rebuilt-map work/rebuild/func_11714.map --rebuilt-symbol func_11714_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11714"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_11714 module at 0x11714"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_11714.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_11714_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_11714.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_11714",
+  "name": "func_11714",
   "notes": [],
   "object_offset": "0x1714",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 139,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 49,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11714",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:e83087366ca4c197e687032a98af9c8882a014ed70065377f0cd92371f2ede8e",
+    "source_digest": "sha256:51af0b7d96e8d66137248a75e075795a671a1a0d0597b3264c356da7cfb07618",
+    "tool": "run.py"
+  },
+  "role": "Releases the object list slot of an object table entry and drops the link when the next list value is set.",
+  "section": "Resource loader",
   "size": 140,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_11714_"
 }

@@ -23906,3 +23906,61 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x118e8`.
 - Limit: the original has no symbol name for this function.  The module name
   stays the weak fallback and inferred.
+
+## The func_11714 module at 0x11714
+
+- Observation: the original body at `0x11714` holds 49 instructions and 139
+  bytes up to the `ret` at `0x1179e`.  The next function starts at `0x117a0`
+  after the one padding byte at `0x1179f`, so the store record keeps the
+  140-byte extent and sets no separate function size.  The identity check uses
+  49 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11714 --count 49` and
+  `tools/rebuild/functions/0x11714.json`.
+- Observation: the two direct callers are at `0x11641` in the release-all pass
+  at `0x115f8` and at `0x14d7d` in `replay_playback_start` at `0x14d2c`.  Race
+  end at `0x279a4`, race cleanup at `0x2a1b0`, and an unnamed reset pass at
+  `0x156a8` call the release-all pass.  Every caller passes the object table at
+  `0x6530` in `eax`, the list at `0x6350` in `edx`, and the entry index address
+  in `ebx`.  The shared table and list match `object_list_link` at `0x11568`,
+  so the record takes the section Resource loader.
+  Evidence: the call sweep for `0x11714` and `0x115f8`, the block at `0x11632`
+  through `0x11650`, and the block at `0x14d70` through `0x14d94`.
+- Observation: the table holds `0x78` records of `0x1c` bytes.  A record holds
+  the name at `+0x00`, the block object at `+0x0c`, the chunk table at
+  `+0x10`, the file record at `+0x14`, and one slot word at `+0x18`.  A slot
+  word of -1 marks a free slot.
+  Evidence: the field use at `0x11725` through `0x11739` and the layout of
+  `object_list_link`.
+- Observation: the function reads the entry index from the index address.  An
+  entry with slot -1 returns `0xc` and changes nothing.  Otherwise the
+  function writes -1 to `list[slot]` when `list[slot + 1]` is non-zero and
+  writes 0 when it is zero.  The function then clears the entry slot to -1 and
+  returns 0.  The acquire at `0x11660` uses the same list.
+  Evidence: the block at `0x11747` through `0x11799` and the body at
+  `0x11660`.
+- Inference: the release-all pass, the replay caller, and the shared object
+  table support the slot-release role.  No name reaches the function and the
+  original has no symbol, so the record keeps the weak fallback `func_11714`
+  with the confidence `inferred`.
+  Evidence: the call sweep and the object table layout above.
+- Observation: the harness holds four `0x1c`-byte records, eight list values,
+  and one entry index.  The seven paths cover the free entry, the non-zero next
+  value, the zero next value, the second record, the last record, the slot 6,
+  and the negative next value.  The output holds the markers `0` through `6`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_11714_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_11714`,
+  `work/rebuild/f11714.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x11714`.
+- Observation: the rebuilt body holds 6 of 49 instructions equal, 2 of 139
+  bytes equal, and 0 of 5 relocation slots.  The identity check stays open
+  because V2 saves no `edi` and `esi`, uses `imul` for the `0x1c` stride, keeps
+  the table and the index in registers, folds the two list stores into one
+  `sete` and `dec` pair, and omits the EBP frame spill.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11714 --count 49 --rebuilt work/rebuild/f11714.exe
+  --rebuilt-map work/rebuild/func_11714.map --rebuilt-symbol func_11714_` and
+  `python3 tools/rebuild/run.py run --function 0x11714`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays the weak fallback and inferred.
