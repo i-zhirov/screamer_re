@@ -25350,7 +25350,7 @@ temporary `-od` recipe.
   at `0x1cbac`, `body_point_place` at `0x1ce38`, `object_collision` at
   `0x1e00c`, `traffic_body_point_place` at `0x1f108`, `ai_update` at `0x205c4`,
   `sound_emitter_update` at `0x21b9c`, and `race_radar` at `0x23a94`.  One more
-  call site at `0x22519` sits in the unnamed record at `0x224dc`.  The callers
+  call site at `0x22519` sits in the record `point_rotation_flags` at `0x224dc`.  The callers
   span the vehicle state chain, the race session, the object update, the object
   prepare, the object physics, and the program functions, so the record takes
   the section Program functions.
@@ -25465,3 +25465,64 @@ temporary `-od` recipe.
   0x262fc`.
 - Limit: the original has no symbol name for this function.  The module name and
   the record section stay inferred.
+
+## The point_rotation_flags module at 0x224dc
+
+- Observation: the original body at `0x224dc` holds 41 instructions and 110
+  bytes up to the `ret 4` at `0x22547`.  The next recorded function starts at
+  `0x2254c`, so the store record keeps the 112-byte extent and sets no separate
+  function size.  The identity check uses 41 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x224dc --count 41` and
+  `tools/rebuild/functions/0x224dc.json`.
+- Observation: the two point arguments arrive in the Watcom register order:
+  `eax` holds the first point and `edx` holds the second point.  The float angle
+  makes the compiler pass the remaining argument on the stack, so the callee
+  cleans it with `ret 4`.
+  Evidence: the stores at `0x224e4` and `0x224e7`, the read of `[ebp + 0x10]`
+  at `0x2250a`, and the `ret 4` at `0x22547`.
+- Observation: a point holds the x value at `+0x00` and the z value at `+0x08`.
+  The function forms the ground-plane delta `second - first`, turns the delta by
+  the angle through the integer rotation helper at `0x2218c`, and returns the
+  sign flags of the turned pair.  Bit 0 is set when the turned x value is
+  positive, and bit 1 is set when the turned z value is positive.
+  Evidence: the blocks at `0x224ea` through `0x22507` and the flag block at
+  `0x2251e` through `0x22547`.
+- Observation: the only callers are `car_collision_response` at `0x1790e` and
+  `0x17991`, which use the flags to choose the collision turn and the turn
+  rate.  The caller sits in the section The vehicle state chain, so the module
+  takes the same section.
+  Evidence: the sweep of every call site, the finding "The car_collision_response
+  module at 0x17828", and the section of `tools/rebuild/functions/0x17828.json`.
+- Inference: the caller harness already names the helper `angle_flags`, and the
+  delta rotation and the two sign tests support the name
+  `point_rotation_flags`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the data flow above and `tools/rebuild/car_collision_response.c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses the FPU only to pass the float angle, so it uses
+  the shared `fpu_stub.asm` and no truncating helper.  The module uses no
+  assembly body.
+  Evidence: the prologue at `0x224dc` and
+  `tools/rebuild/modules/point_rotation_flags.json`.
+- Observation: the harness holds the two points, the configured rotation result,
+  and the `point_rotate_y` stub.  The stub records the delta x and z values and
+  the angle bits, then writes the configured turned x and z values.  The eight
+  paths cover the flags 3, 1, 2, and 0, the zero turned x, the zero turned z, a
+  negative delta, and a large delta.  Every path checks the return flags, the
+  call count, the delta values, and the angle bits.  The output holds the
+  markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/point_rotation_flags_main.c`,
+  `python3 tools/rebuild/harness.py run --module point_rotation_flags`, and
+  `work/rebuild/ptrflg.txt`.
+- Observation: the rebuilt body holds 7 of 41 instructions, 9 of 110 bytes, and
+  0 of 3 relocation slots equal.  V2 saves `ebp` and `ecx` in place of `ebx`,
+  `ecx`, and `ebp`, uses `ecx` and `edx` for the deltas, reorders the prologue,
+  sizes the frame `0x18`, and folds the flag set into `or dl, 2`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x224dc --count 41 --rebuilt work/rebuild/ptrflg.exe
+  --rebuilt-map work/rebuild/point_rotation_flags.map --rebuilt-symbol
+  point_rotation_flags_` and `python3 tools/rebuild/run.py run --function
+  0x224dc`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
