@@ -25656,3 +25656,65 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x110d0`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The map_object_progress_sum module at 0x2b3e5
+
+- Observation: the original body at `0x2b3e5` holds 39 instructions and 107
+  bytes up to the `ret` at `0x2b44f`.  The next function starts at `0x2b450`, so
+  the store record keeps the 107-byte extent and sets no separate function size.
+  The identity check uses 39 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2b3e5 --count 39` and
+  `tools/rebuild/functions/0x2b3e5.json`.
+- Observation: the function walks the `0x50` map object records at `DAT_001db78`
+  with the stride `0x64`.  A record with the field `+0x08` equal to -1 holds no
+  object, and the function skips it.  For a busy record the function adds the
+  progress value `+0x58` to a float total.  The function returns the total.
+  Evidence: the loop from `0x2b3f5` to `0x2b43e`, the check of `[eax + 8]` at
+  `0x2b41b`, and the add of `[eax + 0x1dbd0]` at `0x2b434`.
+- Observation: `map_object_place` at `0x2b044` sets the progress `+0x58` to 1.0,
+  `map_object_update` at `0x2b9cc` decays it, and `map_object_finish` at
+  `0x2b494` resets it to zero.  The sum over the active records therefore
+  measures how much of the menu animation remains.
+  Evidence: the finding "The map_object_place module at 0x2b044", the finding
+  "The map_object_update module at 0x2b9cc", and the finding "The
+  map_object_finish module at 0x2b494".
+- Inference: the shared map object table, the active-record test, and the
+  progress sum support the name `map_object_progress_sum`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.  The
+  function sits in the section race_frame callees.
+  Evidence: the data flow above and the three record writers.
+- Observation: the original pushes `edx`, `edi`, and `ebp` and uses the EBP
+  frame, so the module builds with `-of+`.  The function makes no call.  It uses
+  the x87 stack for the float add, so the module links the shared
+  `fpu_stub.asm` for `__8087`, `__init_387_emulator`, and `_fltused_`.  The
+  module uses no assembly body.
+  Evidence: the prologue at `0x2b3e5` and
+  `tools/rebuild/modules/map_object_progress_sum.json`.
+- Observation: the harness holds the `0x50` records.  The six paths cover every
+  record free, every record busy with the progress 1.0, one busy record, three
+  busy records with the progress 0.5, 0.25, and 1.0 and a free record with the
+  progress 9.0, every record busy with the progress index, and two busy records
+  with the progress -1.5 and 2.0.  Every expected sum is an exact binary value,
+  so the harness compares exactly.  The output holds the markers `0` through `5`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/map_object_progress_sum_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_object_progress_sum`, and
+  `work/rebuild/mops.txt`.
+- Observation: an FPU memory operand of a literal reads the constant pool at a
+  low address in this toolchain.  The harness therefore computes no progress
+  with such an operand, and the module reads the progress from the record.  The
+  first harness with the literal `0.5f` failed every path, and the path with the
+  progress `index` passed.
+  Evidence: the failed path with `fmul dword ptr [4]` and the passing path with
+  the conversion of the index.
+- Observation: the diff reports 6 of 39 instructions, 5 of 88 bytes, and 0 of 5
+  relocation slots equal.  V2 keeps the total in `[ebp - 0xc]`, drops the
+  return temp at `[ebp - 4]`, and computes the `0x64` stride with `imul`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b3e5 --count 39 --rebuilt work/rebuild/mops.exe
+  --rebuilt-map work/rebuild/map_object_progress_sum.map --rebuilt-symbol
+  map_object_progress_sum_` and `python3 tools/rebuild/run.py run --function
+  0x2b3e5`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
