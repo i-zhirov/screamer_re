@@ -25923,3 +25923,61 @@ temporary `-od` recipe.
   0x2a214`.
 - Limit: the original has no symbol name for this function.  The module name and
   the mode, counter, track, and context globals stay inferred.
+
+## The camera_basis_patch module at 0x8a9e8
+
+- Observation: the body at `0x8a9e8` holds 25 instructions and 102 bytes up to
+  the `ret` at `0x8aa4d`.  The next function `sound_mix_prepare` starts at
+  `0x8aa60`, so the store record keeps the 120-byte extent and sets no separate
+  function size.  The identity check uses 25 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8a9e8 --count 25` and
+  `tools/rebuild/functions/0x8a9e8.json`.
+- Observation: the only direct caller is `sound_mix_prepare` at `0x8aa60`, with
+  the call site at `0x8aa6c`.  The caller sets `esi` to the camera record at
+  `0x7a7ac` plus `0x48`, so `esi` points at the 3x3 camera basis.  The helper
+  copies the basis and the saved camera position at `0x7ad94` through `0x7ad9c`
+  into the immediate fields of the caller code at `0x8aaca` through `0x8ab18`.
+  The original patches its own code, and the on-disk value `0xaaaabbbb` is only
+  the linker fill value.
+  Evidence: the call at `0x8aa6c`, the stores at `0x8a9e8` through `0x8aa48`,
+  the relocation at `0x8aa35` into the slot at `0x8aaca`, and the finding
+  "The sound_mix_prepare module at 0x8aa60".
+- Observation: the helper reads the basis in the column order `0`, `3`, `6`,
+  `1`, `4`, `7`, `2`, `5`, `8` into the nine basis slots.  Then it copies the
+  three saved position values into the three offset slots.  The rebuild writes
+  the same values into the globals `mix_prepare_basis` and
+  `mix_prepare_position`.  `sound_mix_prepare` now reads the camera record
+  directly, so the copy is equivalent.
+  Evidence: the loads at `0x8a9e8` through `0x8aa4d`,
+  `tools/rebuild/camera_basis_patch.c`, and the finding "The sound_mix_prepare
+  module at 0x8aa60".
+- Inference: the caller, the basis read order, and the position copy support the
+  name `camera_basis_patch`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/camera_basis_patch.json`.
+- Observation: the original has no EBP frame, so the module builds without
+  `-of+`.  The function uses no floating-point operation, so the module needs no
+  FPU stub.  The module uses no assembly implementation.
+  Evidence: the prologue at `0x8a9e8` and
+  `tools/rebuild/modules/camera_basis_patch.json`.
+- Observation: the harness holds the saved position and the 3x3 basis.  The five
+  paths cover the basis 1 through 9, the basis 100 through 108 with a negative
+  position, an all-zero basis, a repeated call, and the descending basis -1
+  through -9.  The output holds the markers `0` through `4` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/camera_basis_patch_main.c`,
+  `python3 tools/rebuild/harness.py run --module camera_basis_patch`, and
+  `work/rebuild/cambpch.txt`.
+- Observation: the diff reports 23 of 25 instructions, 5 of 102 bytes, and 0 of
+  24 relocation slots equal.  The identity check stays open because V2 passes
+  the basis pointer in `eax`, keeps the result in the low flat addresses, and
+  wraps the body in a `push` and a `pop`.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8a9e8 --count 25 --rebuilt work/rebuild/cambpch.exe
+  --rebuilt-map work/rebuild/camera_basis_patch.map --rebuilt-symbol
+  camera_basis_patch_` and `python3 tools/rebuild/run.py run --function
+  0x8a9e8`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the patch slots stay inferred.

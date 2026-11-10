@@ -1,0 +1,28 @@
+{
+  "exe": "cambpch.exe",
+  "map": "camera_basis_patch.map",
+  "name": "camera_basis_patch",
+  "run": {
+    "command": "cambpch.exe > cambpch.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cambpch.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "camera_basis_patch.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "camera_basis_patch_main.c"
+    }
+  ]
+}
