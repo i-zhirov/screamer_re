@@ -550,8 +550,43 @@ reproduce the original bytes.
 | `0x1f8dc` | `mouse_release_wait` (done) | 112 | 37 | 4 | 0 |
 | `0x2218c` | `point_rotate_y` (done) | 111 | 38 | 4 | 18 |
 
-This table starts Phase V.
+This table completes Phase V.
 
+### Phase W: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x262fc` | unnamed | 110 | 34 | 3 | 0 |
+| `0x224dc` | unnamed | 110 | 41 | 1 | 2 |
+| `0x2211c` | unnamed | 110 | 41 | 1 | 17 |
+| `0x110d0` | unnamed | 110 | 40 | 1 | 0 |
+| `0x2b3e5` | unnamed | 107 | 39 | 0 | 4 |
+| `0x1960c` | unnamed | 105 | 32 | 1 | 6 |
+| `0x24cc8` | unnamed | 104 | 33 | 1 | 5 |
+| `0x2a214` | unnamed | 103 | 31 | 0 | 0 |
+| `0x8a9e8` | unnamed | 102 | 25 | 0 | 0 |
+| `0x4cae4` | unnamed | 102 | 32 | 4 | 0 |
+| `0x2f4ee` | unnamed | 102 | 40 | 2 | 0 |
+| `0x24600` | unnamed | 101 | 35 | 2 | 0 |
+| `0x22278` | unnamed | 101 | 36 | 2 | 18 |
+| `0x115f8` | unnamed | 101 | 40 | 1 | 0 |
+| `0x298b4` | unnamed | 100 | 30 | 1 | 3 |
+| `0x8af08` | unnamed | 98 | 22 | 3 | 0 |
+| `0x24918` | unnamed | 98 | 36 | 0 | 2 |
+| `0x203c4` | unnamed | 98 | 23 | 8 | 0 |
+| `0x20360` | unnamed | 98 | 23 | 8 | 0 |
+| `0x14970` | unnamed | 98 | 37 | 1 | 0 |
+| `0x4c485` | unnamed | 96 | 32 | 3 | 0 |
+| `0x2369c` | unnamed | 96 | 32 | 1 | 0 |
+| `0x2254c` | unnamed | 95 | 34 | 0 | 18 |
+| `0x83500` | unnamed | 93 | 39 | 0 | 0 |
+
+This table starts Phase W.
+
+## Position
 ## Position
 
 Three hundred and forty-seven modules carry a recipe and a result: the twelve Phase A modules,
