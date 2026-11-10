@@ -24854,3 +24854,72 @@ temporary `-od` recipe.
   sound_effect_delay_` and `python3 tools/rebuild/run.py run --function 0x24c4c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The acos_table_build module at 0x4d260
+
+- Observation: the original body at `0x4d260` holds 40 instructions and 121
+  bytes up to the `ret` at `0x4d2d8`.  Three pad bytes follow the `ret`, and the
+  next record starts at `0x4d2dc`, so the store record keeps the 124-byte extent
+  and sets no separate function size.  The identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d260 --count 40` and
+  `tools/rebuild/functions/0x4d260.json`.
+- Observation: the function takes no argument.  It reads the table pointer at
+  `0xc55f4`, calls the inverse cosine helper at `0xc5e42`, and calls the
+  truncation helper at `0x4d9f4`.
+  Evidence: the pointer read at `0x4d2c2`, the call at `0x4d295`, and the two
+  calls at `0x4d2a6` and `0x4d2b7`.
+- Observation: the loop walks the value from -1.0 to 1.0 with the step 1/256.
+  For each value it forms the inverse cosine, scales it by the double constant
+  `40.42535442040344` at object-3 offset `0x176f`, rounds the product to a
+  float, truncates it, and stores it at the slot `(int)(value * 256.0)` through
+  the table pointer.  The double index scale `256.0` sits at object-3 offset
+  `0x1777`.  The table holds 513 entries from index -256 to index 256.  The
+  value 0 maps to 63, the value -1 maps to 127, and the value 1 maps to 0.
+  Evidence: the loop at `0x4d267` through `0x4d2d2`, the constants at object-3
+  offsets `0x1767`, `0x176f`, and `0x1777`, and the pointer at `0xc55f4`.
+- Observation: the helper at `0xc5e42` forms `atan2(sqrt(1 - x * x), x)` with
+  `fpatan` and then subtracts the result from pi / 2, so the routine is the
+  inverse cosine.  The 80-bit pi / 2 constant sits at linear `0xc5e14`.  The
+  table therefore maps a cosine to an angle, and the name `acos_table_build`
+  follows.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0xc5e42 --count 8` and
+  `python3 tools/le.py disasm STARTH.EXE 0xc5e18 --count 12`.
+- Observation: the only direct caller is `stream_layer_init` at `0x4c810`, with
+  the call site at `0x4c834`.  That function first builds the reciprocal table
+  at `0x4d214` and the row offset table at `0x4d2dc`, then builds this table,
+  then loads the perspective table at `0x4cf94` and the visibility table at
+  `0x4d030`.  The caller sits in the section The TABS table loaders, so the
+  record takes the same section.
+  Evidence: the body at `0x4c810` through `0x4c84c` and the
+  `stream_layer_init` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original truncates through `0x4d9f4`, so the local FPU stub makes
+  `__CHP` truncate toward zero.  The local FPU stub also supplies `acos` from
+  the hardware, because this harness links no math library.  The harness does
+  not load the constant segment, so the table pointer and the two scale values
+  arrive through globals that the harness sets at run time from their bit
+  patterns.  The module uses no assembly implementation.
+  Evidence: `tools/rebuild/acos_table_build.c`,
+  `tools/rebuild/acos_table_build_fpu.asm`, and
+  `tools/rebuild/modules/acos_table_build.json`.
+- Observation: the behavior check passes.  The harness holds the table pointer,
+  the 513-entry table, the two scale globals, and the start and step globals.
+  It covers the full scan, the middle entry 63, the ends 127 and 0, and the
+  entries at index 128, -128, 64, and -192.  The output holds the markers `0`
+  through `6` and `D`.
+  Evidence: `tools/rebuild/acos_table_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module acos_table_build`,
+  `work/rebuild/acostb.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4d260`.
+- Observation: the rebuilt body holds 40 instructions and 122 bytes.  The
+  identity check stays open at 5 of 40 instructions, 5 of 121 bytes, and 0 of 5
+  relocation slots.  V2 saves `ebx`, `ecx`, and `edx`, keeps the value in a
+  frame slot, computes the index with another constant reference, and restores
+  the stack with `lea`.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d260 --count 40 --rebuilt work/rebuild/acostb.exe
+  --rebuilt-map work/rebuild/acos_table_build.map --rebuilt-symbol
+  acos_table_build_` and `python3 tools/rebuild/run.py run --function 0x4d260`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
