@@ -258,8 +258,9 @@ current host.
   `traffic_reset` at `0x1ec7c`, and the Phase V module
   `view_mode_dispatch` at `0x19e78`, and the Phase V module
   `direction_angle` at `0x226bc`, and the Phase V module
-  `game_mode_20_start` at `0x13120`;
-  thirty modules are verified, one is matching, and three hundred and two
+  `game_mode_20_start` at `0x13120`, and the Phase V module
+  `cd_audio_volume_set` at `0x265b4`;
+  thirty modules are verified, one is matching, and three hundred and three
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

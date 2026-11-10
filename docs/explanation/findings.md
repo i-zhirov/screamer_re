@@ -24400,3 +24400,65 @@ temporary `-od` recipe.
   0x13120`.
 - Limit: the original has no symbol name for this function.  The module name
   and the section stay inferred.
+
+## The cd_audio_volume_set module at 0x265b4
+
+- Observation: the original body at `0x265b4` holds 43 instructions and 132
+  bytes up to the `ret` at `0x26637`.  The shared guard tail at `0x26638`, the
+  helper at `0x26640`, and the next recorded function at `0x2666c` give the
+  184-byte extent.  The store record keeps that extent and sets no separate
+  function size.  The identity check uses 43 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x265b4 --count 43` and
+  `tools/rebuild/functions/0x265b4.json`.
+- Observation: the only direct caller at `0x1f984` is `view_move` at `0x1f94c`.
+  It passes the same shifted view value in `eax` and `edx`.  The caller takes
+  the section motion_update callees, so the record takes the same section.
+  Evidence: the call at `0x1f984` and the record of `0x1f94c`.
+- Observation: the function returns at once when bit 0 of `DAT_0016669e` is
+  clear or bit 0 of `DAT_00166684` is clear.  It also returns at once when the
+  left and right pair equals the saved pair at `DAT_001666b4` and
+  `DAT_001666b0`.  The function then stores the new pair, so the driver sees no
+  duplicate request.
+  Evidence: the blocks at `0x265b5` through `0x265de`.
+- Observation: the function builds the request header at `DAT_001666a4`.  The
+  header holds the length `0x1a`, the subunit `DAT_00166680`, the command
+  `0x0c` (IOCTL output), and the transfer count 9.  The payload at +0x40 holds
+  the subfunction 3 (audio channel control).  The output channels 0 and 1 take
+  the input sources 0 and 1 and the volumes from the low bytes of the two
+  arguments.  A zero volume rises to 1.  The two extra channels stay zero.
+  Evidence: the blocks at `0x265e4` through `0x2662e`.
+- Observation: the request runs through `0x25f24`.  That helper submits the
+  block through the DPMI INT 31h call at `0x25f44`.  The sibling functions at
+  `0x264b8`, `0x263cc`, and `0x26528` send the stop, play, and seek commands
+  through the same block, so the block is the CD driver request header.
+  Evidence: the call at `0x26631`, the body at `0x25f24` through `0x25f82`,
+  and the sibling blocks.
+- Inference: the command 0x0c with subfunction 3 is the MSCDEX audio channel
+  control request.  The two arguments set the left and right output volumes, so
+  the name `cd_audio_volume_set` fits the data flow.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the request layout and the caller.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: `tools/rebuild/modules/cd_audio_volume_set.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `9` and `D`.  The ten paths cover the two guards, the normal pair,
+  the duplicate pair, the changed right value, the zero clamp, the low-byte
+  values 0x34 and 0xCD, the zero low bytes, the device byte 0x77, and the equal
+  pair.  Every path checks the bytes outside the written fields.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  cd_audio_volume_set` and `work/rebuild/cdvol.txt`.
+- Observation: the rebuilt body holds 43 decoded instructions and 146 bytes.
+  The identity check stays open at 12 of 43 instructions, 13 of 132 bytes, and
+  0 of 13 relocation slots, because V2 saves the registers in another order,
+  keeps the request pointer in a register, forms the clamped volumes with
+  shifts and ors, and orders the tail in another shape.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x265b4 --count 43 --rebuilt work/rebuild/cdvol.exe
+  --rebuilt-map work/rebuild/cd_audio_volume_set.map --rebuilt-symbol
+  cd_audio_volume_set_` and `python3 tools/rebuild/run.py run --function
+  0x265b4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the section stay inferred.

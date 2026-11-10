@@ -1,0 +1,33 @@
+{
+  "exe": "cdvol.exe",
+  "map": "cd_audio_volume_set.map",
+  "name": "cd_audio_volume_set",
+  "run": {
+    "command": "cdvol.exe > cdvol.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "cdvol.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_volume_set.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_volume_set_main.c"
+    }
+  ]
+}
