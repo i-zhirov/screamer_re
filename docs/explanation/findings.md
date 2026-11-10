@@ -24278,3 +24278,68 @@ temporary `-od` recipe.
   0x19e78`.
 - Limit: the original has no symbol name for this function.  The module name
   and the section stay inferred.
+
+## The direction_angle module at 0x226bc
+
+- Observation: the original body at `0x226bc` holds 48 instructions and 133
+  bytes up to the `ret 0xc` at `0x22741`.  The three pad bytes at `0x22741` to
+  `0x22743` and the next function `spline_interpolate` at `0x22744` give the
+  136-byte extent.  The candidate record at `0x226bd` sits on the `push ebp` of
+  the same prologue, so the store keeps the 1-byte extent to that record.  The
+  identity check uses 48 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x226bc --count 48` and
+  `tools/rebuild/functions/0x226bc.json`.
+- Observation: the only direct caller is `object_revolution_step` at `0x1d30c`.
+  It calls this function at `0x1d542` and stores the result at `+0x27c`.  It
+  passes the x, y, and z values at `+0x264`, `+0x268`, and `+0x26c`.  The caller
+  sits in the section The vehicle state chain, so the record takes the same
+  section.
+  Evidence: the block at `0x1d4ca` through `0x1d54a` and the record of
+  `0x1d30c`.
+- Observation: the first instruction `push eax` reserves one stack slot.  The
+  three arguments sit at `[ebp + 0xc]`, `[ebp + 0x10]`, and `[ebp + 0x14]`.  The
+  function reads the first and the third argument and ignores the second.  The
+  callee cleans the three arguments with `ret 0xc`.
+  Evidence: the prologue at `0x226bc` through `0x226c3`, the reads at `0x226c3`
+  and `0x226d8`, and the epilogue at `0x2273e`.
+- Observation: the function forms `fabs(asin(x))` through the Watcom
+  inverse-sine helper at `0xc5e42`.  The helper at `0xc5e1e` forms
+  `sqrt(1 - x * x)` and calls `fpatan`.  When z is above zero, the function adds
+  pi / 2.  Otherwise it subtracts the angle from 5 pi / 2.  It then wraps the
+  value into the range zero to 2 pi.  A value of 2 pi or more loses 2 pi.
+  Evidence: the call at `0x226cc`, the block at `0x226d6` through `0x2272f`, and
+  the helper at `0xc5e1e`.
+- Observation: the four constants sit at object-3 offsets `0xd94`, `0xd98`,
+  `0xd9c`, and `0xda0`.  They are pi / 2, 5 pi / 2, 2 pi, and -2 pi.  They
+  arrive through globals, because the harness image does not load the constant
+  segment.
+  Evidence: the `fadd` and `fcomp` at `0x226e3`, `0x226f1`, `0x2270a`, and
+  `0x22726`, and the data at the four offsets.
+- Inference: the direction input and the angle result support the name
+  `direction_angle`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the caller and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The local `direction_angle_fpu.asm` stub supplies `asin_` from the
+  hardware, because the harness links no math library and does not load the
+  constant segment.
+  Evidence: `tools/rebuild/modules/direction_angle.json` and
+  `tools/rebuild/direction_angle_fpu.asm`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The nine paths cover x zero with both z signs, x plus
+  and minus 0.5 with both z signs, x 0.25 with both z signs, and x 0.125 with
+  the negative z.  The middle argument carries a non-zero value on one path.
+  Evidence: `python3 tools/rebuild/harness.py run --module direction_angle` and
+  `work/rebuild/dirang.txt`.
+- Observation: the rebuilt module holds 48 decoded instructions and 131 bytes in
+  the identity window.  The identity check stays open at 15 of 48 instructions,
+  40 of 131 bytes, and 1 of 8 relocation slots, because V2 puts the frame before
+  the reserved slot, calls the local `asin` and `fabs` stubs instead of the
+  original helper and the inline `fabs`, and uses another local layout.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x226bc --count 48 --rebuilt work/rebuild/dirang.exe
+  --rebuilt-map work/rebuild/direction_angle.map --rebuilt-symbol
+  direction_angle_` and `python3 tools/rebuild/run.py run --function 0x226bc`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the section stay inferred.
