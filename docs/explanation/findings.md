@@ -25389,3 +25389,79 @@ temporary `-od` recipe.
   point_rotate_y_` and `python3 tools/rebuild/run.py run --function 0x2218c`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The cd_audio_table_build module at 0x262fc
+
+- Observation: the original body at `0x262fc` holds 34 instructions and 110
+  bytes up to the `ret` at `0x26369`.  A conditional branch at `0x26357` enters
+  a second block at `0x2636a`, and that block ends with the `ret` at `0x263c8`.
+  The next recorded function starts at `0x263cc`, so the store record keeps the
+  208-byte extent and sets no separate function size.  The identity check uses
+  34 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x262fc --count 34` and
+  `tools/rebuild/functions/0x262fc.json`.
+- Observation: the only direct caller is `cd_check_screen` at `0x15874`, which
+  calls this function at `0x15977` after the CD audio stop.  The caller sits in
+  the section race_loop callees, so the module takes the same section.
+  Evidence: the call at `0x15977`, the finding "The cd_check_screen module at
+  0x15874", and the section of `tools/rebuild/functions/0x15874.json`.
+- Observation: bit 0 of `DAT_00166688` gates the call.  A set bit returns 1 and
+  sets the bit again.  The function then tries up to three times through the
+  audio disc info request at `0x260a0` and the audio track info request at
+  `0x26120`.  A set bit 15 of the status word repeats the pair.  Three failures
+  return 1 and set the flag.
+  Evidence: the blocks at `0x262fd` through `0x26320` and the helpers at
+  `0x260a0` and `0x26120`.
+- Observation: on success the first track at `+0x41` and the last track at
+  `+0x42` of the request response come from the block.  The last track is
+  clamped to `0x14` and stored at `DAT_00166692`.  The first track is stored at
+  `DAT_0016668e`.
+  Evidence: the blocks at `0x26322` through `0x26345`.
+- Observation: the scan calls the track info request at `0x261a8` for each
+  track.  The control byte at `+0x46` bit 6 marks a data track, so the scan
+  stops at the first audio track.  When every track is a data track, the
+  function returns 1 and sets the flag.  Otherwise the second block at `0x2636a`
+  builds the 8-byte table at `DAT_001666c0` from the first audio track to the
+  last track.  Each entry holds the start time and the duration to the next
+  start.  The last duration runs to the lead-out time from the second `0x26120`
+  request.
+  Evidence: the blocks at `0x2634b` through `0x263c8`.
+- Observation: the start time comes from the minute, second, and frame fields
+  through the helper at `0x2626c`.  The helper forms
+  `75 * (60 * minute + second) + frame - 150`.  The playback function at
+  `0x263cc` reads the same table by the first track `DAT_0016668e` and the last
+  track `DAT_00166692`.
+  Evidence: the helper at `0x2626c`, the playback at `0x263cc`, and the finding
+  "The cd_audio_volume_set module at 0x265b4".
+- Inference: the first audio track, the last track, the start and duration
+  table, the lead-out time, and the playback reader support the name
+  `cd_audio_table_build`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it uses no FPU stub and no assembly body.
+  Evidence: the prologue at `0x262fc` and
+  `tools/rebuild/modules/cd_audio_table_build.json`.
+- Observation: the harness holds the state flag, the first and last track cells,
+  the request block, the table, and the stubs.  The eight paths cover the set
+  flag, the three failed status words, one failure then a success with all data
+  tracks, the first audio track with a two-track table, the clamp of the last
+  track `0x20` to `0x14`, the first two data tracks and the third audio, the
+  single audio track, and the audio track 19 with the clamp.  The output holds
+  the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cd_audio_table_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_table_build`, and
+  `work/rebuild/cdtab.txt`.
+- Observation: the rebuilt body holds 6 of 34 instructions, 8 of 110 bytes, and
+  2 of 9 relocation slots equal.  V2 saves `ebx`, `ecx`, `edx`, `esi`, `edi`,
+  and `ebp` in place of `pushal`, keeps the track in `esi`, keeps the last track
+  in a stack local, uses `movzx` loads, and orders the tail in another shape.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x262fc --count 34 --rebuilt work/rebuild/cdtab.exe
+  --rebuilt-map work/rebuild/cd_audio_table_build.map --rebuilt-symbol
+  cd_audio_table_build_` and `python3 tools/rebuild/run.py run --function
+  0x262fc`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the record section stay inferred.

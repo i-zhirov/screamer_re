@@ -273,8 +273,9 @@ current host.
   `video_selector_setup` at `0x8bc7c`, and the Phase V module
   `bios_tick_reset` at `0x1f990`, and the Phase V module
   `mouse_release_wait` at `0x1f8dc`, and the Phase V module
-  `point_rotate_y` at `0x2218c`;
-  thirty modules are verified, one is matching, and three hundred and seventeen
+  `point_rotate_y` at `0x2218c`, and the Phase W module
+  `cd_audio_table_build` at `0x262fc`;
+  thirty modules are verified, one is matching, and three hundred and eighteen
   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
