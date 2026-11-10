@@ -24588,3 +24588,65 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x2471c`.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.
+
+## The game_mode_40_start module at 0x130a0
+
+- Observation: the original body at `0x130a0` holds 44 instructions and 127
+  bytes up to the `ret` at `0x1311e`.  The next record `game_mode_20_start`
+  starts at `0x13120`, so the store record keeps the 128-byte extent and sets
+  no separate function size.  The identity check uses 44 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x130a0 --count 44` and
+  `tools/rebuild/functions/0x130a0.json`.
+- Observation: the only direct caller is the game mode dispatch in
+  `race_session_start` at `0x128e0` with the call site at `0x12a1a`.  The
+  dispatch sends the mode `0x40` to this function and passes the mode in `eax`.
+  The caller sits in The timing and filter layer, so the record takes the same
+  section.
+  Evidence: the call at `0x12a1a` and the `race_session_start` record.
+- Observation: the game mode `0x40` is the SLA mode.  The marker count
+  `sla_marker_count` at `0x7ed4` sets the loop end.  The array
+  `sla_marker_flags` at `0xffb0` is the hit flag array and the object field
+  `+0x694` of the player object at object-3 offset `0xf91c`.  `sla_marker_check` at `0x18ba8` reads and sets the same flag
+  against the same count.
+  Evidence: the loop at `0x130b2` through `0x130d1`, the flag read at `0x18c84`
+  and the flag write at `0x18c92`, and the `sla_marker_check` record.
+- Observation: the function clears the hit flags below the count.  It clears
+  `DAT_001100a4`, `DAT_001100dc` (the hit count at `+0x7c0`), and
+  `DAT_001100d4`, and sets `DAT_0000cf40` to 1.  It loads the player car
+  through `player_car_init` at `0x136cc` with the object offset `0xf91c` and the
+  mode argument.  A non-zero result returns at once.  Otherwise the function
+  runs `scene_setup` at `0x15984` with the mode argument and returns 0.
+  Evidence: the stores at `0x130da` through `0x130ec`, the call at `0x130fa`,
+  and the call at `0x13110`.
+- Inference: the mode `0x40` dispatch, the SLA hit flag array, the hit count,
+  and the player car and scene setup support the name `game_mode_40_start`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above, the caller at `0x12a1a`, and the program map.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module needs
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/game_mode_40_start.c` and
+  `tools/rebuild/modules/game_mode_40_start.json`.
+- Observation: the behavior check passes.  The harness prints the markers `0`
+  through `8` and `D`.  The nine paths cover the count 2, the count 0, the count
+  1 with the mode 0, the count 3 with the mode -1, the count -1, the two car
+  load failures, the count 0 with a failed car load, and the count 4 with the
+  mode `0x100`.
+  Evidence: `tools/rebuild/game_mode_40_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module game_mode_40_start`,
+  `work/rebuild/gm40.txt`, and `python3 tools/rebuild/run.py run --function
+  0x130a0`.
+- Observation: the rebuilt body holds 44 instructions and 142 bytes in the
+  identity window.  The identity check stays open at 10 of 44 instructions, 8
+  of 127 bytes, and 0 of 19 relocation slots.  V2 saves the frame pointer first,
+  keeps the mode in `ecx`, builds the clear loop with an index register and a
+  short data offset, and restores the stack with `lea`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x130a0 --count 44 --rebuilt work/rebuild/gm40.exe
+  --rebuilt-map work/rebuild/game_mode_40_start.map --rebuilt-symbol
+  game_mode_40_start_` and `python3 tools/rebuild/run.py run --function
+  0x130a0`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.
