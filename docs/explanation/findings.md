@@ -24088,3 +24088,63 @@ temporary `-od` recipe.
   0x2414c`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The race_finish_overlay_1 module at 0x240c4
+
+- Observation: the original body at `0x240c4` holds 39 instructions and 135
+  bytes up to the `ret` at `0x2414a`.  The next function starts at `0x2414c`
+  after the one padding byte at `0x2414b`, so the store record keeps the
+  136-byte extent and sets no separate function size.  The identity check uses
+  39 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x240c4 --count 39` and
+  `tools/rebuild/functions/0x240c4.json`.
+- Observation: the only direct caller is `race_finish_update` at `0x21058`.
+  During the finish delay that function switches on the mode `DAT_0011d260` and
+  calls this overlay for mode 1, `0x2414c` for mode 2, `0x241d4` for mode 4,
+  `0x240a0` for mode `0x10`, `0x24264` for mode `0x20`, and `0x2420c` for mode
+  `0x40`.  The caller sits in the frame update path, so the record takes the
+  section Program functions.
+  Evidence: the call sweep for `0x240c4`, the switch at `0x2106f` through
+  `0x210eb`, and the record of `0x21058`.
+- Observation: when bit 8 of `DAT_00118e1d` is set, the function draws the text
+  pointer `DAT_00118fc0` at y `0x3e` with the font 2 and the colour 0 through
+  `panel_draw_centered` at `0x2e7cc`.  It then formats the two car table
+  strings `DAT_00118f94[DAT_0010ffa4]` and `DAT_00118f94[0]` with the format
+  `%s %s` at object-3 offset `0xe50` through `sprintf` at `0x4d32c`, draws that
+  line at y `0x5a` with the font 2, and draws the zero clock text `00:00:00` at
+  object-3 offset `0x1f98` at y `0x78` with the font 2.
+  Evidence: the block at `0x240c4` through `0x2414a`, the format at linear
+  `0x100e50`, and the text at linear `0x101f98`.
+- Observation: the sibling overlay at `0x2414c` holds the same body.  The two
+  bodies differ only in the format address, `0xe50` against `0xe56`, and in the
+  call displacements, so both format the string `%s %s`.  The mode 1 and mode
+  2 paths therefore draw the same shape.
+  Evidence: the byte compare of `0x240c4` and `0x2414c` through
+  `tools/le.py`.
+- Inference: the mode 1 selection, the car table, the format, and the clock
+  text support the name `race_finish_overlay_1`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the control byte, the top text pointer, the
+  player slot, the five-entry car table, the `%s %s` format, and the zero clock
+  text.  The four paths cover the clear control bit with the slot 2, the set
+  control bit with the slot 0, the set control bit with the slot 3, and the
+  clear control bit with the slot 1.  The output holds the markers `0` through
+  `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_overlay_1_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_overlay_1`,
+  `work/rebuild/rfovl1.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x240c4`.
+- Observation: the rebuilt body holds 39 decoded instructions and 135 bytes in
+  the identity window.  The identity check stays open at 25 of 39 instructions,
+  38 of 135 bytes, and 2 of 10 relocation slots, because V2 saves the frame
+  pointer first, sizes the local buffer `0x10c`, keeps the y and font values in
+  other registers across the `sprintf` call, and restores the stack through
+  `lea`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x240c4 --count 39 --rebuilt work/rebuild/rfovl1.exe
+  --rebuilt-map work/rebuild/race_finish_overlay_1.map --rebuilt-symbol
+  race_finish_overlay_1_` and `python3 tools/rebuild/run.py run --function
+  0x240c4`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.

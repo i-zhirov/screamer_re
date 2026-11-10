@@ -1,0 +1,30 @@
+{
+  "exe": "rfovl1.exe",
+  "map": "race_finish_overlay_1.map",
+  "name": "race_finish_overlay_1",
+  "run": {
+    "command": "rfovl1.exe > rfovl1.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rfovl1.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_overlay_1.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_overlay_1_main.c"
+    }
+  ]
+}
