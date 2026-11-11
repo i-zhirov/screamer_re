@@ -29342,3 +29342,71 @@ temporary `-od` recipe.
   and the two sources support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the register order and
   the duplicated epilogue of the original.
+
+## The cd_audio_disc_info_request module at 0x260a0
+
+- Observation: the original body at `0x260a0` holds 62 bytes and 22
+  instructions up to the `ret` at `0x260dd`.  Two padding bytes at `0x260de`
+  precede the next function at `0x260e0`.  The store record keeps the 64-byte
+  extent and sets no separate function size.  The identity check uses the plan
+  count 22.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x260a0 --count
+  22` and `tools/rebuild/functions/0x260a0.json`.
+- Observation: the direct call sites are `0x25e82` and `0x25eb3` in the CD audio
+  setup at `0x25dd5`, `0x25fa8` in the CD audio tick at `0x25f90`, `0x26169` in
+  the playback block at `0x26148`, and `0x2630c` in `cd_audio_table_build` at
+  `0x262fc`.  The CD audio request path sits in the section `race_loop
+  callees`.
+  Evidence: the call scan of `obj.1` and the record of `cd_audio_table_build`.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4`: the length 0x1a, the subunit `DAT_00166680`, the command 3
+  (IOCTL input), the transfer count 2, and the payload subfunction 9 (get audio
+  disc info).  It clears the dword at +0x41 and the dword at +0x45, runs the
+  request through `0x25f24`, and returns the dword at the response pointer
+  `DAT_001666a8`.
+  Evidence: the body at `0x260a0` through `0x260dd` and the helper at `0x25f24`
+  through `0x25f42`.
+- Observation: the setup at `0x25dd5` sets the response pointer
+  `DAT_001666a8` to the request plus 0x41, so the return is the first dword of
+  the disc info payload.  The CD audio tick tests the low byte for 0xff, so the
+  return marks a missing disc.
+  Evidence: the store at `0x25e04`, the test at `0x25fad`, and the body at
+  `0x25f90` through `0x2600c`.
+- Inference: the MSCDEX subfunction 9, the transfer count 2, and the callers
+  support the name `cd_audio_disc_info_request`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the request layout and the callers above.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x260a0` and
+  `tools/rebuild/modules/cd_audio_disc_info_request.json`.
+- Observation: the harness holds the device byte, the request buffer, the
+  response pointer, the response dword, and the submit stub.  The stub counts
+  the driver calls, checks the two cleared dwords at +0x41 and +0x45, and writes
+  the response dword.  The five paths cover the response 0, the low byte 0xff,
+  the device byte 0x77 with the response 0x12345678, two calls, and the response
+  0xffffffff.  The sentinel byte 0xa5 checks every field outside the written
+  set.  The output holds the markers 0 through 4 and D, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/cd_audio_disc_info_request_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_disc_info_request`,
+  `work/rebuild/cddisc.txt`, and `python3 tools/rebuild/run.py run --function
+  0x260a0`.
+- Observation: the rebuilt body holds 15 instructions and 60 bytes up to the
+  `ret` at `0x1003b`, and the 22-instruction identity window crosses the next
+  function.  The identity check stays open at 10 of 22 instructions, 2 of 62
+  bytes, and 0 of 7 relocation slots.  V2 saves `edx` in place of `pushal`,
+  keeps the request pointer in `eax`, loads the two data pointers by a near
+  data operand, folds the constant stores, and reads the response after the
+  call.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x260a0 --count 22 --rebuilt work/rebuild/cddisc.exe
+  --rebuilt-map work/rebuild/cd_audio_disc_info_request.map --rebuilt-symbol
+  cd_audio_disc_info_request_` and `python3 tools/rebuild/run.py run --function
+  0x260a0`.
+- Limit: the original has no symbol name.  The MSCDEX subfunction, the transfer
+  count, and the callers support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the `pushal` save, the
+  register order, and the duplicated `edi` save of the original.
