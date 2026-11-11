@@ -300,9 +300,10 @@ current host.
   `array_sort` at `0x83500`, and the Phase X modules
   `track_resource_load` at `0x150f4`, `func_2f554` at `0x2f554`, and
   `race_frame_loop` at `0x1ff14`, and the Phase X module
-  `sound_event_frame_select` at `0x8a848`;
+  `sound_event_frame_select` at `0x8a848`, and the Phase X module
+  `palette_file_load` at `0x4cf3c`;
   thirty modules are verified, one is matching, and three hundred and
-  forty-five rebuilds hold the recorded difference; the `video_fill`,
+  forty-six rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

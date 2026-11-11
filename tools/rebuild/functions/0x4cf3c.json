@@ -1,9 +1,115 @@
 {
   "address": "0x4cf3c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 30,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cf3c holds 30 instructions and 88 bytes up to the ret at 0x4cf93; the next function starts at 0x4cf94, so the store record keeps the 88-byte extent and sets no separate function size; the identity check uses 30 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x12a7b sits in race_session_start at 0x128e0; the caller puts the level name buffer at object-3 offset 0x1d294 in eax and the palette buffer at object-3 offset 0xcf5c in edx, then runs palette_shade_build at 0x258d0 with the loaded palette, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the member name %s.COL from the level name through sprintf at 0x4d32c with the format string at object-3 offset 0x172c, then calls member_load at 0x4c485 with the local stream, the empty path at object-3 offset 0x7fb4, the member name, and the palette buffer"
+    },
+    {
+      "kind": "note",
+      "text": "a non-zero member_load result runs the file error report at 0x4bf88 with the same stream and then the exit at 0x300be with the code 0; a zero result returns at once and leaves the loaded palette in the caller buffer"
+    },
+    {
+      "kind": "note",
+      "text": "the %s.COL member, the palette buffer, the level name, and the single caller support the name palette_file_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and spills the two register arguments, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness build defines PALETTE_FILE_LOAD_HARNESS and the function builds the two constant texts in local buffers; the default build keeps the literals of the original"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the level name, the palette buffer, and the sprintf, member_load, file error report, and exit stubs; the three paths cover the successful load, the failed load with the report and the exit code 0, and the empty name; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 30 decoded instructions and 100 bytes in the identity window; the identity check stays open at 5 of 30 instructions, 12 of 88 bytes, and 0 of 2 relocation slots, because V2 saves the frame first, keeps the two arguments in esi and edi, builds the two constant texts in the body, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cf3c --count 30"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cf3c --count 30 --rebuilt work/rebuild/pfload.exe --rebuilt-map work/rebuild/palette_file_load.map --rebuilt-symbol palette_file_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module palette_file_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cf3c"
+    },
+    {
+      "kind": "finding",
+      "text": "The palette_file_load module at 0x4cf3c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/palette_file_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/palette_file_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/palette_file_load.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "palette_file_load",
+  "name": "palette_file_load",
   "notes": [],
   "object_offset": "0x3cf3c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 88,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 30,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cf3c",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:2aa68c89ee7cd122315a61efd2a86ca456d08971f74b1a90cc9f3e43fcc98179",
+    "source_digest": "sha256:6a0700bc7b3b99312af8b407cfeb0c6f0f1dda1556c19d5f9bcfec95313e3bd8",
+    "tool": "run.py"
+  },
+  "role": "builds the <level>.COL palette member name, loads the member into the caller palette buffer through member_load, and reports the file error and exits on a failed load",
+  "section": "Resource loader",
   "size": 88,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "palette_file_load_"
 }

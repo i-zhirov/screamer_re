@@ -27203,3 +27203,62 @@ temporary `-od` recipe.
   0x8a848`.
 - Limit: the original has no symbol name for this function.  The name
   `sound_event_frame_select` and the harness field names stay inferred.
+
+## The palette_file_load module at 0x4cf3c
+
+- Observation: the original body at `0x4cf3c` holds 30 instructions and 88
+  bytes up to the `ret` at `0x4cf93`.  The next function starts at `0x4cf94`,
+  so the store record keeps the 88-byte extent and sets no separate function
+  size.  The identity check uses 30 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cf3c --count 30` and
+  `tools/rebuild/functions/0x4cf3c.json`.
+- Observation: the only direct caller is at `0x12a7b` in `race_session_start`
+  at `0x128e0`.  The caller puts the level name buffer at object-3 offset
+  `0x1d294` in eax and the palette buffer at object-3 offset `0xcf5c` in edx.
+  After the call it runs `palette_shade_build` at `0x258d0` with the loaded
+  palette, so the record takes the section Resource loader.
+  Evidence: the call sweep for `0x4cf3c`, the block at `0x12a71` through
+  `0x12a85`, and the record of `0x258d0`.
+- Observation: the function builds the member name `%s.COL` from the level
+  name through `sprintf` at `0x4d32c`.  The format string sits at object-3
+  offset `0x172c`.  The function then calls `member_load` at `0x4c485` with the
+  local stream, the empty path at object-3 offset `0x7fb4`, the member name,
+  and the palette buffer.
+  Evidence: the blocks at `0x4cf4d` through `0x4cf73` and the string at
+  object-3 offset `0x172c`.
+- Observation: a non-zero `member_load` result runs the file error report at
+  `0x4bf88` with the same stream and then the exit at `0x300be` with the code
+  0.  A zero result returns at once and leaves the loaded palette in the
+  caller buffer.
+  Evidence: the blocks at `0x4cf78` through `0x4cf93`.
+- Inference: the `%s.COL` member, the palette buffer, the level name, and the
+  single caller support the name `palette_file_load`.  The original has no
+  symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the call site and the data flow above.
+- Observation: the original has the EBP frame and spills the two register
+  arguments, so the module builds with `-of+`.  The function uses no
+  floating-point instruction, so the module needs no FPU stub.  The module
+  uses no assembly implementation.
+  Evidence: `tools/rebuild/palette_file_load.c` and
+  `tools/rebuild/modules/palette_file_load.json`.
+- Observation: the harness holds the level name, the palette buffer, and the
+  `sprintf`, `member_load`, file error report, and exit stubs.  The three
+  paths cover the successful load, the failed load with the report and the
+  exit code 0, and the empty name.  The output holds the markers `0` through
+  `2` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/palette_file_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module palette_file_load`, and
+  `work/rebuild/pfload.txt`.
+- Observation: the rebuilt body holds 30 decoded instructions and 100 bytes in
+  the identity window.  The identity check stays open at 5 of 30
+  instructions, 12 of 88 bytes, and 0 of 2 relocation slots.  V2 saves the
+  frame first, keeps the two arguments in esi and edi, builds the two constant
+  texts in the body, and uses another local layout.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cf3c --count 30 --rebuilt work/rebuild/pfload.exe
+  --rebuilt-map work/rebuild/palette_file_load.map --rebuilt-symbol
+  palette_file_load_` and `python3 tools/rebuild/run.py run --function
+  0x4cf3c`.
+- Limit: the original has no symbol name for this function.  The name
+  `palette_file_load` and the harness field names stay inferred.
