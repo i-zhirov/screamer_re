@@ -29524,3 +29524,59 @@ temporary `-od` recipe.
   shared name buffer support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the register save order,
   the frame slot of the original source pointer, and the stack restore sequence.
+
+## The car_collision_step module at 0x1c7d0
+
+- Observation: the original body at `0x1c7d0` holds 19 instructions and 61
+  bytes up to the `ret` at `0x1c80c`.  The next function `object_physics`
+  starts at `0x1c810`, so the store record keeps the 64-byte extent and sets no
+  separate function size.  The identity check uses the plan count 19.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1c7d0 --count
+  19` and `tools/rebuild/functions/0x1c7d0.json`.
+- Observation: the only direct caller at `0x20182` is `race_simulation_update`
+  at `0x2003c`.  It runs this step on each 0x590-byte car record at
+  `DAT_00110ab8` after `object_prepare`.  The step sits in the object update
+  chain, so the record takes the section `object update callees`.
+  Evidence: the call at `0x20182`, the loop at `0x20168` through `0x20187`, and
+  `tools/rebuild/callgraph.json`.
+- Observation: the function returns at once when the crash state at `+0x2f8` is
+  not zero or when the physics gate at `+0x414` is zero.  Otherwise it runs
+  `car_nearby_mark` at `0x126e4`, `car_collision_pass` at `0x1d00c`, and
+  `opponent_avoid_player` at `0x1e414` in order with the record in `eax`.
+  Evidence: the body at `0x1c7d0` through `0x1c80c`, the finding "The
+  car_nearby_mark module at 0x126e4", and the finding "The car_collision_pass
+  module at 0x1d00c".
+- Inference: the caller, the three callees, and the car record support the name
+  `car_collision_step`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/car_collision_step.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x1c7d0` through `0x1c7dc` and
+  `tools/rebuild/modules/car_collision_step.json`.
+- Observation: the harness holds the car record and the three pass stubs.
+  Each stub checks the record pointer and the call order.  The five paths cover
+  the set crash state, the clear state with the set gate, the clear gate, the
+  set crash state with the clear gate, and two calls.  The output holds the
+  markers `0` through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/car_collision_step_main.c`,
+  `python3 tools/rebuild/harness.py run --module car_collision_step`,
+  `work/rebuild/ccstep.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1c7d0`.
+- Observation: the rebuilt body holds 19 instructions and 55 bytes.  The
+  identity check stays open at 3 of 19 instructions, 4 of 55 bytes, and 0 of 1
+  relocation slot.  V2 keeps the record in `edx` and pushes it, while the
+  original keeps the argument in the frame slot and reloads it before each
+  call.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1c7d0 --count 19 --rebuilt work/rebuild/ccstep.exe
+  --rebuilt-map work/rebuild/car_collision_step.map --rebuilt-symbol
+  car_collision_step_` and `python3 tools/rebuild/run.py run --function
+  0x1c7d0`.
+- Limit: the original has no symbol name.  The caller, the three callees, and
+  the car record support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the frame slot and the reload of
+  the original argument.

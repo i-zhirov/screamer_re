@@ -1,9 +1,111 @@
 {
   "address": "0x1c7d0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 19,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1c7d0 holds 19 instructions and 61 bytes up to the ret at 0x1c80c; the next function starts at 0x1c810, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses the plan count 19"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_simulation_update at 0x2003c with the call site at 0x20182; it runs this step on each 0x590-byte car record at DAT_00110ab8 after object_prepare, so the record takes the section object update callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when the crash state at +0x2f8 is not zero or when the physics gate at +0x414 is zero; otherwise it runs car_nearby_mark at 0x126e4, car_collision_pass at 0x1d00c, and opponent_avoid_player at 0x1e414 in order with the record in eax"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the three callees, and the car record support the name car_collision_step; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the car record and the three pass stubs; each stub checks the record pointer and the call order; the five paths cover crash state zero with the gate set, crash state one, gate zero, crash state two with gate zero, and two calls; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 19 instructions and 55 bytes; the identity check stays open at 3 of 19 instructions, 4 of 55 bytes, and 0 of 1 relocation slot; V2 keeps the record in edx and pushes it, while the original keeps the argument in the frame slot and reloads it before each call; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The car_collision_step module at 0x1c7d0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1c7d0 --count 19"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1c7d0 --count 19 --rebuilt work/rebuild/ccstep.exe --rebuilt-map work/rebuild/car_collision_step.map --rebuilt-symbol car_collision_step_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module car_collision_step"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module car_collision_step"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1c7d0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/car_collision_step.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/car_collision_step_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/car_collision_step.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "car_collision_step",
+  "name": "car_collision_step",
   "notes": [],
   "object_offset": "0xc7d0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 55,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 19,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1c7d0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:103b82a341ed0aa4c718dcc5679947300a91e58b6d7349ae4ae44642083620e6",
+    "source_digest": "sha256:d2a315fce30f0385a3be47728d4a317d2efb384f35b0a00e5ada8863f0f52f52",
+    "tool": "run.py"
+  },
+  "role": "Gates the car collision passes on the crash state and the physics gate, then runs the nearby mark, the collision pass, and the opponent avoidance.",
+  "section": "object update callees",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "car_collision_step_"
 }

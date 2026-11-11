@@ -1,0 +1,31 @@
+{
+  "exe": "ccstep.exe",
+  "map": "car_collision_step.map",
+  "name": "car_collision_step",
+  "run": {
+    "command": "ccstep.exe > ccstep.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "ccstep.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_step.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "car_collision_step_main.c"
+    }
+  ]
+}
