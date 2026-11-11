@@ -1,0 +1,31 @@
+{
+  "exe": "mapfile.exe",
+  "map": "map_file_load.map",
+  "name": "map_file_load",
+  "run": {
+    "command": "mapfile.exe > mapfile.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "mapfile.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_file_load.c",
+      "flags": [
+        "-of+",
+        "-oi"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_file_load_main.c"
+    }
+  ]
+}

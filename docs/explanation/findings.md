@@ -29466,3 +29466,61 @@ temporary `-od` recipe.
   table address support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the register save order, the
   frame slot of the original index, and the two-part address sequence.
+
+## The map_file_load module at 0x4c94c
+
+- Observation: the original body at `0x4c94c` holds 27 instructions and 61
+  bytes up to the `ret` at `0x4c988`.  The next function `unr_file_load` starts
+  at `0x4c98c`, so the store record keeps the 64-byte extent and sets no
+  separate function size.  The identity check uses the plan count 27.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c94c --count
+  27` and `tools/rebuild/functions/0x4c94c.json`.
+- Observation: the only direct caller is `race_data_load` at `0x131a8`, with the
+  call site at `0x13347`.  It passes the level name `DAT_0011d294` in `eax`,
+  which `race_start` builds as `MAP%d`, and it runs `material_load` at `0x4cd9c`
+  with the same level name first.  The caller sits in the resource load path, so
+  the record takes the section Resource loader.
+  Evidence: the call scan of `obj.1`, the call at `0x13347`, the call at
+  `0x1333d`, and `tools/rebuild/callgraph.json`.
+- Observation: the function takes one argument.  It copies the name to the
+  global name buffer `DAT_002154c` through the inline two-byte copy loop.  It
+  then calls `unr_file_load` at `0x4c98c` and `mmp_file_load` at `0x4cae4`.
+  Those two functions build the `%s.UNR` and `%s.MMP` member names from the
+  shared buffer.
+  Evidence: the body at `0x4c94c` through `0x4c988`, the finding "The
+  unr_file_load module at 0x4c98c", and the finding "The mmp_file_load module
+  at 0x4cae4".
+- Inference: the caller, the two callees, and the shared name buffer support the
+  name `map_file_load`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the data flow above and `tools/rebuild/modules/map_file_load.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The `-oi` flag expands the `strcpy` call into the same two-byte copy
+  loop as the original.  The function holds no floating-point instruction, so
+  the module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x4c94c` through `0x4c95f` and
+  `tools/rebuild/modules/map_file_load.json`.
+- Observation: DOS/4G 2.01a under DOSBox-X leaves the initialized data pages
+  zero, so the harness builds the four name texts in local buffers.  The four
+  paths cover the name `MAP1`, the empty name, the name `MENU`, and the two
+  calls `TRACK01` then `AB`.  Every path checks the shared buffer, the two stub
+  names, the call counts, and the call order.  The output holds the markers `0`
+  through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/map_file_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_file_load`,
+  `work/rebuild/mapfile.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4c94c`.
+- Observation: the rebuilt body holds 27 instructions and 61 bytes.  The
+  identity check stays open at 7 of 27 instructions, 4 of 61 bytes, and 0 of 3
+  relocation slots.  V2 saves `ebp` before `esi` and `edi`, keeps the source in
+  `esi` without the frame slot, and restores the stack with `lea`.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4c94c --count 27 --rebuilt work/rebuild/mapfile.exe
+  --rebuilt-map work/rebuild/map_file_load.map --rebuilt-symbol
+  map_file_load_` and `python3 tools/rebuild/run.py run --function 0x4c94c`.
+- Limit: the original has no symbol name.  The caller, the two callees, and the
+  shared name buffer support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the register save order,
+  the frame slot of the original source pointer, and the stack restore sequence.
