@@ -29649,3 +29649,62 @@ temporary `-od` recipe.
   the two state cells support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the register save order
   and the block order.
+
+## The race_finish_mode_2_update module at 0x23f14
+
+- Observation: the original body at `0x23f14` holds 18 instructions and 60
+  bytes up to the `ret` at `0x23f4f`.  The next function starts at `0x23f50`,
+  so the store record keeps the 60-byte extent and sets no separate function
+  size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23f14 --count
+  18` and `tools/rebuild/functions/0x23f14.json`.
+- Observation: the only direct caller is `race_finish_laps_update` at
+  `0x20ec8` with the call site at `0x20f29`.  It selects this finish handler
+  from the mode byte `DAT_0011d260` on mode 2.  The handler sits in the
+  section `Program functions`.  The mode 1 handler at `0x23ed8` holds the
+  identical body.
+  Evidence: the dispatch tree at `0x20f08` through `0x20f5d`, the block at
+  `0x23ed8` through `0x23f13`, and the record of `race_finish_laps_update`.
+- Observation: the handler compares the finish position `DAT_000ffa4` with 1.
+  Position 1 sets bit 3 of the control byte `DAT_0018e1d` and enqueues the
+  effect `0xb`.  Any other position keeps the control byte and enqueues the
+  effect `0xc`.  Both calls use the variant mode 3 and the delay 0 through
+  `sound_enqueue` at `0x247fc`.
+  Evidence: the body at `0x23f14` through `0x23f4f` and the finding "The
+  sound_enqueue module at 0x247fc".
+- Inference: the caller, the mode 2 selection, the position test, and the two
+  effects support the name `race_finish_mode_2_update`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/race_finish_mode_2_update.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original function holds no floating-point instruction, but the
+  `sound_enqueue` call passes a float argument, so the recipe adds the shared
+  `fpu_stub.asm` for the FPU run-time symbols.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x23f14` and the module recipe.
+- Observation: the harness holds the control byte and the finish position.
+  The five paths cover position 1 with a clear and a set control byte,
+  position 0, position 2, and position -1.  Every path checks the effect, the
+  mode 3, and the delay 0.  The output holds the markers `0` through `4` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_mode_2_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module
+  race_finish_mode_2_update`, `work/rebuild/rfm2.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x23f14`.
+- Observation: the rebuilt body holds 18 instructions and 57 bytes in the
+  identity window.  The identity check stays open at 10 of 18 instructions, 17
+  of 57 bytes, and 1 of 3 relocation slots.  V2 pushes the frame first, pushes
+  the delay before the mode and effect, folds the bit set into `or byte ptr`,
+  and restores the stack with `lea`.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23f14 --count 18 --rebuilt work/rebuild/rfm2.exe
+  --rebuilt-map work/rebuild/race_finish_mode_2_update.map --rebuilt-symbol
+  race_finish_mode_2_update_` and `python3 tools/rebuild/run.py run --function
+  0x23f14`.
+- Limit: the original has no symbol name.  The caller, the mode byte, and the
+  two effects support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the frame and register save
+  order, the push placement, and the byte set shape.
