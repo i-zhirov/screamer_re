@@ -27804,3 +27804,60 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/sound_voice_pitch_set.map --rebuilt-symbol
   sound_voice_pitch_set_` and
   `python3 tools/rebuild/run.py run --function 0x1f7e4`.
+
+## The basis_vector_transform module at 0x81f80
+
+- Observation: the original body at `0x81f80` holds 28 instructions and 78
+  bytes up to the `ret` at `0x81fcd`.  The next function starts at `0x81fd0`, so
+  the store record keeps the 80-byte extent and sets no separate function size.
+  The record sets the instruction count 28.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81f80 --count 28` and
+  `tools/rebuild/functions/0x81f80.json`.
+- Observation: the three direct call sites are `0x8b607` in the second basis
+  builder at `0x8b51c`, `0x8b6e8` in `basis_transform_build` at `0x8b610`, and
+  `0x8b7c8` in the next builder at `0x8b6ee`.  Each caller passes the matrix pointer
+  in `esi` and the three vector values in `eax`, `ebx`, and `ecx`.  The callers
+  sit in the object update chain, so the record takes the section
+  object_update_all callees.
+  Evidence: the three call instructions, the caller at `0x8b51c`, and the
+  record of `basis_transform_build` at `0x8b610`.
+- Observation: the record holds the nine Q14 dwords of the 3x3 matrix at
+  `+0x00` through `+0x20`.  The function multiplies the matrix by the vector,
+  sums each row, shifts the sum right by 14 with the arithmetic shift, and
+  stores the three results at `+0x24`, `+0x28`, and `+0x2c`.  The shift rounds
+  each negative value toward negative infinity.
+  Evidence: the block at `0x81f80` through `0x81fcc`.
+- Observation: `basis_transform_build` calls the function with the negated
+  position, so the three results are the inverse translation at `+0x24`,
+  `+0x28`, and `+0x2c` of the inverse basis.
+  Evidence: the negate block at `0x8b7bf` and the call at `0x8b7c8`.
+- Inference: the three callers and the existing `basis_vector_transform`
+  reference in the `basis_transform_build` module support the name
+  `basis_vector_transform`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call graph, the data flow above, and
+  `tools/rebuild/basis_transform_build.c`.
+- Observation: the original has no EBP frame and uses `ebp` and `edi` as
+  scratch registers, so the module builds without `-of+`.  The function holds
+  no floating-point instruction, so the module needs no FPU stub, and the
+  module uses no assembly implementation.
+  Evidence: `tools/rebuild/basis_vector_transform.c` and the module recipe.
+- Observation: the harness holds one 12-dword record.  The four paths cover the
+  identity matrix, the scale and cross terms, the negative values with the
+  arithmetic shift, and the mixed signs.  The output holds the markers `0`
+  through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/basis_vector_transform_main.c`,
+  `python3 tools/rebuild/harness.py run --module basis_vector_transform`,
+  `work/rebuild/bvt.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x81f80`.
+- Observation: the rebuilt body holds 6 of 28 instructions equal, 0 of 76
+  bytes equal, and 0 of 0 relocation slots equal.  The identity check stays
+  open because the rebuilt C uses the standard Watcom calling convention, takes
+  the pointer from the stack, and keeps the products in `edi` and `esi` instead
+  of `ebp` and `edi`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81f80 --count 28 --rebuilt work/rebuild/bvt.exe
+  --rebuilt-map work/rebuild/basis_vector_transform.map --rebuilt-symbol
+  basis_vector_transform_` and
+  `python3 tools/rebuild/run.py run --function 0x81f80`.

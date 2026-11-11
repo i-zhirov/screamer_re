@@ -1,0 +1,27 @@
+{
+  "exe": "bvt.exe",
+  "map": "basis_vector_transform.map",
+  "name": "basis_vector_transform",
+  "run": {
+    "command": "bvt.exe > bvt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "bvt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "basis_vector_transform.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "basis_vector_transform_main.c"
+    }
+  ]
+}
