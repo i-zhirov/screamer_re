@@ -330,9 +330,10 @@ current host.
   `sound_effect_trigger` at `0x24d30`, and the Phase Y module
   `sound_queue_start` at `0x24a28`, and the Phase Y module
   `net_menu_enter` at `0x2df68`, and the Phase Y module
-  `map_object_record_init` at `0x2b450`;
+  `map_object_record_init` at `0x2b450`, and the Phase Y module
+  `track_stream_open` at `0x25aac`;
   thirty-two modules are verified, one is matching, and three hundred and
-  seventy-three rebuilds hold the recorded difference; the `video_fill`,
+  seventy-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

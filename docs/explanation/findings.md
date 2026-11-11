@@ -29030,3 +29030,65 @@ temporary `-od` recipe.
   screen caller support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the frame order and the register
   allocation of the original.
+
+## The track_stream_open module at 0x25aac
+
+- Observation: the original body at `0x25aac` holds 22 instructions and 65
+  bytes up to the `ret` at `0x25aec`.  The next code starts at `0x25af0`, so
+  the store record keeps the 68-byte extent and sets no separate function size.
+  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25aac --count
+  22` and `tools/rebuild/functions/0x25aac.json`.
+- Observation: the function receives the container path in `eax` and the member
+  name in `edx`.  It loads the engine buffer pointer from the cell
+  `PTR_DAT_000bdd20` at object-1 offset `0xbdd20`.  The cell holds the value
+  `0xbdd24` and its fixup targets object 1 offset `0xbdd24`, so the load fills
+  the buffer at that offset.  The function calls `member_load` at `0x4c485`
+  with the local stream record, the path, the name, and the pointer.  A
+  non-zero result runs `file_error_report` at `0x4bf88` with the stream record.
+  Evidence: the body at `0x25aac` through `0x25aec`, the cells at `0xbdd20`
+  and `0xbdd24`, and the fixups at `0x25ac5` and `0xcdd20`.
+- Observation: the only direct caller is `race_data_load` at `0x131a8` with the
+  call site at `0x1336d`.  The caller builds the `%s\gfx\%s%c.dat` path and the
+  `%s.smg` member name first, so the function opens the level member `.smg`
+  from the track archive.  The third value `0x104` from the caller is not used
+  by the original body.
+  Evidence: the block at `0x1334c` through `0x1336d` and the format strings at
+  object-3 offsets `0x480` and `0x4df`.
+- Inference: the `race_data_load` caller, the path and name arguments, and the
+  `member_load` call support the name `track_stream_open`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.  The
+  function loads a resource, so the record takes the section Resource loader.
+  Evidence: the data flow and the caller above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and makes no
+  floating-point call, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x25aac` through `0x25ab1` and
+  `tools/rebuild/modules/track_stream_open.json`.
+- Observation: the harness holds the engine buffer, its pointer cell, and the
+  `member_load` and `file_error_report` stubs.  The three paths cover the
+  successful load, the failed load with the report, and the empty path and
+  member with the third value `0xabcd` and the second buffer in the pointer
+  cell.  The output holds the markers `0`, `1`, `2`, and `D`, and the behavior
+  check passes.
+  Evidence: `tools/rebuild/track_stream_open_main.c`,
+  `python3 tools/rebuild/harness.py run --module track_stream_open`,
+  `work/rebuild/tsopen.txt`, and `python3 tools/rebuild/run.py run --function
+  0x25aac`.
+- Observation: the rebuilt body holds 17 instructions and 52 bytes up to the
+  `ret` at `0x10033`.  The identity window holds 22 instructions and 65 bytes
+  and stays open at 5 of 22 instructions, 6 of 65 bytes, and 0 of 7 relocation
+  slots.  The difference is open because V2 saves the frame pointer first,
+  keeps the incoming path and member in registers, places the stream record at
+  another local offset, and restores the stack with `lea`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25aac --count 22 --rebuilt work/rebuild/tsopen.exe
+  --rebuilt-map work/rebuild/track_stream_open.map --rebuilt-symbol
+  track_stream_open_` and `python3 tools/rebuild/run.py run --function 0x25aac`.
+- Limit: the original has no symbol name.  The `race_data_load` caller and the
+  `.smg` member support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the frame order and the register
+  allocation of the original.

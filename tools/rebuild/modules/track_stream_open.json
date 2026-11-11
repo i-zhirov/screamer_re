@@ -1,0 +1,29 @@
+{
+  "exe": "tsopen.exe",
+  "map": "track_stream_open.map",
+  "name": "track_stream_open",
+  "run": {
+    "command": "tsopen.exe > tsopen.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "tsopen.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_stream_open.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_stream_open_main.c"
+    }
+  ]
+}
