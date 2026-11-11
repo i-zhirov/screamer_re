@@ -1,0 +1,34 @@
+{
+  "exe": "osa.exe",
+  "map": "object_slot_acquire.map",
+  "name": "object_slot_acquire",
+  "run": {
+    "command": "osa.exe > osa.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "osa.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_slot_acquire.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_slot_acquire_main.c"
+    }
+  ]
+}

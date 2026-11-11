@@ -650,13 +650,13 @@ reproduce the original bytes.
 | `0x23f14` | `race_finish_mode_2_update` (done) | 60 | 18 | 1 | 0 |
 | `0x23ed8` | `race_finish_mode_1_update` (done) | 60 | 18 | 1 | 0 |
 | `0x118a4` | `object_block_tag` (done) | 60 | 21 | 0 | 0 |
-| `0x11660` | unnamed | 60 | 23 | 0 | 0 |
+| `0x11660` | `object_slot_acquire` (done) | 60 | 23 | 0 | 0 |
 
-This table starts Phase Y.
+This table completes Phase Y.
 
 ## Position
 
-Four hundred and eighteen modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and nineteen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -921,5 +921,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_audio_tick` at `0x25f90`, and the Phase Y module
 `race_finish_mode_2_update` at `0x23f14`, and the Phase Y module
 `race_finish_mode_1_update` at `0x23ed8`, and the Phase Y module
-`object_block_tag` at `0x118a4`.
-The next unnamed function is `0x11660`.
+`object_block_tag` at `0x118a4`, and the Phase Y module
+`object_slot_acquire` at `0x11660`.
+The next unnamed function is `0x1f834`.

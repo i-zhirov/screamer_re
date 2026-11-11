@@ -343,9 +343,10 @@ current host.
   `cd_audio_tick` at `0x25f90`, and the Phase Y module
    `race_finish_mode_2_update` at `0x23f14`, and the Phase Y module
    `race_finish_mode_1_update` at `0x23ed8`, and the Phase Y module
-   `object_block_tag` at `0x118a4`;
+   `object_block_tag` at `0x118a4`, and the Phase Y module
+   `object_slot_acquire` at `0x11660`;
    thirty-two modules are verified, one is matching, and three hundred and
-   eighty-six rebuilds hold the recorded difference; the `video_fill`,
+   eighty-seven rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

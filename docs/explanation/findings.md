@@ -29831,3 +29831,75 @@ temporary `-od` recipe.
   the two binders support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the argument spill, the stride
   shape, and the branch layout.
+
+## The object_slot_acquire module at 0x11660
+
+- Observation: the original body at `0x11660` holds 23 instructions and 60
+  bytes up to the early `ret` at `0x1169b`.  The success path continues at
+  `0x1169c` to the `ret` at `0x11710`.  The next function starts at `0x11714`
+  after the three padding bytes at `0x11711`, so the store record keeps the
+  180-byte extent and sets no separate function size.  The identity check uses
+  23 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11660 --count
+  23` and `tools/rebuild/functions/0x11660.json`.
+- Observation: the two direct callers at `0x115b1` and `0x14ded` are
+  `object_list_link` at `0x11568` and `replay_playback_start` at `0x14d2c`.
+  Both pass the object table `0x6530` in `eax`, the list `0x6350` in `edx`, and
+  the entry index address in `ebx`.  `object_list_link` takes a slot for each
+  active record before it binds the record.  `replay_playback_start` takes a
+  slot for the ghost object before it sets the block flag.  The sibling release
+  at `0x11714` reads the same list, so the record takes the name
+  `object_slot_acquire` with the confidence `inferred` and the section Resource
+  loader.
+  Evidence: the call at `0x115b1`, the call at `0x14ded`, and the findings "The
+  object_list_link module at 0x11568", "The func_11714 module at 0x11714", and
+  "The replay_playback_start module at 0x14d2c".
+- Observation: the table holds `0x78` records of `0x1c` bytes.  A record holds
+  the name at `+0x00`, the block object at `+0x0c`, the chunk table at `+0x10`,
+  the file record at `+0x14`, and one slot word at `+0x18`.  A slot word of
+  `-1` marks a free entry.
+  Evidence: the stride at `0x11675` through `0x11684` and the object table
+  finding in "The object_request module at 0x114b4".
+- Observation: an entry with a slot other than `-1` returns `0xd` and changes
+  nothing.  A free entry starts at list index zero.  The scan skips each list
+  value that is neither `-1` nor 0.  At the first `-1` or 0 value the function
+  clears the next value when the found value is zero, stores the record block
+  pointer in the found list slot, keeps the found index in the entry slot, and
+  returns 0.
+  Evidence: the used-entry return at `0x1168a` through `0x1169b`, the scan at
+  `0x1169c` through `0x116c3`, and the store at `0x116c5` through `0x11710`.
+- Inference: the two callers, the shared table and list, and the sibling
+  release support the name `object_slot_acquire`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/object_slot_acquire.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct call,
+  so the module uses no FPU stub and no assembly.
+  Evidence: the prologue at `0x11660` and the module recipe.
+- Observation: the harness holds four 0x1c-byte records, one block object per
+  record, an eight-entry list, and one entry index.  The eight paths cover the
+  free `-1` value, the occupied values with a zero next value, the occupied
+  values with a `-1` next value, the used entry, the second record, the zero
+  value at the last record, the `-1` value at the second record, and the zero
+  value at index 0.  The output holds the markers `0` through `7` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/object_slot_acquire_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_slot_acquire`,
+  `work/rebuild/osa.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11660`.
+- Observation: the rebuilt body holds 5 of 23 instructions equal and 0 of 59
+  bytes equal.  The identity check stays open because V2 pushes the frame
+  pointer first and then the saved register, keeps the list in `ecx` and an
+  index in `edi`, uses `imul` for the 0x1c stride, and folds the loop into a
+  direct compare.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11660 --count 23 --rebuilt work/rebuild/osa.exe
+  --rebuilt-map work/rebuild/object_slot_acquire.map --rebuilt-symbol
+  object_slot_acquire_` and `python3 tools/rebuild/run.py run --function
+  0x11660`.
+- Limit: the original has no symbol name.  The two callers and the sibling
+  release support the role, and the name stays inferred.  The identity check
+  stays open because C cannot reproduce the argument spill and the loop shape.
