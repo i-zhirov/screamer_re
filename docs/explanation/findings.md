@@ -28844,3 +28844,67 @@ temporary `-od` recipe.
   support the role, and the name stays inferred.  The identity check stays open
   because C cannot reproduce the frame order and the register allocation of the
   original.
+
+## The sound_queue_start module at 0x24a28
+
+- Observation: the original body at `0x24a28` holds 23 instructions and 67
+  bytes up to the `ret` at `0x24a6a`.  The -1 return path is out of line at
+  `0x24a6b` through the `ret` at `0x24a71`.  Two pad bytes follow at `0x24a72`,
+  and the jump table of `sound_variant_select` starts at `0x24a74`.  The next
+  function starts at `0x24a84`, so the store record keeps the 92-byte extent and
+  sets no separate function size.  The identity check uses 23 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24a28 --count
+  23` and `tools/rebuild/functions/0x24a28.json`.
+- Observation: the only direct caller is `sound_queue_update` at `0x24880`,
+  with the call site at `0x248d7`.  The caller passes the head queue record at
+  `DAT_0019080` and stores the result as the playing sound status at
+  `DAT_00119070`.  The callee `sound_variant_select` at `0x24a84` selects the
+  sample id, and the callee `table_lookup` at `0x1f718` resolves the table id.
+  Evidence: the call at `0x248d7`, the store at `0x248dc`, and the findings
+  "The sound_queue_update module at 0x24880", "The sound_variant_select module
+  at 0x24a84", and "The table_lookup module at 0x1f718".
+- Observation: the argument in `eax` points at a sound-queue record.  The field
+  +0x00 holds the effect index and the field +0x04 holds the variant mode.  When
+  the selected sample id is -1, the function returns -1 and touches no global.
+  Otherwise it stores the frame counter `DAT_000007fd` at `DAT_0019078`, adds
+  the sample base `DAT_001906c` to the selected sample id, stores the table id
+  at `DAT_0019074`, and returns the table entry from `table_lookup`.  The sample
+  base comes from `sound_effect_list_init` at `0x24600`.
+  Evidence: the block at `0x24a3d` through `0x24a6a` and the base load at
+  `0x24a4f`.
+- Inference: the queue start, the sample base, and the two callees support the
+  name `sound_queue_start`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.  The sound functions sit in the section
+  Program functions.
+  Evidence: the data flow above and the caller list.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no conversion to
+  an integer, so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x24a28` through `0x24a2c` and
+  `tools/rebuild/modules/sound_queue_start.json`.
+- Observation: the harness holds the frame counter, the sample base, the table
+  id, the start frame, and the two callee stubs.  The seven paths cover the -1
+  return with untouched globals, the base add, the zero sample id and zero base,
+  the negative sample id, the large base, the unchanged queue record pointer,
+  and the -1 table entry after the two stores.  The output holds the markers `0`
+  through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_queue_start_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_queue_start`,
+  `work/rebuild/sqstart.txt`, and `python3 tools/rebuild/run.py run --function
+  0x24a28`.
+- Observation: the rebuilt body holds 23 instructions and 76 bytes.  The
+  identity window holds 23 instructions and 67 bytes and stays open at 5 of 23
+  instructions, 5 of 67 bytes, and 0 of 10 relocation slots.  The difference is
+  open because V2 saves the frame pointer before `edx`, keeps the selected
+  sample id in `eax` instead of a frame slot, forms the base add with a load and
+  an add, and reaches the globals through the small harness offsets.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24a28 --count 23 --rebuilt work/rebuild/sqstart.exe
+  --rebuilt-map work/rebuild/sound_queue_start.map --rebuilt-symbol
+  sound_queue_start_` and `python3 tools/rebuild/run.py run --function 0x24a28`.
+- Limit: the original has no symbol name.  The caller chain, the sample base,
+  and the two callees support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the frame order and the
+  register allocation of the original.
