@@ -27622,3 +27622,74 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   stays inferred.  The exact role of the state cell `DAT_001100d4` stays
   unknown; the record reports only that the original tests it for zero.
+
+## The sound_sequence_prepare module at 0x83354
+
+- Observation: the original body at `0x83354` holds 20 instructions and 80
+  bytes up to the `ret` at `0x833a3`.  The next function
+  `sound_source_collect` starts at `0x833a4`, so the store record keeps the
+  80-byte extent and sets no separate function size.  The identity check uses
+  20 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x83354 --count 20` and
+  `tools/rebuild/functions/0x83354.json`.
+- Observation: the only direct caller is `sound_effects_update` at `0x81ab0`
+  with the call site at `0x81ac1`.  The caller source already names this
+  function `sound_sequence_prepare`, and the entry calls it after the timer
+  helper at `0x83ca8`.  No named function sits between the caller and the
+  target, so the record takes the section Program functions.
+  Evidence: the call at `0x81ac1`, `tools/rebuild/sound_effects_update.c`, and
+  the record of `0x81ab0`.
+- Observation: the function takes the row count in `eax` and the row pointer
+  in `esi` from `sound_range_update` at `0x830c8`.  C cannot return a pointer
+  in `esi`, so the callee stores the row pointer in the global `grid_row`.  The
+  function stores the row count at `0x734f0`, clears `0x734fc`, and sets the
+  output cursor to `0x40330`.
+  Evidence: the call at `0x83354`, the stores at `0x83359`, `0x83365`, and
+  `0x8335e`, and the record of `0x830c8`.
+- Observation: the loop reads one row entry with `lodsd` and skips an entry
+  equal to -1.  For every other entry it writes the literal `0xaaaabbbb` to
+  `0x734f4`, adds the same literal to the entry, and calls
+  `sound_source_collect` at `0x833a4` with the entry in `ebp` and the output
+  cursor in `edi`.  The literal is the linker fill value, and no fixup covers
+  either slot.
+  Evidence: the block at `0x8336f` through `0x8338b` and the relocation list of
+  the page.
+- Observation: the loop decrements `0x734f0` after the body and continues
+  while the result is not negative, so it runs `count + 1` times.  The function
+  then divides the output length by the 8-byte record with an arithmetic shift
+  by three, stores the count at `0x72488`, and returns it in `eax`.
+  Evidence: the block at `0x8338c` through `0x833a3`.
+- Inference: the caller, the row walk, the source collect call, and the active
+  count support the name `sound_sequence_prepare`.  The caller source already
+  uses the name, so the record keeps it with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction, so the module builds without `-of+` and links no FPU stub.  The
+  module uses no assembly implementation.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds the row array, the row count, the output
+  cursor, the four scratch globals, and the two callee stubs.  The
+  `sound_source_collect` stub records the region pointer and the row limit and
+  advances the output cursor by a chosen number of 8-byte records.  The five
+  paths cover the single entry, the skipped -1 entry, the -1-only loop, two
+  records per call, and the count -1.  The output holds the markers `0` through
+  `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_sequence_prepare_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_sequence_prepare`,
+  `work/rebuild/sseq.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x83354`.
+- Observation: the rebuilt body holds 1 of 20 instructions equal, 1 of 74
+  bytes equal, and 0 of 11 relocation slots equal.  The identity check stays
+  open because V2 pushes the saved registers, keeps the row cursor and the
+  output cursor in registers, forms the fill add with `sub`, and reloads the
+  count from its stack slot.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x83354 --count 20 --rebuilt work/rebuild/sseq.exe
+  --rebuilt-map work/rebuild/sound_sequence_prepare.map --rebuilt-symbol
+  sound_sequence_prepare_` and
+  `python3 tools/rebuild/run.py run --function 0x83354`.
+- Limit: the original has no symbol name for this function.  The name comes
+  from the caller source and stays inferred.  The exact meaning of the fill
+  value `0xaaaabbbb` on the row limit and the row entry stays unknown; the
+  rebuild keeps both values.

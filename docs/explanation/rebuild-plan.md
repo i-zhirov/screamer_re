@@ -604,7 +604,7 @@ reproduce the original bytes.
 | `0x22664` | `angle_within` (done) | 85 | 32 | 0 | 16 |
 | `0x11974` | `func_11974` (done) | 85 | 28 | 1 | 3 |
 | `0x23fc8` | `race_finish_sla_update` (done) | 83 | 24 | 1 | 0 |
-| `0x83354` | unnamed | 80 | 20 | 2 | 0 |
+| `0x83354` | `sound_sequence_prepare` (done) | 80 | 20 | 2 | 0 |
 | `0x2f709` | unnamed | 79 | 34 | 2 | 0 |
 | `0x1f7e4` | unnamed | 79 | 25 | 2 | 0 |
 | `0x81f80` | unnamed | 78 | 28 | 0 | 0 |
@@ -622,7 +622,7 @@ This table starts Phase X.
 
 ## Position
 
-Three hundred and eighty-two modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and eighty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -851,5 +851,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `race_finish_overlay_5` at `0x24264`, and `race_finish_overlay_6` at
 `0x2420c`, the Phase X module `angle_within` at `0x22664`, the Phase X
 module `func_11974` at `0x11974`, and the Phase X module
-`race_finish_sla_update` at `0x23fc8`.
-The next unnamed function is `0x83354`.
+`race_finish_sla_update` at `0x23fc8`, and the Phase X module
+`sound_sequence_prepare` at `0x83354`.
+The next unnamed function is `0x2f709`.
