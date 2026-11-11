@@ -1,0 +1,32 @@
+{
+  "exe": "svpset.exe",
+  "map": "sound_voice_pitch_set.map",
+  "name": "sound_voice_pitch_set",
+  "run": {
+    "command": "svpset.exe > svpset.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "svpset.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_pitch_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_pitch_set_main.c"
+    }
+  ]
+}

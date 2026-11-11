@@ -309,9 +309,10 @@ current host.
   `func_11974` at `0x11974`, and the Phase X module
   `race_finish_sla_update` at `0x23fc8`, and the Phase X module
   `sound_sequence_prepare` at `0x83354`, and the Phase X module
-  `memory_block_largest` at `0x2f709`;
+  `memory_block_largest` at `0x2f709`, and the Phase X module
+  `sound_voice_pitch_set` at `0x1f7e4`;
   thirty-one modules are verified, one is matching, and three hundred and
-  fifty-three rebuilds hold the recorded difference; the `video_fill`,
+  fifty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

@@ -606,7 +606,7 @@ reproduce the original bytes.
 | `0x23fc8` | `race_finish_sla_update` (done) | 83 | 24 | 1 | 0 |
 | `0x83354` | `sound_sequence_prepare` (done) | 80 | 20 | 2 | 0 |
 | `0x2f709` | `memory_block_largest` (done) | 79 | 34 | 2 | 0 |
-| `0x1f7e4` | unnamed | 79 | 25 | 2 | 0 |
+| `0x1f7e4` | `sound_voice_pitch_set` (done) | 79 | 25 | 2 | 0 |
 | `0x81f80` | unnamed | 78 | 28 | 0 | 0 |
 | `0x24bfc` | unnamed | 78 | 32 | 0 | 0 |
 | `0x15bac` | unnamed | 78 | 23 | 7 | 0 |
@@ -622,7 +622,7 @@ This table starts Phase X.
 
 ## Position
 
-Three hundred and eighty-four modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and eighty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -853,5 +853,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 module `func_11974` at `0x11974`, and the Phase X module
 `race_finish_sla_update` at `0x23fc8`, the Phase X module
 `sound_sequence_prepare` at `0x83354`, and the Phase X module
-`memory_block_largest` at `0x2f709`.
-The next unnamed function is `0x1f7e4`.
+`memory_block_largest` at `0x2f709`, and the Phase X module
+`sound_voice_pitch_set` at `0x1f7e4`.
+The next unnamed function is `0x81f80`.

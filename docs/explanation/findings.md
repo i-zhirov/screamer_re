@@ -27749,3 +27749,58 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The name comes
   from the two caller modules and stays inferred.
 
+
+## The sound_voice_pitch_set module at 0x1f7e4
+
+- Observation: the original body at `0x1f7e4` holds 25 instructions and 79
+  bytes up to the `ret` at `0x1f832`.  The next function starts at `0x1f834`, so
+  the store record keeps the 80-byte extent and sets no separate function size.
+  The record sets the instruction count 25.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f7e4 --count 25` and
+  `tools/rebuild/functions/0x1f7e4.json`.
+- Observation: the three direct callers are `object_collision` at `0x1e00c`,
+  `engine_rpm_update` at `0x18db0`, and `sound_emitter_update` at `0x21b9c`.
+  Each caller passes the voice index in `eax` and the pitch value in `edx`.  The
+  callers sit in three sections, so the record takes the section Program
+  functions.
+  Evidence: the calls at `0x1e2b0`, `0x19468`, and `0x21d75`, and the three
+  caller records.
+- Observation: the setup word `DAT_00008058` gates the store.  A zero value
+  returns at once.  A zero pitch becomes 1.  The function passes the driver
+  handle `DAT_00018d94`, the voice index, and the pitch to the driver value
+  store at `0xc6af6`.  That store writes the dword at voice offset `0x44`.
+  Evidence: the block at `0x1f7e4` through `0x1f818` and the field write at
+  `0xc6b5b`.
+- Observation: a pitch above `0x40000` prints the message `PITCH` from object-3
+  offset `0xbfa` through `0x3009b`.  The compare is signed, so a negative pitch
+  prints nothing.
+  Evidence: the push at `0x1f821`, the block at `0x3009b`, and the bytes at
+  object-3 offset `0xbfa`.
+- Inference: the three callers, the voice field, and the `PITCH` message
+  support the name `sound_voice_pitch_set`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction, so the
+  module needs no FPU stub, and the module uses no assembly implementation.
+  Evidence: `tools/rebuild/sound_voice_pitch_set.c` and the module recipe.
+- Observation: the harness holds the setup word, the driver handle, and the two
+  stubs.  The six paths cover the zero setup word, the zero pitch default, a
+  plain pitch, the `0x40000` boundary, the `0x40001` message, and a negative
+  pitch.  The output holds the markers `0` through `5` and `D`, and the behavior
+  check passes.
+  Evidence: `tools/rebuild/sound_voice_pitch_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_pitch_set`,
+  `work/rebuild/svpset.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1f7e4`.
+- Observation: the rebuilt body holds 16 of 25 instructions equal, 3 of 70
+  bytes equal, and 2 of 4 relocation slots equal.  The identity check stays
+  open because V2 sets the frame first, keeps the voice index and the pitch in
+  registers, saves `ecx` and `esi`, and reaches the driver with register
+  arguments instead of the stack copies of the original.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f7e4 --count 25 --rebuilt work/rebuild/svpset.exe
+  --rebuilt-map work/rebuild/sound_voice_pitch_set.map --rebuilt-symbol
+  sound_voice_pitch_set_` and
+  `python3 tools/rebuild/run.py run --function 0x1f7e4`.
