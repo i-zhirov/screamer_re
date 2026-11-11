@@ -28404,3 +28404,65 @@ temporary `-od` recipe.
   exact role of the driver function at `0xca477` stays unknown.  The identity
   check stays open because C cannot reproduce the parameter spills and the
   explicit data segment load of the original.
+
+## The func_113c8 module at 0x113c8
+
+- Observation: the original body at `0x113c8` holds 27 instructions and 71
+  bytes up to the `ret` at `0x1140e`.  One padding byte at `0x1140f` precedes
+  the next entry at `0x11410`, so the store record keeps the 72-byte extent and
+  sets no separate function size.  The identity check uses 27 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x113c8 --count 27` and
+  `tools/rebuild/functions/0x113c8.json`.
+- Observation: the only direct callee at `0x113fb` is `object_chunk_find` at
+  `0x11410`.  The function takes the wanted name in `eax`, the position block
+  in `edx`, and the object table in `ebx`, and it passes the same three
+  arguments to the callee.  The position block holds the object-table slot at
+  `+0x00` and takes the chunk index at `+0x04`.
+  Evidence: the disassembly above, the argument stores at `0x113ce` through
+  `0x113d4`, and the record of `0x11410`.
+- Observation: the image holds no direct call and no relocation target for
+  this entry.  The callee record, the position block, and the chunk search at
+  `0x11410` define the arguments, and they support the section Resource
+  loader.
+  Evidence: the call sweep for `0x113c8`, the relocation sweep for the target
+  `0x13c8` of object 1, and the record of `0x11410`.
+- Observation: the function walks the 0x78 object-table slots.  It writes the
+  current slot to the position block at `+0x00`, calls `object_chunk_find`, and
+  returns 0 on a match.  A missing name leaves the last slot 0x77 in the
+  position block and returns 7.  The callee writes the found chunk index at
+  `+0x04`, and any non-zero callee result continues the scan.
+  Evidence: the loop at `0x113d7` through `0x11404` and the `mov eax, 7` at
+  `0x11406`.
+- Inference: the callee record and the position block support the role of the
+  function as the object-table wrapper of the chunk search.  The original has
+  no symbol and no direct caller, so the record keeps the weak fallback name
+  `func_113c8` with the confidence `inferred`.
+  Evidence: the call sweep and the callee record above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds one opaque object table, one position block,
+  and the `object_chunk_find` stub.  The five paths cover a match at slot 5, no
+  match, a match at the first slot, a match at the last slot 0x77, and the
+  non-zero callee result 9.  The stub checks the name, position, and object
+  pointers and the slot order.  The output holds the markers `0` through `4`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_113c8_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_113c8`,
+  `work/rebuild/f113c8.txt`, and `python3 tools/rebuild/run.py run --function
+  0x113c8`.
+- Observation: the rebuilt body holds 8 of 27 instructions equal, 4 of 57
+  bytes equal, and 0 of 0 relocation slots equal.  The identity check stays
+  open because V2 saves `ecx`, `esi`, and `edi`, keeps the running slot in
+  `esi` and the position block in `ecx`, and restores the three saved registers
+  in the epilogue, so the 27-instruction window ends before the rebuilt `ret`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x113c8 --count 27 --rebuilt work/rebuild/f113c8.exe
+  --rebuilt-map work/rebuild/func_113c8.map --rebuilt-symbol func_113c8_` and
+  `python3 tools/rebuild/run.py run --function 0x113c8`.
+- Limit: the original has no symbol name and no direct caller.  The callee and
+  the position block support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the register arguments,
+  the register allocation, and the epilogue of the original.

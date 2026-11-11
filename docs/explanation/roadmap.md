@@ -320,9 +320,10 @@ current host.
   `cd_request_send` at `0x25f44`, the Phase X module
   `race_finish_cng_update` at `0x2401c`, and the Phase X module
   `sound_variant_lookup` at `0x247ac`, and the Phase X module
-  `sound_voice_sample_set` at `0x1f764`;
+  `sound_voice_sample_set` at `0x1f764`, and the Phase Y module
+  `func_113c8` at `0x113c8`;
   thirty-two modules are verified, one is matching, and three hundred and
-  sixty-three rebuilds hold the recorded difference; the `video_fill`,
+  sixty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

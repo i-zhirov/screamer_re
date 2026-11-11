@@ -1,0 +1,31 @@
+{
+  "exe": "f113c8.exe",
+  "map": "func_113c8.map",
+  "name": "func_113c8",
+  "run": {
+    "command": "f113c8.exe > f113c8.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "f113c8.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_113c8.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_113c8_main.c"
+    }
+  ]
+}

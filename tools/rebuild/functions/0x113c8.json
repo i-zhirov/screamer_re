@@ -1,9 +1,107 @@
 {
   "address": "0x113c8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 27,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x113c8 holds 27 instructions and 71 bytes up to the ret at 0x1140e; the next entry starts at 0x11410, so the store record keeps the 72-byte extent and sets no separate function size; the identity check uses 27 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct callee at 0x113fb is object_chunk_find at 0x11410; the function takes the wanted name in eax, the position block in edx, and the object table in ebx, and it passes the same three arguments to the callee; the position block holds the object-table slot at +0x00 and takes the chunk index at +0x04"
+    },
+    {
+      "kind": "note",
+      "text": "the image holds no direct call and no relocation to this entry, so the callee record and the position block define the arguments; the callee is the chunk search of the object record at 0x11410, so the section is Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function walks the 0x78 object-table slots; it writes the current slot to the position block at +0x00, calls object_chunk_find, and returns 0 on a match; a missing name leaves the last slot 0x77 in the position block and returns 7; the callee writes the found chunk index at +0x04, and any non-zero callee result continues the scan"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol and no direct caller, so the record keeps the weak fallback name func_113c8 with the confidence inferred; the callee name object_chunk_find is the named record at 0x11410"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one opaque object table, one position block, and the object_chunk_find stub; the five paths cover a match at slot 5, no match, a match at the first slot, a match at the last slot 0x77, and the non-zero callee result 9; the stub checks the name, position, and object pointers and the slot order; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 8 of 27 instructions and 4 of 57 bytes equal, and the compare has no relocation slot; the identity check stays open because V2 saves ecx, esi, and edi, keeps the running slot in esi and the position block in ecx, and restores the three saved registers in the epilogue, so the 27-instruction window ends before the rebuilt ret; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x113c8 --count 27"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x113c8 --count 27 --rebuilt work/rebuild/f113c8.exe --rebuilt-map work/rebuild/func_113c8.map --rebuilt-symbol func_113c8_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x113c8"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_113c8 module at 0x113c8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_113c8.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_113c8_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_113c8.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_113c8",
+  "name": "func_113c8",
   "notes": [],
   "object_offset": "0x13c8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x113c8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:9863710192fa16ae8208cc8327c5d5c6f47e9b35b86306c6ca212af8f5e8ccee",
+    "source_digest": "sha256:925854aa9e4e16930f94bfbfb31891893ad0c8cc51b64affd1dc1b253b35c475",
+    "tool": "run.py"
+  },
+  "role": "Searches the 0x78 object-table slots for the named chunk and returns 0 on a match or 7 when no slot holds the name.",
+  "section": "Resource loader",
   "size": 72,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_113c8_"
 }
