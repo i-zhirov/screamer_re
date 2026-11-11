@@ -29092,3 +29092,64 @@ temporary `-od` recipe.
   `.smg` member support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the frame order and the register
   allocation of the original.
+
+## The state_cells_set module at 0x8bd54
+
+- Observation: the original body at `0x8bd54` holds 16 instructions and 64
+  bytes up to the `ret` at `0x8bd93`.  A later function starts at `0x8bd94`, and
+  the next recorded function starts at `0x8bdec`, so the store record keeps the
+  152-byte extent and sets no separate function size.  The identity check uses
+  16 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8bd54 --count
+  16` and `tools/rebuild/functions/0x8bd54.json`.
+- Observation: the function stores its argument `eax` in the eight data cells at
+  object-1 offsets `0x73bf7`, `0x73c05`, `0x73c13`, `0x73c21`, `0x73c68`,
+  `0x73c76`, `0x73c84`, and `0xc7cf0`.  It copies the value to `ebx`, negates
+  `eax`, and stores the negated value at `0xc7cf4`.  It subtracts `0x80` from
+  `ebx` and stores the result at `0x72bf0`.
+  Evidence: the body at `0x8bd54` through `0x8bd93`.
+- Observation: the object data holds the default state for the argument
+  `0xffff54e0`.  The eight cells hold `0xffff54e0`, the negated cell holds
+  `0xab20`, and the biased cell holds `0xffff5460`.
+  Evidence: `tools/le.py` reads of the cells at object-1 offsets `0x73bf7`
+  through `0x73c84`, `0xc7cf0`, `0xc7cf4`, and `0x72bf0`.
+- Observation: the four direct callers pass the state value.  `race_start` at
+  `0x27770` passes `DAT_000021d8[index]` at the call site `0x277fe`,
+  `loading_screen` at `0x2a364` passes `DAT_000021d8[context + 8]`,
+  `menu_space_init` at `0x29d08` passes the default `0xffff54e0`, and
+  `race_results_screen` at `0x2a558` passes `DAT_000021d8[context + 8]` at the
+  call site `0x2a73c`.  The cell `0xc7cf0` holds the far depth limit that
+  `sound_mix_prepare` at `0x8aa60` and the renderer read.
+  Evidence: the call sites and the comparison at `0x8abdb`.
+- Inference: the four callers, the default state, and the far limit support the
+  name `state_cells_set`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.  The function sets the general program
+  state, so the record takes the section Program functions.
+  Evidence: the data flow and the callers above.
+- Observation: the original holds no EBP frame, so the module builds without
+  `-of+`.  The function uses no floating-point instruction and calls no helper,
+  so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x8bd54` and `tools/rebuild/modules/state_cells_set.json`.
+- Observation: the harness holds the ten data cells.  The three paths cover the
+  default value `0xffff54e0`, the value `0x12345678`, and the value 0.  Every
+  path checks the eight cells, the negated cell, and the biased cell.  The
+  output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/state_cells_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module state_cells_set`,
+  `work/rebuild/scs.txt`, and `python3 tools/rebuild/run.py run --function
+  0x8bd54`.
+- Observation: the rebuilt body holds 16 instructions and 63 bytes up to the
+  `ret` at `0x1003e`.  The identity check stays open at 14 of 16 instructions,
+  22 of 63 bytes, and 8 of 10 relocation slots.  The difference is open because
+  V2 saves `edx` instead of all registers, moves the value to `edx` instead of
+  `ebx`, and subtracts `0x80` from `eax` instead of `ebx`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8bd54 --count 16 --rebuilt work/rebuild/scs.exe
+  --rebuilt-map work/rebuild/scs.map --rebuilt-symbol state_cells_set_` and
+  `python3 tools/rebuild/run.py run --function 0x8bd54`.
+- Limit: the original has no symbol name.  The four callers and the far limit
+  support the role, and the name stays inferred.  The identity check stays open
+  because C cannot reproduce the register order of the original.
