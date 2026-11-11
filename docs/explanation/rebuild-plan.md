@@ -615,14 +615,14 @@ reproduce the original bytes.
 | `0x261e4` | `cd_audio_q_channel_read` (done) | 74 | 25 | 1 | 0 |
 | `0x25f44` | `cd_request_send` (done) | 74 | 20 | 0 | 0 |
 | `0x2401c` | `race_finish_cng_update` (done) | 74 | 22 | 1 | 0 |
-| `0x247ac` | unnamed | 71 | 22 | 2 | 0 |
+| `0x247ac` | `sound_variant_lookup` (done) | 71 | 22 | 2 | 0 |
 | `0x1f764` | unnamed | 71 | 26 | 1 | 0 |
 
 This table starts Phase X.
 
 ## Position
 
-Three hundred and ninety-three modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and ninety-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -862,5 +862,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `reciprocal_table_build` at `0x4d214`, and the Phase X module
 `cd_audio_q_channel_read` at `0x261e4`, and the Phase X module
 `cd_request_send` at `0x25f44`, and the Phase X module
-`race_finish_cng_update` at `0x2401c`.
-The next unnamed function is `0x247ac`.
+`race_finish_cng_update` at `0x2401c`, and the Phase X module
+`sound_variant_lookup` at `0x247ac`.
+The next unnamed function is `0x1f764`.

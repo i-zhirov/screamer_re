@@ -28277,3 +28277,68 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The CNG mode, the
   opponent count, and the state cell support the name, which stays inferred.
   The exact role of the state cell `DAT_001100d4` in the CNG mode stays unknown.
+
+## The sound_variant_lookup module at 0x247ac
+
+- Observation: the original body at `0x247ac` holds 22 instructions and 71
+  bytes up to the `ret` at `0x247f2`.  The early return block at `0x247f3`
+  through `0x247fb` holds `mov eax,-1`, `mov esp,ebp`, `pop ebp`, and `ret`.
+  The next function starts at `0x247fc`, so the store record keeps the 80-byte
+  extent and sets no separate function size.  The identity check uses 22
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x247ac --count 22` and
+  `tools/rebuild/functions/0x247ac.json`.
+- Observation: the only direct caller is `race_intro_update` at `0x20d20` with
+  the call site at `0x20db7`.  The caller passes the half-second bucket
+  `DAT_00118e20` in `eax` and the mode 0 in `edx`.  No named function sits
+  between the caller and the target, so the record takes the section Program
+  functions.
+  Evidence: the call sweep for `0x247ac`, the body at `0x20db0` through
+  `0x20db7`, and the record of `0x20d20`.
+- Observation: the state `DAT_0001d2c8` and the table flag `DAT_00008058` gate
+  the lookup.  A zero state returns -1, and a zero flag returns -1.  The table
+  function `table_lookup` at `0x1f718` reads the same flag.
+  Evidence: the compares at `0x247b8` and `0x247c1`, the early return at
+  `0x247f3`, and the record of `0x1f718`.
+- Observation: with both gates set, the function writes the effect to the field
+  `+0x00` and the mode to the field `+0x04` of a two-field stack record, and
+  passes the record to `sound_variant_select` at `0x24a84`.  It adds the sample
+  base `DAT_0001906c` to the selected sample id and resolves the sum through
+  `table_lookup` at `0x1f718`.  It returns the table entry.  The sample base
+  comes from `sound_effect_list_init` at `0x24600`.
+  Evidence: the block at `0x247ca` through `0x247ea`, the record of `0x24a84`,
+  and the record of `0x24600`.
+- Inference: the caller, the two sound gates, the variant select, and the table
+  lookup support the name `sound_variant_lookup`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the call sweep and the data references above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds the state, the table flag, the sample base,
+  the `sound_variant_select` stub, and the `table_lookup` stub.  The eight
+  paths cover the zero state, the zero flag, the base add, the mode 3 at the
+  base 0, the selected -1 with the base 5, a large base with a negative effect,
+  the effect 0 and mode 0, and a non-zero state and flag.  The output holds the
+  markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_variant_lookup_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_variant_lookup`,
+  `work/rebuild/svlk.txt`, and `python3 tools/rebuild/run.py run --function
+  0x247ac`.
+- Observation: the rebuilt body holds 7 of 22 instructions equal, 9 of 68 bytes
+  equal, and 0 of 7 relocation slots equal.  The identity check stays open
+  because V2 tests the two gates before it saves the arguments, merges the two
+  early returns into one block at the top, uses the 8-byte frame, writes the
+  stack record at `-8` and `-4`, and omits the separate parameter locals.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x247ac --count 22 --rebuilt work/rebuild/svlk.exe
+  --rebuilt-map work/rebuild/sound_variant_lookup.map --rebuilt-symbol
+  sound_variant_lookup_` and `python3 tools/rebuild/run.py run --function
+  0x247ac`.
+- Limit: the original has no symbol name for this function.  The caller, the
+  two gates, and the variant select support the name, which stays inferred.
+  The exact shared role of the flag `DAT_00008058` stays unknown.  The identity
+  check stays open because C cannot reproduce the parameter spills and the
+  cold early return of the original.
