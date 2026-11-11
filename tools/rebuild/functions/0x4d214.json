@@ -1,9 +1,115 @@
 {
   "address": "0x4d214",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 28,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4d214 holds 28 instructions and 76 bytes up to the ret at 0x4d25f; the next entry starts at 0x4d260, so the store record keeps the 76-byte extent and sets no separate function size; the identity check uses 28 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is stream_layer_init at 0x4c810, with the call site at 0x4c82f; that function calls the row offset table at 0x4d2dc, then this table, then the inverse-cosine table at 0x4d260, then loads the perspective table and the visibility table; the caller sits in the section The TABS table loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes no argument and reads the table pointer at 0xc5da0; it walks the index from 0 to 699; for each index it forms the reciprocal 1 / index, scales it by the double constant 32767.0 at object-3 offset 0x1767, and truncates it to an integer through the helper at 0x4d9f4; it stores the result at the slot of the table, so the table holds 700 entries from index 0 to 699"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the reciprocal arithmetic, and the 32767.0 scale support the name reciprocal_table_build; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original truncates through the Watcom helper at 0x4d9f4, so the local FPU stub makes __CHP truncate toward zero; the harness does not load the constant segment, so the scale and the table pointer arrive through globals that the harness sets at run time; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the table pointer, the 700-entry table, and the scale; the six paths cover the full scan from index 1 to 699, the entry at index 1, the entry at index 2, the entry at index 3, the entry at index 699, and the entry at index 256; the index 0 stays out of the scan, because the reciprocal of zero has no defined integer value; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 28 instructions and 80 bytes; the identity check stays open at 8 of 28 instructions, 5 of 76 bytes, and 1 of 3 relocation slots; V2 puts push ebp before push edx, keeps a frame copy for the integer-to-double conversion, and puts the increment at the bottom of the loop; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The reciprocal_table_build module at 0x4d214"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d214 --count 28"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d214 --count 28 --rebuilt work/rebuild/rcptb.exe --rebuilt-map work/rebuild/reciprocal_table_build.map --rebuilt-symbol reciprocal_table_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module reciprocal_table_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module reciprocal_table_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4d214"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/reciprocal_table_build.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/reciprocal_table_build_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/reciprocal_table_build_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/reciprocal_table_build.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "reciprocal_table_build",
+  "name": "reciprocal_table_build",
   "notes": [],
   "object_offset": "0x3d214",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 76,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 28,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d214",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:6e51176c961fd4153fb14858d528a97c1ee8ca10d012c6dfc8b80f4bf773eeb5",
+    "source_digest": "sha256:eb86d6e683b09b7e7c4414af8c22c33712faf0e1ea2115bcdf60f2e72a891134",
+    "tool": "run.py"
+  },
+  "role": "Builds the 700-entry reciprocal table scaled by 32767.",
+  "section": "The TABS table loaders",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "reciprocal_table_build_"
 }

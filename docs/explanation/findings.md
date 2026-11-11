@@ -28027,3 +28027,64 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x15ab8`.
 - Limit: the original has no symbol name for this function.  The name comes
   from the call order and the callee set and stays inferred.
+
+## The reciprocal_table_build module at 0x4d214
+
+- Observation: the original body at `0x4d214` holds 28 instructions and 76
+  bytes up to the `ret` at `0x4d25f`.  The next entry starts at `0x4d260`, so
+  the store record keeps the 76-byte extent and sets no separate function size.
+  The identity check uses 28 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d214 --count 28` and
+  `tools/rebuild/functions/0x4d214.json`.
+- Observation: the only direct caller is `stream_layer_init` at `0x4c810`,
+  with the call site at `0x4c82f`.  That function calls the row offset table at
+  `0x4d2dc`, then this table, then the inverse-cosine table at `0x4d260`, then
+  loads the perspective table and the visibility table.  The caller sits in the
+  section The TABS table loaders, so the record takes the same section.
+  Evidence: the body at `0x4c810` through `0x4c84c` and the
+  `stream_layer_init` record.
+- Observation: the function takes no argument and reads the table pointer at
+  `0xc5da0`.  It walks the index from 0 to 699.  For each index it forms the
+  reciprocal `1 / index`, scales it by the double constant 32767.0 at object-3
+  offset `0x1767`, and truncates it to an integer through the helper at
+  `0x4d9f4`.  It stores the result at the slot of the table, so the table holds
+  700 entries from index 0 to 699.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d214 --count 28` and the
+  double at linear `0x101767`.
+- Observation: the caller, the reciprocal arithmetic, and the 32767.0 scale
+  support the name `reciprocal_table_build`.  The original has no symbol, so
+  the record keeps the name with the confidence inferred.
+  Evidence: the call site at `0x4c82f` and the constant at object-3 offset
+  `0x1767`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original truncates through the Watcom helper at `0x4d9f4`, so
+  the local FPU stub makes `__CHP` truncate toward zero.  The harness does not
+  load the constant segment, so the scale and the table pointer arrive through
+  globals that the harness sets at run time.  The module uses no assembly
+  implementation.
+  Evidence: `tools/rebuild/reciprocal_table_build.c`,
+  `tools/rebuild/reciprocal_table_build_fpu.asm`, and
+  `tools/rebuild/modules/reciprocal_table_build.json`.
+- Observation: the harness holds the table pointer, the 700-entry table, and
+  the scale.  The six paths cover the full scan from index 1 to 699, the entry
+  at index 1, the entry at index 2, the entry at index 3, the entry at index
+  699, and the entry at index 256.  The index 0 stays out of the scan, because
+  the reciprocal of zero has no defined integer value.  The output holds the
+  markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/reciprocal_table_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module reciprocal_table_build`,
+  `work/rebuild/rcptb.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4d214`.
+- Observation: the rebuilt body holds 28 instructions and 80 bytes.  The
+  identity check stays open at 8 of 28 instructions, 5 of 76 bytes, and 1 of 3
+  relocation slots.  V2 puts `push ebp` before `push edx`, keeps a frame copy
+  for the integer-to-double conversion, and puts the increment at the bottom of
+  the loop.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d214 --count 28 --rebuilt work/rebuild/rcptb.exe
+  --rebuilt-map work/rebuild/reciprocal_table_build.map --rebuilt-symbol
+  reciprocal_table_build_` and
+  `python3 tools/rebuild/run.py run --function 0x4d214`.
+- Limit: the original has no symbol name for this function.  The caller, the
+  reciprocal arithmetic, and the scale support the name, which stays inferred.

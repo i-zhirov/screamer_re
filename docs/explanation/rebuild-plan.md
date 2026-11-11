@@ -611,7 +611,7 @@ reproduce the original bytes.
 | `0x24bfc` | `bit_pattern_match` (done) | 78 | 32 | 0 | 0 |
 | `0x15bac` | `player_car_effect_update` (done) | 78 | 23 | 7 | 0 |
 | `0x15ab8` | `player_car_step_update` (done) | 77 | 23 | 8 | 0 |
-| `0x4d214` | unnamed | 76 | 28 | 1 | 5 |
+| `0x4d214` | `reciprocal_table_build` (done) | 76 | 28 | 1 | 5 |
 | `0x261e4` | unnamed | 74 | 25 | 1 | 0 |
 | `0x25f44` | unnamed | 74 | 20 | 0 | 0 |
 | `0x2401c` | unnamed | 74 | 22 | 1 | 0 |
@@ -622,7 +622,7 @@ This table starts Phase X.
 
 ## Position
 
-Three hundred and eighty-nine modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and ninety modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -858,5 +858,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `basis_vector_transform` at `0x81f80`, and the Phase X module
 `bit_pattern_match` at `0x24bfc`, and the Phase X module
 `player_car_effect_update` at `0x15bac`, and the Phase X module
-`player_car_step_update` at `0x15ab8`.
-The next unnamed function is `0x4d214`.
+`player_car_step_update` at `0x15ab8`, and the Phase X module
+`reciprocal_table_build` at `0x4d214`.
+The next unnamed function is `0x261e4`.

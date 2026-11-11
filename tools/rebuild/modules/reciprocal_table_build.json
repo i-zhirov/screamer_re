@@ -1,0 +1,36 @@
+{
+  "exe": "rcptb.exe",
+  "map": "reciprocal_table_build.map",
+  "name": "reciprocal_table_build",
+  "run": {
+    "command": "rcptb.exe > rcptb.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "rcptb.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "reciprocal_table_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "reciprocal_table_build_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "reciprocal_table_build_main.c"
+    }
+  ]
+}
