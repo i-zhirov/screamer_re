@@ -28155,3 +28155,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The MSCDEX
   subfunction code, the transfer count, and the callers support the name, which
   stays inferred.
+
+## The cd_request_send module at 0x25f44
+
+- Observation: the original body at `0x25f44` holds 20 instructions and 74
+  bytes up to the `ret` at `0x25f8d`.  The next function starts at `0x25f90`, so
+  the store record keeps the 76-byte extent and sets no separate function size.
+  The identity check uses 20 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25f44 --count 20` and
+  `tools/rebuild/functions/0x25f44.json`.
+- Observation: the direct call sites are `0x25f3d` in the request helper at
+  `0x25f24`, `0x2643f` in the playback block at `0x263cc`, `0x264e4` in the
+  request helper at `0x264b8`, and `0x2651f` and `0x2657a` in the request helper
+  at `0x264f8`.  The CD audio request path sits in the section race_loop
+  callees, so the module takes the same section.
+  Evidence: the call-site scan of `obj.1` and the records `0x262fc`, `0x26448`,
+  and `0x265b4`.
+- Observation: the function receives the request header address in `edi`.  It
+  writes the low nibble to `DAT_001176d0`, the shifted high part to
+  `DAT_001176e2`, the value `0x1510` to `DAT_001176dc`, and the CD drive unit
+  from `DAT_0016668c` to `DAT_001176d8`.  These fields are the real-mode far
+  pointer `ES:BX` of the request header, the INT 2Fh function `0x1510` (send
+  device driver request), and the drive unit of the `ECX` register.
+  Evidence: the blocks at `0x25f44` through `0x25f6d`.
+- Observation: the function runs INT 31h with `ax` `0x0300` (simulate real-mode
+  interrupt), `bl` `0x2f`, and `es:edi` at the RMCS `0x176c0`.  It then returns
+  the status word at offset 3 of the request header at `DAT_001666a4`.
+  Evidence: the blocks at `0x25f6e` through `0x25f8d`.
+- Inference: the request header, the drive unit, and the status return support
+  the name `cd_request_send`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the blocks above and the MSCDEX INT 2Fh function `0x1510`.
+- Observation: the original has no EBP frame and saves no register, so the
+  module builds without `-of+`.  The function holds no floating-point
+  instruction, so it needs no FPU stub.  The module uses no assembly.
+  Evidence: the prologue at `0x25f44` and
+  `tools/rebuild/modules/cd_request_send.json`.
+- Observation: the harness holds the request header pointer, the CD drive unit,
+  the four RMCS cells, the request buffer, the response status, and the DPMI
+  stub.  The stub checks the RMCS setup and writes the response status word.
+  The eight paths cover the status values `0x0000`, `0x8100`, `0x8002`, and
+  `0x81ff`, a request pointer at `+4`, the drive units 5 and `0x0102`, and the
+  request pointer `0x000256d7` with the response from the request header.  The
+  output holds the markers `0` through `7` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cd_request_send_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_request_send`,
+  `work/rebuild/cdsend.txt`, and `python3 tools/rebuild/run.py run --function
+  0x25f44`.
+- Observation: the rebuilt body holds 20 instructions and 74 bytes in the
+  identity window.  The identity check stays open at 8 of 20 instructions, 6 of
+  74 bytes, and 0 of 11 relocation slots.  V2 keeps the argument in `eax`, uses
+  near data operands for the RMCS cells, and calls the DPMI stub in place of the
+  INT 31h instruction.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25f44 --count 20 --rebuilt work/rebuild/cdsend.exe
+  --rebuilt-map work/rebuild/cd_request_send.map --rebuilt-symbol
+  cd_request_send_` and `python3 tools/rebuild/run.py run --function 0x25f44`.
+- Limit: the original has no symbol name for this function.  The INT 2Fh
+  function `0x1510`, the RMCS far pointer, and the status return support the
+  name, which stays inferred.
