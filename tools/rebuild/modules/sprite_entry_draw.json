@@ -1,0 +1,31 @@
+{
+  "exe": "sprdraw.exe",
+  "map": "sprdraw.map",
+  "name": "sprite_entry_draw",
+  "run": {
+    "command": "sprdraw.exe > sprdraw.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "sprdraw.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sprite_entry_draw.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sprite_entry_draw_main.c"
+    }
+  ]
+}

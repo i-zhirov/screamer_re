@@ -628,7 +628,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x113c8` | `func_113c8` (done) | 71 | 27 | 1 | 0 |
-| `0x25b10` | unnamed | 70 | 22 | 0 | 0 |
+| `0x25b10` | `sprite_entry_draw` (done) | 70 | 22 | 0 | 0 |
 | `0x18b60` | unnamed | 70 | 22 | 0 | 3 |
 | `0x30389` | unnamed | 68 | 28 | 1 | 0 |
 | `0x26120` | unnamed | 68 | 22 | 0 | 0 |
@@ -656,7 +656,7 @@ This table starts Phase Y.
 
 ## Position
 
-Three hundred and ninety-six modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and ninety-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -899,5 +899,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `race_finish_cng_update` at `0x2401c`, and the Phase X module
 `sound_variant_lookup` at `0x247ac`, and the Phase X module
 `sound_voice_sample_set` at `0x1f764`, and the Phase Y module
-`func_113c8` at `0x113c8`.
-The next unnamed function is `0x25b10`.
+`func_113c8` at `0x113c8`, and the Phase Y module
+`sprite_entry_draw` at `0x25b10`.
+The next unnamed function is `0x18b60`.

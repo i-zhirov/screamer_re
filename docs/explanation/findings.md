@@ -28466,3 +28466,74 @@ temporary `-od` recipe.
   the position block support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the register arguments,
   the register allocation, and the epilogue of the original.
+
+## The sprite_entry_draw module at 0x25b10
+
+- Observation: the plan row records a 70-byte body of 22 instructions up to the
+  first `ret` at `0x25b55`.  The function continues through five early exits
+  and ends at the `ret` at `0x25ccb`, so the whole body holds 126 instructions
+  and 444 bytes.  The next record starts at `0x25d28`, so the store record
+  keeps the 536-byte extent and sets no separate function size.  The identity
+  check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25b10 --count 126` and
+  `tools/rebuild/functions/0x25b10.json`.
+- Observation: the only direct caller is the sprite-list flush at `0x25af0`.
+  That function walks the 0x28-byte entries of the list at `DAT_0015cd0` and
+  calls this function for every entry with bit 0 of the first dword set.  An
+  entry holds the active flag at `+0x00`, the x at `+0x04`, the y at `+0x08`,
+  the sprite record index at `+0x0c`, and the reserved cell at `+0x10`.
+  Evidence: the disassembly of `0x25af0` at `0x25af0` through `0x25b0f` and the
+  refresh at `0x257a0`.
+- Observation: the sprite record at `DAT_0015ccc + index * 0x14` holds the x
+  offset, the y offset, the width, the height, and the data offset.  The
+  one-byte pixel data starts at `DAT_0015ce0`, and the framebuffer pointer sits
+  at `DAT_0021528`.  The sprite record dump confirms the five fields.
+  Evidence: the field loads at `0x25b11` through `0x25b4d` and at `0x25bab`
+  through `0x25bc6`, the record dump, and `docs/reference/file-formats.md`.
+- Observation: the function clips the sprite rectangle against the rectangle
+  `DAT_0015ce4` through `DAT_0015cf0` and returns at once when the sprite
+  leaves the clip rectangle.  It copies a nonzero pixel and leaves the
+  destination byte on a zero source byte.  It stores the absolute destination
+  pointer at `+0x14`, the framebuffer offset at `+0x18`, the visible width at
+  `+0x1c`, the visible height at `+0x20`, and the negated visible width at
+  `+0x24` of the entry.
+  Evidence: the two clip blocks at `0x25b39` through `0x25c01`, the output
+  stores at `0x25c5b` through `0x25c8f`, and the copy loop at `0x25cb0`
+  through `0x25cc8`.
+- Observation: the scratch cells `0x15cf4` through `0x15d18` hold the clip
+  skips, the edges, the rectangle, and the row stride.  Only this function
+  reads and writes them, so the rebuilt function keeps them in locals.  The
+  original uses `pushal` and `popal` and has no EBP frame, so the module builds
+  without `-of+`.  The function holds no floating-point instruction, calls no
+  function, and needs no FPU stub and no assembly.
+  Evidence: the byte scan of the six cells and the original body.
+- Inference: the original has no symbol and no named caller.  The sprite-record
+  fields and the framebuffer stores support the name `sprite_entry_draw`.  The
+  record keeps the name with the confidence `inferred`.  The section is Program
+  functions, because the adjacent `shade_rect` primitive at `0x25d28` takes the
+  same section.
+  Evidence: the call sweep, the caller record, and the adjacent record.
+- Observation: the harness holds the sprite record table, the pixel data, the
+  framebuffer, the clip rectangle, an eight-row framebuffer, and a pixel
+  buffer.  The eight paths cover no clip, the left clip, the right clip, the
+  top clip, the bottom clip, the whole-sprite clip, the combined left and top
+  clip, and the combined right and bottom clip.  The output holds the markers
+  `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sprite_entry_draw_main.c`,
+  `python3 tools/rebuild/harness.py run --module sprite_entry_draw`,
+  `work/rebuild/sprdraw.txt`, and `python3 tools/rebuild/run.py run --function
+  0x25b10`.
+- Observation: the rebuilt body holds 3 of 22 instructions equal, 1 of 51 bytes
+  equal, and 0 of 7 relocation slots equal.  The identity check stays open
+  because V2 saves the registers with `push` instructions instead of `pushal`
+  and places the arguments in other registers.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25b10 --count 22 --rebuilt work/rebuild/sprdraw.exe
+  --rebuilt-map work/rebuild/sprdraw.map --rebuilt-symbol sprite_entry_draw_`
+  and `python3 tools/rebuild/run.py run --function 0x25b10`.
+- Limit: the original has no symbol name and no named caller.  The sprite
+  record and the framebuffer stores support the role, and the name stays
+  inferred.  The identity check stays open because C cannot reproduce
+  `pushal`, the register arguments, and the register allocation of the
+  original.
