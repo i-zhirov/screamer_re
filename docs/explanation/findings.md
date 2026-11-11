@@ -27438,3 +27438,59 @@ temporary `-od` recipe.
   0x4cf3c`.
 - Limit: the original has no symbol name for this function.  The name
   `palette_file_load` and the harness field names stay inferred.
+
+## The angle_within module at 0x22664
+
+- Observation: the original body at `0x22664` holds 32 instructions and 85
+  bytes up to the `ret 0xc` at `0x226b6`.  The next function `direction_angle`
+  starts at `0x226bc` after the three padding bytes at `0x226b9`, so the store
+  record keeps the 88-byte extent and sets no separate function size.  The
+  identity check uses 32 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22664 --count 32` and
+  `tools/rebuild/functions/0x22664.json`.
+- Observation: the only direct caller is `car_sound_update` at `0x242bc`.  At
+  `0x242f9` it passes the car angle `+0x13c` plus a bias, the heading `+0x4cc`,
+  and the tolerance pi / 4.  It stores the result as the near-target flag that
+  gates the first sound timer.  The caller belongs to the vehicle state chain,
+  so the record takes the same section.
+  Evidence: the call sweep for `0x22664`, the block at `0x242d6` through
+  `0x24309`, and the record of `0x242bc`.
+- Observation: the function forms the absolute difference of the two angles.
+  It adds one negative full turn while the difference is larger than one full
+  turn.  It returns 1 when the reduced difference is within the tolerance of
+  zero or of one full turn.  The two cases are the same position on the
+  circle, so the function tells whether the two angles agree within the
+  tolerance.
+  Evidence: the blocks at `0x2266a` through `0x226b6`.
+- Observation: the constants at object-3 offsets `0xd8c` and `0xd90` are 2 pi
+  and -2 pi.  They arrive through globals, because the harness image does not
+  load the constant segment.
+  Evidence: the two `fcomp` and `fadd` operands and the object-3 data at
+  `0xd8c` and `0xd90`.
+- Inference: the caller, the two angle arguments, and the tolerance test
+  support the name `angle_within`.  The caller harness already uses that name.
+  The original has no symbol, so the record keeps the name with the confidence
+  inferred.
+  Evidence: the call site and the data flow above.
+- Observation: the harness holds the two turn constants.  The ten paths cover
+  the equal pair, a small difference inside the tolerance, a middle difference
+  outside the tolerance, a difference near one full turn, one and three turn
+  reductions, a negative angle pair, the exact full-turn difference, and the
+  zero tolerance.  The output holds the markers `0` through `9` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/angle_within_main.c`,
+  `python3 tools/rebuild/harness.py run --module angle_within`,
+  `work/rebuild/angwin.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x22664`.
+- Observation: the rebuilt body holds 32 of 32 instructions equal, 79 of 85
+  bytes equal, and 3 of 3 relocation slots equal.  The instruction sequences
+  match and only the link-time constant addresses differ.  The intrinsic
+  `fabs` inlines the x87 absolute value, and the accept and reject labels keep
+  the one shared return block in the original order.  The identity, build, and
+  behavior checks pass, so the store records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22664 --count 32 --rebuilt work/rebuild/angwin.exe
+  --rebuilt-map work/rebuild/angle_within.map --rebuilt-symbol angle_within_`
+  and `python3 tools/rebuild/run.py run --function 0x22664`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
