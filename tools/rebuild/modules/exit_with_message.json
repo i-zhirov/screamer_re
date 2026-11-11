@@ -1,0 +1,27 @@
+{
+  "exe": "exitmsg.exe",
+  "map": "exit_with_message.map",
+  "name": "exit_with_message",
+  "run": {
+    "command": "exitmsg.exe > exitmsg.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "exitmsg.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "exit_with_message.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "exit_with_message_main.c"
+    }
+  ]
+}

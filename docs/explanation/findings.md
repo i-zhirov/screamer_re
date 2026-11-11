@@ -28596,3 +28596,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The counter and the score support
   the role, and the name stays inferred.  The identity check stays open because
   C cannot reproduce the frame order and the local spill cell of the original.
+
+## The exit_with_message module at 0x30389
+
+- Observation: the original body at `0x30389` holds 25 instructions and 62
+  bytes up to the DOS exit at `0x303bf`.  The plan row counts 28 instructions
+  and 68 bytes to the `ret` at `0x303cc`.  The next record starts at `0x4bee0`,
+  so the store record keeps the extent and sets no separate function size.  The
+  identity check uses 28 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x30389 --count 28` and
+  `tools/rebuild/functions/0x30389.json`.
+- Observation: the body matches `__do_exit_with_msg_` in
+  `bld/clib/startup/a/cstrt386.asm` of OpenWatcom V2.  The function takes the
+  message pointer in `EAX` and the exit code in `EDX`.  It opens the console
+  device `con`, writes the zero-terminated message, runs the finalizer routines
+  with the priority `0xff`, and terminates the process with the exit code.  The
+  original version writes no newline after the message.  The current OpenWatcom
+  source adds a newline write.
+  Evidence: the block at `0x30389` through `0x303cc`, the data string `con` at
+  object-1 offset `0x2016c`, and the OpenWatcom V2 source file
+  `bld/clib/startup/a/cstrt386.asm`.
+- Observation: the direct entry at `0xe09ba` jumps to this function and the
+  caller at `0xe09d4` calls it.  The wrapper at `0xe09bf` receives the run-time
+  messages from `0xe67b0`, `0xe68e3`, and `0xea351`.  The messages are `Not
+  enough memory to allocate file structures`, `Floating-point support not
+  loaded`, and `Stack Overflow!`.
+  Evidence: the blocks at `0xe09ba` through `0xe09db`, `0xe67a0` through
+  `0xe67ba`, `0xe68d8` through `0xe68ed`, and `0xea348` through `0xea35b`.
+- Inference: the source match, the console device, the message write, and the
+  terminator support the name `exit_with_message`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the source match and the three caller messages.
+- Observation: the original has no EBP frame, so the module builds without
+  `-of+`.  The function uses no floating-point instruction, so the module links
+  no FPU stub and uses no assembly implementation.
+  Evidence: the prologue at `0x30389` and
+  `tools/rebuild/modules/exit_with_message.json`.
+- Observation: the harness supplies the console open, the message write, the
+  finalizer, and the process terminator as stubs.  The stubs record the device
+  name, the handle, the text, the length, the call order, and the exit code.
+  The four paths cover a message with a trailing CR and LF, an empty message, a
+  long run-time message, and a negative exit code.  The output holds the markers
+  `0` through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/exit_with_message_main.c`,
+  `python3 tools/rebuild/harness.py run --module exit_with_message`,
+  `work/rebuild/exitmsg.txt`, and `python3 tools/rebuild/run.py run --function
+  0x30389`.
+- Observation: the rebuilt body holds 6 of 28 instructions equal, 5 of 61 bytes
+  equal, and 0 of 3 relocation slots equal.  The identity check stays open
+  because the C rebuild moves the DOS services and the finalizer behind helper
+  calls and keeps the value in registers.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x30389 --count 28 --rebuilt work/rebuild/exitmsg.exe
+  --rebuilt-map work/rebuild/exit_with_message.map --rebuilt-symbol
+  exit_with_message_` and `python3 tools/rebuild/run.py run --function 0x30389`.
+- Limit: the original has no symbol name.  The run-time source match, the
+  console device, and the three caller messages support the role, and the name
+  stays inferred.  The identity check stays open because C cannot reproduce the
+  inline DOS interrupts, the `lodsb` loop, and the register allocation of the
+  original.
