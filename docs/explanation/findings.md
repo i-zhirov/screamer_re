@@ -27494,3 +27494,67 @@ temporary `-od` recipe.
   and `python3 tools/rebuild/run.py run --function 0x22664`.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
+
+## The func_11974 module at 0x11974
+
+- Observation: the original body at `0x11974` holds 28 instructions and 85
+  bytes up to the `ret 4` at `0x119c6`.  The next entry starts at `0x119cc`
+  after the three padding bytes at `0x119c9`, so the store record keeps the
+  88-byte extent and sets no separate function size.  The identity check uses
+  28 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11974 --count 28` and
+  `tools/rebuild/functions/0x11974.json`.
+- Observation: the only direct caller is at `0x198b0` in
+  `player_car_wheel_effect_start` at `0x19828`.  At `0x198a9` it loads the
+  object list `0x6530` into `eax`, the effect slot into `edx`, and pushes the
+  float `0.0`.  The caller runs in the vehicle state chain on the player object
+  at object-3 offset `0xf91c`, so the record takes the section The vehicle state
+  chain.
+  Evidence: the call sweep for `0x11974`, the block at `0x19892` through
+  `0x198b5`, and the record of `0x19828`.
+- Observation: the function reads the object index from the first int of the
+  effect slot.  The index selects one `0x1c`-byte entry of the object list at
+  object-3 offset `0x6530` (linear `0x106530`).  The file record at entry
+  `+0x14` marks a free entry, and a free entry returns `0x11`.  The block object
+  pointer sits at entry `+0x0c`, and the frame counter sits at object `+0x20`.
+  Evidence: the body at `0x1197a` through `0x119b5`.
+- Observation: the function sets the frame counter to the delta times `65535.0`,
+  truncated toward zero.  The scale maps a normalized delta onto the 16-bit
+  frame units.  The caller passes `0.0`, so the function resets the frame
+  counter at the effect start.
+  Evidence: the FPU block at `0x1199b` through `0x119b5` and the call site at
+  `0x198ae`.
+- Observation: the scale `65535.0` sits at object-3 offset `0x3ec` (linear
+  `0x1003ec`) and reaches the body through an LE fixup at `0x1199e`.  It
+  arrives through a global, because the original reads the fixed address.  The
+  original calls the truncating helper at `0x4d9f4`, so the local
+  `func_11974_fpu.asm` makes `__CHP` truncate toward zero.  The original has the
+  EBP frame, so the module builds with `-of+`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4d9f4 --count 12`, the
+  fixup at `0x1199e`, and the module recipe.
+- Inference: the only caller, the object list, and the frame counter support the
+  frame-set role.  No name reaches the function, so the record keeps the weak
+  fallback `func_11974` with the confidence `inferred`.
+  Evidence: the call sweep and the object list layout above.
+- Observation: the harness holds the two-entry object list, the two block
+  objects, the effect-slot index, the frame delta, and the frame scale.  The
+  seven paths cover the full scale, the free entry, the positive truncation at
+  the delta 0.5, the second list entry, the negative truncation, the zero
+  delta, and the delta 2.0.  The output holds the markers `0` through `6` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_11974_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_11974`,
+  `work/rebuild/f11974.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x11974`.
+- Observation: the rebuilt body holds 3 of 28 instructions equal, 8 of 71 bytes
+  equal, and 0 of 2 relocation slots equal.  The identity check stays open
+  because V2 uses `imul` for the `0x1c` stride, keeps the entry pointer in
+  `eax`, uses a 4-byte frame, reads the scale through a near data address, and
+  shares the return paths.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11974 --count 28 --rebuilt work/rebuild/f11974.exe
+  --rebuilt-map work/rebuild/func_11974.map --rebuilt-symbol func_11974_` and
+  `python3 tools/rebuild/run.py run --function 0x11974`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays the weak fallback and inferred.
