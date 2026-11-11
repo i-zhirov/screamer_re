@@ -1,9 +1,107 @@
 {
   "address": "0x15bac",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 23,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15bac holds 23 instructions and 78 bytes up to the ret at 0x15bf9; the next entry starts at 0x15bfc, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 23 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call this function on the player object at object-3 offset 0xf91c after the player physics group at 0x15a80 and before the step group at 0x15ab8; the callers and the effect steps take the section The vehicle state chain; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the object pointer arrives in eax; the function runs the suspension update at 0x168b4, the skid update at 0x17d14, the surface effect update at 0x1814c, the reset update at 0x18528, the spin update at 0x188b8, and the wheel effect update at 0x19980 in order, then calls the car sound update at 0x242bc only when bit 0 of DAT_00118e1c is set; the call order, the object forward, and the effect steps support the name player_car_effect_update"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds DAT_00118e1c and one stub for each callee; the five paths cover the set bit, the clear bit, the other bits, the set bit with other bits, and the second object; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 23 instructions and 68 bytes; the identity check stays open at 5 of 23 instructions, 8 of 68 bytes, and 0 of 2 relocation slots, because V2 saves the object pointer in edx, reloads it from edx before each call, places DAT_00118e1c at another address, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_effect_update module at 0x15bac"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15bac --count 23"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15bac --count 23 --rebuilt work/rebuild/pceff.exe --rebuilt-map work/rebuild/player_car_effect_update.map --rebuilt-symbol player_car_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module player_car_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15bac"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_car_effect_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_car_effect_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_car_effect_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_effect_update",
+  "name": "player_car_effect_update",
   "notes": [],
   "object_offset": "0x5bac",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 68,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 23,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15bac",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:25abda8cf20ade2c45adb3c6a4623436bdc5a775b99728202b9d36c0f122fca4",
+    "source_digest": "sha256:35448f4952b7fb12f63371f5f8f0bb9a32d341e7f96b638e3c425d7b777292a9",
+    "tool": "run.py"
+  },
+  "role": "Runs the player car effect steps and the car sound step on the player object.",
+  "section": "The vehicle state chain",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "player_car_effect_update_"
 }

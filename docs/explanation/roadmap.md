@@ -312,9 +312,10 @@ current host.
   `memory_block_largest` at `0x2f709`, and the Phase X module
   `sound_voice_pitch_set` at `0x1f7e4`, and the Phase X module
   `basis_vector_transform` at `0x81f80`, and the Phase X module
-  `bit_pattern_match` at `0x24bfc`;
+  `bit_pattern_match` at `0x24bfc`, and the Phase X module
+  `player_car_effect_update` at `0x15bac`;
   thirty-one modules are verified, one is matching, and three hundred and
-  fifty-six rebuilds hold the recorded difference; the `video_fill`,
+  fifty-seven rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

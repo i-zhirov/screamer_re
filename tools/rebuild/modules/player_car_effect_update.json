@@ -1,0 +1,31 @@
+{
+  "exe": "pceff.exe",
+  "map": "player_car_effect_update.map",
+  "name": "player_car_effect_update",
+  "run": {
+    "command": "pceff.exe > pceff.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "pceff.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_effect_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_effect_update_main.c"
+    }
+  ]
+}

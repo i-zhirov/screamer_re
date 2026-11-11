@@ -27915,3 +27915,56 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x24bfc`.
 - Limit: the original has no symbol name for this function and the image holds
   no reference to it.  The name comes from the data flow and stays inferred.
+
+## The player_car_effect_update module at 0x15bac
+
+- Observation: the original body at `0x15bac` holds 23 instructions and 78
+  bytes up to the `ret` at `0x15bf9`.  The next entry starts at `0x15bfc`, so
+  the store record keeps the 80-byte extent and sets no separate function size.
+  The record sets the instruction count 23.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15bac --count 23` and
+  `tools/rebuild/functions/0x15bac.json`.
+- Observation: the five view groups at `0x2003c`, `0x201d0`, `0x202c0`,
+  `0x20360`, and `0x203c4` call the function on the player object at object-3
+  offset `0xf91c`, after the player physics group at `0x15a80` and before the
+  step group at `0x15ab8`.  The call sites are `0x200e0`, `0x20209`, `0x2032b`,
+  `0x20398`, and `0x203fc`.
+  Evidence: the call sweep for `0x15bac` and the disassembly of the five view
+  groups.
+- Observation: the object pointer arrives in `eax`.  The function runs the
+  suspension update at `0x168b4`, the skid update at `0x17d14`, the surface
+  effect update at `0x1814c`, the reset update at `0x18528`, the spin update at
+  `0x188b8`, and the wheel effect update at `0x19980` in order.  It then calls
+  the car sound update at `0x242bc` only when bit 0 of the byte
+  `DAT_00118e1c` is set.
+  Evidence: the blocks at `0x15bb5` through `0x15bf6`.
+- Inference: the call order, the object forward, and the effect steps support
+  the name `player_car_effect_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no math call,
+  so the module needs no FPU stub, and the module uses no assembly
+  implementation.
+  Evidence: `tools/rebuild/player_car_effect_update.c` and the module recipe.
+- Observation: the harness holds `DAT_00118e1c` and one stub for each callee.
+  The five paths cover the set bit, the clear bit, the other bits, the set bit
+  with other bits, and the second object.  The output holds the markers `0`
+  through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/player_car_effect_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_car_effect_update`,
+  `work/rebuild/pceff.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15bac`.
+- Observation: the rebuilt body holds 23 instructions and 68 bytes.  The
+  identity check stays open at 5 of 23 instructions, 8 of 68 bytes, and 0 of 2
+  relocation slots, because V2 saves the object pointer in `edx`, reloads it
+  from `edx` before each call, places `DAT_00118e1c` at another address, and
+  restores the stack with `lea`.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15bac --count 23 --rebuilt work/rebuild/pceff.exe
+  --rebuilt-map work/rebuild/player_car_effect_update.map --rebuilt-symbol
+  player_car_effect_update_` and
+  `python3 tools/rebuild/run.py run --function 0x15bac`.
+- Limit: the original has no symbol name for this function.  The name comes
+  from the call order and the callees and stays inferred.
