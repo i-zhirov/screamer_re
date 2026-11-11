@@ -646,7 +646,7 @@ reproduce the original bytes.
 | `0x4d2dc` | `row_offset_table_build` (done) | 61 | 22 | 0 | 0 |
 | `0x4c94c` | `map_file_load` (done) | 61 | 27 | 2 | 0 |
 | `0x1c7d0` | `car_collision_step` (done) | 61 | 19 | 3 | 0 |
-| `0x25f90` | unnamed | 60 | 18 | 2 | 0 |
+| `0x25f90` | `cd_audio_tick` (done) | 60 | 18 | 2 | 0 |
 | `0x23f14` | unnamed | 60 | 18 | 1 | 0 |
 | `0x23ed8` | unnamed | 60 | 18 | 1 | 0 |
 | `0x118a4` | unnamed | 60 | 21 | 0 | 0 |
@@ -656,7 +656,7 @@ This table starts Phase Y.
 
 ## Position
 
-Four hundred and fourteen modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and fifteen modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -917,5 +917,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_audio_disc_info_request` at `0x260a0`, and the Phase Y module
 `row_offset_table_build` at `0x4d2dc`, and the Phase Y module
 `map_file_load` at `0x4c94c`, and the Phase Y module
-`car_collision_step` at `0x1c7d0`.
-The next unnamed function is `0x25f90`.
+`car_collision_step` at `0x1c7d0`, and the Phase Y module
+`cd_audio_tick` at `0x25f90`.
+The next unnamed function is `0x23f14`.

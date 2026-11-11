@@ -1,9 +1,115 @@
 {
   "address": "0x25f90",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the first body at 0x25f90 holds 18 instructions and 60 bytes up to the ret at 0x25fcb; the function continues in the blocks at 0x25fcc, 0x25ff2, and 0x2600b, and the whole body ends with the ret at 0x2600c; the next recorded function starts at 0x26014, so the store record keeps the 132-byte extent and sets no separate function size; the identity check uses the plan count 18"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are cd_check_screen at 0x15874 with the call sites 0x1593e, 0x1594e, and 0x15970, options_screen at 0x21338 with the call sites 0x217ae, 0x21845, 0x218a0, and 0x218b5, and the request block at 0x26068 with the call site 0x26097; the callers sit in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function increments the tick counter at DAT_0016000d; while the counter is below 4, it reads the audio Q-channel status through 0x261e4 and sets the state flag at DAT_00166688 when the status is 2 or 0x0f"
+    },
+    {
+      "kind": "note",
+      "text": "on the fourth tick the function clears the counter and reads the audio disc info through 0x260a0; a low byte of 0xff marks a missing disc, so the function sets the state flag and calls 0x262a8 with 0 when the gate at DAT_0016669a is set; with a disc it returns when the state flag bit 0 is clear, reads the Q-channel status, returns on a non-zero status, and on a zero status clears the flag, builds the track table through 0x262fc, and calls 0x262a8 with 0 when the gate is set"
+    },
+    {
+      "kind": "note",
+      "text": "the tick counter, the two state cells, and the four callees support the name cd_audio_tick; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the tick counter, the state flag, the driver gate, and the four callee stubs; the paths cover the first tick, the Q status 2 and 0x0f, the missing disc with a clear and a set gate, the clear state flag, a non-zero Q status, and the zero Q status with a clear and a set gate; the output holds the markers 0 through 8 and D, and the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 18 instructions in the identity window; the identity check stays open at 2 of 18 instructions, 7 of 48 bytes, and 1 of 6 relocation slots, because V2 saves ecx and edx first, keeps the counter in eax, uses near data operands, and orders the blocks in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_tick module at 0x25f90"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25f90 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25f90 --count 18 --rebuilt work/rebuild/cdtick.exe --rebuilt-map work/rebuild/cd_audio_tick.map --rebuilt-symbol cd_audio_tick_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_audio_tick"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_tick"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25f90"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_tick.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_tick_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_tick.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_tick",
+  "name": "cd_audio_tick",
   "notes": [],
   "object_offset": "0x15f90",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 48,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25f90",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:b495753d9638c7e248a416a2d7898766b1ca66faf7f6479818600a80fedb0bfd",
+    "source_digest": "sha256:1222b463b99e349ada8bd524b9ccfbc7ae568739bef55dbb045889e135d08979",
+    "tool": "run.py"
+  },
+  "role": "Polls the CD audio disc and Q-channel status on a four-tick cycle and advances the audio state.",
+  "section": "race_loop callees",
   "size": 132,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_tick_"
 }

@@ -29580,3 +29580,72 @@ temporary `-od` recipe.
   the car record support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the frame slot and the reload of
   the original argument.
+
+## The cd_audio_tick module at 0x25f90
+
+- Observation: the first body at `0x25f90` holds 18 instructions and 60
+  bytes up to the `ret` at `0x25fcb`.  The function continues in the blocks at
+  `0x25fcc`, `0x25ff2`, and `0x2600b`, and the whole body ends with the `ret`
+  at `0x2600c`.  The next recorded function starts at `0x26014`, so the store
+  record keeps the 132-byte extent and sets no separate function size.  The
+  identity check uses the plan count 18.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25f90 --count
+  18` and `tools/rebuild/functions/0x25f90.json`.
+- Observation: the direct callers are `cd_check_screen` at `0x15874` with the
+  call sites `0x1593e`, `0x1594e`, and `0x15970`, `options_screen` at
+  `0x21338` with the call sites `0x217ae`, `0x21845`, `0x218a0`, and
+  `0x218b5`, and the request block at `0x26068` with the call site `0x26097`.
+  The callers sit in the section race_loop callees, so the record takes the
+  same section.
+  Evidence: the call sites above and the function records of `cd_check_screen`
+  and `options_screen`.
+- Observation: the function increments the tick counter at `DAT_0016000d`.
+  While the counter is below 4, it reads the audio Q-channel status through
+  `0x261e4` and sets the state flag at `DAT_00166688` when the status is 2 or
+  `0x0f`.
+  Evidence: the body at `0x25f90` through `0x25ff2` and the finding "The
+  cd_audio_q_channel_read module at 0x261e4".
+- Observation: on the fourth tick the function clears the counter and reads
+  the audio disc info through `0x260a0`.  A low byte of `0xff` marks a missing
+  disc, so the function sets the state flag and calls `0x262a8` with 0 when the
+  gate at `DAT_0016669a` is set.  With a disc it returns when the state flag
+  bit 0 is clear, reads the Q-channel status, returns on a non-zero status, and
+  on a zero status clears the flag, builds the track table through `0x262fc`,
+  and calls `0x262a8` with 0 when the gate is set.
+  Evidence: the body at `0x25fa1` through `0x2600c`, the finding "The
+  cd_audio_disc_info_request module at 0x260a0", and the finding "The
+  cd_audio_table_build module at 0x262fc".
+- Inference: the tick counter, the two state cells, and the four callees
+  support the name `cd_audio_tick`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/cd_audio_tick.json`.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so the module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x25f90` and
+  `tools/rebuild/modules/cd_audio_tick.json`.
+- Observation: the harness holds the tick counter, the state flag, the driver
+  gate, and the four callee stubs.  The paths cover the first tick, the Q
+  status 2 and `0x0f`, the missing disc with a clear and a set gate, the clear
+  state flag, a non-zero Q status, and the zero Q status with a clear and a set
+  gate.  The output holds the markers `0` through `8` and `D`, and the behavior
+  check passes.
+  Evidence: `tools/rebuild/cd_audio_tick_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_tick`,
+  `work/rebuild/cdtick.txt`, and `python3 tools/rebuild/run.py run --function
+  0x25f90`.
+- Observation: the rebuilt body holds 18 instructions in the identity window.
+  The identity check stays open at 2 of 18 instructions, 7 of 48 bytes, and 1
+  of 6 relocation slots.  V2 saves `ecx` and `edx` first, keeps the counter in
+  `eax`, uses near data operands, and orders the blocks in another shape.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25f90 --count 18 --rebuilt work/rebuild/cdtick.exe
+  --rebuilt-map work/rebuild/cd_audio_tick.map --rebuilt-symbol
+  cd_audio_tick_` and `python3 tools/rebuild/run.py run --function 0x25f90`.
+- Limit: the original has no symbol name.  The callers, the four callees, and
+  the two state cells support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the register save order
+  and the block order.
