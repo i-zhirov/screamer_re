@@ -1,9 +1,107 @@
 {
   "address": "0x15ab8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 23,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15ab8 holds 23 instructions and 77 bytes up to the ret at 0x15b04; the next entry starts at 0x15b08, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 23 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the five view groups at 0x2003c, 0x201d0, 0x202c0, 0x20360, and 0x203c4 call this function on the player object at object-3 offset 0xf91c after the physics group at 0x15a80 and the effect group at 0x15bac; the callers and the step set take the section The vehicle state chain; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the object pointer arrives in eax; the function runs the track node update at 0x1821c, the lap progress update at 0x194a0, the body point collision detect at 0x11e74, the segment update at 0x11f98, the segment apply at 0x16b98, the wheel contact update at 0x11a30, the cornering update at 0x16ca0, and the contact update at 0x166a8 in order; the call order, the object forward, and the step set support the name player_car_step_update"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores the argument to the frame and reloads it before each call; a volatile local reproduces the store and the reload, as error_report.c records for the same frame-local pattern; the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one stub for each of the eight callees; the three paths cover the object 0x1234, the object 0x5678, and the null object, and every path checks the forwarded pointer and the call order; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 23 instructions and 77 bytes in the identity window; the identity check passes at 23 of 23 instructions and 55 of 77 bytes, because the only differing operands are the eight link-time call targets; the build and behavior checks pass, so the store records verified"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_car_step_update module at 0x15ab8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15ab8 --count 23"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15ab8 --count 23 --rebuilt work/rebuild/pcstep.exe --rebuilt-map work/rebuild/player_car_step_update.map --rebuilt-symbol player_car_step_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module player_car_step_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_car_step_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15ab8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_car_step_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_car_step_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_car_step_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_car_step_update",
+  "name": "player_car_step_update",
   "notes": [],
   "object_offset": "0x5ab8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 55,
+        "bytes_total": 77,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 23,
+        "instructions_total": 23,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15ab8",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:2d06d12ebf018443e40b20d03d0fdc2ef9ab7290c9b16f5157adc8a87349dd05",
+    "source_digest": "sha256:9d469e72c10bce9246fdaefb35feaccdb12ad114a46a2f8cb74d0eeaf4ca3198",
+    "tool": "run.py"
+  },
+  "role": "Runs the player track, lap, collision, segment, wheel contact, cornering, and contact steps on the player object.",
+  "section": "The vehicle state chain",
   "size": 80,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "player_car_step_update_"
 }

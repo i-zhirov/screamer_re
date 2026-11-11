@@ -27968,3 +27968,62 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x15bac`.
 - Limit: the original has no symbol name for this function.  The name comes
   from the call order and the callees and stays inferred.
+
+## The player_car_step_update module at 0x15ab8
+
+- Observation: the original body at `0x15ab8` holds 23 instructions and 77
+  bytes up to the `ret` at `0x15b04`.  The next entry starts at `0x15b08`, so
+  the store record keeps the 80-byte extent and sets no separate function size.
+  The record sets the instruction count 23.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15ab8 --count 23` and
+  `tools/rebuild/functions/0x15ab8.json`.
+- Observation: the five view groups at `0x2003c`, `0x201d0`, `0x202c0`,
+  `0x20360`, and `0x203c4` call the function on the player object at object-3
+  offset `0xf91c`, after the physics group at `0x15a80` and the effect group at
+  `0x15bac`.  The call sites are `0x200e0`, `0x20209`, `0x2032b`, `0x20398`,
+  and `0x203fc`.
+  Evidence: the call sweep for `0x15ab8` and the disassembly of the five view
+  groups.
+- Observation: the object pointer arrives in `eax`.  The function runs the
+  track node update at `0x1821c`, the lap progress update at `0x194a0`, the body
+  point collision detect at `0x11e74`, the segment update at `0x11f98`, the
+  segment apply at `0x16b98`, the wheel contact update at `0x11a30`, the
+  cornering update at `0x16ca0`, and the contact update at `0x166a8` in order.
+  Evidence: the blocks at `0x15ac1` through `0x15afe`.
+- Inference: the call order, the object forward, and the step set support the
+  name `player_car_step_update`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original stores the argument to the frame and reloads it
+  before each call (`sub esp,4`, `mov [ebp-4],eax`, `mov eax,[ebp-4]`).  A
+  plain parameter stays in a preserved register and produces no load.  The
+  volatile local `saved` reproduces the store and the reload.  The same
+  frame-local pattern is recorded for `error_report` at `0x10978`.
+  Evidence: `tools/rebuild/player_car_step_update.c` and
+  `tools/rebuild/error_report.c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no math call,
+  so the module needs no FPU stub, and the module uses no assembly
+  implementation.
+  Evidence: `tools/rebuild/player_car_step_update.c` and the module recipe.
+- Observation: the harness holds one stub for each of the eight callees.  The
+  three paths cover the object `0x1234`, the object `0x5678`, and the null
+  object.  Every path checks the forwarded pointer and the call order.  The
+  output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/player_car_step_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_car_step_update`,
+  `work/rebuild/pcstep.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15ab8`.
+- Observation: the rebuilt body holds 23 instructions and 77 bytes in the
+  identity window.  The identity check passes at 23 of 23 instructions and 55
+  of 77 bytes, because the only differing operands are the eight link-time call
+  targets.  The build and behavior checks pass, so the store records
+  `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15ab8 --count 23 --rebuilt work/rebuild/pcstep.exe
+  --rebuilt-map work/rebuild/player_car_step_update.map --rebuilt-symbol
+  player_car_step_update_` and
+  `python3 tools/rebuild/run.py run --function 0x15ab8`.
+- Limit: the original has no symbol name for this function.  The name comes
+  from the call order and the callee set and stays inferred.
