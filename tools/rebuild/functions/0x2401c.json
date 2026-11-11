@@ -1,9 +1,111 @@
 {
   "address": "0x2401c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2401c holds 22 instructions and 74 bytes up to the ret at 0x24065; the two padding bytes at 0x24066 and the next function at 0x24068 give the 76-byte extent, so the store record keeps that extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_laps_update at 0x20ec8 with the call site at 0x20f45; it selects one finish handler from the mode byte DAT_0011d260, and this handler runs on mode 0x20; the game mode 0x20 is the CNG mode; no named function sits between the caller and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the handler sets bit 3 of the control byte DAT_00118e1d, writes the finish position 1 to DAT_0000ffa4, and enqueues the effect 0xb with the variant mode 3 and the delay 0; the enqueue goes through sound_enqueue at 0x247fc"
+    },
+    {
+      "kind": "note",
+      "text": "when the opponent count DAT_0010d6f8 equals the state cell DAT_001100d4, the handler sets bit 7 (0x80) of the control byte; the game mode 0x20 start at 0x13120 clears the state cell, and the SLA finish handler at 0x23fc8 sets the same bit for the SLA result"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the CNG mode, the opponent count, and the state cell support the name race_finish_cng_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original function holds no floating-point instruction, but the sound_enqueue call passes a float argument, so the recipe adds the shared fpu_stub.asm for the FPU run-time symbols; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte, the opponent count, the state cell, the finish position, and the sound_enqueue stub; the seven paths cover the unequal values, the equal values, the state -1, the zero count, the count -1, the preserved control bits 0x11, and the preserved control bit 0x10; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 10 of 22 instructions equal, 10 of 73 bytes equal, and 0 of 7 relocation slots equal; the identity check stays open because V2 pushes ebp first and saves ecx after the frame, keeps the control byte in al, keeps the two compared values in edx and ecx, drops the ebx save, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_cng_update module at 0x2401c"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2401c --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2401c --count 22 --rebuilt work/rebuild/rfcng.exe --rebuilt-map work/rebuild/race_finish_cng_update.map --rebuilt-symbol race_finish_cng_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_cng_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2401c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_cng_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_cng_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_cng_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_cng_update",
+  "name": "race_finish_cng_update",
   "notes": [],
   "object_offset": "0x1401c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 73,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2401c",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:2f4f5a39ae1c2af09b134c34ef0e8805c763de890581e81a1c7ae80b08c60462",
+    "source_digest": "sha256:e68e4ea7d1249103f58f5828b01d6eb6a37c2d489e9dc55cd7ef2ae768d6c644",
+    "tool": "run.py"
+  },
+  "role": "Sets the finish control bits and the 0xb effect for the CNG mode, and sets bit 0x80 when the opponent count equals the state cell.",
+  "section": "Program functions",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_cng_update_"
 }

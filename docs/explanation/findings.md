@@ -28215,3 +28215,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The INT 2Fh
   function `0x1510`, the RMCS far pointer, and the status return support the
   name, which stays inferred.
+
+## The race_finish_cng_update module at 0x2401c
+
+- Observation: the original body at `0x2401c` holds 22 instructions and 74
+  bytes up to the `ret` at `0x24065`.  The two padding bytes at `0x24066` and
+  the next function at `0x24068` give the 76-byte extent, so the store record
+  keeps that extent and sets no separate function size.  The identity check
+  uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2401c --count 22` and
+  `tools/rebuild/functions/0x2401c.json`.
+- Observation: the only direct caller is `race_finish_laps_update` at `0x20ec8`
+  with the call site at `0x20f45`.  The caller switches on the mode byte
+  `DAT_0011d260` and selects this handler for mode `0x20`.  The game mode `0x20`
+  is the CNG mode.  No named function sits between the caller and the target,
+  so the record takes the section Program functions.
+  Evidence: the call sweep for `0x2401c` and the record of `0x20ec8`.
+- Observation: the handler sets bit 3 of the control byte `DAT_00118e1d`,
+  writes the finish position 1 to `DAT_0000ffa4`, and enqueues the effect `0xb`
+  with the variant mode 3 and the delay 0.  The enqueue goes through
+  `sound_enqueue` at `0x247fc`.
+  Evidence: the body at `0x24021` through `0x2405d` and the record of `0x247fc`.
+- Observation: when the opponent count `DAT_0010d6f8` equals the state cell
+  `DAT_001100d4`, the handler sets bit 7 (`0x80`) of the control byte.  The game
+  mode `0x20` start at `0x13120` clears the state cell, and the SLA finish
+  handler at `0x23fc8` sets the same bit for the SLA result.
+  Evidence: the body at `0x2402f` through `0x2404a`, the block at `0x13160`
+  through `0x1316c`, and the record of `0x23fc8`.
+- Inference: the caller, the CNG mode, the opponent count, and the state cell
+  support the name `race_finish_cng_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call sweep and the data references above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original function holds no floating-point instruction.  The
+  `sound_enqueue` call passes a float argument, so the recipe adds the shared
+  `fpu_stub.asm` for the FPU run-time symbols.  The module uses no assembly
+  implementation.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds the control byte, the opponent count, the
+  state cell, the finish position, and the `sound_enqueue` stub.  The stub
+  records the raw delay bits, so it needs no float compare.  The seven paths
+  cover the unequal values, the equal values, the state -1, the zero count, the
+  count -1, the preserved control byte `0x11`, and the preserved control byte
+  `0x10`.  The output holds the markers `0` through `6` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/race_finish_cng_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_cng_update`,
+  `work/rebuild/rfcng.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2401c`.
+- Observation: the rebuilt body holds 10 of 22 instructions equal, 10 of 73
+  bytes equal, and 0 of 7 relocation slots equal.  The identity check stays
+  open because V2 pushes `ebp` first and saves `ecx` after the frame, keeps the
+  control byte in `al`, keeps the two compared values in `edx` and `ecx`, drops
+  the `ebx` save, and restores the stack with `lea`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2401c --count 22 --rebuilt work/rebuild/rfcng.exe
+  --rebuilt-map work/rebuild/race_finish_cng_update.map --rebuilt-symbol
+  race_finish_cng_update_` and `python3 tools/rebuild/run.py run --function
+  0x2401c`.
+- Limit: the original has no symbol name for this function.  The CNG mode, the
+  opponent count, and the state cell support the name, which stays inferred.
+  The exact role of the state cell `DAT_001100d4` in the CNG mode stays unknown.

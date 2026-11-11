@@ -317,9 +317,10 @@ current host.
   `player_car_step_update` at `0x15ab8`, and the Phase X module
   `reciprocal_table_build` at `0x4d214`, and the Phase X module
   `cd_audio_q_channel_read` at `0x261e4`, and the Phase X module
-  `cd_request_send` at `0x25f44`;
+  `cd_request_send` at `0x25f44`, and the Phase X module
+  `race_finish_cng_update` at `0x2401c`;
   thirty-two modules are verified, one is matching, and three hundred and
-  sixty rebuilds hold the recorded difference; the `video_fill`,
+  sixty-one rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

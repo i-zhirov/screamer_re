@@ -1,0 +1,37 @@
+{
+  "exe": "rfcng.exe",
+  "map": "race_finish_cng_update.map",
+  "name": "race_finish_cng_update",
+  "run": {
+    "command": "rfcng.exe > rfcng.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "rfcng.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_cng_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_cng_update_main.c"
+    }
+  ]
+}
