@@ -1,9 +1,107 @@
 {
   "address": "0x18b60",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x18b60 holds 22 instructions and 70 bytes up to the ret at 0x18ba5; two padding bytes at 0x18ba6 precede the next function at 0x18ba8, so the store record keeps the 72-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the CNG view group at 0x20360, at the call site 0x2037a; the group runs on the player object at object-3 offset 0xf91c, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the player object holds the score float at +0x790, the started opponent counter at +0x7b8, and the stored counter at +0x7bc; opponent_start at 0x124c0 increments +0x7b8, and the cng_view_update and sla_marker_check findings call +0x790 the score"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the counter and compares it with the stored counter; when the counter is above the stored counter, the function adds 1.0 to the score and copies the counter to the stored counter; a counter at or below the stored counter changes nothing"
+    },
+    {
+      "kind": "note",
+      "text": "the counter, the stored counter, and the score support the name opponent_score_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses the x87 stack for the add, so the module links the shared fpu_stub.asm for the run-time symbols __8087, __init_387_emulator, and _fltused_; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the score float, the two counters, and three guard cells; the eight paths cover an equal counter, a rise by one, a lower counter, a rise by several, a negative crossing, a fractional score, a repeated call, and the guard cells; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 2 of 22 instructions and 0 of 62 bytes equal, and the compare has 0 of 2 relocation slots equal; the identity check stays open because V2 saves ebp first, omits the local spill cell, and restores the stack with lea, so the instruction slots shift; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x18b60 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x18b60 --count 22 --rebuilt work/rebuild/oscore.exe --rebuilt-map work/rebuild/opponent_score_update.map --rebuilt-symbol opponent_score_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x18b60"
+    },
+    {
+      "kind": "finding",
+      "text": "The opponent_score_update module at 0x18b60"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/opponent_score_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/opponent_score_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/opponent_score_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_score_update",
+  "name": "opponent_score_update",
   "notes": [],
   "object_offset": "0x8b60",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 62,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x18b60",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:91a9701bcfd20c46ff8edd0d51def6e8f5f8f13ea394d46bb94fcdc55d2c96b9",
+    "source_digest": "sha256:18d2d8d168104956e31a14aceead8501af1107d7479d8a3e8973f21342f3fa12",
+    "tool": "run.py"
+  },
+  "role": "Adds one point to the player score when a new opponent has started, and stores the started counter.",
+  "section": "The vehicle state chain",
   "size": 72,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "opponent_score_update_"
 }

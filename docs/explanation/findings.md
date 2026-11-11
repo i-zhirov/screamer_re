@@ -28537,3 +28537,62 @@ temporary `-od` recipe.
   inferred.  The identity check stays open because C cannot reproduce
   `pushal`, the register arguments, and the register allocation of the
   original.
+
+## The opponent_score_update module at 0x18b60
+
+- Observation: the original body at `0x18b60` holds 22 instructions and 70
+  bytes up to the `ret` at `0x18ba5`.  Two padding bytes at `0x18ba6` precede
+  the next function at `0x18ba8`, so the store record keeps the 72-byte extent
+  and sets no separate function size.  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x18b60 --count 22` and
+  `tools/rebuild/functions/0x18b60.json`.
+- Observation: the only direct caller is the CNG view group at `0x20360`, at
+  the call site `0x2037a`.  The group runs on the player object at object-3
+  offset `0xf91c`, so the module takes the section `The vehicle state chain`.
+  Evidence: the call at `0x2037a` and the finding "The cng_view_update module
+  at 0x20360".
+- Observation: the player object holds the score float at `+0x790`, the started
+  opponent counter at `+0x7b8`, and the stored counter at `+0x7bc`.
+  `opponent_start` at `0x124c0` increments the counter at `+0x7b8`.  The
+  `cng_view_update` and `sla_marker_check` findings call `+0x790` the score.
+  Evidence: the blocks at `0x18b60` through `0x18ba5`, the increment at
+  `0x124c0`, and the two findings.
+- Observation: the function reads the counter and compares it with the stored
+  counter.  When the counter is above the stored counter, the function adds
+  `1.0` to the score and copies the counter to the stored counter.  A counter
+  at or below the stored counter changes nothing.
+  Evidence: the compare at `0x18b76`, the add at `0x18b81` through `0x18b89`,
+  and the store at `0x18b9b`.
+- Inference: the counter, the stored counter, and the score support the name
+  `opponent_score_update`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the caller at `0x2037a` and the field use in the caller findings.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses the x87 stack for the add, so the module links the
+  shared `fpu_stub.asm` for the run-time symbols `__8087`,
+  `__init_387_emulator`, and `_fltused_`.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x18b60` and
+  `tools/rebuild/modules/opponent_score_update.json`.
+- Observation: the harness holds the score float, the two counters, and three
+  guard cells.  The eight paths cover an equal counter, a rise by one, a lower
+  counter, a rise by several, a negative crossing, a fractional score, a
+  repeated call, and the guard cells.  The output holds the markers `0` through
+  `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/opponent_score_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_score_update`,
+  `work/rebuild/oscore.txt`, and `python3 tools/rebuild/run.py run --function
+  0x18b60`.
+- Observation: the rebuilt body holds 2 of 22 instructions equal, 0 of 62 bytes
+  equal, and 0 of 2 relocation slots equal.  The identity check stays open
+  because V2 saves `ebp` first, omits the local spill cell, and restores the
+  stack with `lea`, so the instruction slots shift.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x18b60 --count 22 --rebuilt work/rebuild/oscore.exe
+  --rebuilt-map work/rebuild/opponent_score_update.map --rebuilt-symbol
+  opponent_score_update_` and `python3 tools/rebuild/run.py run --function
+  0x18b60`.
+- Limit: the original has no symbol name.  The counter and the score support
+  the role, and the name stays inferred.  The identity check stays open because
+  C cannot reproduce the frame order and the local spill cell of the original.
