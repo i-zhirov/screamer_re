@@ -596,7 +596,7 @@ reproduce the original bytes.
 | `0x150f4` | `track_resource_load` (done) | 92 | 29 | 3 | 0 |
 | `0x2f554` | `func_2f554` (done) | 90 | 37 | 0 | 0 |
 | `0x1ff14` | `race_frame_loop` (done) | 90 | 27 | 9 | 0 |
-| `0x8a848` | unnamed | 89 | 40 | 0 | 0 |
+| `0x8a848` | `sound_event_frame_select` (done) | 89 | 40 | 0 | 0 |
 | `0x4cf3c` | unnamed | 88 | 30 | 4 | 0 |
 | `0x22c30` | unnamed | 87 | 30 | 2 | 0 |
 | `0x24264` | unnamed | 86 | 27 | 2 | 0 |
@@ -622,7 +622,7 @@ This table starts Phase X.
 
 ## Position
 
-Three hundred and seventy-four modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and seventy-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -845,6 +845,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `race_gauges` at `0x2369c`, and the Phase W module
 `angle_in_arc` at `0x2254c`, and the Phase W module
 `array_sort` at `0x83500`, and the Phase X modules
-`track_resource_load` at `0x150f4`, `func_2f554` at `0x2f554`, and
-`race_frame_loop` at `0x1ff14`.
-The next unnamed function is `0x8a848`.
+`track_resource_load` at `0x150f4`, `func_2f554` at `0x2f554`,
+`race_frame_loop` at `0x1ff14`, and `sound_event_frame_select` at `0x8a848`.
+The next unnamed function is `0x4cf3c`.

@@ -27138,3 +27138,68 @@ temporary `-od` recipe.
   race_frame_loop_` and `python3 tools/rebuild/run.py run --function 0x1ff14`.
 - Limit: the original has no symbol name for this function.  The name
   `race_frame_loop` and the harness field names stay inferred.
+
+## The sound_event_frame_select module at 0x8a848
+
+- Observation: the original body at `0x8a848` holds 40 instructions and 89
+  bytes up to the `ret` at `0x8a8a0`.  The next store record starts at
+  `0x8a8d8`, so the store record keeps the 144-byte extent and sets no
+  separate function size.  The identity check uses 40 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8a848 --count 40` and
+  `tools/rebuild/functions/0x8a848.json`.
+- Observation: the only direct caller is `sound_event_render` at `0x836ac`,
+  with the call site at `0x8378b`.  That function runs in the per-frame event
+  path of `sound_effects_update` at `0x81ab0`, so the record takes the
+  section `object_update_all callees`.
+  Evidence: the call at `0x8378b` and the record of `0x836ac`.
+- Observation: the caller puts the three scaled direction values in eax, ebx,
+  and ecx.  It reads the returned frame list pointer from esi and ignores the
+  returned eax.  C cannot return a value in esi, so the rebuild returns the
+  pointer in eax and the harness compares that value.
+  Evidence: the call block at `0x83755` through `0x8378b` and the far tail at
+  `0x83863`.
+- Observation: the function forms a 16-way direction index.  The base is 0
+  when y is zero or positive and 8 when y is negative.  The sector from x and
+  z is 0 when x >= 0, z >= 0, and z > x, 1 when x >= 0, z >= 0, and z <= x,
+  2 when x >= 0, z < 0, and -z <= x, 3 when x >= 0, z < 0, and -z > x, 4 when
+  x < 0, z < 0, and -z > -x, 5 when x < 0, z < 0, and -z <= -x, 6 when
+  x < 0, z >= 0, and z <= -x, and 7 when x < 0, z >= 0, and z > -x.
+  Evidence: the block at `0x8a84e` through `0x8a898`.
+- Observation: the index selects one dword from the 16-entry frame offset
+  table at +0x28 of the event record.  The event record pointer is the global
+  `0x74464`.  The original stores the index at `0x7b7d0` and returns the
+  record base plus the selected offset in esi.  The returned pointer is the
+  frame vertex list that `sound_event_render` walks in its far tail.
+  Evidence: the table read at `0x8a89d`, the store at `0x8a898`, and the far
+  tail at `0x83863`.
+- Inference: the single caller, the event path, the 16-way index, and the
+  frame offset table support the name `sound_event_frame_select`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  inferred.
+  Evidence: the call site and the data flow above.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction, so the module builds without `-of+` and links no FPU stub.  The
+  module uses no assembly implementation.
+  Evidence: `tools/rebuild/sound_event_frame_select.c` and
+  `tools/rebuild/modules/sound_event_frame_select.json`.
+- Observation: the harness holds one event record with the 16-entry frame
+  offset table and the sentinel header.  The ten paths cover the eight
+  sectors, the negative y base, and the `z == x` and `-z == -x` boundaries.
+  The output holds the markers `0` through `9` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/sound_event_frame_select_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_event_frame_select`,
+  and `work/rebuild/sefs_out.txt`.
+- Observation: the rebuilt body holds 40 decoded instructions and 104 bytes
+  in the identity window.  The identity check stays open at 3 of 40
+  instructions, 1 of 89 bytes, and 0 of 6 relocation slots, because V2 passes
+  the second argument in edx and the third in ebx, keeps the index in eax, and
+  returns the pointer in eax in place of esi.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8a848 --count 40 --rebuilt work/rebuild/sefs.exe
+  --rebuilt-map work/rebuild/sound_event_frame_select.map --rebuilt-symbol
+  sound_event_frame_select_` and `python3 tools/rebuild/run.py run --function
+  0x8a848`.
+- Limit: the original has no symbol name for this function.  The name
+  `sound_event_frame_select` and the harness field names stay inferred.
