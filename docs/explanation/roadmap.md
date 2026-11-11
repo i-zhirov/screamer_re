@@ -334,9 +334,10 @@ current host.
   `track_stream_open` at `0x25aac`, and the Phase Y module
   `state_cells_set` at `0x8bd54`, and the Phase Y module
   `cd_audio_status_request` at `0x260e0`, and the Phase Y module
-  `replay_playback_begin` at `0x22db8`;
+  `replay_playback_begin` at `0x22db8`, and the Phase Y module
+  `camera_reference_update` at `0x212d0`;
   thirty-two modules are verified, one is matching, and three hundred and
-  seventy-seven rebuilds hold the recorded difference; the `video_fill`,
+  seventy-eight rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

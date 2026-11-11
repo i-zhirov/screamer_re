@@ -1,9 +1,107 @@
 {
   "address": "0x212d0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x212d0 holds 63 bytes and 20 instructions to the fall-through ret at 0x2130e; the else branch continues from 0x2130f to the ret at 0x21335, so the complete body holds 102 bytes; the next function options_screen starts at 0x21338 after the two padding bytes at 0x21336, so the store record keeps the 104-byte extent and sets no separate function size; the identity check uses the plan count 20"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x19ae0 is player_update at 0x19ab0; it runs this function as its fifth step on the player view object DAT_00110a20 after camera_pose_build at 0x1a144, so the record takes the section player_update callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function publishes the shared camera reference: the two cells DAT_0013ccc and DAT_0013cd0 hold the camera world position and the cell DAT_0013cd4 holds the camera heading; sound_emitter_update at 0x21b9c reads the two position cells and the heading, and opponent_update at 0x20954 reads the two position cells as the proximity reference"
+    },
+    {
+      "kind": "note",
+      "text": "the control byte DAT_00118e1d selects the source; when bit 0 is set and bit 0x20 is clear, the function copies the player world position DAT_0011fdcc and DAT_0011fdd4 and the player heading DAT_0011fde8; otherwise it copies the view saved x and z at +0x0c and +0x14 and the view yaw at +0x34"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the shared camera cells, and the two sources support the name camera_reference_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original holds the two floating-point instructions fld and fstp for the player heading copy, but V2 lowers the copy to an integer move, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte, the player pose, the view saved copies and yaw, and the three camera cells; every camera cell starts at a distinct sentinel value on each path; the seven paths cover the control bytes 0x01, 0x00, 0x21, 0x20, 0xff, 0x05, and 0xfe; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The camera_reference_update module at 0x212d0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x212d0 --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x212d0 --count 20 --rebuilt work/rebuild/camref.exe --rebuilt-map work/rebuild/camera_reference_update.map --rebuilt-symbol camera_reference_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module camera_reference_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x212d0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/camera_reference_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/camera_reference_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/camera_reference_update.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "camera_reference_update",
+  "name": "camera_reference_update",
   "notes": [],
   "object_offset": "0x112d0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 63,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x212d0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:d1d81f74b97fea3e6fb4956f81e954a9b6f96ba5ab2c0e0e58c9d1743f61a2e8",
+    "source_digest": "sha256:df6052e6ab6255242708272a3a83883c44e626b5b2c727a6949b17782037e538",
+    "tool": "run.py"
+  },
+  "role": "publishes the shared camera world position and heading from the player pose or the view pose",
+  "section": "player_update callees",
   "size": 104,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "camera_reference_update_"
 }

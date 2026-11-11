@@ -29270,3 +29270,75 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the read mode, and the
   sibling write path support the name, which stays inferred.  The identity check
   stays open because C cannot reproduce the register order of the original.
+
+## The camera_reference_update module at 0x212d0
+
+- Observation: the original body at `0x212d0` holds 63 bytes and 20
+  instructions up to the fall-through `ret` at `0x2130e`.  The else branch
+  continues from `0x2130f` to the `ret` at `0x21335`, so the complete body
+  holds 102 bytes.  The next function `options_screen` starts at `0x21338`
+  after the two padding bytes at `0x21336`.  The store record keeps the
+  104-byte extent and sets no separate function size.  The identity check uses
+  the plan count 20.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x212d0 --count
+  20` and `tools/rebuild/functions/0x212d0.json`.
+- Observation: the only direct caller at `0x19ae0` is `player_update` at
+  `0x19ab0`.  It runs this function as its fifth step on the player view
+  object `DAT_00110a20`, after `camera_pose_build` at `0x1a144`.
+  Evidence: the block at `0x19ab0` through `0x19ae6` and the record of
+  `player_update`.
+- Observation: the function publishes the shared camera reference.  The cells
+  `DAT_0013ccc` and `DAT_0013cd0` hold the camera world position, and the cell
+  `DAT_0013cd4` holds the camera heading.  `sound_emitter_update` at `0x21b9c`
+  reads the two position cells and the heading.  `opponent_update` at
+  `0x20954` reads the two position cells as the reference point for the
+  proximity test.
+  Evidence: the bodies at `0x212ea` through `0x2130d` and `0x2130f` through
+  `0x21334`, and the records of `sound_emitter_update` and `opponent_update`.
+- Observation: the control byte `DAT_00118e1d` selects the source.  When bit 0
+  is set and bit 0x20 is clear, the function copies the player world position
+  `DAT_0011fdcc` and `DAT_0011fdd4` and the player heading `DAT_0011fde8`.
+  Otherwise it copies the view saved x and z at `+0x0c` and `+0x14` and the
+  view yaw at `+0x34`.  `input_map` at `0x211e0` reads bit 0x20 as the race
+  exit request.
+  Evidence: the test at `0x212da` through `0x212e8`, the else branch at
+  `0x2130f` through `0x21334`, and the record of `input_map`.
+- Inference: the caller, the shared camera cells, and the two sources support
+  the name `camera_reference_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.  The caller sits in the
+  player view path, so the record takes the section `player_update callees`.
+  Evidence: the data flow and the caller above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original holds the two floating-point instructions `fld` and
+  `fstp` for the player heading copy.  V2 lowers the same copy to an integer
+  move, so the module needs no FPU stub.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x212d0` through `0x212d7` and
+  `tools/rebuild/modules/camera_reference_update.json`.
+- Observation: the harness holds the control byte, the player pose, the view
+  saved copies and yaw, and the three camera cells.  Every camera cell starts
+  at a distinct sentinel value on each path.  The seven paths cover the
+  control bytes `0x01`, `0x00`, `0x21`, `0x20`, `0xff`, `0x05`, and `0xfe`.
+  The output holds the markers `0` through `6` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/camera_reference_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module camera_reference_update`,
+  `work/rebuild/camref.txt`, and `python3 tools/rebuild/run.py run --function
+  0x212d0`.
+- Observation: the rebuilt body holds 20 decoded instructions in the identity
+  window.  The identity check stays open at 7 of 20 instructions, 1 of 63
+  bytes, and 1 of 12 relocation slots.  V2 saves `ebp` first and `edx` after
+  the frame, keeps the control byte in `dl` in place of `ah`, keeps the view
+  pointer in `eax` instead of a local slot, lowers the heading copy to an
+  integer move, and joins the two branches at one epilogue.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x212d0 --count 20 --rebuilt work/rebuild/camref.exe
+  --rebuilt-map work/rebuild/camera_reference_update.map --rebuilt-symbol
+  camera_reference_update_` and `python3 tools/rebuild/run.py run --function
+  0x212d0`.
+- Limit: the original has no symbol name.  The caller, the shared camera cells,
+  and the two sources support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the register order and
+  the duplicated epilogue of the original.
