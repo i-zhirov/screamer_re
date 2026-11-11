@@ -336,9 +336,10 @@ current host.
   `cd_audio_status_request` at `0x260e0`, and the Phase Y module
   `replay_playback_begin` at `0x22db8`, and the Phase Y module
   `camera_reference_update` at `0x212d0`, and the Phase Y module
-  `cd_audio_disc_info_request` at `0x260a0`;
+  `cd_audio_disc_info_request` at `0x260a0`, and the Phase Y module
+  `row_offset_table_build` at `0x4d2dc`;
   thirty-two modules are verified, one is matching, and three hundred and
-  seventy-nine rebuilds hold the recorded difference; the `video_fill`,
+  eighty rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

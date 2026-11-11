@@ -29410,3 +29410,59 @@ temporary `-od` recipe.
   count, and the callers support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the `pushal` save, the
   register order, and the duplicated `edi` save of the original.
+
+## The row_offset_table_build module at 0x4d2dc
+
+- Observation: the original body at `0x4d2dc` holds 61 bytes and 22
+  instructions up to the `ret` at `0x4d318`.  The next record starts at
+  `0x4d32c`.  The store record keeps the 80-byte extent and sets no separate
+  function size.  The identity check uses the plan count 22.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d2dc --count
+  22` and `tools/rebuild/functions/0x4d2dc.json`.
+- Observation: the only direct caller is `stream_layer_init` at `0x4c810`, with
+  the call site at `0x4c82a`.  That function calls this table first, then the
+  reciprocal table at `0x4d214`, the inverse-cosine table at `0x4d260`, the
+  perspective table at `0x4cf94`, and the visibility table at `0x4d030`.  The
+  caller sits in the section `The TABS table loaders`.
+  Evidence: the call scan of `obj.1`, the record of `stream_layer_init`, and
+  `tools/rebuild/callgraph.json`.
+- Observation: the function takes no argument.  It walks the index from 0 to
+  `0x1e0` and stores the row byte offset at the slot of the table at
+  `0x20bbc`.  Each entry is the index times 640 bytes.  The body forms the
+  product with `lea eax, [edx*4]`, `add eax, edx`, and `shl eax, 7`.  The table
+  holds 481 entries from index 0 to `0x1e0`.
+  Evidence: the body at `0x4d2dc` through `0x4d318`.
+- Inference: the caller, the fixed 640-byte row step, and the table at
+  `0x20bbc` support the name `row_offset_table_build`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow and the caller above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x4d2dc` through `0x4d2e3` and
+  `tools/rebuild/modules/row_offset_table_build.json`.
+- Observation: the harness holds the 481-entry table and two guard cells.  It
+  fills the table and the guards with the sentinel `0xA5A5A5A5` before the
+  checks.  The four paths cover the full scan with the guard cells, the entries
+  at index 1 and 2, the entry at index `0x1e0`, and two calls.  The output
+  holds the markers `0` through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/row_offset_table_build_main.c`,
+  `python3 tools/rebuild/harness.py run --module row_offset_table_build`,
+  `work/rebuild/rowtab.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4d2dc`.
+- Observation: the rebuilt body holds 22 instructions and 60 bytes.  The
+  identity check stays open at 6 of 22 instructions, 5 of 60 bytes, and 0 of 4
+  relocation slots.  V2 saves `ebp` only, keeps the index in `eax` and the
+  scaled value in `ecx`, increments at the loop bottom, and folds the `lea` and
+  `add` into one `lea`.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d2dc --count 22 --rebuilt work/rebuild/rowtab.exe
+  --rebuilt-map work/rebuild/row_offset_table_build.map --rebuilt-symbol
+  row_offset_table_build_` and `python3 tools/rebuild/run.py run --function
+  0x4d2dc`.
+- Limit: the original has no symbol name.  The caller, the row step, and the
+  table address support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the register save order, the
+  frame slot of the original index, and the two-part address sequence.

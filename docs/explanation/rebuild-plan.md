@@ -643,7 +643,7 @@ reproduce the original bytes.
 | `0x22db8` | `replay_playback_begin` (done) | 64 | 19 | 0 | 0 |
 | `0x212d0` | `camera_reference_update` (done) | 63 | 20 | 0 | 2 |
 | `0x260a0` | `cd_audio_disc_info_request` (done) | 62 | 22 | 1 | 0 |
-| `0x4d2dc` | unnamed | 61 | 22 | 0 | 0 |
+| `0x4d2dc` | `row_offset_table_build` (done) | 61 | 22 | 0 | 0 |
 | `0x4c94c` | unnamed | 61 | 27 | 2 | 0 |
 | `0x1c7d0` | unnamed | 61 | 19 | 3 | 0 |
 | `0x25f90` | unnamed | 60 | 18 | 2 | 0 |
@@ -656,7 +656,7 @@ This table starts Phase Y.
 
 ## Position
 
-Four hundred and eleven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and twelve modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -914,5 +914,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_audio_status_request` at `0x260e0`, and the Phase Y module
 `replay_playback_begin` at `0x22db8`, and the Phase Y module
 `camera_reference_update` at `0x212d0`, and the Phase Y module
-`cd_audio_disc_info_request` at `0x260a0`.
-The next unnamed function is `0x4d2dc`.
+`cd_audio_disc_info_request` at `0x260a0`, and the Phase Y module
+`row_offset_table_build` at `0x4d2dc`.
+The next unnamed function is `0x4c94c`.
