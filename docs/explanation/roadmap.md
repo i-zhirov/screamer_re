@@ -341,9 +341,10 @@ current host.
   `map_file_load` at `0x4c94c`, and the Phase Y module
   `car_collision_step` at `0x1c7d0`, and the Phase Y module
   `cd_audio_tick` at `0x25f90`, and the Phase Y module
-  `race_finish_mode_2_update` at `0x23f14`;
-  thirty-two modules are verified, one is matching, and three hundred and
-  eighty-four rebuilds hold the recorded difference; the `video_fill`,
+   `race_finish_mode_2_update` at `0x23f14`, and the Phase Y module
+   `race_finish_mode_1_update` at `0x23ed8`;
+   thirty-two modules are verified, one is matching, and three hundred and
+   eighty-five rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
