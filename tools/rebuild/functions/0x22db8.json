@@ -1,9 +1,102 @@
 {
   "address": "0x22db8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22db8 holds 19 instructions and 64 bytes up to the ret at 0x22df4; the next function starts at 0x22df8, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses 19 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs only when the frame buffer gate DAT_00018e60 is not zero; it sets the replay read mode DAT_00018e6c to 1, clears the replay index DAT_00018e64, sets the shared view cells DAT_00001df0 and DAT_0010a9c to 1, and sets the playback bit 0x40 of the byte DAT_00018e1c"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is game_mode_1_start at 0x12c0c, at the call site 0x12ce1; it runs after replay_load at 0x1b840 with the flag 1, so the function begins the loaded replay; the sibling at 0x22d88 sets the write mode with the same gate, and timing_update at 0x22df8 reads the mode: a non-zero value reads a record through 0x22e94 and a zero value writes a record through 0x22f54"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the read mode, the cleared index, and the sibling write path support the name replay_playback_begin; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls no helper, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame buffer gate, the control byte, the replay read mode, the replay index, and the two shared view cells; every cell starts at a distinct sentinel value; the five paths cover the zero gate, the flags 0x00, 0xa5, 0x7f, and 0xff; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_playback_begin module at 0x22db8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22db8 --count 19"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22db8 --count 19 --rebuilt work/rebuild/rplbeg.exe --rebuilt-map work/rebuild/replay_playback_begin.map --rebuilt-symbol replay_playback_begin_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_playback_begin"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22db8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_playback_begin.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_playback_begin_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/replay_playback_begin.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "replay_playback_begin",
+  "name": "replay_playback_begin",
   "notes": [],
   "object_offset": "0x12db8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 64,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 19,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22db8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:943888940ad02694ae52359923bada2e2fb404af450249b1af5448e15d237855",
+    "source_digest": "sha256:387508bb4497385dd23b6d3be4eb381ea93d3a7570418a8607a7e28b74f61be7",
+    "tool": "run.py"
+  },
+  "role": "Starts the replay playback: it sets the read mode and clears the replay index when the frame buffer is ready.",
+  "section": "The replay records",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_playback_begin_"
 }

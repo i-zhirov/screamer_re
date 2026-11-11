@@ -29213,3 +29213,60 @@ temporary `-od` recipe.
   transfer count, and the caller support the name, which stays inferred.  The
   identity check stays open because C cannot reproduce the register order of the
   original.
+
+## The replay_playback_begin module at 0x22db8
+
+- Observation: the original body at `0x22db8` holds 19 instructions and 64
+  bytes up to the `ret` at `0x22df4`.  The next function starts at `0x22df8`, so
+  the store record keeps the 64-byte extent and sets no separate function size.
+  The identity check uses 19 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22db8 --count
+  19` and `tools/rebuild/functions/0x22db8.json`.
+- Observation: the function runs only when the frame buffer gate
+  `DAT_00018e60` is not zero.  It sets the replay read mode `DAT_00018e6c` to 1,
+  clears the replay index `DAT_00018e64`, sets the two shared view cells
+  `DAT_00001df0` and `DAT_0010a9c` to 1, and sets the playback bit `0x40` of the
+  byte `DAT_00018e1c`.
+  Evidence: the blocks at `0x22dbd` through `0x22df7` and
+  `tools/rebuild/replay_playback_begin.c`.
+- Observation: the only direct caller is `game_mode_1_start` at `0x12c0c`, at
+  the call site `0x12ce1`.  The caller runs this function after `replay_load` at
+  `0x1b840` with the flag 1.  The sibling at `0x22d88` sets the write mode with
+  the same gate.  `timing_update` at `0x22df8` reads the mode: a non-zero value
+  reads a record through `0x22e94`, and a zero value writes a record through
+  `0x22f54`.
+  Evidence: the blocks at `0x12ccd` through `0x12cfe`, `0x22d88` through
+  `0x22db4`, and `0x22df8` through `0x22e90`.
+- Inference: the caller, the read mode, the cleared index, and the sibling write
+  path support the name `replay_playback_begin`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the record of `game_mode_1_start`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls no helper,
+  so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x22db8` and
+  `tools/rebuild/modules/replay_playback_begin.json`.
+- Observation: the harness holds the frame buffer gate, the control byte, the
+  replay read mode, the replay index, and the two shared view cells.  Every cell
+  starts at a distinct sentinel value, so a missing store or an extra store
+  fails the path.  The five paths cover the zero gate, the flags `0x00`, `0xa5`,
+  `0x7f`, and `0xff`.  The output holds the markers `0` through `4` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/replay_playback_begin_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_playback_begin`,
+  `work/rebuild/rplbeg.txt`, and `python3 tools/rebuild/run.py run --function
+  0x22db8`.
+- Observation: the rebuilt body holds 19 instructions up to the `ret`.  The
+  identity check stays open at 13 of 19 instructions, 10 of 64 bytes, and 1 of 9
+  relocation slots.  V2 saves `ebp` first, keeps the constant 1 in `edx` and the
+  constant 0 in `ecx`, uses `al` in place of `ah`, and restores the stack with
+  `lea`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22db8 --count 19 --rebuilt work/rebuild/rplbeg.exe
+  --rebuilt-map work/rebuild/replay_playback_begin.map --rebuilt-symbol
+  replay_playback_begin_` and `python3 tools/rebuild/run.py run --function
+  0x22db8`.
+- Limit: the original has no symbol name.  The caller, the read mode, and the
+  sibling write path support the name, which stays inferred.  The identity check
+  stays open because C cannot reproduce the register order of the original.
