@@ -1,9 +1,103 @@
 {
   "address": "0x260e0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x260e0 holds 22 instructions and 64 bytes up to the ret at 0x2611f; the next function starts at 0x26120, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the MSCDEX request header at DAT_001666a4: the length 0x1a, the subunit DAT_00166680, the command 3 (IOCTL input), the transfer count 0x0b, and the payload subfunction 0x0f (get audio status); it clears the dword at +0x41 and the dword at +0x45, runs the request through 0x25f24, and returns the raw status word at +3"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is input_poll at 0x26448, at the call site 0x2647e; the caller reads the status word at +3 and tests bit 9, so the request sits in the section race_loop callees; the MSCDEX subfunction table gives the 0x0f code the 11-byte audio status block"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the request, and the returned status support the name cd_audio_status_request; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the device byte, the request buffer, the response status, and the submit stub; the stub counts the driver calls and writes the response status word; the five paths cover the status 0x0100, the status 0x8002, the status 0x81ff with the device byte 0x77, two calls, and the status 0xffff; the sentinel byte 0xa5 checks every field outside the written set; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_status_request module at 0x260e0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x260e0 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x260e0 --count 22 --rebuilt work/rebuild/cdstat.exe --rebuilt-map work/rebuild/cdstat.map --rebuilt-symbol cd_audio_status_request_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_status_request"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x260e0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_status_request.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_status_request_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_status_request.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_status_request",
+  "name": "cd_audio_status_request",
   "notes": [],
   "object_offset": "0x160e0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 64,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 13,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x260e0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:0508c79b61c4360eda3068674955501fc5c0bac728e8bdd7dfa631f00c2f908d",
+    "source_digest": "sha256:1c126806e1c200d8a72bcae318b6da8f51521976a217fff39c67dcaf91e75616",
+    "tool": "run.py"
+  },
+  "role": "Builds the MSCDEX get audio status request and returns the driver status word.",
+  "section": "race_loop callees",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_status_request_"
 }

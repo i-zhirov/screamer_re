@@ -639,7 +639,7 @@ reproduce the original bytes.
 | `0x2b450` | `map_object_record_init` (done) | 65 | 22 | 1 | 0 |
 | `0x25aac` | `track_stream_open` (done) | 65 | 22 | 2 | 0 |
 | `0x8bd54` | `state_cells_set` (done) | 64 | 16 | 0 | 0 |
-| `0x260e0` | unnamed | 64 | 22 | 1 | 0 |
+| `0x260e0` | `cd_audio_status_request` (done) | 64 | 22 | 1 | 0 |
 | `0x22db8` | unnamed | 64 | 19 | 0 | 0 |
 | `0x212d0` | unnamed | 63 | 20 | 0 | 2 |
 | `0x260a0` | unnamed | 62 | 22 | 1 | 0 |
@@ -656,7 +656,7 @@ This table starts Phase Y.
 
 ## Position
 
-Four hundred and seven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -910,5 +910,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `net_menu_enter` at `0x2df68`, and the Phase Y module
 `map_object_record_init` at `0x2b450`, and the Phase Y module
 `track_stream_open` at `0x25aac`, and the Phase Y module
-`state_cells_set` at `0x8bd54`.
-The next unnamed function is `0x260e0`.
+`state_cells_set` at `0x8bd54`, and the Phase Y module
+`cd_audio_status_request` at `0x260e0`.
+The next unnamed function is `0x22db8`.

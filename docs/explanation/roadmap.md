@@ -332,9 +332,10 @@ current host.
   `net_menu_enter` at `0x2df68`, and the Phase Y module
   `map_object_record_init` at `0x2b450`, and the Phase Y module
   `track_stream_open` at `0x25aac`, and the Phase Y module
-  `state_cells_set` at `0x8bd54`;
+  `state_cells_set` at `0x8bd54`, and the Phase Y module
+  `cd_audio_status_request` at `0x260e0`;
   thirty-two modules are verified, one is matching, and three hundred and
-  seventy-five rebuilds hold the recorded difference; the `video_fill`,
+  seventy-six rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

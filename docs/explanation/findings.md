@@ -29153,3 +29153,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The four callers and the far limit
   support the role, and the name stays inferred.  The identity check stays open
   because C cannot reproduce the register order of the original.
+
+## The cd_audio_status_request module at 0x260e0
+
+- Observation: the original body at `0x260e0` holds 22 instructions and 64
+  bytes up to the `ret` at `0x2611f`.  The next function starts at `0x26120`, so
+  the store record keeps the 64-byte extent and sets no separate function size.
+  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x260e0 --count
+  22` and `tools/rebuild/functions/0x260e0.json`.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4`: the length `0x1a`, the subunit `DAT_00166680`, the command 3
+  (IOCTL input), the transfer count `0x0b`, and the payload subfunction `0x0f`.
+  It clears the dword at `+0x41` and the dword at `+0x45`, runs the request
+  through `0x25f24`, and returns the raw status word at `+3`.
+  Evidence: the blocks at `0x260e0` through `0x2611f` and the helper at
+  `0x25f24`.
+- Observation: the only direct caller is `input_poll` at `0x26448`, at the call
+  site `0x2647e`.  The caller reads the status word at `+3` and tests bit 9, so
+  the request sits in the section race_loop callees.
+  Evidence: the blocks at `0x26448` through `0x264ae` and the record of
+  `input_poll`.
+- Inference: the MSCDEX IOCTL input subfunction table gives the `0x0f` code the
+  11-byte audio status block (get audio status).  The caller, the request, and
+  the returned status support the name `cd_audio_status_request`.  The original
+  has no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the transfer count at `0x260fe`, the subfunction at `0x26104`, and
+  the MSCDEX IOCTL input subfunction table.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x260e0` and
+  `tools/rebuild/modules/cd_audio_status_request.json`.
+- Observation: the harness holds the device byte, the request buffer, the
+  response status, and the submit stub.  The stub counts the driver calls and
+  writes the response status word.  The five paths cover the status `0x0100`,
+  the status `0x8002`, the status `0x81ff` with the device byte `0x77`, two
+  calls, and the status `0xffff`.  The sentinel byte `0xa5` checks every field
+  outside the written set.  The output holds the markers `0` through `4` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/cd_audio_status_request_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_status_request`,
+  `work/rebuild/cdstat.txt`, and `python3 tools/rebuild/run.py run --function
+  0x260e0`.
+- Observation: the rebuilt body holds 15 instructions up to the `ret` at
+  `0x1003d`, and the 22-instruction window crosses the submit stub at `0x1003e`.
+  The identity check stays open at 13 of 22 instructions, 1 of 64 bytes, and 0
+  of 7 relocation slots.  V2 saves `edx` in place of `pushal`, keeps the
+  request pointer in `eax`, folds the constant stores into immediate forms, uses
+  `movzx` for the status load, and places the submit stub after the function.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x260e0 --count 22 --rebuilt work/rebuild/cdstat.exe
+  --rebuilt-map work/rebuild/cdstat.map --rebuilt-symbol
+  cd_audio_status_request_` and `python3 tools/rebuild/run.py run --function
+  0x260e0`.
+- Limit: the original has no symbol name.  The MSCDEX subfunction code, the
+  transfer count, and the caller support the name, which stays inferred.  The
+  identity check stays open because C cannot reproduce the register order of the
+  original.
