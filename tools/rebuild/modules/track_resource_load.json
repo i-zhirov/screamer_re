@@ -1,0 +1,30 @@
+{
+  "exe": "trkres.exe",
+  "map": "trkres.map",
+  "name": "track_resource_load",
+  "run": {
+    "command": "trkres.exe > trkres.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "trkres.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "track_resource_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "track_resource_load_main.c"
+    }
+  ]
+}

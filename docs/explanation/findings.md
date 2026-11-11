@@ -26969,3 +26969,56 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x83500`.
 - Limit: the original has no symbol name for this function.  The name
   `array_sort` and the harness field names stay inferred.
+
+## The track_resource_load module at 0x150f4
+
+- Observation: the original body at `0x150f4` holds 29 instructions and 92
+  bytes up to the `ret` at `0x1514f`.  The next record starts at `0x1517c`, so
+  the store record keeps the 92-byte extent and sets no separate function size.
+  The identity check uses 29 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x150f4 --count 29` and
+  `tools/rebuild/functions/0x150f4.json`.
+- Observation: the only direct caller at `0x133ba` is `race_data_load` at
+  `0x131a8`.  The caller puts the level name at `[ebp + 0x17e]` in eax, so the
+  record takes the section `race_session_start callees`.
+  Evidence: the block at `0x133a9` through `0x133bf`.
+- Observation: the function calls `track_marker_load` at `0x1b198` with the
+  level name, the name at `DAT_0001d294`, and the track node table at
+  `DAT_00007250`, and it stores the returned count at `DAT_00007ed0`.
+  Evidence: the call at `0x1510c` and the store at `0x15111`.
+- Observation: the function tests bit `0x40` of the game mode byte at
+  `DAT_0001d260`.  For the SLA mode it builds the name `%ssla` with `sprintf`
+  at `0x4d32c` from the name at `DAT_0001d294`, calls `track_marker_load`
+  again with the SLA marker table at `DAT_00007890`, and stores the returned
+  count at `DAT_00007ed4`.
+  Evidence: the gate at `0x15116`, the format string at object-3 offset
+  `0x62d`, and the second call at `0x15140`.
+- Inference: the track node table, the SLA marker table, and the mode `0x40`
+  gate support the name `track_resource_load`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the loaders at `0x1b198` and `0x150f4` and the records at
+  `0x1821c`, `0x18ba8`, and `0x1db94`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module needs
+  no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x150f4` through `0x150f9` and
+  `tools/rebuild/modules/track_resource_load.json`.
+- Observation: the harness holds the level name, the game mode byte, the two
+  tables, and the two counts, with the `track_marker_load` and `sprintf`
+  stubs.  The four paths cover the mode `0x00`, the mode `0x40`, the mode
+  `0x50`, and the mode `0x40` with a zero first count.  The output holds the
+  markers `0` through `3` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/track_resource_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module track_resource_load`, and
+  `work/rebuild/trkres.txt`.
+- Observation: the identity check stays open at 26 of 29 instructions and 52
+  of 92 bytes.  V2 establishes the frame first, keeps the saved level pointer
+  in another local slot, and uses a `lea` epilogue.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x150f4 --count 29 --rebuilt work/rebuild/trkres.exe
+  --rebuilt-map work/rebuild/trkres.map --rebuilt-symbol
+  track_resource_load_` and `python3 tools/rebuild/run.py run --function
+  0x150f4`.
+- Limit: the original has no symbol name for this function.  The name
+  `track_resource_load` and the harness field names stay inferred.
