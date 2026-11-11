@@ -25643,6 +25643,66 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name and
   the record section stay inferred.
 
+## The cd_audio_track_info_request module at 0x26120
+
+- Observation: the original body at `0x26120` holds 13 instructions and 38
+  bytes up to the `jmp` at `0x26144`.  The jump enters the shared tail at
+  `0x26104`.  That tail writes the payload subfunction, clears two dwords, runs
+  the DPMI request through `0x25f24`, and returns the status word.  The plan row
+  counts 22 instructions and 68 bytes through the first `ret` at `0x26163`.  The
+  next recorded function starts at `0x261a8`, so the store record keeps the
+  136-byte extent and sets no separate function size.  The identity check uses 22
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x26120 --count 22` and
+  `tools/rebuild/functions/0x26120.json`.
+- Observation: the direct callers are the two request pairs in
+  `cd_audio_table_build` at `0x262fc`, at the call site `0x26311` and in the
+  second block at `0x2636a`.  The caller sits in the section race_loop callees,
+  so the module takes the same section.
+  Evidence: the call sites, the finding "The cd_audio_table_build module at
+  0x262fc", and `tools/rebuild/functions/0x262fc.json`.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4`: the length `0x1a`, the subunit `DAT_00166680`, the command 3
+  (IOCTL input), the transfer count 7, and the payload subfunction `0x0a` (audio
+  track info).  It clears the dword at `+0x41` and the dword at `+0x45`.  The
+  request runs through `0x25f24`.  The function then returns the raw status word
+  at `+3`, so the error bit does not select a value.
+  Evidence: the block at `0x26120` through `0x26144`, the shared tail at
+  `0x26104`, and the request helper at `0x25f24`.
+- Inference: the MSCDEX subfunction `0x0a` and the 7-byte transfer count give
+  the audio track info record.  The caller, the request, and the returned status
+  support the name `cd_audio_track_info_request`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x26120` and
+  `tools/rebuild/modules/cd_audio_track_info_request.json`.
+- Observation: the harness holds the device byte, the request buffer, the
+  response status, and the submit stub.  The stub counts the driver calls and
+  writes the response status word.  The five paths cover the status `0x0100`, the
+  status `0x8002`, the status `0x81ff` with the device byte `0x77`, two calls,
+  and the status `0xffff`.  The sentinel byte `0xa5` checks every field outside
+  the written set.  The output holds the markers `0` through `4` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/cd_audio_track_info_request_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_track_info_request`,
+  and `work/rebuild/cdtrkinf.txt`.
+- Observation: the rebuilt body holds 10 of 22 instructions and 4 of 68 bytes
+  equal, and the relocation compare holds 0 of 8 slots equal.  The identity check
+  stays open because V2 builds the whole header with immediate stores, keeps the
+  request pointer in `eax`, calls the submit stub, and the 22-instruction window
+  crosses the next function at `0x26146`.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x26120 --count 22 --rebuilt work/rebuild/cdtrkinf.exe
+  --rebuilt-map work/rebuild/cdtrkinf.map --rebuilt-symbol
+  cd_audio_track_info_request_` and `python3 tools/rebuild/run.py run --function
+  0x26120`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the record section stay inferred.
+
 ## The point_rotation_flags module at 0x224dc
 
 - Observation: the original body at `0x224dc` holds 41 instructions and 110
