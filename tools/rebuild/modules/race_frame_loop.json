@@ -1,0 +1,31 @@
+{
+  "exe": "rfl.exe",
+  "map": "race_frame_loop.map",
+  "name": "race_frame_loop",
+  "run": {
+    "command": "rfl.exe > rfl_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rfl_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_frame_loop.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_frame_loop_main.c"
+    }
+  ]
+}

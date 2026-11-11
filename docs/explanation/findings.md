@@ -27077,3 +27077,64 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x2f554`.
 - Limit: the original has no symbol name for this function.  The name
   `func_2f554` and the harness field names stay inferred.
+
+## The race_frame_loop module at 0x1ff14
+
+- Observation: the original body at `0x1ff14` holds 27 instructions and 90
+  bytes up to the `ret` at `0x1ff6d`.  Two padding bytes at `0x1ff6e` and
+  `0x1ff6f` precede the next function at `0x1ff70`, so the store record keeps
+  the 92-byte extent and sets no separate function size.  The identity check
+  uses 27 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1ff14 --count 27` and
+  `tools/rebuild/functions/0x1ff14.json`.
+- Observation: the only direct caller is `race_session_run` at `0x1fd70`,
+  which calls this function at `0x1fdb5` and `0x1fe7a`.  The driver runs the
+  loop once per race session and treats a negative result as the replay mode.
+  The neighbouring record `race_frame_update` at `0x1ff70` calls this function
+  the frame loop.
+  Evidence: the record of `0x1fd70` and the caller scan through
+  `tools/le.py`.
+- Observation: the loop runs `motion_update` at `0x21e6c`,
+  `default_data_copy` at `0x10193`, `joystick_update` at `0x24da0`, the
+  optional `input_poll` at `0x26448`, `music_play` at `0x2ff14` with the
+  request record `0x62b0`, `frame_timer` at `0x1fc38`, `input_map` at
+  `0x211e0`, `race_frame_update` at `0x1ff70`, and `video_fill` at `0x2aa98`.
+  It then reads the exit state `DAT_0018e18` and repeats while the state stays
+  zero.  It returns the exit state.
+  Evidence: the call block at `0x1ff19` through `0x1ff66`.
+- Observation: the input poll runs only when `DAT_001d2c0` and `DAT_001d2cc`
+  are not zero, the same gate as `quit_confirm_screen` at `0x219ec`.
+  Evidence: the gate at `0x1ff28` through `0x1ff3b` and the record of
+  `0x219ec`.
+- Inference: the caller, the per-frame callees, and the exit state support the
+  section `race_frame callees` and the name `race_frame_loop`.  The original
+  has no symbol, so the record keeps the name with the confidence inferred.
+  Evidence: the record of `0x1fd70` and the record of `0x1ff70`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x1ff14` through `0x1ff17` and
+  `tools/rebuild/modules/race_frame_loop.json`.
+- Observation: the harness holds the two input gates, the exit state, and one
+  stub for each of the nine callees.  The five paths cover one full frame with
+  the exit state 1, three full frames with the exit state -1, the two input
+  gates that skip the poll, and two full frames with the exit state 5.  The output holds the
+  markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/race_frame_loop_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_frame_loop`, and
+  `work/rebuild/rfl_out.txt`.
+- Observation: the rebuilt body alone holds 22 instructions and 84 bytes up
+  to its `ret`.  The identity check uses the count 27, so it decodes the
+  following code and reports 6 of 27 instructions, 0 of 90 bytes, and 0 of 9
+  relocation slots equal.  V2 saves only ebp, keeps the exit state in eax,
+  reads the two gates and the exit state through direct memory operands, and
+  restores the frame with `mov esp, ebp` and `pop ebp`; the original saves
+  ecx, edx, and ebp, keeps the exit state in ecx, and restores the three
+  registers.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ff14 --count 27 --rebuilt work/rebuild/rfl.exe
+  --rebuilt-map work/rebuild/race_frame_loop.map --rebuilt-symbol
+  race_frame_loop_` and `python3 tools/rebuild/run.py run --function 0x1ff14`.
+- Limit: the original has no symbol name for this function.  The name
+  `race_frame_loop` and the harness field names stay inferred.
