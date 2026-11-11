@@ -1,9 +1,103 @@
 {
   "address": "0x2b450",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2b450 holds 22 instructions and 65 bytes up to the ret at 0x2b490; the next function starts at 0x2b494, so the store record keeps the 68-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function receives the record in eax and the index in edx; it stores the index in the first record field, sets the object field +0x08 to -1, and binds the object slot at 0x1d2d0 + index * 8 through object_list_bind at 0x11850, which reads the slot and binds the record into the display list"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct call sites are 0x29966 in menu_text_update at 0x29918 and 0x2e02e in screen_object_lists_init at 0x2dff4; both callers walk the 0x50 map object records at DAT_001db78, stride 0x64, and the module map_object_place at 0x2b044 and the module map_object_update at 0x2b9cc read and fill the same records; the map object record family and the two reset loops support the name map_object_record_init; the original has no symbol, so the record keeps the name with the confidence inferred and the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and makes no floating-point call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the slot table DAT_001d2d0 and the object_list_bind stub; the three paths cover index 0 with a fresh record, index 0x4f over a full record, and two records in one run; every path checks the index field, the object field -1, the table 0x6530, the name 0x6350, and the slot pointer; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 12 instructions and 44 bytes up to the ret at 0x1002b; the identity check holds 6 of 22 instructions, 3 of 65 bytes, and 0 of 6 relocation slots equal; the identity check stays open because V2 pushes the frame pointer first, keeps the record and the index in registers, folds the record stores, and computes the slot from a local data address; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_object_record_init module at 0x2b450"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2b450 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2b450 --count 22 --rebuilt work/rebuild/mopri.exe --rebuilt-map work/rebuild/map_object_record_init.map --rebuilt-symbol map_object_record_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_object_record_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2b450"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_object_record_init.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_object_record_init_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/map_object_record_init.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "map_object_record_init",
+  "name": "map_object_record_init",
   "notes": [],
   "object_offset": "0x1b450",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 65,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2b450",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:c2bb1f7aba11dc1036e8b02daa8eddacdf5e335dfeda2e2ff2ccf4647d6468ab",
+    "source_digest": "sha256:75f8e491e41ce10033cde6aab9e695aecd0a5b5a4b79d420adf175d32f2244b3",
+    "tool": "run.py"
+  },
+  "role": "initializes one map object record and binds its object slot",
+  "section": "race_frame callees",
   "size": 68,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_object_record_init_"
 }

@@ -1,0 +1,29 @@
+{
+  "exe": "mopri.exe",
+  "map": "map_object_record_init.map",
+  "name": "map_object_record_init",
+  "run": {
+    "command": "mopri.exe > mopri.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mopri.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_record_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_record_init_main.c"
+    }
+  ]
+}

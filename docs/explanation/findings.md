@@ -28971,3 +28971,62 @@ temporary `-od` recipe.
   the five callees support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the frame order and the register
   allocation of the original.
+
+## The map_object_record_init module at 0x2b450
+
+- Observation: the original body at `0x2b450` holds 22 instructions and 65
+  bytes up to the `ret` at `0x2b490`.  The next function starts at `0x2b494`, so
+  the store record keeps the 68-byte extent and sets no separate function size.
+  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2b450 --count
+  22` and `tools/rebuild/functions/0x2b450.json`.
+- Observation: the function receives the record in `eax` and the index in `edx`.
+  It stores the index in the first record field, sets the object field `+0x08`
+  to -1, and binds the object slot at `0x1d2d0 + index * 8` through
+  `object_list_bind` at `0x11850`.  The helper reads the index from the slot and
+  binds the record into the display list.
+  Evidence: the body at `0x2b450` through `0x2b490` and the call at `0x2b487`.
+- Observation: the two direct call sites are `0x29966` in `menu_text_update`
+  at `0x29918` and `0x2e02e` in `screen_object_lists_init` at `0x2dff4`.  Both
+  callers walk the 0x50 map object records at `DAT_0011db78`, stride 0x64.  The
+  module `map_object_place` at `0x2b044` and the module `map_object_update` at
+  `0x2b9cc` read and fill the same records.
+  Evidence: the calls at `0x29966` and `0x2e02e`, the loops at `0x29942` through
+  `0x2996b` and `0x2dffd` through `0x2e033`, and the record writers above.
+- Inference: the map object record family and the two reset loops support the name
+  `map_object_record_init`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.  The record sits with the other map
+  object helpers, so it takes the section race_frame callees.
+  Evidence: the data flow and the caller above.
+- Observation: the original has the EBP frame, so the module builds with `-of+`.
+  The function holds no floating-point instruction and makes no floating-point
+  call, so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x2b450` through `0x2b454` and
+  `tools/rebuild/modules/map_object_record_init.json`.
+- Observation: the harness holds the slot table `DAT_001d2d0` and the
+  `object_list_bind` stub.  The three paths cover index 0 with a fresh record,
+  index 0x4f over a full record, and two records in one run.  Every path checks
+  the index field, the object field -1, the table `0x6530`, the name `0x6350`,
+  and the slot pointer.  The output holds the markers `0`, `1`, `2`, and `D`,
+  and the behavior check passes.
+  Evidence: `tools/rebuild/map_object_record_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module map_object_record_init`,
+  `work/rebuild/mopri.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2b450`.
+- Observation: the rebuilt body holds 12 instructions and 44 bytes up to the
+  `ret` at `0x1002b`.  The identity window holds 22 instructions and 65 bytes
+  and stays open at 6 of 22 instructions, 3 of 65 bytes, and 0 of 6 relocation
+  slots.  The difference is open because V2 pushes the frame pointer first, keeps
+  the record and the index in registers, folds the record stores, and computes
+  the slot from a local data address.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2b450 --count 22 --rebuilt work/rebuild/mopri.exe
+  --rebuilt-map work/rebuild/map_object_record_init.map --rebuilt-symbol
+  map_object_record_init_` and `python3 tools/rebuild/run.py run --function
+  0x2b450`.
+- Limit: the original has no symbol name.  The map object record family and the
+  screen caller support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the frame order and the register
+  allocation of the original.
