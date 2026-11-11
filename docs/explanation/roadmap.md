@@ -302,9 +302,10 @@ current host.
   `race_frame_loop` at `0x1ff14`, and the Phase X module
   `sound_event_frame_select` at `0x8a848`, and the Phase X module
   `palette_file_load` at `0x4cf3c`, and the Phase X module
-  `replay_frame_buffer_init` at `0x22c30`;
+  `replay_frame_buffer_init` at `0x22c30`, and the Phase X module
+  `race_finish_overlay_5` at `0x24264`;
   thirty modules are verified, one is matching, and three hundred and
-  forty-seven rebuilds hold the recorded difference; the `video_fill`,
+  forty-eight rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

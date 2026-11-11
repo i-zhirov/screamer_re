@@ -599,7 +599,7 @@ reproduce the original bytes.
 | `0x8a848` | `sound_event_frame_select` (done) | 89 | 40 | 0 | 0 |
 | `0x4cf3c` | `palette_file_load` (done) | 88 | 30 | 4 | 0 |
 | `0x22c30` | `replay_frame_buffer_init` (done) | 87 | 30 | 2 | 0 |
-| `0x24264` | unnamed | 86 | 27 | 2 | 0 |
+| `0x24264` | `race_finish_overlay_5` (done) | 86 | 27 | 2 | 0 |
 | `0x2420c` | unnamed | 86 | 27 | 2 | 0 |
 | `0x22664` | unnamed | 85 | 32 | 0 | 16 |
 | `0x11974` | unnamed | 85 | 28 | 1 | 3 |
@@ -622,7 +622,7 @@ This table starts Phase X.
 
 ## Position
 
-Three hundred and seventy-seven modules carry a recipe and a result: the twelve Phase A modules,
+Three hundred and seventy-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -847,5 +847,6 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `array_sort` at `0x83500`, and the Phase X modules
 `track_resource_load` at `0x150f4`, `func_2f554` at `0x2f554`,
 `race_frame_loop` at `0x1ff14`, `sound_event_frame_select` at `0x8a848`,
-`palette_file_load` at `0x4cf3c`, and `replay_frame_buffer_init` at `0x22c30`.
-The next unnamed function is `0x24264`.
+`palette_file_load` at `0x4cf3c`, `replay_frame_buffer_init` at `0x22c30`,
+and `race_finish_overlay_5` at `0x24264`.
+The next unnamed function is `0x2420c`.

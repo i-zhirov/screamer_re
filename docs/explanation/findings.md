@@ -24273,6 +24273,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the global names in the harness stay inferred.
 
+## The race_finish_overlay_5 module at 0x24264
+
+- Observation: the original body at `0x24264` holds 27 instructions and 86
+  bytes up to the `ret` at `0x242b9`.  The next function starts at `0x242bc`,
+  so the store record keeps the 88-byte extent and sets no separate function
+  size.  The identity check uses 27 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24264 --count 27` and
+  `tools/rebuild/functions/0x24264.json`.
+- Observation: the only direct caller is `race_finish_update` at `0x21058`.
+  During the finish delay that function switches on the mode `DAT_0011d260` and
+  calls the overlay at `0x240c4` for mode 1, `0x2414c` for mode 2, `0x241d4`
+  for mode 4, `0x240a0` for mode `0x10`, this function for mode `0x20`, and
+  `0x2420c` for mode `0x40`.  The caller sits in the frame update path, so the
+  record takes the section Program functions.
+  Evidence: the call sweep for `0x24264`, the switch at `0x2106f` through
+  `0x210eb`, and the record of `0x21058`.
+- Observation: the function draws the car table string
+  `DAT_00118f94[index]` at y `0x5a` with the font 0 and the colour 2 through
+  `panel_draw_centered` at `0x2e7cc`.  The index is `0xd`, or `0xe` when bit 3
+  of `DAT_00118e1d` is set.  When bit 7 (`0x80`) of `DAT_00118e1d` is also
+  set, the function then draws the text pointer `DAT_00118fd0` at y `0x78`
+  with the font 0 and the colour 2.
+  Evidence: the block at `0x24264` through `0x242b9` and the callee record of
+  `0x2e7cc`.
+- Observation: the sibling overlay at `0x2420c` holds the same body and the
+  same two call sites.  The two bodies differ only in the two call
+  displacements.  The two overlays serve the modes `0x20` and `0x40`.
+  Evidence: the byte compare of `0x24264` and `0x2420c` through
+  `tools/le.py`.
+- Inference: the mode `0x20` selection, the car table, and the extra text
+  support the name `race_finish_overlay_5`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the harness holds the control byte, the sixteen-entry car table,
+  and the extra text pointer.  It builds every test string at run time, because
+  the initialized data page does not reach the DOS/4G image.  The five paths
+  cover the control bytes 0, 8, `0x80`, `0x88`, and `0x77`.  The output holds
+  the markers `0` through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_overlay_5_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_overlay_5`,
+  `work/rebuild/rfo5.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x24264`.
+- Observation: the rebuilt body holds 27 decoded instructions and 83 bytes in
+  the identity window.  The identity check stays open at 7 of 27 instructions,
+  11 of 83 bytes, and 0 of 6 relocation slots, because V2 saves the frame
+  pointer first, moves the argument setup after the table load, uses `movzx`
+  for the byte mask, folds the `0xd` offset into the table displacement, and
+  restores the stack through `lea`.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24264 --count 27 --rebuilt work/rebuild/rfo5.exe
+  --rebuilt-map work/rebuild/race_finish_overlay_5.map --rebuilt-symbol
+  race_finish_overlay_5_` and `python3 tools/rebuild/run.py run --function
+  0x24264`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the global names in the harness stay inferred.
+
 ## The view_mode_dispatch module at 0x19e78
 
 - Observation: the original body at `0x19e78` holds 41 instructions and 134
