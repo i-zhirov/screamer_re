@@ -28088,3 +28088,70 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x4d214`.
 - Limit: the original has no symbol name for this function.  The caller, the
   reciprocal arithmetic, and the scale support the name, which stays inferred.
+
+## The cd_audio_q_channel_read module at 0x261e4
+
+- Observation: the original body at `0x261e4` holds 25 instructions and 74
+  bytes up to the `ret` at `0x2622d`.  A clear status bit 15 jumps to the shared
+  tail at `0x2622e`.  The next recorded function starts at `0x262a8`, so the
+  store record keeps the 196-byte extent and sets no separate function size.
+  The identity check uses 25 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x261e4 --count 25` and
+  `tools/rebuild/functions/0x261e4.json`.
+- Observation: the direct callers are the CD audio tick at `0x25f90` at the
+  call sites `0x25fd6` and `0x25ff2`, the playback start at `0x26148` at the
+  call site `0x26172`, and the options screen at `0x21338` at the call site
+  `0x21705`.  The options screen sits in the section race_loop callees, so the
+  module takes the same section.
+  Evidence: the call sites above and the `options_screen` record.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4`: the length `0x1a`, the subunit `DAT_00166680`, the command 3
+  (IOCTL input), and the transfer count `0x0b`.  The payload subfunction `0x0c`
+  is the audio Q-channel info, and the 11-byte response at `+0x41` is zero
+  first.  The request runs through `0x25f24`.
+  Evidence: the blocks at `0x261e5` through `0x26214` and the helper at
+  `0x25f24`.
+- Observation: the function then reads the status word at `+3` and returns 0
+  when the error bit 15 is clear, or the status word when the error bit is set.
+  The CD audio tick compares the return byte with 2 and `0x0f`, so the return
+  carries the driver error code.
+  Evidence: the blocks at `0x2621a` through `0x2622d` and the compare at
+  `0x25ff7` through `0x25ffd`.
+- Inference: the MSCDEX subfunction table gives the `0x0c` code the 11-byte
+  control block of the audio Q-channel info, and the request holds that transfer
+  count.  The request and the return support the name
+  `cd_audio_q_channel_read`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the transfer count at `0x261fe`, the subfunction at `0x26206`, and
+  the MSCDEX IOCTL input subfunction table.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x261e4` and
+  `tools/rebuild/modules/cd_audio_q_channel_read.json`.
+- Observation: the harness holds the device byte, the request buffer, the
+  response status, and the submit stub.  The eight paths cover the done status,
+  the error statuses `0x8002`, `0x800f`, `0x8000`, and `0x8003`, the clear error
+  bit with the low byte 2, the device byte `0x77` with the status `0x81ff`, and
+  the second call.  Each path checks the header, the return, and the submit
+  count.  The output holds the markers `0` through `7` and `D`.  The behavior
+  check passes.
+  Evidence: `tools/rebuild/cd_audio_q_channel_read_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_q_channel_read`,
+  `work/rebuild/cdqc.txt`, and `python3 tools/rebuild/run.py run --function
+  0x261e4`.
+- Observation: the rebuilt body holds 19 instructions up to the first `ret` and
+  93 bytes in the 25-instruction window.  The identity check stays open at 11 of
+  25 instructions, 2 of 74 bytes, and 0 of 7 relocation slots.  V2 saves only
+  the used register, keeps the request pointer in `eax`, folds the constant
+  stores into immediate forms, returns from two blocks, and places the submit
+  stub after the function.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x261e4 --count 25 --rebuilt work/rebuild/cdqc.exe
+  --rebuilt-map work/rebuild/cd_audio_q_channel_read.map --rebuilt-symbol
+  cd_audio_q_channel_read_` and `python3 tools/rebuild/run.py run --function
+  0x261e4`.
+- Limit: the original has no symbol name for this function.  The MSCDEX
+  subfunction code, the transfer count, and the callers support the name, which
+  stays inferred.
