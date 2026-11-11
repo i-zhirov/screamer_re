@@ -28342,3 +28342,65 @@ temporary `-od` recipe.
   The exact shared role of the flag `DAT_00008058` stays unknown.  The identity
   check stays open because C cannot reproduce the parameter spills and the
   cold early return of the original.
+
+## The sound_voice_sample_set module at 0x1f764
+
+- Observation: the original body at `0x1f764` holds 26 instructions and 71
+  bytes up to the `ret` at `0x1f7aa`.  One padding byte at `0x1f7ab` precedes
+  the next function at `0x1f7ac`, so the store record keeps the 72-byte extent
+  and sets no separate function size.  The identity check uses 26
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f764 --count 26` and
+  `tools/rebuild/functions/0x1f764.json`.
+- Observation: the only direct caller is `player_car_surface_effect_update` at
+  `0x1814c` with the call site at `0x1820f`.  The caller passes the voice index
+  at `+0x7cc` in `eax` and the sample index in `edx`.  The caller sits in The
+  vehicle state chain, so the record takes that section.
+  Evidence: the call sweep for `0x1f764`, the block at `0x18206` through
+  `0x1820f`, and the record of `0x1814c`.
+- Observation: the setup word `DAT_00008058` gates the store.  A zero word
+  returns at once.  With a set word the function passes the driver handle
+  `DAT_00018d94`, the voice index, and the address of the sample record to the
+  driver record loader at `0xca477`.
+  Evidence: the gate at `0x1f772` through `0x1f779` and the call at `0x1f7a0`.
+- Observation: the sample table at `0x16034` holds 116-byte records.
+  `sound_bank_load` at `0x1f2e0` fills each record from the 0x74-byte template,
+  and `table_lookup` at `0x1f718` reads the same table.  The driver at
+  `0xca477` copies the record fields into the voice slot at the driver base
+  `0x27694` plus the voice index times 6.
+  Evidence: the block at `0x1f77b` through `0x1f7a0`, the block at `0xca4e0`
+  through `0xca7cc`, and the records of `0x1f2e0` and `0x1f718`.
+- Inference: the caller, the setup word, the sample table, and the sibling
+  `sound_voice_pitch_set` at `0x1f7e4` support the name
+  `sound_voice_sample_set`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call sweep and the data references above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds the setup word, the driver handle, and the
+  `voice_sample_write` stub.  The eight paths cover the zero setup word, the
+  base record, one record, three records, a negative voice, a negative sample,
+  the driver pass-through, and ten records.  The output holds the markers `0`
+  through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_voice_sample_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_sample_set`,
+  `work/rebuild/svss.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f764`.
+- Observation: the rebuilt body holds 7 of 26 instructions equal, 3 of 71 bytes
+  equal, and 0 of 8 relocation slots equal.  The identity check stays open
+  because V2 saves the frame pointer first, computes the index with one `imul`
+  by 0x74 instead of the `lea` and `shift` chain, and reaches the driver with a
+  near record value instead of the explicit `mov ecx, ds`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f764 --count 26 --rebuilt work/rebuild/svss.exe
+  --rebuilt-map work/rebuild/sound_voice_sample_set.map --rebuilt-symbol
+  sound_voice_sample_set_` and `python3 tools/rebuild/run.py run --function
+  0x1f764`.
+- Limit: the original has no symbol name for this function.  The caller, the
+  setup word, and the sample table support the name, which stays inferred.  The
+  exact role of the driver function at `0xca477` stays unknown.  The identity
+  check stays open because C cannot reproduce the parameter spills and the
+  explicit data segment load of the original.
