@@ -27861,3 +27861,57 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/basis_vector_transform.map --rebuilt-symbol
   basis_vector_transform_` and
   `python3 tools/rebuild/run.py run --function 0x81f80`.
+
+## The bit_pattern_match module at 0x24bfc
+
+- Observation: the original body at `0x24bfc` holds 32 instructions and 78
+  bytes up to the `ret` at `0x24c49`.  The next entry `sound_effect_delay`
+  starts at `0x24c4c`, so the store record keeps the 80-byte extent and sets no
+  separate function size.  The record sets the instruction count 32.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24bfc --count 32` and
+  `tools/rebuild/functions/0x24bfc.json`.
+- Observation: the function has no direct caller, no indirect call, and no
+  relocation slot that points to it.  A scan of every object for a call, a jump,
+  or a stored pointer to `0x24bfc` finds no reference.  The function sits
+  between `sound_variant_next` at `0x24b48` and `sound_effect_delay` at
+  `0x24c4c`, but the body reads only `DAT_000007fd`, so the record takes the
+  section Program functions.
+  Evidence: the two neighbors, the body at `0x24bfc` through `0x24c49`, and the
+  relocation table.
+- Observation: the argument arrives in `eax`.  The loop doubles the mask and
+  sets the low bit for each bit of the argument, so the mask becomes all ones up
+  to the highest set bit of the argument.  The function returns 1 when the low
+  bits of `DAT_000007fd` equal the argument and 0 otherwise.  A zero argument
+  returns 1 with an empty mask.  The shift is arithmetic, so a negative argument
+  does not terminate.
+  Evidence: the block at `0x24c05` through `0x24c3e`.
+- Inference: the mask build and the compare against `DAT_000007fd` support the
+  name `bit_pattern_match`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub, and the module uses no assembly implementation.
+  Evidence: `tools/rebuild/bit_pattern_match.c` and the module recipe.
+- Observation: the harness holds `DAT_000007fd`.  The eight paths cover the
+  six-bit match, the four-bit match, the five-bit difference, the zero argument,
+  the zero global, the eight-bit match, the ninth-bit difference, and the
+  high-bit match.  The output holds the markers `0` through `7` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/bit_pattern_match_main.c`,
+  `python3 tools/rebuild/harness.py run --module bit_pattern_match`,
+  `work/rebuild/bpmatch.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x24bfc`.
+- Observation: the rebuilt body holds 5 of 32 instructions equal, 1 of 78
+  bytes equal, and 0 of 4 relocation slots equal.  The identity check stays
+  open because V2 pushes the frame first, keeps the remaining value in `eax`,
+  builds the mask with `lea`, uses `movzx` for the return, places
+  `DAT_000007fd` at another address, and restores the stack with `lea`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24bfc --count 32 --rebuilt work/rebuild/bpmatch.exe
+  --rebuilt-map work/rebuild/bit_pattern_match.map --rebuilt-symbol
+  bit_pattern_match_` and
+  `python3 tools/rebuild/run.py run --function 0x24bfc`.
+- Limit: the original has no symbol name for this function and the image holds
+  no reference to it.  The name comes from the data flow and stays inferred.
