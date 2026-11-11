@@ -584,7 +584,41 @@ reproduce the original bytes.
 | `0x2254c` | `angle_in_arc` (done) | 95 | 34 | 0 | 18 |
 | `0x83500` | `array_sort` (done) | 93 | 39 | 0 | 0 |
 
-This table starts Phase W.
+This table completes Phase W.
+
+### Phase X: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x150f4` | unnamed | 92 | 29 | 3 | 0 |
+| `0x2f554` | unnamed | 90 | 37 | 0 | 0 |
+| `0x1ff14` | unnamed | 90 | 27 | 9 | 0 |
+| `0x8a848` | unnamed | 89 | 40 | 0 | 0 |
+| `0x4cf3c` | unnamed | 88 | 30 | 4 | 0 |
+| `0x22c30` | unnamed | 87 | 30 | 2 | 0 |
+| `0x24264` | unnamed | 86 | 27 | 2 | 0 |
+| `0x2420c` | unnamed | 86 | 27 | 2 | 0 |
+| `0x22664` | unnamed | 85 | 32 | 0 | 16 |
+| `0x11974` | unnamed | 85 | 28 | 1 | 3 |
+| `0x23fc8` | unnamed | 83 | 24 | 1 | 0 |
+| `0x83354` | unnamed | 80 | 20 | 2 | 0 |
+| `0x2f709` | unnamed | 79 | 34 | 2 | 0 |
+| `0x1f7e4` | unnamed | 79 | 25 | 2 | 0 |
+| `0x81f80` | unnamed | 78 | 28 | 0 | 0 |
+| `0x24bfc` | unnamed | 78 | 32 | 0 | 0 |
+| `0x15bac` | unnamed | 78 | 23 | 7 | 0 |
+| `0x15ab8` | unnamed | 77 | 23 | 8 | 0 |
+| `0x4d214` | unnamed | 76 | 28 | 1 | 5 |
+| `0x261e4` | unnamed | 74 | 25 | 1 | 0 |
+| `0x25f44` | unnamed | 74 | 20 | 0 | 0 |
+| `0x2401c` | unnamed | 74 | 22 | 1 | 0 |
+| `0x247ac` | unnamed | 71 | 22 | 2 | 0 |
+| `0x1f764` | unnamed | 71 | 26 | 1 | 0 |
+
+This table starts Phase X.
 
 ## Position
 
