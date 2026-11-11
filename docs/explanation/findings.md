@@ -27693,3 +27693,59 @@ temporary `-od` recipe.
   from the caller source and stays inferred.  The exact meaning of the fill
   value `0xaaaabbbb` on the row limit and the row entry stays unknown; the
   rebuild keeps both values.
+
+## The memory_block_largest module at 0x2f709
+
+- Observation: the original body at `0x2f709` holds 34 instructions and 79
+  bytes up to the `ret` at `0x2f757`.  The next entry
+  `heap_memory_available` starts at `0x2f758`, so the store record keeps the
+  79-byte extent and sets no separate function size.  The identity check uses
+  34 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f709 --count 34` and
+  `tools/rebuild/functions/0x2f709.json`.
+- Observation: the two direct call sites at `0x22c3d` and `0x22c96` sit in
+  `replay_frame_buffer_init` at `0x22c30` and `replay_buffer_init` at
+  `0x22c88`.  Each caller passes the memory context `DAT_000062ac` and divides
+  the result by the size of one replay record.  Both caller modules already
+  name this function `memory_block_largest`, so the record keeps that name.
+  Evidence: the two call sites, `tools/rebuild/replay_frame_buffer_init.c`, and
+  `tools/rebuild/replay_buffer_init.c`.
+- Observation: the function passes the context in `eax` to the DOS block probe
+  at `0x2f66c` and to the heap block probe at `0x2f5ae`, stores the two
+  results, and returns the larger one.  The compare is signed, so a negative
+  result loses against a zero result.  The DOS probe calls the DOS allocator at
+  `0x2f0fc`, and the heap probe calls the heap allocator at `0xd1f25`.  Both
+  probes halve the probe size, so the result is the largest single free block.
+  Evidence: the body at `0x2f709` through `0x2f757` and the two probe bodies.
+- Inference: the two callers, the two probes, and the max compare support the
+  name `memory_block_largest`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly implementation.
+  Evidence: `tools/rebuild/memory_block_largest.c` and the module recipe.
+- Observation: the harness holds the two scripted sizes, the two recorded pool
+  pointers, and the two callee stubs.  Each stub records its pool argument and
+  its call count and returns its scripted size.  The five paths cover the heap
+  win, the DOS win, the equal compare, the negative DOS size, and the negative
+  heap size.  The output holds the markers `0` through `4` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/memory_block_largest_main.c`,
+  `python3 tools/rebuild/harness.py run --module memory_block_largest`,
+  `work/rebuild/mblkmax.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2f709`.
+- Observation: the rebuilt body holds 8 of 34 instructions equal, 3 of 79
+  bytes equal, and 0 of 7 relocation slots equal.  The identity check stays
+  open because V2 sets the frame first, keeps the two block sizes in `ecx` and
+  `eax`, and reaches both callees with a register argument instead of the stack
+  copies of the original.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f709 --count 34 --rebuilt work/rebuild/mblkmax.exe
+  --rebuilt-map work/rebuild/memory_block_largest.map --rebuilt-symbol
+  memory_block_largest_` and
+  `python3 tools/rebuild/run.py run --function 0x2f709`.
+- Limit: the original has no symbol name for this function.  The name comes
+  from the two caller modules and stays inferred.
+

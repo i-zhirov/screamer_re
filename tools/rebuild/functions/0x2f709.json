@@ -1,9 +1,103 @@
 {
   "address": "0x2f709",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 34,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2f709 holds 34 instructions and 79 bytes up to the ret at 0x2f757; the next entry heap_memory_available starts at 0x2f758, so the store record keeps the 79-byte extent and sets no separate function size; the identity check uses 34 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct call sites at 0x22c3d and 0x22c96 sit in replay_frame_buffer_init at 0x22c30 and replay_buffer_init at 0x22c88; each caller passes the memory context DAT_000062ac and divides the result by the size of one replay record; both callers already name this function memory_block_largest, so the record keeps that name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function passes the context to the DOS block probe at 0x2f66c and to the heap block probe at 0x2f5ae and returns the larger of the two results; the compare is signed, so a negative result loses against a zero result"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two scripted sizes, the two recorded pool pointers, and the two callee stubs; each stub records its pool argument and its call count and returns its scripted size; the five paths cover the heap win, the DOS win, the equal compare, the negative DOS size, and the negative heap size; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 8 of 34 instructions equal, 3 of 79 bytes equal, and 0 of 7 relocation slots equal; the identity check stays open because V2 sets the frame first, keeps the two block sizes in ecx and eax, and reaches both callees with a register argument instead of the stack copies of the original; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2f709 --count 34"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2f709 --count 34 --rebuilt work/rebuild/mblkmax.exe --rebuilt-map work/rebuild/memory_block_largest.map --rebuilt-symbol memory_block_largest_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module memory_block_largest"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2f709"
+    },
+    {
+      "kind": "finding",
+      "text": "The memory_block_largest module at 0x2f709"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/memory_block_largest.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/memory_block_largest_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/memory_block_largest.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "memory_block_largest",
+  "name": "memory_block_largest",
   "notes": [],
   "object_offset": "0x1f709",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 79,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 34,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f709",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:f00d3f9008cc599f2d42630c98d6e96f58b3a8065b44f50afbec0f593bff148b",
+    "source_digest": "sha256:15b51f263dc6fd87bb37b36512852b84cab11834afa4414cafac419dd22339c1",
+    "tool": "run.py"
+  },
+  "role": "Returns the larger of the largest single DOS memory block and the largest single heap block for the memory context.",
+  "section": "The runtime memory manager",
   "size": 79,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "memory_block_largest_"
 }

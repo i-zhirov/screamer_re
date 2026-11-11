@@ -308,9 +308,10 @@ current host.
   `angle_within` at `0x22664`, and the Phase X module
   `func_11974` at `0x11974`, and the Phase X module
   `race_finish_sla_update` at `0x23fc8`, and the Phase X module
-  `sound_sequence_prepare` at `0x83354`;
+  `sound_sequence_prepare` at `0x83354`, and the Phase X module
+  `memory_block_largest` at `0x2f709`;
   thirty-one modules are verified, one is matching, and three hundred and
-  fifty-two rebuilds hold the recorded difference; the `video_fill`,
+  fifty-three rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

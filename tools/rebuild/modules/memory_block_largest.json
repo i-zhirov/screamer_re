@@ -1,0 +1,31 @@
+{
+  "exe": "mblkmax.exe",
+  "map": "memory_block_largest.map",
+  "name": "memory_block_largest",
+  "run": {
+    "command": "mblkmax.exe > mblkmax.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mblkmax.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_block_largest.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "memory_block_largest_main.c"
+    }
+  ]
+}
