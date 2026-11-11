@@ -28716,3 +28716,63 @@ temporary `-od` recipe.
   stays inferred.  The identity check stays open because C cannot reproduce the
   inline DOS interrupts, the `lodsb` loop, and the register allocation of the
   original.
+
+## The camera_relative_angles module at 0x4bee0
+
+- Observation: the original body at `0x4bee0` holds 26 instructions and 67
+  bytes up to the `ret` at `0x4bf22`.  The next code starts at `0x4bf23`, so the
+  store record keeps the 67-byte extent and sets no separate function size.  The
+  identity check uses 26 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4bee0 --count
+  26` and `tools/rebuild/functions/0x4bee0.json`.
+- Observation: the function takes the object in `eax` and the output triple in
+  `edx`.  It loads the global pointer `PTR_DAT_0008a844`, takes its first field
+  as the camera pointer, and reads the camera angles at `+0x00`, `+0x04`, and
+  `+0x08`.  The `screen_mode_set` module at `0x4c850` fills the same record from
+  `+0x14`, and `race_data_load` at `0x131a8` fills `+0x10`.  The `camera_project`
+  module at `0x82c14` reads the same camera record from the global pointer
+  `0x7a7ac`.
+  Evidence: the body at `0x4bee0` through `0x4bf22`, the finding "The
+  screen_mode_set module at 0x4c850", and the finding "The camera_project module
+  at 0x82c14".
+- Observation: the object fields `+0x14` and `+0x18` hold the object angles.
+  The function writes the relative yaw, the relative pitch with the quarter-turn
+  bias `0x400`, and the inverse camera roll.  The yaw and the pitch wrap with the
+  `0x7ff` mask.  The roll is the complement `0x7ff - angle2` without a mask.
+  Evidence: the blocks at `0x4bef3` through `0x4bf1c`.
+- Inference: the camera data flow, the object angles, and the three output
+  fields support the name `camera_relative_angles`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.  The direct call
+  sweep over the named records and the 688 prologue starts finds no caller, so
+  the section stays Program functions.
+  Evidence: the data flow above and the direct call sweep.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction and calls no
+  function, so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x4bee0` through `0x4bee4` and
+  `tools/rebuild/modules/camera_relative_angles.json`.
+- Observation: the harness holds the screen record, two screen records, two
+  camera records, one object, and one output triple.  The six paths cover the
+  plain case, the upper wrap, the negative angles, the quarter-turn bias, the
+  upper camera limits, and the untouched output sentinels and object.  The
+  output holds the markers `0` through `5` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/camera_relative_angles_main.c`,
+  `python3 tools/rebuild/harness.py run --module camera_relative_angles`,
+  `work/rebuild/camrel.txt`, and `python3 tools/rebuild/run.py run --function
+  0x4bee0`.
+- Observation: the rebuilt body holds 17 of 26 instructions equal, 8 of 67
+  bytes equal, and 0 of 2 relocation slots equal.  The identity check stays open
+  because V2 orders the frame and the register saves differently, keeps the
+  object pointer in `ecx`, and forms the pitch bias with `sub`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4bee0 --count 26 --rebuilt work/rebuild/camrel.exe
+  --rebuilt-map work/rebuild/camrel.map --rebuilt-symbol
+  camera_relative_angles_` and `python3 tools/rebuild/run.py run --function
+  0x4bee0`.
+- Limit: the original has no symbol name and no direct caller.  The camera data
+  flow supports the role, and the name stays inferred.  The identity check stays
+  open because C cannot reproduce the frame order and the register allocation of
+  the original.

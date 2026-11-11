@@ -1,9 +1,103 @@
 {
   "address": "0x4bee0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 26,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4bee0 holds 26 instructions and 67 bytes up to the ret at 0x4bf22; the next code starts at 0x4bf23, so the store record keeps the 67-byte extent and sets no separate function size; the identity check uses 26 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the object in eax and the output triple in edx; the camera pointer is the first field of the screen record at the global pointer PTR_DAT_0008a844, which screen_mode_set at 0x4c850 and race_data_load at 0x131a8 also fill; the camera record holds the three angle indices at +0x00, +0x04, and +0x08, as camera_project at 0x82c14 shows"
+    },
+    {
+      "kind": "note",
+      "text": "the object fields +0x14 and +0x18 hold the object angles; the function writes the relative yaw, the relative pitch with the quarter-turn bias, and the inverse camera roll; the yaw and the pitch wrap with the 0x7ff mask, and the roll is the complement 0x7ff - angle2 without a mask"
+    },
+    {
+      "kind": "note",
+      "text": "the direct call sweep over the named records and the 688 prologue starts finds no caller, so the section stays Program functions; the camera data flow supports the name camera_relative_angles; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction and calls no function, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the screen record, two screen records, two camera records, one object, and one output triple; the six paths cover the plain case, the upper wrap, the negative angles, the quarter-turn bias, the upper camera limits, and the untouched output sentinels and object; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 17 of 26 instructions equal, 8 of 67 bytes equal, and 0 of 2 relocation slots equal; the identity check stays open because V2 orders the frame and the register saves differently, keeps the object pointer in ecx, and forms the pitch bias with sub; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4bee0 --count 26"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4bee0 --count 26 --rebuilt work/rebuild/camrel.exe --rebuilt-map work/rebuild/camrel.map --rebuilt-symbol camera_relative_angles_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4bee0"
+    },
+    {
+      "kind": "finding",
+      "text": "The camera_relative_angles module at 0x4bee0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/camera_relative_angles.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/camera_relative_angles_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/camera_relative_angles.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "camera_relative_angles",
+  "name": "camera_relative_angles",
   "notes": [],
   "object_offset": "0x3bee0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 67,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 17,
+        "instructions_total": 26,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4bee0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:51f5591e4e8859485f91e929bd949016eb0e6fa20206bafedd9b02a67bf76334",
+    "source_digest": "sha256:b61cbdb5a559d2915beb5f0b88f1a3d43b8b35539b9915b824e03cfbd5fcbd6e",
+    "tool": "run.py"
+  },
+  "role": "Computes the camera-relative yaw, pitch, and inverse roll angles of an object.",
+  "section": "Program functions",
   "size": 67,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "camera_relative_angles_"
 }
