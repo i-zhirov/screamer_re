@@ -28908,3 +28908,66 @@ temporary `-od` recipe.
   and the two callees support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the frame order and the
   register allocation of the original.
+
+## The net_menu_enter module at 0x2df68
+
+- Observation: the original body at `0x2df68` holds 22 instructions and 65
+  bytes up to the `ret` at `0x2dfa8`.  The next function starts at `0x2dfac`, so
+  the store record keeps the 68-byte extent and sets no separate function size.
+  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2df68 --count
+  22` and `tools/rebuild/functions/0x2df68.json`.
+- Observation: the function calls `net_player_add` at `0x2dddc` with 1, the
+  network session init at `0xc6f80`, `resource_get` at `0x2eed0` with the
+  resource set `DAT_000062ac`, the name `NET_SPACE` at object-3 offset `0x12ca`,
+  and the size `0x2000`, `memory_error_report` at `0x2edad` with
+  `DAT_000062ac` on a zero result, and `menu_enter` at `0x28b5c`.  `menu_enter`
+  sets `DAT_0011fb64` to -1, clears the fade `DAT_0011d224`, runs `menu_frame`
+  at `0x29f80`, and restores `DAT_0011fb58`.
+  Evidence: the calls at `0x2df73`, `0x2df78`, `0x2df8c`, `0x2df9a`, and
+  `0x2df9f`, and the string at object-3 offset `0x12ca`.
+- Observation: the four direct call sites are `0x28365` and `0x283e7` in
+  `overlay_dispatch` at `0x28160` and `0x2da64` and `0x2dcdf` in
+  `net_race_lobby` at `0x2d7c4`.  Every caller runs the function to return from
+  a network screen to the menu and then stores the mode `0x20` in
+  `DAT_0001fb68`.  The same sequence appears inline at `0x282a2` in
+  `overlay_dispatch`.
+  Evidence: the four call sites and the mode store at `0x2836a`, `0x283ec`,
+  and the case at `0x282a2`.
+- Inference: the network player add, the session init, the `NET_SPACE` resource,
+  and the menu enter support the name `net_menu_enter`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.  The two
+  callers sit in the race-frame group, and the function is a callee of
+  `overlay_dispatch`, so the record takes the section overlay_dispatch callees.
+  Evidence: the data flow above and the caller list.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and makes no
+  floating-point call, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x2df68` through `0x2df6c` and
+  `tools/rebuild/modules/net_menu_enter.json`.
+- Observation: the harness holds the resource set `DAT_000062ac` and the five
+  callee stubs.  The three paths cover a non-zero resource result with the call
+  order, a zero resource result with the error report before the menu enter, and
+  a changed resource set with the new pointer.  The output holds the markers `0`,
+  `1`, `2`, and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/net_menu_enter_main.c`,
+  `python3 tools/rebuild/harness.py run --module net_menu_enter`,
+  `work/rebuild/netmnu.txt`, and `python3 tools/rebuild/run.py run --function
+  0x2df68`.
+- Observation: the rebuilt body holds 22 instructions and 67 bytes.  The
+  identity window holds 22 instructions and 65 bytes and stays open at 11 of 22
+  instructions, 10 of 65 bytes, and 1 of 5 relocation slots.  The difference is
+  open because V2 saves the frame pointer first and restores `esp`, the original
+  saves the frame pointer last, and the original loads the three `resource_get`
+  arguments in another order.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2df68 --count 22 --rebuilt work/rebuild/netmnu.exe
+  --rebuilt-map work/rebuild/net_menu_enter.map --rebuilt-symbol
+  net_menu_enter_` and `python3 tools/rebuild/run.py run --function 0x2df68`.
+- Limit: the original has no symbol name.  The caller sites, the mode store, and
+  the five callees support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the frame order and the register
+  allocation of the original.

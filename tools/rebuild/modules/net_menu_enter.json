@@ -1,0 +1,29 @@
+{
+  "exe": "netmnu.exe",
+  "map": "net_menu_enter.map",
+  "name": "net_menu_enter",
+  "run": {
+    "command": "netmnu.exe > netmnu.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "netmnu.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "net_menu_enter.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "net_menu_enter_main.c"
+    }
+  ]
+}

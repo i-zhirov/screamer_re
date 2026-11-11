@@ -1,9 +1,103 @@
 {
   "address": "0x2df68",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2df68 holds 22 instructions and 65 bytes up to the ret at 0x2dfa8; the next function starts at 0x2dfac, so the store record keeps the 68-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls net_player_add at 0x2dddc with 1, the network session init at 0xc6f80, resource_get at 0x2eed0 with the resource set DAT_000062ac, the name NET_SPACE at object-3 offset 0x12ca, and the size 0x2000, memory_error_report at 0x2edad with DAT_000062ac on a zero result, and menu_enter at 0x28b5c; menu_enter sets DAT_0011fb64 to -1, clears the fade DAT_0011d224, runs menu_frame at 0x29f80, and restores DAT_0011fb58"
+    },
+    {
+      "kind": "note",
+      "text": "the four direct call sites are 0x28365 and 0x283e7 in overlay_dispatch at 0x28160 and 0x2da64 and 0x2dcdf in net_race_lobby at 0x2d7c4; every caller runs the function to return from a network screen to the menu and then stores the mode 0x20 in DAT_0001fb68, and the same sequence appears inline at 0x282a2 in overlay_dispatch; the network player add, the session init, the NET_SPACE resource, and the menu enter support the name net_menu_enter; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and makes no floating-point call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the resource set DAT_000062ac and the five callee stubs; the three paths cover a non-zero resource result with the call order, a zero resource result with the error report before the menu enter, and a changed resource set with the new pointer; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 22 instructions and 67 bytes; the identity check holds 11 of 22 instructions, 10 of 65 bytes, and 1 of 5 relocation slots equal; the identity check stays open because V2 saves the frame pointer first and restores esp, the original saves the frame pointer last, and the original loads the three resource_get arguments in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The net_menu_enter module at 0x2df68"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2df68 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2df68 --count 22 --rebuilt work/rebuild/netmnu.exe --rebuilt-map work/rebuild/net_menu_enter.map --rebuilt-symbol net_menu_enter_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module net_menu_enter"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2df68"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/net_menu_enter.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/net_menu_enter_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/net_menu_enter.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "net_menu_enter",
+  "name": "net_menu_enter",
   "notes": [],
   "object_offset": "0x1df68",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 65,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2df68",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:bafe75337649bd9bd5f59f0fdd50d05cb565d0e6bb80bf73177b77f4a14674bd",
+    "source_digest": "sha256:b0c979dcc6ab69982139a7e13dc51232a020677566f85d5ad8e53d0136d4187e",
+    "tool": "run.py"
+  },
+  "role": "adds the network player, opens the network session, loads NET_SPACE, and enters the menu",
+  "section": "overlay_dispatch callees",
   "size": 68,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "net_menu_enter_"
 }
