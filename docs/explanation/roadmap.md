@@ -326,9 +326,10 @@ current host.
   `opponent_score_update` at `0x18b60`, and the Phase Y module
   `exit_with_message` at `0x30389`, and the Phase Y module
   `cd_audio_track_info_request` at `0x26120`, and the Phase Y module
-  `camera_relative_angles` at `0x4bee0`;
+  `camera_relative_angles` at `0x4bee0`, and the Phase Y module
+  `sound_effect_trigger` at `0x24d30`;
   thirty-two modules are verified, one is matching, and three hundred and
-  sixty-nine rebuilds hold the recorded difference; the `video_fill`,
+  seventy rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

@@ -28776,3 +28776,71 @@ temporary `-od` recipe.
   flow supports the role, and the name stays inferred.  The identity check stays
   open because C cannot reproduce the frame order and the register allocation of
   the original.
+
+## The sound_effect_trigger module at 0x24d30
+
+- Observation: the original body at `0x24d30` holds 18 instructions and 67
+  bytes up to the `ret` at `0x24d72`.  The `return 0` path is out of line at
+  `0x24d73` through the `ret` at `0x24d78`, and the next record starts at
+  `0x24d7c`, so the store record keeps the 76-byte extent and sets no separate
+  function size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24d30 --count
+  18` and `tools/rebuild/functions/0x24d30.json`.
+- Observation: the two integer arguments arrive in the Watcom register order.
+  `eax` holds the effect index and `edx` holds the variant mode.  The function
+  pushes the float delay 0.7 and calls `sound_enqueue` at `0x247fc` with the
+  effect, the mode, and the delay.
+  Evidence: the block at `0x24d30` through `0x24d72` and the finding "The
+  sound_enqueue module at 0x247fc".
+- Observation: the array at `DAT_001922c` holds one timer per effect, and the
+  value `0xbf800000` is the float -1.0.  `sound_effect_delay` at `0x24c4c`
+  latches its timer at -1 after one firing, and `sound_reset` at `0x2471c`
+  clears the array to 0.  A latched cell returns 0.  Any other cell enqueues the
+  effect, latches the cell at -1, and returns 1.
+  Evidence: the blocks at `0x24c4c`, `0x2471c`, and `0x24d3f` through
+  `0x24d6a`, and the findings "The sound_effect_delay module at 0x24c4c" and
+  "The sound_reset module at 0x2471c".
+- Observation: the only direct caller is `car_sound_update` at `0x242bc`, with
+  the call sites at `0x24363`, `0x24420`, and `0x245ec`.  It passes the variant
+  mode 3 to the effects `0x16`, `0x1a`, and `0x13`.
+  Evidence: the calls at `0x24363`, `0x24420`, and `0x245ec` and the finding
+  "The car_sound_update module at 0x242bc".
+- Inference: the array index, the latch, and the enqueue support the name
+  `sound_effect_trigger`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.  The sound functions sit in the section
+  Program functions.
+  Evidence: the data flow above and the caller list.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, but the
+  `sound_enqueue` call passes a float delay, so the recipe adds the shared
+  `fpu_stub.asm` for the FPU run-time symbols.  The module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x24d30` through `0x24d33` and
+  `tools/rebuild/modules/sound_effect_trigger.json`.
+- Observation: the harness holds the 27-entry timer array and the
+  `sound_enqueue` stub.  The seven paths cover the armed cell, the latched cell,
+  the positive cell with the mode -2, the latched effect 0, the last cell 26,
+  the cell `0xbf800001` next to the latch, and the cell `0xbf7fffff` below the
+  latch.  The output holds the markers `0` through `6` and `D`, and the behavior
+  check passes.
+  Evidence: `tools/rebuild/sound_effect_trigger_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_effect_trigger`,
+  `work/rebuild/setrg.txt`, and `python3 tools/rebuild/run.py run --function
+  0x24d30`.
+- Observation: the rebuilt body holds 17 instructions and 56 bytes.  The
+  identity window holds 18 instructions and 57 bytes and stays open at 5 of 18
+  instructions, 3 of 57 bytes, and 0 of 4 relocation slots.  The difference is
+  open because V2 keeps the effect index in `ecx` and the variant mode in `edx`
+  across the call, saves `ecx` instead of the two argument slots, and places the
+  `return 0` block inline.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24d30 --count 18 --rebuilt work/rebuild/setrg.exe
+  --rebuilt-map work/rebuild/sound_effect_trigger.map --rebuilt-symbol
+  sound_effect_trigger_` and `python3 tools/rebuild/run.py run --function
+  0x24d30`.
+- Limit: the original has no symbol name.  The timer latch and the caller list
+  support the role, and the name stays inferred.  The identity check stays open
+  because C cannot reproduce the frame order and the register allocation of the
+  original.
