@@ -617,9 +617,42 @@ reproduce the original bytes.
 | `0x2401c` | `race_finish_cng_update` (done) | 74 | 22 | 1 | 0 |
 | `0x247ac` | `sound_variant_lookup` (done) | 71 | 22 | 2 | 0 |
 | `0x1f764` | `sound_voice_sample_set` (done) | 71 | 26 | 1 | 0 |
-| `0x113c8` | unnamed | 71 | 27 | 1 | 0 |
 
-This table starts Phase X.
+This table completes Phase X.
+
+### Phase Y: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x113c8` | unnamed | 71 | 27 | 1 | 0 |
+| `0x25b10` | unnamed | 70 | 22 | 0 | 0 |
+| `0x18b60` | unnamed | 70 | 22 | 0 | 3 |
+| `0x30389` | unnamed | 68 | 28 | 1 | 0 |
+| `0x26120` | unnamed | 68 | 22 | 0 | 0 |
+| `0x4bee0` | unnamed | 67 | 26 | 0 | 0 |
+| `0x24d30` | unnamed | 67 | 18 | 1 | 0 |
+| `0x24a28` | unnamed | 67 | 23 | 2 | 0 |
+| `0x2df68` | unnamed | 65 | 22 | 5 | 0 |
+| `0x2b450` | unnamed | 65 | 22 | 1 | 0 |
+| `0x25aac` | unnamed | 65 | 22 | 2 | 0 |
+| `0x8bd54` | unnamed | 64 | 16 | 0 | 0 |
+| `0x260e0` | unnamed | 64 | 22 | 1 | 0 |
+| `0x22db8` | unnamed | 64 | 19 | 0 | 0 |
+| `0x212d0` | unnamed | 63 | 20 | 0 | 2 |
+| `0x260a0` | unnamed | 62 | 22 | 1 | 0 |
+| `0x4d2dc` | unnamed | 61 | 22 | 0 | 0 |
+| `0x4c94c` | unnamed | 61 | 27 | 2 | 0 |
+| `0x1c7d0` | unnamed | 61 | 19 | 3 | 0 |
+| `0x25f90` | unnamed | 60 | 18 | 2 | 0 |
+| `0x23f14` | unnamed | 60 | 18 | 1 | 0 |
+| `0x23ed8` | unnamed | 60 | 18 | 1 | 0 |
+| `0x118a4` | unnamed | 60 | 21 | 0 | 0 |
+| `0x11660` | unnamed | 60 | 23 | 0 | 0 |
+
+This table starts Phase Y.
 
 ## Position
 
