@@ -1,9 +1,103 @@
 {
   "address": "0x118a4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 21,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x118a4 holds 21 instructions and 60 bytes up to the ret at 0x118df; the success path jumps to the shared epilogue at 0x118e0, and the next function starts at 0x118e8 after two padding bytes, so the store record keeps the 68-byte extent and sets no separate function size; the identity check uses 21 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x13805 is player_car_init at 0x136cc; the caller loads each of the eight 0x28-byte wheel effect slots at player object offset 0x308 through the object loader at 0x11060 and then passes the object table 0x6530 in eax and the slot in edx; the vehicle state chain runs player_car_init, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the slot holds the object index in its first int; the index selects one 0x1c-byte record of the object table; the file record at entry + 0x14 marks a loaded record, and the block object pointer sits at entry + 0x0c; a free record returns 0x10 and changes nothing; an active record sets bit 0x80 of the block byte at + 0x05 and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "object_list_link at 0x11568 tests the same block byte + 5; a set bit 0x80 binds the record with the tagged list slot through 0x11850, and a clear bit keeps the plain slot through 0x117fc; the caller, the object table, and the two sibling binders support the name object_block_tag with the confidence inferred; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds eight 0x1c-byte records, one block object per record, and one slot; the six paths cover the clear byte, the byte 0x7f, the set byte 0xa5, the free record, the second record 5, and the last record 7; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 3 of 21 instructions equal and 4 of 49 bytes equal; the identity check stays open because V2 keeps both arguments in registers and omits the frame spill, uses imul for the 0x1c stride, and inverts the branch so the active path falls through; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x118a4 --count 21"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x118a4 --count 21 --rebuilt work/rebuild/obt.exe --rebuilt-map work/rebuild/object_block_tag.map --rebuilt-symbol object_block_tag_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x118a4"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_block_tag module at 0x118a4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_block_tag.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_block_tag_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_block_tag.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_block_tag",
+  "name": "object_block_tag",
   "notes": [],
   "object_offset": "0x18a4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 49,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x118a4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:4c9370e0dc429c0c4efdbf8f2420c8c1b5103f0d57c6297723a77772947b9ed9",
+    "source_digest": "sha256:204a6507043d023e376cd264fd006ab49f08e029b369eab7cdd010d37ce38d3e",
+    "tool": "run.py"
+  },
+  "role": "Sets the tagged-list flag on the block of an active object table record and reports 0x10 for a free record.",
+  "section": "The vehicle state chain",
   "size": 68,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_block_tag_"
 }

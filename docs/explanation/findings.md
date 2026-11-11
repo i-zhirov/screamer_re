@@ -29767,3 +29767,67 @@ temporary `-od` recipe.
   two effects support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the frame order, the byte set
   shape, and the call encoding.
+
+## The object_block_tag module at 0x118a4
+
+- Observation: the original body at `0x118a4` holds 21 instructions and 60
+  bytes up to the `ret` at `0x118df`.  The success path jumps to the shared
+  epilogue at `0x118e0`.  The next function starts at `0x118e8` after two
+  padding bytes, so the store record keeps the 68-byte extent and sets no
+  separate function size.  The identity check uses 21 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x118a4 --count
+  21` and `tools/rebuild/functions/0x118a4.json`.
+- Observation: the only direct caller at `0x13805` is `player_car_init` at
+  `0x136cc`.  The caller loads each of the eight 0x28-byte wheel effect slots
+  at player object offset `0x308` through the object loader at `0x11060`, then
+  calls this function with the object table `0x6530` in `eax` and the slot in
+  `edx`.  The vehicle state chain runs `player_car_init`, so the record takes
+  the section `The vehicle state chain`.
+  Evidence: the calls at `0x13805` and `0x1383a`, the block at `0x137e1`
+  through `0x13814`, and the record of `0x136cc`.
+- Observation: the slot holds the object index in its first int.  The index
+  selects one 0x1c-byte record of the object table.  The file record at
+  `+0x14` marks a loaded record, and the block object pointer sits at `+0x0c`.
+  A free record returns `0x10` and changes nothing.  An active record sets bit
+  `0x80` of the block byte at `+0x05` and returns 0.
+  Evidence: the body at `0x118aa` through `0x118df` and the object table
+  finding in "The object_request module at 0x114b4".
+- Observation: `object_list_link` at `0x11568` tests the same block byte at
+  `+0x05`.  A set bit `0x80` binds the record with the tagged list slot
+  through `0x11850`, and a clear bit keeps the plain slot through `0x117fc`.
+  Evidence: the test at `0x115cb` through `0x115d1`, the two bind bodies at
+  `0x117fc` and `0x11850`, and the finding "The object_list_link module at
+  0x11568".
+- Inference: the caller, the object table, and the two sibling binders support
+  the name `object_block_tag`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/object_block_tag.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct call,
+  so the module uses no FPU stub and no assembly.
+  Evidence: the prologue at `0x118a4` and the module recipe.
+- Observation: the harness holds eight 0x1c-byte records, one block object per
+  record, and one slot.  The six paths cover the clear block byte, the byte
+  `0x7f`, the set byte `0xa5`, the free record, the record 5, and the record 7.
+  The output holds the markers `0` through `5` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/object_block_tag_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_block_tag`,
+  `work/rebuild/obt.txt`, and `python3 tools/rebuild/run.py run --function
+  0x118a4`.
+- Observation: the rebuilt body holds 21 instructions and 49 bytes in the
+  identity window.  The identity check stays open at 3 of 21 instructions and 4
+  of 49 bytes.  V2 keeps both arguments in registers and omits the frame spill,
+  uses `imul` for the 0x1c stride, and inverts the branch so the active path
+  falls through.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x118a4 --count 21 --rebuilt work/rebuild/obt.exe
+  --rebuilt-map work/rebuild/object_block_tag.map --rebuilt-symbol
+  object_block_tag_` and `python3 tools/rebuild/run.py run --function 0x118a4`.
+- Limit: the original has no symbol name.  The caller, the object table, and
+  the two binders support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the argument spill, the stride
+  shape, and the branch layout.
