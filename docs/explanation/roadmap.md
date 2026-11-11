@@ -306,9 +306,10 @@ current host.
   `race_finish_overlay_5` at `0x24264`, and the Phase X module
   `race_finish_overlay_6` at `0x2420c`, and the Phase X module
   `angle_within` at `0x22664`, and the Phase X module
-  `func_11974` at `0x11974`;
+  `func_11974` at `0x11974`, and the Phase X module
+  `race_finish_sla_update` at `0x23fc8`;
   thirty-one modules are verified, one is matching, and three hundred and
-  fifty rebuilds hold the recorded difference; the `video_fill`,
+  fifty-one rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

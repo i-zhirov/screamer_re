@@ -27558,3 +27558,67 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x11974`.
 - Limit: the original has no symbol name for this function.  The module name
   stays the weak fallback and inferred.
+
+## The race_finish_sla_update module at 0x23fc8
+
+- Observation: the original body at `0x23fc8` holds 24 instructions and 83
+  bytes up to the `ret` at `0x2401a`.  The one padding byte at `0x2401b` and
+  the next function at `0x2401c` give the 84-byte extent, so the store record
+  keeps the 84-byte extent and sets no separate function size.  The identity
+  check uses 24 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x23fc8 --count 24` and
+  `tools/rebuild/functions/0x23fc8.json`.
+- Observation: the only direct caller is `race_finish_laps_update` at
+  `0x20ec8` with the call site at `0x20f3e`.  The caller switches on the mode
+  byte `DAT_0011d260` and selects this handler for mode `0x40`.  The game mode
+  `0x40` is the SLA mode.  No named function sits between the caller and the
+  target, so the record takes the section Program functions.
+  Evidence: the call sweep for `0x23fc8` and the record of `0x20ec8`.
+- Observation: the handler sets bit 3 of the control byte `DAT_00118e1d`,
+  writes the finish position 1 to `DAT_0000ffa4`, and enqueues the effect `0xb`
+  with the variant mode 3 and the delay 0.  The enqueue goes through
+  `sound_enqueue` at `0x247fc`.
+  Evidence: the body at `0x23fcd` through `0x24012` and the record of `0x247fc`.
+- Observation: when the SLA marker count `DAT_00007ed4` equals the hit count
+  `DAT_001100dc` and the state cell `DAT_001100d4` is zero, the handler sets bit
+  7 (`0x80`) of the control byte.  The mode `0x40` overlay at `0x2420c` reads
+  bit 7 and adds the extra text, so the bit marks the all-marker result.
+  `car_sound_update` at `0x242bc` tests the same three values for the effect
+  `0x1a`.
+  Evidence: the body at `0x23fe7` through `0x24006`, the record of `0x2420c`,
+  and the block at `0x243fa` through `0x24420`.
+- Inference: the caller, the SLA marker count, the hit count, and the extra-text
+  bit support the name `race_finish_sla_update`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the call sweep and the data references above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original function holds no floating-point instruction.  The
+  `sound_enqueue` call passes a float argument, so the recipe adds the shared
+  `fpu_stub.asm` for the FPU run-time symbols.  The module uses no assembly
+  implementation.
+  Evidence: the original body and the module recipe.
+- Observation: the harness holds the control byte, the marker count, the hit
+  count, the state cell, the finish position, and the `sound_enqueue` stub.
+  The stub records the raw delay bits, so it needs no float compare.  The seven
+  paths cover the partial hit, the all-marker hit, the set state cell, the zero
+  count, the negative count, the preserved control byte `0x11`, and the
+  preserved control byte `0x10`.  The output holds the markers `0` through `6`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_sla_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_finish_sla_update`,
+  `work/rebuild/rfsla.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x23fc8`.
+- Observation: the rebuilt body holds 8 of 24 instructions equal, 10 of 82
+  bytes equal, and 0 of 10 relocation slots equal.  The identity check stays
+  open because V2 pushes `ebp` first and saves `edx` after the frame, keeps the
+  control byte in `al` instead of `ah`, keeps the marker count in `edx`, drops
+  the `ebx` save, and restores the stack with `lea`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x23fc8 --count 24 --rebuilt work/rebuild/rfsla.exe
+  --rebuilt-map work/rebuild/race_finish_sla_update.map --rebuilt-symbol
+  race_finish_sla_update_` and
+  `python3 tools/rebuild/run.py run --function 0x23fc8`.
+- Limit: the original has no symbol name for this function.  The module name
+  stays inferred.  The exact role of the state cell `DAT_001100d4` stays
+  unknown; the record reports only that the original tests it for zero.
