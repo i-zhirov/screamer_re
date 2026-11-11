@@ -22074,6 +22074,68 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name for this function.  The module name
   and the callee names in the harness stay inferred.
 
+## The replay_frame_buffer_init module at 0x22c30
+
+- Observation: the original body at `0x22c30` holds 30 instructions and 87
+  bytes up to the `ret` at `0x22c86`.  The next function starts at `0x22c88`, so
+  the record keeps the 88-byte extent and sets no separate function size.  The
+  identity check uses 30 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22c30 --count 30` and
+  `tools/rebuild/functions/0x22c30.json`.
+- Observation: the two direct call sites at `0x12cc8` and `0x12cef` sit in
+  `game_mode_1_start` at `0x12c0c`.  They run only when the mode argument is not
+  zero, store the result in the replay flag `DAT_0018e60`, and then load the
+  replay record through `replay_load` at `0x1b840` or reset the replay indices
+  through `0x22d88`.  The sibling `replay_buffer_init` at `0x22c88` and the
+  replay reader at `0x1b840` and the writer at `0x1b738` use this buffer and
+  count, so the record takes the section `The replay records`.
+  Evidence: the two call sites, the record of `game_mode_1_start`, and the
+  sibling records at `0x22c88`, `0x1b738`, and `0x1b840`.
+- Observation: the function asks `0x2f709` for the largest single memory block.
+  That helper returns the larger of the DOS block at `0x2f66c` and the heap block
+  at `0x2f5ae`.  The function divides the block by `0x14`, the size of one
+  replay frame record, and stores the count at `DAT_0018e68`.  A count below
+  `0xc8` returns 0.
+  Evidence: the call at `0x22c3d` and the divide at `0x22c4f`.
+- Observation: a count at or above `0xc8` loads the `REPLAY` resource at
+  object-3 offset `0xdac` through `resource_get` at `0x2eed0` with the block
+  size and stores the pointer at `DAT_0018e5c`.  A zero pointer returns 0.
+  Otherwise the function returns 1, so the caller sets the replay flag.
+  Evidence: the block at `0x22c61` through `0x22c7c` and the string `REPLAY` at
+  object-3 offset `0xdac`.
+- Inference: the caller, the `REPLAY` resource, the `0x14`-byte frame record,
+  and the replay reader and writer support the name
+  `replay_frame_buffer_init`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the caller at `0x12c0c` and the three sibling records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module uses
+  no FPU stub and no assembly.
+  Evidence: `tools/rebuild/replay_frame_buffer_init.c` and the module recipe.
+- Observation: the harness holds the replay buffer pointer, the frame count, the
+  context, the `REPLAY` name cell, and the two callee stubs.  The five paths
+  cover the count 199 below the gate, the count 200 with the load, the count 200
+  with the failed load, the count 201, and the count 2000.  The output holds the
+  markers `0` through `4` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/replay_frame_buffer_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_frame_buffer_init`,
+  `work/rebuild/rplfb.txt`, and `python3 tools/rebuild/run.py run --function
+  0x22c30`.
+- Observation: the rebuilt body holds 30 decoded instructions and 85 bytes in
+  the identity window.  The identity check stays open at 11 of 30 instructions,
+  5 of 85 bytes, and 1 of 9 relocation slots, because V2 saves the frame and the
+  registers in another order, keeps the largest in `ebx` and the count in
+  `ecx`, loads the two globals through near data operands, and restores the
+  stack with `lea`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22c30 --count 30 --rebuilt work/rebuild/rplfb.exe
+  --rebuilt-map work/rebuild/replay_frame_buffer_init.map --rebuilt-symbol
+  replay_frame_buffer_init_` and `python3 tools/rebuild/run.py run --function
+  0x22c30`.
+- Limit: the original has no symbol name for this function.  The module name
+  and the callee names in the harness stay inferred.
+
 ## The cd_check module at 0x157b8
 
 - Observation: the original body at `0x157b8` holds 57 instructions and 185
