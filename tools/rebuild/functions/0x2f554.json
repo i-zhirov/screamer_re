@@ -1,9 +1,107 @@
 {
   "address": "0x2f554",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 37,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2f554 holds 37 instructions and 90 bytes up to the ret at 0x2f5ad; the next entry starts at 0x2f5ae, so the store record keeps the 90-byte extent and sets no separate function size; the identity check uses 37 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "no direct call, no data reference, and no LE relocation target reaches 0x2f554; Ghidra reports no reference and no function at the address; the sibling resource functions show the layout: the record array at +0x00, the count at +0x04, the limit at +0x08, and the status at +0x0c; each 0x1c-byte record holds the allocation result at +0x0c, the address cell at +0x10, the requested size at +0x14, and the free flag at +0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the resource in eax, walks the 0x1c-byte records up to the count at +0x04, sums the requested size at +0x14 plus the 0x10-byte allocation header, and returns the total; the total does not change the resource"
+    },
+    {
+      "kind": "note",
+      "text": "the record layout and the sibling resource_free family at 0x2f470 support the section The resource layer; the original has no caller and no data reference, so the record keeps the weak name func_2f554"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the resource record, four 0x1c-byte record slots, and four requested sizes; the four paths cover the count 3, the count 0, the count 1 with the size 0, and the count 2 with the sizes 0x1234 and 0x20; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body alone holds 25 instructions and 44 bytes up to its ret; the identity window uses the count 37, so it decodes the following code and reports 11 of 37 instructions, 1 of 82 bytes, and 0 of 4 relocation slots equal; V2 sets the frame first, keeps the total in ebx and the index in edx, reaches the record through esi, and uses a lea epilogue; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2f554 --count 37"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2f554 --count 37 --rebuilt work/rebuild/func2f5.exe --rebuilt-map work/rebuild/func_2f554.map --rebuilt-symbol func_2f554_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module func_2f554"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2f554"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_2f554 module at 0x2f554"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f554.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f554_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_2f554.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_2f554",
+  "name": "func_2f554",
   "notes": [],
   "object_offset": "0x1f554",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 82,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 37,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f554",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:a69fb8ecca7b8ebabdfaee23ce345cfb7935a64bef6ac29538d2861a8a948462",
+    "source_digest": "sha256:3972d0a9c00527e3fd2aa231f4aa47ba2bd6dd6dd5a5985b57f78ec6bb14b828",
+    "tool": "run.py"
+  },
+  "role": "Sums the requested size plus the 0x10-byte allocation header of every resource record and returns the total.",
+  "section": "The resource layer",
   "size": 90,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_2f554_"
 }

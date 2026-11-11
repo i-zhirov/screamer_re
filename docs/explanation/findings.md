@@ -27022,3 +27022,58 @@ temporary `-od` recipe.
   0x150f4`.
 - Limit: the original has no symbol name for this function.  The name
   `track_resource_load` and the harness field names stay inferred.
+
+## The func_2f554 module at 0x2f554
+
+- Observation: the original body at `0x2f554` holds 37 instructions and 90
+  bytes up to the `ret` at `0x2f5ad`.  The next entry starts at `0x2f5ae`, so
+  the store record keeps the 90-byte extent and sets no separate function size.
+  The identity check uses 37 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f554 --count 37` and
+  `tools/rebuild/functions/0x2f554.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x2f554`.  Ghidra reports no reference and no function at the
+  address.
+  Evidence: the call scan of the 688 candidate starts through `tools/le.py`
+  and the fixup slots of the LE reader.
+- Observation: the sibling resource functions show the layout.  The resource
+  holds the record array at `+0x00`, the count at `+0x04`, the limit at
+  `+0x08`, and the status at `+0x0c`.  Each 0x1c-byte record holds the
+  allocation result at `+0x0c`, the address cell at `+0x10`, the requested
+  size at `+0x14`, and the free flag at `+0x18`.
+  Evidence: the record of `0x2f4ee` and `resource_get` at `0x2eed0`.
+- Observation: the function takes the resource in eax.  It walks the
+  0x1c-byte records up to the count at `+0x04`, sums the requested size at
+  `+0x14` plus the 0x10-byte allocation header, and returns the total.  The
+  total does not change the resource.
+  Evidence: the loop at `0x2f573` through `0x2f59a`.
+- Inference: the record layout and the sibling `resource_free` family at
+  `0x2f470` support the section `The resource layer`.  The original has no
+  caller and no data reference, so the record keeps the weak name
+  `func_2f554`.
+  Evidence: the records at `0x2f4ee` and `0x2f470`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function uses no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x2f554` through `0x2f55c` and
+  `tools/rebuild/modules/func_2f554.json`.
+- Observation: the harness holds the resource record, four 0x1c-byte record
+  slots, and four requested sizes.  The four paths cover the count 3, the
+  count 0, the count 1 with the size 0, and the count 2 with the sizes 0x1234
+  and 0x20.  The output holds the markers `0` through `3` and `D`.  The
+  behavior check passes.
+  Evidence: `tools/rebuild/func_2f554_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_2f554`, and
+  `work/rebuild/func2f5.txt`.
+- Observation: the rebuilt body alone holds 25 instructions and 44 bytes up
+  to its `ret`.  The identity window uses the count 37, so it decodes the
+  following code and reports 11 of 37 instructions, 1 of 82 bytes, and 0 of 4
+  relocation slots equal.  V2 sets the frame first, keeps the total in ebx and
+  the index in edx, reaches the record through esi, and uses a `lea` epilogue.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f554 --count 37 --rebuilt work/rebuild/func2f5.exe
+  --rebuilt-map work/rebuild/func_2f554.map --rebuilt-symbol func_2f554_` and
+  `python3 tools/rebuild/run.py run --function 0x2f554`.
+- Limit: the original has no symbol name for this function.  The name
+  `func_2f554` and the harness field names stay inferred.

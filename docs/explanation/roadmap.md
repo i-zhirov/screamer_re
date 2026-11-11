@@ -297,10 +297,10 @@ current host.
   `member_load` at `0x4c485`, and the Phase W module
   `race_gauges` at `0x2369c`, and the Phase W module
   `angle_in_arc` at `0x2254c`, and the Phase W module
-  `array_sort` at `0x83500`, and the Phase X module
-  `track_resource_load` at `0x150f4`;
+  `array_sort` at `0x83500`, and the Phase X modules
+  `track_resource_load` at `0x150f4` and `func_2f554` at `0x2f554`;
   thirty modules are verified, one is matching, and three hundred and
-  forty-two rebuilds hold the recorded difference; the `video_fill`,
+  forty-three rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
