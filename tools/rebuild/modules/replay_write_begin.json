@@ -1,0 +1,31 @@
+{
+  "exe": "rplwbgn.exe",
+  "map": "replay_write_begin.map",
+  "name": "replay_write_begin",
+  "run": {
+    "command": "rplwbgn.exe > rplwbgn.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rplwbgn.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_write_begin.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_write_begin_main.c"
+    }
+  ]
+}

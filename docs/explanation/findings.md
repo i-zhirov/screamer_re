@@ -31422,3 +31422,27 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the voice record
   selection, and the event source pointers support the name, and the name stays
   inferred.
+
+### The replay_write_begin module at 0x22d88
+
+- Observation: the original body at `0x22d88` holds 14 instructions and 45
+  bytes up to the `ret` at `0x22db4`.  The next record starts at `0x22db8`,
+  so the store keeps the 48-byte extent and sets no separate function size.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22d88 --count 14`.
+- Observation: the only direct caller is `game_mode_1_start` at `0x12c0c`,
+  at the call site `0x12cf9`, on the no-replay path.  The function runs when
+  `DAT_00018e60` is non-zero; it clears `DAT_00018e64`, sets
+  `DAT_00018e6c = 0`, and sets bit `0x40` of `DAT_00018e1c`.
+  Evidence: `tools/rebuild/replay_write_begin.c` and the block at `0x22d88`.
+- Inference: the write mode and the sibling `replay_playback_begin` at
+  `0x22db8` support the name `replay_write_begin`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+- Observation: the C build passes the build and behavior checks.  The
+  identity check fails at 6 of 14 instructions and 5 of 44 bytes, because V2
+  saves the frame first and keeps the flag in another register.  The record
+  stays `rebuilt` under the C-first policy.
+  Evidence: `python3 tools/rebuild/run.py run --function 0x22d88`.
+- Observation: the harness covers the gate closed, the gate open, and the
+  flag already set.  The output holds the markers `0` through `4` and `D`.
+  Evidence: `tools/rebuild/replay_write_begin_main.c` and
+  `work/rebuild/rplwbgn.txt`.
