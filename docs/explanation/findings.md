@@ -31922,3 +31922,52 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The `MATERIALS` resource, the
   material record, and the two callers support the name, and the name stays
   inferred.
+
+## The func_2f985 module at 0x2f985
+
+- Observation: the original body at `0x2f985` holds 21 instructions and 38
+  bytes up to the `ret` at `0x2f9aa`.  The next function starts at `0x2f9b0`
+  after the five padding bytes, so the store record keeps the 43-byte extent
+  and sets no separate function size.  The identity check uses 21
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2f985 --count 21` and
+  `tools/rebuild/functions/0x2f985.json`.
+- Observation: no direct call, no data reference, and no LE relocation target
+  reaches `0x2f985`.  The function is a leaf getter.  It stores its argument,
+  reloads the pointer, reads the dword at `+0x3c`, stores the value in the
+  second local, reloads it, and returns it.
+  Evidence: the block at `0x2f985` through `0x2f9aa`, the call scan of obj.1,
+  and the relocation scan.
+- Observation: the sibling `pool_init` at `0x2f904` writes the field `+0x3c`
+  as a 4 KB page count and converts it to bytes.  The resource functions at
+  `0x2f470` through `0x2f554` show the same pool layout and support the section
+  The resource layer.
+  Evidence: the shifts at `0x2f952` and `0x2f962`, the block at `0x2f5ae`, and
+  the `pool_init` record.
+- Inference: the original has no caller and no data reference, so the record
+  keeps the weak name `func_2f985`.  The read of `+0x3c` gives the role.
+  Evidence: the call scan and the relocation scan.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The two volatile locals reproduce the two stores and the
+  reloads.  The function holds no floating-point instruction and calls no
+  helper, so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x2f985` and `tools/rebuild/func_2f985.c`.
+- Observation: the harness holds one 0x40-byte pool record.  The five paths
+  cover the fields 0, 1, 0x1000, 0x12345678, and 0xffffffff.  Every path
+  clears the record, sets the field, and checks the returned value.  The
+  output holds the markers `0` through `4` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/func_2f985_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_2f985`,
+  `work/rebuild/f985.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2f985`.
+- Observation: the rebuilt body holds 6 of 21 instructions equal, 1 of 38
+  bytes equal, and 0 of 4 relocation slots equal.  V2 saves only the frame
+  pointer, while the original saves `ebx`, `ecx`, `edx`, `esi`, `edi`, and
+  `ebp`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f985 --count 21 --rebuilt work/rebuild/f985.exe
+  --rebuilt-map work/rebuild/func_2f985.map --rebuilt-symbol func_2f985_` and
+  `python3 tools/rebuild/run.py run --function 0x2f985`.
+- Limit: the original has no symbol name.  The field `+0x3c` and the sibling
+  `pool_init` give the role, and the weak name `func_2f985` stays.
