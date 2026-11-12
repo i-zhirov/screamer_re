@@ -32157,3 +32157,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The `OBJ_LIST` resource and the
   handle table loader give the role, and the name `object_handle_table_release`
   stays inferred.
+
+## The gameport_pulse module at 0x1028c
+
+- Observation: the original body at `0x1028c` holds 18 instructions and 36
+  bytes up to the `ret` at `0x102af`.  The next function starts at `0x102b0`,
+  so the store record keeps the 36-byte extent and sets no separate function
+  size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1028c --count 18` and
+  `tools/rebuild/functions/0x1028c.json`.
+- Observation: the only direct caller is `joystick_axis_read` at `0x10263` at
+  the call site `0x10274`.  It passes the axis mask in `eax`, the game port in
+  `edx`, and a selector in `ebx` that the helper ignores.  The caller keeps the
+  low 12 bits of the result and scales the axis, so the result is the game port
+  pulse length.  The caller sits in the `race_loop callees` section, so the
+  record takes the same section.
+  Evidence: the block at `0x10263` through `0x1028b` and the
+  `joystick_axis_read` record.
+- Observation: the function copies the mask from `al` to `ah` and waits up to
+  0x1000 reads for the mask bits to clear.  It clears the 16-bit counter,
+  writes the last read byte to the port, and counts the reads until the mask
+  bits clear again or the count reaches 0x2000.  The original disables the
+  interrupts between the write and the count loop with `cli` and `sti`.
+  Evidence: the block at `0x1028c` through `0x102af`.
+- Inference: the caller, the game port, and the pulse timing support the name
+  `gameport_pulse`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the caller at `0x10274` and the pulse loops at `0x10294` and
+  `0x102a0`.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction, so the module builds without `-of+` and needs no FPU stub and no
+  assembly implementation.  The C body leaves out the `cli` and `sti` guard,
+  because the harness link holds no `_disable` and no `_enable` helper.
+  Evidence: the prologue at `0x1028c`, the guard at `0x1029c`, and
+  `tools/rebuild/gameport_pulse.c`.
+- Observation: the harness holds a scripted read sequence, a constant read
+  mode, and the `inportb` and `outportb` stubs.  The six paths cover the
+  immediate clear, the settle loop, the count loop, the two limits 0x1000 and
+  0x2000, the low-byte mask, and the last read write.  Every path checks the
+  count, the read and write counts, the port, and the out byte.  The output
+  holds the markers `0` through `5` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/gameport_pulse_main.c`,
+  `python3 tools/rebuild/harness.py run --module gameport_pulse`,
+  `work/rebuild/gpp.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1028c`.
+- Observation: the identity check compares 18 instructions.  The rebuilt body
+  holds 0 of 18 instructions, 3 of 36 bytes, and 0 of 0 relocation slots equal.
+  V2 makes the poll loops into calls to the `inportb` and `outportb` stubs,
+  keeps the mask and the port in registers, and returns the count in `eax`
+  instead of `ecx`.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1028c --count 18 --rebuilt work/rebuild/gpp.exe
+  --rebuilt-map work/rebuild/gameport_pulse.map --rebuilt-symbol
+  gameport_pulse_` and `python3 tools/rebuild/run.py run --function 0x1028c`.
+- Limit: the original has no symbol name.  The caller, the game port, and the
+  pulse timing give the role, and the name `gameport_pulse` stays inferred.

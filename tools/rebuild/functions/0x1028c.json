@@ -1,9 +1,111 @@
 {
   "address": "0x1028c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1028c holds 18 instructions and 36 bytes up to the ret at 0x102af; the next function starts at 0x102b0, so the store record keeps the 36-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is joystick_axis_read at 0x10263 at the call site 0x10274; it passes the axis mask in eax, the game port in edx, and a selector in ebx that the helper ignores; the caller keeps the low 12 bits of the result and scales the axis, so the result is the game port pulse length; the caller sits in the race_loop callees section, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the mask from al to ah and waits up to 0x1000 reads for the mask bits to clear; it clears the 16-bit counter, writes the last read byte to the port, and counts the reads until the mask bits clear again or the count reaches 0x2000; the original disables the interrupts between the write and the count loop with cli and sti"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the game port, and the pulse timing support the name gameport_pulse; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and holds no floating-point instruction, so the module builds without -of+ and needs no FPU stub and no assembly implementation; the C body leaves out the cli and sti guard, because the harness link holds no _disable and no _enable helper"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds a scripted read sequence, a constant read mode, and the inportb and outportb stubs; the six paths cover the immediate clear, the settle loop, the count loop, the two limits 0x1000 and 0x2000, the low-byte mask, and the last read write; every path checks the count, the read and write counts, the port, and the out byte; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 18 instructions; the rebuilt body holds 0 of 18 instructions, 3 of 36 bytes, and 0 of 0 relocation slots equal; V2 makes the poll loops into calls to the inportb and outportb stubs, keeps the mask and the port in registers, and returns the count in eax instead of ecx; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1028c --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1028c --count 18 --rebuilt work/rebuild/gpp.exe --rebuilt-map work/rebuild/gameport_pulse.map --rebuilt-symbol gameport_pulse_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module gameport_pulse"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module gameport_pulse"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1028c"
+    },
+    {
+      "kind": "finding",
+      "text": "The gameport_pulse module at 0x1028c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/gameport_pulse.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/gameport_pulse_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/gameport_pulse.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "gameport_pulse",
+  "name": "gameport_pulse",
   "notes": [],
   "object_offset": "0x28c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 36,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 0,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1028c",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:606318b26a463922d40d742c494fbb7dd75fe7f5ef86b5085ef7ff7a364efb9a",
+    "source_digest": "sha256:195352701bbc5e328495d36bee4a062ebfe995f142d07c16596b4d38a49b3077",
+    "tool": "run.py"
+  },
+  "role": "Measures the game port pulse length and returns the read count.",
+  "section": "race_loop callees",
   "size": 36,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "gameport_pulse_"
 }
