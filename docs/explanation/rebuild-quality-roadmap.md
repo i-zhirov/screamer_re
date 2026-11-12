@@ -39,11 +39,11 @@ intra-function branch targets. Compare the target identity of an internal
 fixup. Cover the whole function extent. Stitch LE pages. Re-baseline the strict
 count after the change.
 
-- **Status:** Unplanned
+- **Status:** In Progress
 - **Depends on:** Slice 1
 - **Requirements:** FR-006, FR-007, FR-008, FR-009, FR-018
 - **Manual prerequisites:** —
-- **Plan:** —
+- **Plan:** docs/explanation/rebuild-quality-plan-oracle.md
 - **Done when:** The tests reject a wrong branch and a wrong global reference.
   The full function extent is compared. A body that crosses an LE page decodes
   the correct bytes. The strict baseline is recorded.
