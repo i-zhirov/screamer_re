@@ -1,0 +1,30 @@
+{
+  "exe": "peff.exe",
+  "map": "player_effect_update.map",
+  "name": "player_effect_update",
+  "run": {
+    "command": "peff.exe > peff.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "peff.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_effect_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_effect_update_main.c"
+    }
+  ]
+}

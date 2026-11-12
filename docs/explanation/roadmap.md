@@ -350,8 +350,9 @@ current host.
    `object_handle_table_load` at `0x119cc`, and the Phase Z module
    `stricmp` at `0x4d9ba`, and the Phase Z module
    `cd_audio_track_query` at `0x261a8`, and the Phase Z module
-   `traffic_effect_update` at `0x15b44`;
-   thirty-three modules are verified, one is matching, and three hundred and
+   `traffic_effect_update` at `0x15b44`, and the Phase Z module
+   `player_effect_update` at `0x15b08`;
+   thirty-four modules are verified, one is matching, and three hundred and
    ninety-two rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

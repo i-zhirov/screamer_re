@@ -30274,3 +30274,63 @@ temporary `-od` recipe.
   0x15b44`.
 - Limit: the original has no symbol name.  The callers and the traffic steps
   support the role, and the name stays inferred.
+
+## The player_effect_update module at 0x15b08
+
+- Observation: the original body at `0x15b08` holds 18 instructions and 57
+  bytes up to the `ret` at `0x15b40`.  The next function starts at `0x15b44`,
+  so the store record keeps the 60-byte extent and sets no separate function
+  size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15b08 --count
+  18` and `tools/rebuild/functions/0x15b08.json`.
+- Observation: the player update at `0x2003c` runs this group at `0x20154` on
+  the player object at object-3 offset `0xf91c`.  The player nearby mark at
+  `0x12378` records this group as its only caller, and the car proximity pass
+  at `0x17408` records the same.  The sibling traffic group at `0x15b44` has
+  the same shape with the traffic nearby marker and the traffic collision pass.
+  The record therefore takes the section `The vehicle state chain`.
+  Evidence: the call at `0x20154`, the finding "The player_nearby_mark module
+  at 0x12378", the finding "The car_proximity_pass module at 0x17408", and the
+  block at `0x15b08` through `0x15b40`.
+- Observation: the object pointer arrives in `eax`.  The function first calls
+  `player_body_point_place` at `0x17c6c`.  It returns at once when the state
+  field `+0x148` is not zero.  Otherwise it calls `player_nearby_mark` at
+  `0x12378`, `car_proximity_pass` at `0x17408`, and `opponent_start` at
+  `0x124c0`, all with the same player object.
+  Evidence: the calls at `0x15b14`, `0x15b28`, `0x15b30`, and `0x15b38`, the
+  compare at `0x15b1c`, and the records at `0x17c6c`, `0x12378`, `0x17408`, and
+  `0x124c0`.
+- Inference: the player update caller, the player steps, and the state gate
+  support the name `player_effect_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller at `0x20154`, the four callee records, and the state
+  field `+0x148`.
+- Observation: the original stores the argument to the frame and reloads it
+  before each call.  The volatile local reproduces the store and the reload, as
+  `error_report.c` records for the same frame-local pattern.  The original has
+  the EBP frame, so the module builds with `-of+`.  The function holds no
+  floating-point instruction and makes no math call, so the module needs no FPU
+  stub and no assembly implementation.
+  Evidence: the prologue at `0x15b08` through `0x15b14` and the module recipe
+  `tools/rebuild/modules/player_effect_update.json`.
+- Observation: the harness holds the two player object buffers and one stub for
+  each of the four callees.  The four paths cover the clear state, the state 1,
+  the state -1, and the second object.  The output holds the markers `0` through
+  `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/player_effect_update_main.c`, `python3
+  tools/rebuild/harness.py run --module player_effect_update`,
+  `work/rebuild/peff.txt`, and `python3 tools/rebuild/run.py run --function
+  0x15b08`.
+- Observation: the rebuilt body matches the original instruction sequence at 18
+  of 18 instructions and 45 of 57 bytes.  The five differing operands are
+  link-time addresses.  The instruction sequence matches exactly, so the call
+  targets and the branch target differ only by the link address.  The identity
+  check therefore passes, and the store records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15b08 --count 18 --rebuilt work/rebuild/peff.exe
+  --rebuilt-map work/rebuild/player_effect_update.map --rebuilt-symbol
+  player_effect_update_` and `python3 tools/rebuild/run.py run --function
+  0x15b08`.
+- Limit: the original has no symbol name.  The caller and the player steps
+  support the role, and the name stays inferred.
