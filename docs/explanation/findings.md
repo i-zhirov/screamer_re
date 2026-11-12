@@ -32376,3 +32376,56 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the two opponent calls,
   and the level value give the role, and the name `race_track_load` stays
   inferred.
+
+## The music_voice_stop module at 0x2fef4
+
+- Observation: the original body at `0x2fef4` holds 13 instructions and 32
+  bytes up to the `ret` at `0x2ff13`.  The next function starts at `0x2ff14`,
+  so the store record keeps the 32-byte extent and sets no separate function
+  size.  The identity check uses 13 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2fef4 --count 13` and
+  `tools/rebuild/functions/0x2fef4.json`.
+- Observation: the only direct caller at `0x214a7` is `options_screen` at
+  `0x21338`.  It runs the call when the music volume at `DAT_001d2c4` reaches
+  zero and the once flag at `[ebp + 0x56]` is clear.  It passes the music bank
+  record `0x62b0` and then sets the flag, so the function stops the music voice
+  one time.  The two other fades in the same block set the CD audio volume
+  through `0x264b8` and the FX volume through `0x265b4`.  The sibling modules
+  `music_select` at `0x2febc` and `music_bank_stop` at `0x2fe68` sit in the
+  section The sound loaders, so the record takes that section.
+  Evidence: the calls at `0x214a7`, `0x2146d`, and `0x214b8`, and the records
+  of `0x21338`, `0x2febc`, and `0x2fe68`.
+- Observation: the function returns at once when the success flag at `+0x04`
+  is negative.  Otherwise it frees the driver voice of the channel index at
+  `+0x00` through `sound_channel_free` at `0xd38e6`.  The same gate and the same
+  free call start the body of `music_bank_stop` at `0x2fe68` and of
+  `music_select` at `0x2febc`.  The zero-volume music stop and the sibling
+  callers support the name `music_voice_stop`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the block at `0x2fef4` through `0x2ff13`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module needs
+  no FPU stub, and the module uses no assembly implementation.
+  Evidence: the prologue at `0x2fef4` and `tools/rebuild/music_voice_stop.c`.
+- Observation: the harness holds the music bank record and the channel free
+  stub.  The stub records the forwarded index and the call count.  The five
+  paths cover the set flag, the zero flag, the two negative flags, and the
+  channel index 0.  Every path checks the call count and the forwarded index.
+  The output holds the markers `0` through `4` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/music_voice_stop_main.c`,
+  `python3 tools/rebuild/harness.py run --module music_voice_stop`,
+  `work/rebuild/mvst.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2fef4`.
+- Observation: the identity check compares 13 instructions.  The rebuilt body
+  holds 4 of 13 instructions and 8 of 32 bytes equal, and 0 of 3 relocation
+  slots, because V2 drops the two local slots, tests `eax` in place, and uses
+  direct operands.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2fef4 --count 13 --rebuilt work/rebuild/mvst.exe
+  --rebuilt-map work/rebuild/music_voice_stop.map --rebuilt-symbol
+  music_voice_stop_` and `python3 tools/rebuild/run.py run --function 0x2fef4`.
+- Limit: the original has no symbol name.  The caller, the zero-volume stop,
+  and the sibling sound modules give the role, and the name `music_voice_stop`
+  stays inferred.

@@ -386,8 +386,9 @@ current host.
    `gameport_pulse` at `0x1028c`, and the Phase AA module
    `phase_delta` at `0x1fa04`, and the Phase AA module
    `race_finish_overlay_4` at `0x240a0`, and the Phase AA module
-   `race_track_load` at `0x13540`;
-   thirty-eight modules are verified, one is matching, and four hundred and twenty-three
+   `race_track_load` at `0x13540`, and the Phase AA module
+   `music_voice_stop` at `0x2fef4`;
+   thirty-eight modules are verified, one is matching, and four hundred and twenty-four
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

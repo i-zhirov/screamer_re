@@ -1,9 +1,107 @@
 {
   "address": "0x2fef4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2fef4 holds 13 instructions and 32 bytes up to the ret at 0x2ff13; the next function starts at 0x2ff14, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x214a7 is options_screen at 0x21338; it runs the call when the music volume at DAT_001d2c4 reaches zero and the once flag at [ebp + 0x56] is clear, passes the music bank record 0x62b0, and then sets the flag, so the function stops the music voice one time; the two other fades in the same block set the CD audio volume through 0x264b8 and the FX volume through 0x265b4; the sibling modules music_select at 0x2febc and music_bank_stop at 0x2fe68 sit in the section The sound loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when the success flag at +0x04 is negative; otherwise it frees the driver voice of the channel index at +0x00 through sound_channel_free at 0xd38e6; the same gate and the same free call start the body of music_bank_stop at 0x2fe68 and of music_select at 0x2febc; the zero-volume music stop and the sibling callers support the name music_voice_stop; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the music bank record and the channel free stub; the stub records the forwarded index and the call count; the five paths cover the set flag, the zero flag, the two negative flags, and the channel index 0; every path checks the call count and the forwarded index; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2fef4 --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2fef4 --count 13 --rebuilt work/rebuild/mvst.exe --rebuilt-map work/rebuild/music_voice_stop.map --rebuilt-symbol music_voice_stop_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module music_voice_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module music_voice_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2fef4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_voice_stop.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_voice_stop_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/music_voice_stop.json"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 13 instructions; the rebuilt body holds 4 of 13 instructions and 8 of 32 bytes equal, and 0 of 3 relocation slots; the check stays open because V2 drops the two local slots, tests eax in place, and uses direct operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The music_voice_stop module at 0x2fef4"
+    }
+  ],
+  "implementation": "c",
+  "module": "music_voice_stop",
+  "name": "music_voice_stop",
   "notes": [],
   "object_offset": "0x1fef4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 32,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2fef4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:26fda4fee3298631b4f7828663ceebd7a25d500a79066be3379cb50bddd87e1e",
+    "source_digest": "sha256:c3c668ad05aad5237287e916761937260a7dd465588f196b219312d03084eaa5",
+    "tool": "run.py"
+  },
+  "role": "frees the driver voice of the music bank record when the success flag is not negative",
+  "section": "The sound loaders",
   "size": 32,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "music_voice_stop_"
 }

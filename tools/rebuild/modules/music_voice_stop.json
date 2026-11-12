@@ -1,0 +1,31 @@
+{
+  "exe": "mvst.exe",
+  "map": "music_voice_stop.map",
+  "name": "music_voice_stop",
+  "run": {
+    "command": "mvst.exe > mvst.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mvst.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_voice_stop.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_voice_stop_main.c"
+    }
+  ]
+}
