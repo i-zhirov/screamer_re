@@ -31099,3 +31099,71 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  No caller names the function.  The
   queue behavior and the sibling `traffic_event_read` support the name, and the
   name stays inferred.
+
+## The cd_audio_play module at 0x263cc
+
+- Observation: the first block at `0x263cc` holds 13 instructions and 49 bytes
+  up to the `ret` at `0x263fc`.  A branch at `0x263f4` enters the second block
+  at `0x263fd`, and that block ends with the `ret` at `0x26447`.  The next
+  recorded function starts at `0x26448`, so the store record keeps the 124-byte
+  extent and sets no separate function size.  The identity check uses 13
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x263cc --count 13` and
+  `tools/rebuild/functions/0x263cc.json`.
+- Observation: the direct callers at `0x12b74`, `0x219b7`, `0x29f3b`, and
+  `0x264a8` pass the track number in `eax` and the value 1 in `edx`.  The call
+  site `0x264a8` sits in `input_poll` at `0x26448`, which reads the two cells
+  back after the status request.
+  Evidence: the call sweep for `0x263cc` and the body at `0x26448` through
+  `0x264b3`.
+- Observation: the function returns at once when bit 0 of `DAT_0016669e` is
+  clear or bit 0 of `DAT_00166684` is clear.  Otherwise it stores the track at
+  `DAT_00166696` and the flag at `DAT_001666ac`.  A track below
+  `DAT_0016668e` or above `DAT_00166692` returns 1.
+  Evidence: the blocks at `0x263cd` through `0x263f4`.
+- Observation: a track inside the range selects the 8-byte entry of the table
+  at `DAT_001666c0` by the track minus the first track.  The entry holds the
+  start time and the duration.
+  Evidence: the blocks at `0x263fd` through `0x26413` and the table builder at
+  `0x262fc`.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4` with the length 0x16, the subunit `DAT_00166680`, the command
+  0x84 (play audio), and the zero byte at +0x0d.  The start time goes to +0x0e
+  and the duration to +0x12.
+  Evidence: the blocks at `0x26415` through `0x2643c`.
+- Observation: the request runs through the send helper at `0x25f44`.  The
+  sibling functions at `0x264b8` and `0x26528` send the stop and seek commands
+  through the same block.
+  Evidence: the call at `0x2643f`, the body at `0x25f44`, and the finding "The
+  cd_audio_volume_set module at 0x265b4".
+- Inference: the callers, the table reader at `0x262fc`, the play command 0x84,
+  and the sibling commands support the name `cd_audio_play`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x263cc` and
+  `tools/rebuild/modules/cd_audio_play.json`.
+- Observation: the harness holds the two guard flags, the track range, the track
+  table, the request buffer, the two saved cells, and the send stub.  The nine
+  paths cover the first track, the two guards, a track below the first, a track
+  above the last, the last track, the device byte 0x77, a middle track, and two
+  calls.  Every path checks the request bytes outside the written fields, the
+  two cells, and the send count.  The output holds the markers `0` through `8`
+  and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/cd_audio_play_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_audio_play`,
+  `work/rebuild/cdplay.txt`, and `python3 tools/rebuild/run.py run --function
+  0x263cc`.
+- Observation: the rebuilt first block holds 0 of 13 instructions and 0 of 47
+  bytes equal, and 0 of 8 relocation slots.  V2 saves `ecx` in place of
+  `pushal`, tests the guard bytes instead of the guard dwords, keeps the first
+  track in `edx`, and orders the guards in another shape.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x263cc --count 13 --rebuilt work/rebuild/cdplay.exe
+  --rebuilt-map work/rebuild/cd_audio_play.map --rebuilt-symbol
+  cd_audio_play_` and `python3 tools/rebuild/run.py run --function 0x263cc`.
+- Limit: the original has no symbol name for this function.  The module name and
+  the section stay inferred.

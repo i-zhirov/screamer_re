@@ -1,9 +1,119 @@
 {
   "address": "0x263cc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the first block at 0x263cc holds 13 instructions and 49 bytes up to the ret at 0x263fc; a branch at 0x263f4 enters the second block at 0x263fd, and that block ends with the ret at 0x26447; the next recorded function starts at 0x26448, so the store record keeps the 124-byte extent and sets no separate function size; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers at 0x12b74, 0x219b7, 0x29f3b, and 0x264a8 pass the track number in eax and the value 1 in edx; the call site 0x264a8 sits in input_poll at 0x26448, which reads the two cells back after the status request"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when bit 0 of DAT_0016669e is clear or bit 0 of DAT_00166684 is clear; otherwise it stores the track at DAT_00166696 and the flag at DAT_001666ac; a track below DAT_0016668e or above DAT_00166692 returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "a track inside the range selects the 8-byte entry of the table at DAT_001666c0 by the track minus the first track; the entry holds the start time and the duration"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the MSCDEX request header at DAT_001666a4 with the length 0x16, the subunit DAT_00166680, the command 0x84 (play audio), and the zero byte at +0x0d; the start time goes to +0x0e and the duration to +0x12"
+    },
+    {
+      "kind": "note",
+      "text": "the request runs through the send helper at 0x25f44; the sibling functions at 0x264b8 and 0x26528 send the stop and seek commands through the same block; the callers, the table reader at 0x262fc, the play command 0x84, and the sibling commands support the name cd_audio_play; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two guard flags, the track range, the track table, the request buffer, the two saved cells, and the send stub; the nine paths cover the first track, the two guards, a track below the first, a track above the last, the last track, the device byte 0x77, a middle track, and two calls; every path checks the request bytes outside the written fields, the two cells, and the send count; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt first block holds 0 of 13 instructions and 0 of 47 bytes equal, and 0 of 8 relocation slots; V2 saves ecx in place of pushal, tests the guard bytes instead of the guard dwords, keeps the first track in edx, and orders the guards in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_play module at 0x263cc"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x263cc --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x263cc --count 13 --rebuilt work/rebuild/cdplay.exe --rebuilt-map work/rebuild/cd_audio_play.map --rebuilt-symbol cd_audio_play_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_audio_play"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_play"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x263cc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_play.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_play_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_play.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_play",
+  "name": "cd_audio_play",
   "notes": [],
   "object_offset": "0x163cc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 47,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 0,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x263cc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:b5c58986bbe47d892cfc78a76b1cdf9f8897114cf1fc067ebab8e9d7bf51af91",
+    "source_digest": "sha256:a41d3e3c5014972e6c1133c3bbc5f4da296fd121b1071f43a5fca1238e7912fb",
+    "tool": "run.py"
+  },
+  "role": "Sends the MSCDEX play-audio request for a track inside the CD audio table and returns 0, or returns 1 when a guard or range check fails.",
+  "section": "race_loop callees",
   "size": 124,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_play_"
 }
