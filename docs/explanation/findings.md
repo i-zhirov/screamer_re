@@ -32556,3 +32556,55 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The request layout, the callee, and
   the callers give the role, and the name `cd_request_submit` stays inferred.
   The two request builders at `0x26014` and `0x26068` stay unrecorded.
+
+## The font_table_init module at 0x25620
+
+- Observation: the original body at `0x25620` holds 12 instructions and 31
+  bytes up to the `ret` at `0x2563e`.  The next record starts at `0x25640`
+  after one padding byte at `0x2563f`, so the store record keeps the 32-byte
+  extent and sets no separate function size.  The identity check uses 12
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25620 --count 12` and
+  `tools/rebuild/functions/0x25620.json`.
+- Observation: the body loads the constant `0x1ca98` into `ebx` and the
+  constant `0x19898` into `edx`.  It stores the first value at `0x15438` and
+  the second value at `0x15434`.
+  Evidence: the body at `0x25625` through `0x25635`.
+- Observation: `DAT_00015438` points at the descriptor table `0x1ca98`, and
+  `DAT_00015434` points at the bitmap table `0x19898`.  `font_load` at
+  `0x25658` fills both tables, and `text_measure` at `0x254a8` and `text_draw`
+  at `0x25020` read them.  The direct call sites are `0x133bf` in
+  `race_data_load` at `0x131a8` and `0x29d5a` in `menu_space_init` at
+  `0x29d08`.  Both callers run this initializer before `font_load`.
+  Evidence: the call sites, the records of `0x25658`, `0x254a8`, `0x25020`,
+  `0x131a8`, and `0x29d08`, and the table facts in
+  `docs/reference/file-formats.md`.
+- Inference: the descriptor table, the bitmap table, and the two callers
+  support the name `font_table_init`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the stores at `0x2562f` and `0x25635`, and the call sites at
+  `0x133bf` and `0x29d5a`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly implementation.
+  Evidence: the prologue at `0x25620` and `tools/rebuild/font_table_init.c`.
+- Observation: the harness holds the two font table pointers.  The three paths
+  cover the sentinel fill and one call, a second fill and call, and two calls
+  in a row.  Every path checks the descriptor pointer, the bitmap pointer, and
+  the distinct table addresses.  The output holds the markers `0`, `1`, `2`,
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/font_table_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module font_table_init`,
+  `work/rebuild/ftinit.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x25620`.
+- Observation: the identity check compares 12 instructions.  The rebuilt body
+  holds 3 of 12 instructions and 0 of 31 bytes equal, and 0 of 9 relocation
+  slots, because V2 keeps the frame first and emits direct immediate stores.
+  The original loads the two constants into `ebx` and `edx` and then stores
+  them.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25620 --count 12 --rebuilt work/rebuild/ftinit.exe
+  --rebuilt-map work/rebuild/font_table_init.map --rebuilt-symbol
+  font_table_init_` and `python3 tools/rebuild/run.py run --function 0x25620`.
+- Limit: the original has no symbol name.  The two table pointers and the
+  callers give the role, and the name `font_table_init` stays inferred.
