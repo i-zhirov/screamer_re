@@ -32429,3 +32429,64 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the zero-volume stop,
   and the sibling sound modules give the role, and the name `music_voice_stop`
   stays inferred.
+
+## The sprite_list_flush module at 0x25af0
+
+- Observation: the original body at `0x25af0` holds 11 instructions and 32
+  bytes up to the `ret` at `0x25b0f`.  The next function starts at `0x25b10`,
+  so the store record keeps the 32-byte extent and sets no separate function
+  size.  The identity check uses 11 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25af0 --count 11` and
+  `tools/rebuild/functions/0x25af0.json`.
+- Observation: the function loads the entry count from `DAT_0015cd8` and the
+  list base from `DAT_0015cd0`.  It walks the 0x28-byte entries and calls
+  `sprite_entry_draw` at `0x25b10` for every entry with bit 0 of the first dword
+  set.  The init function at `0x257a0` sets `DAT_0015cd0` to `0x1cb14`.  The
+  entry holds the active flag at `+0x00`, the x at `+0x04`, the y at `+0x08`,
+  the sprite record index at `+0x0c`, and the reserved cell at `+0x10`.  The
+  loop uses `dec` and `jne`, so it runs at least one time.
+  Evidence: the body at `0x25af0` through `0x25b0f`, the init at `0x257a0`, and
+  the record of `0x25b10`.
+- Observation: the direct callers are `race_intro_update` at `0x20d20`,
+  `options_screen` at `0x21338`, `race_gauges` at `0x2369c`, `race_radar` at
+  `0x23a94`, `hud_panel_show` at `0x27a5c`, and `panel_show` at `0x2dfac`.  The
+  callers write the sprite position fields first and then flush the list.  The
+  sibling modules `sprite_entry_draw` at `0x25b10` and `shade_rect` at `0x25d28`
+  sit in the section Program functions, so the record takes that section.
+  Evidence: the call sites at `0x20dff`, `0x21931`, `0x2380e`, `0x23c28`,
+  `0x23cf3`, `0x23da4`, `0x23dcf`, `0x27c25`, and `0x2dfea`, and the records
+  of `0x25b10` and `0x25d28`.
+- Observation: the callers flush the drawn sprite entries, and the only callee
+  draws one sprite entry, so the name is `sprite_list_flush`.  The original has
+  no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the callers, the callee at `0x25b10`, and the record of `0x25b10`.
+- Observation: the original uses `pushal` and `popal` and has no EBP frame, so
+  the module builds without `-of+`.  The function holds no floating-point
+  instruction, so the module needs no FPU stub, and the module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x25af0` and `tools/rebuild/sprite_list_flush.c`.
+- Observation: the harness holds the two list globals, four 0x28-byte sprite
+  entries, and the `sprite_entry_draw` stub.  The stub records the call count
+  and the entry pointer of every call.  The five paths cover one active entry, a
+  mixture of active and cleared entries, two cleared entries, the flags `0xfe`
+  and `0x100`, and the flags `0x101`.  Every path checks the call count and the
+  forwarded entry pointer, so the pointer check confirms the 0x28-byte stride.
+  The output holds the markers `0` through `4` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/sprite_list_flush_main.c`,
+  `python3 tools/rebuild/harness.py run --module sprite_list_flush`,
+  `work/rebuild/slflush.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x25af0`.
+- Observation: the identity check compares 11 instructions.  The rebuilt body
+  holds 1 of 11 instructions and 3 of 32 bytes equal, and 0 of 3 relocation
+  slots, because V2 saves `ecx` and `edx` instead of `pushal`, keeps the list
+  base in `edx` instead of `esi`, tests the low byte instead of the bit, and
+  loads the two globals as near data symbols.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25af0 --count 11 --rebuilt work/rebuild/slflush.exe
+  --rebuilt-map work/rebuild/sprite_list_flush.map --rebuilt-symbol
+  sprite_list_flush_` and `python3 tools/rebuild/run.py run --function 0x25af0`.
+- Limit: the original has no symbol name.  The direct callers, the callee, and
+  the list structure give the role, and the name `sprite_list_flush` stays
+  inferred.

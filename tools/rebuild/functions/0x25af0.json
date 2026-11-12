@@ -1,9 +1,111 @@
 {
   "address": "0x25af0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25af0 holds 11 instructions and 32 bytes up to the ret at 0x25b0f; the next function starts at 0x25b10, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function loads the entry count from DAT_0015cd8 into ecx and the list base from DAT_0015cd0 into esi; it walks the 0x28-byte entries and calls sprite_entry_draw at 0x25b10 for every entry with bit 0 of the first dword set; the init function at 0x257a0 sets DAT_0015cd0 to 0x1cb14; an entry holds the active flag at +0x00, the x at +0x04, the y at +0x08, the sprite record index at +0x0c, and the reserved cell at +0x10; the loop uses dec and jne, so it runs at least one time"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are race_intro_update at 0x20d20 with the site at 0x20dff, options_screen at 0x21338 with the site at 0x21931, race_gauges at 0x2369c with the site at 0x2380e, race_radar at 0x23a94 with the sites at 0x23c28, 0x23cf3, 0x23da4, and 0x23dcf, hud_panel_show at 0x27a5c with the site at 0x27c25, and panel_show at 0x2dfac with the site at 0x2dfea; the callers write the sprite position fields first and then flush the list; the sibling modules sprite_entry_draw at 0x25b10 and shade_rect at 0x25d28 sit in the section Program functions, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the callers flush the drawn sprite entries, and the only callee draws one sprite entry, so the record takes the name sprite_list_flush; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original uses pushal and popal and has no EBP frame, so the module builds without -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two list globals, four 0x28-byte sprite entries, and the sprite_entry_draw stub; the stub records the call count and the entry pointer of every call; the five paths cover one active entry, a mixture of active and cleared entries, two cleared entries, the flags 0xfe and 0x100, and the flags 0x101; every path checks the call count and the forwarded entry pointer, so the pointer check confirms the 0x28-byte stride; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25af0 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25af0 --count 11 --rebuilt work/rebuild/slflush.exe --rebuilt-map work/rebuild/sprite_list_flush.map --rebuilt-symbol sprite_list_flush_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sprite_list_flush"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sprite_list_flush"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25af0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_list_flush.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_list_flush_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sprite_list_flush.json"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 11 instructions; the rebuilt body holds 1 of 11 instructions and 3 of 32 bytes equal, and 0 of 3 relocation slots; the check stays open because V2 saves ecx and edx instead of pushal, keeps the list base in edx instead of esi, tests the low byte instead of the bit, and loads the two globals as near data symbols; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The sprite_list_flush module at 0x25af0"
+    }
+  ],
+  "implementation": "c",
+  "module": "sprite_list_flush",
+  "name": "sprite_list_flush",
   "notes": [],
   "object_offset": "0x15af0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 32,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25af0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:ae24021097ff786238f46298597eace4aef1759222049bb94d16c09883f3aee6",
+    "source_digest": "sha256:6c17fea706dfc89d8d12a4bfdf5260ef2df31e38a6dae823bfde3a8ce22649d9",
+    "tool": "run.py"
+  },
+  "role": "Walks the 0x28-byte sprite list entries and draws every entry with bit 0 of the first dword set.",
+  "section": "Program functions",
   "size": 32,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sprite_list_flush_"
 }
