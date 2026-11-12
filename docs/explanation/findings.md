@@ -31686,3 +31686,60 @@ temporary `-od` recipe.
   0x15b80`.
 - Limit: the original has no symbol name.  The three view callers, the callee
   set, and the state gate support the name, and the name stays inferred.
+
+### The joystick_axis_read module at 0x10263
+
+- Observation: the original body at `0x10263` holds 16 instructions and 41
+  bytes up to the `ret` at `0x1028b`.  The next function starts at `0x1028c`,
+  so the store keeps the 41-byte extent and sets no separate function size.
+  The identity check uses 16 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x10263 --count 16` and
+  `tools/rebuild/functions/0x10263.json`.
+- Observation: the only direct caller is `joystick_update` at `0x24da0`,
+  which calls this function at `0x24e77` for a control record of kind 1.  It
+  passes the axis mask `1 << device` in `eax` and the game port from `+0x10`
+  of the 28-byte axis record at `0x192a4` in `edx`.  It keeps the low 12 bits
+  of the result and scales the axis.  The caller sits in the `race_loop
+  callees` section, so the record takes the same section.
+  Evidence: the block at `0x24e64` through `0x24e81`, the record of
+  `0x24da0`, and the scan of the direct `call` operands in object 1.
+- Observation: the function builds `((port - 0x200) << 1) + mask` with the low
+  bit cleared in `ebx`.  It calls the helper at `0x1028c` with the mask, the
+  port, and that value.  It then reads the same port for the button nibble,
+  shifts the nibble to bits 16 through 19, and joins the low 12 timing bits
+  from the helper count.  The helper ignores the third argument.
+  Evidence: the block at `0x10263` through `0x1028b` and the helper at
+  `0x1028c`.
+- Inference: the game port, the axis mask, and the caller support the name
+  `joystick_axis_read`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the caller gate at `0x24e77` and the axis read at `0x10263`.
+- Observation: the original has no EBP frame and pushes `ecx` and `edi` only.
+  The function holds no floating-point instruction and makes one direct call.
+  The module builds without `-of+`, needs no FPU stub, and uses no assembly
+  implementation.
+  Evidence: `tools/rebuild/joystick_axis_read.c` and
+  `tools/rebuild/modules/joystick_axis_read.json`.
+- Observation: the harness holds the scripted pulse count, the scripted button
+  byte, and one stub for each of the two callees.  The five paths cover the
+  selector low bit clear, the button nibble shift, the timing mask at 0x2000,
+  another game port, and the base port 0x200.  Every path checks the result,
+  the call count, the forwarded mask, port, and selector, and the byte read
+  port.  The output holds the markers `0` through `4` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/joystick_axis_read_main.c`,
+  `python3 tools/rebuild/harness.py run --module joystick_axis_read`,
+  `work/rebuild/jaxis.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x10263`.
+- Observation: the rebuilt body holds 3 of 16 instructions equal, 2 of 41
+  bytes equal, and 0 of 0 relocation slots equal.  V2 saves `ebx`, builds the
+  selector with `lea`, returns the helper value in `eax` instead of `ecx`, and
+  forms the button shift with `ecx`.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x10263 --count 16 --rebuilt work/rebuild/jaxis.exe
+  --rebuilt-map work/rebuild/joystick_axis_read.map --rebuilt-symbol
+  joystick_axis_read_` and `python3 tools/rebuild/run.py run --function
+  0x10263`.
+- Limit: the original has no symbol name.  The single caller, the game port,
+  and the axis mask support the name, and the name stays inferred.

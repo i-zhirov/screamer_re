@@ -1,9 +1,106 @@
 {
   "address": "0x10263",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x10263 holds 16 instructions and 41 bytes up to the ret at 0x1028b; the next entry starts at 0x1028c, so the store record keeps the 41-byte extent and sets no separate function size; the identity check uses 16 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is joystick_update at 0x24da0, which calls this function at 0x24e77 for a control record of kind 1; it passes the axis mask 1 << device in eax and the game port from +0x10 of the 28-byte axis record at 0x192a4 in edx, and it keeps the low 12 bits of the result; the caller sits in the race_loop callees section, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds ((port - 0x200) << 1) + mask with the low bit cleared, calls the helper at 0x1028c with the mask, the port, and that value, reads the port again for the button nibble, and returns the button nibble at bits 16 through 19 with the low 12 timing bits; the helper ignores the third argument; the game port, the mask, and the caller support the name joystick_axis_read; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, pushes ecx and edi only, holds no floating-point instruction, and makes one direct call; the module builds without -of+, needs no FPU stub, and uses no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the scripted pulse count, the scripted button byte, and one stub for each of the two callees; the five paths cover the selector bit 0 clear, the button nibble shift, the timing mask at 0x2000, another game port, and the base port 0x200; every path checks the result, the call count, the forwarded mask, port, and selector, and the byte read port; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 3 of 16 instructions and 0 of 0 relocation slots equal; the identity check stays open because V2 saves ebx, builds the selector with lea, returns the helper value in eax instead of ecx, and forms the button shift with ecx; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x10263 --count 16"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x10263 --count 16 --rebuilt work/rebuild/jaxis.exe --rebuilt-map work/rebuild/joystick_axis_read.map --rebuilt-symbol joystick_axis_read_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module joystick_axis_read"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module joystick_axis_read"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x10263"
+    },
+    {
+      "kind": "finding",
+      "text": "The joystick_axis_read module at 0x10263"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/joystick_axis_read.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/joystick_axis_read_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/joystick_axis_read.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "joystick_axis_read",
+  "name": "joystick_axis_read",
   "notes": [],
   "object_offset": "0x263",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 41,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x10263",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:240c7d9572d8158603881a5766318b55158b27b67f7d7a0bb61e48c04f9fa625",
+    "source_digest": "sha256:afd1707bb7305a29718732af6e776d342c207958cbd8807a437bec96cc1193b3",
+    "tool": "run.py"
+  },
+  "role": "Reads one game port axis and the button nibble and returns the low timing bits with the four button bits.",
+  "section": "race_loop callees",
   "size": 41,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "joystick_axis_read_"
 }
