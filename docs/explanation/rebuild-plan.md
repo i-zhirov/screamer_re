@@ -654,6 +654,40 @@ reproduce the original bytes.
 
 This table completes Phase Y.
 
+### Phase Z: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1f834` | unnamed | 59 | 20 | 2 | 0 |
+| `0x11060` | unnamed | 59 | 22 | 2 | 0 |
+| `0x119cc` | unnamed | 58 | 21 | 1 | 0 |
+| `0x4d9ba` | unnamed | 57 | 28 | 0 | 0 |
+| `0x261a8` | unnamed | 57 | 21 | 1 | 0 |
+| `0x15b44` | unnamed | 57 | 18 | 4 | 0 |
+| `0x15b08` | unnamed | 57 | 18 | 4 | 0 |
+| `0x8afc4` | unnamed | 56 | 25 | 0 | 0 |
+| `0x22bec` | unnamed | 56 | 25 | 1 | 7 |
+| `0x241d4` | unnamed | 55 | 20 | 1 | 0 |
+| `0x2febc` | unnamed | 54 | 20 | 2 | 0 |
+| `0x22bb4` | unnamed | 54 | 21 | 1 | 5 |
+| `0x4cef4` | unnamed | 53 | 15 | 3 | 0 |
+| `0x15a80` | unnamed | 53 | 17 | 5 | 0 |
+| `0x102b0` | unnamed | 52 | 26 | 0 | 0 |
+| `0x264b8` | unnamed | 51 | 15 | 1 | 0 |
+| `0x11850` | unnamed | 51 | 18 | 0 | 0 |
+| `0x117fc` | unnamed | 51 | 18 | 0 | 0 |
+| `0x117a0` | unnamed | 51 | 18 | 0 | 0 |
+| `0x1ec48` | unnamed | 50 | 24 | 3 | 0 |
+| `0x263cc` | unnamed | 49 | 13 | 0 | 0 |
+| `0x1f7ac` | unnamed | 48 | 17 | 2 | 0 |
+| `0x102e4` | unnamed | 47 | 16 | 0 | 0 |
+| `0x264f8` | unnamed | 46 | 14 | 1 | 0 |
+
+This table starts Phase Z.
+
 ## Position
 
 Four hundred and nineteen modules carry a recipe and a result: the twelve Phase A modules,
