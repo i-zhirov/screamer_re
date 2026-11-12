@@ -1,0 +1,37 @@
+{
+  "exe": "ppss.exe",
+  "map": "player_previous_speed_set.map",
+  "name": "player_previous_speed_set",
+  "run": {
+    "command": "ppss.exe > ppss.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "ppss.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_previous_speed_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_previous_speed_set_main.c"
+    }
+  ]
+}

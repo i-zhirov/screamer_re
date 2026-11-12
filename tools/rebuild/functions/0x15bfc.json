@@ -1,9 +1,111 @@
 {
   "address": "0x15bfc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15bfc holds 11 instructions and 31 bytes up to the ret at 0x15c1a; the next function starts at 0x15c1c after one padding byte at 0x15c1b, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is player_car_view_update at 0x16f34 with the call site at 0x16fda; the caller runs on the player object at object-3 offset 0xf91c in the section The vehicle state chain, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the road speed +0x50c and writes the previous speed +0x588; player_car_suspension_update at 0x168b4 forms the speed change from the road speed +0x50c minus the previous speed +0x588, so the function latches the current speed for the next suspension step"
+    },
+    {
+      "kind": "note",
+      "text": "the speed source, the previous-speed target, and the suspension consumer support the name player_previous_speed_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores the argument to the frame and reloads it before each access; the volatile local reproduces the store and the reload; the original has the EBP frame, so the module builds with -of+; the function holds the two floating-point instructions fld and fstp and makes no math call, so the module links the FPU stub for the run-time symbols and uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one player object, the road speed +0x50c, the previous speed +0x588, and the sentinels +0x508 and +0x58c; the seven paths cover the speed 1.0, -2.5, zero, the small bit pattern 0x00000001, 1234.5, NaN, and infinity; every path checks the previous speed, the road speed, and both sentinels; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body is byte-identical at 11 of 11 instructions, 31 of 31 bytes, and 0 of 0 relocation slots; the build, identity, and behavior checks pass, so the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15bfc --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15bfc --count 11 --rebuilt work/rebuild/ppss.exe --rebuilt-map work/rebuild/player_previous_speed_set.map --rebuilt-symbol player_previous_speed_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module player_previous_speed_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_previous_speed_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15bfc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_previous_speed_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_previous_speed_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_previous_speed_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_previous_speed_set module at 0x15bfc"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_previous_speed_set",
+  "name": "player_previous_speed_set",
   "notes": [],
   "object_offset": "0x5bfc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 31,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 11,
+        "instructions_total": 11,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15bfc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:dde7a5ba952d256e442a2edd1c38b2d51235d2c2e9ab363b6a7b51c1502552cd",
+    "source_digest": "sha256:46d8639effb13345fdb01b7d62081ba0ee4e3e57b09c108df14cd481402ddba9",
+    "tool": "run.py"
+  },
+  "role": "Latches the current player road speed into the previous-speed field for the next suspension step.",
+  "section": "The vehicle state chain",
   "size": 32,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "player_previous_speed_set_"
 }

@@ -718,13 +718,13 @@ reproduce the original bytes.
 | `0x25f24` | `cd_request_submit` (done) | 31 | 11 | 1 | 0 |
 | `0x25620` | `font_table_init` (done) | 31 | 12 | 0 | 0 |
 | `0x1f6f8` | `sound_bank_release` (done) | 31 | 11 | 1 | 0 |
-| `0x15bfc` | unnamed | 31 | 11 | 0 | 2 |
+| `0x15bfc` | `player_previous_speed_set` (done) | 31 | 11 | 0 | 2 |
 
-This table starts Phase AA.
+This table completes Phase AA.
 
 ## Position
 
-Four hundred and sixty-six modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1037,5 +1037,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `sprite_list_flush` at `0x25af0`, and the Phase AA module
 `cd_request_submit` at `0x25f24`, and the Phase AA module
 `font_table_init` at `0x25620`, and the Phase AA module
-`sound_bank_release` at `0x1f6f8`.
-The next unnamed function is `0x15bfc`.
+`sound_bank_release` at `0x1f6f8`, and the Phase AA module
+`player_previous_speed_set` at `0x15bfc`.
+The next unnamed function is `0x81a05`.

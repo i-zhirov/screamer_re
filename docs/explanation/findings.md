@@ -32669,3 +32669,61 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The `SOUND_FX` resource, the shared
   setup gate, and the `sound_bank_load` counterpart give the role, and the
   name `sound_bank_release` stays inferred.
+
+## The player_previous_speed_set module at 0x15bfc
+
+- Observation: the original body at `0x15bfc` holds 11 instructions and 31
+  bytes up to the `ret` at `0x15c1a`.  The next function starts at `0x15c1c`
+  after one padding byte at `0x15c1b`, so the store record keeps the 32-byte
+  extent and sets no separate function size.  The identity check uses 11
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15bfc --count 11` and
+  `tools/rebuild/functions/0x15bfc.json`.
+- Observation: the only direct caller is `player_car_view_update` at `0x16f34`
+  with the call site at `0x16fda`.  The caller runs on the player object at
+  object-3 offset `0xf91c` in the section The vehicle state chain, so the
+  record takes the same section.
+  Evidence: the call at `0x16fda`, the record of `0x16f34`, and
+  `tools/rebuild/callgraph.json`.
+- Observation: the function reads the road speed `+0x50c` and writes the
+  previous speed `+0x588`.  `player_car_suspension_update` at `0x168b4` forms
+  the speed change from the road speed `+0x50c` minus the previous speed
+  `+0x588`, so the function latches the current speed for the next suspension
+  step.
+  Evidence: the body at `0x15c08` and `0x15c11`, and the record of `0x168b4`.
+- Inference: the speed source, the previous-speed target, and the suspension
+  consumer support the name `player_previous_speed_set`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the body at `0x15c08` and `0x15c11`, and the speed change in the
+  record of `0x168b4`.
+- Observation: the original stores the argument to the frame and reloads it
+  before each access.  The volatile local reproduces the store and the reload.
+  The original has the EBP frame, so the module builds with `-of+`.  The
+  function holds two floating-point instructions, `fld` and `fstp`, and makes
+  no math call, so the module links the FPU stub for the run-time symbols and
+  uses no assembly implementation.
+  Evidence: the prologue at `0x15bfc` through `0x15c05`,
+  `tools/rebuild/player_previous_speed_set.c`, and
+  `tools/rebuild/modules/player_previous_speed_set.json`.
+- Observation: the harness holds one player object, the road speed `+0x50c`,
+  the previous speed `+0x588`, and the sentinels `+0x508` and `+0x58c`.  The
+  seven paths cover the speed 1.0, -2.5, zero, the small bit pattern
+  `0x00000001`, 1234.5, NaN, and infinity.  Every path checks the previous
+  speed, the road speed, and both sentinels.  The output holds the markers `0`
+  through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/player_previous_speed_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_previous_speed_set`,
+  `work/rebuild/ppss.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15bfc`.
+- Observation: the identity check compares 11 instructions.  The rebuilt body
+  is byte-identical at 11 of 11 instructions, 31 of 31 bytes, and 0 of 0
+  relocation slots.  The build, identity, and behavior checks pass, so the
+  store records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15bfc --count 11 --rebuilt work/rebuild/ppss.exe
+  --rebuilt-map work/rebuild/player_previous_speed_set.map --rebuilt-symbol
+  player_previous_speed_set_` and
+  `python3 tools/rebuild/run.py run --function 0x15bfc`.
+- Limit: the original has no symbol name.  The speed source, the previous-speed
+  target, and the suspension consumer give the role, and the name
+  `player_previous_speed_set` stays inferred.
