@@ -30154,3 +30154,63 @@ temporary `-od` recipe.
   difference result support the role, and the name stays inferred.  The
   identity check stays open because C cannot reproduce the `ebx` register save
   and the byte-register pair of the original.
+
+## The cd_audio_track_query module at 0x261a8
+
+- Observation: the original body at `0x261a8` holds 21 instructions and 57
+  bytes up to the `ret` at `0x261e0`.  The next function starts at `0x261e4`
+  after the three padding bytes at `0x261e1`, so the store record keeps the
+  60-byte extent and sets no separate function size.  The identity check uses
+  21 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x261a8 --count
+  21` and `tools/rebuild/functions/0x261a8.json`.
+- Observation: the only direct caller is `cd_audio_table_build` at `0x262fc`,
+  call site `0x2634d`.  The caller passes the track number in `eax` and reads
+  the response control byte at `+0x46` bit 6 after the call to tell a data
+  track from an audio track.  The caller sits in the section race_loop
+  callees, so the module takes the same section.
+  Evidence: the block at `0x2634b` through `0x2635c`, the finding "The
+  cd_audio_table_build module at 0x262fc", and the section of
+  `tools/rebuild/functions/0x262fc.json`.
+- Observation: the function builds the MSCDEX request header at
+  `DAT_001666a4`: the length `0x1a`, the subunit `DAT_00166680`, the command 3
+  (IOCTL input), the transfer count 7, and the payload subfunction `0x0b`
+  (audio track info).  It writes the input track number at `+0x41` and two
+  zero dwords at `+0x42` and `+0x46`, then runs the request through `0x25f24`.
+  Evidence: the block at `0x261a8` through `0x261e0`.
+- Inference: the MSCDEX subfunction table gives the `0x0b` code the per-track
+  audio track info record, and the caller reads the returned control byte.  The
+  request and the caller support the name `cd_audio_track_query`.  The original
+  has no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the request fields, the call site `0x2634d`, and the response read
+  at `0x26352`.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so it needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x261a8`, the `ret` at `0x261e0`, and the module
+  recipe.
+- Observation: the harness holds the device byte, the request buffer, and the
+  submit stub that counts the driver calls.  The six paths cover the tracks `0`,
+  `1`, `0x13`, `0xff`, and `0x80`, the second device byte `0x77`, and two
+  calls.  Every path checks the header fields, the two zero dwords, and the
+  sentinel bytes.  The output holds the markers `0` through `5` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/cd_audio_track_query_main.c`, `python3
+  tools/rebuild/harness.py run --module cd_audio_track_query`,
+  `work/rebuild/cdtq.txt`, and `python3 tools/rebuild/run.py run --function
+  0x261a8`.
+- Observation: the rebuilt body holds 9 of 21 instructions equal, 1 of 57
+  bytes equal, and 0 of 5 relocation slots equal.  V2 keeps the request pointer
+  in `eax` and the track in `dl` in place of `edi` and `al`, and it stores the
+  header fields with immediate stores instead of the `al` scratch byte.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x261a8 --count 21 --rebuilt work/rebuild/cdtq.exe
+  --rebuilt-map work/rebuild/cdtq.map --rebuilt-symbol cd_audio_track_query_`
+  and `python3 tools/rebuild/run.py run --function 0x261a8`.
+- Limit: the original has no symbol name.  The request fields and the caller
+  support the role, and the name stays inferred.  The identity check stays open
+  because C cannot reproduce the `pushal` register save and the `al` scratch
+  byte of the original.

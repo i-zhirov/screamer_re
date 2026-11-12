@@ -1,9 +1,99 @@
 {
   "address": "0x261a8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 21,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x261a8 holds 21 instructions and 57 bytes up to the ret at 0x261e0; the next function starts at 0x261e4 after the three padding bytes at 0x261e1, so the store record keeps the 60-byte extent and sets no separate function size; the identity check uses 21 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is cd_audio_table_build at 0x262fc, call site 0x2634d; it passes the track number in eax and reads the response control byte at +0x46 bit 6 after the call to tell a data track from an audio track; the caller sits in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the MSCDEX request header at DAT_001666a4: the length 0x1a, the subunit DAT_00166680, the command 3 (IOCTL input), the transfer count 7, and the payload subfunction 0x0b (audio track info); it writes the input track number at +0x41 and two zero dwords at +0x42 and +0x46, then runs the request through 0x25f24"
+    },
+    {
+      "kind": "note",
+      "text": "the MSCDEX subfunction table gives the 0x0b code the per-track audio track info record, and the caller reads the returned control byte; the request and the caller support the name cd_audio_track_query; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the device byte, the request buffer, and the submit stub that counts the driver calls; the six paths cover the tracks 0, 1, 0x13, 0xff, and 0x80, the second device byte 0x77, and two calls; every path checks the header fields, the two zero dwords, and the sentinel bytes; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x261a8 --count 21"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x261a8 --count 21 --rebuilt work/rebuild/cdtq.exe --rebuilt-map work/rebuild/cdtq.map --rebuilt-symbol cd_audio_track_query_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x261a8"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_track_query module at 0x261a8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_track_query.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_track_query_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_track_query.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_track_query",
+  "name": "cd_audio_track_query",
   "notes": [],
   "object_offset": "0x161a8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x261a8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:9f88d650d9d8343c21c3028de270dc15ae1127e0d9bdbd56f09d8549ebc19296",
+    "source_digest": "sha256:81a6c4963c85bc5bfd7829d59fcf5776430aa3fbe624639630c0749cbb56a966",
+    "tool": "run.py"
+  },
+  "role": "Builds the MSCDEX audio track info request for one track and submits it.",
+  "section": "race_loop callees",
   "size": 60,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_track_query_"
 }

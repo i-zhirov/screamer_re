@@ -348,9 +348,10 @@ current host.
    `sound_voice_finished` at `0x1f834`, and the Phase Z module
    `object_load_by_name` at `0x11060`, and the Phase Z module
    `object_handle_table_load` at `0x119cc`, and the Phase Z module
-   `stricmp` at `0x4d9ba`;
+   `stricmp` at `0x4d9ba`, and the Phase Z module
+   `cd_audio_track_query` at `0x261a8`;
    thirty-two modules are verified, one is matching, and three hundred and
-   ninety-one rebuilds hold the recorded difference; the `video_fill`,
+   ninety-two rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
