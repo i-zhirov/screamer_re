@@ -31971,3 +31971,69 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x2f985`.
 - Limit: the original has no symbol name.  The field `+0x3c` and the sibling
   `pool_init` give the role, and the weak name `func_2f985` stays.
+
+## The sound_fx_volume_set module at 0x1f8b4
+
+- Observation: the original body at `0x1f8b4` holds 14 instructions and 37
+  bytes up to the `ret` at `0x1f8d8`.  The next recorded function starts at
+  `0x1f8dc`, so the store record keeps the 40-byte extent and sets no separate
+  function size.  The identity check uses 14 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f8b4 --count 14` and
+  `tools/rebuild/functions/0x1f8b4.json`.
+- Observation: the direct callers are `race_end` at `0x279a4` with the call
+  site at `0x279ae` and the value 0, `race_data_release` at `0x156a8`,
+  `credits_fade_out` at `0x27e08` with the call site at `0x27eae` and the
+  scaled `DAT_0011d2bc` value, and `view_move` at `0x1f94c` with the call site
+  at `0x1f95e` and its second value.  The callers sit in several sections, so
+  the record takes the section Program functions.
+  Evidence: the call sweep for `0x1f8b4`, the bodies at the call sites, and
+  `tools/rebuild/functions/0x1f8b4.json`.
+- Observation: the setup word `DAT_00008058` gates the call.  A zero word
+  returns at once.  A set word passes the driver handle `DAT_00018d94` in
+  `eax` and the saved value in `edx` to the driver word store at `0xc6c73`.
+  That store indexes the far pointer table at `0x27a54` by the handle and
+  writes the word at `+4`.
+  Evidence: the block at `0x1f8b4` through `0x1f8d8`, the body of `0xc6c73`,
+  and the `mouse_init` record for the handle `DAT_00018d94`.
+- Observation: the options screen maps the label `FX` to `DAT_0011d2bc`, the
+  label `CD` to `DAT_0011d2c0`, and the label `MU` to `DAT_0011d2c4`.
+  `view_move` passes the `CD` slot to `cd_audio_volume_set` and the `MU` slot
+  to `music_volume_set`.  The second slot and the two parallel volume setters
+  support the name `sound_fx_volume_set`.
+  Evidence: the label table at object-3 offset `0x1f74`, the pointer table at
+  `0x1f80`, the body of `view_move` at `0x1f94c`, and the `options_screen`
+  record.
+- Inference: the earlier notes call the same slot the mouse helper.  The audio
+  slot table and the parallel volume setters give the stronger evidence, so
+  the name `sound_fx_volume_set` replaces that label with the confidence
+  `inferred`.
+  Evidence: the `credits_fade_out`, `race_data_release`, and
+  `mouse_release_wait` records.
+- Observation: the original has the EBP frame and one local, so the module
+  builds with `-of+`.  The function holds no floating-point instruction and
+  calls one driver helper, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x1f8b4` through `0x1f8b8` and
+  `tools/rebuild/sound_fx_volume_set.c`.
+- Observation: the harness holds the setup word, the driver handle, and the
+  driver word store stub.  The stub records the handle, the value, and the call
+  count.  The seven paths cover the zero setup word, the values 0, 0x7f, 0x80,
+  0x123, and 0x7fff, and two calls in a row.  The output holds the markers `0`
+  through `6` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/sound_fx_volume_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_fx_volume_set`,
+  `work/rebuild/fxvol.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1f8b4`.
+- Observation: the identity check compares 14 instructions.  The rebuilt body
+  holds 11 of 14 instructions, 19 of 37 bytes, and 2 of 2 relocation slots
+  equal.  The rebuilt body holds 38 bytes because V2 puts `push ebp` before
+  `push edx`, places the local at `ebp - 8`, and uses `lea esp, [ebp - 4]`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f8b4 --count 14 --rebuilt work/rebuild/fxvol.exe
+  --rebuilt-map work/rebuild/sound_fx_volume_set.map --rebuilt-symbol
+  sound_fx_volume_set_` and
+  `python3 tools/rebuild/run.py run --function 0x1f8b4`.
+- Limit: the original has no symbol name.  The audio slot table and the two
+  parallel volume setters give the role, and the name `sound_fx_volume_set`
+  stays inferred.

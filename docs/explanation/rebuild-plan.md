@@ -706,7 +706,7 @@ reproduce the original bytes.
 | `0x19478` | `player_effect_state_set` (done) | 40 | 14 | 0 | 0 |
 | `0x4cecc` | `material_data_release` (done) | 38 | 12 | 2 | 0 |
 | `0x2f985` | `func_2f985` (done) | 38 | 21 | 0 | 0 |
-| `0x1f8b4` | unnamed | 37 | 14 | 1 | 0 |
+| `0x1f8b4` | `sound_fx_volume_set` (done) | 37 | 14 | 1 | 0 |
 | `0x22d64` | unnamed | 36 | 12 | 1 | 0 |
 | `0x11a08` | unnamed | 36 | 13 | 2 | 0 |
 | `0x1028c` | unnamed | 36 | 18 | 0 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and fifty-four modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and fifty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1025,5 +1025,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `music_volume_set` at `0x2ff84`, and the Phase AA module
 `player_effect_state_set` at `0x19478`, and the Phase AA module
 `material_data_release` at `0x4cecc`, and the Phase AA module
-`func_2f985` at `0x2f985`.
-The next unnamed function is `0x1f8b4`.
+`func_2f985` at `0x2f985`, and the Phase AA module
+`sound_fx_volume_set` at `0x1f8b4`.
+The next unnamed function is `0x22d64`.

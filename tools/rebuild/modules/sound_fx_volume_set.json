@@ -1,0 +1,33 @@
+{
+  "exe": "fxvol.exe",
+  "map": "sound_fx_volume_set.map",
+  "name": "sound_fx_volume_set",
+  "run": {
+    "command": "fxvol.exe > fxvol.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "fxvol.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_fx_volume_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_fx_volume_set_main.c"
+    }
+  ]
+}

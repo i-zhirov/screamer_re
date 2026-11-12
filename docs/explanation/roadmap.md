@@ -379,8 +379,9 @@ current host.
    `music_volume_set` at `0x2ff84`, and the Phase AA module
    `player_effect_state_set` at `0x19478`, and the Phase AA module
    `material_data_release` at `0x4cecc`, and the Phase AA module
-   `func_2f985` at `0x2f985`;
-   thirty-seven modules are verified, one is matching, and four hundred and seventeen
+   `func_2f985` at `0x2f985`, and the Phase AA module
+   `sound_fx_volume_set` at `0x1f8b4`;
+   thirty-seven modules are verified, one is matching, and four hundred and eighteen
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
