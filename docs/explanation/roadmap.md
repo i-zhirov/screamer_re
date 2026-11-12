@@ -384,8 +384,9 @@ current host.
    `attack_data_release` at `0x22d64`, and the Phase AA module
    `object_handle_table_release` at `0x11a08`, and the Phase AA module
    `gameport_pulse` at `0x1028c`, and the Phase AA module
-   `phase_delta` at `0x1fa04`;
-   thirty-eight modules are verified, one is matching, and four hundred and twenty-one
+   `phase_delta` at `0x1fa04`, and the Phase AA module
+   `race_finish_overlay_4` at `0x240a0`;
+   thirty-eight modules are verified, one is matching, and four hundred and twenty-two
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
