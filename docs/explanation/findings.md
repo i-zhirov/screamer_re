@@ -30214,3 +30214,63 @@ temporary `-od` recipe.
   support the role, and the name stays inferred.  The identity check stays open
   because C cannot reproduce the `pushal` register save and the `al` scratch
   byte of the original.
+
+## The traffic_effect_update module at 0x15b44
+
+- Observation: the original body at `0x15b44` holds 18 instructions and 57
+  bytes up to the `ret` at `0x15b7c`.  The next function starts at `0x15b80`,
+  so the store record keeps the 60-byte extent and sets no separate function
+  size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15b44 --count
+  18` and `tools/rebuild/functions/0x15b44.json`.
+- Observation: the only direct caller is the traffic view group at `0x201d0`,
+  call site `0x20268`, on the player object at object-3 offset `0xf91c`.  That
+  group is selected through the mode byte `DAT_0011d260` bit 0x10.  The car
+  path has the same shape at `0x15b08` with the player nearby marker and the
+  car proximity pass.  The record therefore takes the section `The vehicle
+  state chain`.
+  Evidence: the call at `0x20268`, the finding "The traffic_simulation_update
+  module at 0x201d0", the block at `0x15b08` through `0x15b40`, and the block
+  at `0x15b44` through `0x15b7c`.
+- Observation: the object pointer arrives in `eax`.  The function first calls
+  `player_body_point_place` at `0x17c6c`.  It returns at once when the state
+  field `+0x148` is not zero.  Otherwise it calls `traffic_nearby_mark` at
+  `0x12424`, `traffic_collision_pass` at `0x175dc`, and `opponent_start` at
+  `0x124c0`, all with the same player object.
+  Evidence: the calls at `0x15b50`, `0x15b64`, `0x15b6c`, and `0x15b74`, the
+  compare at `0x15b58`, and the records at `0x17c6c`, `0x12424`, `0x175dc`, and
+  `0x124c0`.
+- Inference: the caller chain, the traffic steps, and the state gate support the
+  name `traffic_effect_update`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the caller at `0x20268`, the four callee records, and the state
+  field `+0x148`.
+- Observation: the original stores the argument to the frame and reloads it
+  before each call.  The volatile local reproduces the store and the reload, as
+  `error_report.c` records for the same frame-local pattern.  The original has
+  the EBP frame, so the module builds with `-of+`.  The function holds no
+  floating-point instruction and makes no math call, so the module needs no FPU
+  stub and no assembly implementation.
+  Evidence: the prologue at `0x15b44` through `0x15b50` and the module recipe
+  `tools/rebuild/modules/traffic_effect_update.json`.
+- Observation: the harness holds the two player object buffers and one stub for
+  each of the four callees.  The four paths cover the clear state, the state 1,
+  the state -1, and the second object.  The output holds the markers `0` through
+  `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/traffic_effect_update_main.c`, `python3
+  tools/rebuild/harness.py run --module traffic_effect_update`,
+  `work/rebuild/teff.txt`, and `python3 tools/rebuild/run.py run --function
+  0x15b44`.
+- Observation: the rebuilt body matches the original instruction sequence at 18
+  of 18 instructions and 45 of 57 bytes.  The five differing operands are link-time
+  addresses.  The instruction sequence matches exactly, so the call targets
+  and the branch target differ only by the link address.  The identity check therefore passes, and the store
+  records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15b44 --count 18 --rebuilt work/rebuild/teff.exe
+  --rebuilt-map work/rebuild/traffic_effect_update.map --rebuilt-symbol
+  traffic_effect_update_` and `python3 tools/rebuild/run.py run --function
+  0x15b44`.
+- Limit: the original has no symbol name.  The callers and the traffic steps
+  support the role, and the name stays inferred.

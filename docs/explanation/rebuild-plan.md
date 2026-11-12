@@ -666,7 +666,7 @@ reproduce the original bytes.
 | `0x119cc` | `object_handle_table_load` (done) | 58 | 21 | 1 | 0 |
 | `0x4d9ba` | `stricmp` (done) | 57 | 28 | 0 | 0 |
 | `0x261a8` | `cd_audio_track_query` (done) | 57 | 21 | 1 | 0 |
-| `0x15b44` | unnamed | 57 | 18 | 4 | 0 |
+| `0x15b44` | `traffic_effect_update` (done) | 57 | 18 | 4 | 0 |
 | `0x15b08` | unnamed | 57 | 18 | 4 | 0 |
 | `0x8afc4` | unnamed | 56 | 25 | 0 | 0 |
 | `0x22bec` | unnamed | 56 | 25 | 1 | 7 |
@@ -690,7 +690,7 @@ This table starts Phase Z.
 
 ## Position
 
-Four hundred and twenty-four modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and twenty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -961,5 +961,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `object_load_by_name` at `0x11060`, and the Phase Z module
 `object_handle_table_load` at `0x119cc`, and the Phase Z module
 `stricmp` at `0x4d9ba`, and the Phase Z module
-`cd_audio_track_query` at `0x261a8`.
-The next unnamed function is `0x15b44`.
+`cd_audio_track_query` at `0x261a8`, and the Phase Z module
+`traffic_effect_update` at `0x15b44`.
+The next unnamed function is `0x15b08`.

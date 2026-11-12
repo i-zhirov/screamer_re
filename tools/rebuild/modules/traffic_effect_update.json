@@ -1,0 +1,30 @@
+{
+  "exe": "teff.exe",
+  "map": "traffic_effect_update.map",
+  "name": "traffic_effect_update",
+  "run": {
+    "command": "teff.exe > teff.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "teff.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_effect_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_effect_update_main.c"
+    }
+  ]
+}
