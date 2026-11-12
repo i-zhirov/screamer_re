@@ -356,9 +356,10 @@ current host.
    `sqrt` at `0x22bec`, and the Phase Z module
    `race_finish_overlay_3` at `0x241d4`, and the Phase Z module
    `music_select` at `0x2febc`, and the Phase Z module
-   `filter_update_int` at `0x22bb4`;
+   `filter_update_int` at `0x22bb4`, and the Phase Z module
+   `map_data_release` at `0x4cef4`;
    thirty-four modules are verified, one is matching, and three hundred and
-   ninety-seven rebuilds hold the recorded difference; the `video_fill`,
+   ninety-eight rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

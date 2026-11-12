@@ -30632,3 +30632,66 @@ temporary `-od` recipe.
   filter support the name, and the name stays inferred.  The V2 prologue, the
   index register, and the stack restore differ from the original, so the C
   build cannot reproduce the exact bytes.
+
+## The map_data_release module at 0x4cef4
+
+- Observation: the original body at `0x4cef4` holds 15 instructions and 53
+  bytes up to the `ret` at `0x4cf28`.  The three padding bytes at `0x4cf29`,
+  `0x4cf2a`, and `0x4cf2b` precede the next function at `0x4cf2c`, so the
+  store record keeps the 56-byte extent and sets no separate function size.
+  The identity check uses 15 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cef4 --count
+  15` and `tools/rebuild/functions/0x4cef4.json`.
+- Observation: the only direct caller is the wrapper at `0x4cf2c`.  It calls
+  the sibling at `0x4cecc` and then this function, and `race_data_release` at
+  `0x156a8` calls the wrapper during a shutdown.
+  Evidence: the block at `0x4cf2c` through `0x4cf3a` and the
+  `race_data_release` record.
+- Observation: the function frees the `OBJ_LST` and `UNR_FILE` resources of
+  the archive head `DAT_0021574` through `resource_free_name` at `0x2f326`.
+  The two names sit at object-3 offsets `0x171b` and `0x1723`.  The function
+  then frees the `ALFILE` map grid record whose allocation pointer is
+  `DAT_0021468` through `resource_find` at `0x2f25f`.  The resource record
+  field at `+0xc` holds the allocation result.
+  Evidence: the calls at `0x4cf02`, `0x4cf11`, and `0x4cf21`, the record
+  fields at `0x2f2a1`, and the two name offsets.
+- Observation: the sibling at `0x4cecc` frees the `MATERIALS` resource and the
+  material record at `DAT_00214e8`.  The two functions form the material and
+  map data release pair.  `unr_file_load` at `0x4c98c` loads the `OBJ_LST` and
+  `UNR_FILE` resources, and `mmp_file_load` at `0x4cae4` loads the map grid
+  record.
+  Evidence: the blocks at `0x4cecc` through `0x4cef1` and the two loader
+  records.
+- Inference: the two resource names, the map grid record, the wrapper caller,
+  and the sibling material release support the name `map_data_release`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.  The module sits with the resource loaders, so the record takes
+  the section Resource loader.
+  Evidence: the data flow above and the loader records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  uses no FPU stub and no assembly body.  The module implementation is C.
+  Evidence: the prologue at `0x4cef4` and `tools/rebuild/map_data_release.c`.
+- Observation: the harness holds the archive head and the map grid key.  The
+  three paths cover the full sequence, a second context and key, and a
+  sentinel context and key.  Every path checks the call order, the two
+  resource names, and the key.  The output holds the markers `0` through `2`
+  and `D`, and the behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module map_data_release`
+  and `work/rebuild/mdrl.txt`.
+- Observation: the rebuilt body holds 11 of 15 instructions and 14 of 53
+  bytes equal, and 2 of 6 relocation slots.  V2 saves `ebp` before `edx` and
+  restores the stack through `lea`, loads the two globals as near data
+  offsets, and turns the two name pointers into the rebuilt data offsets 0 and
+  8.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cef4 --count 15 --rebuilt work/rebuild/mdrl.exe
+  --rebuilt-map work/rebuild/map_data_release.map --rebuilt-symbol
+  map_data_release_` and `python3 tools/rebuild/run.py run --function
+  0x4cef4`.
+- Limit: the original has no symbol name.  The sibling release, the two
+  resource names, and the wrapper caller support the name, and the name stays
+  inferred.  The V2 prologue order, the near data offsets, and the stack
+  restore differ from the original, so the C build cannot reproduce the exact
+  bytes.
