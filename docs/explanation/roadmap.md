@@ -354,9 +354,10 @@ current host.
    `player_effect_update` at `0x15b08`, and the Phase Z module
    `sound_source_pose_copy` at `0x8afc4`, and the Phase Z module
    `sqrt` at `0x22bec`, and the Phase Z module
-   `race_finish_overlay_3` at `0x241d4`;
+   `race_finish_overlay_3` at `0x241d4`, and the Phase Z module
+   `music_select` at `0x2febc`;
    thirty-four modules are verified, one is matching, and three hundred and
-   ninety-five rebuilds hold the recorded difference; the `video_fill`,
+   ninety-six rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

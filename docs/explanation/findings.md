@@ -6003,6 +6003,56 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the ready track without the select word starts only.
   Evidence: `python3 tools/rebuild/harness.py run --module music_play` and `work/rebuild/mp_out.txt`.
 
+## The music_select module at 0x2febc
+
+- Observation: the original body at `0x2febc` holds 20 instructions and 54
+  bytes up to the `ret` at `0x2fef1`.  The two padding bytes at `0x2fef2` and
+  `0x2fef3` precede the next function at `0x2fef4`, so the store record keeps
+  the 56-byte extent and sets no separate function size.  The identity check
+  uses 20 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2febc --count 20` and
+  `tools/rebuild/functions/0x2febc.json`.
+- Observation: three rebuilt callers declare the target as `music_select`.
+  `music_play` at `0x2ff14` calls it at `0x2ff50` with the music record and the
+  value 1 when the word at `+0x0c` is 1.  `menu_space_init` at `0x29d08` calls
+  it at `0x29f6f` with the record `0x62b0` and the value 1, after
+  `music_load`.  `race_session_start` at `0x128e0` calls it at `0x12b83` with
+  the record `0x62b0` and the value 1.
+  Evidence: `tools/rebuild/music_play.c`, `tools/rebuild/menu_space_init.c`,
+  `tools/rebuild/race_session_start.c`, and the three call sites.
+- Observation: the function returns at once when the success flag at `+0x04` is
+  negative.  Otherwise it frees the driver voice of the channel index at
+  `+0x00` through `sound_channel_free` at `0xd38e6`, starts the voice again
+  through `0xd3857`, and writes the argument to `+0x0c`.  The same record gate
+  and the same free call sit in `music_bank_stop` at `0x2fe68`.
+  Evidence: the block at `0x2fec8` through `0x2fef1` and the block at
+  `0x2fe72` through `0x2feb8`.
+- Inference: the three rebuilt callers supply the name `music_select`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  inferred.  The sibling `music_load` at `0x2fcec` and `music_bank_stop` at
+  `0x2fe68` sit in the section The sound loaders, so the record takes that
+  section.
+  Evidence: the three caller sources and the section of the sibling records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly.
+  Evidence: the prologue at `0x2febc` and `tools/rebuild/music_select.c`.
+- Observation: the harness holds the music record, the two channel stubs, and
+  the call order.  The five paths cover the set flag, the zero flag, the two
+  negative flags, and the channel index 0.  The output holds the markers `0`
+  through `4` and `D`, and the behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module music_select` and
+  `work/rebuild/msel.txt`.
+- Observation: the rebuilt body holds 6 of 20 instructions and 7 of 54 bytes
+  equal, and 0 of 3 relocation slots.  The identity check stays open because
+  V2 saves `ecx`, keeps the record in `ecx`, drops the two argument slots, uses
+  direct operands, and restores the stack through `lea`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2febc --count 20 --rebuilt work/rebuild/msel.exe
+  --rebuilt-map work/rebuild/music_select.map --rebuilt-symbol music_select_`
+  and `python3 tools/rebuild/run.py run --function 0x2febc`.
+
 ## The race_state_begin module
 
 - `race_state_begin` at `0x294c8` holds 35 instructions and 117 bytes: the six register saves, the

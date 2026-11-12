@@ -1,0 +1,31 @@
+{
+  "exe": "msel.exe",
+  "map": "music_select.map",
+  "name": "music_select",
+  "run": {
+    "command": "msel.exe > msel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "msel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "music_select.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "music_select_main.c"
+    }
+  ]
+}
