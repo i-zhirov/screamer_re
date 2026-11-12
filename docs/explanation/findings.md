@@ -31569,3 +31569,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller use, the empty handle
   result, and the sibling sound voice functions support the name, and the name
   stays inferred.
+
+### The screen_setup_cleanup module at 0x15150
+
+- Observation: the original body at `0x15150` holds 12 instructions and 42
+  bytes up to the `ret` at `0x15179`.  The next function starts at `0x1517c`,
+  so the store keeps the 44-byte extent and sets no separate function size.
+  The identity check uses 12 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15150 --count 12` and
+  `tools/rebuild/functions/0x15150.json`.
+- Observation: the direct callers sit in the screen setup functions.
+  `cd_check_screen` at `0x15874` calls it at `0x158ef` after a failed
+  `menu1h.pcx` load.  `menu_space_init` at `0x29d08` calls it at `0x29dbd` and
+  `0x29de4` after the sprite load and the font load.  `menu_frame` at
+  `0x29f80` calls it at `0x29fac` after a failed `pcx_load`, and
+  `loading_screen` at `0x2a364` calls it at `0x2a431`.  The screens at
+  `0x2a558`, `0x2bedc`, `0x2c188`, `0x2c430`, `0x2c7a8`, `0x2c954`,
+  `0x2ca40`, and `0x2d7c4` call it at `0x2a624`, `0x2bf2c`, `0x2c1d8`,
+  `0x2c497`, `0x2c8ec`, `0x2c9de`, `0x2caa9`, and `0x2d9f1`.  The callers
+  span several sections, so the record takes the section Program functions.
+  Evidence: the call at `0x158ef`, the records of `0x15874`, `0x29d08`, and
+  `0x29f80`, and the scan of the direct `call` operands in object 1.
+- Observation: the function runs the teardown in order: the text mode at
+  `0x4c928`, the keyboard hook with the value 0 at `0x14e20`, the material
+  release at `0x4cecc`, the FONTS release at `0x25640`, the SPRITES release at
+  `0x258b8`, the sound system shutdown at `0x1f28c`, and the DOS clock set at
+  `0x1fa2c`.
+  Evidence: the block at `0x15150` through `0x15179`, the records of
+  `0x4c928`, `0x14e20`, `0x1f28c`, and `0x1fa2c`, and the resource name
+  offsets `0xea4` and `0xec7` of the two release helpers.
+- Inference: the short teardown follows a failed screen asset load, and the
+  loader call, the callee set, and the call order support the name
+  `screen_setup_cleanup`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the caller gate at every call site and the two release helpers.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and makes no math
+  call, so the module needs no FPU stub, and the module uses no assembly
+  implementation.
+  Evidence: `tools/rebuild/screen_setup_cleanup.c` and
+  `tools/rebuild/modules/screen_setup_cleanup.json`.
+- Observation: the harness holds one stub for each of the seven callees.  Each
+  stub appends a letter to the trace and counts its calls, and the keyboard
+  stub records the enable value.  The three paths cover the first, second, and
+  third call with the order `ABCDEFG`, the counts 1, 2, and 3, and the value 0.
+  The output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/screen_setup_cleanup_main.c`,
+  `python3 tools/rebuild/harness.py run --module screen_setup_cleanup`,
+  `work/rebuild/ssclean.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15150`.
+- Observation: the rebuilt body holds 10 of 12 instructions equal, 20 of 42
+  bytes equal, and 0 of 0 relocation slots equal.  V2 emits `mov esp, ebp`
+  before `pop ebp`, while the original restores the frame with `pop ebp` alone
+  at `0x15178`.  The seven call operands are the link-time addresses.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15150 --count 12 --rebuilt work/rebuild/ssclean.exe
+  --rebuilt-map work/rebuild/screen_setup_cleanup.map --rebuilt-symbol
+  screen_setup_cleanup_` and `python3 tools/rebuild/run.py run --function
+  0x15150`.
+- Limit: the original has no symbol name.  The caller gate, the callee set,
+  and the call order support the name, and the name stays inferred.

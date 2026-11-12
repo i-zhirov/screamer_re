@@ -372,8 +372,9 @@ current host.
    `sound_event_next` at `0x8a8d8`, and the Phase AA module
    `replay_write_begin` at `0x22d88`, and the Phase AA module
    `trig_range_reduce` at `0x4da3a`, and the Phase AA module
-   `sound_voice_stop` at `0x1f880`;
-   thirty-five modules are verified, one is matching, and four hundred and twelve
+   `sound_voice_stop` at `0x1f880`, and the Phase AA module
+   `screen_setup_cleanup` at `0x15150`;
+   thirty-five modules are verified, one is matching, and four hundred and thirteen
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
