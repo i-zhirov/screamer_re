@@ -31859,3 +31859,66 @@ temporary `-od` recipe.
   0x19478`.
 - Limit: the original has no symbol name.  The two callers and the state
   values support the name, and the name stays inferred.
+
+## The material_data_release module at 0x4cecc
+
+- Observation: the original body at `0x4cecc` holds 12 instructions and 38
+  bytes up to the `ret` at `0x4cef1`.  The two padding bytes at `0x4cef2` and
+  `0x4cef3` precede the next function at `0x4cef4`, so the store record keeps
+  the 40-byte extent and sets no separate function size.  The identity check
+  uses 12 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cecc --count 12` and
+  `tools/rebuild/functions/0x4cecc.json`.
+- Observation: the wrapper at `0x4cf2c` calls this function at `0x4cf2f` and
+  then the sibling at `0x4cef4`.  `screen_setup_cleanup` at `0x15150` calls
+  this function at `0x1515f` during a teardown, and `race_cleanup` at
+  `0x2a1b0` calls it at `0x2a1eb`.  The callers span several sections, so the
+  record takes the section Resource loader.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4cf2c --count 8`,
+  `python3 tools/le.py disasm STARTH.EXE 0x15150 --count 8`,
+  `python3 tools/le.py disasm STARTH.EXE 0x2a1b0 --count 15`, and the records
+  of `0x4cf2c`, `0x15150`, and `0x2a1b0`.
+- Observation: the function frees the `MATERIALS` resource of the archive
+  head `DAT_0021574` through `resource_free_name` at `0x2f326`.  The name sits
+  at object-3 offset `0x1711`.  The function then frees the material record
+  whose allocation pointer is `DAT_00214e8` through `resource_find` at
+  `0x2f25f`.
+  Evidence: the calls at `0x4ceda` and `0x4ceea`, the name offset `0x1711`,
+  and the `resource_free_name` and `resource_find` records.
+- Observation: `material_load` at `0x4cd9c` loads the `MATERIALS` resource and
+  stores the record at `DAT_00214e8`.  The two functions form the material
+  load and release pair.  The sibling `map_data_release` at `0x4cef4` forms
+  the parallel map data release.
+  Evidence: the `material_load` record and the block at `0x4cecc` through
+  `0x4cef1`.
+- Inference: the `MATERIALS` resource, the material record, the two callers,
+  and the sibling map data release support the name `material_data_release`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and the sibling record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  uses no FPU stub and no assembly body.  The module implementation is C.
+  Evidence: the prologue at `0x4cecc` and
+  `tools/rebuild/material_data_release.c`.
+- Observation: the harness holds the archive head and the material record.
+  The three paths cover the full sequence, a second context and key, and a
+  sentinel context and key.  Every path checks the call order, the resource
+  name, and the key.  The output holds the markers `0` through `2` and `D`.
+  The behavior check passes.
+  Evidence: `tools/rebuild/material_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module material_data_release`,
+  `work/rebuild/mdrel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4cecc`.
+- Observation: the rebuilt body holds 8 of 12 instructions equal, 10 of 38
+  bytes equal, and 2 of 4 relocation slots equal.  V2 saves `ebp` before
+  `edx`, loads `eax` before `edx`, and places the data offsets at other
+  values.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cecc --count 12 --rebuilt work/rebuild/mdrel.exe
+  --rebuilt-map work/rebuild/material_data_release.map --rebuilt-symbol
+  material_data_release_` and `python3 tools/rebuild/run.py run --function
+  0x4cecc`.
+- Limit: the original has no symbol name.  The `MATERIALS` resource, the
+  material record, and the two callers support the name, and the name stays
+  inferred.
