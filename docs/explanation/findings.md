@@ -30923,3 +30923,68 @@ temporary `-od` recipe.
   object_list_bind_` and `python3 tools/rebuild/run.py run --function 0x11850`.
 - Limit: the original has no symbol name.  The callers, the shared list, and
   the sibling helpers support the name, and the name stays inferred.
+
+## The object_list_refresh module at 0x117fc
+
+- Observation: the original body at `0x117fc` holds 18 instructions and 51
+  bytes up to the first `ret` at `0x1182e`.  The bind path continues at
+  `0x1182f` to the second `ret` at `0x1184c`, and the next function starts at
+  `0x11850`, so the store record keeps the 84-byte extent and sets no separate
+  function size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x117fc --count
+  18` and `tools/rebuild/functions/0x117fc.json`.
+- Observation: the ten direct call sites are `0x198c2` in
+  `player_car_wheel_effect_start` at `0x19828`, `0x1a3da` and `0x1a3f2` in
+  `player_view_orbit` at `0x1a3b8`, `0x1a653` and `0x1a66b` in
+  `player_route_camera` at `0x1a630`, `0x2b4f2` in `map_object_finish` at
+  `0x2b494`, `0x2b6e9` in `name_entry_letter_update` at `0x2b660`, `0x2ba52`
+  in `map_object_update` at `0x2b9cc`, `0x2c151` in `car_select_screen` at
+  `0x2bedc`, and `0x2c3fa` in `track_select_screen` at `0x2c188`.
+  Evidence: the ten call edges of `tools/rebuild/callgraph.json` and the
+  callers above.
+- Observation: every caller passes the object table `0x6530` in `eax`, the
+  list `0x6350` in `edx`, and the address of the entry index in `ebx`.  Every
+  caller already names the call `object_list_refresh`.
+  Evidence: the call sites above and `tools/rebuild/map_object_finish.c`.
+- Observation: the function reads the entry index from the address in `ebx`.
+  The index selects one 0x1c-byte record of the object table.  A record with
+  the slot word at `+0x18` equal to -1 returns `0xe` and changes nothing.
+  Otherwise the function writes the plain block pointer at `+0x0c` into
+  `list[slot]` and returns 0.
+  Evidence: the blocks at `0x117fc` through `0x1184c`.
+- Inference: the sibling at `0x11850` writes the same block pointer with the
+  two top bits inverted, and the sibling at `0x117a0` inverts only the top
+  bit.  The callers, the shared table and list, and the object list group
+  support the name `object_list_refresh`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred` and the section
+  `Resource loader`.
+  Evidence: the bodies at `0x117a0`, `0x117fc`, and `0x11850`, and the finding
+  "The object_list_bind module at 0x11850".
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct
+  call, so the module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x117fc` through `0x11808` and
+  `tools/rebuild/object_list_refresh.c`.
+- Observation: the harness holds eight 0x1c-byte records, one block object per
+  record, an eight-entry list, and one entry index.  The seven paths cover the
+  first list slot, a middle slot, the last slot, the free slot, the record
+  selection by index, record 3 at slot 6, and two calls.  The output holds the
+  markers `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_list_refresh_main.c`, `python3
+  tools/rebuild/harness.py run --module object_list_refresh`,
+  `work/rebuild/olr.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x117fc`.
+- Observation: the rebuilt body holds 6 of 18 instructions equal and 4 of 41
+  bytes equal.  The identity check stays open because V2 pushes `ecx` in place
+  of the frame spill, keeps the index in `ebx`, uses `imul` for the 0x1c
+  stride, keeps the slot in `ecx`, and inverts the branch so the free path
+  jumps over the bind path.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x117fc --count 18 --rebuilt work/rebuild/olr.exe
+  --rebuilt-map work/rebuild/object_list_refresh.map --rebuilt-symbol
+  object_list_refresh_` and `python3 tools/rebuild/run.py run --function
+  0x117fc`.
+- Limit: the original has no symbol name.  The callers, the shared list, and
+  the sibling helpers support the name, and the name stays inferred.

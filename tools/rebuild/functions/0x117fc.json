@@ -1,9 +1,103 @@
 {
   "address": "0x117fc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x117fc holds 18 instructions and 51 bytes up to the first ret at 0x1182e; the bind path continues at 0x1182f to the second ret at 0x1184c, and the next function starts at 0x11850, so the store record keeps the 84-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the ten direct call sites are 0x198c2 in player_car_wheel_effect_start at 0x19828, 0x1a3da and 0x1a3f2 in player_view_orbit at 0x1a3b8, 0x1a653 and 0x1a66b in player_route_camera at 0x1a630, 0x2b4f2 in map_object_finish at 0x2b494, 0x2b6e9 in name_entry_letter_update at 0x2b660, 0x2ba52 in map_object_update at 0x2b9cc, 0x2c151 in car_select_screen at 0x2bedc, and 0x2c3fa in track_select_screen at 0x2c188; every caller passes the object table 0x6530 in eax, the list 0x6350 in edx, and the address of the entry index in ebx; every caller already names the call object_list_refresh"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the entry index from the address in ebx; the index selects one 0x1c-byte record of the object table; a record with the slot word at +0x18 equal to -1 returns 0xe and changes nothing; otherwise the function writes the plain block pointer at +0x0c into list[slot] and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling at 0x11850 writes the same block pointer with the two top bits inverted, and the sibling at 0x117a0 inverts only the top bit; the callers, the shared table and list, and the object list group support the name object_list_refresh with the confidence inferred; the record takes the section Resource loader; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds eight 0x1c-byte records, one block object per record, an eight-entry list, and one entry index; the seven paths cover the first list slot, a middle slot, the last slot, the free slot, the record selection by index, record 3 at slot 6, and two calls; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 18 instructions equal and 4 of 41 bytes equal; the identity check stays open because V2 pushes ecx in place of the frame spill, keeps the index in ebx, uses imul for the 0x1c stride, keeps the slot in ecx, and inverts the branch so the free path jumps over the bind path; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x117fc --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x117fc --count 18 --rebuilt work/rebuild/olr.exe --rebuilt-map work/rebuild/object_list_refresh.map --rebuilt-symbol object_list_refresh_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x117fc"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_list_refresh module at 0x117fc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_refresh.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_refresh_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_list_refresh.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_list_refresh",
+  "name": "object_list_refresh",
   "notes": [],
   "object_offset": "0x17fc",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 41,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x117fc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:45113be48b1d747fa7f427f25dcf0980767196c2c2bcd6f53f6e7def36321f70",
+    "source_digest": "sha256:a5dcd74390e2ae4d1683fe99c6f60e116b8a98435c84784d9e0889f81c73523c",
+    "tool": "run.py"
+  },
+  "role": "Writes the object record block pointer without a tag into the list slot of an active object table record and reports 0xe for a free slot.",
+  "section": "Resource loader",
   "size": 84,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_list_refresh_"
 }

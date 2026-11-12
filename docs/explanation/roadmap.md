@@ -361,8 +361,9 @@ current host.
    `player_physics_update` at `0x15a80`, and the Phase Z module
    `data_blit` at `0x102b0`, and the Phase Z module
    `cd_audio_stop` at `0x264b8`, and the Phase Z module
-   `object_list_bind` at `0x11850`;
-   thirty-five modules are verified, one is matching, and four hundred and one
+   `object_list_bind` at `0x11850`, and the Phase Z module
+   `object_list_refresh` at `0x117fc`;
+   thirty-five modules are verified, one is matching, and four hundred and two
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
