@@ -662,7 +662,7 @@ reproduce the original bytes.
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
 | `0x1f834` | `sound_voice_finished` (done) | 59 | 20 | 2 | 0 |
-| `0x11060` | unnamed | 59 | 22 | 2 | 0 |
+| `0x11060` | `object_load_by_name` (done) | 59 | 22 | 2 | 0 |
 | `0x119cc` | unnamed | 58 | 21 | 1 | 0 |
 | `0x4d9ba` | unnamed | 57 | 28 | 0 | 0 |
 | `0x261a8` | unnamed | 57 | 21 | 1 | 0 |
@@ -690,7 +690,7 @@ This table starts Phase Z.
 
 ## Position
 
-Four hundred and twenty modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and twenty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -957,5 +957,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `race_finish_mode_1_update` at `0x23ed8`, and the Phase Y module
 `object_block_tag` at `0x118a4`, and the Phase Y module
 `object_slot_acquire` at `0x11660`, and the Phase Z module
-`sound_voice_finished` at `0x1f834`.
-The next unnamed function is `0x11060`.
+`sound_voice_finished` at `0x1f834`, and the Phase Z module
+`object_load_by_name` at `0x11060`.
+The next unnamed function is `0x119cc`.

@@ -29967,3 +29967,72 @@ temporary `-od` recipe.
   fields support the role, and the name stays inferred.  The identity check
   stays open because C cannot reproduce the argument spill and the register
   save shape.
+
+## The object_load_by_name module at 0x11060
+
+- Observation: the identity window at `0x11060` holds 22 instructions and 59
+  bytes up to the first `ret` at `0x1109a`.  The zero-result arm continues at
+  `0x1109b` to the `ret` at `0x110ce`.  The next function starts at `0x110d0`,
+  so the store record keeps the 112-byte extent and sets no separate function
+  size.  The identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11060 --count
+  22` and `tools/rebuild/functions/0x11060.json`.
+- Observation: the direct callers are `player_car_init` at `0x136cc` with the
+  call sites `0x1379a`, `0x137c8`, and `0x1383a`, `car_setup` at `0x142ec`
+  with `0x14361` and `0x143b5`, the animation consumer at `0x14970` with
+  `0x149b8` and `0x149e2`, `replay_playback_start` at `0x14d2c` with
+  `0x14dc9`, `opponent_route_setup` at `0x1517c` with `0x15352` and
+  `0x15432`, and `menu_objects_init` at `0x2aab8` with `0x2aaf0`, `0x2ab7b`,
+  `0x2abc1`, `0x2acd0`, and `0x2ada2`.  Each caller passes the object table at
+  `0x6530` in `eax`, an object name in `edx`, and an output slot pointer in
+  `ebx`.
+  Evidence: the call sites above and the records at `0x136cc`, `0x142ec`,
+  `0x14970`, `0x14d2c`, `0x1517c`, and `0x2aab8`.
+- Observation: the function copies the slot value into a local source index.
+  The lookup at `0x110d0` searches the table by name and stores the found
+  index in the local.  A found object goes to `object_duplicate` at `0x10ed4`,
+  which makes one more instance of the source index in the output slot.  A
+  missing object goes to `object_request` at `0x114b4`, which reserves a free
+  record and stores the name.  A request result other than zero returns at
+  once.  Otherwise `object_load` at `0x10bfc` runs with the new index and the
+  count 1.
+  Evidence: the body at `0x11060` through `0x110ce` and the records at
+  `0x110d0`, `0x10ed4`, `0x114b4`, and `0x10bfc`.
+- Inference: the many callers, the object table, and the lookup, duplicate,
+  request, and load helpers support the name `object_load_by_name`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/object_load_by_name.json`.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction, so the
+  module uses no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x11060` through `0x11074` and the module recipe.
+- Observation: the harness holds a small object table, the name `SHADOW`, the
+  output slot, and four callee stubs.  The eight paths cover the found object
+  with the duplicate result, the found object with the zero duplicate result,
+  the missing object with the request and load path, the request result 8, the
+  request result 3, the load result 2, the load result -1, and the found source
+  index 0 with the duplicate result -1.  Every path checks the result, the
+  call counts, the recorded arguments, and the slot values.  The output holds
+  the markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_load_by_name_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_load_by_name`,
+  `work/rebuild/objlbn.txt`, and `python3 tools/rebuild/run.py run --function
+  0x11060`.
+- Observation: the rebuilt body holds 8 of 22 instructions equal, 6 of 50
+  bytes equal, and 0 of 0 relocation slots equal.  The identity check stays
+  open because V2 saves `ecx`, `esi`, and `edi`, keeps the table, the name, and
+  the slot in registers, reaches the four callees with other call addresses,
+  and lays out the two returns in another shape.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11060 --count 22 --rebuilt work/rebuild/objlbn.exe
+  --rebuilt-map work/rebuild/object_load_by_name.map --rebuilt-symbol
+  object_load_by_name_` and `python3 tools/rebuild/run.py run --function
+  0x11060`.
+- Limit: the original has no symbol name.  The many callers and the four
+  helpers support the role, and the name stays inferred.  The identity check
+  stays open because C cannot reproduce the argument spill and the register
+  save shape.

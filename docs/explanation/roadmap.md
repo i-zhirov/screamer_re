@@ -345,9 +345,10 @@ current host.
    `race_finish_mode_1_update` at `0x23ed8`, and the Phase Y module
    `object_block_tag` at `0x118a4`, and the Phase Y module
    `object_slot_acquire` at `0x11660`, and the Phase Z module
-   `sound_voice_finished` at `0x1f834`;
+   `sound_voice_finished` at `0x1f834`, and the Phase Z module
+   `object_load_by_name` at `0x11060`;
    thirty-two modules are verified, one is matching, and three hundred and
-   eighty-eight rebuilds hold the recorded difference; the `video_fill`,
+   eighty-nine rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
