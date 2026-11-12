@@ -368,8 +368,9 @@ current host.
    `cd_audio_play` at `0x263cc`, and the Phase Z module
    `sound_voice_acquire` at `0x1f7ac`, and the Phase Z module
    `line_clip_draw` at `0x102e4`, and the Phase Z module
-   `cd_audio_resume` at `0x264f8`;
-   thirty-five modules are verified, one is matching, and four hundred and eight
+   `cd_audio_resume` at `0x264f8`, and the Phase AA module
+   `sound_event_next` at `0x8a8d8`;
+   thirty-five modules are verified, one is matching, and four hundred and nine
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

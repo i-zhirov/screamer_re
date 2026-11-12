@@ -31342,3 +31342,83 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the command byte, and
   the sibling request path support the name, and the name stays inferred.
 
+
+## The sound_event_next module at 0x8a8d8
+
+- Observation: the original body at `0x8a8d8` holds 12 instructions and 45
+  bytes up to the `ret` at `0x8a904`.  A branch at `0x8a902` enters the second
+  block at `0x8a908`, and that block ends with the `ret` at `0x8a952`.  The next
+  recorded function starts at `0x8a958`, so the store record keeps the 128-byte
+  extent and sets no separate function size.  The identity check uses 12
+  instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8a8d8 --count
+  12` and `tools/rebuild/functions/0x8a8d8.json`.
+- Observation: the only direct caller is the inner loop of `sound_effects_update`
+  at `0x81ab0`, at the call site `0x81b2c`.  The caller tests the returned flag
+  and runs the event helpers when the flag is non-zero.  The event path sits in
+  the shared sound service body, so the module takes the section
+  `object_update_all callees`.
+  Evidence: the call at `0x81b2c`, the test at `0x81b31`, and the record of
+  `0x81ab0`.
+- Observation: the context record at `0x74454` holds the frame table base at
+  `+0x00`, the voice count at `+0x04`, the frame index at `+0x08`, the view
+  record at `+0x0c`, and the event record at `+0x10`.  The table at `0x7a6e4`
+  holds one 4-byte entry for each frame index: the signed short voice slot and a
+  second short value.  The voice record size is `0x1f4`, and the voice record
+  array starts at `0x7453c`.
+  Evidence: the block at `0x8a8d8` through `0x8a8e8`, the record of `0x8af08`,
+  and the finding "The sound_source_frame_prepare module at 0x8affc".
+- Observation: the function takes the voice slot of the current frame index,
+  forms the voice record pointer, and stores it at `+0x0c`.  It reads the first
+  dword of the voice record, stores it at `+0x10`, and returns 0 when that dword
+  is null.
+  Evidence: the block at `0x8a8e8` through `0x8a904`.
+- Observation: for a non-null event the function runs the setup helper at
+  `0x83560` on the camera basis at `voice + 0x118`.  It copies the event flag at
+  `+0x18` to `0x74530` and adds the frame table base to the event offsets at
+  `+0x1c`, `+0x20`, and `+0x24`.  It stores the three source pointers at
+  `0x7446c`, `0x74470`, and `0x74474` and returns 1.
+  Evidence: the block at `0x8a908` through `0x8a952` and the finding "The
+  sound_event_transform module at 0x835c0".
+- Observation: the original returns the flag in `edx`, so the caller at
+  `0x81b31` tests `edx`.  The C build returns the flag in `eax`, and the rebuilt
+  caller tests the C return.  The harness checks the C return.
+  Evidence: the block at `0x8a900` through `0x8a904`, the store of `edx` at
+  `0x8a94d`, and `tools/rebuild/sound_effects_update.c`.
+- Inference: the caller already names the callee at `0x8a8d8`
+  `sound_event_next`.  The caller flag, the voice record selection, and the
+  event source pointers support the name.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the extern `sound_event_next` in
+  `tools/rebuild/sound_effects_update.c` and the call at `0x81b2c`.
+- Observation: the original has no EBP frame and uses no floating-point
+  instruction.  It makes one call, so the module uses no FPU stub and no
+  assembly body.  The module implementation is C.
+  Evidence: the block at `0x8a8d8` through `0x8a952` and
+  `tools/rebuild/sound_event_next.c`.
+- Observation: the harness holds the voice context, the source distance table,
+  the voice records, the four event records, the frame table, the three event
+  pointers, and the setup stub.  The five paths cover a non-null event, a null
+  event, a signed voice slot with a negative offset, a zero render flag, and two
+  calls at one index.  Every path checks the voice record, the event pointer,
+  the return value, the setup call and its basis, the render flag, and the three
+  source pointers.  The output holds the markers `0` through `4` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/sound_event_next_main.c`, `python3
+  tools/rebuild/harness.py run --module sound_event_next`,
+  `work/rebuild/sevnext.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x8a8d8`.
+- Observation: the rebuilt body holds 1 of 12 instructions equal and 0 of 45
+  bytes equal, and 0 of 8 relocation slots.  V2 saves `ebx`, `ecx`, and `edx`,
+  loads the source distance as a dword and shifts it to the signed short, uses
+  absolute memory operands for the globals, and forms the event in another
+  register order.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8a8d8 --count 12 --rebuilt work/rebuild/sevnext.exe
+  --rebuilt-map work/rebuild/sound_event_next.map --rebuilt-symbol
+  sound_event_next_` and `python3 tools/rebuild/run.py run --function 0x8a8d8`.
+- Limit: the original has no symbol name.  The caller, the voice record
+  selection, and the event source pointers support the name, and the name stays
+  inferred.
