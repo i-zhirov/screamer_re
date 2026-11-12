@@ -30334,3 +30334,68 @@ temporary `-od` recipe.
   0x15b08`.
 - Limit: the original has no symbol name.  The caller and the player steps
   support the role, and the name stays inferred.
+
+## The sound_source_pose_copy module at 0x8afc4
+
+- Observation: the original body at `0x8afc4` holds 25 instructions and 56
+  bytes up to the `ret` at `0x8affb`.  The next function starts at `0x8affc`,
+  so the 56-byte extent equals the body.  The store record keeps the extent and
+  sets no separate function size.  The identity check uses 25 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8afc4 --count
+  25` and `tools/rebuild/functions/0x8afc4.json`.
+- Observation: the only direct caller at `0x8b067` is the per-source frame
+  prepare at `0x8affc`.  That helper runs from the frame prepare at `0x8af08`,
+  which `sound_effects_update` at `0x81ab0` calls in the per-frame loop.  The
+  record therefore takes the section `object_update_all callees`.
+  Evidence: the call at `0x8b067` and the finding "The
+  sound_source_frame_prepare module at 0x8affc".
+- Observation: the caller holds the voice record in `ebp` and the frame table
+  base in `ebx`.  The original reads both registers and saves them with
+  `pushal`, so the two inputs are register inputs, not stack arguments.
+  Evidence: the prologue at `0x8afc4` and the caller at `0x8affc` through
+  `0x8b067`.
+- Observation: the source pointer forms from the global state pointer at
+  `0x74468`.  The dword at state `+0x0c` is an offset from the frame table.
+  The constant `0x1c` and the sample offset at `0x74528` follow.  The function
+  copies twelve signed 16-bit words to the voice record at `+0x28` and the next
+  twelve words to `+0x58`.  It sign-extends every word to a 32-bit int, and the
+  two blocks feed the two Q14 pose matrices of the caller.
+  Evidence: the block at `0x8afc5` through `0x8aff7`, the finding "The
+  sound_source_frame_prepare module at 0x8affc", and
+  `tools/rebuild/sound_source_pose_copy.c`.
+- Inference: the caller, the per-frame path, the two 12-element source blocks,
+  and the two voice matrix destinations support the name
+  `sound_source_pose_copy`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the call at `0x8b067`, the source block, and the two destinations.
+- Observation: the original reads the caller registers `ebp` and `ebx`
+  directly.  The module states the two inputs as explicit parameters, because
+  the C build uses its own register convention and its own frame.  The function
+  holds no floating-point instruction and makes no math call, so the module
+  needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x8afc4` and the module recipe
+  `tools/rebuild/modules/sound_source_pose_copy.json`.
+- Observation: the harness holds the global state pointer, the sample offset,
+  the state block with the table offset, the frame table, and the voice record.
+  The four paths cover the positive offsets, the zero offsets, a negative
+  sample offset with the signed extremes, and a negative table offset.  The
+  output holds the markers `0` through `3` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/sound_source_pose_copy_main.c`, `python3
+  tools/rebuild/harness.py run --module sound_source_pose_copy`,
+  `work/rebuild/sspose.txt`, and `python3 tools/rebuild/run.py run --function
+  0x8afc4`.
+- Observation: the rebuilt body starts with a register save and a register-based
+  source form, so the instruction sequence differs from the original `pushal`
+  sequence.  The identity check stays open at 2 of 25 instructions, 0 of 56
+  bytes, and 0 of 3 relocation slots.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8afc4 --count 25 --rebuilt work/rebuild/sspose.exe
+  --rebuilt-map work/rebuild/sound_source_pose_copy.map --rebuilt-symbol
+  sound_source_pose_copy_` and `python3 tools/rebuild/run.py run --function
+  0x8afc4`.
+- Limit: the original has no symbol name.  The caller and the frame path
+  support the role, and the name stays inferred.  The original uses the caller
+  registers, so the C build cannot reproduce the exact bytes.

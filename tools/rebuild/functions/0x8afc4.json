@@ -1,9 +1,102 @@
 {
   "address": "0x8afc4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8afc4 holds 25 instructions and 56 bytes up to the ret at 0x8affb; the next function starts at 0x8affc, so the 56-byte extent equals the body and the store record sets no separate function size; the identity check uses 25 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x8b067 is the per-source frame prepare at 0x8affc; that helper runs from the frame prepare at 0x8af08, which sound_effects_update at 0x81ab0 calls in the per-frame loop; the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the caller holds the voice record in ebp and the frame table base in ebx; the original reads both registers and saves them with pushal; the source pointer forms as table plus the dword at the global state pointer 0x74468 plus 0x0c plus 0x1c plus the sample offset at 0x74528; the function copies twelve signed 16-bit words to the voice record at +0x28 and the next twelve to +0x58 and sign-extends every word to a 32-bit int; the two blocks feed the two Q14 pose matrices of the caller"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the per-frame path, the two 12-element source blocks, and the two voice matrix destinations support the name sound_source_pose_copy; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original reads the caller registers ebp and ebx directly, so the module states the two inputs as explicit parameters and the C build uses its own register convention; the function holds no floating-point instruction and makes no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the global state pointer, the sample offset, the state block with the table offset, the frame table, and the voice record; the four paths cover the positive offsets, the zero offsets, a negative sample offset with the signed extremes, and a negative table offset; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body starts with a register save and a register-based source form, so the instruction sequence differs from the original pushal sequence; the identity check stays open at 2 of 25 instructions, 0 of 56 bytes, and 0 of 3 relocation slots; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8afc4 --count 25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8afc4 --count 25 --rebuilt work/rebuild/sspose.exe --rebuilt-map work/rebuild/sound_source_pose_copy.map --rebuilt-symbol sound_source_pose_copy_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8afc4"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_source_pose_copy module at 0x8afc4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_pose_copy.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_source_pose_copy_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_source_pose_copy.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_source_pose_copy",
+  "name": "sound_source_pose_copy",
   "notes": [],
   "object_offset": "0x7afc4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 56,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 25,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8afc4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:b35d8cc0c1559c456c11098f0fbda5c509b0c43e479a328ed33205f7d64285d8",
+    "source_digest": "sha256:e4ef287c7e4e559ae0b8842d7cd4a75e82aea9dfbaf7509faadf6d0761297ca0",
+    "tool": "run.py"
+  },
+  "role": "Copies the two 12-element signed 16-bit pose blocks from the sample source into the two voice matrix slots.",
+  "section": "object_update_all callees",
   "size": 56,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_source_pose_copy_"
 }
