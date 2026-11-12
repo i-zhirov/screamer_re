@@ -31039,3 +31039,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  No caller names the function.  The
   data flow and the sibling helpers support the name, and the name stays
   inferred.
+
+## The traffic_event_flush module at 0x1ec48
+
+- Observation: the original body at `0x1ec48` holds 24 instructions and 50
+  bytes up to the `ret` at `0x1ec79`.  The next function starts at `0x1ec7c`
+  after the two padding bytes at `0x1ec7a`, so the store record keeps the
+  52-byte extent and sets no separate function size.  The identity check uses
+  24 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ec48 --count
+  24` and `tools/rebuild/functions/0x1ec48.json`.
+- Observation: the function drains the pending receive queue.  The dequeue
+  helper at `0xc739c` copies a twelve-byte header into the local buffer and
+  returns the payload pointer.  The function discards the header and the
+  payload, calls the queue helper at `0xc76f0` once after every received
+  message, and calls it once more when the queue is empty.  The loop ends when
+  the dequeue helper returns zero.
+  Evidence: the blocks at `0x1ec48` through `0x1ec79` and the callees at
+  `0xc739c` and `0xc76f0`.
+- Observation: the five direct call sites are `0x12bcb` and `0x12bda` in
+  `race_session_start` at `0x128e0` after `traffic_step`, `0x12db3` in
+  `game_mode_10_start` at `0x12d0c` after `traffic_step`, `0x2cb11` in
+  `net_race_lobby_init` at `0x2ca40` after the player record clear, and
+  `0x2da2f` in `net_race_lobby` at `0x2d7c4`.
+  Evidence: the caller bodies above and the call sweep for `0x1ec48`.
+- Inference: the callers, the two queue helpers, and the sibling
+  `traffic_event_read` at `0x1eed8` support the name `traffic_event_flush`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.  The callers sit in several sections, so the record takes the
+  section `Program functions`.
+  Evidence: the call graph, the two queue helpers, and the finding "The
+  traffic_event_read module at 0x1eed8".
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x1ec48` through `0x1ec4e` and
+  `tools/rebuild/traffic_event_flush.c`.
+- Observation: the harness holds the dequeue stub, the pump stub, and a script
+  of pending events.  The eight paths cover the empty queue, one event, three
+  events, five events, the count equality and the pointer checks, six events,
+  two runs in a row, and four events.  The output holds the markers `0` through
+  `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/traffic_event_flush_main.c`, `python3
+  tools/rebuild/harness.py run --module traffic_event_flush`,
+  `work/rebuild/tefl.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1ec48`.
+- Observation: the rebuilt body holds 3 of 24 instructions equal, 3 of 50
+  bytes equal, and 0 of 3 relocation slots.  The identity check stays open
+  because V2 saves the frame pointer first, orders the pushes differently,
+  keeps the argument pointer and the result in registers, and folds the
+  twelve-byte length into a register move.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1ec48 --count 24 --rebuilt work/rebuild/tefl.exe
+  --rebuilt-map work/rebuild/traffic_event_flush.map --rebuilt-symbol
+  traffic_event_flush_` and `python3 tools/rebuild/run.py run --function
+  0x1ec48`.
+- Limit: the original has no symbol name.  No caller names the function.  The
+  queue behavior and the sibling `traffic_event_read` support the name, and the
+  name stays inferred.

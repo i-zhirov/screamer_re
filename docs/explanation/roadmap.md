@@ -363,8 +363,9 @@ current host.
    `cd_audio_stop` at `0x264b8`, and the Phase Z module
    `object_list_bind` at `0x11850`, and the Phase Z module
    `object_list_refresh` at `0x117fc`, and the Phase Z module
-   `object_list_tag_toggle` at `0x117a0`;
-   thirty-five modules are verified, one is matching, and four hundred and three
+   `object_list_tag_toggle` at `0x117a0`, and the Phase Z module
+   `traffic_event_flush` at `0x1ec48`;
+   thirty-five modules are verified, one is matching, and four hundred and four
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

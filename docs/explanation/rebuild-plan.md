@@ -680,7 +680,7 @@ reproduce the original bytes.
 | `0x11850` | `object_list_bind` (done) | 51 | 18 | 0 | 0 |
 | `0x117fc` | `object_list_refresh` (done) | 51 | 18 | 0 | 0 |
 | `0x117a0` | `object_list_tag_toggle` (done) | 51 | 18 | 0 | 0 |
-| `0x1ec48` | unnamed | 50 | 24 | 3 | 0 |
+| `0x1ec48` | `traffic_event_flush` (done) | 50 | 24 | 3 | 0 |
 | `0x263cc` | unnamed | 49 | 13 | 0 | 0 |
 | `0x1f7ac` | unnamed | 48 | 17 | 2 | 0 |
 | `0x102e4` | unnamed | 47 | 16 | 0 | 0 |
@@ -690,7 +690,7 @@ This table starts Phase Z.
 
 ## Position
 
-Four hundred and thirty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and thirty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -975,5 +975,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_audio_stop` at `0x264b8`, and the Phase Z module
 `object_list_bind` at `0x11850`, and the Phase Z module
 `object_list_refresh` at `0x117fc`, and the Phase Z module
-`object_list_tag_toggle` at `0x117a0`.
-The next unnamed function is `0x1ec48`.
+`object_list_tag_toggle` at `0x117a0`, and the Phase Z module
+`traffic_event_flush` at `0x1ec48`.
+The next unnamed function is `0x263cc`.
