@@ -30753,3 +30753,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The five callers and the five
   vehicle steps support the name, and the name stays inferred.  The identity
   check passes only because the direct call targets are link-time values.
+
+## The data_blit module at 0x102b0
+
+- Observation: the original body at `0x102b0` holds 26 instructions and 52
+  bytes up to the `ret` at `0x102e3`.  The next entry starts at `0x102e4`, so
+  the store record keeps the 52-byte extent and sets no separate function size.
+  The identity check uses 26 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x102b0 --count
+  26` and `tools/rebuild/functions/0x102b0.json`.
+- Observation: the gauge panel at `0x2369c` calls this function at `0x236d9`,
+  `0x23707`, and `0x23827` before a cockpit blit.  It passes the compressed
+  source in `eax` and the destination in `edx`.  The `race_gauges` module
+  names the same helper `data_blit` at the same three sites.
+  Evidence: the call sweep of `0x2369c` and `tools/rebuild/race_gauges.c`.
+- Observation: the options screen at `0x21338` calls this function at
+  `0x214cd` before a sprite blit.  It passes the same source and destination
+  registers.  The `options_screen` module names the helper `sprite_blit`.
+  Evidence: the call sweep of `0x21338` and `tools/rebuild/options_screen.c`.
+- Observation: the source is a sequence of signed 32-bit spans.  A positive
+  span copies that many literal bytes.  A negative span moves the destination
+  pointer forward without a write.  A zero span ends the sequence.  The
+  original copies the dwords through `rep movsd` and the remainder through
+  `rep movsb`.
+  Evidence: the block at `0x102b0` through `0x102e3`.
+- Inference: the two callers and the span format support the name `data_blit`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.  The function sits with the program functions, so the record
+  takes the section Program functions.
+  Evidence: the caller sites above and the two caller records.
+- Observation: the original has no EBP frame and saves every register through
+  `pushal`.  It holds no floating-point instruction and makes no call, so the
+  module uses no FPU stub and no assembly body.  The module implementation is
+  C.
+  Evidence: the block at `0x102b0` through `0x102e3` and
+  `tools/rebuild/data_blit.c`.
+- Observation: the harness holds one source stream and one target block per
+  path.  The five paths cover one positive span, two spans around a negative
+  skip, a dword span with a three-byte remainder, a zero span at once, and
+  three one-byte spans.  Every path checks the whole target block.  The output
+  holds the markers `0` through `4` and `D`, and the behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module data_blit` and
+  `work/rebuild/dblit.txt`.
+- Observation: the rebuilt body holds 2 of 26 instructions and 0 of 52 bytes
+  equal.  V2 pushes `ebx`, `ecx`, and `esi`, keeps the cursors in `eax` and
+  `edx`, copies through a dword loop and a byte loop instead of `rep movsd`
+  and `rep movsb`, and signs the shift.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x102b0 --count 26 --rebuilt work/rebuild/dblit.exe
+  --rebuilt-map work/rebuild/data_blit.map --rebuilt-symbol data_blit_` and
+  `python3 tools/rebuild/run.py run --function 0x102b0`.
+- Limit: the original has no symbol name.  The caller and the span format
+  support the name, and the name stays inferred.  The C build cannot reproduce
+  the original bytes, because the original uses `pushal`, `cld`, and the
+  string copy instructions.

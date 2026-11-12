@@ -1,9 +1,110 @@
 {
   "address": "0x102b0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x102b0 holds 26 instructions and 52 bytes up to the ret at 0x102e3; the next entry starts at 0x102e4, so the store record keeps the 52-byte extent and sets no separate function size; the identity check uses 26 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the gauge panel at 0x2369c calls this function at 0x236d9, 0x23707, and 0x23827 before a cockpit blit; it passes the compressed source in eax and the destination in edx; the race_gauges module names the same helper data_blit at the same three sites"
+    },
+    {
+      "kind": "note",
+      "text": "the source is a sequence of signed 32-bit spans; a positive span copies that many literal bytes, a negative span moves the destination pointer forward without a write, and a zero span ends the sequence; the caller and the span format support the name data_blit; the original has no symbol, so the record keeps the name with the confidence inferred; the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves every register through pushal; it holds no floating-point instruction and makes no call, so the module uses no FPU stub and no assembly body; the module implementation is C"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one source stream and one target block per path; the five paths cover one positive span, two spans around a negative skip, a dword span with a three-byte remainder, a zero span at once, and three one-byte spans; every path checks the whole target block; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 2 of 26 instructions and 0 of 52 bytes equal; V2 pushes ebx, ecx, and esi, keeps the cursors in eax and edx, copies through a dword loop and a byte loop instead of rep movsd and rep movsb, and signs the shift; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The data_blit module at 0x102b0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x102b0 --count 26"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x102b0 --count 26 --rebuilt work/rebuild/dblit.exe --rebuilt-map work/rebuild/data_blit.map --rebuilt-symbol data_blit_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module data_blit"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module data_blit"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x102b0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/data_blit.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/data_blit_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/data_blit.json"
+    },
+    {
+      "kind": "note",
+      "text": "the options screen at 0x21338 calls this function at 0x214cd before a sprite blit and passes the same source and destination registers; the options_screen module names the helper sprite_blit; the two callers and the four sites support the general span blit name data_blit"
+    }
+  ],
+  "implementation": "c",
+  "module": "data_blit",
+  "name": "data_blit",
   "notes": [],
   "object_offset": "0x2b0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 52,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 26,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x102b0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:4714f8f8f07f39f7e5143b0b0987bb20c8e032c4b070a1ddb357f351eff4cf4e",
+    "source_digest": "sha256:14b8040ff19abb6a2ad3c251eb7b6d6167f1d661ec6f75ccd3c786d1a3a15876",
+    "tool": "run.py"
+  },
+  "role": "Copies a compressed sequence of positive spans and moves the destination on a negative span.",
+  "section": "Program functions",
   "size": 52,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "data_blit_"
 }
