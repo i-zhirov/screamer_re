@@ -30465,3 +30465,62 @@ temporary `-od` recipe.
   error code, and the negative guard support the name, and the name stays
   inferred.  The V2 register save order and the double push form differ from
   the original, so the C build cannot reproduce the exact bytes.
+
+## The race_finish_overlay_3 module at 0x241d4
+
+- Observation: the original body at `0x241d4` holds 20 instructions and 55
+  bytes up to the `ret` at `0x2420a`.  The one padding byte at `0x2420b` is
+  part of the 56-byte extent, and the next function starts at `0x2420c`, so the
+  store record keeps the extent and sets no separate function size.  The
+  identity check uses 20 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x241d4 --count
+  20` and `tools/rebuild/functions/0x241d4.json`.
+- Observation: the only direct caller is `race_finish_update` at `0x21058`.
+  During the finish delay it switches on the mode `DAT_0011d260` and calls
+  `0x240c4` for mode 1, `0x2414c` for mode 2, this overlay for mode 4,
+  `0x240a0` for mode 0x10, `0x24264` for mode 0x20, and `0x2420c` for mode
+  0x40.  The caller sits in the frame update path, so the record takes the
+  section `Program functions`.
+  Evidence: the mode switch at `0x21058` and the records at `0x240c4`,
+  `0x2414c`, `0x240a0`, `0x24264`, and `0x2420c`.
+- Observation: the function draws the car table string `DAT_00118f94[index]`
+  at y `0x5a` with the font 0 and the colour 2.  The index is `0xd`, or `0xe`
+  when bit 3 of `DAT_00118e1d` is set.  The sibling overlays at `0x24264` and
+  `0x2420c` hold the same line and add the extra text at y `0x78` when bit 7
+  is set.  This overlay holds the line only.
+  Evidence: the block at `0x241d4` through `0x2420a` and the sibling blocks at
+  `0x2420c` and `0x24264`.
+- Inference: the mode 4 selection, the car table, and the shortest body
+  support the name `race_finish_overlay_3`.  The suffix 3 is the third case of
+  the mode switch.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the six mode cases in `race_finish_update` and the record names
+  `race_finish_overlay_1`, `_2`, `_5`, and `_6`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly.
+  Evidence: `tools/rebuild/modules/race_finish_overlay_3.json` and the frame
+  at `0x241d4` through `0x2420a`.
+- Observation: the harness holds the control byte and the sixteen-entry car
+  table.  It builds every string at run time, because the initialized data
+  page does not reach the DOS/4G image.  The five paths cover the control
+  bytes 0, 8, 0x80, 0x88, and 0x77.  The output holds the markers `0` through
+  `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_overlay_3_main.c`, `python3
+  tools/rebuild/harness.py run --module race_finish_overlay_3`,
+  `work/rebuild/rfo3.txt`, and `python3 tools/rebuild/run.py run --function
+  0x241d4`.
+- Observation: the rebuilt body holds 6 of 20 instructions and 1 of 52 bytes
+  equal, and 0 of 4 relocation slots.  V2 saves the frame pointer first, moves
+  the table load before the argument setup, and restores the stack through
+  `lea`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x241d4 --count 20 --rebuilt work/rebuild/rfo3.exe
+  --rebuilt-map work/rebuild/race_finish_overlay_3.map --rebuilt-symbol
+  race_finish_overlay_3_` and `python3 tools/rebuild/run.py run --function
+  0x241d4`.
+- Limit: the original has no symbol name.  The mode case, the car table line,
+  and the sibling overlays support the name, and the name stays inferred.  The
+  V2 prologue and the stack restore differ from the original, so the C build
+  cannot reproduce the exact bytes.

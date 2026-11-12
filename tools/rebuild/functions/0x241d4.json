@@ -1,9 +1,107 @@
 {
   "address": "0x241d4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x241d4 holds 20 instructions and 55 bytes up to the ret at 0x2420a; the one padding byte at 0x2420b is part of the 56-byte extent and the next function starts at 0x2420c, so the store record keeps the extent and sets no separate function size; the identity check uses 20 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_update at 0x21058; during the finish delay it switches on the mode DAT_0011d260 and calls 0x240c4 for mode 1, 0x2414c for mode 2, this overlay for mode 4, 0x240a0 for mode 0x10, 0x24264 for mode 0x20, and 0x2420c for mode 0x40; the caller sits in the frame update path, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function draws the car table string DAT_00118f94[index] at y 0x5a with the font 0 and the colour 2; the index is 0xd, or 0xe when bit 3 of DAT_00118e1d is set; the sibling overlays at 0x24264 and 0x2420c hold the same line and add the extra text at y 0x78 when bit 7 is set, while this overlay holds the line only"
+    },
+    {
+      "kind": "note",
+      "text": "the mode 4 selection, the car table, and the shortest body support the name race_finish_overlay_3; the suffix 3 is the third case of the mode switch; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte and the sixteen-entry car table; it builds every string at run time, because the initialized data page does not reach the DOS/4G image; the five paths cover the control bytes 0, 8, 0x80, 0x88, and 0x77; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 20 instructions and 1 of 52 bytes equal, and 0 of 4 relocation slots; the identity check stays open because V2 saves the frame pointer first, moves the table load before the argument setup, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x241d4 --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x241d4 --count 20 --rebuilt work/rebuild/rfo3.exe --rebuilt-map work/rebuild/race_finish_overlay_3.map --rebuilt-symbol race_finish_overlay_3_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_overlay_3"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x241d4"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_overlay_3 module at 0x241d4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_overlay_3.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_overlay_3_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_overlay_3.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_finish_overlay_3",
+  "name": "race_finish_overlay_3",
   "notes": [],
   "object_offset": "0x141d4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 52,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x241d4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:3d8f0408d1ac2372d27bef227ba0b76681770454d68056150c8513c3bf6be5cf",
+    "source_digest": "sha256:e861cf755d1ad08b9c406158f03f3ad67f5c09331b335c01391732b001764ee1",
+    "tool": "run.py"
+  },
+  "role": "Draws the mode 4 finish overlay: the car table line at y 0x5a.",
+  "section": "Program functions",
   "size": 56,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_overlay_3_"
 }
