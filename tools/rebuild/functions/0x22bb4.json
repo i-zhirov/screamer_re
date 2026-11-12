@@ -1,9 +1,107 @@
 {
   "address": "0x22bb4",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 21,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22bb4 holds 21 instructions and 54 bytes up to the ret 8 at 0x22be7; the two padding bytes at 0x22bea and 0x22beb precede the next function at 0x22bec, so the store record keeps the 56-byte extent and sets no separate function size; the identity check uses 21 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "two rebuilt callers name the target filter_update_int: player_view_orbit at 0x1a3b8 calls it at 0x1a548 for the view height, and credits_scroll at 0x27c34 calls it at 0x27c95 for the line position"
+    },
+    {
+      "kind": "note",
+      "text": "the function is the integer form of the one-pole filter at 0x22b80: it loads the integer cell, subtracts the target, multiplies by DAT_0010cf08[index], adds the target, truncates through the helper at 0x4d9f4, and stores the integer back; the first argument arrives in eax, and the float argument puts the remaining arguments on the stack, so the callee cleans them with ret 8"
+    },
+    {
+      "kind": "note",
+      "text": "the two rebuilt callers and the sibling filter_update at 0x22b80 supply the name filter_update_int; the original has no symbol, so the record keeps the name with the confidence inferred; the function sits next to filter_update in the filter region, so the record takes the section The timing and filter layer"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original calls the truncate helper at 0x4d9f4 before the fistp, so the local filter_update_int_fpu.asm makes __CHP truncate toward zero; the module implementation is C, and the FPU stub is harness support"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22bb4 --count 21"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22bb4 --count 21 --rebuilt work/rebuild/fint.exe --rebuilt-map work/rebuild/filter_update_int.map --rebuilt-symbol filter_update_int_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module filter_update_int"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22bb4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/filter_update_int.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/filter_update_int_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/filter_update_int_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/filter_update_int.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the coefficient table and one integer cell; the eight paths cover the equal value, the higher target, the lower target, the full step, the positive truncation, the negative truncation, the index selection, and the target term; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 3 of 21 instructions and 1 of 47 bytes equal, and 0 of 2 relocation slots; the identity check stays open because V2 saves ebp first, keeps the index in ecx, loads the table pointer as a fixed data offset, folds the index scale into the fmul operand, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "filter_update_int",
+  "name": "filter_update_int",
   "notes": [],
   "object_offset": "0x12bb4",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 47,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22bb4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:49ad49568f387c57cf6ac5c32bdd47009384d68d6126650d55586174eaa034a1",
+    "source_digest": "sha256:e5a04fdf1e86c27b243549820f36efe3e24902856c25f1ad6121588dfe854865",
+    "tool": "run.py"
+  },
+  "role": "moves an integer cell toward a target with the one-pole coefficient and truncates the result",
+  "section": "The timing and filter layer",
   "size": 56,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "filter_update_int_"
 }

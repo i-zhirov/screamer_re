@@ -30574,3 +30574,61 @@ temporary `-od` recipe.
   and the sibling overlays support the name, and the name stays inferred.  The
   V2 prologue and the stack restore differ from the original, so the C build
   cannot reproduce the exact bytes.
+
+## The filter_update_int module at 0x22bb4
+
+- Observation: the original body at `0x22bb4` holds 21 instructions and 54
+  bytes up to the `ret 8` at `0x22be7`.  The two padding bytes at `0x22bea` and
+  `0x22beb` precede the next function at `0x22bec`, so the store record keeps
+  the 56-byte extent and sets no separate function size.  The identity check
+  uses 21 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22bb4 --count
+  21` and `tools/rebuild/functions/0x22bb4.json`.
+- Observation: two rebuilt callers pass the target and the index.
+  `player_view_orbit` at `0x1a3b8` calls it at `0x1a548` for the view height,
+  and `credits_scroll` at `0x27c34` calls it at `0x27c95` for the line
+  position.
+  Evidence: `tools/rebuild/player_view_orbit.c` and
+  `tools/rebuild/credits_scroll.c`.
+- Observation: the function is the integer form of the one-pole filter at
+  `0x22b80`.  It loads the integer cell through `fild`, subtracts the target
+  `[ebp + 0xc]`, multiplies by `DAT_0010cf08[index]`, adds the target again,
+  truncates through the helper at `0x4d9f4`, and stores the integer through
+  `fistp`.  The first argument arrives in `eax`.  The float argument puts the
+  remaining arguments on the stack, so the callee cleans them with `ret 8`.
+  Evidence: the block at `0x22bb4` through `0x22be7` and the sibling block at
+  `0x22b80` through `0x22bae`.
+- Inference: the two rebuilt callers and the sibling `filter_update` at
+  `0x22b80` supply the name `filter_update_int`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.  The function
+  sits next to `filter_update` in the filter region, so the record takes the
+  section The timing and filter layer.
+  Evidence: the two caller sources and the section of the sibling record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The original calls the truncate helper at `0x4d9f4` before the
+  `fistp`, so the local `filter_update_int_fpu.asm` makes `__CHP` truncate
+  toward zero.  The module implementation is C, and the FPU stub is harness
+  support.
+  Evidence: the prologue at `0x22bb4` and `tools/rebuild/filter_update_int.c`.
+- Observation: the harness holds the coefficient table and one integer cell.
+  The eight paths cover the equal value, the higher target, the lower target,
+  the full step, the positive truncation, the negative truncation, the index
+  selection, and the target term.  The output holds the markers `0` through
+  `7` and `D`, and the behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module filter_update_int`
+  and `work/rebuild/fint_out.txt`.
+- Observation: the rebuilt body holds 3 of 21 instructions and 1 of 47 bytes
+  equal, and 0 of 2 relocation slots.  V2 saves `ebp` first, keeps the index
+  in `ecx`, loads the table pointer as a fixed data offset, folds the index
+  scale into the `fmul` operand, and restores the stack through `lea`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22bb4 --count 21 --rebuilt work/rebuild/fint.exe
+  --rebuilt-map work/rebuild/filter_update_int.map --rebuilt-symbol
+  filter_update_int_` and `python3 tools/rebuild/run.py run --function
+  0x22bb4`.
+- Limit: the original has no symbol name.  The two callers and the sibling
+  filter support the name, and the name stays inferred.  The V2 prologue, the
+  index register, and the stack restore differ from the original, so the C
+  build cannot reproduce the exact bytes.
