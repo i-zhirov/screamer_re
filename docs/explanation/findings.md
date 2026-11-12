@@ -31167,3 +31167,63 @@ temporary `-od` recipe.
   cd_audio_play_` and `python3 tools/rebuild/run.py run --function 0x263cc`.
 - Limit: the original has no symbol name for this function.  The module name and
   the section stay inferred.
+
+## The sound_voice_acquire module at 0x1f7ac
+
+- Observation: the identity window at `0x1f7ac` holds 17 instructions and 48
+  bytes up to the `ret` at `0x1f7db`.  A branch at `0x1f7ce` enters the second
+  exit block at `0x1f7dc`, and that block ends with the `ret` at `0x1f7e2`.
+  The next function starts at `0x1f7e4`, so the store record keeps the 56-byte
+  extent and sets no separate function size.  The identity check uses 17
+  instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f7ac --count
+  17` and `tools/rebuild/functions/0x1f7ac.json`.
+- Observation: the only direct caller at `0x16f1b` is
+  `player_car_cornering_update` at `0x16ca0`.  The caller passes the constant
+  4 in `eax` and the object cell at `+0x7d4` in `edx`, then stores the result
+  back in the cell.  The caller sits in The vehicle state chain, so the record
+  takes that section.
+  Evidence: the block at `0x16f0d` through `0x16f23` and the record of
+  `0x16ca0`.
+- Observation: when the cached voice is -1 or the driver word at offset `0x34`
+  of that voice differs from the sample, the function returns `table_lookup`
+  at `0x1f718` for the sample.  Otherwise it returns the cached voice.  The
+  driver word comes from `0xc6bde` with the driver handle `DAT_00018d94`.
+  Evidence: the gate at `0x1f7b8` through `0x1f7ce` and the two calls at
+  `0x1f7c6` and `0x1f7d3`.
+- Inference: the sibling `sound_voice_sample_set` at `0x1f764`,
+  `sound_voice_finished` at `0x1f834`, and `table_lookup` at `0x1f718` read
+  the same driver fields and the sample table at `0x16034`, and the caller
+  stores the entry in the type-4 voice cell `+0x7d4`.  These facts support the
+  name `sound_voice_acquire`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/sound_voice_acquire.json`.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction, so the
+  module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x1f7ac` through `0x1f7b5` and the module recipe.
+- Observation: the harness holds the driver handle, the driver field stub, and
+  the table lookup stub.  The eight paths cover the cached voice -1, a kept
+  sample, another sample, the voice 0 with sample 0, a large sample, a
+  different word with sample 0, the voice `0x1f`, and the sample 0.  Every path
+  checks the result, the call counts, and the recorded arguments.  The output
+  holds the markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_voice_acquire_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_acquire`,
+  `work/rebuild/svaq.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f7ac`.
+- Observation: the rebuilt body holds 10 of 17 instructions equal, 3 of 42
+  bytes equal, and 1 of 1 relocation slot equal.  The identity check stays open
+  because V2 keeps the two arguments in `ebx` and `ecx` in place of the frame
+  spills and places the lookup call before the return block.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f7ac --count 17 --rebuilt work/rebuild/svaq.exe
+  --rebuilt-map work/rebuild/svaq.map --rebuilt-symbol sound_voice_acquire_`
+  and `python3 tools/rebuild/run.py run --function 0x1f7ac`.
+- Limit: the original has no symbol name for this function.  The single caller,
+  the two sibling modules, and the shared driver fields support the role.  The
+  name stays `inferred`.  The identity check stays open because C cannot
+  reproduce the argument spill and the call order.
