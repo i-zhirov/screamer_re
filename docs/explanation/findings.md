@@ -29903,3 +29903,67 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The two callers and the sibling
   release support the role, and the name stays inferred.  The identity check
   stays open because C cannot reproduce the argument spill and the loop shape.
+
+## The sound_voice_finished module at 0x1f834
+
+- Observation: the identity window at `0x1f834` holds 20 instructions and 59
+  bytes up to the success-path `ret` at `0x1f86e`.  Two return-1 tails follow
+  out of line at `0x1f86f` and `0x1f878`.  The next function starts at
+  `0x1f880`, so the store record keeps the 76-byte extent and sets no separate
+  function size.  The identity check uses 20 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f834 --count
+  20` and `tools/rebuild/functions/0x1f834.json`.
+- Observation: the only direct caller at `0x248fb` is `sound_queue_update` at
+  `0x24880`.  The caller passes the sound table id `DAT_00119074` in `eax` and
+  the playing sound status `DAT_00119070` in `edx`.  A zero result keeps the
+  queue, and a non-zero result pops the queue through `0x24918` and clears the
+  timer.
+  Evidence: the call at `0x248fb`, the branch at `0x24900` through `0x2490b`,
+  and the finding "The sound_queue_update module at 0x24880".
+- Observation: the setup word `DAT_00008058` gates the check.  When the word is
+  zero, the function returns 0.  Otherwise it reads the voice word at driver
+  offset `0x34` through `0xc6bde` with the driver handle `DAT_00018d94` and the
+  status.  When that word equals the table id plus one, the function returns
+  the free check at `0xca815`.  That callee reads bit `0x8000` of the voice
+  word at offset `0x30` and returns 1 when the bit is clear.  A different word
+  returns 1.
+  Evidence: the prologue at `0x1f834` through `0x1f83d`, the gate at
+  `0x1f840`, the first call at `0x1f851`, the compare at `0x1f856` through
+  `0x1f85c`, and the second call at `0x1f866`.
+- Inference: the caller, the table id, the two voice fields, and the sibling
+  sound voice functions support the name `sound_voice_finished`.  The original
+  has no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and
+  `tools/rebuild/modules/sound_voice_finished.json`.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction and no
+  direct call to a math symbol, so the module uses no FPU stub and no assembly.
+  Evidence: the prologue at `0x1f834` through `0x1f83d` and the module recipe.
+- Observation: the harness holds the setup word, the driver handle, and the two
+  driver stubs.  The field stub records the handle, the voice index, and the
+  call count, and returns a scripted word.  The idle stub records the same and
+  returns a scripted result.  The eight paths cover the zero word, the matching
+  word with an idle voice, the matching word with a busy voice, the different
+  word, the table id 0, the table id -1, the field equal to the table id, and
+  the table id `0x1234` with the status `0x1f`.  The output holds the markers
+  `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_voice_finished_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_finished`,
+  `work/rebuild/svf.txt`, and `python3 tools/rebuild/run.py run --function
+  0x1f834`.
+- Observation: the rebuilt body holds 9 of 20 instructions equal and 0 of 6
+  relocation slots equal.  The identity check stays open because V2 saves
+  `ebx` and `ecx` and keeps the table id and the status in registers, reaches
+  the globals through the small harness offsets, and lays out the two returns
+  in another shape.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f834 --count 20 --rebuilt work/rebuild/svfin.exe
+  --rebuilt-map work/rebuild/sound_voice_finished.map --rebuilt-symbol
+  sound_voice_finished_` and `python3 tools/rebuild/run.py run --function
+  0x1f834`.
+- Limit: the original has no symbol name.  The single caller and the two voice
+  fields support the role, and the name stays inferred.  The identity check
+  stays open because C cannot reproduce the argument spill and the register
+  save shape.
