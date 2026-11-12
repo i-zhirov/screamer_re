@@ -698,7 +698,7 @@ reproduce the original bytes.
 | `0x8a8d8` | `sound_event_next` (done) | 45 | 12 | 0 | 0 |
 | `0x22d88` | `replay_write_begin` (done) | 45 | 14 | 0 | 0 |
 | `0x4da3a` | `trig_range_reduce` (done) | 44 | 22 | 0 | 6 |
-| `0x1f880` | unnamed | 42 | 15 | 1 | 0 |
+| `0x1f880` | `sound_voice_stop` (done) | 42 | 15 | 1 | 0 |
 | `0x15150` | unnamed | 42 | 12 | 7 | 0 |
 | `0x15b80` | unnamed | 41 | 14 | 2 | 0 |
 | `0x10263` | unnamed | 41 | 16 | 1 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and forty-six modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and forty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1017,5 +1017,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_audio_resume` at `0x264f8`, and the Phase AA module
 `sound_event_next` at `0x8a8d8`, and the Phase AA module
 `replay_write_begin` at `0x22d88`, and the Phase AA module
-`trig_range_reduce` at `0x4da3a`.
-The next unnamed function is `0x1f880`.
+`trig_range_reduce` at `0x4da3a`, and the Phase AA module
+`sound_voice_stop` at `0x1f880`.
+The next unnamed function is `0x15150`.

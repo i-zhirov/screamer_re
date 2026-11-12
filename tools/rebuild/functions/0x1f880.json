@@ -1,9 +1,107 @@
 {
   "address": "0x1f880",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 15,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f880 holds 15 instructions and 42 bytes up to the ret at 0x1f8a9; a zero setup word branches to the second exit at 0x1f8aa, and the next recorded function starts at 0x1f8b4, so the store record keeps the 52-byte extent and sets no separate function size; the identity check uses 15 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers sit in several sections: race_finish_laps_update at 0x20ec8 and race_finish_time_update at 0x20f98 release DAT_00100e8, race_finish_update at 0x21058 releases DAT_001100ec, sound_emitter_update at 0x21b9c stops the record sound at offset +0x38, player_car_skid_update at 0x17d14 releases the effect at object offset +0x148, and object_collision at 0x1e00c releases the hit sound; the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the setup word DAT_00008058 gates the call; a zero word returns 0 and calls nothing; otherwise the function passes the driver handle DAT_00018d94 and the voice index to the driver voice release at 0xca3c9 and returns -1; the callers store the -1 result as the empty sound handle; the caller data and the driver fields support the name sound_voice_stop; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and one local, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the setup word, the driver handle, and the voice release stub; the stub records the handle, the voice index, and the call count and returns a scripted result; the eight paths cover the zero setup word, the voice 3, the voice 0, the voice -1, the voice 0x1f, the voice 0x1000, the -1 stub result, and two calls in a row; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 15 instructions; the rebuilt body holds 5 of 15 instructions, 2 of 42 bytes, and 0 of 4 relocation slots equal; the identity check stays open because V2 saves ecx, keeps the voice index in eax, reaches the globals through the small harness offsets, and places the zero exit after the jump instead of after the ret; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f880 --count 15"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f880 --count 15 --rebuilt work/rebuild/svstop.exe --rebuilt-map work/rebuild/sound_voice_stop.map --rebuilt-symbol sound_voice_stop_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_voice_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_voice_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f880"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_stop.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_stop_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_voice_stop.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_voice_stop module at 0x1f880"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_voice_stop",
+  "name": "sound_voice_stop",
   "notes": [],
   "object_offset": "0xf880",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 42,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 15,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f880",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:b4d1c57a89a418ceddad0e651f96655917fc5b8f2536016948cd4087e947b25f",
+    "source_digest": "sha256:3c11763c540e47196f96ebb66cbac84e31a0d66c1360a03772a6465b3c77fcd7",
+    "tool": "run.py"
+  },
+  "role": "Stops the sound voice through the driver release when the setup word is set.",
+  "section": "Program functions",
   "size": 52,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_voice_stop_"
 }

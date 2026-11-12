@@ -31508,3 +31508,64 @@ temporary `-od` recipe.
   trig_range_reduce_` and `python3 tools/rebuild/run.py run --function 0x4da3a`.
 - Limit: the original has no symbol name.  The two trig cores and the `fprem`
   loop support the name, and the name stays inferred.
+
+### The sound_voice_stop module at 0x1f880
+
+- Observation: the original body at `0x1f880` holds 15 instructions and 42
+  bytes up to the `ret` at `0x1f8a9`.  A zero setup word branches to the second
+  exit at `0x1f8aa`, and that exit returns 0 through the `ret` at `0x1f8b0`.
+  The next recorded function starts at `0x1f8b4`, so the store keeps the
+  52-byte extent and sets no separate function size.  The identity check uses
+  15 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f880 --count 15` and
+  `tools/rebuild/functions/0x1f880.json`.
+- Observation: the direct callers sit in several sections.  `race_finish_laps_update`
+  at `0x20ec8` and `race_finish_time_update` at `0x20f98` release the sound
+  handle `DAT_00100e8`.  `race_finish_update` at `0x21058` releases
+  `DAT_001100ec`.  `sound_emitter_update` at `0x21b9c` stops the sound at
+  record offset `+0x38`.  `player_car_skid_update` at `0x17d14` releases the
+  effect at object offset `+0x148`, and `object_collision` at `0x1e00c`
+  releases the hit sound.  The record takes the section Program functions.
+  Evidence: the call at `0x21c32`, the extern declarations in
+  `tools/rebuild/sound_emitter_update.c`, and the records of `0x20ec8`,
+  `0x20f98`, `0x21058`, `0x17d14`, and `0x1e00c`.
+- Observation: the setup word `DAT_00008058` gates the call.  A zero word
+  returns 0 and calls nothing.  Otherwise the function passes the driver handle
+  `DAT_00018d94` and the voice index to the driver voice release at `0xca3c9`
+  and returns -1.  The callers store the -1 result as the empty sound handle.
+  Evidence: the block at `0x1f880` through `0x1f8b0` and the driver block at
+  `0xca3c9` through `0xca455`.
+- Inference: the caller use, the empty handle result, and the sibling
+  `sound_voice_acquire`, `sound_voice_finished`, `sound_voice_pitch_set`,
+  `sound_voice_sample_set`, and `sound_voice_setup` functions support the name
+  `sound_voice_stop`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the records of `0x1f7ac`, `0x1f834`, `0x1f7e4`, `0x1f764`, and
+  `0x8adac`.
+- Observation: the original has the EBP frame and one local, so the module
+  builds with `-of+`.  The function holds no floating-point instruction, so the
+  module needs no FPU stub.  The module uses no assembly implementation.
+  Evidence: `tools/rebuild/sound_voice_stop.c` and
+  `tools/rebuild/modules/sound_voice_stop.json`.
+- Observation: the harness holds the setup word, the driver handle, and the
+  voice release stub.  The stub records the handle, the voice index, and the
+  call count and returns a scripted result.  The eight paths cover the zero
+  setup word, the voice 3, the voice 0, the voice -1, the voice `0x1f`, the
+  voice `0x1000`, the -1 stub result, and two calls in a row.  The output holds
+  the markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_voice_stop_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_voice_stop`,
+  `work/rebuild/svstop.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1f880`.
+- Observation: the rebuilt body holds 5 of 15 instructions equal, 2 of 42
+  bytes equal, and 0 of 4 relocation slots equal.  V2 saves `ecx`, keeps the
+  voice index in `eax`, reaches the globals through the small harness offsets,
+  and places the zero exit after the jump instead of after the `ret`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f880 --count 15 --rebuilt work/rebuild/svstop.exe
+  --rebuilt-map work/rebuild/sound_voice_stop.map --rebuilt-symbol
+  sound_voice_stop_` and `python3 tools/rebuild/run.py run --function 0x1f880`.
+- Limit: the original has no symbol name.  The caller use, the empty handle
+  result, and the sibling sound voice functions support the name, and the name
+  stays inferred.
