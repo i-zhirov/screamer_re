@@ -1,0 +1,29 @@
+{
+  "exe": "ohtr.exe",
+  "map": "object_handle_table_release.map",
+  "name": "object_handle_table_release",
+  "run": {
+    "command": "ohtr.exe > ohtr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ohtr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_table_release.c",
+        "flags": [
+          "-of+"
+        ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_table_release_main.c"
+    }
+  ]
+}

@@ -708,7 +708,7 @@ reproduce the original bytes.
 | `0x2f985` | `func_2f985` (done) | 38 | 21 | 0 | 0 |
 | `0x1f8b4` | `sound_fx_volume_set` (done) | 37 | 14 | 1 | 0 |
 | `0x22d64` | `attack_data_release` (done) | 36 | 12 | 1 | 0 |
-| `0x11a08` | unnamed | 36 | 13 | 2 | 0 |
+| `0x11a08` | `object_handle_table_release` (done) | 36 | 13 | 2 | 0 |
 | `0x1028c` | unnamed | 36 | 18 | 0 | 0 |
 | `0x1fa04` | unnamed | 34 | 15 | 0 | 0 |
 | `0x240a0` | unnamed | 33 | 15 | 1 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and fifty-six modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and fifty-seven modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1027,5 +1027,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `material_data_release` at `0x4cecc`, and the Phase AA module
 `func_2f985` at `0x2f985`, and the Phase AA module
 `sound_fx_volume_set` at `0x1f8b4`, and the Phase AA module
-`attack_data_release` at `0x22d64`.
-The next unnamed function is `0x11a08`.
+`attack_data_release` at `0x22d64`, and the Phase AA module
+`object_handle_table_release` at `0x11a08`.
+The next unnamed function is `0x1028c`.

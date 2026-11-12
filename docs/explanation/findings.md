@@ -32097,3 +32097,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The `ATTACK` resource and the
   replay buffer loader give the role, and the name `attack_data_release` stays
   inferred.
+
+## The object_handle_table_release module at 0x11a08
+
+- Observation: the original body at `0x11a08` holds 13 instructions and 36
+  bytes up to the `ret` at `0x11a2b`.  The next function starts at `0x11a30`,
+  so the store record keeps the 40-byte extent and sets no separate function
+  size.  The identity check uses 13 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11a08 --count 13` and
+  `tools/rebuild/functions/0x11a08.json`.
+- Observation: the only direct caller is `race_cleanup` at `0x2a1b0` with the
+  call site at `0x2a1e6`.  It calls this function after `object_unload` at
+  `0x11304` and before `material_data_release` at `0x4cecc`.
+  Evidence: the body of `race_cleanup` at `0x2a1b0` and the `race_cleanup`
+  record.
+- Observation: the function loads the resource list at object-3 offset
+  `0x801c` in `eax` and the name at object-3 offset `0x3f9` in `edx`, then
+  calls `resource_free_name` at `0x2f326`.  The string at linear `0x1003f9`
+  holds `OBJ_LIST`.  A non-zero result loads the same list in `eax` and calls
+  the memory error report at `0x2edad`.
+  Evidence: the block at `0x11a08` through `0x11a2b`, the body of `0x2f326`,
+  and the body of `0x2edad`.
+- Observation: `object_handle_table_load` at `0x119cc` requests the same
+  `OBJ_LIST` name at object-3 offset `0x3f0` and stores the result in the
+  handle table pointer at `DAT_00021540`.  The two functions form the object
+  handle table load and release pair.  The module sits with the resource
+  loader records, so it takes the section Resource loader.
+  Evidence: the `object_handle_table_load` record and the two bodies.
+- Inference: the `OBJ_LIST` resource and the handle table loader support the
+  name `object_handle_table_release`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the `object_handle_table_load` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls two
+  resource helpers, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x11a08` through `0x11a0a` and
+  `tools/rebuild/object_handle_table_release.c`.
+- Observation: the harness holds the resource list pointer, the resource free
+  stub, and the memory error stub.  The stub records the call count, the list,
+  and the name pointer.  The three paths cover the successful free, the failed
+  free, and a failed free with another list.  Every path checks the call
+  count, the list, the `OBJ_LIST` name, and the error call.  The output holds
+  the markers `0`, `1`, `2`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/object_handle_table_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_handle_table_release`,
+  `work/rebuild/ohtr.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x11a08`.
+- Observation: the identity check compares 13 instructions.  The rebuilt body
+  holds 9 of 13 instructions, 15 of 36 bytes, and 1 of 3 relocation slots
+  equal.  V2 puts `push ebp` before `push edx`, loads `eax` before `edx`, keeps
+  the name pointer in `edx`, and restores the stack with `lea esp, [ebp - 4]`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11a08 --count 13 --rebuilt work/rebuild/ohtr.exe
+  --rebuilt-map work/rebuild/object_handle_table_release.map --rebuilt-symbol
+  object_handle_table_release_` and
+  `python3 tools/rebuild/run.py run --function 0x11a08`.
+- Limit: the original has no symbol name.  The `OBJ_LIST` resource and the
+  handle table loader give the role, and the name `object_handle_table_release`
+  stays inferred.

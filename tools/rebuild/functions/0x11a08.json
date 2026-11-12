@@ -1,9 +1,111 @@
 {
   "address": "0x11a08",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11a08 holds 13 instructions and 36 bytes up to the ret at 0x11a2b; the next function starts at 0x11a30, so the store record keeps the 40-byte extent and sets no separate function size; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_cleanup at 0x2a1b0 with the call site at 0x2a1e6; it calls this function after object_unload at 0x11304 and before material_data_release at 0x4cecc; the function frees the object resource that object_handle_table_load at 0x119cc loads, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the OBJ_LIST name at object-3 offset 0x3f9 from the resource list at object-3 offset 0x801c through resource_free_name at 0x2f326; a non-zero result runs the memory error report at 0x2edad with the same list; the string at linear 0x1003f9 holds OBJ_LIST"
+    },
+    {
+      "kind": "note",
+      "text": "object_handle_table_load at 0x119cc requests the same OBJ_LIST name at object-3 offset 0x3f0 and stores the result in the handle table pointer at DAT_00021540; the load and release pair supports the name object_handle_table_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls two resource helpers, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the resource list pointer, the resource free stub, and the memory error stub; the stub records the call count, the list, and the name pointer; the three paths cover the successful free, the failed free, and a failed free with another list; every path checks the call count, the list, the OBJ_LIST name, and the error call; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 13 instructions; the rebuilt body holds 9 of 13 instructions, 15 of 36 bytes, and 1 of 3 relocation slots equal; V2 puts push ebp before push edx, loads eax before edx, keeps the name pointer in edx, and restores the stack with lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11a08 --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11a08 --count 13 --rebuilt work/rebuild/ohtr.exe --rebuilt-map work/rebuild/object_handle_table_release.map --rebuilt-symbol object_handle_table_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module object_handle_table_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module object_handle_table_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11a08"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_handle_table_release module at 0x11a08"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_table_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_table_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_handle_table_release.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_handle_table_release",
+  "name": "object_handle_table_release",
   "notes": [],
   "object_offset": "0x1a08",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 15,
+        "bytes_total": 36,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11a08",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:8b33684c578d8d83596072dbc49734419e4d5d4f7240434fe777bb2592e22c3e",
+    "source_digest": "sha256:954795054d10b1db4dfe06a0aa90e6134b1d2dd3e79f760163b26f0bc9280358",
+    "tool": "run.py"
+  },
+  "role": "Frees the OBJ_LIST resource and reports a memory error on a failed free.",
+  "section": "Resource loader",
   "size": 40,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_handle_table_release_"
 }
