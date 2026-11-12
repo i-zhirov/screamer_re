@@ -30988,3 +30988,54 @@ temporary `-od` recipe.
   0x117fc`.
 - Limit: the original has no symbol name.  The callers, the shared list, and
   the sibling helpers support the name, and the name stays inferred.
+
+## The object_list_tag_toggle module at 0x117a0
+
+- Observation: the original body at `0x117a0` holds 18 instructions and 51
+  bytes up to the first `ret` at `0x117d2`.  The bind path continues at
+  `0x117d3` to the second `ret` at `0x117fb`.  The next function starts at
+  `0x117fc`, so the store record keeps the 92-byte extent and sets no separate
+  function size.  The identity check uses 18 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x117a0 --count
+  18` and `tools/rebuild/functions/0x117a0.json`.
+- Observation: the function reads the entry index from the address in `ebx`.
+  The index selects one 0x1c-byte record of the object table.  A record with
+  the slot word at `+0x18` equal to -1 returns `0xe` and changes nothing.
+  Otherwise the function inverts the top bit of the list value at `list[slot]`
+  and returns 0.
+  Evidence: the blocks at `0x117a0` through `0x117fb`.
+- Inference: the helper at `0x117fc` writes the plain block pointer, and the
+  helper at `0x11850` writes the block pointer with the two top bits inverted.
+  No caller names the function.  The data flow supports the name
+  `object_list_tag_toggle`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred` and the section `Resource loader`.
+  Evidence: the bodies at `0x117a0`, `0x117fc`, and `0x11850`, and the finding
+  "The object_list_refresh module at 0x117fc".
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no direct
+  call, so the module needs no FPU stub and no assembly.
+  Evidence: the prologue at `0x117a0` through `0x117ac` and
+  `tools/rebuild/object_list_tag_toggle.c`.
+- Observation: the harness holds eight 0x1c-byte records, one block object per
+  record, an eight-entry list, and one entry index.  The seven paths cover the
+  first list slot, the middle slot, the last slot, the free slot, the record
+  selection by index, record 3 at slot 6, and two calls.  The output holds the
+  markers `0` through `6` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_list_tag_toggle_main.c`, `python3
+  tools/rebuild/harness.py run --module object_list_tag_toggle`,
+  `work/rebuild/olt.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x117a0`.
+- Observation: the rebuilt body holds 7 of 18 instructions equal and 4 of 41
+  bytes equal.  The identity check stays open because V2 keeps the index in
+  `ebx`, uses `imul` for the 0x1c stride, keeps the slot in `ecx`, and folds
+  the top-bit inversion into `xor byte ptr [edx + eax*4 + 3], 0x80`.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x117a0 --count 18 --rebuilt work/rebuild/olt.exe
+  --rebuilt-map work/rebuild/object_list_tag_toggle.map --rebuilt-symbol
+  object_list_tag_toggle_` and `python3 tools/rebuild/run.py run --function
+  0x117a0`.
+- Limit: the original has no symbol name.  No caller names the function.  The
+  data flow and the sibling helpers support the name, and the name stays
+  inferred.

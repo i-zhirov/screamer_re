@@ -1,0 +1,33 @@
+{
+  "exe": "olt.exe",
+  "map": "object_list_tag_toggle.map",
+  "name": "object_list_tag_toggle",
+  "run": {
+    "command": "olt.exe > olt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "olt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_list_tag_toggle.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_list_tag_toggle_main.c"
+    }
+  ]
+}
