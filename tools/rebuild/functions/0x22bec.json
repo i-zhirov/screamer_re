@@ -1,9 +1,111 @@
 {
   "address": "0x22bec",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 25,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22bec holds 25 instructions and 56 bytes up to the ret 8 at 0x22c21; the 12 padding bytes at 0x22c24 through 0x22c2f and the next function at 0x22c30 follow; the candidate record at 0x22bed sits on the push edx of the same prologue, so the store keeps the 1-byte extent to that record and sets no separate function size; the identity check uses 25 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct call sites at 0x174eb in car_proximity_pass at 0x17408, at 0x21c05 in sound_emitter_update at 0x21b9c, at 0x1e579 in opponent_avoid_player at 0x1e414, at 0x1d0fd in car_collision_pass at 0x1d00c, at 0x18c60 in sla_marker_check at 0x18ba8, and at 0x12d54 in game_mode_10_start at 0x12d0c pass a non-negative distance or a squared distance and use the result; the callers span four sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes one double on the stack; a negative argument returns 0.0, and any other argument goes to the square-root core at 0xc6cbe; the core tests the sign bit, uses fsqrt for a non-negative value, and reports the code 3 to the error routine at 0xde484 for a negative value"
+    },
+    {
+      "kind": "note",
+      "text": "the name sqrt comes from the math name table at file offset 0xf8212, where acos, asin, and sqrt are the first three names; the core reports code 3, so the third name is the core operation; many records also call this function the square-root wrapper, and the sqrt_ stub of the curve_speed module repeats the same negative guard; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the local sqrt_fpu.asm supplies sqrt_core_ from the hardware and the FPU run-time symbols; the original has the EBP frame and one 8-byte local, so the module builds with -of+; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness builds each double from its bit pattern, because the minimal image does not load the constant segment; the eight paths cover 9.0, 0.0, -1.0, 2.0, 0.25, 1000000.0, 100.0, and -0.0; every path compares the two 32-bit words of the result; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22bec --count 25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22bec --count 25 --rebuilt work/rebuild/sqrt.exe --rebuilt-map work/rebuild/sqrt.map --rebuilt-symbol sqrt_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sqrt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22bec"
+    },
+    {
+      "kind": "finding",
+      "text": "The sqrt module at 0x22bec"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sqrt.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sqrt_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sqrt_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sqrt.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 4 of 25 instructions and 7 of 53 bytes equal, and 0 of 0 relocation slots; the identity check stays open because V2 puts the frame first and saves eax, ecx, and edx, while the original saves eax and edx before the frame; V2 keeps the zero value in ecx instead of edx and passes the double to the core with two dword pushes instead of fld and fstp; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "sqrt",
+  "name": "sqrt",
   "notes": [],
   "object_offset": "0x12bec",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 53,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 25,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22bec",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f7bd283b021055a1716b707bb36ce844fe09ad1f1aa7d23d40f34169c586dd44",
+    "source_digest": "sha256:cdec2c323c2ffc182e92edc5f91a2830c7f342017fedb2acb078689c8fe6c1da",
+    "tool": "run.py"
+  },
+  "role": "Returns the square root of a double, or zero for a negative argument.",
+  "section": "Program functions",
   "size": 1,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sqrt_"
 }

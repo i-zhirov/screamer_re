@@ -30399,3 +30399,69 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller and the frame path
   support the role, and the name stays inferred.  The original uses the caller
   registers, so the C build cannot reproduce the exact bytes.
+
+## The sqrt module at 0x22bec
+
+- Observation: the original body at `0x22bec` holds 25 instructions and 56
+  bytes up to the `ret 8` at `0x22c21`.  The 12 padding bytes at `0x22c24`
+  through `0x22c2f` and the next function at `0x22c30` follow the body.  A
+  candidate record at `0x22bed` sits on the `push edx` of the same prologue,
+  so the store keeps the 1-byte extent to that record and sets no separate
+  function size.  The identity check uses 25 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22bec --count
+  25` and `tools/rebuild/functions/0x22bec.json`.
+- Observation: the direct call sites at `0x174eb` in `car_proximity_pass` at
+  `0x17408`, at `0x21c05` in `sound_emitter_update` at `0x21b9c`, at `0x1e579`
+  in `opponent_avoid_player` at `0x1e414`, at `0x1d0fd` in
+  `car_collision_pass` at `0x1d00c`, at `0x18c60` in `sla_marker_check` at
+  `0x18ba8`, and at `0x12d54` in `game_mode_10_start` at `0x12d0c` pass a
+  non-negative distance or a squared distance and use the result.  The callers
+  span four sections, so the record takes the section `Program functions`.
+  Evidence: the six call sites and the records at `0x17408`, `0x21b9c`,
+  `0x1e414`, `0x1d00c`, `0x18ba8`, and `0x12d0c`.
+- Observation: the function takes one double on the stack.  A negative
+  argument returns 0.0.  Any other argument goes to the square-root core at
+  `0xc6cbe`.  The core tests the sign bit, uses `fsqrt` for a non-negative
+  value, and reports the code 3 to the error routine at `0xde484` for a
+  negative value.
+  Evidence: the block at `0x22bec` through `0x22c21`, the core at `0xc6cbe`,
+  and the error routine at `0xde484`.
+- Inference: the name `sqrt` comes from the math name table at file offset
+  `0xf8212`.  The first three names are `acos`, `asin`, and `sqrt`.  The core
+  reports the code 3, so the third name is the core operation.  Many records
+  call this function the square-root wrapper, and the `sqrt_` stub of the
+  `curve_speed` module repeats the same negative guard.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the name table at file offset `0xf8208` through `0xf8214`, the
+  code at the call site `0xc6cde`, and
+  `tools/rebuild/curve_speed_fpu.asm`.
+- Observation: the local `sqrt_fpu.asm` supplies `sqrt_core_` from the
+  hardware and the FPU run-time symbols.  The original has the EBP frame and
+  one 8-byte local, so the module builds with `-of+`.  The module uses no
+  assembly implementation.
+  Evidence: `tools/rebuild/sqrt_fpu.asm`,
+  `tools/rebuild/modules/sqrt.json`, and the frame at `0x22bb4` through
+  `0x22c21`.
+- Observation: the harness builds each double from its bit pattern, because
+  the minimal image does not load the constant segment.  The eight paths cover
+  9.0, 0.0, -1.0, 2.0, 0.25, 1000000.0, 100.0, and -0.0.  Every path compares
+  the two 32-bit words of the result.  The output holds the markers `0`
+  through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sqrt_main.c`, `python3 tools/rebuild/harness.py run
+  --module sqrt`, `work/rebuild/sqrt.txt`, and `python3 tools/rebuild/run.py
+  run --function 0x22bec`.
+- Observation: the rebuilt body holds 4 of 25 instructions and 7 of 53 bytes
+  equal, and 0 of 0 relocation slots.  V2 puts the frame first and saves
+  `eax`, `ecx`, and `edx`, while the original saves `eax` and `edx` before the
+  frame.  V2 keeps the zero value in `ecx` instead of `edx` and passes the
+  double to the core with two dword pushes instead of `fld` and `fstp`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22bec --count 25 --rebuilt work/rebuild/sqrt.exe
+  --rebuilt-map work/rebuild/sqrt.map --rebuilt-symbol sqrt_` and `python3
+  tools/rebuild/run.py run --function 0x22bec`.
+- Limit: the original has no symbol name.  The math name table, the core
+  error code, and the negative guard support the name, and the name stays
+  inferred.  The V2 register save order and the double push form differ from
+  the original, so the C build cannot reproduce the exact bytes.

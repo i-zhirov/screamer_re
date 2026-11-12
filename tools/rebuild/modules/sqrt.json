@@ -1,0 +1,38 @@
+{
+  "exe": "sqrt.exe",
+  "map": "sqrt.map",
+  "name": "sqrt",
+  "run": {
+    "command": "sqrt.exe > sqrt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "sqrt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sqrt.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "sqrt_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sqrt_main.c"
+    }
+  ]
+}
