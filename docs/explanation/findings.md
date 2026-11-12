@@ -30036,3 +30036,66 @@ temporary `-od` recipe.
   helpers support the role, and the name stays inferred.  The identity check
   stays open because C cannot reproduce the argument spill and the register
   save shape.
+
+## The object_handle_table_load module at 0x119cc
+
+- Observation: the original body at `0x119cc` holds 21 instructions and 58
+  bytes up to the `ret` at `0x11a05`.  The next function starts at `0x11a08`,
+  so the store record keeps the 60-byte extent and sets no separate function
+  size.  The identity check uses 21 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x119cc --count
+  21` and `tools/rebuild/functions/0x119cc.json`.
+- Observation: the only direct caller is `menu_objects_init` at `0x2aab8`,
+  call site `0x2aadc`.  That caller loads the menu object list before it looks
+  the object names up, so the record takes the section `Resource loader`.
+  Evidence: the call at `0x2aadc`, the record at `0x2aab8`, and
+  `tools/rebuild/menu_objects_init.c`.
+- Observation: the function requests the `OBJ_LIST` name at object-3 offset
+  `0x3f0` with the size `0x17e80` through `resource_get` at `0x2eed0`.  It
+  passes the resource list at object-3 offset `0x801c` in `eax`, the name in
+  `edx`, and the size in `ebx`.  The data at object-3 offset `0x3f0` holds
+  `OBJ_LIST`.
+  Evidence: the operands at `0x119d4`, `0x119d9`, and `0x119de`, the call at
+  `0x119e3`, and the data dump at object-3 offset `0x3f0`.
+- Observation: the function stores the result in the handle table pointer at
+  object-3 offset `0x21540`.  A zero result returns `0x12`.  Otherwise the
+  function writes the free marker -1 to the first handle and returns 0.
+  Evidence: the block at `0x119e8` through `0x11a05`.
+- Inference: `object_load` at `0x10bfc` walks the same handle table from the
+  first handle and stops at the -1 marker, so the loaded resource is the object
+  file handle table.  The caller, the resource name, and the free marker
+  support the name `object_handle_table_load`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: the free-slot walk at `0x10c1f` through `0x10c39` and the module
+  `tools/rebuild/object_load.c`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no other
+  helper, so the module uses no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x119cc` through `0x119d1` and the module recipe.
+- Observation: the harness holds the resource list pointer, the handle table
+  pointer, the handle table, and the `resource_get` stub.  The three paths
+  cover the non-zero result, the zero result, and a second non-zero result with
+  another resource list.  Every path checks the result, the call count, the
+  recorded arguments, the table pointer, and the first handle.  The output
+  holds the markers `0` through `2` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_handle_table_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_handle_table_load`,
+  `work/rebuild/ohtl.txt`, and `python3 tools/rebuild/run.py run --function
+  0x119cc`.
+- Observation: the rebuilt body holds 6 of 21 instructions equal, 6 of 57
+  bytes equal, and 1 of 5 relocation slots equal.  The identity check stays
+  open because V2 saves `ebp` first, orders the saved `ebx` and `edx` in
+  another shape, keeps no frame local, reads the two globals through near data
+  addresses, and passes the literal `OBJ_LIST` address instead of the fixed
+  object-3 offset.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x119cc --count 21 --rebuilt work/rebuild/ohtl.exe
+  --rebuilt-map work/rebuild/object_handle_table_load.map --rebuilt-symbol
+  object_handle_table_load_` and `python3 tools/rebuild/run.py run --function
+  0x119cc`.
+- Limit: the original has no symbol name.  The caller, the resource name, and
+  the handle table support the role, and the name stays inferred.  The identity
+  check stays open because C cannot reproduce the fixed data address and the
+  register save shape.
