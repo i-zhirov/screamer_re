@@ -686,7 +686,41 @@ reproduce the original bytes.
 | `0x102e4` | `line_clip_draw` (done) | 47 | 16 | 0 | 0 |
 | `0x264f8` | `cd_audio_resume` (done) | 46 | 14 | 1 | 0 |
 
-This table starts Phase Z.
+This table completes Phase Z.
+
+### Phase AA: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x8a8d8` | unnamed | 45 | 12 | 0 | 0 |
+| `0x22d88` | unnamed | 45 | 14 | 0 | 0 |
+| `0x4da3a` | unnamed | 44 | 22 | 0 | 6 |
+| `0x1f880` | unnamed | 42 | 15 | 1 | 0 |
+| `0x15150` | unnamed | 42 | 12 | 7 | 0 |
+| `0x15b80` | unnamed | 41 | 14 | 2 | 0 |
+| `0x10263` | unnamed | 41 | 16 | 1 | 0 |
+| `0x2ff84` | unnamed | 40 | 15 | 1 | 0 |
+| `0x19478` | unnamed | 40 | 14 | 0 | 0 |
+| `0x4cecc` | unnamed | 38 | 12 | 2 | 0 |
+| `0x2f985` | unnamed | 38 | 21 | 0 | 0 |
+| `0x1f8b4` | unnamed | 37 | 14 | 1 | 0 |
+| `0x22d64` | unnamed | 36 | 12 | 1 | 0 |
+| `0x11a08` | unnamed | 36 | 13 | 2 | 0 |
+| `0x1028c` | unnamed | 36 | 18 | 0 | 0 |
+| `0x1fa04` | unnamed | 34 | 15 | 0 | 0 |
+| `0x240a0` | unnamed | 33 | 15 | 1 | 0 |
+| `0x13540` | unnamed | 33 | 13 | 1 | 0 |
+| `0x2fef4` | unnamed | 32 | 13 | 1 | 0 |
+| `0x25af0` | unnamed | 32 | 11 | 1 | 0 |
+| `0x25f24` | unnamed | 31 | 11 | 1 | 0 |
+| `0x25620` | unnamed | 31 | 12 | 0 | 0 |
+| `0x1f6f8` | unnamed | 31 | 11 | 1 | 0 |
+| `0x15bfc` | unnamed | 31 | 11 | 0 | 2 |
+
+This table starts Phase AA.
 
 ## Position
 
