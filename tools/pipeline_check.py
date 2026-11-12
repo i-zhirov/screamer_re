@@ -705,13 +705,27 @@ def expected_result(record: dict, skip_runtime: bool) -> tuple[str, str | None]:
     return "PASS", detail
 
 
-def unchanged_is_verified(record: dict, game_dir: Path) -> bool:
+def unchanged_matches(record: dict, verdict: str) -> bool:
+    """Tell whether the printed verdict equals the stored verdict of a record.
+
+    The runner prints the stored verdict of a record whose inputs are unchanged,
+    so a stored `fail` prints `FAIL` and stays the expected result of the drift
+    check.
+    """
+    return verdict == store_module.stored_verdict(record)
+
+
+def unchanged_is_verified(
+    record: dict, game_dir: Path, skip_runtime: bool
+) -> bool:
     """Tell whether the recorded result of an unchanged record is trustworthy.
 
-    The runner reports `PASS` with the unchanged detail only when the fingerprint
-    of the recorded result equals the current input fingerprint.  The stage
-    recomputes the fingerprint itself, so a forged or a stale store record
-    fails even when the runner is skipped.
+    The runner reports the stored verdict with the unchanged detail only when
+    the fingerprint of the recorded result equals the current input
+    fingerprint.  The stage recomputes the fingerprint itself, so a forged or a
+    stale store record fails even when the runner is skipped.  The strict mode
+    and the toolchain enter the fingerprint.  The runtime mode does not, so a
+    stored runtime-run result still verifies under `--skip-runtime`.
     """
     result = record.get("result") or {}
     stored = result.get("fingerprint")
@@ -723,7 +737,10 @@ def unchanged_is_verified(record: dict, game_dir: Path) -> bool:
     except ValueError:
         return False
     current = store_module.compute_fingerprint(
-        record, module, original=game_dir / "STARTH.EXE"
+        record,
+        module,
+        original=game_dir / "STARTH.EXE",
+        mode=store_module.run_mode(True, skip_runtime),
     )
     return stored == current
 
@@ -737,10 +754,12 @@ def check_run(
     the stage needs Docker and DOSBox-X.  With `--skip-unchanged` the runner
     reports a record whose inputs are unchanged since the previous run without
     running its checks, and the stage verifies the stored fingerprint of that
-    record itself.  The stage compares the printed verdict of every record that
-    ran with the recorded result, so a known difference passes and a change or an
-    unexpected skip fails.  A record the store holds no result for is skipped,
-    because the run holds nothing to compare it with.
+    record itself.  The runner prints the stored verdict, so a stored `fail` is
+    the expected result of an unchanged record and still shows `FAIL`.  The stage
+    compares the printed verdict of every record that ran with the recorded
+    result, so a known difference passes and a change or an unexpected skip
+    fails.  A record the store holds no result for is skipped, because the run
+    holds nothing to compare it with.
     """
     if shutil.which("docker") is None:
         print("docker is not on PATH; the record run is skipped")
@@ -777,11 +796,16 @@ def check_run(
             checks.skip(f"stage 11: {label}", NO_RESULT_DETAIL)
             continue
         if detail == UNCHANGED_DETAIL:
-            ok = verdict == "PASS" and unchanged_is_verified(record, game_dir)
+            matches = unchanged_matches(record, verdict)
+            verified = unchanged_is_verified(record, game_dir, skip_runtime)
             detail_text = f"{verdict} ({detail})"
-            if not ok:
+            if not matches:
+                detail_text += (
+                    f", the stored result is {store_module.stored_verdict(record)}"
+                )
+            if not verified:
                 detail_text += ", the recorded fingerprint does not match the inputs"
-            checks.check(f"stage 11: {label}", ok, detail_text)
+            checks.check(f"stage 11: {label}", matches and verified, detail_text)
             compared += 1
             continue
         expected, expected_detail = expected_result(record, skip_runtime)

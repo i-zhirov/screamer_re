@@ -5,6 +5,7 @@ Usage:
 """
 from __future__ import annotations
 
+import argparse
 import contextlib
 import io
 import json
@@ -122,6 +123,10 @@ class RunTestCase(unittest.TestCase):
             records, modules or {}, stale_fn, **arguments
         )
 
+    def parse(self, *arguments: str) -> argparse.Namespace:
+        with mock.patch.object(sys, "argv", ["run.py", "run", *arguments]):
+            return run.parse_arguments()
+
     def test_progress_line_pass(self) -> None:
         self.assertEqual(
             run.progress_line(
@@ -178,12 +183,52 @@ class RunTestCase(unittest.TestCase):
             "[4/10] 0x108e4 bios_video: FAIL (instructions 22/22, bytes 42/52)",
         )
 
-    def test_summary(self) -> None:
-        self.assertEqual(
-            run.summarize(["PASS", "PASS", "FAIL", "SKIP"]),
-            "4 records: 2 pass, 1 fail, 1 skip",
+    def test_runner_mode_holds_the_three_fields(self) -> None:
+        mode = run.run_mode(argparse.Namespace(strict=True, skip_runtime=False))
+        self.assertTrue(mode["strict"])
+        self.assertEqual(mode["toolchain"], "v2")
+        self.assertEqual(mode["runtime"], "run")
+        skipped = run.run_mode(
+            argparse.Namespace(strict=False, skip_runtime=True)
         )
-        self.assertEqual(run.summarize([]), "0 records: 0 pass, 0 fail, 0 skip")
+        self.assertFalse(skipped["strict"])
+        self.assertEqual(skipped["toolchain"], "v2")
+        self.assertEqual(skipped["runtime"], "skip")
+
+    def test_parse_arguments_defaults_to_strict(self) -> None:
+        self.assertTrue(self.parse("--all").strict)
+
+    def test_parse_arguments_allow_shape_restores_the_historical_gate(self) -> None:
+        self.assertFalse(self.parse("--all", "--allow-shape").strict)
+
+    def test_parse_arguments_accepts_the_strict_flag(self) -> None:
+        self.assertTrue(self.parse("--all", "--strict").strict)
+
+    def test_result_holds_the_mode(self) -> None:
+        mode = store.run_mode(True, False)
+        result = run._result(
+            {},
+            self.module(),
+            "python3 tools/rebuild/run.py run --all",
+            "sha256:" + "0" * 64,
+            mode,
+        )
+        self.assertEqual(result["mode"], mode)
+
+    def test_summary_separates_the_match_buckets(self) -> None:
+        self.assertEqual(
+            run.summarize(
+                ["PASS", "PASS", "FAIL", "SKIP"],
+                ["exact", None, "shape", None],
+            ),
+            "4 records: 2 pass, 1 fail, 1 skip; exact 1, relocation-only 0, "
+            "shape 1, behavior-only 0",
+        )
+        self.assertEqual(
+            run.summarize([], []),
+            "0 records: 0 pass, 0 fail, 0 skip; exact 0, relocation-only 0, "
+            "shape 0, behavior-only 0",
+        )
 
     def test_diff_verdict_pass(self) -> None:
         for verdict in (
@@ -410,7 +455,10 @@ class RunTestCase(unittest.TestCase):
             "tool": "run.py",
             "source_digest": store.source_digest(module),
             "fingerprint": store.compute_fingerprint(
-                record, module, original=self.original
+                record,
+                module,
+                original=self.original,
+                mode=store.run_mode(True, False),
             ),
             "checks": {"build": {"verdict": "pass", "detail": "the module builds"}},
         }
@@ -422,6 +470,254 @@ class RunTestCase(unittest.TestCase):
             "--function",
             "0x300ec",
             "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_build", side_effect=AssertionError("must not build")
+        ):
+            with mock.patch.object(
+                run, "run_identity", side_effect=AssertionError("must not diff")
+            ):
+                with mock.patch.object(
+                    run, "run_behavior", side_effect=AssertionError("must not run")
+                ):
+                    with mock.patch.object(sys, "argv", arguments):
+                        with contextlib.redirect_stdout(output):
+                            code = run.main()
+        self.assertEqual(code, 0)
+        self.assertIn(
+            "PASS (the inputs are unchanged since the previous run)",
+            output.getvalue(),
+        )
+
+    def test_skip_unchanged_prints_the_stored_fail(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="rebuilt",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": store.source_digest(module),
+            "fingerprint": store.compute_fingerprint(
+                record,
+                module,
+                original=self.original,
+                mode=store.run_mode(True, False),
+            ),
+            "checks": {
+                "identity": {
+                    "verdict": "fail",
+                    "detail": "the instruction sequences differ",
+                    "match": "same-shape",
+                }
+            },
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_identity", side_effect=AssertionError("must not diff")
+        ):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 1)
+        self.assertIn(
+            "FAIL (the inputs are unchanged since the previous run)",
+            output.getvalue(),
+        )
+        self.assertIn("1 fail", output.getvalue())
+        self.assertIn("shape 1", output.getvalue())
+
+    def test_failed_build_demotes_a_verified_record(self) -> None:
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="verified",
+            module="free",
+            symbol="free_",
+            checks=["build"],
+        )
+        self.write_record(196844, record)
+        self.write_module("free", self.module())
+        failing = ("fail", "error: the module build failed")
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--original",
+            str(self.original),
+        ]
+        with mock.patch.object(run, "run_build", return_value=failing):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    code = run.main()
+        self.assertEqual(code, 1)
+        stored = store.load_record(196844)
+        self.assertEqual(stored["status"], "named")
+        self.assertEqual(
+            stored["result"]["checks"]["build"]["verdict"], "fail"
+        )
+
+    def test_failed_behavior_demotes_a_verified_identity_record(self) -> None:
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="verified",
+            module="free",
+            symbol="free_",
+            checks=["identity", "behavior"],
+        )
+        self.write_record(196844, record)
+        self.write_module("free", self.module())
+        passing = (
+            "pass",
+            {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "match": "exact-bytes",
+                "instructions_equal": 3,
+                "instructions_total": 3,
+                "bytes_equal": 9,
+                "bytes_total": 9,
+            },
+        )
+        failing = ("fail", "the output differs")
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--original",
+            str(self.original),
+        ]
+        with mock.patch.object(run, "run_identity", return_value=passing):
+            with mock.patch.object(run, "run_behavior", return_value=failing):
+                with mock.patch.object(sys, "argv", arguments):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        code = run.main()
+        self.assertEqual(code, 1)
+        stored = store.load_record(196844)
+        self.assertEqual(stored["status"], "matching")
+        self.assertEqual(
+            stored["result"]["checks"]["behavior"]["verdict"], "fail"
+        )
+
+    def test_skip_unchanged_runs_a_record_with_a_changed_mode(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="rebuilt",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": store.source_digest(module),
+            "fingerprint": store.compute_fingerprint(
+                record,
+                module,
+                original=self.original,
+                mode=store.run_mode(True, False),
+            ),
+            "checks": {
+                "identity": {
+                    "verdict": "pass",
+                    "detail": "the modules are byte-identical",
+                }
+            },
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        passing = (
+            "pass",
+            {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "instructions_equal": 3,
+                "instructions_total": 3,
+                "bytes_equal": 6,
+                "bytes_total": 9,
+            },
+        )
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--allow-shape",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_identity", return_value=passing
+        ) as identity:
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        identity.assert_called_once()
+        self.assertNotIn(
+            "the inputs are unchanged since the previous run", output.getvalue()
+        )
+
+    def test_skip_unchanged_ignores_the_runtime_mode(self) -> None:
+        module = self.module()
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="verified",
+            module="free",
+            symbol="free_",
+            checks=["build", "identity", "behavior"],
+        )
+        record["result"] = {
+            "date": "2026-10-27",
+            "command": "python3 tools/rebuild/run.py run --function 0x300ec",
+            "tool": "run.py",
+            "source_digest": store.source_digest(module),
+            "fingerprint": store.compute_fingerprint(
+                record,
+                module,
+                original=self.original,
+                mode=store.run_mode(True, False),
+            ),
+            "checks": {"build": {"verdict": "pass", "detail": "the module builds"}},
+        }
+        self.write_record(196844, record)
+        self.write_module("free", module)
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--skip-unchanged",
+            "--skip-runtime",
             "--original",
             str(self.original),
         ]
@@ -567,18 +863,31 @@ class RunTestCase(unittest.TestCase):
         self.assertIn("is missing", errors.getvalue())
         self.assertNotIn("FAIL", output.getvalue())
 
-    def test_identity_accepted_default_and_strict(self) -> None:
-        identical = "the modules are byte-identical"
-        link_time = (
+    def test_match_of_maps_each_verdict(self) -> None:
+        verdicts = {
+            "the modules are byte-identical": "exact-bytes",
             "the instruction sequences match; the differing operands are the "
-            "link-time addresses"
-        )
-        reordered = "the modules hold the same instructions in a different order"
-        for verdict in (identical, link_time):
-            self.assertTrue(run.identity_accepted(verdict, True))
-            self.assertTrue(run.identity_accepted(verdict, False))
-        self.assertTrue(run.identity_accepted(reordered, False))
-        self.assertFalse(run.identity_accepted(reordered, True))
+            "link-time addresses": "exact-relocations",
+            "the instruction shapes match; the differing bytes are not "
+            "relocations": "same-shape",
+            "the modules hold the same instructions in a different order": (
+                "same-mnemonics"
+            ),
+            "the instruction sequences differ": "different",
+        }
+        for verdict, match in verdicts.items():
+            self.assertEqual(run.match_of(verdict), match)
+        self.assertEqual(run.match_of("an unknown verdict"), "different")
+
+    def test_identity_accepted_uses_the_match(self) -> None:
+        for match in ("exact-bytes", "exact-relocations"):
+            self.assertTrue(run.identity_accepted(match, True))
+            self.assertTrue(run.identity_accepted(match, False))
+        for match in ("same-shape", "same-mnemonics"):
+            self.assertFalse(run.identity_accepted(match, True))
+            self.assertTrue(run.identity_accepted(match, False))
+        for strict in (True, False):
+            self.assertFalse(run.identity_accepted("different", strict))
 
     def identity_stdout(self, verdict: str) -> str:
         return (
@@ -599,12 +908,27 @@ class RunTestCase(unittest.TestCase):
             default_verdict, _ = run.run_identity(
                 record, module, self.original
             )
-            strict_verdict, strict_check = run.run_identity(
-                record, module, self.original, strict=True
+            shape_verdict, shape_check = run.run_identity(
+                record, module, self.original, strict=False
             )
-        self.assertEqual(default_verdict, "pass")
-        self.assertEqual(strict_verdict, "fail")
-        self.assertEqual(strict_check["verdict"], "fail")
+        self.assertEqual(default_verdict, "fail")
+        self.assertEqual(shape_verdict, "pass")
+        self.assertEqual(shape_check["verdict"], "pass")
+
+    def test_identity_result_holds_the_match(self) -> None:
+        link_time = (
+            "the instruction sequences match; the differing operands are the "
+            "link-time addresses"
+        )
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout(link_time), ""
+        )
+        record = {"address": "0x300ec", "symbol": "free_"}
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(run.subprocess, "run", return_value=completed):
+            verdict, check = run.run_identity(record, module, self.original)
+        self.assertEqual(verdict, "pass")
+        self.assertEqual(check["match"], "exact-relocations")
 
     def test_strict_identity_accepts_link_time_operands(self) -> None:
         link_time = (
@@ -638,7 +962,10 @@ class RunTestCase(unittest.TestCase):
             "tool": "run.py",
             "source_digest": store.source_digest(module),
             "fingerprint": store.compute_fingerprint(
-                record, module, original=self.original
+                record,
+                module,
+                original=self.original,
+                mode=store.run_mode(True, False),
             ),
             "checks": {
                 "identity": {

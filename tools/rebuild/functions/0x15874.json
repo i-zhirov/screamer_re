@@ -74,12 +74,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 47,
         "instructions_total": 69,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15874",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:7a1412417e9fe3ec8a2aaee740b571ccbee024e58a3292aa4e7b296b3b55f06d",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f7a0604362d781448d32170fa0f3e139794aa1ac08bb4a15bef807191c459b94",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:47e1f7bd38bca1c77c6d392d5f79e928e5d24b5b635e1f7231d0cce4fe9ae3b4",
     "tool": "run.py"
   },

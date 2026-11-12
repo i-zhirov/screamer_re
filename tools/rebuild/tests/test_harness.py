@@ -6,6 +6,7 @@ Usage:
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -160,13 +161,13 @@ class HarnessTestCase(unittest.TestCase):
             "free.exe > free_out.txt\n",
         )
 
-    def test_missing_lines_accepts_lines_on_their_own(self) -> None:
+    def test_missing_lines_accepts_a_complete_line(self) -> None:
         text = "NULL\nDONE\nFREE\nAFTR\n"
         self.assertEqual(
             harness.missing_lines(["NULL", "DONE", "FREE", "AFTR"], text), []
         )
 
-    def test_missing_lines_accepts_embedded_suffix(self) -> None:
+    def test_missing_lines_requires_a_complete_line(self) -> None:
         expect = [
             "W 20 0F",
             "W 40 3F",
@@ -187,7 +188,18 @@ class HarnessTestCase(unittest.TestCase):
             "W 43 01\n"
             "W C0 01\n"
         )
-        self.assertEqual(harness.missing_lines(expect, text), [])
+        self.assertEqual(harness.missing_lines(expect, text), ["W 20 0F"])
+
+    def test_clear_output_removes_a_stale_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "out.txt"
+            path.write_text("stale\n")
+            harness.clear_output(path)
+            self.assertFalse(path.exists())
+
+    def test_clear_output_accepts_a_missing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            harness.clear_output(Path(directory) / "out.txt")
 
     def test_missing_lines_rejects_crash_dump(self) -> None:
         expect = ["R", "R", "R", "D"]

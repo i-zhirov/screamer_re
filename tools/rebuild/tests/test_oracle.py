@@ -138,14 +138,11 @@ class OracleTestCase(unittest.TestCase):
         self.assertFalse(result.passes_strict)
 
     def test_strict_gate_accepts_a_relocation_only_verdict(self) -> None:
-        relocation_only = oracle.VERDICTS[oracle.EXACT_RELOCATIONS]
-        shape_only = oracle.VERDICTS[oracle.SAME_SHAPE]
-        reordered = oracle.VERDICTS[oracle.SAME_MNEMONICS]
-        self.assertTrue(run.identity_accepted(relocation_only, True))
-        self.assertFalse(run.identity_accepted(shape_only, True))
-        self.assertFalse(run.identity_accepted(reordered, True))
-        self.assertTrue(run.identity_accepted(shape_only, False))
-        self.assertTrue(run.identity_accepted(reordered, False))
+        self.assertTrue(run.identity_accepted(oracle.EXACT_RELOCATIONS, True))
+        self.assertFalse(run.identity_accepted(oracle.SAME_SHAPE, True))
+        self.assertFalse(run.identity_accepted(oracle.SAME_MNEMONICS, True))
+        self.assertTrue(run.identity_accepted(oracle.SAME_SHAPE, False))
+        self.assertTrue(run.identity_accepted(oracle.SAME_MNEMONICS, False))
 
 
 class FixupRecordTestCase(unittest.TestCase):

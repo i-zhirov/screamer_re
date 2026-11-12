@@ -1559,6 +1559,44 @@ reports 299 checks with `--skip-cross`, 288 checks with `--skip-runtime`, and
   `int 21` with `EAX=0x4b03` (`AH=0x4b`, `AL=0x03`, load overlay).  Evidence:
   the first log line.
 
+## The truthful verification baseline
+
+The verification baseline makes the reported number true.  A stored `fail`
+prints `FAIL`, a failed check demotes the record, the strict gate is the
+default, and the report separates the four result buckets.  Evidence:
+
+- The stored verdict reaches the progress line.  Command:
+  `python3 tools/rebuild/run.py run --function 0x2003c --skip-unchanged`.  The
+  command prints
+  `[1/1] 0x2003c race_simulation_update: FAIL (the inputs are unchanged since the previous run)`,
+  the summary holds `1 fail`, and the exit code is 1.
+- A failed check demotes the record.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_store.py" -k build_fails`.
+  The command reports 2 tests and OK.  A failed build gives `named` for a named
+  record and `unknown` for an unnamed record.
+- Every written result holds the mode.  Command:
+  `python3 tools/rebuild/store.py list --json`.  The store holds 1187 records.
+  253 records hold `result.mode`, and 252 records hold an identity `match`.
+  The mode holds `strict`, `toolchain` `v2`, and `runtime`.
+- The behavior run uses fresh output.  Command:
+  `python3 tools/rebuild/harness.py run --module driver`.  The command deletes
+  the old output and finds the eight complete marker lines.
+- The strict and default counts are separate.  The strict run prints
+  `24 pass`, and the run under `--allow-shape` prints `31 pass`.  The eight
+  shape matches pass the historical gate and fail the strict gate.  One shape
+  record also fails its behavior check, so the record verdict rises by seven.
+  Evidence: the summary line of each run.
+- A rebuild changes the input fingerprint even when the code is unchanged.  The
+  Open Watcom linker writes a creation time into the map file, and the
+  fingerprint covers the map.  Evidence: two builds of `free` produce the same
+  `free.exe` SHA-256 `32e3bc52...` and different `free.map` SHA-256 values
+  `6a497fbd...` and `6232e4a0...`.  The verification run therefore re-verifies
+  every record after a rebuild.  A stored result stays valid when no rebuild
+  occurs.
+- The full check reports 303 checks.  `--skip-cross` reports 299 checks,
+  `--skip-runtime` reports 288 checks, and both flags report 284 checks.
+  Evidence: the four pipeline commands.
+
 ## Open questions
 
 ### Entry alignment (resolved)

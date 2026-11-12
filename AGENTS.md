@@ -76,7 +76,10 @@ screamer_re/
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
-│   │   └── roadmap.md         # milestones and next steps
+│   │   ├── roadmap.md         # milestones and next steps
+│   │   ├── rebuild-quality-design.md         # rebuild quality improvement design
+│   │   ├── rebuild-quality-roadmap.md        # the seven rebuild quality slices
+│   │   └── rebuild-quality-plan-baseline.md  # the truthful verification baseline plan
 │   └── reference/
 │       ├── distribution.md    # GOG package and installed bundle layout
 │       ├── executables.md     # LE header metadata and runtime facts
@@ -133,6 +136,7 @@ python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
@@ -295,9 +299,9 @@ open ~/Documents/Screamer.app
 - Keep It Boring: the tools use the standard library and one
   `ctypes` binding to capstone.
 - Shared View Logic: every record element of the status page carries
-  `data-key`, `data-address`, `data-name`, `data-module`, `data-status`, and
-  `data-stale`. The filter and the selection use these attributes, so a new
-  view adds no separate filter or selection code.
+  `data-key`, `data-address`, `data-name`, `data-module`, `data-status`,
+  `data-stale`, and `data-match`. The filter and the selection use these
+  attributes, so a new view adds no separate filter or selection code.
 
 Layers:
 
@@ -344,10 +348,27 @@ through the store.
   and the tool preflight.
 - Stage 12 checks the program-map tables and the call graph for drift.  The
   call graph check needs capstone and the original executable.
-- The identity gate has two modes.  The default gate accepts the three
-  historical verdicts.  `--strict` accepts only the byte-identical verdict and
-  the verdict whose differences are the link-time addresses.  A reordered
-  instruction sequence and a shape match are diagnostic, not exact.
+- The identity gate has two modes.  Strict is the default.  The strict gate
+  accepts only the byte-identical verdict and the verdict whose differences are
+  the link-time addresses.  `--allow-shape` restores the historical gate, which
+  also accepts a shape match and a reordered instruction sequence.  `--strict`
+  stays accepted and selects the default gate.  A reordered instruction
+  sequence and a shape match are diagnostic, not exact.
+- The identity check result holds a `match` value: `exact-bytes`,
+  `exact-relocations`, `same-shape`, `same-mnemonics`, or `different`.  The
+  report holds four buckets: `exact`, `relocation-only`, `shape`, and
+  `behavior-only`.  The `same-shape` and `same-mnemonics` matches count in
+  `shape`.  The status page shows one counter per bucket and updates the
+  counters with the filter.
+- A failed build or a failed behavior check demotes the record.  A failed build
+  sets `named` when the record has a name, else `unknown`.  A failed behavior
+  check sets `matching` when identity passes, else `named` or `unknown`.  The
+  failed result stays on the record.  `store.py check` rejects a status that is
+  stronger than the stored result supports.
+- A behavior run deletes the old output first.  A marker matches a complete
+  output line, so an embedded marker does not pass.
+- `--skip-unchanged` prints the stored verdict of a record whose inputs are
+  unchanged since the previous run.  A stored `fail` prints `FAIL`.
 - `oracle.py` masks every byte that an LE fixup slot controls and every byte
   that encodes a direct branch target.  It compares the remaining bytes in
   instruction order.  An internal target compares by kind and width, because
@@ -391,8 +412,10 @@ through the store.
   shared harness sources (`chk.asm`, `stack.asm`, `cstart.c`), the record
   fields that steer the checks, the participating tools (`run.py`,
   `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original image, and
-  the built artifacts.  The fingerprint lives in the `result.fingerprint` of
-  the record, `store.compute_fingerprint` computes it, and `run.py
+  the built artifacts.  The fingerprint also covers the strict mode and the
+  toolchain.  It does not cover the runtime mode, so `--skip-runtime` does not
+  invalidate a stored result.  The fingerprint lives in the `result.fingerprint`
+  of the record, `store.compute_fingerprint` computes it, and `run.py
   --skip-unchanged` uses it.  `pipeline_check.py` verifies the stored
   fingerprint of an unchanged record itself.  A documentation-only change to a
   record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`,

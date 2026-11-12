@@ -82,12 +82,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 17,
         "instructions_total": 99,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19828",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:76ffd88e83da78f68e105636612d78e887ef0202c69735f480ebe11d1c6a8ac5",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f86c03cce98a36cba608cd9e3d799e120a6fb907ce7d1541d1cb57715db00996",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:f9628cad5d8552b7deddd7f1d45396e0cd3c006f10479a7ddcfd6756529ea7b8",
     "tool": "run.py"
   },

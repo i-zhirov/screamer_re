@@ -115,13 +115,14 @@
         "fingerprint": {
           "type": "string",
           "pattern": "^sha256:[0-9a-f]{64}$",
-          "description": "The SHA-256 over every input of the declared checks: the module recipe, the module sources, the shared harness sources, the record fields, the participating tools, the original image, and the built artifacts. Written by run.py."
+          "description": "The SHA-256 over every input of the declared checks: the module recipe, the module sources, the shared harness sources, the record fields, the strict mode and the toolchain, the participating tools, the original image, and the built artifacts. Written by run.py."
         },
         "checks": {
           "type": "object",
           "minProperties": 1,
           "additionalProperties": { "$ref": "#/$defs/check_result" }
-        }
+        },
+        "mode": { "$ref": "#/$defs/mode" }
       }
     },
     "check_result": {
@@ -131,10 +132,25 @@
       "properties": {
         "verdict": { "enum": ["pass", "fail"] },
         "detail": { "type": "string", "minLength": 1 },
+        "match": {
+          "enum": ["exact-bytes", "exact-relocations", "same-shape", "same-mnemonics", "different"],
+          "description": "The identity result class. Absent on a result that predates the field."
+        },
         "instructions_equal": { "type": "integer", "minimum": 0 },
         "instructions_total": { "type": "integer", "minimum": 0 },
         "bytes_equal": { "type": "integer", "minimum": 0 },
         "bytes_total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "description": "The mode of the run that wrote the result.",
+      "additionalProperties": false,
+      "required": ["strict", "toolchain", "runtime"],
+      "properties": {
+        "strict": { "type": "boolean" },
+        "toolchain": { "enum": ["v2"] },
+        "runtime": { "enum": ["run", "skip"] }
       }
     }
   }

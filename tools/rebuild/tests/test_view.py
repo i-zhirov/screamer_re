@@ -29,7 +29,7 @@ class ViewTestCase(unittest.TestCase):
         base.update(overrides)
         return base
 
-    def result(self, **counts: object) -> dict:
+    def result(self, match: str | None = None, **counts: object) -> dict:
         identity = {
             "verdict": "pass",
             "detail": "the instruction sequences match",
@@ -39,11 +39,14 @@ class ViewTestCase(unittest.TestCase):
             "bytes_total": 9,
         }
         identity.update(counts)
+        if match is not None:
+            identity["match"] = match
         return {
             "date": "2026-10-27",
             "command": "python3 tools/rebuild/run.py run --name free",
             "tool": "run.py",
             "source_digest": "sha256:" + "1" * 64,
+            "mode": {"strict": True, "toolchain": "v2", "runtime": "run"},
             "checks": {"identity": identity},
         }
 
@@ -331,6 +334,97 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn("verified", detail)
         self.assertIn("run.py run --module driver", detail)
 
+    def test_page_reports_match_buckets(self) -> None:
+        behavior = self.result()
+        behavior["checks"] = {"behavior": {"verdict": "pass"}}
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+            self.record(
+                "0x300f0",
+                name="exit_flush",
+                status="verified",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="exact-relocations"),
+            ),
+            self.record(
+                "0x300f4",
+                name="exit",
+                status="rebuilt",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="same-shape"),
+            ),
+        ]
+        modules = [
+            self.module("driver", checks=["behavior"], result=behavior),
+        ]
+        page = view.render_page(
+            records, modules, {"free": "sha256:" + "1" * 64}
+        )
+        self.assertIn('data-bucket="exact">1 exact</span>', page)
+        self.assertIn(
+            'data-bucket="relocation-only">1 relocation-only</span>', page
+        )
+        self.assertIn('data-bucket="shape">1 shape</span>', page)
+        self.assertIn('data-bucket="behavior-only">1 behavior-only</span>', page)
+
+    def test_page_targets_carry_the_match_bucket(self) -> None:
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                size=12,
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+        ]
+        page = view.render_page(records, [], {"free": "sha256:" + "1" * 64})
+        targets = {
+            "chip": r'<button class="chip[^"]*"[^>]*>',
+            "table row": r'<tr class="record-row[^"]*"[^>]*>',
+            "map block": r'<button class="map-block[^"]*"[^>]*>',
+            "treemap block": r'<button class="treemap-block[^"]*"[^>]*>',
+            "graph node": r'<g class="graph-node[^"]*"[^>]*>',
+        }
+        for label, pattern in targets.items():
+            match = re.search(pattern, page, re.DOTALL)
+            self.assertIsNotNone(match, f"the page holds no {label}")
+            self.assertIn('data-match="exact"', match.group(0), label)
+        module = self.module(
+            "driver",
+            checks=["identity"],
+            result=self.result(match="exact-bytes"),
+        )
+        page = view.render_page(
+            records,
+            [module],
+            {"free": "sha256:" + "1" * 64, "driver": "sha256:" + "1" * 64},
+        )
+        module_chip = re.search(
+            r'<button class="chip[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_chip, "the page holds no module chip")
+        self.assertIn('data-match="exact"', module_chip.group(0))
+        module_row = re.search(
+            r'<tr class="record-row[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_row, "the page holds no module row")
+        self.assertIn('data-match="exact"', module_row.group(0))
+
     def test_page_filters_and_switch(self) -> None:
         page = self.page()
         script = self.script(page)
@@ -354,6 +448,10 @@ class ViewTestCase(unittest.TestCase):
         )
         self.assertIn("document.querySelectorAll(TARGETS)", script)
         self.assertIn('document.querySelectorAll(".counter")', script)
+        self.assertIn("buckets[data.match]", script)
+        self.assertIn('document.querySelectorAll(".match-counter")', script)
+        self.assertIn('document.querySelectorAll(".match-counter")', script)
+        self.assertIn("counter.dataset.bucket", script)
         self.assertIn('getElementById("progress-verified")', script)
         self.assertIn('getElementById("progress-rebuilt")', script)
         self.assertIn("function setView", script)

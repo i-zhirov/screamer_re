@@ -640,7 +640,7 @@ The files:
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
-python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
@@ -649,6 +649,10 @@ python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
 ```
+
+`harness.py run` deletes the old output file before the DOSBox-X launch, so a
+stale file cannot pass.  A marker matches a complete output line, so an
+embedded marker does not pass.
 
 `view.py html` writes five views. The board groups the records by the
 program-map section. The table lists one row per record. The map places each
@@ -668,8 +672,19 @@ call targets of the verified and rebuilt roots, the entry jump at `0x300f8`,
 and the exit helper at `0x300d6`.  The target scan uses the capstone
 disassembly, so the seed needs the capstone library.
 
-`run.py --strict` accepts an identity verdict only when the bytes are exact or
-the only differences are the link-time addresses.  `--recheck-record ADDR`
+`run.py` uses the strict identity gate by default.  The strict gate accepts an
+identity verdict only when the bytes are exact or the only differences are the
+link-time addresses.  `--allow-shape` restores the historical gate, which also
+accepts a shape match and a reordered instruction sequence.  `--strict` stays
+accepted and selects the default gate.  The identity check result holds a
+`match` value: `exact-bytes`, `exact-relocations`, `same-shape`,
+`same-mnemonics`, or `different`.  The report holds four buckets: `exact`,
+`relocation-only`, `shape`, and `behavior-only`.  The `same-mnemonics` match
+counts in `shape`.  The input fingerprint covers the strict mode and the
+toolchain, and the result records the runtime mode.  The runtime mode does not
+enter the fingerprint, so `--skip-runtime` does not invalidate a stored result.
+`--skip-unchanged` prints the stored verdict, so a stored `fail` prints `FAIL`.
+`--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`
 validates every record and module against the JSON Schema contracts, in addition
 to the semantic checks.  `store.py set --function 0x2ed77 --implementation
@@ -790,13 +805,17 @@ python3 tools/rebuild/diff_module.py \
 ```
 
 The diff reads the original address from the command line and the rebuilt address
-from the linker map.  It exits with code 0 when the default gate passes.
+from the linker map.  It exits with code 0 when the default gate passes.  The
+`run.py` identity gate is separate: it uses the strict list by default and the
+historical list under `--allow-shape`.  `diff_module.py` still exits 0 when
+`oracle.passes_default` is true.  The oracle exposes `passes_strict` and
+`passes_default`.
 `oracle.py` masks every byte that an LE fixup slot controls and every byte that
 encodes a direct branch target.  It compares the remaining bytes in instruction
 order.  An internal target compares by kind and width, because the object number
 and the object offset are link-time values.  An imported target compares by
-module and ordinal or name offset.  A relocation-only difference passes
-`--strict`.  A reordered, inserted, or non-relocation difference does not.
+module and ordinal or name offset.  A relocation-only difference passes the
+strict gate.  A reordered, inserted, or non-relocation difference does not.
 
 The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
 `85 c0`, `0f 85 14 1f 0a 00`, and `c3`.  The direct branch target is masked, so
@@ -809,7 +828,8 @@ The rebuilt `printf` holds 34 bytes and 13 instructions, the same as the origina
 and no EBP frame.  Three instructions come in a different order, because the V2
 register allocator spills the argument list before it loads the arguments.  The
 oracle reports `the instruction shapes match; the differing bytes are not
-relocations`.  The default gate passes the record, and the strict gate fails it.
+relocations`.  The `diff_module.py` default gate passes the record, and the
+strict gate fails it.
 
 The `exit` test program carries the name `exitmod.exe`, because the DOS shell reads
 `exit` as its own command and leaves the session.  The `printf` test program carries
@@ -981,9 +1001,11 @@ decode, the record run, and the store check.  Stage 8 compares the entry, the
 page-0 mapping, the main function, and the main caller from `le.py`, radare2,
 and Ghidra.  It adds exactly four checks.  The check pins the reference values
 from the reference pages.  The tool exits with code 0 when every check passes.
-The record run is skipped when Docker is missing.  After the record run, stage
-11 compares the rebuilt whole image with the original when `--rebuilt-image`
-exists, and reports a skip when no whole image is built.  The member probe stage
+The record run is skipped when Docker is missing.  Stage 11 accepts a stored
+`fail` as the expected result and still shows `FAIL`.  After the record run,
+stage 11 compares the rebuilt whole image with the original when
+`--rebuilt-image` exists, and reports a skip when no whole image is built.
+The member probe stage
 caps the probe at the 55-open demo window and repeats it once when the control
 connection closes or times out before the first member, because that failure is
 transient.  It also repeats the probe once when a mid-run timeout ends the run

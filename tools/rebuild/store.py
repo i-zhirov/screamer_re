@@ -56,6 +56,7 @@ TOOL_FILES = (
 )
 MISSING = b"<missing>"
 UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
+TOOLCHAIN = "v2"
 STATUS_LADDER = (
     "unknown",
     "not_a_function",
@@ -67,6 +68,7 @@ STATUS_LADDER = (
 CHECKS = ("build", "identity", "behavior")
 EVIDENCE_KINDS = ("command", "finding", "file", "note")
 RUN_STATUSES = ("rebuilt", "matching", "verified")
+MATCH_BUCKETS = ("exact", "relocation-only", "shape", "behavior-only")
 LOAD_BASE = 0x1C2000
 ENTRY_ADDRESS = 0x300F8
 EXIT_FLUSH_ADDRESS = 0x300D6
@@ -244,20 +246,30 @@ def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
     return offenders
 
 
-def advance_status(checks: list[str], verdicts: dict[str, str]) -> str | None:
+def advance_status(
+    checks: list[str], verdicts: dict[str, str], has_name: bool = False
+) -> str | None:
     """Return the status the declared checks support, or None for no write.
 
-    The rules are exclusive in this order.
+    A failed build or a failed behavior check demotes the record, so a stored
+    `verified` status cannot survive a failed check.  A failed check sets
+    `named` for a named record and `unknown` for an unnamed record.  The rules
+    are exclusive in this order.
     """
     declared = list(checks)
     if not declared:
         return None
     if any(verdicts.get(name) == "skip" for name in declared):
         return None
+    demoted = "named" if has_name else "unknown"
     if "build" in declared:
         if verdicts.get("build") != "pass":
-            return None
+            return demoted
         if "identity" not in declared:
+            if "behavior" in declared:
+                if verdicts.get("behavior") != "pass":
+                    return demoted
+                return "verified"
             return "rebuilt"
     if "identity" in declared:
         if verdicts.get("identity") != "pass":
@@ -265,7 +277,9 @@ def advance_status(checks: list[str], verdicts: dict[str, str]) -> str | None:
         if "behavior" in declared and verdicts.get("behavior") != "pass":
             return "matching"
         return "verified"
-    if verdicts.get("behavior") == "pass":
+    if "behavior" in declared:
+        if verdicts.get("behavior") != "pass":
+            return demoted
         return "verified"
     return None
 
@@ -278,7 +292,57 @@ def supported_status(record: dict) -> str | None:
         name: check.get("verdict")
         for name, check in result.get("checks", {}).items()
     }
-    return advance_status(record.get("checks", []), verdicts)
+    return advance_status(
+        record.get("checks", []), verdicts, bool(record.get("name"))
+    )
+
+
+def stored_verdict(record: dict) -> str:
+    """Return the verdict of a stored result: `FAIL` on any stored fail.
+
+    A stored `fail` must not print as `PASS`, so the runner reads this value
+    instead of a fixed pass string.
+    """
+    checks = (record.get("result") or {}).get("checks", {})
+    if any(check.get("verdict") == "fail" for check in checks.values()):
+        return "FAIL"
+    return "PASS"
+
+
+def match_bucket(match: str | None) -> str | None:
+    """Return the report bucket of an identity match, or None for no bucket.
+
+    The shape bucket holds both `same-shape` and `same-mnemonics`, because the
+    report names the strength of the match, not the gate that accepted it.
+    """
+    return {
+        "exact-bytes": "exact",
+        "exact-relocations": "relocation-only",
+        "same-shape": "shape",
+        "same-mnemonics": "shape",
+    }.get(match)
+
+
+def result_bucket(
+    checks: dict[str, dict], declared: list[str]
+) -> str | None:
+    """Return the report bucket of a result, or None for no bucket.
+
+    The identity match gives the bucket even when the identity check failed, so
+    a failed shape match stays visible in the report.  A `different` or absent
+    match gives no bucket.  A result without a declared identity gives
+    `behavior-only` when its behavior check passed.
+    """
+    identity = checks.get("identity")
+    if identity is not None:
+        bucket = match_bucket(identity.get("match"))
+        if bucket is not None:
+            return bucket
+    if "identity" not in declared:
+        behavior = checks.get("behavior")
+        if behavior is not None and behavior.get("verdict") == "pass":
+            return "behavior-only"
+    return None
 
 
 def is_stale(record: dict, fingerprint: str) -> bool:
@@ -351,6 +415,34 @@ def _recipe_fields(module: dict) -> bytes:
     return json.dumps(recipe, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
+def run_mode(strict: bool, skip_runtime: bool) -> dict:
+    """Return the mode of a run with its strict flag, toolchain, and runtime.
+
+    The runtime field stays in the object for reporting.  The fingerprint does
+    not hash it, so a run that skips the behavior check keeps the stored build
+    and identity results valid.
+    """
+    return {
+        "strict": strict,
+        "toolchain": TOOLCHAIN,
+        "runtime": "skip" if skip_runtime else "run",
+    }
+
+
+def _mode_fields(mode: dict | None) -> bytes:
+    """The canonical bytes of the mode fields that steer the checks.
+
+    The strict flag and the toolchain are inputs, so a change of the gate makes
+    the record stale.  The runtime field is a reported value, so it stays out of
+    the hash.  A missing mode contributes a fixed marker, so a record without a
+    stored mode is stale.
+    """
+    if mode is None:
+        return b"<none>"
+    fields = {"strict": mode["strict"], "toolchain": mode["toolchain"]}
+    return json.dumps(fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
 def compute_fingerprint(
     record: dict,
     module: dict,
@@ -359,15 +451,18 @@ def compute_fingerprint(
     work_dir: Path | None = None,
     tools_dir: Path | None = None,
     original: Path | None = None,
+    mode: dict | None = None,
 ) -> str:
     """The SHA-256 over every input of the declared checks of one record.
 
     The inputs are, in order: the module recipe fields, the module sources by
     file name, the shared harness sources, the record fields that steer the
-    checks, the participating tool sources, the original image, and the built
-    artifacts.  Every file is hashed by content, and a missing file contributes
-    a fixed marker, so a deleted artifact or a moved game makes the record stale
-    instead of raising.
+    checks, the strict mode and the toolchain, the participating tool sources,
+    the original image, and the built artifacts.  The runtime mode is a
+    reported value.  It is not hashed, so a run that skips the behavior check
+    does not invalidate a stored build and identity result.  Every file is
+    hashed by content, and a missing file contributes a fixed marker, so a
+    deleted artifact or a moved game makes the record stale instead of raising.
     """
     base = Path(rebuild_dir) if rebuild_dir is not None else REBUILD_DIR
     work = Path(work_dir) if work_dir is not None else WORK_DIR
@@ -387,6 +482,7 @@ def compute_fingerprint(
     for name in SHARED_SOURCES:
         feed(f"shared:{name}", _file_bytes(base / name))
     feed("record", _record_fields(record))
+    feed("mode", _mode_fields(mode))
     for name in TOOL_FILES:
         feed(f"tool:{name}", _file_bytes(tools / name))
     feed("original", _file_bytes(original_path))

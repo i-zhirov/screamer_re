@@ -31,18 +31,24 @@
         "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 35,
         "instructions_total": 35,
-        "verdict": "pass"
+        "match": "same-shape",
+        "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd2008",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:f4b087abb61308076425ac19557935d4118ef1e8d3cf318b18625a011f460cf8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:691d3758e3ae110431b66e621080a09c6572630824e59403f0d37a4c3f2b1227",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:60836ee4588741f92d83a4ed89b97fc687238f61a9aa0ea6189e4a568ef61ebb",
     "tool": "run.py"
   },
   "role": "walks the free list, releases the block through the heap routine, and keeps the largest free size",
   "section": "The runtime memory manager",
   "size": 94,
-  "status": "verified",
+  "status": "rebuilt",
   "symbol": "free_"
 }

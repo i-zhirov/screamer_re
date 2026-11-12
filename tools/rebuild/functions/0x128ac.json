@@ -34,12 +34,18 @@
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 14,
         "instructions_total": 14,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128ac",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:60f78fc687524656b7dab299bac29df2556c97beab8a0cd7537846bf5557d59e",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:46a048817587bc448086beadfe2dfa6bd1cbbf0932e208f09bb1974b56a5fbc9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:2b0610cdb9f5868e66fe74dbab781c06ac51297023b441f6aa3064cdd1bc6d40",
     "tool": "run.py"
   },

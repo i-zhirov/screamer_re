@@ -3,20 +3,23 @@
 The tool selects the function records and the module rows of the store, runs the
 declared checks of each one in address order, prints one progress line per record,
 and writes the result through `store.py`.  With `--skip-unchanged` a record whose
-input fingerprint still matches the fingerprint of its recorded result prints
-`PASS` and runs no check, so an unchanged module or function costs one hash and
-no build, no diff, and no DOSBox run.  The full log of the run stays under
-`work/rebuild/logs/`.
+input fingerprint still matches the fingerprint of its recorded result prints the
+stored verdict and runs no check, so an unchanged module or function costs one
+hash and no build, no diff, and no DOSBox run.  The runner prints `FAIL` for a
+stored `fail`, so an unchanged failing record cannot pass the gate.  The full log
+of the run stays under `work/rebuild/logs/`.
 
-With `--strict` the identity check passes only when the bytes are exact or the
-only differences are the link-time addresses.  With `--recheck-record ADDR` the
+The identity gate is strict by default: the identity check passes only when the
+bytes are exact or the only differences are the link-time addresses.  With
+`--allow-shape` the gate restores the historical rule and also accepts a shape
+match and a reordered instruction sequence.  With `--recheck-record ADDR` the
 runner forces one fresh run and prints the full check output.
 
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
-        [--no-write] [--show] [--strict] [--skip-runtime] [--skip-unchanged]
-        [--original PATH]
+        [--no-write] [--show] [--strict] [--allow-shape] [--skip-runtime]
+        [--skip-unchanged] [--original PATH]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -41,16 +44,29 @@ WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 LOG_DIR = WORK_DIR / "logs"
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
-PASS_VERDICTS = (
-    "the modules are byte-identical",
-    "the instruction sequences match; the differing operands are the link-time addresses",
-    "the instruction shapes match; the differing bytes are not relocations",
-    "the modules hold the same instructions in a different order",
+MATCHES = (
+    "exact-bytes",
+    "exact-relocations",
+    "same-shape",
+    "same-mnemonics",
+    "different",
 )
-STRICT_VERDICTS = (
-    "the modules are byte-identical",
-    "the instruction sequences match; the differing operands are the link-time addresses",
+MATCH_BY_VERDICT = dict(
+    zip(
+        (
+            "the modules are byte-identical",
+            "the instruction sequences match; the differing operands are the "
+            "link-time addresses",
+            "the instruction shapes match; the differing bytes are not "
+            "relocations",
+            "the modules hold the same instructions in a different order",
+            "the instruction sequences differ",
+        ),
+        MATCHES,
+    )
 )
+STRICT_MATCHES = ("exact-bytes", "exact-relocations")
+DEFAULT_MATCHES = STRICT_MATCHES + ("same-shape", "same-mnemonics")
 BUILD_DETAIL = {
     "pass": "the module builds",
     "fail": "the module build failed",
@@ -155,11 +171,19 @@ def progress_line(index: int, total: int, label: str, verdict: str, detail: str)
     return f"[{index}/{total}] {label}: {verdict} ({detail})"
 
 
-def summarize(verdicts: list[str]) -> str:
+def summarize(verdicts: list[str], buckets: list[str | None]) -> str:
     passes = verdicts.count("PASS")
     fails = verdicts.count("FAIL")
     skips = verdicts.count("SKIP")
-    return f"{len(verdicts)} records: {passes} pass, {fails} fail, {skips} skip"
+    exact = buckets.count("exact")
+    relocation = buckets.count("relocation-only")
+    shape = buckets.count("shape")
+    behavior = buckets.count("behavior-only")
+    return (
+        f"{len(verdicts)} records: {passes} pass, {fails} fail, {skips} skip; "
+        f"exact {exact}, relocation-only {relocation}, shape {shape}, "
+        f"behavior-only {behavior}"
+    )
 
 
 def diff_verdict(text: str) -> str:
@@ -188,19 +212,30 @@ def parse_identity(text: str) -> dict[str, int]:
     return counts
 
 
-def identity_accepted(verdict: str, strict: bool) -> bool:
-    """Tell whether an identity verdict passes the gate.
+def match_of(verdict: str) -> str:
+    """The identity match of a diff verdict; an unknown verdict is `different`."""
+    return MATCH_BY_VERDICT.get(verdict, "different")
 
-    The default gate accepts the three historical verdicts.  The strict gate
-    accepts only the byte-identical verdict and the verdict whose differences are
-    the link-time addresses.  A reordered instruction sequence is not exact.
+
+def identity_accepted(match: str, strict: bool) -> bool:
+    """Tell whether an identity match passes the gate.
+
+    Strict is the default gate.  It accepts only the byte-identical match and
+    the match whose differences are the link-time addresses.  `--allow-shape`
+    restores the historical gate, which also accepts a shape match and a
+    reordered instruction sequence.  A different match never passes.
     """
-    accepted = STRICT_VERDICTS if strict else PASS_VERDICTS
-    return verdict in accepted
+    accepted = STRICT_MATCHES if strict else DEFAULT_MATCHES
+    return match in accepted
+
+
+def run_mode(arguments: argparse.Namespace) -> dict:
+    """The mode of the run: the strict flag, the toolchain, and the runtime."""
+    return store.run_mode(arguments.strict, arguments.skip_runtime)
 
 
 def run_identity(
-    record: dict, module: dict, original: Path, strict: bool = False
+    record: dict, module: dict, original: Path, strict: bool = True
 ) -> tuple[str, dict]:
     """Run the identity check and return its verdict and its check result."""
     if not original.is_file():
@@ -230,14 +265,16 @@ def run_identity(
             if line.strip()
         ]
         verdict = error_lines[-1] if error_lines else "the diff tool printed no verdict"
+    match = match_of(verdict)
     check = {
         "verdict": (
             "pass"
             if completed.returncode == 0
-            and identity_accepted(verdict, strict)
+            and identity_accepted(match, strict)
             else "fail"
         ),
         "detail": verdict,
+        "match": match,
     }
     check.update(parse_identity(completed.stdout))
     return check["verdict"], check
@@ -315,14 +352,19 @@ def record_detail(record: dict, checks: dict[str, dict]) -> str:
     return ", ".join(record.get("checks", []))
 
 
-def _next_status(declared: list[str], checks: dict[str, dict]) -> str | None:
+def _next_status(
+    record: dict | None, row: dict | None, checks: dict[str, dict]
+) -> str | None:
     """The status the run writes, or None to keep the stored one.
 
-    The verdicts go through `store.advance_status`, so a skip or a failed
-    build keeps the stored status, and a failed identity gives `rebuilt`.
+    A failed build or a failed behavior check demotes the record, and the
+    failed result stays on the record.  A skip keeps the stored status, and a
+    failed identity gives `rebuilt`.
     """
+    target = record if record is not None else row
+    declared = target.get("checks", [])
     verdicts = {name: check.get("verdict") for name, check in checks.items()}
-    return store.advance_status(declared, verdicts)
+    return store.advance_status(declared, verdicts, bool(target.get("name")))
 
 
 def _label(record: dict | None, row: dict | None) -> str:
@@ -397,7 +439,11 @@ def _run_record(
 
 
 def _result(
-    checks: dict[str, dict], module: dict, command: str, fingerprint: str
+    checks: dict[str, dict],
+    module: dict,
+    command: str,
+    fingerprint: str,
+    mode: dict,
 ) -> dict:
     return {
         "date": date.today().isoformat(),
@@ -405,6 +451,7 @@ def _result(
         "tool": "run.py",
         "source_digest": store.source_digest(module),
         "fingerprint": fingerprint,
+        "mode": mode,
         "checks": checks,
     }
 
@@ -421,22 +468,25 @@ def _write_result(
     checks: dict[str, dict],
     command: str,
     original: Path,
+    mode: dict,
 ) -> None:
     target = record if record is not None else row
     module_name = target.get("module") if record is not None else target["name"]
     module = store.load_module(module_name)
-    fingerprint = store.compute_fingerprint(target, module, original=original)
+    fingerprint = store.compute_fingerprint(
+        target, module, original=original, mode=mode
+    )
     if record is not None:
         store.save_result(
             int(record["address"], 16),
-            _result(checks, module, command, fingerprint),
-            _next_status(record.get("checks", []), checks),
+            _result(checks, module, command, fingerprint, mode),
+            _next_status(record, row, checks),
         )
         return
     store.save_module_result(
         row["name"],
-        _result(checks, module, command, fingerprint),
-        _next_status(row.get("checks", []), checks),
+        _result(checks, module, command, fingerprint, mode),
+        _next_status(record, row, checks),
     )
 
 
@@ -475,13 +525,16 @@ def _current_fingerprint(
     row: dict | None,
     modules: dict[str, dict],
     original: Path,
+    mode: dict,
 ) -> str | None:
     """The fingerprint of one record, or None when its module is missing."""
     module = _module_for(record, row, modules)
     target = record if record is not None else row
     if module is None or target is None:
         return None
-    return store.compute_fingerprint(target, module, original=original)
+    return store.compute_fingerprint(
+        target, module, original=original, mode=mode
+    )
 
 
 def _stored_fingerprint(record: dict | None, row: dict | None) -> str | None:
@@ -495,7 +548,11 @@ def _stored_fingerprint(record: dict | None, row: dict | None) -> str | None:
 
 
 def _is_unchanged(
-    record: dict | None, row: dict | None, modules: dict[str, dict], original: Path
+    record: dict | None,
+    row: dict | None,
+    modules: dict[str, dict],
+    original: Path,
+    mode: dict,
 ) -> bool:
     """Tell whether the recorded result matches the current inputs.
 
@@ -505,7 +562,7 @@ def _is_unchanged(
     stored = _stored_fingerprint(record, row)
     if stored is None:
         return False
-    fingerprint = _current_fingerprint(record, row, modules, original)
+    fingerprint = _current_fingerprint(record, row, modules, original, mode)
     return fingerprint is not None and stored == fingerprint
 
 
@@ -519,6 +576,7 @@ def command_run(arguments: argparse.Namespace) -> int:
     ]
     module_names = sorted(path.stem for path in store.MODULES_DIR.glob("*.json"))
     modules = {name: store.load_module(name) for name in module_names}
+    mode = run_mode(arguments)
 
     def stale_fn(record: dict) -> bool:
         if not record.get("result"):
@@ -530,7 +588,7 @@ def command_run(arguments: argparse.Namespace) -> int:
         if module is None:
             return False
         fingerprint = store.compute_fingerprint(
-            record, module, original=arguments.original
+            record, module, original=arguments.original, mode=mode
         )
         return store.is_stale(record, fingerprint)
 
@@ -556,17 +614,26 @@ def command_run(arguments: argparse.Namespace) -> int:
     ] + [(None, row) for row in rows]
     log_lines: list[str] = []
     verdicts: list[str] = []
+    buckets: list[str | None] = []
     failed = False
     for index, (record, row) in enumerate(entries, 1):
+        target = record if record is not None else row
         if arguments.skip_unchanged and _is_unchanged(
-            record, row, modules, arguments.original
+            record, row, modules, arguments.original, mode
         ):
-            verdicts.append("PASS")
+            stored_checks = (target.get("result") or {}).get("checks", {})
+            verdict = store.stored_verdict(target)
+            verdicts.append(verdict)
+            buckets.append(
+                store.result_bucket(stored_checks, target.get("checks", []))
+            )
+            if verdict == "FAIL":
+                failed = True
             line = progress_line(
                 index,
                 len(entries),
                 _label(record, row),
-                "PASS",
+                verdict,
                 store.UNCHANGED_DETAIL,
             )
             print(line)
@@ -576,18 +643,26 @@ def command_run(arguments: argparse.Namespace) -> int:
             record, row, modules, arguments, log_lines
         )
         verdicts.append(verdict)
+        buckets.append(
+            store.result_bucket(checks, target.get("checks", []))
+        )
         if verdict == "FAIL":
             failed = True
         if write and not arguments.no_write:
             _write_result(
-                record, row, checks, _command_text(record, row), arguments.original
+                record,
+                row,
+                checks,
+                _command_text(record, row),
+                arguments.original,
+                mode,
             )
         line = progress_line(
             index, len(entries), _label(record, row), verdict, detail
         )
         print(line)
         log_lines.append(line)
-    summary = summarize(verdicts)
+    summary = summarize(verdicts, buckets)
     print(summary)
     log_lines.append(summary)
     print(f"log: {_write_log(log_lines)}")
@@ -661,13 +736,23 @@ def parse_arguments() -> argparse.Namespace:
     run_parser.add_argument(
         "--skip-unchanged",
         action="store_true",
-        help="report a record whose inputs are unchanged since the previous "
-        "run, and run no check for it",
+        help="print the stored verdict of a record whose inputs are unchanged "
+        "since the previous run, and run no check for it",
     )
     run_parser.add_argument(
         "--strict",
+        dest="strict",
         action="store_true",
-        help="pass the identity check only for exact bytes or link-time operands",
+        default=True,
+        help="pass the identity check only for exact bytes or link-time "
+        "operands (the default)",
+    )
+    run_parser.add_argument(
+        "--allow-shape",
+        dest="strict",
+        action="store_false",
+        help="also pass a shape match and a reordered instruction sequence, "
+        "as the historical gate does",
     )
     run_parser.add_argument(
         "--original",

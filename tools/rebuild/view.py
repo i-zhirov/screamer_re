@@ -497,6 +497,7 @@ function applyFilters() {
   const search = document.getElementById("search-filter").value.trim().toLowerCase();
   const staleOnly = document.getElementById("stale-filter").checked;
   const counts = {};
+  const buckets = {};
   const seen = new Map();
   let visible = 0;
   let verified = 0;
@@ -521,12 +522,19 @@ function applyFilters() {
       } else if (data.status === "rebuilt") {
         rebuilt += 1;
       }
+      if (data.match) {
+        buckets[data.match] = (buckets[data.match] || 0) + 1;
+      }
     }
     counts[data.status] = (counts[data.status] || 0) + 1;
   }
   for (const counter of document.querySelectorAll(".counter")) {
     const count = counts[counter.dataset.status] || 0;
     counter.textContent = count + " " + counter.dataset.status;
+  }
+  for (const counter of document.querySelectorAll(".match-counter")) {
+    const count = buckets[counter.dataset.bucket] || 0;
+    counter.textContent = count + " " + counter.dataset.bucket;
   }
   document.getElementById("progress-verified").style.width =
     visible === 0 ? "0%" : Math.round((100 * verified) / visible) + "%";
@@ -676,6 +684,36 @@ def _counted_rows(rows: list[dict]) -> list[dict]:
     return [row for row in rows if row.get("status") != "not_a_function"]
 
 
+def _match(record: dict) -> str:
+    """The report bucket of a record, or an empty string for no bucket."""
+    return (
+        store.result_bucket(
+            (record.get("result") or {}).get("checks", {}),
+            record.get("checks", []),
+        )
+        or ""
+    )
+
+
+def _match_counts(rows: list[dict]) -> dict[str, int]:
+    """The number of counted rows in each match bucket."""
+    counts = {bucket: 0 for bucket in store.MATCH_BUCKETS}
+    for row in _counted_rows(rows):
+        bucket = _match(row)
+        if bucket in counts:
+            counts[bucket] += 1
+    return counts
+
+
+def _match_counters(rows: list[dict]) -> str:
+    counts = _match_counts(rows)
+    return " · ".join(
+        f'<span class="match-counter" data-bucket="{bucket}">'
+        f"{counts[bucket]} {bucket}</span>"
+        for bucket in store.MATCH_BUCKETS
+    )
+
+
 def _progress_widths(rows: list[dict]) -> tuple[str, str]:
     """The verified and rebuilt percentages of the progress total."""
     counted = _counted_rows(rows)
@@ -727,6 +765,7 @@ def _chip(
     status: str,
     stale: bool,
     lang: str = "",
+    match: str = "",
 ) -> str:
     classes = f"chip status-{status}" + (" stale" if stale else "")
     mark = _mark(status, stale)
@@ -737,7 +776,8 @@ def _chip(
         f' data-key="{_escaped(key)}" data-address="{_escaped(address)}"'
         f' data-name="{_escaped(name)}" data-module="{_escaped(module)}"'
         f' data-status="{_escaped(status)}"'
-        f' data-stale="{str(stale).lower()}">'
+        f' data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(match)}">'
         f'<span class="chip-label">{_escaped(label)}</span>'
         f' <span class="chip-status">{_escaped(status)}</span>{mark_html}'
         f"{lang_html}</button>"
@@ -757,6 +797,7 @@ def _function_chip(record: dict, stale: bool) -> str:
         status=record.get("status", "unknown"),
         stale=stale,
         lang=_language_label(record),
+        match=_match(record),
     )
 
 
@@ -770,6 +811,7 @@ def _module_chip(module: dict, stale: bool) -> str:
         module=name,
         status=module.get("status", "unknown"),
         stale=stale,
+        match=_match(module),
     )
 
 
@@ -847,7 +889,8 @@ def _table_row(record: dict, stale: bool) -> str:
         f'<tr class="{classes}" data-key="{_escaped(address)}"'
         f' data-address="{_escaped(address)}" data-name="{_escaped(name or "")}"'
         f' data-module="{_escaped(module)}" data-status="{_escaped(status)}"'
-        f' data-stale="{str(stale).lower()}">'
+        f' data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(_match(record))}">'
         f'<td class="cell-address">{_escaped(address)}</td>'
         f'<td class="cell-name">{_escaped(name) if name else MISSING_NAME}</td>'
         f'<td class="cell-lang">{_escaped(lang) if lang else UNDEFINED}</td>'
@@ -866,7 +909,8 @@ def _module_table_row(module: dict, stale: bool) -> str:
     return (
         f'<tr class="{classes}" data-key="{_escaped(name)}" data-address=""'
         f' data-name="{_escaped(name)}" data-module="{_escaped(name)}"'
-        f' data-status="{_escaped(status)}" data-stale="{str(stale).lower()}">'
+        f' data-status="{_escaped(status)}" data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(_match(module))}">'
         f'<td class="cell-address">{UNDEFINED}</td>'
         f'<td class="cell-name">{_escaped(name)}</td>'
         f'<td class="cell-lang">{UNDEFINED}</td>'
@@ -943,6 +987,7 @@ def _map_block(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(_match(record))}"'
         f' style="left: {left:.3f}%; width: {width:.3f}%"'
         f' title="{_escaped(title)}">'
         f'<span class="map-block-label">{_escaped(label)}</span></button>'
@@ -1104,6 +1149,7 @@ def _treemap_block(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(_match(record))}"'
         f' style="left: {100 * x / group_width:.3f}%;'
         f" top: {100 * y / group_height:.3f}%;"
         f" width: {100 * width / group_width:.3f}%;"
@@ -1361,6 +1407,7 @@ def _graph_node(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-match="{_escaped(_match(record))}"'
         ' tabindex="0" role="button">'
         f"<title>{_escaped(title)}</title>"
         f'<rect x="{x:.1f}" y="{y:.1f}" width="{GRAPH_NODE_WIDTH}"'
@@ -1657,6 +1704,8 @@ def _progress_row(rows: list[dict]) -> str:
         f' style="width: {rebuilt_width}"></span>'
         "</span>"
         f'<span id="counters" class="counters">{_counters(rows)}</span>'
+        f'<span id="match-counters" class="counters match-counters">'
+        f"{_match_counters(rows)}</span>"
         "</div>"
         f"{_progress_legend()}"
         "</div>"

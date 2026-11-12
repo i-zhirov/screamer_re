@@ -359,5 +359,55 @@ class ImageGateTestCase(unittest.TestCase):
         self.assertFalse(checks.results[0][1])
 
 
+class UnchangedResultTestCase(unittest.TestCase):
+    """Stage 11 must accept the stored verdict and verify the fingerprint."""
+
+    def record(self, verdict: str) -> dict:
+        return {
+            "address": "0x300ec",
+            "result": {
+                "fingerprint": "sha256:stored",
+                "checks": {"identity": {"verdict": verdict}},
+            },
+        }
+
+    def run_check_run(self, verdict: str, stored: str) -> pipeline_check.Checks:
+        record = self.record(stored)
+        line = f"[1/1] 0x300ec: {verdict} ({pipeline_check.UNCHANGED_DETAIL})\n"
+        result = subprocess.CompletedProcess([], 0, line, "")
+        checks = pipeline_check.Checks()
+        with mock.patch.object(
+            pipeline_check.shutil, "which", return_value="/usr/bin/docker"
+        ), mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ), mock.patch.object(
+            pipeline_check, "recorded_records", return_value={"0x300ec": record}
+        ), mock.patch.object(
+            pipeline_check, "unchanged_is_verified", return_value=True
+        ), contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_run(checks, Path("/game"), False, 300.0)
+        return checks
+
+    def test_unchanged_matches_accepts_a_stored_pass(self) -> None:
+        record = self.record("pass")
+        self.assertTrue(pipeline_check.unchanged_matches(record, "PASS"))
+
+    def test_unchanged_matches_accepts_a_stored_fail(self) -> None:
+        record = self.record("fail")
+        self.assertTrue(pipeline_check.unchanged_matches(record, "FAIL"))
+
+    def test_check_run_accepts_a_stored_fail(self) -> None:
+        checks = self.run_check_run("FAIL", "fail")
+        self.assertEqual(checks.failures, [])
+
+    def test_check_run_fails_an_unchanged_record_with_the_wrong_verdict(
+        self,
+    ) -> None:
+        checks = self.run_check_run("PASS", "fail")
+        self.assertEqual(len(checks.failures), 1)
+        self.assertIn("0x300ec", checks.failures[0])
+        self.assertIn("the stored result is FAIL", checks.results[0][2])
+
+
 if __name__ == "__main__":
     unittest.main()

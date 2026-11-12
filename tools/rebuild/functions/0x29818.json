@@ -35,12 +35,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 2,
         "instructions_total": 37,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29818",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:fa118b9393274915f11d999e7519a1742a6a8255bcdd6d5b2619c5fea1e11a3c",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:1ec308230c9bcf3b94191d4a4ea3fdd7031efe01d1d6fb9b896f3056e10feade",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:5e155706f8840480aedfa520bdc363d52794c2de230a53bc81591afa04816381",
     "tool": "run.py"
   },

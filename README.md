@@ -17,9 +17,9 @@ Initial reconnaissance is complete.  The project has:
   (`tools/rebuild/store.py`),
 - a check runner that builds and tests the declared checks
   (`tools/rebuild/run.py`),
-- a strict identity gate and a whole-image oracle
-  (`--strict`, `tools/rebuild/oracle.py`, and
-  `tools/rebuild/image_compare.py`),
+- a strict identity gate by default and a whole-image oracle
+  (`--allow-shape` restores the historical gate, `tools/rebuild/oracle.py`,
+  and `tools/rebuild/image_compare.py`),
 - a self-contained status page of the store (`tools/rebuild/view.py`), published
   to GitHub Pages at <https://i-zhirov.github.io/screamer_re/>,
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
@@ -68,7 +68,8 @@ python3 tools/le.py targets ~/Documents/Screamer.app/Contents/Resources/game/STA
 Run the strict byte gate and the whole-image oracle:
 
 ```sh
-python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/image_compare.py \
   --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
@@ -148,10 +149,11 @@ reports 299 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
 runs stage 8, so the run reports 288 checks.  Both flags report 284 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
-time for the unchanged modules.  `--strict` turns the identity check into a
-byte gate: the relocation-aware oracle masks the fixup slots and the direct
-branch targets, so `free` and `exit` pass, and a reordered or shape-only match
-fails.  `--recheck-record ADDR`
+time for the unchanged modules.  Strict is the default identity gate: the
+relocation-aware oracle masks the fixup slots and the direct branch targets, so
+`free` and `exit` pass, and a reordered or shape-only match fails.
+`--allow-shape` restores the historical gate, which accepts a shape match and a
+reordered sequence.  `--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`
 validates every record and module against the JSON Schema contracts.  Stage 11
 also runs the whole-image oracle when `--rebuilt-image` exists, and reports a

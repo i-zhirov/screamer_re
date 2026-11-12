@@ -117,17 +117,18 @@ def conf_text(module: dict, port: int) -> str:
 
 
 def missing_lines(expect: list[str], text: str) -> list[str]:
-    """The expect lines no output line equals and no output line ends with.
+    """The expect markers no complete output line equals.
 
-    A suffix match is needed because the first driver marker is embedded in a
-    longer print-buffer line.
+    A marker matches only an output line that equals it, so an embedded copy
+    in a longer line does not count.
     """
     lines = text.splitlines()
-    return [
-        line
-        for line in expect
-        if not any(out_line == line or out_line.endswith(line) for out_line in lines)
-    ]
+    return [line for line in expect if line not in lines]
+
+
+def clear_output(path: Path) -> None:
+    """Delete an old output file, so a run shows only its own output."""
+    path.unlink(missing_ok=True)
 
 
 def command_build(name: str) -> int:
@@ -184,6 +185,8 @@ def command_run(name: str, show: bool) -> int:
     debug_path = WORK_DIR / f"run_{name}.dbg"
     conf_path.write_text(conf_text(module, port))
     debug_path.write_text(run_script_text())
+    output_path = WORK_DIR / recipe["output"]
+    clear_output(output_path)
     completed = subprocess.run(
         [
             sys.executable,
@@ -202,11 +205,11 @@ def command_run(name: str, show: bool) -> int:
         ],
         cwd=REPOSITORY_ROOT,
     )
-    text = ""
-    output_path = WORK_DIR / recipe["output"]
-    if output_path.is_file():
-        data = output_path.read_bytes().replace(b"\x00", b"")
-        text = data.decode("utf-8", "replace")
+    if not output_path.is_file():
+        print(f"error: the run of {name} wrote no output", file=sys.stderr)
+        return 1
+    data = output_path.read_bytes().replace(b"\x00", b"")
+    text = data.decode("utf-8", "replace")
     missing = missing_lines(recipe["expect"], text)
     if completed.returncode != 0 or missing:
         if completed.returncode != 0:

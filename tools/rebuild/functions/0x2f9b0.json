@@ -34,12 +34,18 @@
         "detail": "the modules are byte-identical",
         "instructions_equal": 14,
         "instructions_total": 14,
+        "match": "exact-bytes",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f9b0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:43adc9c568e7b47002936f0c435484d9b0ab6495b0543a5ba1df880acd79031b",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:8ccbed83efc51364c6a13651eb18673957062575e532cbcb9e73323442b65b66",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:cdd6e1771254a1145bac05c03655f228fb873d7d6b012635c24707203e41461a",
     "tool": "run.py"
   },

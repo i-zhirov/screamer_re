@@ -162,7 +162,14 @@ class StoreTestCase(unittest.TestCase):
         return rebuild, work, tools, original, record, module
 
     def fingerprint_of(
-        self, rebuild: Path, work: Path, tools: Path, original: Path, record: dict, module: dict
+        self,
+        rebuild: Path,
+        work: Path,
+        tools: Path,
+        original: Path,
+        record: dict,
+        module: dict,
+        mode: dict | None = None,
     ) -> str:
         return store.compute_fingerprint(
             record,
@@ -171,46 +178,114 @@ class StoreTestCase(unittest.TestCase):
             work_dir=work,
             tools_dir=tools,
             original=original,
+            mode=mode,
         )
+
+    def test_run_mode_holds_the_three_fields(self) -> None:
+        run = store.run_mode(False, False)
+        self.assertFalse(run["strict"])
+        self.assertEqual(run["toolchain"], "v2")
+        self.assertEqual(run["runtime"], "run")
+        self.assertEqual(store.run_mode(False, True)["runtime"], "skip")
 
     def test_advance_status_build_passes(self) -> None:
         self.assertEqual(
-            store.advance_status(["build"], {"build": "pass"}), "rebuilt"
+            store.advance_status(["build"], {"build": "pass"}, False), "rebuilt"
         )
 
     def test_advance_status_identity_fails(self) -> None:
         verdicts = {"build": "pass", "identity": "fail"}
         self.assertEqual(
-            store.advance_status(["build", "identity"], verdicts), "rebuilt"
+            store.advance_status(["build", "identity"], verdicts, True), "rebuilt"
         )
 
     def test_advance_status_behavior_fails(self) -> None:
         verdicts = {"build": "pass", "identity": "pass", "behavior": "fail"}
         checks = ["build", "identity", "behavior"]
-        self.assertEqual(store.advance_status(checks, verdicts), "matching")
+        self.assertEqual(
+            store.advance_status(checks, verdicts, True), "matching"
+        )
 
     def test_advance_status_identity_only(self) -> None:
         self.assertEqual(
-            store.advance_status(["identity"], {"identity": "pass"}), "verified"
+            store.advance_status(["identity"], {"identity": "pass"}, True),
+            "verified",
         )
 
     def test_advance_status_all_pass(self) -> None:
         checks = ["build", "identity", "behavior"]
         verdicts = {name: "pass" for name in checks}
-        self.assertEqual(store.advance_status(checks, verdicts), "verified")
+        self.assertEqual(
+            store.advance_status(checks, verdicts, True), "verified"
+        )
 
     def test_advance_status_behavior_only(self) -> None:
         self.assertEqual(
-            store.advance_status(["behavior"], {"behavior": "pass"}), "verified"
+            store.advance_status(["behavior"], {"behavior": "pass"}, True),
+            "verified",
         )
 
     def test_advance_status_skip(self) -> None:
         verdicts = {"build": "pass", "identity": "skip"}
-        self.assertIsNone(store.advance_status(["build", "identity"], verdicts))
+        self.assertIsNone(
+            store.advance_status(["build", "identity"], verdicts, True)
+        )
 
-    def test_advance_status_build_fails(self) -> None:
+    def test_advance_status_build_fails_demotes_a_named_record(self) -> None:
         verdicts = {"build": "fail", "identity": "pass"}
-        self.assertIsNone(store.advance_status(["build", "identity"], verdicts))
+        self.assertEqual(
+            store.advance_status(["build", "identity"], verdicts, True), "named"
+        )
+
+    def test_advance_status_build_fails_demotes_an_unnamed_record(self) -> None:
+        verdicts = {"build": "fail", "identity": "pass"}
+        self.assertEqual(
+            store.advance_status(["build", "identity"], verdicts, False),
+            "unknown",
+        )
+
+    def test_advance_status_behavior_fails_without_identity_demotes_a_named_record(
+        self,
+    ) -> None:
+        self.assertEqual(
+            store.advance_status(["behavior"], {"behavior": "fail"}, True),
+            "named",
+        )
+
+    def test_advance_status_behavior_fails_without_identity_demotes_an_unnamed_record(
+        self,
+    ) -> None:
+        self.assertEqual(
+            store.advance_status(["behavior"], {"behavior": "fail"}, False),
+            "unknown",
+        )
+
+    def test_advance_status_build_passes_and_behavior_fails_demotes_a_named_record(
+        self,
+    ) -> None:
+        verdicts = {"build": "pass", "behavior": "fail"}
+        self.assertEqual(
+            store.advance_status(["build", "behavior"], verdicts, True), "named"
+        )
+
+    def test_advance_status_build_passes_and_behavior_fails_demotes_an_unnamed_record(
+        self,
+    ) -> None:
+        verdicts = {"build": "pass", "behavior": "fail"}
+        self.assertEqual(
+            store.advance_status(["build", "behavior"], verdicts, False),
+            "unknown",
+        )
+
+    def test_advance_status_build_and_behavior_pass_gives_verified(self) -> None:
+        self.assertEqual(
+            store.advance_status(["build"], {"build": "pass"}, True), "rebuilt"
+        )
+        verdicts = {"build": "pass", "behavior": "pass"}
+        self.assertEqual(
+            store.advance_status(["build", "behavior"], verdicts, True),
+            "verified",
+        )
 
     def test_supported_status_from_result(self) -> None:
         record = self.record(
@@ -226,6 +301,57 @@ class StoreTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(store.supported_status(record), "matching")
+
+    def test_stored_verdict_reports_a_stored_fail(self) -> None:
+        record = self.record(
+            result=self.result({"build": ("fail", "the module does not build")})
+        )
+        self.assertEqual(store.stored_verdict(record), "FAIL")
+
+    def test_stored_verdict_reports_a_stored_pass(self) -> None:
+        record = self.record(
+            result=self.result({"build": ("pass", "the module builds")})
+        )
+        self.assertEqual(store.stored_verdict(record), "PASS")
+
+    def test_match_bucket_maps_each_match(self) -> None:
+        self.assertEqual(store.match_bucket("exact-bytes"), "exact")
+        self.assertEqual(store.match_bucket("exact-relocations"), "relocation-only")
+        self.assertEqual(store.match_bucket("same-shape"), "shape")
+        self.assertEqual(store.match_bucket("same-mnemonics"), "shape")
+        self.assertIsNone(store.match_bucket("different"))
+
+    def test_result_bucket_prefers_identity(self) -> None:
+        checks = {
+            "identity": {"verdict": "pass", "match": "exact-bytes"},
+            "behavior": {"verdict": "pass"},
+        }
+        self.assertEqual(
+            store.result_bucket(checks, ["identity", "behavior"]), "exact"
+        )
+
+    def test_result_bucket_reports_behavior_only(self) -> None:
+        checks = {"behavior": {"verdict": "pass"}}
+        self.assertEqual(
+            store.result_bucket(checks, ["behavior"]), "behavior-only"
+        )
+
+    def test_result_bucket_maps_a_failed_shape_match(self) -> None:
+        checks = {"identity": {"verdict": "fail", "match": "same-shape"}}
+        self.assertEqual(store.result_bucket(checks, ["identity"]), "shape")
+        checks = {"identity": {"verdict": "fail", "match": "same-mnemonics"}}
+        self.assertEqual(store.result_bucket(checks, ["identity"]), "shape")
+
+    def test_result_bucket_ignores_a_failed_different_match(self) -> None:
+        checks = {"identity": {"verdict": "fail", "match": "different"}}
+        self.assertIsNone(store.result_bucket(checks, ["identity"]))
+
+    def test_result_bucket_ignores_an_absent_match(self) -> None:
+        checks = {
+            "identity": {"verdict": "fail"},
+            "behavior": {"verdict": "pass"},
+        }
+        self.assertIsNone(store.result_bucket(checks, ["identity", "behavior"]))
 
     def test_is_stale_no_result(self) -> None:
         self.assertFalse(store.is_stale(self.record(), "sha256:" + "0" * 64))
@@ -270,14 +396,63 @@ class StoreTestCase(unittest.TestCase):
 
     def test_fingerprint_is_stable(self) -> None:
         rebuild, work, tools, original, record, module = self.fingerprint_env()
+        mode = store.run_mode(True, False)
         self.assertEqual(
-            self.fingerprint_of(rebuild, work, tools, original, record, module),
-            self.fingerprint_of(rebuild, work, tools, original, record, module),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, mode
+            ),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, mode
+            ),
         )
         self.assertRegex(
-            self.fingerprint_of(rebuild, work, tools, original, record, module),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, mode
+            ),
             re.compile(r"^sha256:[0-9a-f]{64}$"),
         )
+
+    def test_fingerprint_changes_with_strict_mode(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        strict = store.run_mode(True, False)
+        allow_shape = store.run_mode(False, False)
+        self.assertNotEqual(
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, strict
+            ),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, allow_shape
+            ),
+        )
+
+    def test_fingerprint_ignores_the_runtime_mode(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        run = store.run_mode(True, False)
+        skip = store.run_mode(True, True)
+        self.assertEqual(
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, run
+            ),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, skip
+            ),
+        )
+
+    def test_fingerprint_changes_with_the_toolchain(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        v2 = store.run_mode(True, False)
+        other = {**v2, "toolchain": "other"}
+        self.assertNotEqual(
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, v2
+            ),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, module, other
+            ),
+        )
+
+    def test_mode_fields_mark_a_missing_mode(self) -> None:
+        self.assertEqual(store._mode_fields(None), b"<none>")
 
     def test_fingerprint_changes_with_source_content(self) -> None:
         rebuild, work, tools, original, record, module = self.fingerprint_env()
@@ -412,6 +587,73 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(len(violations), 1)
         self.assertIn("implementation", violations[0])
 
+    def test_schema_accepts_a_result_with_a_mode(self) -> None:
+        record = self.full_record()
+        record["result"]["mode"] = {
+            "strict": True,
+            "toolchain": "v2",
+            "runtime": "run",
+        }
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(violations, [])
+
+    def test_schema_rejects_an_unknown_runtime_mode(self) -> None:
+        record = self.full_record()
+        record["result"]["mode"] = {
+            "strict": True,
+            "toolchain": "v2",
+            "runtime": "sometimes",
+        }
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("runtime", violations[0])
+
+    def test_schema_accepts_each_identity_match(self) -> None:
+        for match in (
+            "exact-bytes",
+            "exact-relocations",
+            "same-shape",
+            "same-mnemonics",
+            "different",
+        ):
+            record = self.full_record()
+            record["result"]["checks"]["identity"] = {
+                "verdict": "pass",
+                "detail": "the instruction sequences are equal",
+                "match": match,
+            }
+            with self.subTest(match=match):
+                violations = schema.validate(
+                    record,
+                    self.schema("record.schema.json"),
+                    base_dir=store.CONTRACTS_DIR,
+                )
+                self.assertEqual(violations, [])
+
+    def test_schema_rejects_an_unknown_identity_match(self) -> None:
+        record = self.full_record()
+        record["result"]["checks"]["identity"] = {
+            "verdict": "pass",
+            "detail": "the instruction sequences are equal",
+            "match": "close",
+        }
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("match", violations[0])
+        self.assertIn("is not in", violations[0])
+
     def test_validate_record_named_without_name(self) -> None:
         path = self.write_record(0x300EC, self.record(status="named"))
         violations = store.validate_record(path)
@@ -538,6 +780,18 @@ class StoreTestCase(unittest.TestCase):
             status="matching",
             checks=["build"],
             result=self.result({"build": ("pass", "the module builds")}),
+        )
+        path = self.write_record(0x300EC, record)
+        violations = store.validate_record(path)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("stronger", violations[0])
+
+    def test_validate_record_rejects_verified_after_a_failed_build(self) -> None:
+        record = self.record(
+            name="free",
+            status="verified",
+            checks=["build"],
+            result=self.result({"build": ("fail", "the module does not build")}),
         )
         path = self.write_record(0x300EC, record)
         violations = store.validate_record(path)
