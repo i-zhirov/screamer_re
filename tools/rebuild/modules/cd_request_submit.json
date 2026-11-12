@@ -1,0 +1,28 @@
+{
+  "exe": "cdsub.exe",
+  "map": "cd_request_submit.map",
+  "name": "cd_request_submit",
+  "run": {
+    "command": "cdsub.exe > cdsub.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cdsub.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_request_submit.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_request_submit_main.c"
+    }
+  ]
+}

@@ -715,7 +715,7 @@ reproduce the original bytes.
 | `0x13540` | `race_track_load` (done) | 33 | 13 | 1 | 0 |
 | `0x2fef4` | `music_voice_stop` (done) | 32 | 13 | 1 | 0 |
 | `0x25af0` | `sprite_list_flush` (done) | 32 | 11 | 1 | 0 |
-| `0x25f24` | unnamed | 31 | 11 | 1 | 0 |
+| `0x25f24` | `cd_request_submit` (done) | 31 | 11 | 1 | 0 |
 | `0x25620` | unnamed | 31 | 12 | 0 | 0 |
 | `0x1f6f8` | unnamed | 31 | 11 | 1 | 0 |
 | `0x15bfc` | unnamed | 31 | 11 | 0 | 2 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and sixty-three modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and sixty-four modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1034,5 +1034,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `race_finish_overlay_4` at `0x240a0`, and the Phase AA module
 `race_track_load` at `0x13540`, and the Phase AA module
 `music_voice_stop` at `0x2fef4`, and the Phase AA module
-`sprite_list_flush` at `0x25af0`.
-The next unnamed function is `0x25f24`.
+`sprite_list_flush` at `0x25af0`, and the Phase AA module
+`cd_request_submit` at `0x25f24`.
+The next unnamed function is `0x25620`.

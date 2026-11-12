@@ -32490,3 +32490,69 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The direct callers, the callee, and
   the list structure give the role, and the name `sprite_list_flush` stays
   inferred.
+
+## The cd_request_submit module at 0x25f24
+
+- Observation: the original body at `0x25f24` holds 11 instructions and 31
+  bytes up to the `ret` at `0x25f42`.  The next function starts at `0x25f44`, so
+  the store record keeps the 32-byte extent and sets no separate function size.
+  The identity check uses 11 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25f24 --count 11` and
+  `tools/rebuild/functions/0x25f24.json`.
+- Observation: the function receives the request header address in `edi`.  It
+  forms the real-mode address of the block at request + `0x40` and writes the
+  low nibble at `+0x0e` and the shifted high part at `+0x10`.  The field at
+  `+0x0e` is the transfer address of the MSCDEX request header, and the
+  callers put the request payload and the response at `+0x40`.
+  Evidence: the body at `0x25f24` through `0x25f42` and the request headers at
+  `0x260a0` and `0x260e0`.
+- Observation: after the two stores the function calls `cd_request_send` at
+  `0x25f44`.  That helper submits the block through the DPMI INT 31h path and
+  returns the driver status word.  The callers reuse the request header at
+  `DAT_001666a4`, so this helper is the common submit path.
+  Evidence: the call at `0x25f3d`, the body at `0x25f44` through `0x25f8d`, and
+  the record of `0x25f44`.
+- Observation: the direct call sites are `0x26059` in the request builder at
+  `0x26014`, `0x26092` in the request builder at `0x26068`, `0x260cd` in
+  `cd_audio_disc_info_request` at `0x260a0`, `0x2610d` in
+  `cd_audio_status_request` at `0x260e0` and in the shared tail of
+  `cd_audio_track_info_request` at `0x26120`, `0x261da` in
+  `cd_audio_track_query` at `0x261a8`, `0x26214` and `0x26264` in
+  `cd_audio_q_channel_read` at `0x261e4`, `0x262f0` in `sound_driver_set` at
+  `0x262a8`, and `0x26631` in `cd_audio_volume_set` at `0x265b4`.  The CD
+  request path sits in the section `race_loop callees`, so the record takes
+  that section.
+  Evidence: the nine call sites and the records of the callers.
+- Inference: the request header, the transfer buffer, and the shared sender
+  support the name `cd_request_submit`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the request layout, the callee at `0x25f44`, and the callers.
+- Observation: the original has no EBP frame and saves no register, so the
+  module builds without `-of+`.  The function holds no floating-point
+  instruction, so the module needs no FPU stub, and the module uses no assembly
+  implementation.
+  Evidence: the prologue at `0x25f24` and `tools/rebuild/cd_request_submit.c`.
+- Observation: the harness holds the request buffer and the `cd_request_send`
+  stub.  The stub records the call count, the request pointer, and returns a
+  chosen status word.  The five paths cover the buffer base, the buffer at `+4`,
+  the forwarded status `0x81ff`, the sentinel bytes outside `+0x0e` through
+  `+0x11`, and two calls in a row.  Every path checks the two transfer words,
+  the request pointer, and the return value.  The output holds the markers `0`
+  through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/cd_request_submit_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_request_submit`,
+  `work/rebuild/cdsub.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x25f24`.
+- Observation: the identity check compares 11 instructions.  The rebuilt body
+  holds 1 of 11 instructions and 0 of 28 bytes equal, and 0 of 0 relocation
+  slots, because V2 takes the argument in `eax`, forms the block with `lea`,
+  saves `ecx` and `edx`, and calls the C sender.  The original takes the
+  argument in `edi` and forms the far pointer with `ebp` and `ebx`.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25f24 --count 11 --rebuilt work/rebuild/cdsub.exe
+  --rebuilt-map work/rebuild/cd_request_submit.map --rebuilt-symbol
+  cd_request_submit_` and `python3 tools/rebuild/run.py run --function 0x25f24`.
+- Limit: the original has no symbol name.  The request layout, the callee, and
+  the callers give the role, and the name `cd_request_submit` stays inferred.
+  The two request builders at `0x26014` and `0x26068` stay unrecorded.

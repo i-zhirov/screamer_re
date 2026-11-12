@@ -1,9 +1,115 @@
 {
   "address": "0x25f24",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25f24 holds 11 instructions and 31 bytes up to the ret at 0x25f42; the next function starts at 0x25f44, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct call sites are 0x26059 in the request builder at 0x26014, 0x26092 in the request builder at 0x26068, 0x260cd in cd_audio_disc_info_request at 0x260a0, 0x2610d in cd_audio_status_request at 0x260e0 and in the shared tail of cd_audio_track_info_request at 0x26120, 0x261da in cd_audio_track_query at 0x261a8, 0x26214 and 0x26264 in cd_audio_q_channel_read at 0x261e4, 0x262f0 in sound_driver_set at 0x262a8, and 0x26631 in cd_audio_volume_set at 0x265b4"
+    },
+    {
+      "kind": "note",
+      "text": "the function receives the request header address in edi; it forms the real-mode address of the block at request + 0x40 and writes the low nibble at +0x0e and the shifted high part at +0x10; the field at +0x0e is the transfer address of the MSCDEX request header, and the callers put the request payload and response at +0x40"
+    },
+    {
+      "kind": "note",
+      "text": "after the two stores the function calls cd_request_send at 0x25f44, which submits the block through the DPMI INT 31h path and returns the driver status word; the callers reuse the request header at DAT_001666a4, so the helper is the common submit path"
+    },
+    {
+      "kind": "note",
+      "text": "the request header, the transfer buffer, and the shared sender support the name cd_request_submit; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves no register, so the module builds without -of+; the function holds no floating-point instruction, so the module needs no FPU stub; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the request buffer and the cd_request_send stub; the stub records the call count, the request pointer, and returns a chosen status word; the five paths cover the buffer base, the buffer at +4, the forwarded status 0x81ff, the sentinel bytes outside +0x0e through +0x11, and two calls in a row; every path checks the two transfer words, the request pointer, and the return value; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 11 instructions; the rebuilt body holds 1 of 11 instructions and 0 of 28 bytes equal, and 0 of 0 relocation slots, because V2 takes the argument in eax, forms the block with lea, saves ecx and edx, and calls the C sender; the original takes the argument in edi and forms the far pointer with ebp and ebx; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_request_submit module at 0x25f24"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25f24 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25f24 --count 11 --rebuilt work/rebuild/cdsub.exe --rebuilt-map work/rebuild/cd_request_submit.map --rebuilt-symbol cd_request_submit_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_request_submit"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_request_submit"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25f24"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_request_submit.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_request_submit_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_request_submit.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_request_submit",
+  "name": "cd_request_submit",
   "notes": [],
   "object_offset": "0x15f24",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 28,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25f24",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:7a605d2c4b1e61a64051706328dfde09664f35c87b9a7bd8c9c0badb645fcd71",
+    "source_digest": "sha256:33df750e61df3395cba4ddab35242fc239fe0d7aae216232f0a6a8e5d5d11b82",
+    "tool": "run.py"
+  },
+  "role": "Sets the transfer buffer pointer in the MSCDEX request header and submits the request through the CD request sender.",
+  "section": "race_loop callees",
   "size": 32,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_request_submit_"
 }

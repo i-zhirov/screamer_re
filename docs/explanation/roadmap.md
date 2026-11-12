@@ -388,8 +388,9 @@ current host.
    `race_finish_overlay_4` at `0x240a0`, and the Phase AA module
    `race_track_load` at `0x13540`, and the Phase AA module
    `music_voice_stop` at `0x2fef4`, and the Phase AA module
-   `sprite_list_flush` at `0x25af0`;
-   thirty-eight modules are verified, one is matching, and four hundred and twenty-five
+   `sprite_list_flush` at `0x25af0`, and the Phase AA module
+   `cd_request_submit` at `0x25f24`;
+   thirty-eight modules are verified, one is matching, and four hundred and twenty-six
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
