@@ -31227,3 +31227,64 @@ temporary `-od` recipe.
   the two sibling modules, and the shared driver fields support the role.  The
   name stays `inferred`.  The identity check stays open because C cannot
   reproduce the argument spill and the call order.
+
+## The line_clip_draw module at 0x102e4
+
+- Observation: the plan window at `0x102e4` holds 16 instructions and 47 bytes
+  up to the first `ret` at `0x10312`.  A branch at `0x1030b` or `0x1030f`
+  enters the clip body past that `ret`, and the last `ret` sits at `0x1055a`.
+  The next entry starts at `0x1057c`, so the store record keeps the 664-byte
+  extent and sets no separate function size.  The identity check uses 16
+  instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x102e4 --count
+  16` and `tools/rebuild/functions/0x102e4.json`.
+- Observation: the direct caller at `0x1072e` is `radar_world_draw` at
+  `0x1057c`.  The three calls at `0x23a56`, `0x23a67`, and `0x23a78` sit in
+  `gauge_marker_draw` at `0x2392c`.  The call at `0x23eb4` sits in
+  `volume_bar_draw` at `0x23dfc`.  The two graphics callers sit in the Program
+  functions section, so the record takes that section, like `data_blit`.
+  Evidence: the call sweep of `0x1057c`, `0x2392c`, and `0x23dfc`, and the
+  three caller records.
+- Observation: the function sorts the two endpoints so that x1 is not above x2,
+  and it swaps the two y values together with the x values.  It stores the
+  sorted endpoints in the near-data cells `0x55c`, `0x564`, `0x560`, and
+  `0x568`.  It clips the line against the rectangle in `0x56c`, `0x570`,
+  `0x574`, and `0x578`.  It draws the clipped line with the byte color at
+  `0x55b` into the video buffer at `0x21528` with the row stride `0x280`, so
+  the coordinates are doubled.
+  Evidence: the blocks at `0x102e4` through `0x1055a`.
+- Observation: the two internal `call 0x10547` sites are the Bresenham setup
+  block of the same function.  The function makes no external call and holds no
+  floating-point instruction.  The original has no EBP frame and saves every
+  register through `pushal`.  The module builds without `-of+`, needs no FPU
+  stub, and uses a C implementation.
+  Evidence: the calls at `0x104e9` and `0x1051a`, the setup block at `0x10547`
+  through `0x1055a`, and the module recipe.
+- Inference: the draw color, the four bounds, the video buffer, and the three
+  callers support the name `line_clip_draw`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/modules/line_clip_draw.json` and the three caller
+  records.
+- Observation: the harness holds the color, the four endpoint cells, the four
+  clip bounds, and the `0x3e800`-byte video buffer.  The eight paths cover the
+  guard above the top bound, a horizontal line with the endpoints out of order,
+  a vertical line, a shallow diagonal, the right clip, the top clip, the left
+  clip, and the bottom clip.  Every path checks the touched and the untouched
+  pixels.  The output holds the markers `0` through `7` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/line_clip_draw_main.c`, `python3
+  tools/rebuild/harness.py run --module line_clip_draw`, `work/rebuild/lcd.txt`,
+  and `python3 tools/rebuild/run.py run --function 0x102e4`.
+- Observation: the rebuilt body holds 3 of 16 instructions equal, 0 of 46 bytes
+  equal, and 0 of 9 relocation slots equal.  The identity check stays open
+  because V2 makes a stack frame, saves the registers that it uses, and keeps
+  the endpoints and the loop cursors in registers instead of the `pushal`
+  frame.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x102e4 --count 16 --rebuilt work/rebuild/lcd.exe
+  --rebuilt-map work/rebuild/lcd.map --rebuilt-symbol line_clip_draw_` and
+  `python3 tools/rebuild/run.py run --function 0x102e4`.
+- Limit: the original has no symbol name.  The three callers, the draw globals,
+  and the clip rectangle support the role, and the name stays `inferred`.  The
+  identity check stays open because C cannot reproduce the `pushal` frame.
