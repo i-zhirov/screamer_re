@@ -1,9 +1,106 @@
 {
   "address": "0x19478",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x19478 holds 14 instructions and 40 bytes up to the ret at 0x1949f; the record keeps the 40-byte extent and sets no separate function size; the identity check uses 14 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers run on the player object: player_car_cornering_update at 0x16ca0 calls this function at 0x16da4 with the state 2 when the heading error times the speed is above 0x180 and the effect control word +0x7b0 is zero, and engine_rpm_update at 0x18db0 calls this function at 0x19044 with the state 5 when the engine speed is above the limit and the joystick sits at an extreme; both callers sit in the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function tests the state field +0x148 and stores the second argument only when the field is zero, so a running effect keeps its value; the car state values 2 and 5 and the two callers support the name player_effect_state_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores both arguments to the frame and reloads them; the two volatile locals reproduce the store and the reload; the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls no helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one player object buffer and covers the clear state, the set state, the kept state 2, the kept state 5, the kept state -1, the zero value, and the negative value; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 14 instructions and the rebuilt body is byte-identical at 14 of 14 instructions, 40 of 40 bytes, and 0 of 0 relocation slots; the build, identity, and behavior checks pass, so the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x19478 --count 14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x19478 --count 14 --rebuilt work/rebuild/pess.exe --rebuilt-map work/rebuild/player_effect_state_set.map --rebuilt-symbol player_effect_state_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module player_effect_state_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module player_effect_state_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x19478"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_effect_state_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_effect_state_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_effect_state_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_effect_state_set module at 0x19478"
+    }
+  ],
+  "implementation": "c",
+  "module": "player_effect_state_set",
+  "name": "player_effect_state_set",
   "notes": [],
   "object_offset": "0x9478",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 40,
+        "bytes_total": 40,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 14,
+        "instructions_total": 14,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x19478",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:ec1622f79513564e2af351c4167fa668f90491075c3081b80d0e2c4e476a6a3d",
+    "source_digest": "sha256:a5c794ad1452e541239e58f67bebb01c743362a5d68be0150b3fcbb685703cb9",
+    "tool": "run.py"
+  },
+  "role": "Sets the player effect state only when no effect is active.",
+  "section": "The vehicle state chain",
   "size": 40,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "player_effect_state_set_"
 }

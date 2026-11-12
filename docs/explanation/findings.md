@@ -31802,3 +31802,60 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The music bank record, the active
   gate, and the MIDI volume helper support the name, and the name stays
   inferred.
+
+### The player_effect_state_set module at 0x19478
+
+- Observation: the original body at `0x19478` holds 14 instructions and 40
+  bytes up to the `ret` at `0x1949f`.  The record keeps the 40-byte extent and
+  sets no separate function size.  The identity check uses 14 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x19478 --count 14` and
+  `tools/rebuild/functions/0x19478.json`.
+- Observation: the function has two direct callers.  `player_car_cornering_update`
+  at `0x16ca0` calls this function at `0x16da4` with the state 2 when the
+  heading error times the speed is above `0x180` and the effect control word
+  `+0x7b0` is zero.  `engine_rpm_update` at `0x18db0` calls this function at
+  `0x19044` with the state 5 when the engine speed is above the limit and the
+  joystick sits at an extreme.  Both callers run on the player object and sit
+  in the section The vehicle state chain.  The record takes the same section.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x16d70 --count 25`,
+  `python3 tools/le.py disasm STARTH.EXE 0x18fd0 --count 45`, and the records
+  of `0x16ca0` and `0x18db0`.
+- Observation: the function tests the state field `+0x148` of the first
+  argument.  A zero field takes the second argument.  A non-zero field keeps
+  its value, so a running effect is not replaced.  The state 2 selects the
+  skid effect, and the state 5 selects the engine limit effect.
+  Evidence: the blocks at `0x19484` through `0x19496` and the records of
+  `0x1814c` and `0x16ca0`.
+- Inference: the player state values 2 and 5 and the two callers support the
+  name `player_effect_state_set`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the records of `0x16ca0`, `0x18db0`, and `0x1814c`.
+- Observation: the original stores both arguments to the frame and reloads
+  them.  A plain parameter stays in a register.  The two volatile locals
+  reproduce the store and the reload, as `error_report.c` records for the same
+  frame-local pattern.  The original has the EBP frame and two locals, so the
+  module builds with `-of+`.  The function holds no floating-point instruction
+  and calls no helper, so the module needs no FPU stub.  The module uses no
+  assembly implementation.
+  Evidence: `tools/rebuild/player_effect_state_set.c` and
+  `tools/rebuild/modules/player_effect_state_set.json`.
+- Observation: the harness holds one player object buffer.  The seven paths
+  cover the clear state, the set state, the kept state 2, the kept state 5,
+  the kept state -1, the zero value, and the negative value.  Every path
+  checks the state after the call.  The output holds the markers `0` through
+  `6` and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/player_effect_state_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module player_effect_state_set`,
+  `work/rebuild/pess.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x19478`.
+- Observation: the rebuilt body is byte-identical.  It holds 14 of 14
+  instructions equal, 40 of 40 bytes equal, and 0 of 0 relocation slots equal.
+  The build, identity, and behavior checks pass, so the store records
+  `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x19478 --count 14 --rebuilt work/rebuild/pess.exe
+  --rebuilt-map work/rebuild/player_effect_state_set.map --rebuilt-symbol
+  player_effect_state_set_` and `python3 tools/rebuild/run.py run --function
+  0x19478`.
+- Limit: the original has no symbol name.  The two callers and the state
+  values support the name, and the name stays inferred.

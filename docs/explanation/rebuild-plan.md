@@ -703,7 +703,7 @@ reproduce the original bytes.
 | `0x15b80` | `opponent_effect_update` (done) | 41 | 14 | 2 | 0 |
 | `0x10263` | `joystick_axis_read` (done) | 41 | 16 | 1 | 0 |
 | `0x2ff84` | `music_volume_set` (done) | 40 | 15 | 1 | 0 |
-| `0x19478` | unnamed | 40 | 14 | 0 | 0 |
+| `0x19478` | `player_effect_state_set` (done) | 40 | 14 | 0 | 0 |
 | `0x4cecc` | unnamed | 38 | 12 | 2 | 0 |
 | `0x2f985` | unnamed | 38 | 21 | 0 | 0 |
 | `0x1f8b4` | unnamed | 37 | 14 | 1 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and fifty-one modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and fifty-two modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1022,5 +1022,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `screen_setup_cleanup` at `0x15150`, and the Phase AA module
 `opponent_effect_update` at `0x15b80`, and the Phase AA module
 `joystick_axis_read` at `0x10263`, and the Phase AA module
-`music_volume_set` at `0x2ff84`.
-The next unnamed function is `0x19478`.
+`music_volume_set` at `0x2ff84`, and the Phase AA module
+`player_effect_state_set` at `0x19478`.
+The next unnamed function is `0x4cecc`.
