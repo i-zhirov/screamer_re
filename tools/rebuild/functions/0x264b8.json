@@ -1,9 +1,107 @@
 {
   "address": "0x264b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 15,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x264b8 holds 15 instructions and 51 bytes up to the ret at 0x264ea; the next function starts at 0x264ec after the padding byte at 0x264eb, so the store record keeps the 52-byte extent and sets no separate function size; the identity check uses 15 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is options_screen at 0x21338 at the call site 0x2146d; the wrapper at 0x264ec calls this function twice; the CD audio request path and the caller sit in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when bit 0 of DAT_0016669e is clear or bit 0 of DAT_00166684 is clear; otherwise it writes the length 0x0d at +0, the subunit DAT_00166680 at +1, and the command 0x85 at +2 of the request header at DAT_001666a4, then calls 0x25f44; DOSBox maps the driver command 0x85 to Stop Audio, and the finding at 0x265b4 lists 0x264b8 with the stop command, so the name cd_audio_stop fits the data flow; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves every register through pushal; it holds no floating-point instruction and makes one call, so the module uses no FPU stub and no assembly body; the module implementation is C"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two guard flags, the device byte, the request buffer, and the send stub; the seven paths cover both guards set, each guard clear, each guard with bit 0 clear and the upper bits set, the device byte 0x77, and two calls; every path checks the whole request buffer; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 15 instructions and 3 of 51 bytes equal; V2 keeps the request pointer in eax, tests the guard bytes instead of the guard dwords, writes the fields in another order, and saves only edx in place of pushal; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_stop module at 0x264b8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x264b8 --count 15"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x264b8 --count 15 --rebuilt work/rebuild/cdstop.exe --rebuilt-map work/rebuild/cd_audio_stop.map --rebuilt-symbol cd_audio_stop_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_audio_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_stop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x264b8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_stop.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_stop_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_stop.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_stop",
+  "name": "cd_audio_stop",
   "notes": [],
   "object_offset": "0x164b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 51,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 15,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x264b8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:1efa24eb8a719f236cdd53a1726e869aee1e4576b90ed203e91af01cab2a70b2",
+    "source_digest": "sha256:a0b4068d5103a7b4e77beaf9178c8483e03a9b4c35b9f1880e31b3480929362c",
+    "tool": "run.py"
+  },
+  "role": "Sends the MSCDEX stop-audio request when the two CD audio guard flags are set.",
+  "section": "race_loop callees",
   "size": 52,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_stop_"
 }

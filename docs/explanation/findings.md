@@ -30809,3 +30809,57 @@ temporary `-od` recipe.
   support the name, and the name stays inferred.  The C build cannot reproduce
   the original bytes, because the original uses `pushal`, `cld`, and the
   string copy instructions.
+
+## The cd_audio_stop module at 0x264b8
+
+- Observation: the original body at `0x264b8` holds 15 instructions and 51
+  bytes up to the `ret` at `0x264ea`.  The next function starts at `0x264ec`
+  after the padding byte at `0x264eb`, so the store record keeps the 52-byte
+  extent and sets no separate function size.  The identity check uses 15
+  instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x264b8 --count
+  15` and `tools/rebuild/functions/0x264b8.json`.
+- Observation: the only direct caller is `options_screen` at `0x21338`, at the
+  call site `0x2146d`.  The small wrapper at `0x264ec` calls this function
+  twice.  The CD audio request path and the caller sit in the section
+  race_loop callees, so the module takes the same section.
+  Evidence: the call sweep of the named functions, the call site `0x264ec`,
+  and `tools/rebuild/functions/0x21338.json`.
+- Observation: the function returns at once when bit 0 of `DAT_0016669e` is
+  clear or bit 0 of `DAT_00166684` is clear.  Otherwise it writes the length
+  `0x0d` at +0, the subunit `DAT_00166680` at +1, and the command `0x85` at +2
+  of the request header at `DAT_001666a4`.  It then calls `0x25f44`.
+  Evidence: the blocks at `0x264b9` through `0x264e4`.
+- Inference: DOSBox maps the driver command `0x85` to Stop Audio.  The finding
+  "The cd_audio_volume_set module at 0x265b4" lists `0x264b8` with the stop
+  command.  The guard flags, the request, and the command support the name
+  `cd_audio_stop`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the command byte at `0x264d7`, the DOSBox MSCDEX request dispatch,
+  and the sibling finding.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`.  It holds no floating-point instruction and makes one call, so the
+  module uses no FPU stub and no assembly body.  The module implementation is
+  C.
+  Evidence: the block at `0x264b8` through `0x264ea` and
+  `tools/rebuild/cd_audio_stop.c`.
+- Observation: the harness holds the two guard flags, the device byte, the
+  request buffer, and the send stub.  The seven paths cover both guards set,
+  each guard clear, each guard with bit 0 clear and the upper bits set, the
+  device byte `0x77`, and two calls.  Every path checks the whole request
+  buffer.  The output holds the markers `0` through `6` and `D`, and the
+  behavior check passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module cd_audio_stop` and
+  `work/rebuild/cdstop.txt`.
+- Observation: the rebuilt body holds 6 of 15 instructions and 3 of 51 bytes
+  equal.  V2 keeps the request pointer in `eax`, tests the guard bytes instead
+  of the guard dwords, writes the fields in another order, and saves only
+  `edx` in place of `pushal`.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x264b8 --count 15 --rebuilt work/rebuild/cdstop.exe
+  --rebuilt-map work/rebuild/cd_audio_stop.map --rebuilt-symbol
+  cd_audio_stop_` and `python3 tools/rebuild/run.py run --function 0x264b8`.
+- Limit: the original has no symbol name.  The caller, the command byte, and
+  the sibling request path support the name, and the name stays inferred.

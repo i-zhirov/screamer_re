@@ -359,9 +359,10 @@ current host.
    `filter_update_int` at `0x22bb4`, and the Phase Z module
    `map_data_release` at `0x4cef4`, and the Phase Z module
    `player_physics_update` at `0x15a80`, and the Phase Z module
-   `data_blit` at `0x102b0`;
-   thirty-five modules are verified, one is matching, and three hundred and
-   ninety-nine rebuilds hold the recorded difference; the `video_fill`,
+   `data_blit` at `0x102b0`, and the Phase Z module
+   `cd_audio_stop` at `0x264b8`;
+   thirty-five modules are verified, one is matching, and four hundred
+   rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
