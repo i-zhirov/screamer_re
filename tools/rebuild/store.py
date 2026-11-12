@@ -396,10 +396,13 @@ def _file_bytes(path: Path) -> bytes:
 
 
 def _record_fields(record: dict) -> bytes:
-    """The canonical bytes of the record fields that steer the declared checks."""
+    """The canonical bytes of the record fields that steer the declared checks.
+
+    The `size` field bounds the identity check, so it stays an input.
+    """
     fields = {
         key: record[key]
-        for key in ("address", "symbol", "count", "checks", "module")
+        for key in ("address", "symbol", "count", "size", "checks", "module")
         if key in record
     }
     return json.dumps(fields, sort_keys=True, separators=(",", ":")).encode("utf-8")

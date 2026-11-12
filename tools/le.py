@@ -408,10 +408,52 @@ class LinearExecutable:
         return page.file_offset + (linear_address - page.virtual_address)
 
     def read(self, linear_address: int, length: int) -> bytes | None:
-        offset = self.to_file_offset(linear_address)
-        if offset is None:
+        """Read a run of bytes across the object pages.
+
+        The read walks the pages from the start address.  A legal page
+        contributes its file bytes, and a page whose `data_size` is below its
+        `virtual_size` contributes only that short slice, so the file region of
+        the next page does not enter the result.  A zeroed page contributes
+        zeros for the rest of its virtual range.  A page without a file offset
+        stops the read and keeps the collected bytes, and so does an address
+        that no page maps.  The start must be mapped: an unmapped start, or a
+        start page without a file offset that is not zeroed, returns `None`.  A
+        zero length at a mapped start returns an empty result.
+        """
+        start_page = self.page_at(linear_address)
+        if start_page is None:
             return None
-        return self.data[offset : offset + length]
+        if length == 0:
+            return b""
+        if start_page.file_offset is None and start_page.flags != P_ZEROED:
+            return None
+        collected = bytearray()
+        current = linear_address
+        end = linear_address + length
+        while current < end:
+            page = self.page_at(current)
+            if page is None:
+                break
+            offset_in_page = current - page.virtual_address
+            remaining = end - current
+            if page.flags == P_ZEROED:
+                count = min(remaining, page.virtual_size - offset_in_page)
+                collected.extend(bytes(count))
+                current += count
+                continue
+            if page.file_offset is None:
+                break
+            count = min(
+                remaining,
+                page.data_size - offset_in_page,
+                page.virtual_size - offset_in_page,
+            )
+            if count <= 0:
+                break
+            file_start = page.file_offset + offset_in_page
+            collected.extend(self.data[file_start : file_start + count])
+            current += count
+        return bytes(collected)
 
     def fixup_section(self) -> bytes:
         """The raw fixup section: the page table, the record table, and names."""
@@ -604,38 +646,153 @@ def decode(exe: LinearExecutable, address: int, max_instructions: int = 64) -> l
     return instructions
 
 
-def function_body(
-    exe: LinearExecutable, address: int, max_instructions: int = 4000
-) -> list[Insn]:
-    """Decode a function body from its start until a terminator.
+def _jump_target(insn: Insn) -> int | None:
+    """Return the direct target of a jump or loop instruction."""
+    if insn.mnemonic == "call":
+        return None
+    if not (insn.mnemonic.startswith("j") or insn.mnemonic.startswith("loop")):
+        return None
+    operand = insn.operands.strip()
+    if not operand.startswith("0x"):
+        return None
+    return int(operand.split()[0], 16)
 
-    A leading unconditional jump is followed, because the linker puts a jump over the
-    run-time banner string at the entry point.  The sweep then stops at the first
-    `ret`, `retf`, `iret`, `hlt`, or `int3`, or after max_instructions.  A function
-    that ends with a tail call has no terminator, so the sweep continues into the
-    next function.
+
+def _table_jump_targets(
+    exe: LinearExecutable,
+    insn: Insn,
+    block: list[Insn],
+    address: int,
+    end: int,
+) -> list[int]:
+    """Return the compiler jump-table case targets of an indirect `jmp`."""
+    if insn.mnemonic != "jmp":
+        return []
+    operand = insn.operands.strip()
+    marker = "cs:["
+    if marker not in operand or not operand.endswith("]"):
+        return []
+    inside = operand[operand.index(marker) + len(marker) : -1]
+    if "+" in inside:
+        displacement_text = inside.rsplit("+", 1)[1]
+    else:
+        displacement_text = inside
+    displacement_text = displacement_text.strip()
+    if not displacement_text.startswith("0x"):
+        return []
+    displacement = int(displacement_text, 16)
+    immediate = None
+    for previous in reversed(block):
+        if previous.address >= insn.address or previous.mnemonic != "cmp":
+            continue
+        tokens = previous.operands.rsplit(",", 1)
+        if len(tokens) != 2:
+            continue
+        try:
+            immediate = int(tokens[1].strip(), 0)
+        except ValueError:
+            continue
+        break
+    if immediate is None:
+        return []
+    count = immediate + 1
+    if count <= 0 or count > 256:
+        return []
+    obj = exe.object_at(insn.address)
+    if obj is None:
+        return []
+    data = exe.read(obj.reloc_base + displacement, count * 4)
+    if data is None or len(data) < count * 4:
+        return []
+    targets: list[int] = []
+    for index in range(count):
+        entry = int.from_bytes(data[index * 4 : index * 4 + 4], "little")
+        target = obj.reloc_base + entry
+        if address <= target < end and target not in targets:
+            targets.append(target)
+    return targets
+
+
+def function_body(
+    exe: LinearExecutable,
+    address: int,
+    max_instructions: int = 4000,
+    end: int | None = None,
+) -> list[Insn]:
+    """Decode the reachable blocks of a function body.
+
+    The walk starts at `address` and follows every direct jump and loop target
+    inside the bound.  It does not follow a call target.  The bound is the
+    half-open range `[address, end)`, where `end` is the argument when given,
+    else the next candidate function start, else the end of the object.  A
+    block stops at a terminator, at an address already in the body, at the
+    bound, and after an unconditional jump, so the fallthrough and the code
+    after a `ret` stay out.  A leading unconditional jump is kept and followed,
+    because the linker puts a jump over the run-time banner string at the entry
+    point.  An indirect unconditional jump follows the compiler jump table when
+    the nearest preceding `cmp` gives the entry count.  Duplicate instructions
+    are removed, and the walk stops at `max_instructions`.
     """
     body: list[Insn] = []
+    seen: set[int] = set()
     current = address
     for _ in range(4):
+        if len(body) >= max_instructions:
+            break
         instructions = decode(exe, current, 1)
         if not instructions:
             return body
         first = instructions[0]
         operand = first.operands.strip()
         if first.mnemonic == "jmp" and operand.startswith("0x"):
+            if first.address in seen:
+                break
             body.append(first)
+            seen.add(first.address)
             current = int(operand.split()[0], 16)
             continue
         break
-    remaining = max_instructions - len(body)
-    if remaining <= 0:
-        return body
-    for insn in decode(exe, current, remaining):
-        body.append(insn)
-        if insn.mnemonic in TERMINATORS:
-            break
-    return body
+    if end is None:
+        end = _next_function_start(exe, address)
+        if end is None:
+            obj = exe.object_at(address)
+            if obj is None:
+                raise ValueError("the address is unmapped")
+            end = obj.reloc_base + obj.virtual_size
+    leading_target = current if body else None
+    pending = [current]
+    while pending and len(body) < max_instructions:
+        start = pending.pop()
+        if start in seen:
+            continue
+        inside = address <= start < end
+        if not inside and start != leading_target:
+            continue
+        beyond = not inside and start == leading_target
+        remaining = max_instructions - len(body)
+        block = sorted(decode(exe, start, remaining), key=lambda item: item.address)
+        for insn in block:
+            if insn.address in seen:
+                break
+            if not beyond and insn.address >= end:
+                break
+            body.append(insn)
+            seen.add(insn.address)
+            if insn.mnemonic in TERMINATORS:
+                break
+            target = _jump_target(insn)
+            if target is not None:
+                if address <= target < end:
+                    pending.append(target)
+            elif insn.mnemonic == "jmp":
+                pending.extend(
+                    _table_jump_targets(exe, insn, block, address, end)
+                )
+            if insn.mnemonic == "jmp":
+                break
+            if len(body) >= max_instructions:
+                break
+    return sorted(body, key=lambda item: item.address)
 
 
 @dataclass
@@ -774,6 +931,24 @@ def _prologue_positions(data: bytes) -> list[int]:
             positions.append(position)
             position = data.find(pattern, position + 1)
     return positions
+
+
+def _next_function_start(exe: LinearExecutable, address: int) -> int | None:
+    """Return the nearest candidate function start strictly above an address."""
+    obj = exe.object_at(address)
+    if obj is None:
+        raise ValueError("the address is unmapped")
+    low = obj.reloc_base
+    high = low + obj.virtual_size
+    data = exe.read(low, high - low)
+    if data is None:
+        raise ValueError("the range is not mapped to a file offset")
+    candidates = {
+        low + prologue_start(data, position)
+        for position in _prologue_positions(data)
+    }
+    later = [candidate for candidate in candidates if candidate > address]
+    return min(later) if later else None
 
 
 def function_starts(

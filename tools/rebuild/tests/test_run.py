@@ -946,6 +946,52 @@ class RunTestCase(unittest.TestCase):
             )
         self.assertEqual(verdict, "pass")
 
+    def test_identity_command_carries_the_original_end(self) -> None:
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout("the modules are byte-identical"), ""
+        )
+        record = {"address": "0x300ec", "symbol": "free_", "size": 5}
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(
+            run.subprocess, "run", return_value=completed
+        ) as execute:
+            run.run_identity(record, module, self.original)
+        command = execute.call_args.args[0]
+        self.assertIn("--original-end", command)
+        self.assertIn("0x300f1", command)
+
+    def test_identity_command_omits_the_original_end_without_a_size(self) -> None:
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout("the modules are byte-identical"), ""
+        )
+        record = {"address": "0x300ec", "symbol": "free_"}
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(
+            run.subprocess, "run", return_value=completed
+        ) as execute:
+            run.run_identity(record, module, self.original)
+        command = execute.call_args.args[0]
+        self.assertNotIn("--original-end", command)
+
+    def test_identity_command_carries_both_count_and_end(self) -> None:
+        completed = subprocess.CompletedProcess(
+            [], 0, self.identity_stdout("the modules are byte-identical"), ""
+        )
+        record = {
+            "address": "0x300ec",
+            "symbol": "free_",
+            "count": 3,
+            "size": 5,
+        }
+        module = {"exe": "free.exe", "map": "free.map"}
+        with mock.patch.object(
+            run.subprocess, "run", return_value=completed
+        ) as execute:
+            run.run_identity(record, module, self.original)
+        command = execute.call_args.args[0]
+        self.assertEqual(command[command.index("--count") + 1], "3")
+        self.assertEqual(command[command.index("--original-end") + 1], "0x300f1")
+
     def test_recheck_record_forces_a_fresh_run(self) -> None:
         module = self.module()
         record = self.record(

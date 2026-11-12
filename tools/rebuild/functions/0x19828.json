@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x19828 holds 99 instructions and 344 bytes up to the ret at 0x1997f; the next function starts at 0x19980, so the store record keeps the 344-byte extent and sets no function size; the identity check uses 99 instructions"
+      "text": "the original body at 0x19828 holds 99 instructions and 344 bytes over the full extent; the ret is at 0x1997f; the next function starts at 0x19980, so the store record keeps the 344-byte extent and sets no function size; the identity check uses 73 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 99 decoded instructions and 332 bytes in the identity window; the identity check stays open at 17 of 99 instructions, 17 of 332 bytes, and 1 of 22 relocation slots, because V2 saves the registers after the frame, keeps the self pointer in edi and the slot in ecx, and builds the address calculation with imul 0x54; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 73 decoded instructions and 245 bytes in the identity window; the identity check stays open at 13 of 73 instructions, 13 of 245 bytes, and 1 of 22 relocation slots, because V2 saves the registers after the frame, keeps the self pointer in edi and the slot in ecx, and builds the address calculation with imul 0x54; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -77,18 +77,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 17,
-        "bytes_total": 332,
+        "bytes_equal": 13,
+        "bytes_total": 245,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 17,
-        "instructions_total": 99,
+        "instructions_equal": 13,
+        "instructions_total": 73,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19828",
     "date": "2026-11-12",
-    "fingerprint": "sha256:f86c03cce98a36cba608cd9e3d799e120a6fb907ce7d1541d1cb57715db00996",
+    "fingerprint": "sha256:5386f489ee962f4dd5402275141889fc4711e404ce8a27a21bb606e5aae2a886",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -79,7 +79,8 @@ screamer_re/
 │   │   ├── roadmap.md         # milestones and next steps
 │   │   ├── rebuild-quality-design.md         # rebuild quality improvement design
 │   │   ├── rebuild-quality-roadmap.md        # the seven rebuild quality slices
-│   │   └── rebuild-quality-plan-baseline.md  # the truthful verification baseline plan
+│   │   ├── rebuild-quality-plan-baseline.md  # the truthful verification baseline plan
+│   │   └── rebuild-quality-plan-oracle.md    # the reachable extent and symbol-aware oracle plan
 │   └── reference/
 │       ├── distribution.md    # GOG package and installed bundle layout
 │       ├── executables.md     # LE header metadata and runtime facts
@@ -160,7 +161,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
-python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x3009b --rebuilt work/rebuild/prtfmod.exe --rebuilt-map work/rebuild/printf.map --rebuilt-symbol printf_
@@ -234,7 +235,7 @@ open ~/Documents/Screamer.app
       tool
     - `python3 tools/rebuild/diff_module.py --original
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
-      --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+      --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map
       work/rebuild/free.map --rebuilt-symbol free_` to check the module diffs; the
       Build And Test Commands section holds the exit module commands
     - `python3 tools/rebuild/image_compare.py --original
@@ -371,11 +372,16 @@ through the store.
   unchanged since the previous run.  A stored `fail` prints `FAIL`.
 - `oracle.py` masks every byte that an LE fixup slot controls and every byte
   that encodes a direct branch target.  It compares the remaining bytes in
-  instruction order.  An internal target compares by kind and width, because
-  the object number and the object offset are link-time values.  An imported
+  instruction order.  An intra-function branch target compares by instruction
+  position, and a target outside the body stays masked.  An internal target
+  compares by symbol and addend when both sides resolve a symbol.  An imported
   target compares by module and ordinal or name offset.  A relocation-only
   difference passes `--strict`, and a reordered, inserted, or non-relocation
   difference does not.
+- `le.read` stitches the LE pages: a zeroed page gives zeros, and a page
+  without a file offset stops the read.  `function_body` follows every direct
+  jump and loop target inside the bound, and it follows the compiler jump table.
+  It does not follow a call target.
 - `store.py check` validates every record against `contracts/record.schema.json`
   and every module against `contracts/module.schema.json`, in addition to the
   semantic checks.  The validator uses the standard library only.
@@ -410,18 +416,18 @@ through the store.
   skip a record whose inputs are unchanged since the previous run.  The input
   fingerprint of a record covers the module recipe, the module sources, the
   shared harness sources (`chk.asm`, `stack.asm`, `cstart.c`), the record
-  fields that steer the checks, the participating tools (`run.py`,
-  `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original image, and
-  the built artifacts.  The fingerprint also covers the strict mode and the
-  toolchain.  It does not cover the runtime mode, so `--skip-runtime` does not
-  invalidate a stored result.  The fingerprint lives in the `result.fingerprint`
-  of the record, `store.compute_fingerprint` computes it, and `run.py
-  --skip-unchanged` uses it.  `pipeline_check.py` verifies the stored
-  fingerprint of an unchanged record itself.  A documentation-only change to a
-  record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`,
-  `implementation`) must not invalidate a result.  The optional `implementation`
-  field is `c` or `assembly`; the status page shows `asm` for `assembly` and
-  `C` for `c`.
+  fields that steer the checks (including `size`), the participating tools
+  (`run.py`, `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original
+  image, and the built artifacts.  The fingerprint also covers the strict mode
+  and the toolchain.  It does not cover the runtime mode, so `--skip-runtime`
+  does not invalidate a stored result.  The fingerprint lives in the
+  `result.fingerprint` of the record, `store.compute_fingerprint` computes it,
+  and `run.py --skip-unchanged` uses it.  `pipeline_check.py` verifies the
+  stored fingerprint of an unchanged record itself.  A documentation-only
+  change to a record (`evidence`, `notes`, `name`, `role`, `confidence`,
+  `section`, `implementation`) must not invalidate a result.  The optional
+  `implementation` field is `c` or `assembly`; the status page shows `asm` for
+  `assembly` and `C` for `c`.
 - A mutation that changes the record addresses must call `sync_extents()`.
   `save_record` marks a new address and `remove_record` marks a deletion, and
   the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,

@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x168b4 holds 219 instructions and 740 bytes up to the ret at 0x16b97; the next function starts at 0x16b98, so the record keeps the 740-byte extent and sets no function size; the identity check uses 219 instructions"
+      "text": "the original body at 0x168b4 holds 219 instructions and 740 bytes over the full extent; the ret is at 0x16b97; the next function starts at 0x16b98, so the record keeps the 740-byte extent and sets no function size; the identity check uses 171 instructions"
     },
     {
       "kind": "note",
@@ -65,18 +65,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 32,
-        "bytes_total": 719,
+        "bytes_equal": 29,
+        "bytes_total": 609,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 23,
-        "instructions_total": 219,
+        "instructions_equal": 18,
+        "instructions_total": 171,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x168b4",
     "date": "2026-11-12",
-    "fingerprint": "sha256:4997adaa2df39cb70fcd2918cd547a796c458195688a7e73acad0f2eeda56ad5",
+    "fingerprint": "sha256:1d610619ff2e502b07b138266918978b77258c960f8e1b44fa916d8b8ed70683",
     "mode": {
       "runtime": "run",
       "strict": true,

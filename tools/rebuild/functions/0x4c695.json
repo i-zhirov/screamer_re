@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x4c695 holds 106 instructions and 331 bytes up to the ret at 0x4c7df; the next function starts at 0x4c7e0, so the store record keeps the 331-byte extent and sets no function size; the identity check uses 106 instructions"
+      "text": "the original body at 0x4c695 holds 106 instructions and 331 bytes over the full extent; the ret is at 0x4c7df; the next function starts at 0x4c7e0, so the store record keeps the 331-byte extent and sets no function size; the identity check uses 72 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 106 decoded instructions and 277 bytes in the identity window; the identity check stays open at 27 of 106 instructions and 7 of 277 bytes, because V2 saves the frame first, keeps the three arguments in registers, forms the terminator branches with local flags, and builds the unbuffered tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 72 decoded instructions and 180 bytes in the identity window; the identity check stays open at 17 of 72 instructions and 6 of 180 bytes, because V2 saves the frame first, keeps the three arguments in registers, forms the terminator branches with local flags, and builds the unbuffered tail in another shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 7,
-        "bytes_total": 277,
+        "bytes_equal": 6,
+        "bytes_total": 180,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 27,
-        "instructions_total": 106,
+        "instructions_equal": 17,
+        "instructions_total": 72,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c695",
     "date": "2026-11-12",
-    "fingerprint": "sha256:4a755d41dc18c8730b0629e0f018cd6653d14723e63efc406956b365bbe34cf0",
+    "fingerprint": "sha256:c14f3f8ac334b41f8d1553ee40df21292de469488cd6c417d93b7ba52196f834",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x120c0 holds 201 instructions and 695 bytes up to the ret at 0x12376; the record keeps the 696-byte extent to the next function at 0x12378 and sets no function size; the identity check uses 201 instructions"
+      "text": "the original body at 0x120c0 holds 201 instructions and 695 bytes over the full extent; the ret is at 0x12376; the record keeps the 696-byte extent to the next function at 0x12378 and sets no function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the identity check stays open at 39 of 201 instructions and 36 of 687 bytes, because V2 saves the frame pointer first, uses another register and local layout, and uses imul for the entry stride; the build and behavior checks pass, so the record status is rebuilt"
+      "text": "the identity check stays open at 25 of 127 instructions and 21 of 447 bytes, because V2 saves the frame pointer first, uses another register and local layout, and uses imul for the entry stride; the build and behavior checks pass, so the record status is rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 36,
-        "bytes_total": 687,
+        "bytes_equal": 21,
+        "bytes_total": 447,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 39,
-        "instructions_total": 201,
+        "instructions_equal": 25,
+        "instructions_total": 127,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x120c0",
     "date": "2026-11-12",
-    "fingerprint": "sha256:8364bcd5bc2ae3e25eb0b9b4616cc2985de1cd92842b485afef761c57a288e21",
+    "fingerprint": "sha256:6ab09a749f91ce1553b0a67517e614b2b78e1734985fbd9482818ffb70d59892",
     "mode": {
       "runtime": "run",
       "strict": true,

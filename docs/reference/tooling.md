@@ -29,6 +29,10 @@ object page table.  It reports the header metadata, the objects, the entry
 point, and the mapping from a linear address to a file offset.  The mapping
 follows the LE page table, so the last page ends at the end of the file.
 
+`LinearExecutable.read` stitches a run of bytes across the object pages.  A
+zeroed page gives zeros.  A page without a file offset stops the read and keeps
+the collected bytes.  The start address must be mapped.
+
 The disassembly uses the capstone shared library through ctypes.  The tool
 looks for the library in these paths:
 
@@ -62,11 +66,18 @@ target reachable from the given roots.  A call target is a function entry even
 when the function has no frame, so the store seed adds the targets of the
 verified and rebuilt roots as candidates.
 
-The body sweep stops at the first `ret`, `retf`, `iret`, `hlt`, or `int3`, or
-after `--max` instructions.  A function that ends with a tail call has no
-terminator, so the sweep continues into the next function.  An indirect call has
-no
-static target.  See [Program map](program-map.md) for the recovered structure.
+`function_body` decodes the reachable extent of a function.  The bound is the
+half-open range `[address, end)`.  `end` is the argument when given, else the
+next candidate function start, else the end of the object.  The walk follows
+every direct jump and loop target inside the bound.  It does not follow a call
+target.  A block stops at a terminator, at an address already in the body, at
+the bound, and after an unconditional jump, so the code after a `ret` stays out.
+A leading unconditional jump is kept and followed, because the linker puts a
+jump over the run-time banner string at the entry point.  An indirect
+unconditional jump follows the compiler jump table when the nearest preceding
+`cmp` gives the entry count.  Duplicate instructions are removed, and the walk
+stops after `--max` instructions.  An indirect call has no static target.  See
+[Program map](program-map.md) for the recovered structure.
 
 ### `tools/extract_cd_image.py`
 
@@ -680,9 +691,11 @@ accepted and selects the default gate.  The identity check result holds a
 `match` value: `exact-bytes`, `exact-relocations`, `same-shape`,
 `same-mnemonics`, or `different`.  The report holds four buckets: `exact`,
 `relocation-only`, `shape`, and `behavior-only`.  The `same-mnemonics` match
-counts in `shape`.  The input fingerprint covers the strict mode and the
-toolchain, and the result records the runtime mode.  The runtime mode does not
-enter the fingerprint, so `--skip-runtime` does not invalidate a stored result.
+counts in `shape`.  The input fingerprint covers the record fields that steer
+the checks (`address`, `symbol`, `count`, `size`, `checks`, `module`), the
+strict mode, and the toolchain.  The result records the runtime mode.  The
+runtime mode does not enter the fingerprint, so `--skip-runtime` does not
+invalidate a stored result.
 `--skip-unchanged` prints the stored verdict, so a stored `fail` prints `FAIL`.
 `--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`
@@ -778,6 +791,7 @@ The module rebuild:
 python3 tools/rebuild/diff_module.py \
     --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
     --original-address 0x300ec \
+    --original-end 0x300f8 \
     --rebuilt work/rebuild/free.exe \
     --rebuilt-map work/rebuild/free.map \
     --rebuilt-symbol free_
@@ -804,18 +818,24 @@ python3 tools/rebuild/diff_module.py \
     --rebuilt-symbol printf_
 ```
 
-The diff reads the original address from the command line and the rebuilt address
-from the linker map.  It exits with code 0 when the default gate passes.  The
-`run.py` identity gate is separate: it uses the strict list by default and the
-historical list under `--allow-shape`.  `diff_module.py` still exits 0 when
+The diff reads the original address from the command line and the rebuilt
+address from the linker map.  `--original-end ADDR` bounds the original body at
+a half-open address, so the body covers every reachable instruction.  The
+record `size` supplies the bound: the end is the record address plus the size.
+The tool exits with code 0 when the default gate passes.  The `run.py` identity
+gate is separate: it uses the strict list by default and the historical list
+under `--allow-shape`.  `diff_module.py` still exits 0 when
 `oracle.passes_default` is true.  The oracle exposes `passes_strict` and
 `passes_default`.
 `oracle.py` masks every byte that an LE fixup slot controls and every byte that
 encodes a direct branch target.  It compares the remaining bytes in instruction
-order.  An internal target compares by kind and width, because the object number
-and the object offset are link-time values.  An imported target compares by
-module and ordinal or name offset.  A relocation-only difference passes the
-strict gate.  A reordered, inserted, or non-relocation difference does not.
+order.  An intra-function branch target compares by instruction position, and a
+target outside the body stays masked.  An internal fixup target compares by
+symbol and addend when both sides resolve a symbol, and by kind and width
+otherwise.  A one-sided symbol is a limitation: the two images have no common
+symbol table for it.  An imported target compares by module and ordinal or name
+offset.  A relocation-only difference passes the strict gate.  A reordered,
+inserted, or non-relocation difference does not.
 
 The rebuilt `free` holds `85 c0`, `0f 85 <rel32>`, and `c3`; the original holds
 `85 c0`, `0f 85 14 1f 0a 00`, and `c3`.  The direct branch target is masked, so

@@ -507,6 +507,16 @@ class StoreTestCase(unittest.TestCase):
             ),
         )
 
+    def test_fingerprint_changes_with_the_record_size(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(
+            rebuild, work, tools, original, {**record, "size": 5}, module
+        )
+        after = self.fingerprint_of(
+            rebuild, work, tools, original, {**record, "size": 6}, module
+        )
+        self.assertNotEqual(before, after)
+
     def test_fingerprint_changes_with_tool_code(self) -> None:
         rebuild, work, tools, original, record, module = self.fingerprint_env()
         before = self.fingerprint_of(rebuild, work, tools, original, record, module)

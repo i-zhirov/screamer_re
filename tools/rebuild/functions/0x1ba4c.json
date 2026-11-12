@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1ba4c holds 82 instructions and 267 bytes up to the ret at 0x1bb56; the next function starts at 0x1bb58, so the store record keeps the 268-byte extent and sets no separate function size; the identity check uses 82 instructions"
+      "text": "the original body at 0x1ba4c holds 82 instructions and 267 bytes over the full extent; the ret is at 0x1bb56; the next function starts at 0x1bb58, so the store record keeps the 268-byte extent and sets no separate function size; the identity check uses 68 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 82 decoded instructions and 251 bytes in the identity window; the identity check stays open at 33 of 82 instructions and 16 of 251 bytes, because V2 saves the frame pointer first, keeps the stream in esi and edi, uses another local layout, and copies the header fields in another order; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 68 decoded instructions and 213 bytes in the identity window; the identity check stays open at 30 of 68 instructions and 13 of 213 bytes, because V2 saves the frame pointer first, keeps the stream in esi and edi, uses another local layout, and copies the header fields in another order; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -81,18 +81,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 251,
+        "bytes_equal": 13,
+        "bytes_total": 213,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 33,
-        "instructions_total": 82,
+        "instructions_equal": 30,
+        "instructions_total": 68,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1ba4c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:916c0cd4ce2ead33c13f73fbd8cd4e31464dcd65d6b59a3666e9350864871fdb",
+    "fingerprint": "sha256:17e59ac1eb0bbf012857f691d567b62b38609cd5ecfd13bb5a77e1b166d0fe8f",
     "mode": {
       "runtime": "run",
       "strict": true,

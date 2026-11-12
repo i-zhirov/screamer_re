@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x20b1c holds 166 instructions and 516 bytes up to the ret 4 at 0x20d1d; the next function starts at 0x20d20, so the record keeps the 516-byte extent and sets no function size; the identity check uses 166 instructions"
+      "text": "the original body at 0x20b1c holds 166 instructions and 516 bytes up to the ret 4 at 0x20d1d; the next function starts at 0x20d20, so the record keeps the 516-byte extent and sets no function size; the identity check uses 123 instructions"
     },
     {
       "kind": "note",
@@ -61,18 +61,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 18,
-        "bytes_total": 483,
+        "bytes_equal": 15,
+        "bytes_total": 381,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 17,
-        "instructions_total": 166,
+        "instructions_equal": 14,
+        "instructions_total": 123,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20b1c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:93c7390dfde8082e8dd10f8d59d8edee65850e7f7a2b84b21c4fbb26e5551e27",
+    "fingerprint": "sha256:e7661175c8995824335c7ac629e2def7d562e6fc3a2bb9970a36a51de10b70b7",
     "mode": {
       "runtime": "run",
       "strict": true,

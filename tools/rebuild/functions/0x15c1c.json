@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x15c1c holds 306 instructions and 1160 bytes up to the ret at 0x160a3, so the record keeps the 1160-byte extent and sets no function size"
+      "text": "the original at 0x15c1c holds 306 instructions and 1160 bytes over the full extent; the ret is at 0x160a3, so the record keeps the 1160-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -56,18 +56,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 67,
-        "bytes_total": 1133,
+        "bytes_equal": 63,
+        "bytes_total": 787,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 76,
-        "instructions_total": 306,
+        "instructions_equal": 55,
+        "instructions_total": 197,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15c1c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:de508bca7313863fabe0c5ed174d02bf4d1901a6cc687ed6ddbea9f6fc853979",
+    "fingerprint": "sha256:566de7de4261175ec8300c743211bfcf22117fa01f2531075193cdbd508839fe",
     "mode": {
       "runtime": "run",
       "strict": true,

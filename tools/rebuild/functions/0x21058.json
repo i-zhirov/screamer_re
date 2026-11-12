@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x21058 holds 114 instructions and 391 bytes up to the ret at 0x211de; the next function starts at 0x211e0, so the store record keeps the 392-byte extent and sets no function size; the identity check uses 114 instructions"
+      "text": "the original body at 0x21058 holds 114 instructions and 391 bytes over the full extent; the ret is at 0x211de; the next function starts at 0x211e0, so the store record keeps the 392-byte extent and sets no function size; the identity check uses 91 instructions"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 114 decoded instructions and 396 bytes; the identity check stays open at 12 of 114 instructions, 15 of 391 bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer first, keeps the finished flag in ecx, uses other local offsets, reads the data globals through near operands, and emits an if chain for the mode switch; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 91 decoded instructions and 315 bytes; the identity check stays open at 10 of 91 instructions, 12 of 315 bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer first, keeps the finished flag in ecx, uses other local offsets, reads the data globals through near operands, and emits an if chain for the mode switch; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -85,18 +85,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 391,
+        "bytes_equal": 12,
+        "bytes_total": 315,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 12,
-        "instructions_total": 114,
+        "instructions_equal": 10,
+        "instructions_total": 91,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21058",
     "date": "2026-11-12",
-    "fingerprint": "sha256:bb303b416b07568f03e583885e4eb0fffe9764aaf9c833868f1a486814fb6fc8",
+    "fingerprint": "sha256:e3bec5666639e67b10c7be693f0e06efd996b6af23b880e9ef8866008f15235a",
     "mode": {
       "runtime": "run",
       "strict": true,

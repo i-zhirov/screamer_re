@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at `0x29918` holds 174 instructions and 657 bytes up to the `ret` at `0x29ba8`; the next function starts at `0x29bac`, so the store record keeps the 660-byte extent and sets no function size; the identity check uses 174 instructions"
+      "text": "the original body at `0x29918` holds 174 instructions and 657 bytes up to the `ret` at `0x29ba8`; the next function starts at `0x29bac`, so the store record keeps the 660-byte extent and sets no function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -57,18 +57,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 605,
+        "bytes_equal": 20,
+        "bytes_total": 481,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 36,
-        "instructions_total": 174,
+        "instructions_equal": 33,
+        "instructions_total": 127,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29918",
     "date": "2026-11-12",
-    "fingerprint": "sha256:251af15a4e6140bc73bbfbc37af58209658f0580c32dd33ca878407353c9b3ee",
+    "fingerprint": "sha256:151a976053aad63e0ea8de6dc65c1577b9d41fa6732076ad6684f8e449bbfe03",
     "mode": {
       "runtime": "run",
       "strict": true,

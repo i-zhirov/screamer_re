@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the record keeps the 2176-byte extent to the next entry, so the identity check uses `--count 201`"
+      "text": "the record keeps the 640-byte extent to the next entry, so the identity check uses `--original-end 0x25020`"
     }
   ],
   "module": "joystick_update",
@@ -31,18 +31,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 13,
-        "bytes_total": 630,
+        "bytes_equal": 8,
+        "bytes_total": 460,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 48,
-        "instructions_total": 201,
+        "instructions_equal": 33,
+        "instructions_total": 138,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x24da0",
     "date": "2026-11-12",
-    "fingerprint": "sha256:d667d67eef2021f24aa2c49a4d763f92e468ac92692d34180c59cc1588c6d659",
+    "fingerprint": "sha256:82de6942bb2fa81983a610cdf974d420f87a6be7221de1a6b579787fa7c0b9c5",
     "mode": {
       "runtime": "run",
       "strict": true,

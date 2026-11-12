@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the body runs from 0x20428 past the first ret at 0x2055b to the second ret at 0x205c0, so it holds 110 instructions and 409 bytes; the plan row and the identity check use the first 86 instructions and 308 bytes up to the first ret; the store record keeps the 412-byte extent and sets no separate function size"
+      "text": "the body runs from 0x20428 past the first ret at 0x2055b to the second ret at 0x205c0, so it holds 118 instructions and 409 bytes; the first-ret body holds 86 instructions and 308 bytes; the identity check uses the full reachable body bounded by the 412-byte extent; the store record keeps the 412-byte extent and sets no separate function size"
     },
     {
       "kind": "note",
@@ -78,7 +78,7 @@
       },
       "identity": {
         "bytes_equal": 34,
-        "bytes_total": 308,
+        "bytes_total": 321,
         "detail": "the instruction sequences differ",
         "instructions_equal": 21,
         "instructions_total": 86,
@@ -88,7 +88,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20428",
     "date": "2026-11-12",
-    "fingerprint": "sha256:676f914ee33b01e0a1e6d9de6446076e679841507dedb3d2f1580360125df186",
+    "fingerprint": "sha256:0e79fe39588bb056afe9cb1a0c1472ce5faf593542d03606cede40db75ac0536",
     "mode": {
       "runtime": "run",
       "strict": true,

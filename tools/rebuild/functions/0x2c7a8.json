@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2c7a8 holds 125 instructions and 425 bytes up to the ret at 0x2c950; the next function starts at 0x2c954, so the store record keeps the 428-byte extent and sets no function size; the identity check uses 125 instructions"
+      "text": "the original body at 0x2c7a8 holds 125 instructions and 425 bytes over the full extent; the ret is at 0x2c950; the next function starts at 0x2c954, so the store record keeps the 428-byte extent and sets no function size; the identity check uses 91 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 125 decoded instructions; the identity check stays open at 28 of 125 instructions and 27 of 403 bytes because V2 uses another prologue and register order and the data constants arrive through globals; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 125 decoded instructions; the identity check stays open at 22 of 91 instructions and 23 of 330 bytes because V2 uses another prologue and register order and the data constants arrive through globals; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "note",
@@ -77,18 +77,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 403,
+        "bytes_equal": 23,
+        "bytes_total": 330,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 28,
-        "instructions_total": 125,
+        "instructions_equal": 22,
+        "instructions_total": 91,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c7a8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:b140b2b6de795e92797f48b308e25def0d2dbdb8f2f61d48bc9f4145cb59f60e",
+    "fingerprint": "sha256:61d6f8bb194f092bafd835dc7539b77ae131c8c864388dcd29c65f4d1a23cb86",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -39,7 +39,7 @@ intra-function branch targets. Compare the target identity of an internal
 fixup. Cover the whole function extent. Stitch LE pages. Re-baseline the strict
 count after the change.
 
-- **Status:** In Progress
+- **Status:** Implemented
 - **Depends on:** Slice 1
 - **Requirements:** FR-006, FR-007, FR-008, FR-009, FR-018
 - **Manual prerequisites:** —

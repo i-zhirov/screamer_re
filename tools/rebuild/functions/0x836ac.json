@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the plan row records a 351-byte body of 100 instructions; the 100th instruction is the ret at 0x8380a, so the identity check uses 100 instructions; the store record keeps the 1532-byte extent, which reaches the next record at 0x83ca8, and it sets no separate function size"
+      "text": "the original body holds 404 instructions and 1438 bytes, so the identity check uses 87 instructions; the store record keeps the 1532-byte extent, which reaches the next record at 0x83ca8, and it sets no separate function size"
     },
     {
       "kind": "note",
@@ -26,7 +26,7 @@
     },
     {
       "kind": "note",
-      "text": "the two calls are 0xc2270 and 0x8a848; the three tail jumps leave the 100-instruction window: the near tail at 0x83880, the clipped tail at 0x83b48, and the far tail at 0x83863; the far tail patches the coordinate immediates 0xaaaabbbb with the scaled values; the module records the selected tail in the global render_path instead of a call into the tail code"
+      "text": "the two calls are 0xc2270 and 0x8a848; the three tail jumps leave the identity window: the near tail at 0x83880, the clipped tail at 0x83b48, and the far tail at 0x83863; the far tail patches the coordinate immediates 0xaaaabbbb with the scaled values; the module records the selected tail in the global render_path instead of a call into the tail code"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 100 instructions and 334 bytes in the identity window; the identity check stays open at 14 of 100 instructions, 11 of 334 bytes, and 0 of 25 relocation slots, because V2 saves the registers before the body, addresses the globals through other registers, and emits the prepare and selector calls with another register order; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 87 instructions and 304 bytes in the identity window; the identity check stays open at 11 of 87 instructions, 9 of 304 bytes, and 0 of 25 relocation slots, because V2 saves the registers before the body, addresses the globals through other registers, and emits the prepare and selector calls with another register order; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 11,
-        "bytes_total": 334,
+        "bytes_equal": 9,
+        "bytes_total": 304,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 100,
+        "instructions_equal": 11,
+        "instructions_total": 87,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x836ac",
     "date": "2026-11-12",
-    "fingerprint": "sha256:66f9d662cd346d0acc9a59d759ff4a815bce70279039ca0431153ecbe9eab021",
+    "fingerprint": "sha256:ae837cc644671f1988bf1308821c13ae217ce13993ec8f8ab10dcffb0fb83eb1",
     "mode": {
       "runtime": "run",
       "strict": true,

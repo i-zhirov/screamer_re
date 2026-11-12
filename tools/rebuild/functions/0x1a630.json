@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1a630 holds 243 instructions and 768 bytes up to the ret at 0x1a92f; the record keeps the 768-byte extent, which ends at the next function car_camera at 0x1a930, and sets no function size; the identity check uses 243 instructions"
+      "text": "the original body at 0x1a630 holds 243 instructions and 768 bytes over the full extent; the ret is at 0x1a92f; the record keeps the 768-byte extent, which ends at the next function car_camera at 0x1a930, and sets no function size; the identity check uses 210 instructions"
     },
     {
       "kind": "note",
@@ -62,17 +62,17 @@
       },
       "identity": {
         "bytes_equal": 27,
-        "bytes_total": 768,
+        "bytes_total": 711,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 46,
-        "instructions_total": 243,
+        "instructions_equal": 45,
+        "instructions_total": 210,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a630",
     "date": "2026-11-12",
-    "fingerprint": "sha256:94eec543a80df1394b6ade818e495bf853d34cb3ec45323f4f763721f7f4ca27",
+    "fingerprint": "sha256:78b44b71937ad7afe61c9d4c08c44d8a320c2bea2799162d5694378e6f3e89b4",
     "mode": {
       "runtime": "run",
       "strict": true,

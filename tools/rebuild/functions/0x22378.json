@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x22378 holds 121 instructions and 353 bytes up to the ret at 0x224d8; the next function starts at 0x224dc after the three padding bytes at 0x224d9, so the store record keeps the 356-byte extent and sets no separate function size; the identity check uses 121 instructions"
+      "text": "the original body at 0x22378 holds 121 instructions and 353 bytes over the full extent; the ret is at 0x224d8; the next function starts at 0x224dc after the three padding bytes at 0x224d9, so the store record keeps the 356-byte extent and sets no separate function size; the identity check uses 69 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 69 instructions and 177 bytes; the identity check stays open at 8 of 121 instructions, 5 of 304 bytes, and 0 of 6 relocation slots, because V2 orders the register saves before the frame, keeps the path in ebx and the state result in eax, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 69 instructions and 177 bytes; the identity check stays open at 4 of 69 instructions, 4 of 177 bytes, and 0 of 6 relocation slots, because V2 orders the register saves before the frame, keeps the path in ebx and the state result in eax, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 5,
-        "bytes_total": 304,
+        "bytes_equal": 4,
+        "bytes_total": 177,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 8,
-        "instructions_total": 121,
+        "instructions_equal": 4,
+        "instructions_total": 69,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22378",
     "date": "2026-11-12",
-    "fingerprint": "sha256:e10e28e9a372a61d6cdb6ee0eb880c3066a30555465d1fbda6a922bb5cd5be61",
+    "fingerprint": "sha256:779c1e8f0485bd5409f4447d9155b2ba9eccadcadceefd434e50bc6bf4369cd8",
     "mode": {
       "runtime": "run",
       "strict": true,

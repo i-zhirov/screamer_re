@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x20d20 holds 106 instructions and 421 bytes up to the ret at 0x20ec4; the next function starts at 0x20ec8, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 106 instructions"
+      "text": "the original body at 0x20d20 holds 106 instructions and 421 bytes over the full extent; the ret is at 0x20ec4; the next function starts at 0x20ec8, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 85 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 106 decoded instructions and 416 bytes in the identity window; the identity check stays open at 13 of 106 instructions and 30 of 416 bytes because V2 saves the frame pointer first, uses another prologue and register order, and builds the sine argument from the local phase and amplitude; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 85 decoded instructions and 372 bytes in the identity window; the identity check stays open at 12 of 85 instructions and 29 of 372 bytes because V2 saves the frame pointer first, uses another prologue and register order, and builds the sine argument from the local phase and amplitude; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 30,
-        "bytes_total": 416,
+        "bytes_equal": 29,
+        "bytes_total": 372,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 13,
-        "instructions_total": 106,
+        "instructions_equal": 12,
+        "instructions_total": 85,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20d20",
     "date": "2026-11-12",
-    "fingerprint": "sha256:16755d829d126d59d83828425fd0edbfc47e02f55fcbe415747f57228ecb805b",
+    "fingerprint": "sha256:57f731010594b2b4e291fba8ee2999303e499408f7eb64023d4841b31ca087c7",
     "mode": {
       "runtime": "run",
       "strict": true,

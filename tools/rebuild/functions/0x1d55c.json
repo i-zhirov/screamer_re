@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1d55c holds 103 instructions and 350 bytes up to the ret at 0x1d6b9; the next function starts at 0x1d6bc, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 103 instructions"
+      "text": "the original body at 0x1d55c holds 103 instructions and 350 bytes over the full extent; the ret is at 0x1d6b9; the next function starts at 0x1d6bc, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 53 instructions"
     },
     {
       "kind": "note",
@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 52 instructions and 189 bytes up to the ret at 0x100bc; the identity check decodes 103 instructions from the symbol, so its range continues past the function, and the check stays open at 11 of 103 instructions and 21 of 340 bytes, because V2 reorders the control-point stores, fuses the two table lookups, and uses a shorter frame; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 53 instructions and 189 bytes over the full extent; the ret is at 0x100bc; the identity check decodes 103 instructions from the symbol, so its range continues past the function, and the check stays open at 5 of 53 instructions and 12 of 189 bytes, because V2 reorders the control-point stores, fuses the two table lookups, and uses a shorter frame; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -65,18 +65,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
-        "bytes_total": 340,
+        "bytes_equal": 12,
+        "bytes_total": 189,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 11,
-        "instructions_total": 103,
+        "instructions_equal": 5,
+        "instructions_total": 53,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d55c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:22cebf3897ca3108134f754e5d38b88667580beafd7a3b13e4907122d9b34e75",
+    "fingerprint": "sha256:4662ecd43e544007f2823ea9b92e5425b1129f7a3480111f623975c124aea593",
     "mode": {
       "runtime": "run",
       "strict": true,

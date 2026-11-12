@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x19ae8 holds 223 instructions and 869 bytes up to the ret at 0x19e4c, so the record keeps the 912-byte extent and sets no function size"
+      "text": "the original at 0x19ae8 holds 223 instructions and 869 bytes over the full extent; the ret is at 0x19e4c, so the record keeps the 912-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19ae8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:a6f65d07f89795491d996259158d205f614ec90aa355c003996ea55b405b175d",
+    "fingerprint": "sha256:0654978cc7c9fd4b180c9a14e760015f820f9d5fb93a1cde2e1b811821561e72",
     "mode": {
       "runtime": "run",
       "strict": true,

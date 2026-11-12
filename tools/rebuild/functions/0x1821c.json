@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1821c holds 220 instructions and 756 bytes up to the ret at 0x1850f; the record keeps the 780-byte extent, which ends at the next function player_car_reset_update at 0x18528, and sets no function size; the identity check uses 220 instructions"
+      "text": "the original body at 0x1821c holds 220 instructions and 756 bytes over the full extent; the ret is at 0x1850f; the record keeps the 780-byte extent, which ends at the next function player_car_reset_update at 0x18528, and sets no function size; the identity check uses 151 instructions"
     },
     {
       "kind": "note",
@@ -69,18 +69,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 52,
-        "bytes_total": 756,
+        "bytes_equal": 45,
+        "bytes_total": 556,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 47,
-        "instructions_total": 220,
+        "instructions_equal": 37,
+        "instructions_total": 151,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1821c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:961f485e67a836b54cf6bec87807cef39a8ff7f67d2d1f99cb5e773a06182bb8",
+    "fingerprint": "sha256:676be2a95bc1a37a9c2d539bcacfdc5e358050056b099cd7c9d3a73c9b08d29f",
     "mode": {
       "runtime": "run",
       "strict": true,

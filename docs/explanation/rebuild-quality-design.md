@@ -128,3 +128,9 @@ record whose stored result is `fail`.
   and to `named` or `unknown` when identity is not declared.
 - Stage 11 remains a drift check. It accepts a stored `fail` as the expected
   result, but the progress line and the run summary must show `FAIL`.
+- The reachable function extent follows a compiler jump table when a block
+  ends at `jmp dword ptr cs:[reg*4 + disp]` or at the pre-scaled form
+  `shl reg, 2; jmp dword ptr cs:[reg + disp]`. The entry count is `N + 1`,
+  where the nearest preceding `cmp` holds the bound `N`. Each table entry is
+  a 4-byte object-relative code address. An indirect jump without the
+  compiler table pattern stops the block, because the target is unknown.

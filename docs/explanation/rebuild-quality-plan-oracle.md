@@ -5,7 +5,7 @@
 > command passes.
 
 - **Date**: 2026-11-12
-- **Status**: In Progress
+- **Status**: Implemented
 - **Design**: docs/explanation/rebuild-quality-design.md
 - **Roadmap**: docs/explanation/rebuild-quality-roadmap.md — slice: oracle
 - **Depends on**: Slice 1 — baseline
@@ -41,6 +41,8 @@
   target and returns `None` for a call and for an indirect operand.
 - `le._next_function_start(exe: LinearExecutable, address: int) -> int | None`
   returns the first candidate function start strictly above an address.
+- `le._table_jump_targets(exe: LinearExecutable, insn: Insn, block: list[Insn], address: int, end: int) -> list[int]`
+  returns the compiler jump-table case targets of an indirect `jmp`.
 - `oracle.compare(original, rebuilt, *, original_relocations=None, rebuilt_relocations=None, original_symbols=None, rebuilt_symbols=None) -> OracleResult`.
 - `oracle.slot_key(slot: le.Relocation, symbols: Callable[[le.Relocation], str | None] | None = None) -> tuple`.
 - `oracle._bounds(instructions: list[le.Insn]) -> tuple[int, int]` returns
@@ -52,14 +54,16 @@
 - `oracle._instruction_difference(original, rebuilt, original_mask, rebuilt_mask, original_slots, rebuilt_slots, original_bounds, rebuilt_bounds, original_index, rebuilt_index, original_symbols=None, rebuilt_symbols=None) -> str | None`.
 - `diff_module.map_symbols(map_path: Path, exe: le.LinearExecutable) -> list[tuple[int, str]]`.
 - `diff_module.symbol_at(symbols: list[tuple[int, str | None]], address: int) -> str | None`.
+- `diff_module.next_symbol(symbols: list[tuple[int, str | None]], address: int) -> int | None`
+  returns the nearest symbol address strictly above an address.
 - `diff_module.rebuilt_symbol_resolver(exe, symbols) -> Callable[[le.Relocation], str | None]`.
 - `diff_module.original_symbol_resolver(exe, records) -> Callable[[le.Relocation], str | None]`.
 - `diff_module._internal_target(exe: le.LinearExecutable, slot: le.Relocation) -> int | None`.
 - `diff_module.original_body(exe, address, end, count) -> list[le.Insn]` uses the
   end when it is present, else the count, else the default extent.
-- `diff_module.rebuilt_body(exe, address, end, count) -> list[le.Insn]` uses the
-  extent when the end is present, else the count decode, else the default
-  extent.
+- `diff_module.rebuilt_body(exe, address, end, count, extent=None) -> list[le.Insn]`
+  uses the rebuilt extent when it is present, else the default extent when the
+  original end is present, else the count decode, else the default extent.
 - `diff_module.parse_arguments` gains `--original-end`, parsed with
   `int(value, 0)` and default `None`.
 - `store._record_fields` hashes the `size` field.
@@ -68,7 +72,7 @@
 
 ## Tasks
 
-- [ ] **Task 1: LE page stitching**
+- [x] **Task 1: LE page stitching**
     - **Implements:** FR-009, design §Requirements
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_le_helpers.py`**
@@ -126,7 +130,7 @@
           start.
     - **Verify:** `python3 -m unittest discover -s tools/rebuild/tests -p "test_le_helpers.py"`
 
-- [ ] **Task 2: Reachable function extent**
+- [x] **Task 2: Reachable function extent**
     - **Implements:** FR-008, design §Requirements
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_le_helpers.py`**
@@ -151,6 +155,9 @@
           fallthrough after a `jmp` stays out and the target block enters.
         - `test_function_body_keeps_a_leading_jump` — the leading `jmp`
           instruction stays in the body and its target is followed.
+        - `test_function_body_keeps_the_leading_jump_target_outside_the_bound`
+          — a leading `jmp` whose target is at or above an explicit `end`
+          still enters the body.
         - `test_function_body_ignores_a_target_outside_the_end` — a target at
           or above an explicit `end` is not followed.
         - `test_function_body_uses_the_next_start_as_the_default_end` — a
@@ -166,6 +173,38 @@
           is not followed.
         - `test_function_body_honors_the_instruction_cap` — the total body
           length does not exceed `max_instructions`.
+        - `test_function_body_caps_the_leading_jumps` — with
+          `max_instructions` below the number of leading jumps, the body does
+          not exceed the cap.
+        - `test_function_body_removes_a_duplicate_leading_jump` — a leading
+          `jmp` that targets itself enters the body once.
+        - `test_function_body_follows_a_compiler_jump_table` — a block that
+          ends at `cmp eax, 2; ja 0x10040; jmp dword ptr cs:[eax*4 + 0x100]`
+          enters the three table blocks. The table holds the object-relative
+          entries `0x20`, `0x30`, and `0x40`, so the targets are `0x10020`,
+          `0x10030`, and `0x10040`.
+        - `test_function_body_jump_table_skips_a_target_outside_the_bound` — a
+          table entry at or above the explicit `end` is not followed.
+        - `test_function_body_jump_table_uses_the_cmp_bound` — a table with
+          more entries than the `cmp` bound does not follow the extra entry.
+        - `test_function_body_stops_at_an_indirect_jump_without_a_table` — an
+          indirect `jmp` with no preceding `cmp` stops the block and follows
+          no target.
+        - Add `JumpTargetTestCase` and `NextFunctionStartTestCase`.
+        - `test_jump_target_returns_a_direct_target` — a `jne 0x10010` gives
+          `0x10010`.
+        - `test_jump_target_returns_none_for_a_call` — a `call 0x10010` gives
+          `None`.
+        - `test_jump_target_returns_none_for_an_indirect_operand` — a
+          `jmp dword ptr cs:[eax*4 + 0x100]` gives `None`.
+        - `test_next_function_start_returns_the_nearest_later_prologue` — a
+          `StubImage` with prologues at `0x10000` and `0x10010` returns
+          `0x10010` for an address of `0x10005`.
+        - `test_next_function_start_raises_for_an_unmapped_address` — a
+          missing object raises `ValueError("the address is unmapped")`.
+        - `test_next_function_start_raises_for_an_unmapped_range` — an
+          `UnreadableImage` raises
+          `ValueError("the range is not mapped to a file offset")`.
     - **Modify `tools/le.py`**
         - Add `_jump_target(insn) -> int | None`. It returns the target when
           the mnemonic starts with `j` or `loop` and the operand starts with
@@ -178,12 +217,35 @@
           object raises `ValueError("the address is unmapped")`. A range that
           is not mapped raises
           `ValueError("the range is not mapped to a file offset")`.
+        - Add `_table_jump_targets(exe, insn, block, address, end) -> list[int]`.
+          It returns the compiler jump-table case targets of an indirect
+          `jmp`.
+            - Return `[]` when the mnemonic is not `jmp`, when the operand
+              does not hold `cs:[`, or when the operand does not end with `]`.
+            - Parse the displacement: the text after the last `+` and before
+              the closing `]`, or the text between `[` and `]` when there is
+              no `+`. Require a `0x` prefix.
+            - Scan `block` backwards from `insn` for the nearest `cmp` with an
+              immediate last operand. Parse the immediate with `int(token, 0)`.
+              Return `[]` when no such `cmp` is found.
+            - Set `count = immediate + 1`. Return `[]` when `count <= 0` or
+              `count > 256`.
+            - Find the object at `insn.address`. Return `[]` when the object
+              is missing.
+            - Read `count * 4` bytes at `object.reloc_base + displacement`.
+              Return `[]` when the read is `None` or short.
+            - For each 4-byte little-endian entry, compute
+              `object.reloc_base + entry` and keep it when
+              `address <= target < end`.
+            - Return the targets in table order without duplicates.
         - Change `function_body` to the new signature.
         - Resolve `end` when it is `None`. Use `_next_function_start`. When
           that returns `None`, use `object.reloc_base + object.virtual_size`.
         - Keep the leading-jump behavior. Follow up to four leading
           unconditional jumps, add each jump instruction to the body, and
-          start the worklist at the final target.
+          start the worklist at the final target. Stop the leading-jump loop
+          when the body reaches `max_instructions`, and skip a leading jump
+          whose address is already in the body.
         - Walk the body with a worklist of block starts and a set of body
           addresses:
             - Pop a start. Skip it when the start address is already in the
@@ -200,16 +262,21 @@
               `jmp`.
             - Enqueue every direct jump and loop target inside
               `[address, end)`. Do not enqueue a call target.
+            - When an unconditional `jmp` has no direct target, enqueue
+              `_table_jump_targets(exe, insn, block, address, end)`.
             - Stop when the body reaches `max_instructions`.
         - Return the body sorted by address.
         - Update the `function_body` docstring. State the reachable blocks,
-          the bound, the terminator stop, the unconditional jump stop, the
-          call exclusion, the duplicate removal, and the cap.
-    - **Verify:** `python3 -m unittest discover -s tools/rebuild/tests -p "test_le_helpers.py"` and `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --max 400`
-        - The `calls` output holds the second exit at `0x8af05`, past the
+          the half-open bound `[address, end)`, the terminator stop, the
+          unconditional jump stop, the call exclusion, the compiler jump
+          table, the duplicate removal, and the cap.
+    - **Verify:** `python3 -m unittest discover -s tools/rebuild/tests -p "test_le_helpers.py"`, `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --max 400`, and `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2807c --max 400`
+        - The `0x8adac` output holds the second exit at `0x8af05`, past the
           first `ret` at `0x8aec2`.
+        - The `0x2807c` output holds the case calls at `0x2e0b4`, `0x2e21c`,
+          `0x2e58c`, and `0x2e724`.
 
-- [ ] **Task 3: Intra-function branch targets**
+- [x] **Task 3: Intra-function branch targets**
     - **Implements:** FR-006, design §Requirements
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_oracle.py`**
@@ -261,7 +328,7 @@
           stays masked.
     - **Verify:** `python3 -m unittest discover -s tools/rebuild/tests -p "test_oracle.py"`
 
-- [ ] **Task 4: Internal fixup symbol identity and the original bound**
+- [x] **Task 4: Internal fixup symbol identity and the original bound**
     - **Implements:** FR-007, FR-008, design §Requirements
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_oracle.py`**
@@ -298,6 +365,10 @@
           and a target `0x10000` give the symbol.
         - `test_symbol_at_returns_none_for_an_interior_address` — a target
           `0x10018` between two symbols gives `None`.
+        - `test_next_symbol_returns_the_nearest_later_symbol` — symbols at
+          `0x10000` and `0x10034` and an address of `0x10000` give `0x10034`.
+        - `test_next_symbol_returns_none_for_the_last_symbol` — the last symbol
+          gives `None`.
         - `test_rebuilt_resolver_maps_an_internal_slot_to_the_symbol` — a slot
           with object 1 and target `0x0` gives the symbol at `0x10000`. A
           target `0x8` gives `None`. A missing object gives `None`.
@@ -315,6 +386,9 @@
           truncates the default body to three instructions.
         - `test_rebuilt_body_uses_the_extent_with_an_end` — an end calls
           `function_body` and not `decode`.
+        - `test_rebuilt_body_uses_the_rebuilt_extent` — an extent of `0x10010`
+          calls `function_body` with `end=0x10010`, so a tail jump to the next
+          function stays out of the body.
         - `test_rebuilt_body_uses_the_count_without_an_end` — a count of `3`
           calls `decode` with three instructions.
         - `test_original_body_uses_the_default_extent_without_an_end_or_count`
@@ -379,6 +453,9 @@
         - Add `symbol_at(symbols, address)`. Return the symbol of the entry
           whose address equals the target. Among equal addresses the first map
           entry wins. Return `None` when no entry equals the address.
+        - Add `next_symbol(symbols, address)`. Return the smallest symbol
+          address strictly above the address. Return `None` when no symbol is
+          above the address.
         - Add `_internal_target(exe, slot)`. Return
           `object.reloc_base + slot.target` for an internal slot. Return
           `None` for another kind, a missing object, or a missing target.
@@ -392,23 +469,28 @@
           `[store.load_record(address) for address in store.candidate_addresses()]`.
         - Add `--original-end` to `parse_arguments`.
         - Add `original_body(exe, address, end, count)` and
-          `rebuilt_body(exe, address, end, count)`. The original helper uses
-          `function_body(exe, address, end=end)` when `end` is not `None`, else
-          `function_body(exe, address)[:count]` when `count` is greater than
-          zero, else `function_body(exe, address)`. The rebuilt helper uses
-          `function_body(exe, address)` when `end` is not `None`, else
-          `decode(exe, address, count)` when `count` is greater than zero, else
-          `function_body(exe, address)`.
+          `rebuilt_body(exe, address, end, count, extent=None)`. The original
+          helper uses `function_body(exe, address, end=end)` when `end` is not
+          `None`, else `function_body(exe, address)[:count]` when `count` is
+          greater than zero, else `function_body(exe, address)`. The rebuilt
+          helper uses `function_body(exe, address, end=extent)` when `extent`
+          is not `None`, else `function_body(exe, address)` when `end` is not
+          `None`, else `decode(exe, address, count)` when `count` is greater
+          than zero, else `function_body(exe, address)`.
         - In `main`, replace the body selection with the two helpers. Use the
           local names `original_instructions` and `rebuilt_instructions`, so
           the helpers are not shadowed. The end wins over the count, so a
           record with both compares the full extent. Build the original
           resolver with `original_symbol_resolver(original, load_records())`.
-          Build the rebuilt resolver with
-          `rebuilt_symbol_resolver(rebuilt, map_symbols(Path(arguments.rebuilt_map), rebuilt))`
-          only when `--rebuilt-map` is given. Pass both to `oracle.compare`.
-          The original symbol table loads every record for each diff call.
-          This is a known cost of the re-baseline.
+          Build the rebuilt symbol table with
+          `map_symbols(Path(arguments.rebuilt_map), rebuilt)` only when
+          `--rebuilt-map` is given, and build the rebuilt resolver with
+          `rebuilt_symbol_resolver(rebuilt, rebuilt_symbols)`. Pass the rebuilt
+          extent `next_symbol(rebuilt_symbols, rebuilt_address)` to
+          `rebuilt_body`, so a tail jump into the next function stays out of
+          the body. Pass both resolvers to `oracle.compare`. The original
+          symbol table loads every record for each diff call. This is a known
+          cost of the re-baseline.
         - Update the module docstring and the usage block. Name
           `--original-end`, the intra-function branch targets, and the
           internal symbol identity.
@@ -433,7 +515,7 @@
           — the command prints a verdict and the relocation compare. The exit
           code is 0 or 1, because the verdict depends on the build.
 
-- [ ] **Task 5: Re-baseline, strict count, and documentation**
+- [x] **Task 5: Re-baseline, strict count, and documentation**
     - **Implements:** FR-018
     - **Files:** `tools/rebuild/functions/*.json`, `tools/rebuild/modules/*.json`,
       `tools/rebuild/callgraph.json`, `tools/rebuild/contracts/record.schema.json`,
@@ -543,3 +625,44 @@
         - `python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --skip-cross`
         - The full check reports 303 checks, `--skip-cross` reports 299,
           `--skip-runtime` reports 288, and both flags report 284.
+
+## Deviations
+
+- Task 2 follows the compiler jump table. The approved manifest followed only
+  direct jumps. The reviewer found that `race_frame` stopped at 41 of 48
+  instructions. The user approved the extension. `function_body` now reads the
+  `cmp` bound and the object-relative table entries, and the design holds the
+  new decision.
+- The rebuilt body is bounded by the next linker-map symbol. The manifest used
+  `function_body(exe, address)` when `--original-end` was present. That followed
+  a tail jump into the next function and demoted `free` and `exit_flush`
+  falsely. `diff_module.next_symbol` and the `extent` argument to
+  `rebuilt_body` fix this.
+- Task 5 seeds the 36 candidate addresses that the new extents add. The
+  manifest did not list the seed. The pipeline stage 12 seed check fails
+  without it. The seed writes `unknown` records and rebuilds no module.
+- The strict count is 23, not the baseline 24. `dpmi_real_int` at `0x25db0`
+  loses its 17-instruction `exact-relocations` match when the full extent adds
+  81 instructions. That demotion is correct.
+- The default count is derived from the stored `match` values, not from a
+  second `--allow-shape` run. A second run would rebuild the modules and
+  invalidate the strict fingerprints. The strict 23 plus the seven shape
+  matches gives 30.
+- The `0x24da0` and `0x8adac` spot checks use the record evidence, the
+  program map, and the `le.py calls` or `diff_module.py` output. The record
+  `result.command` holds the `run.py` command, and the run log holds the
+  verdict, so neither holds the diff command or the second exit address.
+- Deferred minor findings:
+  - The `diff_module.py` usage example still shows `--original-end 0x300f1`
+    instead of `0x300f8`.
+  - `load_records` has no docstring.
+  - The `main` resolver construction sits outside the `try` that guards the
+    body selection.
+  - `le._next_function_start` raises only for a `None` read, not a short read.
+  - The `read` docstring says a zeroed page fills the rest of its virtual
+    range; the loop also stops at the requested length.
+  - The rebuilt-extent test covers the helper but not the `main` wiring.
+  - No test decodes a multi-byte instruction across an LE page boundary; the
+    `read` tests cover the stitch.
+  The first five touch a fingerprint input and wait for the next re-baseline.
+  The last two are test-only and can be added without a re-baseline.

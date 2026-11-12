@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x10bfc holds 69 instructions and 232 bytes in the first block; the full 728-byte extent continues past the early return with the free-slot walk in the handle table at `DAT_00021540`, the 0x1c-byte record walk, the `%s.3DX` name build at `0x1003ac`, the name copy to `DAT_00007fe8`, the member open at `0x4c08d` with the base path `DAT_00007f80` and the mode `rb` at `0x1003b3`, the `3D_HEADER` look-up at `0x2eed0`, the stream read at `0x4c4e5`, the stream close at `0x4c38d`, the object count at `+0x14`, the `3D_BLKOBJ` look-up with the size `count * 0x20 + 0x60`, the six cleared block words at `+0x24` through `+0x38`, the handle store, the `object_init_from_file` call at `0x4cc10`, and the chunk link at `+0x40`; the behavior check passes; the identity check stays open because the early return and the frame differ"
+      "text": "the original at 0x10bfc holds 218 instructions and 728 bytes in the first block; the full 728-byte extent continues past the early return with the free-slot walk in the handle table at `DAT_00021540`, the 0x1c-byte record walk, the `%s.3DX` name build at `0x1003ac`, the name copy to `DAT_00007fe8`, the member open at `0x4c08d` with the base path `DAT_00007f80` and the mode `rb` at `0x1003b3`, the `3D_HEADER` look-up at `0x2eed0`, the stream read at `0x4c4e5`, the stream close at `0x4c38d`, the object count at `+0x14`, the `3D_BLKOBJ` look-up with the size `count * 0x20 + 0x60`, the six cleared block words at `+0x24` through `+0x38`, the handle store, the `object_init_from_file` call at `0x4cc10`, and the chunk link at `+0x40`; the behavior check passes; the identity check stays open because the early return and the frame differ"
     },
     {
       "kind": "note",
@@ -34,18 +34,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 11,
-        "bytes_total": 232,
+        "bytes_equal": 19,
+        "bytes_total": 390,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 69,
+        "instructions_equal": 26,
+        "instructions_total": 104,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10bfc",
     "date": "2026-11-12",
-    "fingerprint": "sha256:9fc7347bb7f1d8fcb0bb7263cf07b2b5c607b07be094967d3ff0efc1603f3ffe",
+    "fingerprint": "sha256:dc35fbb9bc27468b0321ffad42f3db59f744069c0e3cb3ef10202f9505c6ba35",
     "mode": {
       "runtime": "run",
       "strict": true,

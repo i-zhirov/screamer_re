@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x16f34 holds 318 instructions and 1236 bytes up to the ret at 0x17407, so the record keeps the 1236-byte extent and sets no function size"
+      "text": "the original at 0x16f34 holds 318 instructions and 1236 bytes over the full extent; the ret is at 0x17407, so the record keeps the 1236-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -54,7 +54,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16f34",
     "date": "2026-11-12",
-    "fingerprint": "sha256:3a60265f599101371caec687ecab02359f8e9db597e88ecf075904819872311f",
+    "fingerprint": "sha256:c55d8502fcdf787548cfd58fe40b050da5ac67cc94c8993ab46622b2aee99b91",
     "mode": {
       "runtime": "run",
       "strict": true,

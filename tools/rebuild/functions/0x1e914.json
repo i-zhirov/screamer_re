@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1e914 holds 160 instructions and 452 bytes up to the ret 4 at 0x1ead5; the next function starts at 0x1eae0, so the store record keeps the 460-byte extent and sets no function size; the identity check uses 160 instructions"
+      "text": "the original body at 0x1e914 holds 160 instructions and 452 bytes up to the ret 4 at 0x1ead5; the next function starts at 0x1eae0, so the store record keeps the 460-byte extent and sets no function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 431 bytes and 160 decoded instructions; the identity check stays open at 24 of 160 instructions and 21 of 431 bytes because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 353 bytes and 127 decoded instructions; the identity check stays open at 22 of 127 instructions and 19 of 353 bytes because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
-        "bytes_total": 431,
+        "bytes_equal": 19,
+        "bytes_total": 353,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 24,
-        "instructions_total": 160,
+        "instructions_equal": 22,
+        "instructions_total": 127,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e914",
     "date": "2026-11-12",
-    "fingerprint": "sha256:cbcfa889d5d5d27f12c193a5a33ca48fbfcb8ac95443de60603d9255e2177f3b",
+    "fingerprint": "sha256:69b42be19ea138d68f3b9b0916ce4692a5ebf05337fe966a27437e4ce6392097",
     "mode": {
       "runtime": "run",
       "strict": true,

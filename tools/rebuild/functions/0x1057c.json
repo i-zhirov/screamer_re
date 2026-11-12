@@ -26,7 +26,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1057c holds 154 instructions and 483 bytes up to the ret at 0x1075e; the next function starts at 0x1075f, so the store record keeps the 483-byte extent and sets no function size; the identity check uses 154 instructions"
+      "text": "the original body at 0x1057c holds 153 instructions and 481 bytes over the full extent; the ret is at 0x1075e; the next function starts at 0x1075f, so the store record keeps the 483-byte extent and sets no function size; the identity check uses 145 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 533 bytes and 154 decoded instructions; the identity check stays open at 27 of 154 instructions, 25 of 483 bytes, and 2 of 54 relocation slots because V2 pushes esi, edi, and ebp and makes a stack frame instead of pushal, keeps the loop cursors in stack slots, computes the cell offset with lea, and uses another register order; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 505 bytes and 145 decoded instructions; the identity check stays open at 24 of 145 instructions, 15 of 481 bytes, and 2 of 54 relocation slots because V2 pushes esi, edi, and ebp and makes a stack frame instead of pushal, keeps the loop cursors in stack slots, computes the cell offset with lea, and uses another register order; the build and behavior checks pass, so the store records rebuilt"
     }
   ],
   "implementation": "c",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 483,
+        "bytes_equal": 15,
+        "bytes_total": 481,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 27,
-        "instructions_total": 154,
+        "instructions_equal": 24,
+        "instructions_total": 145,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1057c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:6b144c402c03f02f5bd2f74a48e1dcbe002840eb24a7104a401a2f8fbaa61636",
+    "fingerprint": "sha256:40267cd1d6b52b3aac7ea6a00ed0788989572cfedb06007d569e9650be0ee25e",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x25658 holds 93 instructions and 324 bytes up to the ret at 0x2579b; the next function starts at 0x257a0 after four bytes of padding at 0x2579c, so the store record keeps the 328-byte extent and sets no separate function size; the identity check uses 93 instructions"
+      "text": "the original body at 0x25658 holds 93 instructions and 324 bytes over the full extent; the ret is at 0x2579b; the next function starts at 0x257a0 after four bytes of padding at 0x2579c, so the store record keeps the 328-byte extent and sets no separate function size; the identity check uses 93 instructions"
     },
     {
       "kind": "note",
@@ -58,7 +58,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 93 decoded instructions and 337 bytes; the identity check stays open at 15 of 93 instructions, 37 of 324 bytes, and 0 of 27 relocation slots, because V2 saves the frame first, builds the two constant texts in local buffers, keeps the arguments in registers, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 98 decoded instructions and 342 bytes; the identity check stays open at 15 of 93 instructions, 37 of 324 bytes, and 0 of 27 relocation slots, because V2 saves the frame first, builds the two constant texts in local buffers, keeps the arguments in registers, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -92,7 +92,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25658",
     "date": "2026-11-12",
-    "fingerprint": "sha256:55b95b4acff3217fe66aeb923c5f1d48ac324619334127a56c6af3c17f8cd156",
+    "fingerprint": "sha256:4e71fbd7446b2eea2f84ea6f8edada7fa10779a810887c1ed6bccfa757e8ea56",
     "mode": {
       "runtime": "run",
       "strict": true,

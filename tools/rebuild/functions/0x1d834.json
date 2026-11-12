@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at `0x1d834` holds 133 instructions and 635 bytes. It branches on the state at `+0x2f8` through the jump table at `0x1d824`. State 2 sets the state to 1, the timer `+0x2fc` to 3000.0, the counter `+0x300` to 0, the velocities `+0x304` and `+0x308` to 12.0, and the velocity `+0x30c` to 0. State 1 integrates the position `+0x49c` and the three velocities with the damping at `DAT_0010cf08 + 0x184`, subtracts 6000.0 times the frame delta from the timer, and on the target compare at `+0x238` increments the counter, snaps the position, reflects the timer by 0.4, and clears the three integrated values. State 3 sets the state to 4 and the velocity `+0x308` to 24.0. State 4 integrates that velocity into `+0x318` and clears the state at the 12.566371 threshold. The record keeps the 772-byte extent."
+      "text": "the original at `0x1d834` holds 163 instructions and 769 bytes. It branches on the state at `+0x2f8` through the jump table at `0x1d824`. State 2 sets the state to 1, the timer `+0x2fc` to 3000.0, the counter `+0x300` to 0, the velocities `+0x304` and `+0x308` to 12.0, and the velocity `+0x30c` to 0. State 1 integrates the position `+0x49c` and the three velocities with the damping at `DAT_0010cf08 + 0x184`, subtracts 6000.0 times the frame delta from the timer, and on the target compare at `+0x238` increments the counter, snaps the position, reflects the timer by 0.4, and clears the three integrated values. State 3 sets the state to 4 and the velocity `+0x308` to 24.0. State 4 integrates that velocity into `+0x318` and clears the state at the 12.566371 threshold. The record keeps the 772-byte extent."
     },
     {
       "kind": "note",
@@ -41,7 +41,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d834",
     "date": "2026-11-12",
-    "fingerprint": "sha256:62335f27ca9e024e27514488c25bd876407374ecb9f86122b2cd64c3be76c195",
+    "fingerprint": "sha256:05456fe16d01f17091c890f7e0d7d787f159acd846d8af6863ca4cfbf0861eb3",
     "mode": {
       "runtime": "run",
       "strict": true,

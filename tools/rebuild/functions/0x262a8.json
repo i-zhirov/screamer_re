@@ -26,18 +26,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 60,
-        "bytes_total": 79,
+        "bytes_equal": 62,
+        "bytes_total": 81,
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
-        "instructions_equal": 24,
-        "instructions_total": 24,
+        "instructions_equal": 26,
+        "instructions_total": 26,
         "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x262a8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:5e3d222359cd6e20e1c561296dba177c1af63bff07e9a16a7db9e61a2fb6ef44",
+    "fingerprint": "sha256:3da2be8e18c38b7ddb80c3599d07ada35284db52c2d86f457ee40fdcfc9e066a",
     "mode": {
       "runtime": "run",
       "strict": true,

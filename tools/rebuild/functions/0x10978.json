@@ -29,17 +29,17 @@
       },
       "identity": {
         "bytes_equal": 25,
-        "bytes_total": 51,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
-        "instructions_equal": 16,
-        "instructions_total": 16,
-        "match": "same-shape",
+        "bytes_total": 56,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 17,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
     "date": "2026-11-12",
-    "fingerprint": "sha256:b63f63e8d7d36fd0740ca54f4403f2b38f83417a7187ac574be802863978ebd6",
+    "fingerprint": "sha256:6f76114d484bab2124fcba822aeefe68076f9755c02dacdca2f47cfad884c8ad",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -37,7 +37,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x3009b",
     "date": "2026-11-12",
-    "fingerprint": "sha256:ebbba8a6743b811a94c474894af9da08f25e5a127e87503fe1b6016470fb67c1",
+    "fingerprint": "sha256:2277d81c9d54a855e0448972baead7d06bf0e21f72904ee83831dbdc10d8449e",
     "mode": {
       "runtime": "run",
       "strict": true,

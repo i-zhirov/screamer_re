@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x23a94 holds 208 instructions and 870 bytes up to the ret at 0x23df9, so the record keeps the 872-byte extent and sets no function size"
+      "text": "the original at 0x23a94 holds 208 instructions and 870 bytes over the full extent; the ret is at 0x23df9, so the record keeps the 872-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -64,18 +64,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 69,
-        "bytes_total": 870,
+        "bytes_equal": 38,
+        "bytes_total": 528,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 52,
-        "instructions_total": 208,
+        "instructions_equal": 32,
+        "instructions_total": 122,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23a94",
     "date": "2026-11-12",
-    "fingerprint": "sha256:288f92cb42070f98a968e19df8425897b8f39e38e9ac95ab6ef8f5aa9a881dd0",
+    "fingerprint": "sha256:9ae50bfbfa54abeb544dbea34308cb22ac285f9f5158ce598e7686d70a579c1a",
     "mode": {
       "runtime": "run",
       "strict": true,

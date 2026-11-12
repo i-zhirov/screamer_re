@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x2b660 holds 219 instructions and 803 bytes up to the first ret at 0x2b982; the second return block continues to the shared epilogue at 0x2b9cb, so the record keeps the 876-byte extent and sets no function size; the identity check uses 219 instructions"
+      "text": "the original body at 0x2b660 holds 245 instructions and 876 bytes over the full extent; the first ret is at 0x2b982; the second return block continues to the shared epilogue at 0x2b9cb, so the record keeps the 876-byte extent and sets no function size; the identity check uses 170 instructions"
     },
     {
       "kind": "note",
@@ -60,18 +60,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 29,
-        "bytes_total": 764,
+        "bytes_equal": 26,
+        "bytes_total": 602,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 42,
-        "instructions_total": 219,
+        "instructions_equal": 35,
+        "instructions_total": 170,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2b660",
     "date": "2026-11-12",
-    "fingerprint": "sha256:81a0f6b4e9fb4777358ec3212b7daf53bf29d0d22118c6bc1604b41a74c9315c",
+    "fingerprint": "sha256:da46cd93964b29f0463707986cbb7b91a3fd55801669fa1f1eff00a1ed647b04",
     "mode": {
       "runtime": "run",
       "strict": true,

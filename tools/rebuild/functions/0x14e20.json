@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x14e20 holds 100 instructions and 334 bytes up to the early-exit block at 0x14f6e: the register saves, the EBP frame, the keyboard controller command 0xed and the 0xfa acknowledge with the 0xffff timeout and the three retries, the BIOS keyboard flag clear at 0040:0017, the INT 21h AX=3509h get-vector call, the INT 21h AX=2509h set-vector call with CS:0xe4, and the second set-vector call that restores the saved vector at 0x14f6e"
+      "text": "the original at 0x14e20 holds 121 instructions and 407 bytes up to the early-exit block at 0x14f6e: the register saves, the EBP frame, the keyboard controller command 0xed and the 0xfa acknowledge with the 0xffff timeout and the three retries, the BIOS keyboard flag clear at 0040:0017, the INT 21h AX=3509h get-vector call, the INT 21h AX=2509h set-vector call with CS:0xe4, and the second set-vector call that restores the saved vector at 0x14f6e"
     },
     {
       "kind": "note",
@@ -49,7 +49,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x14e20",
     "date": "2026-11-12",
-    "fingerprint": "sha256:ebcdafd4fd9ed5f5a5a949c40694856e5ff3f112a0dc319c75703217036b0352",
+    "fingerprint": "sha256:7c77a241428973678c04bd5e9c1dc7865045fc4b2ce968d3017dbd0836fd6675",
     "mode": {
       "runtime": "run",
       "strict": true,

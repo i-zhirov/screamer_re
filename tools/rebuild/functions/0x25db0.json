@@ -26,18 +26,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 43,
-        "bytes_total": 58,
-        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
-        "instructions_equal": 17,
-        "instructions_total": 17,
-        "match": "exact-relocations",
-        "verdict": "pass"
+        "bytes_equal": 78,
+        "bytes_total": 354,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 88,
+        "instructions_total": 98,
+        "match": "different",
+        "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25db0",
     "date": "2026-11-12",
-    "fingerprint": "sha256:f2eb26fa9f9ea6ed18d04978d489ab2f301d178293b8735a5c92edf1668e6792",
+    "fingerprint": "sha256:9ea9e5b7381b1ad2af22e00477015e09b71461be7b37687c1aae6c4d341c1a04",
     "mode": {
       "runtime": "run",
       "strict": true,
@@ -49,6 +49,6 @@
   "role": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path",
   "section": "Subsystem initialisation",
   "size": 356,
-  "status": "verified",
+  "status": "rebuilt",
   "symbol": "dpmi_real_int_"
 }

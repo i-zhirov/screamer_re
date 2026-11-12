@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x25020 holds 292 instructions and 1044 bytes up to the ret 4 at 0x25431; the next record starts at 0x254a8, so the store record keeps the 1160-byte extent and sets no separate function size; the identity check uses 292 instructions"
+      "text": "the original body at 0x25020 holds 273 instructions and 993 bytes up to the ret 4 at 0x25431; the next record starts at 0x254a8, so the store record keeps the 1160-byte extent and sets no separate function size; the identity check uses 269 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function keeps the same behavior in C but holds fewer instructions than the 292 original instructions, because the original keeps the draw state in the BSS cells at 0x154xx and the C build keeps the same state in locals; the identity check stays open at 38 of 292 instructions and 25 of 918 bytes; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function keeps the same behavior in C but holds fewer instructions than the 292 original instructions, because the original keeps the draw state in the BSS cells at 0x154xx and the C build keeps the same state in locals; the identity check stays open at 44 of 269 instructions and 13 of 819 bytes; the build and behavior checks pass, so the store records rebuilt"
     }
   ],
   "implementation": "c",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 918,
+        "bytes_equal": 13,
+        "bytes_total": 819,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 38,
-        "instructions_total": 292,
+        "instructions_equal": 44,
+        "instructions_total": 269,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25020",
     "date": "2026-11-12",
-    "fingerprint": "sha256:f03abeb4d8542985aab39a89fa6370a6fcb6eee9bd767ff3b7fa6b63d7eeb3ee",
+    "fingerprint": "sha256:e8bfb8be1d11428f6866b4c48cc4f4d57fb18236583867b1b32bd3beb40478de",
     "mode": {
       "runtime": "run",
       "strict": true,

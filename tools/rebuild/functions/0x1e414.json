@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1e414 holds 162 instructions and 590 bytes up to the ret at 0x1e661; the next function starts at 0x1e670, so the store record keeps the 604-byte extent and sets no function size; the identity check uses 162 instructions"
+      "text": "the original body at 0x1e414 holds 162 instructions and 590 bytes over the full extent; the ret is at 0x1e661; the next function starts at 0x1e670, so the store record keeps the 604-byte extent and sets no function size; the identity check uses 139 instructions"
     },
     {
       "kind": "note",
@@ -65,17 +65,17 @@
       },
       "identity": {
         "bytes_equal": 19,
-        "bytes_total": 513,
+        "bytes_total": 464,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 20,
-        "instructions_total": 162,
+        "instructions_equal": 19,
+        "instructions_total": 139,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e414",
     "date": "2026-11-12",
-    "fingerprint": "sha256:6d98c59a818545fdea60eaa5cc72222b08f1e4e3055cb63933bba745e3ff3580",
+    "fingerprint": "sha256:46397c05507ba66ac0b3cd71b532ff11bbf517061baceaf95fcb897eaa35bf96",
     "mode": {
       "runtime": "run",
       "strict": true,

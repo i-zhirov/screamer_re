@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x1a930 holds 396 instructions and 1425 bytes up to the ret at 0x1aec0, so the record keeps the 1428-byte extent and sets no function size"
+      "text": "the original at 0x1a930 holds 396 instructions and 1425 bytes over the full extent; the ret is at 0x1aec0, so the record keeps the 1428-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -52,18 +52,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 71,
-        "bytes_total": 1383,
+        "bytes_equal": 64,
+        "bytes_total": 1222,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 67,
-        "instructions_total": 396,
+        "instructions_equal": 61,
+        "instructions_total": 328,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a930",
     "date": "2026-11-12",
-    "fingerprint": "sha256:18ec765dd5103c2ac2d2e51778ab305611b477879f3df17041b281cd7c8db4f0",
+    "fingerprint": "sha256:3c2c4c82d2c7a5348f0d52e0953d98399a3a36dc657f85890092993e8e9e83ae",
     "mode": {
       "runtime": "run",
       "strict": true,

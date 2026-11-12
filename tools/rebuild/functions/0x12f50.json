@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x12f50 holds 85 instructions and 335 bytes up to the ret at 0x1309e; the next function starts at 0x130a0, so the store record keeps the 336-byte extent and sets no function size; the identity check uses 85 instructions"
+      "text": "the original body at 0x12f50 holds 85 instructions and 335 bytes over the full extent; the ret is at 0x1309e; the next function starts at 0x130a0, so the store record keeps the 336-byte extent and sets no function size; the identity check uses 66 instructions"
     },
     {
       "kind": "note",
@@ -58,7 +58,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 85 decoded instructions and 335 bytes in the identity window; the identity check stays open at 31 of 85 instructions, 29 of 335 bytes, and 1 of 55 relocation slots, because V2 saves the frame pointer first, uses a shorter prologue, and orders the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 66 decoded instructions and 270 bytes in the identity window; the identity check stays open at 26 of 66 instructions, 24 of 270 bytes, and 1 of 55 relocation slots, because V2 saves the frame pointer first, uses a shorter prologue, and orders the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -81,18 +81,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 29,
-        "bytes_total": 335,
+        "bytes_equal": 24,
+        "bytes_total": 270,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 31,
-        "instructions_total": 85,
+        "instructions_equal": 26,
+        "instructions_total": 66,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x12f50",
     "date": "2026-11-12",
-    "fingerprint": "sha256:e2f59d3a68dfd30d2ab5a5afb25320cdd8ba8cf9894daeaead370c27b471e0b9",
+    "fingerprint": "sha256:c33717860e8d9c95b5ff2129adf0690d07b599a333efed6638fe3bf4546898da",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at `0x26448` holds 27 instructions and 108 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path"
+      "text": "the original at `0x26448` holds 30 instructions and 112 bytes up to the first return, plus the early-exit block at `0x264b4`: it tests the flags at `DAT_0016669e`, `DAT_00166684`, and `DAT_00166688`, counts `DAT_001666bc` to 8, reads through `0x260e0`, and applies the input through `0x263cc` when device bit 9 is clear and `DAT_001666ac` is set; it returns 0 on every early exit and `DAT_00166696` on the normal path"
     }
   ],
   "module": "input_poll",
@@ -26,18 +26,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 4,
-        "bytes_total": 108,
+        "bytes_equal": 5,
+        "bytes_total": 112,
         "detail": "the instruction sequences differ",
         "instructions_equal": 2,
-        "instructions_total": 27,
+        "instructions_total": 30,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x26448",
     "date": "2026-11-12",
-    "fingerprint": "sha256:9dddffd8d3357d3b39f43b49051dc23f90b44e912bdadbfa3c6638200499c0c5",
+    "fingerprint": "sha256:edc8cb0a14c55cdacb2cfb4e7d44d94d231860d66fd9062b2809d8b8bf27ad57",
     "mode": {
       "runtime": "run",
       "strict": true,

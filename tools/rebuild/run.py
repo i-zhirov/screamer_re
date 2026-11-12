@@ -237,7 +237,11 @@ def run_mode(arguments: argparse.Namespace) -> dict:
 def run_identity(
     record: dict, module: dict, original: Path, strict: bool = True
 ) -> tuple[str, dict]:
-    """Run the identity check and return its verdict and its check result."""
+    """Run the identity check and return its verdict and its check result.
+
+    The record `size` bounds the original body through `--original-end`, so the
+    body covers every reachable instruction.
+    """
     if not original.is_file():
         raise ValueError(f"the original image {original} is missing")
     command = [
@@ -256,6 +260,9 @@ def run_identity(
     ]
     if "count" in record:
         command += ["--count", str(record["count"])]
+    if "size" in record:
+        end = int(record["address"], 16) + record["size"]
+        command += ["--original-end", f"0x{end:x}"]
     completed = subprocess.run(command, capture_output=True, text=True)
     verdict = diff_verdict(completed.stdout)
     if not verdict:

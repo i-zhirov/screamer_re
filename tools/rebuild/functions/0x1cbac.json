@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1cbac holds 81 instructions and 297 bytes up to the ret at 0x1ccd4; the next function starts at 0x1ccd8, so the store record keeps the 300-byte extent and sets no separate function size; the identity check uses 81 instructions"
+      "text": "the original body at 0x1cbac holds 81 instructions and 297 bytes over the full extent; the ret is at 0x1ccd4; the next function starts at 0x1ccd8, so the store record keeps the 300-byte extent and sets no separate function size; the identity check uses 69 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 81 decoded instructions and 299 bytes; the identity check stays open at 23 of 81 instructions and 11 of 297 bytes because V2 saves ecx and edx first, keeps the object in ecx, addresses the globals as near data offsets, and saves the two angle fields to local slots; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 69 decoded instructions and 263 bytes; the identity check stays open at 20 of 69 instructions and 11 of 263 bytes because V2 saves ecx and edx first, keeps the object in ecx, addresses the globals as near data offsets, and saves the two angle fields to local slots; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -82,17 +82,17 @@
       },
       "identity": {
         "bytes_equal": 11,
-        "bytes_total": 297,
+        "bytes_total": 263,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 23,
-        "instructions_total": 81,
+        "instructions_equal": 20,
+        "instructions_total": 69,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cbac",
     "date": "2026-11-12",
-    "fingerprint": "sha256:685068fc2e52dd10ef3c0928c4fcad8c09bc915726b1edf4594847e276e864f2",
+    "fingerprint": "sha256:9a326561b588c4d616bf047fbfb5403f86882e44d51f0c8f3521ecde7bcc452e",
     "mode": {
       "runtime": "run",
       "strict": true,

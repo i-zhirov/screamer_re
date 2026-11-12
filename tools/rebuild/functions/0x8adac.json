@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x8adac holds 71 instructions and 279 bytes up to the first ret at 0x8aec2; the function has a second path that ends at the ret at 0x8af05; the next function starts at 0x8af08, so the store record keeps the 348-byte extent and sets no separate function size; the identity check uses 71 instructions"
+      "text": "the original body at 0x8adac holds 91 instructions and 345 bytes up to the second ret at 0x8af05; the first ret is at 0x8aec2; the next function starts at 0x8af08, so the store record keeps the 348-byte extent and sets no separate function size; the identity check uses the 91-instruction original body and the 77-instruction rebuilt body"
     },
     {
       "kind": "note",
@@ -38,15 +38,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 71 decoded instructions and 301 bytes; the identity check stays open at 29 of 71 instructions, 21 of 279 bytes, and 0 of 38 relocation slots, because V2 saves four registers, keeps the context base and the emitter in registers, builds the flag test in another shape, and uses another branch layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 77 decoded instructions and 312 bytes; the identity check stays open at 30 of 77 instructions and 22 of 312 bytes, because V2 saves four registers, keeps the context base and the emitter in registers, builds the flag test in another shape, and uses another branch layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
-      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --count 71"
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --count 91"
     },
     {
       "kind": "command",
-      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8adac --count 71 --rebuilt work/rebuild/svsetup.exe --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol sound_voice_setup_"
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8adac --original-end 0x8af08 --rebuilt work/rebuild/svsetup.exe --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol sound_voice_setup_"
     },
     {
       "kind": "command",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
-        "bytes_total": 279,
+        "bytes_equal": 22,
+        "bytes_total": 312,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 29,
-        "instructions_total": 71,
+        "instructions_equal": 30,
+        "instructions_total": 77,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8adac",
     "date": "2026-11-12",
-    "fingerprint": "sha256:b8a60445c7ffa257c2aba4ca3a4f0bba7b26586b9236acade74e461ac35f53a9",
+    "fingerprint": "sha256:8f5504b153f0809051397579a7a855495f1b552e79c022b4dd840458720c17a3",
     "mode": {
       "runtime": "run",
       "strict": true,

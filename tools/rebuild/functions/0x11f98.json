@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x11f98 holds 96 instructions and 295 bytes up to the ret at 0x120be; the next function starts at 0x120c0, so the store record keeps the 296-byte extent and sets no separate function size; the identity check uses 96 instructions"
+      "text": "the original body at 0x11f98 holds 96 instructions and 295 bytes over the full extent; the ret is at 0x120be; the next function starts at 0x120c0, so the store record keeps the 296-byte extent and sets no separate function size; the identity check uses 70 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 70 decoded instructions and 219 bytes; the identity check stays open at 21 of 96 instructions, 9 of 295 bytes, and 0 of 22 relocation slots, because V2 saves ebp first, keeps the self pointer and the slot in registers, uses other local offsets, folds the two stores, and hoists the loop bound; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 70 decoded instructions and 219 bytes; the identity check stays open at 16 of 70 instructions, 8 of 219 bytes, and 0 of 22 relocation slots, because V2 saves ebp first, keeps the self pointer and the slot in registers, uses other local offsets, folds the two stores, and hoists the loop bound; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -81,18 +81,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 9,
-        "bytes_total": 295,
+        "bytes_equal": 8,
+        "bytes_total": 219,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
-        "instructions_total": 96,
+        "instructions_equal": 16,
+        "instructions_total": 70,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11f98",
     "date": "2026-11-12",
-    "fingerprint": "sha256:bf50fcf6d08accd86aca523dae0f180ab54dd31b7f7a034d52dd96f26708716b",
+    "fingerprint": "sha256:e13cb7d770e7185da50a5485f735266f184f2331ae144541d045368a7e439a90",
     "mode": {
       "runtime": "run",
       "strict": true,

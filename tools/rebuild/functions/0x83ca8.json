@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x83ca8 holds 111 instructions and 323 bytes up to the ret at 0x83dea; the next store record starts at 0x843a8, so the record keeps the 1792-byte extent and sets no separate function size; the identity check uses 111 instructions"
+      "text": "the original body at 0x83ca8 holds 107 instructions and 316 bytes over the full extent; the ret is at 0x83dea; the next store record starts at 0x843a8, so the record keeps the 1792-byte extent and sets no separate function size; the identity check uses 91 instructions"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 111 decoded instructions and 335 bytes; the identity check stays open at 24 of 111 instructions, 11 of 323 bytes, and 0 of 25 relocation slots, because V2 saves the registers one by one, uses a single data object, and emits the byte loops in another shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 91 decoded instructions and 269 bytes; the identity check stays open at 26 of 91 instructions, 10 of 269 bytes, and 0 of 25 relocation slots, because V2 saves the registers one by one, uses a single data object, and emits the byte loops in another shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 11,
-        "bytes_total": 323,
+        "bytes_equal": 10,
+        "bytes_total": 269,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 24,
-        "instructions_total": 111,
+        "instructions_equal": 26,
+        "instructions_total": 91,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x83ca8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:54a19f48a3af4674ec5e3abf5a8b3923c52f7153ef8ef421cfc21b05c31932f2",
+    "fingerprint": "sha256:9bf325481e2a62b223964daa052ba2525d5dc7200b7b5d27b314aee51cdae02e",
     "mode": {
       "runtime": "run",
       "strict": true,

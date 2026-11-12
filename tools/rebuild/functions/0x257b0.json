@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x257b0 holds 67 instructions and 261 bytes up to the ret at 0x258b4; the next function starts at 0x258b8, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 67 instructions"
+      "text": "the original body at 0x257b0 holds 67 instructions and 261 bytes over the full extent; the ret is at 0x258b4; the next function starts at 0x258b8, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 67 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the diff reports 10 of 67 instructions and 27 of 251 bytes equal; the identity check stays open because V2 saves the frame pointer first, builds the harness constant texts in local buffers, keeps the two arguments in esi and edi, and uses imul for the record size; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the diff reports 10 of 67 instructions and 28 of 261 bytes equal; the identity check stays open because V2 saves the frame pointer first, builds the harness constant texts in local buffers, keeps the two arguments in esi and edi, and uses imul for the record size; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -81,8 +81,8 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 251,
+        "bytes_equal": 28,
+        "bytes_total": 261,
         "detail": "the instruction sequences differ",
         "instructions_equal": 10,
         "instructions_total": 67,
@@ -92,7 +92,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x257b0",
     "date": "2026-11-12",
-    "fingerprint": "sha256:bde79881a539b99d0132fc885f48d98849fbdbe1ea371be27cd4741a60f21761",
+    "fingerprint": "sha256:8a9285523442774c31a13c6475a3e8f3190ceb29624b4a083fcd807a07675784",
     "mode": {
       "runtime": "run",
       "strict": true,

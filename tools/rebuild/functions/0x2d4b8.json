@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x2d4b8 holds 224 instructions and 779 bytes up to the ret at 0x2d7c2; the record keeps the 780-byte extent and sets no function size"
+      "text": "the original at 0x2d4b8 holds 224 instructions and 779 bytes over the full extent; the ret is at 0x2d7c2; the record keeps the 780-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -56,18 +56,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 44,
-        "bytes_total": 631,
+        "bytes_equal": 41,
+        "bytes_total": 514,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 34,
-        "instructions_total": 224,
+        "instructions_equal": 31,
+        "instructions_total": 166,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2d4b8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:d582a5359dfcbdcffae927bcfdc6132eb809ad538c7f42555b21362aadea3eae",
+    "fingerprint": "sha256:3a436948b4d4e46855304c8a0577f6099dd3367f43bd372d10ed4875a90c9e0a",
     "mode": {
       "runtime": "run",
       "strict": true,

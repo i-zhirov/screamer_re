@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x1d6bc holds 82 instructions and 339 bytes up to the first ret at 0x1d80e: it truncates each scaled velocity sum with the helper at 0x4d9f4, multiplies the factor by the damping at DAT_0010cf08 + 0x13c, clears the factor below the 10.0 constant at object 3 offset 0xb24, accumulates the dwell timer +0x46c while both positions equal the target at +0x160 and +0x168, and snaps both positions by the scale at DAT_0010cf08 + 0x180 at the 3.0 constant at offset 0xb28; the rebuild keeps the 376-byte extent and uses a module-local FPU stub with a truncating __CHP"
+      "text": "the original at 0x1d6bc holds 88 instructions and 357 bytes over the full extent; the first ret is at 0x1d80e: it truncates each scaled velocity sum with the helper at 0x4d9f4, multiplies the factor by the damping at DAT_0010cf08 + 0x13c, clears the factor below the 10.0 constant at object 3 offset 0xb24, accumulates the dwell timer +0x46c while both positions equal the target at +0x160 and +0x168, and snaps both positions by the scale at DAT_0010cf08 + 0x180 at the 3.0 constant at offset 0xb28; the rebuild keeps the 376-byte extent and uses a module-local FPU stub with a truncating __CHP"
     },
     {
       "kind": "note",
@@ -45,7 +45,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d6bc",
     "date": "2026-11-12",
-    "fingerprint": "sha256:548daaebb5eb0d7b2180e267c9d87d75379c13b628d18454584e175db0ad151d",
+    "fingerprint": "sha256:363d20d38889e1425af16966c0c41124ee7a4243970b83be8ee58ecbf439a8ac",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -10,11 +10,11 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at `0x30170` holds 196 instructions and 605 bytes: the interrupt enable, the stack alignment to 4, the stack top and break stores, the DOS version call, the Phar Lap, CauseWay, Rational DOS/4G, and unknown extender paths, the PSP words, the command-line copy, the `no87=` environment scan, the program-name copy, the BSS clear with the 0x1000 limit for the Rational extender, the initializer call at `0xd4374`, the main invoker call at `0xd4324`, the message writer at `0x30389`, the finalizer call at `0xd43bf`, the DOS exit, and the DS restore; the shape follows `bld/clib/startup/a/cstrt386.asm`"
+      "text": "the original at `0x30170` holds 168 instructions and 537 bytes: the interrupt enable, the stack alignment to 4, the stack top and break stores, the DOS version call, the Phar Lap, CauseWay, Rational DOS/4G, and unknown extender paths, the PSP words, the command-line copy, the `no87=` environment scan, the program-name copy, the BSS clear with the 0x1000 limit for the Rational extender, the initializer call at `0xd4374`, the main invoker call at `0xd4324`, the message writer at `0x30389`, the finalizer call at `0xd43bf`, the DOS exit, and the DS restore; the shape follows `bld/clib/startup/a/cstrt386.asm`"
     },
     {
       "kind": "note",
-      "text": "the record keeps the 114032-byte extent to the next entry at `0x4bee0`, so the identity check uses `--count 196`; the C rebuild moves the DOS and DPMI services, the extender records, the command line, the environment, and the runtime calls behind harness helpers, and the harness runs the Phar Lap, Rational zero-base, Rational non-zero-base, CauseWay, unknown, and message paths"
+      "text": "the record keeps the 537-byte extent to the next entry at `0x30389`, so the identity check uses `--original-end 0x30389`; the C rebuild moves the DOS and DPMI services, the extender records, the command line, the environment, and the runtime calls behind harness helpers, and the harness runs the Phar Lap, Rational zero-base, Rational non-zero-base, CauseWay, unknown, and message paths"
     }
   ],
   "module": "startup",
@@ -32,18 +32,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
-        "bytes_total": 605,
+        "bytes_equal": 20,
+        "bytes_total": 537,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 40,
-        "instructions_total": 196,
+        "instructions_equal": 36,
+        "instructions_total": 168,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x30170",
     "date": "2026-11-12",
-    "fingerprint": "sha256:c3e7cc12638d03d11413e677bbd14897c71273819ca82d9cae8a20a27695ace2",
+    "fingerprint": "sha256:183ae6ab607a428fdf4dc0f339260990cdedea2e3e77c1f435ea43199a830720",
     "mode": {
       "runtime": "run",
       "strict": true,

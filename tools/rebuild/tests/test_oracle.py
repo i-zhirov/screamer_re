@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from collections.abc import Callable
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -32,6 +33,15 @@ def slot(
     return le.Relocation(offset=offset, width=width, kind=kind, **fields)
 
 
+def symbols(
+    table: dict[tuple[int | None, int | None], str],
+) -> Callable[[le.Relocation], str | None]:
+    def resolve(slot: le.Relocation) -> str | None:
+        return table.get((slot.object, slot.target))
+
+    return resolve
+
+
 class OracleTestCase(unittest.TestCase):
     def compare(
         self,
@@ -39,12 +49,16 @@ class OracleTestCase(unittest.TestCase):
         rebuilt: list[le.Insn],
         original_relocations: list[le.Relocation] | None = None,
         rebuilt_relocations: list[le.Relocation] | None = None,
+        original_symbols: Callable[[le.Relocation], str | None] | None = None,
+        rebuilt_symbols: Callable[[le.Relocation], str | None] | None = None,
     ) -> oracle.OracleResult:
         return oracle.compare(
             original,
             rebuilt,
             original_relocations=original_relocations or [],
             rebuilt_relocations=rebuilt_relocations or [],
+            original_symbols=original_symbols,
+            rebuilt_symbols=rebuilt_symbols,
         )
 
     def test_exact_bytes(self) -> None:
@@ -67,12 +81,85 @@ class OracleTestCase(unittest.TestCase):
         self.assertEqual(result.relocations_equal, 1)
         self.assertEqual(result.relocations_total, 1)
 
-    def test_direct_branch_relocation_passes_strict(self) -> None:
+    def test_outside_function_branch_target_stays_masked(self) -> None:
         original = [
             insn(0x300EE, "jne", "0xd2008", bytes.fromhex("0f85141f0a00"))
         ]
         rebuilt = [
             insn(0x10000, "jne", "0x10024", bytes.fromhex("0f8500000000"))
+        ]
+        result = self.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_intra_function_branch_target_matches_by_index(self) -> None:
+        original = [
+            insn(0x1000, "jne", "0x1008", bytes.fromhex("0f8502000000")),
+            insn(0x1008, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "jne", "0x2006", bytes.fromhex("0f8500000000")),
+            insn(0x2006, "ret", "", b"\xc3"),
+        ]
+        result = self.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_intra_function_branch_target_mismatch_fails_strict(self) -> None:
+        original = [
+            insn(0x1000, "jne", "0x1006", bytes.fromhex("0f8500000000")),
+            insn(0x1006, "nop", "", b"\x90"),
+            insn(0x1007, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "jne", "0x2007", bytes.fromhex("0f8501000000")),
+            insn(0x2006, "nop", "", b"\x90"),
+            insn(0x2007, "ret", "", b"\xc3"),
+        ]
+        result = self.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.SAME_SHAPE)
+        self.assertFalse(result.passes_strict)
+
+    def test_intra_function_branch_target_into_the_middle_is_a_difference(
+        self,
+    ) -> None:
+        original = [
+            insn(0x1000, "jne", "0x1006", bytes.fromhex("0f8500000000")),
+            insn(0x1006, "mov", "eax, 1", bytes.fromhex("b801000000")),
+            insn(0x100B, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "jne", "0x2008", bytes.fromhex("0f8502000000")),
+            insn(0x2006, "mov", "eax, 1", bytes.fromhex("b801000000")),
+            insn(0x200B, "ret", "", b"\xc3"),
+        ]
+        result = self.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.SAME_SHAPE)
+        self.assertFalse(result.passes_strict)
+
+    def test_branch_target_inside_only_one_side_stays_masked(self) -> None:
+        original = [
+            insn(0x1000, "jne", "0x1006", bytes.fromhex("0f8500000000")),
+            insn(0x1006, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "jne", "0x9000", bytes.fromhex("0f85fa6f0000")),
+            insn(0x2006, "ret", "", b"\xc3"),
+        ]
+        result = self.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_intra_function_call_target_stays_masked(self) -> None:
+        original = [
+            insn(0x1000, "call", "0x1006", bytes.fromhex("e801000000")),
+            insn(0x1005, "nop", "", b"\x90"),
+            insn(0x1006, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "call", "0x2005", bytes.fromhex("e800000000")),
+            insn(0x2005, "nop", "", b"\x90"),
+            insn(0x2006, "ret", "", b"\xc3"),
         ]
         result = self.compare(original, rebuilt)
         self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
@@ -122,6 +209,93 @@ class OracleTestCase(unittest.TestCase):
         result = self.compare(original, rebuilt)
         self.assertEqual(result.match, oracle.DIFFERENT)
         self.assertFalse(result.passes_strict)
+
+    def test_internal_symbol_identity_matches(self) -> None:
+        original = [insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        result = self.compare(
+            original,
+            rebuilt,
+            [slot(0x1001, object=1, target=0x2FD2)],
+            [slot(0x2001, object=2, target=0x370)],
+            original_symbols=symbols({(1, 0x2FD2): "free_"}),
+            rebuilt_symbols=symbols({(2, 0x370): "free_"}),
+        )
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_internal_symbol_identity_mismatch_fails_strict(self) -> None:
+        original = [insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        result = self.compare(
+            original,
+            rebuilt,
+            [slot(0x1001, object=1, target=0x2FD2)],
+            [slot(0x2001, object=2, target=0x370)],
+            original_symbols=symbols({(1, 0x2FD2): "free_"}),
+            rebuilt_symbols=symbols({(2, 0x370): "malloc_"}),
+        )
+        self.assertEqual(result.match, oracle.SAME_SHAPE)
+        self.assertFalse(result.passes_strict)
+
+    def test_internal_symbol_identity_compares_the_addend(self) -> None:
+        original = [insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        result = self.compare(
+            original,
+            rebuilt,
+            [slot(0x1001, object=1, target=0x2FD2, addend=0)],
+            [slot(0x2001, object=2, target=0x370, addend=4)],
+            original_symbols=symbols({(1, 0x2FD2): "free_"}),
+            rebuilt_symbols=symbols({(2, 0x370): "free_"}),
+        )
+        self.assertEqual(result.match, oracle.SAME_SHAPE)
+        self.assertFalse(result.passes_strict)
+
+    def test_internal_symbol_identity_treats_a_missing_addend_as_zero(self) -> None:
+        original = [insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        result = self.compare(
+            original,
+            rebuilt,
+            [slot(0x1001, object=1, target=0x2FD2)],
+            [slot(0x2001, object=2, target=0x370, addend=0)],
+            original_symbols=symbols({(1, 0x2FD2): "free_"}),
+            rebuilt_symbols=symbols({(2, 0x370): "free_"}),
+        )
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_internal_symbol_identity_falls_back_to_the_kind(self) -> None:
+        original = [insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        result = self.compare(
+            original,
+            rebuilt,
+            [slot(0x1001, object=1, target=0x2FD2)],
+            [slot(0x2001, object=2, target=0x370)],
+            original_symbols=symbols({(1, 0x2FD2): "free_"}),
+            rebuilt_symbols=symbols({}),
+        )
+        self.assertEqual(result.match, oracle.EXACT_RELOCATIONS)
+        self.assertTrue(result.passes_strict)
+
+    def test_slot_key_holds_the_symbol_and_the_addend(self) -> None:
+        internal = slot(0x1001, object=1, target=0x2FD2)
+        resolver = symbols({(1, 0x2FD2): "free_"})
+        self.assertEqual(
+            oracle.slot_key(internal, resolver), ("internal", "free_", 0)
+        )
+        self.assertEqual(oracle.slot_key(internal), ("internal",))
+
+    def test_slot_key_keeps_an_import_key_with_a_resolver(self) -> None:
+        imported = slot(
+            0x1001, width=1, kind="import-ordinal", module=1, ordinal=3
+        )
+        self.assertEqual(
+            oracle.slot_key(imported, symbols({})),
+            ("import-ordinal", 1, 3),
+        )
 
     def test_imported_target_identity(self) -> None:
         original = [insn(0x1000, "push", "0x10", bytes.fromhex("6a10"))]

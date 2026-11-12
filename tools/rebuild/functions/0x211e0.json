@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x211e0 holds 62 instructions and 239 bytes up to the ret at 0x212ce: it tests bit 0x20 of the control byte 0x18e1d and sets bit 1 of the exit byte 0x1ce44 when one of the flags 0x3b, 0x1e, 0x3, or 0x19880 is set; otherwise it returns at once when the input word 0x18e1c holds 0x401c; it calls 0x21338 and clears 0x7f9 when the flag 0x1b is set and the mode 0x1d260 is not 0x10; it advances the counter 0x1d2a4 from 0 through 3 while the flag 0x34 is set and 0x18f90 is zero; and it calls 0x101b4 with 1 and sets the input bits 0x220 when the flag 0x3 is set and the control byte holds bit 0"
+      "text": "the original at 0x211e0 holds 62 instructions and 239 bytes over the full extent; the ret is at 0x212ce: it tests bit 0x20 of the control byte 0x18e1d and sets bit 1 of the exit byte 0x1ce44 when one of the flags 0x3b, 0x1e, 0x3, or 0x19880 is set; otherwise it returns at once when the input word 0x18e1c holds 0x401c; it calls 0x21338 and clears 0x7f9 when the flag 0x1b is set and the mode 0x1d260 is not 0x10; it advances the counter 0x1d2a4 from 0 through 3 while the flag 0x34 is set and 0x18f90 is zero; and it calls 0x101b4 with 1 and sets the input bits 0x220 when the flag 0x3 is set and the control byte holds bit 0"
     }
   ],
   "module": "input_map",
@@ -41,7 +41,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x211e0",
     "date": "2026-11-12",
-    "fingerprint": "sha256:c1dac6cb0b81a1fcbe26f8ebafa3a9067d7d0f83e606aee80dc95dfacd433760",
+    "fingerprint": "sha256:14f27ce7328610bc34f50773f6fe57e861f18691f1b122f4c338b09bb1ac4307",
     "mode": {
       "runtime": "run",
       "strict": true,

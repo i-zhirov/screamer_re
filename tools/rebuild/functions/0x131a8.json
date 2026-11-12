@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x131a8 holds 236 instructions and 919 bytes up to the ret at 0x1353e, so the record keeps the 920-byte extent and sets no function size"
+      "text": "the original at 0x131a8 holds 236 instructions and 919 bytes over the full extent; the ret is at 0x1353e, so the record keeps the 920-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x131a8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:1c6a139b4ef6630c46094288afcda2517f135cf344141d4a859855e7a4a34eb1",
+    "fingerprint": "sha256:0e0afc4e23158db2f0cbf2e3c511c5b6127e215797c2568b673558ee7d538585",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -1597,6 +1597,64 @@ default, and the report separates the four result buckets.  Evidence:
   `--skip-runtime` reports 288 checks, and both flags report 284 checks.
   Evidence: the four pipeline commands.
 
+## The reachable extent and the symbol-aware oracle
+
+The identity oracle now compares what the report claims.  The function extent
+covers every reachable block, including the second exit path and the compiler
+jump-table cases.  The oracle compares an intra-function branch target by
+instruction position and an internal fixup target by symbol and addend.
+Evidence:
+
+- The extent reaches the second exit path.  Command:
+  `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --max 400`.
+  The command reports 91 instructions and holds the first `ret` at `0x8aec2`
+  and the second exit at `0x8af05`.  The original body holds 91 instructions
+  and the rebuilt body holds 77; the record held 71 before the change.
+- The extent follows the compiler jump table.  Command:
+  `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2807c --max 400`.
+  The command reports 48 instructions and the case calls at `0x2e0b4`,
+  `0x2e21c`, `0x2e58c`, and `0x2e724`.  The Watcom table sits before the
+  function entry and holds `N + 1` object-relative 4-byte entries, where the
+  nearest preceding `cmp` holds `N`.  The pre-scaled form
+  `shl reg, 2; jmp dword ptr cs:[reg + disp]` uses the same table layout.
+  An indirect jump without the table pattern stops the block, because the
+  target is unknown.
+- The branch and symbol comparison is covered by tests.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_oracle.py"`.
+  The command reports 25 tests and OK.  The tests pin the index compare, the
+  outside-target mask, the call-target mask, the symbol and addend compare,
+  and the one-sided-symbol fallback.
+- The page reads and the reachable body are covered by tests.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_le_helpers.py"`.
+  The command reports 50 tests and OK.  The tests pin the page stitch, the
+  zeroed page, the short page, the page without a file offset, the unmapped
+  start, the reachable body, the scaled jump table, and the pre-scaled jump
+  table.
+- The strict baseline is 23 pass.  The strict run prints
+  `972 records: 23 pass, 230 fail, 719 skip; exact 7, relocation-only 15, shape 7, behavior-only 1`.
+  The stored `match` values give the historical gate 30 pass: the strict 23
+  plus the seven shape matches.  The seven shape matches pass the historical
+  gate and fail the strict gate.  A second `--allow-shape` run would rebuild
+  the modules and invalidate the strict fingerprints, so the historical count
+  comes from the stored `match` values.
+- The strict count falls from the baseline 24 to 23.  The full extent adds 81
+  instructions to `dpmi_real_int` at `0x25db0`, so its former 17-instruction
+  `exact-relocations` match becomes a 98-instruction comparison with 88 equal
+  instructions and the verdict `different`.  The `free` and `exit_flush`
+  records stay `exact-relocations` once the rebuilt body is bounded by the next
+  map symbol; before that bound, the rebuilt body followed a tail jump into the
+  next function and the two records fell to `different`.  `error_report` at
+  `0x10978` moves from `same-shape` to `different`, so the shape bucket falls
+  from eight to seven.
+  Evidence: the records `0x25db0`, `0x300ec`, `0x300d6`, and `0x10978`.
+- The new extents add 36 candidate addresses.  Command:
+  `python3 tools/rebuild/store.py seed --check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+  The command reports `added: 36` before the seed and `no difference` after it.
+  The store holds 1223 records and 0 violations.  The seed writes the new
+  records with the status `unknown`; it does not rebuild a module.  The four
+  pipeline commands still report 303, 299, 288, and 284 checks, as the
+  baseline section records.
+
 ## Open questions
 
 ### Entry alignment (resolved)
@@ -5668,14 +5726,16 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The dpmi_real_int module
 
-- `dpmi_real_int` at `0x25db0` holds 17 compared instructions and 58 bytes plus the real-mode
+- `dpmi_real_int` at `0x25db0` holds 98 instructions and 354 bytes over the full extent.  The
+  first-return body held 17 instructions and 58 bytes.  The full body adds the real-mode
   interrupt path: the state flags, the DOS multiplexer call INT 2Fh AX=1500h, the success return,
   and the real-mode path through INT 31h with the register block at `DAT_001176c0`.
-  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25db0 --count 60`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25db0 --count 98` and the
+  finding "The reachable extent and the symbol-aware oracle".
 - The module is assembly, because the original is library-style code: it holds `pushad`/`popad`,
-  the direct INT 2Fh and INT 31h calls, and no EBP frame.  The diff reports 17 of 17 compared
-  instructions equal and the verdict `the instruction sequences match; the differing operands are
-  the link-time addresses`, so the identity check passes and the store records `verified`.
+  the direct INT 2Fh and INT 31h calls, and no EBP frame.  The full extent adds 81 instructions,
+  so the diff reports 88 of 98 compared instructions equal and the verdict `the instruction
+  sequences differ`; the identity check fails and the store records `rebuilt`.
   Evidence: `tools/rebuild/dpmi_real_int.asm` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x25db0
   --rebuilt work/rebuild/dprimod.exe --rebuilt-map work/rebuild/dpmi_real_int.map
@@ -10142,8 +10202,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 ## The joystick_update module at 0x24da0
 
 - Observation: the original body at `0x24da0` holds 201 instructions and 630
-  bytes.  The plan row holds the same counts.  The record keeps the 2176-byte
-  extent to the next entry, so the identity check uses `--count 201`.
+  bytes.  The plan row holds the same counts.  The record keeps the 640-byte
+  extent to the next entry, so the identity check uses
+  `--original-end 0x25020`.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24da0 --count 201`,
   `docs/explanation/rebuild-plan.md`, and
   `tools/rebuild/functions/0x24da0.json`.
@@ -10180,14 +10241,14 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   0 or 2 tests the byte at `+2` of the state pointer at `+0x18` and stores
   1023 or 0.
   Evidence: the block at `0x24f50` through `0x24f9b`.
-- Observation: the rebuilt module holds 48 of 201 instructions and 13 of 630
-  bytes.  The identity check stays open.  The V2 toolchain saves fewer
-  registers, uses a different loop shape, and forms the record index with a
-  multiply.  The store records `rebuilt`.
+- Observation: the rebuilt module holds 138 instructions and 460 bytes, and 33
+  instructions and 8 bytes are equal.  The identity check stays open.  The V2
+  toolchain saves fewer registers, uses a different loop shape, and forms the
+  record index with a multiply.  The store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x24da0 --count 201 --rebuilt work/rebuild/joymod.exe
-  --rebuilt-map work/rebuild/joystick_update.map --rebuilt-symbol
-  joystick_update_`.
+  --original-address 0x24da0 --original-end 0x25020 --rebuilt
+  work/rebuild/joymod.exe --rebuilt-map work/rebuild/joystick_update.map
+  --rebuilt-symbol joystick_update_`.
 - Observation: the behavior check passes.  The harness prints the markers `0`
   through `9`, `A`, `B`, and `D`.  The paths cover the positive scale, the
   negative scale with the truncation toward zero, the dead zone, the high and
@@ -18570,12 +18631,13 @@ temporary `-od` recipe.
 
 ## The sound_voice_setup module at 0x8adac
 
-- Observation: the original body at `0x8adac` holds 71 instructions and 279
-  bytes up to the first `ret` at `0x8aec2`.  The function has a second path
-  that ends at the `ret` at `0x8af05`.  The next function starts at `0x8af08`,
-  so the store record keeps the 348-byte extent and sets no separate function
-  size.  The identity check uses 71 instructions.
-  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8adac --count 71` and
+- Observation: the original body at `0x8adac` holds 91 instructions and 345
+  bytes up to the second `ret` at `0x8af05`.  The first `ret` is at
+  `0x8aec2`.  The next function starts at `0x8af08`, so the store record
+  keeps the 348-byte extent and sets no separate function size.  The identity
+  check uses the 91-instruction original body and the 77-instruction rebuilt
+  body.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8adac --count 91` and
   `tools/rebuild/functions/0x8adac.json`.
 - Observation: the only direct caller is the frame prepare at `0x8af08`.  That
   helper runs in the per-frame loop of `sound_effects_update` at `0x81ab0`
@@ -18623,16 +18685,15 @@ temporary `-od` recipe.
   Evidence: `tools/rebuild/sound_voice_setup_main.c`,
   `python3 tools/rebuild/harness.py run --module sound_voice_setup`, and
   `work/rebuild/svsetup.txt`.
-- Observation: the rebuilt module holds 71 decoded instructions and 301 bytes.
-  The identity check stays open at 29 of 71 instructions, 21 of 279 bytes, and
-  0 of 38 relocation slots, because V2 saves four registers, keeps the context
-  base and the emitter in registers, builds the flag test in another shape,
-  and uses another branch layout.  The build and behavior checks pass, so the
-  store records `rebuilt`.
+- Observation: the rebuilt module holds 77 decoded instructions and 312 bytes.
+  The identity check stays open at 30 of 77 instructions and 22 of 312 bytes,
+  because V2 saves four registers, keeps the context base and the emitter in
+  registers, builds the flag test in another shape, and uses another branch
+  layout.  The build and behavior checks pass, so the store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x8adac --count 71 --rebuilt work/rebuild/svsetup.exe
-  --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol
-  sound_voice_setup_` and
+  --original-address 0x8adac --original-end 0x8af08 --rebuilt
+  work/rebuild/svsetup.exe --rebuilt-map work/rebuild/sound_voice_setup.map
+  --rebuilt-symbol sound_voice_setup_` and
   `python3 tools/rebuild/run.py run --function 0x8adac`.
 - Inference: the voice entry list, the voice record, the emitter, and the
   basis builders support the name `sound_voice_setup`.  The original has no

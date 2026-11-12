@@ -19,7 +19,7 @@
     "size": {
       "type": "integer",
       "minimum": 0,
-      "description": "The byte count of the original body."
+      "description": "The distance to the next entry; it bounds the identity check."
     },
     "name": {
       "type": "string",
@@ -56,7 +56,7 @@
     "count": {
       "type": "integer",
       "minimum": 1,
-      "description": "The instruction count of the identity check, passed to diff_module.py --count. Set when the body sweep runs past the end of the function."
+      "description": "The instruction count of the identity check, passed to diff_module.py --count. The record size wins over the count when both are present, because --original-end bounds the original body. Set when the body sweep runs past the end of the function."
     },
     "implementation": {
       "enum": ["c", "assembly"],

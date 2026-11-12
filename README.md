@@ -150,8 +150,10 @@ runs stage 8, so the run reports 288 checks.  Both flags report 284 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  Strict is the default identity gate: the
-relocation-aware oracle masks the fixup slots and the direct branch targets, so
-`free` and `exit` pass, and a reordered or shape-only match fails.
+relocation-aware oracle normalizes the link-time addresses, compares an
+intra-function branch target by instruction position, masks an outside target,
+and compares an internal target by symbol, so `free` and `exit` pass, and a
+reordered or shape-only match fails.
 `--allow-shape` restores the historical gate, which accepts a shape match and a
 reordered sequence.  `--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`

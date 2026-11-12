@@ -81,17 +81,20 @@ def make_edges(calls: list[tuple[str, int, int]], records: list[dict]) -> list[d
 
 
 def build_edges(original: Path, records: list[dict]) -> list[dict]:
-    """Scan the named records of the original image and return the edges."""
+    """Scan the named records of the original image and return the edges.
+
+    The record size bounds the body, so a second exit path stays in the body.
+    """
     image = le.load(original)
     calls: list[tuple[str, int, int]] = []
     for record in records:
         if not record.get("name"):
             continue
-        body = le.function_body(
-            image,
-            _address(record["address"]),
-            record.get("count", 4000),
-        )
+        address = _address(record["address"])
+        if "size" in record:
+            body = le.function_body(image, address, end=address + record["size"])
+        else:
+            body = le.function_body(image, address)
         for site in le.call_sites(body):
             if site.target is not None:
                 calls.append((record["address"], site.address, site.target))

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x16150 holds 95 instructions and 332 bytes up to the ret at 0x1629b; the next function starts at 0x1629c, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 95 instructions"
+      "text": "the original body at 0x16150 holds 95 instructions and 332 bytes over the full extent; the ret is at 0x1629b; the next function starts at 0x1629c, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 72 instructions"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 95 decoded instructions and 350 bytes in the identity window; the identity check stays open at 13 of 95 instructions and 15 of 332 bytes, because V2 saves the frame first, keeps the object in edx, forms the absolute value with neg instead of cdq, xor, and sub, and orders the tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 72 decoded instructions and 275 bytes in the identity window; the identity check stays open at 8 of 72 instructions and 13 of 275 bytes, because V2 saves the frame first, keeps the object in edx, forms the absolute value with neg instead of cdq, xor, and sub, and orders the tail in another shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -73,18 +73,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 332,
+        "bytes_equal": 13,
+        "bytes_total": 275,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 13,
-        "instructions_total": 95,
+        "instructions_equal": 8,
+        "instructions_total": 72,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16150",
     "date": "2026-11-12",
-    "fingerprint": "sha256:5a18dc85a7b0a15c61a1e66453aad0f54922f29a08f38fcf8d6a84f5a6e5e639",
+    "fingerprint": "sha256:9f3e39958717ce23720b7115a7ac8762f5856eec33331e85746bfc13cf534892",
     "mode": {
       "runtime": "run",
       "strict": true,

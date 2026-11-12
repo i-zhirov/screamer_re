@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1fa2c holds 166 instructions and 524 bytes up to the ret at 0x1fc37. The next function starts at 0x1fc38, so the store record keeps the 524-byte extent and sets no function size. The identity check uses 166 instructions"
+      "text": "the original body at 0x1fa2c holds 166 instructions and 524 bytes over the full extent; the ret is at 0x1fc37. The next function starts at 0x1fc38, so the store record keeps the 524-byte extent and sets no function size. The identity check uses 149 instructions"
     },
     {
       "kind": "note",
@@ -61,18 +61,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 29,
-        "bytes_total": 524,
+        "bytes_equal": 28,
+        "bytes_total": 474,
         "detail": "the instruction sequences differ",
         "instructions_equal": 30,
-        "instructions_total": 166,
+        "instructions_total": 149,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1fa2c",
     "date": "2026-11-12",
-    "fingerprint": "sha256:6bf7607a9bb88d797950e53bcf202e1e4f53eafc42b3493faa4411c7c34415df",
+    "fingerprint": "sha256:c74695527e4fd6f5f940e531942f8f3defa9a514ea2652710781e15ebc306b58",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x830c8 holds 207 instructions and 649 bytes up to the ret at 0x83350; the next function starts at 0x83354, so the store record keeps the 652-byte extent and sets no separate function size; the identity check uses 207 instructions"
+      "text": "the original body at 0x830c8 holds 207 instructions and 649 bytes over the full extent; the ret is at 0x83350; the next function starts at 0x83354, so the store record keeps the 652-byte extent and sets no separate function size; the identity check uses 207 instructions"
     },
     {
       "kind": "note",
@@ -79,7 +79,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x830c8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:4e203cf4597596d6e47eac390d95bd9b17b7b1bb2487a25aac08bd9d7b0c0d77",
+    "fingerprint": "sha256:f8b3a3d0ce0c3c1d0d72432f09267882bd63386966d4aefd74f7c01232aed6e4",
     "mode": {
       "runtime": "run",
       "strict": true,

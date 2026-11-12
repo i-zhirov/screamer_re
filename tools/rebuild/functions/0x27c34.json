@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x27c34 holds 133 instructions and 466 bytes up to the ret at 0x27e05; the next function starts at 0x27e08, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 133 instructions"
+      "text": "the original body at 0x27c34 holds 133 instructions and 466 bytes over the full extent; the ret is at 0x27e05; the next function starts at 0x27e08, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 98 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function body holds 98 instructions and 370 bytes; the identity window uses the 133 original instructions, so the check stays open at 30 of 133 instructions and 22 of 466 bytes because V2 saves the frame pointer first, uses another prologue order, and uses integer immediates for the float constants; the build and behavior checks pass, so the store records rebuilt; the original has no symbol name for this function, so the module name and the callee names in the harness stay inferred"
+      "text": "the rebuilt function body holds 98 instructions and 370 bytes; the identity window uses the 133 original instructions, so the check stays open at 21 of 98 instructions and 21 of 370 bytes because V2 saves the frame pointer first, uses another prologue order, and uses integer immediates for the float constants; the build and behavior checks pass, so the store records rebuilt; the original has no symbol name for this function, so the module name and the callee names in the harness stay inferred"
     },
     {
       "kind": "command",
@@ -69,18 +69,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
-        "bytes_total": 466,
+        "bytes_equal": 21,
+        "bytes_total": 370,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 30,
-        "instructions_total": 133,
+        "instructions_equal": 21,
+        "instructions_total": 98,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27c34",
     "date": "2026-11-12",
-    "fingerprint": "sha256:e7d80d3a025ef9ebbdebb34314b87a801d95efbc821b70ecc5274dca80f5fd45",
+    "fingerprint": "sha256:fe9cf38e588128b94f94c17c628d1737d1a0bd5b1a2f20ee71c98eff5ad54a0c",
     "mode": {
       "runtime": "run",
       "strict": true,

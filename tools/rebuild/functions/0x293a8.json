@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x293a8 holds 78 instructions and 288 bytes up to the ret at 0x294c7; the next function starts at 0x294c8, so the store record keeps the 288-byte extent and sets no separate function size; the identity check uses 78 instructions"
+      "text": "the original body at 0x293a8 holds 78 instructions and 288 bytes over the full extent; the ret is at 0x294c7; the next function starts at 0x294c8, so the store record keeps the 288-byte extent and sets no separate function size; the identity check uses 44 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 44 instructions and 143 bytes up to the ret at 0x1008e; the identity check decodes 78 instructions from the symbol, so its range continues past the function; the check stays open at 10 of 78 instructions and 10 of 238 bytes because V2 uses another prologue and register order, uses imul for the record index, and keeps the record pointer in eax; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 44 instructions and 143 bytes over the full extent; the ret is at 0x1008e; the identity check decodes 78 instructions from the symbol, so its range continues past the function; the check stays open at 7 of 44 instructions and 5 of 143 bytes because V2 uses another prologue and register order, uses imul for the record index, and keeps the record pointer in eax; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -81,18 +81,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 10,
-        "bytes_total": 238,
+        "bytes_equal": 5,
+        "bytes_total": 143,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 78,
+        "instructions_equal": 7,
+        "instructions_total": 44,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x293a8",
     "date": "2026-11-12",
-    "fingerprint": "sha256:a2107e9c753de5e8b7b883922d65364ff04dca56d55b5b143710e155f7283d97",
+    "fingerprint": "sha256:0598a2483ff3fd262e9719eac093afbc07f341ada35a2e3910dd85d0160f65ad",
     "mode": {
       "runtime": "run",
       "strict": true,
