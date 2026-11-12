@@ -1,0 +1,29 @@
+{
+  "exe": "sbrmod.exe",
+  "map": "sound_bank_release.map",
+  "name": "sound_bank_release",
+  "run": {
+    "command": "sbrmod.exe > sbr_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "sbr_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_bank_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_bank_release_main.c"
+    }
+  ]
+}

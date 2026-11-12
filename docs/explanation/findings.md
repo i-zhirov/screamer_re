@@ -32608,3 +32608,64 @@ temporary `-od` recipe.
   font_table_init_` and `python3 tools/rebuild/run.py run --function 0x25620`.
 - Limit: the original has no symbol name.  The two table pointers and the
   callers give the role, and the name `font_table_init` stays inferred.
+
+## The sound_bank_release module at 0x1f6f8
+
+- Observation: the original body at `0x1f6f8` holds 11 instructions and 31
+  bytes up to the `ret` at `0x1f716`.  The next function starts at `0x1f718`
+  after one padding byte at `0x1f717`, so the store record keeps the 32-byte
+  extent and sets no separate function size.  The identity check uses 11
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f6f8 --count 11` and
+  `tools/rebuild/functions/0x1f6f8.json`.
+- Observation: the function tests the setup word `DAT_00008058`.  A zero word
+  returns at once.  A set word frees the `SOUND_FX` resource from the archive
+  `DAT_000062ac` through `resource_free_name` at `0x2f326`.
+  Evidence: the body at `0x1f6fc` through `0x1f70f`, and the record of
+  `0x2f326`.
+- Observation: the string at linear `0x100bf1` holds `SOUND_FX`.
+  `sound_bank_load` at `0x1f2e0` gets the `SOUND_FX` resource from the same
+  archive through `resource_get` at `0x2eed0` and returns at once when the
+  setup word is zero.  The two functions form the sound bank load and release
+  pair.
+  Evidence: the bytes at file offset `0xf73f1`, the body of `sound_bank_load`
+  at `0x1f4c6` through `0x1f4d0`, and its record.
+- Inference: the `SOUND_FX` resource, the shared setup gate, and the
+  `sound_bank_load` counterpart support the name `sound_bank_release`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: the string at `0x100bf1` and the `resource_get` call at `0x1f4d0`.
+- Observation: the direct callers are `race_data_release` at `0x156a8` with
+  the call site at `0x156ea`, `race_end` at `0x279a4` with the call site at
+  `0x27a03`, and `race_cleanup` at `0x2a1b0` with the call site at `0x2a1ff`.
+  All three callers run at race teardown.  The function sits with the sound
+  loaders, so the record takes the section The sound loaders.
+  Evidence: `python3 tools/le.py calls STARTH.EXE 0x156a8`, the same command
+  for `0x279a4` and `0x2a1b0`, and `tools/rebuild/callgraph.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub, and the module uses no assembly implementation.
+  Evidence: the prologue at `0x1f6f8` and `tools/rebuild/sound_bank_release.c`.
+- Observation: the harness holds the setup word, the archive context, and the
+  resource free stub.  The three paths cover the zero setup word, the set
+  setup word with the first context, and another non-zero setup word with a
+  sentinel context.  Every path checks the call count, the context, and the
+  `SOUND_FX` name.  The output holds the markers `0`, `1`, `2`, and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/sound_bank_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_bank_release`,
+  `work/rebuild/sbr_out.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1f6f8`.
+- Observation: the identity check compares 11 instructions.  The rebuilt body
+  holds 7 of 11 instructions, 14 of 31 bytes, and 1 of 3 relocation slots
+  equal, because V2 puts `push ebp` before `push edx`, loads `eax` before
+  `edx`, and restores the stack with `lea esp, [ebp-4]`.  The build and
+  behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1f6f8 --count 11 --rebuilt work/rebuild/sbrmod.exe
+  --rebuilt-map work/rebuild/sound_bank_release.map --rebuilt-symbol
+  sound_bank_release_` and `python3 tools/rebuild/run.py run --function
+  0x1f6f8`.
+- Limit: the original has no symbol name.  The `SOUND_FX` resource, the shared
+  setup gate, and the `sound_bank_load` counterpart give the role, and the
+  name `sound_bank_release` stays inferred.
