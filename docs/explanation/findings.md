@@ -31743,3 +31743,62 @@ temporary `-od` recipe.
   0x10263`.
 - Limit: the original has no symbol name.  The single caller, the game port,
   and the axis mask support the name, and the name stays inferred.
+
+### The music_volume_set module at 0x2ff84
+
+- Observation: the original body at `0x2ff84` holds 15 instructions and 40
+  bytes up to the `ret` at `0x2ffab`.  The next recorded function starts at
+  `0x2ffc4`, so the store keeps the 64-byte extent and sets no separate
+  function size.  The identity check uses 15 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2ff84 --count 15` and
+  `tools/rebuild/functions/0x2ff84.json`.
+- Observation: the only direct caller is `view_move` at `0x1f94c`.  It calls
+  this function at `0x1f96e` with the music bank record `0x62b0` in `eax` and
+  the third argument shifted right by 8 in `edx`.  `view_move` sits in the
+  section motion_update callees.  The record takes the same section.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1f94c --count 20` and the
+  record of `0x1f94c`.
+- Observation: the record gate sits at `+0x14`.  `music_bank_load` at
+  `0x2f9e0` sets this flag to 1 on success, and `music_load` at `0x2fcec`
+  uses the same gate.  A clear gate returns without a call.  A set gate
+  passes the low seven bits of the value to the helper at `0xd3d14`.
+  Evidence: the blocks at `0x2fc6d` through `0x2fc84` and the record of
+  `0x2fcec`.
+- Observation: the helper at `0xd3d14` stores the value at `0x3ff9` and
+  re-sends the volume on each active MIDI channel.  It calls `0xe2cc9` for
+  each non-zero entry at `0x233a0`, and `0xe2cc9` sends controller 7 with the
+  per-channel value at `0x3ffc`.
+  Evidence: the loops at `0xd3d13` through `0xd3d6a` and the controller bytes
+  at `0x2541a` through `0x2541c`.
+- Inference: the music bank record, the active gate, the seven-bit value, and
+  the MIDI volume helper support the name `music_volume_set`.  The original
+  has no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: the records of `0x2f9e0`, `0x2fcec`, and `0xd3d14`.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction, so
+  the module needs no FPU stub.  The module uses no assembly implementation.
+  Evidence: `tools/rebuild/music_volume_set.c` and
+  `tools/rebuild/modules/music_volume_set.json`.
+- Observation: the harness holds the music bank record and the master volume
+  stub.  The stub records the forwarded volume and the call count.  The six
+  paths cover the clear gate, the volumes `0x7f`, `0x80`, `0x123`, `0x40`,
+  and `0x55`, and the gates 1, 2, and -1.  Every path checks the call count
+  and the forwarded volume.  The output holds the markers `0` through `5` and
+  `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/music_volume_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module music_volume_set`,
+  `work/rebuild/mvol.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x2ff84`.
+- Observation: the rebuilt body holds 3 of 15 instructions equal, 6 of 40
+  bytes equal, and 0 of 3 relocation slots equal.  V2 keeps the two arguments
+  in the registers, drops the two local slots, uses `eax` for the mask, and
+  calls the nearby harness stub in place of the link-time target.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2ff84 --count 15 --rebuilt work/rebuild/mvol.exe
+  --rebuilt-map work/rebuild/music_volume_set.map --rebuilt-symbol
+  music_volume_set_` and `python3 tools/rebuild/run.py run --function
+  0x2ff84`.
+- Limit: the original has no symbol name.  The music bank record, the active
+  gate, and the MIDI volume helper support the name, and the name stays
+  inferred.

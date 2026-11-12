@@ -375,8 +375,9 @@ current host.
    `sound_voice_stop` at `0x1f880`, and the Phase AA module
    `screen_setup_cleanup` at `0x15150`, and the Phase AA module
    `opponent_effect_update` at `0x15b80`, and the Phase AA module
-   `joystick_axis_read` at `0x10263`;
-   thirty-six modules are verified, one is matching, and four hundred and fourteen
+   `joystick_axis_read` at `0x10263`, and the Phase AA module
+   `music_volume_set` at `0x2ff84`;
+   thirty-six modules are verified, one is matching, and four hundred and fifteen
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
