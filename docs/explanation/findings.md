@@ -32037,3 +32037,63 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The audio slot table and the two
   parallel volume setters give the role, and the name `sound_fx_volume_set`
   stays inferred.
+
+## The attack_data_release module at 0x22d64
+
+- Observation: the original body at `0x22d64` holds 12 instructions and 36
+  bytes up to the `ret` at `0x22d87`.  The next recorded function
+  `replay_write_begin` starts at `0x22d88`, so the store record keeps the
+  36-byte extent and sets no separate function size.  The identity check uses
+  12 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22d64 --count 12` and
+  `tools/rebuild/functions/0x22d64.json`.
+- Observation: the only direct caller is `race_data_release` at `0x156a8` with
+  the call site at `0x15703`.  It calls this function after the `REPLAY`
+  release at `0x22d44` and before the `GAMESPLINE` release at `0x1b180`.
+  Evidence: the body of `race_data_release` at `0x156a8` and the
+  `race_data_release` record.
+- Observation: the function loads the archive `DAT_000062ac` in `eax` and the
+  name at object-3 offset `0xdc1` in `edx`, then calls `resource_free_name` at
+  `0x2f326`.  The string at linear `0x100dc1` holds `ATTACK`.  The function
+  then clears `DAT_0018ed0` and `DAT_0018eac`.
+  Evidence: the block at `0x22d64` through `0x22d87`, the body of `0x2f326`,
+  and the `race_data_release` record.
+- Observation: `replay_buffer_init` at `0x22c88` loads the same `ATTACK`
+  resource at object-3 offset `0xdb3` and sets `DAT_0018eac` and
+  `DAT_0018ed0`.  The two functions form the attack replay buffer load and
+  release pair.  The module sits with the replay records, so it takes the
+  section The replay records.
+  Evidence: the `replay_buffer_init` record and the two bodies.
+- Inference: the `ATTACK` resource, the two cells, and the replay buffer
+  loader support the name `attack_data_release`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the `replay_buffer_init` record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls one
+  resource helper, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x22d64` through `0x22d68` and
+  `tools/rebuild/attack_data_release.c`.
+- Observation: the harness holds the archive context, the two attack replay
+  cells, and the resource free stub.  The stub records the call count, the
+  context, and the name pointer.  The three paths cover the first values, other
+  values, and the sentinel context and cells.  Every path checks the call
+  count, the context, the `ATTACK` name, and the two cleared cells.  The output
+  holds the markers `0`, `1`, `2`, and `D`.  The behavior check passes.
+  Evidence: `tools/rebuild/attack_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module attack_data_release`,
+  `work/rebuild/atkrel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x22d64`.
+- Observation: the identity check compares 12 instructions.  The rebuilt body
+  holds 8 of 12 instructions, 9 of 36 bytes, and 0 of 4 relocation slots
+  equal.  V2 puts `push ebp` before `push edx`, loads `eax` before `edx`, keeps
+  the zero in `eax`, and restores the stack with `lea esp, [ebp - 4]`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22d64 --count 12 --rebuilt work/rebuild/atkrel.exe
+  --rebuilt-map work/rebuild/attack_data_release.map --rebuilt-symbol
+  attack_data_release_` and
+  `python3 tools/rebuild/run.py run --function 0x22d64`.
+- Limit: the original has no symbol name.  The `ATTACK` resource and the
+  replay buffer loader give the role, and the name `attack_data_release` stays
+  inferred.

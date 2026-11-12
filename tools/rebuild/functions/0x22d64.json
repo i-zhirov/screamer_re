@@ -1,9 +1,107 @@
 {
   "address": "0x22d64",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 12,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22d64 holds 12 instructions and 36 bytes up to the ret at 0x22d87; the next recorded function replay_write_begin starts at 0x22d88, so the store record keeps the 36-byte extent and sets no separate function size; the identity check uses 12 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_data_release at 0x156a8 with the call site at 0x15703; it calls this function after the REPLAY release at 0x22d44 and before the GAMESPLINE release at 0x1b180; the function frees the ATTACK resource at object-3 offset 0xdc1 from the archive DAT_000062ac through resource_free_name at 0x2f326, then clears DAT_0018ed0 and DAT_0018eac; the string at linear 0x100dc1 holds ATTACK"
+    },
+    {
+      "kind": "note",
+      "text": "replay_buffer_init at 0x22c88 loads the same ATTACK resource at object-3 offset 0xdb3 and sets DAT_0018eac and DAT_0018ed0; the load and release pair and the replay records support the name attack_data_release; the original has no symbol, so the record keeps the name with the confidence inferred; the module sits with the replay records, so the record takes the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls one resource helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/attack_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/attack_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/attack_data_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The attack_data_release module at 0x22d64"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22d64 --count 12"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22d64 --count 12 --rebuilt work/rebuild/atkrel.exe --rebuilt-map work/rebuild/attack_data_release.map --rebuilt-symbol attack_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module attack_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module attack_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22d64"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive context, the two attack replay cells, and the resource free stub; the stub records the call count, the context, and the name pointer; the three paths cover the first values, other values, and the sentinel context and cells; every path checks the call count, the context, the ATTACK name, and the two cleared cells; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 12 instructions; the rebuilt body holds 8 of 12 instructions, 9 of 36 bytes, and 0 of 4 relocation slots equal; V2 puts push ebp before push edx, loads eax before edx, keeps the zero in eax, and restores the stack with lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "attack_data_release",
+  "name": "attack_data_release",
   "notes": [],
   "object_offset": "0x12d64",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 36,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 12,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22d64",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:46e9554a8cd2e9cf34e7e2c972a9f1f6ee25ab2635765ce6bf7bf73e209069d4",
+    "source_digest": "sha256:f62f95c98a8b2541a7fc2f1fa61a6eae6f7d70dd27d1e6a7188974e68fc9c9c7",
+    "tool": "run.py"
+  },
+  "role": "Releases the ATTACK resource and clears the attack replay cells.",
+  "section": "The replay records",
   "size": 36,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "attack_data_release_"
 }
