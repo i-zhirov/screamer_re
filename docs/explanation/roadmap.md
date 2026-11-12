@@ -367,8 +367,9 @@ current host.
    `traffic_event_flush` at `0x1ec48`, and the Phase Z module
    `cd_audio_play` at `0x263cc`, and the Phase Z module
    `sound_voice_acquire` at `0x1f7ac`, and the Phase Z module
-   `line_clip_draw` at `0x102e4`;
-   thirty-five modules are verified, one is matching, and four hundred and seven
+   `line_clip_draw` at `0x102e4`, and the Phase Z module
+   `cd_audio_resume` at `0x264f8`;
+   thirty-five modules are verified, one is matching, and four hundred and eight
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

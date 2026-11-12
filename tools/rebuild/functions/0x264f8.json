@@ -1,9 +1,111 @@
 {
   "address": "0x264f8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 14,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x264f8 holds 14 instructions and 46 bytes up to the ret at 0x26525; the next recorded function starts at 0x265b4, so the store record keeps the 188-byte extent and sets no separate function size; the identity check uses 14 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is options_screen at 0x21338 at the call site 0x219be; the caller chooses this function when the local flag at +0x4a is set, and it chooses cd_audio_play at 0x263cc otherwise; the CD audio request path sits in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when bit 0 of DAT_0016669e is clear or bit 0 of DAT_00166684 is clear; otherwise it writes the length 0x1a at +0, the byte 0x88 at +1, and the command 0x88 at +2 of the request header at DAT_001666a4, then calls 0x25f44"
+    },
+    {
+      "kind": "note",
+      "text": "DOSBox maps the driver command 0x88 to Resume Audio; the caller flag, the request, and the command support the name cd_audio_resume; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal; it holds no floating-point instruction and makes one call, so the module uses no FPU stub and no assembly body; the module implementation is C"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two guard flags, the request buffer, and the send stub; the seven paths cover both guards set, each guard clear, each guard with bit 0 clear and the upper bits set, both guards all ones, and two calls; every path checks the whole request buffer; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 2 of 14 instructions and 1 of 46 bytes equal; V2 tests the guard bytes instead of the guard dwords, folds the two 0x88 stores into one word store, and tail-calls the send stub through a jump; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_resume module at 0x264f8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x264f8 --count 14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x264f8 --count 14 --rebuilt work/rebuild/cdres.exe --rebuilt-map work/rebuild/cd_audio_resume.map --rebuilt-symbol cd_audio_resume_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_audio_resume"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_resume"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x264f8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_resume.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_resume_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_resume.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_audio_resume",
+  "name": "cd_audio_resume",
   "notes": [],
   "object_offset": "0x164f8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 46,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 14,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x264f8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:49b22d264abd90df837d9f2b593a571d76319501213541f28ea1a7cec623794a",
+    "source_digest": "sha256:a139c911554c3f8290b4458e674b43882857e14684dc318d0536d4ded3fd2da1",
+    "tool": "run.py"
+  },
+  "role": "Builds the MSCDEX resume audio request header and sends it through the CD request helper.",
+  "section": "race_loop callees",
   "size": 188,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_resume_"
 }

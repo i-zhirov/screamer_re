@@ -684,13 +684,13 @@ reproduce the original bytes.
 | `0x263cc` | `cd_audio_play` (done) | 49 | 13 | 0 | 0 |
 | `0x1f7ac` | `sound_voice_acquire` (done) | 48 | 17 | 2 | 0 |
 | `0x102e4` | `line_clip_draw` (done) | 47 | 16 | 0 | 0 |
-| `0x264f8` | unnamed | 46 | 14 | 1 | 0 |
+| `0x264f8` | `cd_audio_resume` (done) | 46 | 14 | 1 | 0 |
 
 This table starts Phase Z.
 
 ## Position
 
-Four hundred and forty-two modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and forty-three modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -979,5 +979,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `traffic_event_flush` at `0x1ec48`, and the Phase Z module
 `cd_audio_play` at `0x263cc`, and the Phase Z module
 `sound_voice_acquire` at `0x1f7ac`, and the Phase Z module
-`line_clip_draw` at `0x102e4`.
-The next unnamed function is `0x264f8`.
+`line_clip_draw` at `0x102e4`, and the Phase Z module
+`cd_audio_resume` at `0x264f8`.
+The next unnamed function is `0x8a8d8`.
