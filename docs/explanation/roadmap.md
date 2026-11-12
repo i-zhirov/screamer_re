@@ -347,9 +347,10 @@ current host.
    `object_slot_acquire` at `0x11660`, and the Phase Z module
    `sound_voice_finished` at `0x1f834`, and the Phase Z module
    `object_load_by_name` at `0x11060`, and the Phase Z module
-   `object_handle_table_load` at `0x119cc`;
+   `object_handle_table_load` at `0x119cc`, and the Phase Z module
+   `stricmp` at `0x4d9ba`;
    thirty-two modules are verified, one is matching, and three hundred and
-   ninety rebuilds hold the recorded difference; the `video_fill`,
+   ninety-one rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

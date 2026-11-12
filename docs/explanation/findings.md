@@ -30099,3 +30099,58 @@ temporary `-od` recipe.
   the handle table support the role, and the name stays inferred.  The identity
   check stays open because C cannot reproduce the fixed data address and the
   register save shape.
+
+## The stricmp module at 0x4d9ba
+
+- Observation: the original body at `0x4d9ba` holds 28 instructions and 57
+  bytes up to the `ret` at `0x4d9f2`.  The next function starts at `0x4d9f4`
+  after the one padding byte at `0x4d9f3`, so the store record keeps the
+  58-byte extent and sets no separate function size.  The identity check uses
+  28 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d9ba --count
+  28` and `tools/rebuild/functions/0x4d9ba.json`.
+- Observation: seven direct call sites pass two string pointers in `eax` and
+  `edx` and test the result for zero.  The sites at `0x11123`, `0x11470`,
+  `0x1550c`, `0x1553b`, `0x15553`, `0x2f37e`, and `0x4c1bf` sit in
+  `object_lookup` at `0x110d0`, `object_chunk_find` at `0x11410`,
+  `list_file_load` at `0x15460`, `resource_free_name` at `0x2f326`, and
+  `member_open` at `0x4c128`.
+  Evidence: the call sites and the records at those addresses.
+- Observation: the function loads one byte from each string, folds a byte in
+  the range `A` to `Z` to lowercase, compares the two bytes, advances both
+  pointers on an equal non-zero pair, and returns the difference of the final
+  bytes.
+  Evidence: the block at `0x4d9ba` through `0x4d9f2`.
+- Inference: the case fold and the difference result identify the Watcom
+  string compare `stricmp`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred` and the section `Resource loader`.
+  Evidence: the callers, the case fold, and the return shape.
+- Observation: the original has no EBP frame and no local stack slot, so the
+  module builds without `-of+`.  The function holds no floating-point
+  instruction and no direct call, so the module uses no FPU stub and no
+  assembly implementation.
+  Evidence: the prologue at `0x4d9ba`, the `ret` at `0x4d9f2`, and the module
+  recipe.
+- Observation: the harness holds two data buffers filled with explicit byte
+  values, because the minimal image does not load a constant data segment.  The
+  nine paths cover the equal strings, the case-insensitive pair, both
+  difference signs, the empty string on each side, the prefix, the non-letter
+  pair, and the mixed-case pair.  The output holds the markers `0` through `8`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/stricmp_main.c`, `python3
+  tools/rebuild/harness.py run --module stricmp`, `work/rebuild/stricmp.txt`,
+  and `python3 tools/rebuild/run.py run --function 0x4d9ba`.
+- Observation: the rebuilt body holds 4 of 28 instructions equal, 3 of 56
+  bytes equal, and 0 of 0 relocation slots equal.  The identity check stays
+  open because V2 keeps the two bytes in `ah` and `al` and the first pointer in
+  `ecx`, saves `ecx` instead of `ebx`, and zero-extends the final bytes with
+  `movzx`.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4d9ba --count 28 --rebuilt work/rebuild/stricmp.exe
+  --rebuilt-map work/rebuild/stricmp.map --rebuilt-symbol stricmp_` and
+  `python3 tools/rebuild/run.py run --function 0x4d9ba`.
+- Limit: the original has no symbol name.  The callers, the case fold, and the
+  difference result support the role, and the name stays inferred.  The
+  identity check stays open because C cannot reproduce the `ebx` register save
+  and the byte-register pair of the original.

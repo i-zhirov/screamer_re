@@ -1,0 +1,32 @@
+{
+  "exe": "stricmp.exe",
+  "map": "stricmp.map",
+  "name": "stricmp",
+  "run": {
+    "command": "stricmp.exe > stricmp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "stricmp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stricmp.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stricmp_main.c"
+    }
+  ]
+}
