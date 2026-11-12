@@ -1,9 +1,106 @@
 {
   "address": "0x15b80",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15b80 holds 14 instructions and 41 bytes up to the ret at 0x15ba8; the next function starts at 0x15bac, so the store record keeps the 44-byte extent and sets no separate function size; the identity check uses 14 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three view groups call this function on the player object at object-3 offset 0xf91c: replay_view_update at 0x202c0 calls it at 0x2033f, cng_view_update at 0x20360 calls it at 0x203ac, and sla_view_update at 0x203c4 calls it at 0x20410; the sibling car group at 0x15b08 and traffic group at 0x15b44 have the same shape with the nearby marker and the proximity pass added; the callers sit in Program functions, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the object pointer arrives in eax; the function first calls player_body_point_place at 0x17c6c, returns at once when the state field +0x148 is not zero, and otherwise calls opponent_start at 0x124c0, both with the same player object; the three view callers, the opponent start step, and the state gate support the name opponent_effect_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores the argument to the frame and reloads it before each call; the volatile local reproduces the store and the reload, as error_report.c records for the same frame-local pattern; the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two player object buffers and one stub for each of the two callees; the four paths cover the clear state, the state 1, the state -1, and the second object; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body matches the original instruction sequence at 14 of 14 instructions and 35 of 41 bytes; the three differing operands are the link-time addresses, so the identity check passes and the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15b80 --count 14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15b80 --count 14 --rebuilt work/rebuild/oppeff.exe --rebuilt-map work/rebuild/opponent_effect_update.map --rebuilt-symbol opponent_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module opponent_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module opponent_effect_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15b80"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/opponent_effect_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/opponent_effect_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/opponent_effect_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The opponent_effect_update module at 0x15b80"
+    }
+  ],
+  "implementation": "c",
+  "module": "opponent_effect_update",
+  "name": "opponent_effect_update",
   "notes": [],
   "object_offset": "0x5b80",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 41,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 14,
+        "instructions_total": 14,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15b80",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:e44227c8bf0e6bc51d8ad4626c57dc67130ca61ccbc336023c743a81ad181620",
+    "source_digest": "sha256:5759aa1e455fd10ad5136eda127b0fdb487a3b21508d0a2d85330760fc229dde",
+    "tool": "run.py"
+  },
+  "role": "Places the player body points, then starts a nearby opponent when the player state field is clear, for the view groups.",
+  "section": "Program functions",
   "size": 44,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "opponent_effect_update_"
 }

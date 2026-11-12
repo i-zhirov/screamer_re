@@ -31631,3 +31631,58 @@ temporary `-od` recipe.
   0x15150`.
 - Limit: the original has no symbol name.  The caller gate, the callee set,
   and the call order support the name, and the name stays inferred.
+
+### The opponent_effect_update module at 0x15b80
+
+- Observation: the original body at `0x15b80` holds 14 instructions and 41
+  bytes up to the `ret` at `0x15ba8`.  The next function starts at `0x15bac`,
+  so the store keeps the 44-byte extent and sets no separate function size.
+  The identity check uses 14 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x15b80 --count 14` and
+  `tools/rebuild/functions/0x15b80.json`.
+- Observation: the three view groups call this function on the player object at
+  object-3 offset `0xf91c`.  `replay_view_update` at `0x202c0` calls it at
+  `0x2033f`, `cng_view_update` at `0x20360` calls it at `0x203ac`, and
+  `sla_view_update` at `0x203c4` calls it at `0x20410`.  The sibling car group
+  at `0x15b08` and traffic group at `0x15b44` have the same shape with the
+  nearby marker and the proximity pass added.  The callers sit in the section
+  Program functions.
+  Evidence: the call scanner over object 1 and the records of `0x202c0`,
+  `0x20360`, and `0x203c4`.
+- Observation: the object pointer arrives in `eax`.  The function first calls
+  `player_body_point_place` at `0x17c6c`, returns at once when the state field
+  `+0x148` is not zero, and otherwise calls `opponent_start` at `0x124c0`, both
+  with the same player object.
+  Evidence: the block at `0x15b80` through `0x15ba8` and the records of
+  `0x17c6c` and `0x124c0`.
+- Inference: the three view callers, the opponent start step, and the state
+  gate support the name `opponent_effect_update`.  The original has no symbol,
+  so the record keeps the name with the confidence `inferred`.
+  Evidence: the call graph and the data flow above.
+- Observation: the original stores the argument to the frame and reloads it
+  before each call.  The volatile local reproduces the store and the reload,
+  as `error_report.c` records for the same frame-local pattern.  The original
+  has the EBP frame, so the module builds with `-of+`.  The function holds no
+  floating-point instruction and makes no math call, so the module needs no FPU
+  stub, and the module uses no assembly implementation.
+  Evidence: `tools/rebuild/opponent_effect_update.c` and
+  `tools/rebuild/modules/opponent_effect_update.json`.
+- Observation: the harness holds the two player object buffers and one stub for
+  each of the two callees.  The four paths cover the clear state, the state 1,
+  the state -1, and the second object.  The output holds the markers `0`
+  through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/opponent_effect_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module opponent_effect_update`,
+  `work/rebuild/oppeff.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x15b80`.
+- Observation: the rebuilt body matches the original instruction sequence at
+  14 of 14 instructions and 35 of 41 bytes.  The three differing operands are
+  the link-time addresses, so the identity check passes and the store records
+  `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15b80 --count 14 --rebuilt work/rebuild/oppeff.exe
+  --rebuilt-map work/rebuild/opponent_effect_update.map --rebuilt-symbol
+  opponent_effect_update_` and `python3 tools/rebuild/run.py run --function
+  0x15b80`.
+- Limit: the original has no symbol name.  The three view callers, the callee
+  set, and the state gate support the name, and the name stays inferred.
