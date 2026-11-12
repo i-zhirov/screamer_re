@@ -712,7 +712,7 @@ reproduce the original bytes.
 | `0x1028c` | `gameport_pulse` (done) | 36 | 18 | 0 | 0 |
 | `0x1fa04` | `phase_delta` (done) | 34 | 15 | 0 | 0 |
 | `0x240a0` | `race_finish_overlay_4` (done) | 33 | 15 | 1 | 0 |
-| `0x13540` | unnamed | 33 | 13 | 1 | 0 |
+| `0x13540` | `race_track_load` (done) | 33 | 13 | 1 | 0 |
 | `0x2fef4` | unnamed | 32 | 13 | 1 | 0 |
 | `0x25af0` | unnamed | 32 | 11 | 1 | 0 |
 | `0x25f24` | unnamed | 31 | 11 | 1 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and sixty modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and sixty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1031,5 +1031,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `object_handle_table_release` at `0x11a08`, and the Phase AA module
 `gameport_pulse` at `0x1028c`, and the Phase AA module
 `phase_delta` at `0x1fa04`, and the Phase AA module
-`race_finish_overlay_4` at `0x240a0`.
-The next unnamed function is `0x13540`.
+`race_finish_overlay_4` at `0x240a0`, and the Phase AA module
+`race_track_load` at `0x13540`.
+The next unnamed function is `0x2fef4`.

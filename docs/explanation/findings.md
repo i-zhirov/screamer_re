@@ -32327,3 +32327,52 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The mode selection, the runtime text
   pointer, and the sibling overlays give the role, and the name
   `race_finish_overlay_4` stays inferred.
+
+## The race_track_load module at 0x13540
+
+- Observation: the original body at `0x13540` holds 13 instructions and 33
+  bytes up to the `ret` at `0x13560`.  The branch at `0x13558` jumps over the
+  first `ret` to `0x13561`, so the function continues through the `ret` at
+  `0x1357e`.  The store record keeps the 64-byte extent to the next function at
+  `0x13580` and sets no separate function size.  The identity check uses 13
+  instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x13540 --count 13` and
+  `tools/rebuild/functions/0x13540.json`.
+- Observation: the only direct caller at `0x1294e` is `race_session_start` at
+  `0x128e0`.  It passes the level value and drops a non-zero result.  The
+  function runs `opponent_route_setup` at `0x1517c` and then
+  `opponent_records_init` at `0x15378` with the same value.  A non-zero result
+  returns at once.  The record therefore takes the section
+  `race_session_start callees`.
+  Evidence: the call at `0x1294e`, the call at `0x1354c`, the call at
+  `0x13564`, and the records of `0x1517c` and `0x15378`.
+- Observation: the function returns 0 when both calls succeed, and returns the
+  first non-zero result.  The two opponent calls and the level value support the
+  name `race_track_load`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: the block at `0x13540` through `0x1357e`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls two
+  helpers, so the module needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x13540` and `tools/rebuild/race_track_load.c`.
+- Observation: the harness holds the two callee stubs.  Each stub records the
+  call count and the load value and returns a chosen result.  The five paths
+  cover both success, the route setup error, the records init error, both
+  errors, and the large level value.  The output holds the markers `0` through
+  `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_track_load_main.c`,
+  `python3 tools/rebuild/harness.py run --module race_track_load`,
+  `work/rebuild/rtrkld.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x13540`.
+- Observation: the identity check compares 13 instructions.  The rebuilt body
+  holds 4 of 13 instructions and 3 of 29 bytes equal, because V2 keeps the
+  level value in `edx`, tests `eax` in place, restores the stack through `lea`,
+  and saves `edx` instead of the frame locals.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x13540 --count 13 --rebuilt work/rebuild/rtrkld.exe
+  --rebuilt-map work/rebuild/race_track_load.map --rebuilt-symbol
+  race_track_load_` and `python3 tools/rebuild/run.py run --function 0x13540`.
+- Limit: the original has no symbol name.  The caller, the two opponent calls,
+  and the level value give the role, and the name `race_track_load` stays
+  inferred.

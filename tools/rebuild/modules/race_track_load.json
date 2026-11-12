@@ -1,0 +1,31 @@
+{
+  "exe": "rtrkld.exe",
+  "map": "race_track_load.map",
+  "name": "race_track_load",
+  "run": {
+    "command": "rtrkld.exe > rtrkld.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rtrkld.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_track_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_track_load_main.c"
+    }
+  ]
+}

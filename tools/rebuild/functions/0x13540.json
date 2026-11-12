@@ -1,9 +1,107 @@
 {
   "address": "0x13540",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x13540 holds 13 instructions and 33 bytes up to the ret at 0x13560; the branch at 0x13558 jumps over the first ret to 0x13561, so the function continues through the ret at 0x1357e; the store record keeps the 64-byte extent to the next function at 0x13580 and sets no separate function size; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x1294e is race_session_start at 0x128e0; it passes the level value and drops a non-zero result; the function runs opponent_route_setup at 0x1517c and then opponent_records_init at 0x15378 with the same value; a non-zero result returns at once; the record takes the section race_session_start callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns 0 when both calls succeed, and returns the first non-zero result; the two opponent calls and the level value support the name race_track_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls two helpers, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two callee stubs and records the call count and the load value; the five paths cover both success, the route setup error, the records init error, both errors, and the large level value; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 13 instructions; the rebuilt body holds 4 of 13 instructions and 3 of 29 bytes equal, because V2 keeps the level value in edx, tests eax in place, restores the stack through lea, and saves edx instead of the frame locals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x13540 --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x13540 --count 13 --rebuilt work/rebuild/rtrkld.exe --rebuilt-map work/rebuild/race_track_load.map --rebuilt-symbol race_track_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module race_track_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_track_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x13540"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_track_load module at 0x13540"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_track_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_track_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_track_load.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "race_track_load",
+  "name": "race_track_load",
   "notes": [],
   "object_offset": "0x3540",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 29,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x13540",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:683bbde55287f6369d6b607a936b6163cf64d5fcbf760bd134a0e0fcfb0baaae",
+    "source_digest": "sha256:e6f61b05433dce5e5e6483bb04788937e042c63ec10d8483a90107ffe9896da0",
+    "tool": "run.py"
+  },
+  "role": "Runs the opponent route setup and the opponent record init on the level value and returns the first non-zero result.",
+  "section": "race_session_start callees",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_track_load_"
 }
