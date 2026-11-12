@@ -32213,3 +32213,59 @@ temporary `-od` recipe.
   gameport_pulse_` and `python3 tools/rebuild/run.py run --function 0x1028c`.
 - Limit: the original has no symbol name.  The caller, the game port, and the
   pulse timing give the role, and the name `gameport_pulse` stays inferred.
+
+## The phase_delta module at 0x1fa04
+
+- Observation: the original body at `0x1fa04` holds 15 instructions and 34
+  bytes up to the `ret` at `0x1fa25`.  The return path for a current value
+  below the saved value continues at `0x1fa26`, and the next function starts at
+  `0x1fa2c`, so the store record keeps the 40-byte extent and sets no separate
+  function size.  The identity check uses 15 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fa04 --count 15` and
+  `tools/rebuild/functions/0x1fa04.json`.
+- Observation: the four direct callers are `traffic_step` at `0x1eae0` at the
+  call site `0x1eb53`, `mouse_release_wait` at `0x1f8dc` at `0x1f937`,
+  `view_fade_out` at `0x21da8` at `0x21e2f`, and `race_timeout` at `0x27f44` at
+  `0x27f53`.  The callers pass the saved value in `eax` and the current value in
+  `edx`; `race_timeout` passes the two values in the other order.  Three
+  callers sit in `Program functions` and one sits in `object_update_all
+  callees`, so the record takes the section `Program functions`.
+  Evidence: the four call blocks and `tools/rebuild/callgraph.json`.
+- Observation: the function forms the difference `current - saved`.  When the
+  current value is at least the saved value, it returns the difference.
+  Otherwise it returns the bitwise complement, which is `saved - current - 1`.
+  The phase wait and the fade read the delta between the saved phase
+  `DAT_000007f9` and the current phase.  The traffic step and the timeout read
+  the frame counter `DAT_000007fd`.
+  Evidence: the block at `0x1fa04` through `0x1fa2b`.
+- Inference: the callers, the phase counter, and the frame counter support the
+  name `phase_delta`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: the callers at `0x1eb53`, `0x1f937`, `0x21e2f`, and `0x27f53`.
+- Observation: the original has the EBP frame and two locals, so the module
+  builds with `-of+`.  The function holds no floating-point instruction and
+  calls no helper, so the module needs no FPU stub and no assembly
+  implementation.  The two volatile locals reproduce the two argument stores
+  and the reloads.
+  Evidence: the prologue at `0x1fa04` and `tools/rebuild/phase_delta.c`.
+- Observation: the harness calls the module with six pairs of saved and current
+  values.  The six paths cover the forward delta, the complement form, the
+  equal values, the full-range delta, the complement across the sign bit, and
+  the wrap from the top value to zero.  Every path checks the returned delta.
+  The output holds the markers `0` through `5` and `D`.  The behavior check
+  passes.
+  Evidence: `tools/rebuild/phase_delta_main.c`,
+  `python3 tools/rebuild/harness.py run --module phase_delta`,
+  `work/rebuild/phd.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x1fa04`.
+- Observation: the identity check compares 15 instructions.  The rebuilt body
+  holds 15 of 15 instructions and 34 of 34 bytes equal, and 0 of 0 relocation
+  slots.  The two volatile locals make V2 reproduce the argument stores, the
+  reloads, the `jae` branch, and the two return paths.  The build, identity,
+  and behavior checks pass, so the store records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1fa04 --count 15 --rebuilt work/rebuild/phdelta.exe
+  --rebuilt-map work/rebuild/phase_delta.map --rebuilt-symbol phase_delta_`
+  and `python3 tools/rebuild/run.py run --function 0x1fa04`.
+- Limit: the original has no symbol name.  The callers, the two counters, and
+  the delta form give the role, and the name `phase_delta` stays inferred.

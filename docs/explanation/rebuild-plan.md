@@ -710,7 +710,7 @@ reproduce the original bytes.
 | `0x22d64` | `attack_data_release` (done) | 36 | 12 | 1 | 0 |
 | `0x11a08` | `object_handle_table_release` (done) | 36 | 13 | 2 | 0 |
 | `0x1028c` | `gameport_pulse` (done) | 36 | 18 | 0 | 0 |
-| `0x1fa04` | unnamed | 34 | 15 | 0 | 0 |
+| `0x1fa04` | `phase_delta` (done) | 34 | 15 | 0 | 0 |
 | `0x240a0` | unnamed | 33 | 15 | 1 | 0 |
 | `0x13540` | unnamed | 33 | 13 | 1 | 0 |
 | `0x2fef4` | unnamed | 32 | 13 | 1 | 0 |
@@ -724,7 +724,7 @@ This table starts Phase AA.
 
 ## Position
 
-Four hundred and fifty-eight modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and fifty-nine modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1029,5 +1029,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `sound_fx_volume_set` at `0x1f8b4`, and the Phase AA module
 `attack_data_release` at `0x22d64`, and the Phase AA module
 `object_handle_table_release` at `0x11a08`, and the Phase AA module
-`gameport_pulse` at `0x1028c`.
-The next unnamed function is `0x1fa04`.
+`gameport_pulse` at `0x1028c`, and the Phase AA module
+`phase_delta` at `0x1fa04`.
+The next unnamed function is `0x240a0`.
