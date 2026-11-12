@@ -31446,3 +31446,65 @@ temporary `-od` recipe.
   flag already set.  The output holds the markers `0` through `4` and `D`.
   Evidence: `tools/rebuild/replay_write_begin_main.c` and
   `work/rebuild/rplwbgn.txt`.
+
+### The trig_range_reduce module at 0x4da3a
+
+- Observation: the original body at `0x4da3a` holds 22 instructions and 44
+  bytes up to the `ret` at `0x4da65`.  The next helper starts at `0x4da66`, so
+  the store keeps the 44-byte extent and sets no separate function size.  The
+  identity check uses 22 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4da3a --count 22`.
+- Observation: the two direct callers are the cosine core at `0x4da26` and the
+  sine core at `0x4da30`, at the call sites `0x4da28` and `0x4da32`.  The
+  cosine helper at `0x4da66` loads the double argument and calls the cosine
+  core, and the sine helper at `0x4da72` loads the double argument and calls
+  the sine core.  The helper is shared by both trig routines, so the record
+  takes the section Program functions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x4da24 --count 30` and
+  `python3 tools/le.py disasm STARTH.EXE 0x4da66 --count 10`.
+- Observation: the helper reads the x87 status word with `fnstsw` and tests the
+  C2 bit through `sahf` and `jnp`.  A clear C2 bit returns with the carry flag
+  set.  A set C2 bit loads the 80-bit `fprem` constant at object offset
+  `0x3da1c`, which is 2 pi, computes the remainder, and repeats through the
+  `fnstsw` test until the reduction is complete.  It then clears the carry flag
+  and returns.
+  Evidence: the block at `0x4da3e` through `0x4da65` and the constant bytes at
+  linear `0x4da1c` (`35 c2 68 21 a2 da 0f c9 01 40`).
+- Observation: the cosine core and the sine core repeat while the carry flag
+  is clear, so a value out of the `fsin` or `fcos` range is reduced one turn at
+  a time and then tested again.
+  Evidence: the `jnc` at `0x4da2d` and `0x4da37`.
+- Inference: the data flow reduces the value modulo 2 pi and keeps the sign of
+  the value, as `fprem` does.  The two cores and the `fprem` loop support the
+  name `trig_range_reduce`.  The original has no symbol, so the record keeps
+  the name with the confidence `inferred`.
+- Observation: the C form computes the remainder with a subtraction loop.  The
+  x87 C2 gate and the carry-flag result belong to the core loop and have no C
+  form.  The original has the EBP frame, so the module builds with `-of+`.  The
+  2 pi constant arrives through the global `trig_two_pi`, because the harness
+  image does not load the constant segment.  The shared `fpu_stub.asm` supplies
+  the FPU run-time symbols and the float-used marker.  The module uses no
+  assembly implementation.
+  Evidence: `tools/rebuild/trig_range_reduce.c` and
+  `tools/rebuild/modules/trig_range_reduce.json`.
+- Observation: the harness builds every double from its bit pattern and holds
+  the 2 pi constant.  The eight paths cover 0.0, 1.0, -1.0, 2 pi, 7.0, -7.0,
+  20.0, and 2 pi plus 0.5.  Each path compares the result with a tolerance of
+  0.0001.  The output holds the markers `0` through `7` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/trig_range_reduce_main.c`,
+  `python3 tools/rebuild/harness.py run --module trig_range_reduce`,
+  `work/rebuild/trred.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x4da3a`.
+- Observation: the rebuilt body holds 4 of 22 instructions equal, 4 of 44
+  bytes equal, and 0 of 3 relocation slots equal.  V2 copies the two argument
+  dwords to frame locals, compares with the 2 pi global through a near operand,
+  and builds the subtraction loop, while the original reads the x87 status
+  word, gates on C2, and runs the `fprem` loop.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4da3a --count 22 --rebuilt work/rebuild/trred.exe
+  --rebuilt-map work/rebuild/trig_range_reduce.map --rebuilt-symbol
+  trig_range_reduce_` and `python3 tools/rebuild/run.py run --function 0x4da3a`.
+- Limit: the original has no symbol name.  The two trig cores and the `fprem`
+  loop support the name, and the name stays inferred.

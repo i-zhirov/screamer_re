@@ -1,0 +1,38 @@
+{
+  "exe": "trred.exe",
+  "map": "trig_range_reduce.map",
+  "name": "trig_range_reduce",
+  "run": {
+    "command": "trred.exe > trred.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "trred.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "trig_range_reduce.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "trig_range_reduce_main.c"
+    }
+  ]
+}
