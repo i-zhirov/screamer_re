@@ -1,9 +1,103 @@
 {
   "address": "0x11850",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11850 holds 18 instructions and 51 bytes up to the first ret at 0x11882; the bind path continues at 0x11883 to the second ret at 0x118a3, and the next function starts at 0x118a4, so the store record keeps the 84-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the ten direct call sites are 0x115dc in object_list_link at 0x11568, 0x19a97 in player_car_wheel_effect_update at 0x19980, 0x1a2dd in player_cockpit_camera at 0x1a2bc, 0x1eb97 in traffic_step at 0x1eae0, 0x2af72 in menu_objects_init at 0x2aab8, 0x2b487 in map_object_record_init at 0x2b450, 0x2b4c1 in map_object_finish at 0x2b494, 0x2b68e in name_entry_letter_update at 0x2b660, 0x2b9fb in map_object_update at 0x2b9cc, and 0x2e066 in screen_object_lists_init at 0x2dff4; the callers pass the object table 0x6530 in eax, the list 0x6350 in edx, and the address of the entry index in ebx"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the entry index from the address in ebx; the index selects one 0x1c-byte record of the object table; a record with the slot word at +0x18 equal to -1 returns 0xe and changes nothing; otherwise the function writes the block pointer at +0x0c with the two top bits inverted into list[slot] and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the helper at 0x117fc writes the same block pointer without the inversion, and the helper at 0x117a0 inverts only the top bit; the sibling helpers, the shared table and list, and the object list group support the name object_list_bind with the confidence inferred; the record takes the section Resource loader; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds eight 0x1c-byte records, one block object per record, an eight-entry list, and one entry index; the seven paths cover the first list slot, a middle slot, the last slot, the free slot, the record selection by index, record 3 at slot 6, and two calls; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 18 instructions equal and 4 of 46 bytes equal; the identity check stays open because V2 keeps the index in ecx, uses imul for the 0x1c stride, keeps the slot in ecx, and inverts the branch so the free path jumps over the bind path; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11850 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11850 --count 18 --rebuilt work/rebuild/olb.exe --rebuilt-map work/rebuild/object_list_bind.map --rebuilt-symbol object_list_bind_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11850"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_list_bind module at 0x11850"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_bind.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_bind_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_list_bind.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_list_bind",
+  "name": "object_list_bind",
   "notes": [],
   "object_offset": "0x1850",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 46,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11850",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:86169a4c35621865f0f651e4446ed83192d095f4c7505373a6546bd9ab9c35dc",
+    "source_digest": "sha256:ebb9e115308afd0cd17c2536d591db54e55189b9b5978143f1c456babfcdb42a",
+    "tool": "run.py"
+  },
+  "role": "Writes the record block pointer with the two top bits inverted into the list slot of an active object table record and reports 0xe for a free slot.",
+  "section": "Resource loader",
   "size": 84,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_list_bind_"
 }

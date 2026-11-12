@@ -677,7 +677,7 @@ reproduce the original bytes.
 | `0x15a80` | `player_physics_update` (done) | 53 | 17 | 5 | 0 |
 | `0x102b0` | `data_blit` (done) | 52 | 26 | 0 | 0 |
 | `0x264b8` | `cd_audio_stop` (done) | 51 | 15 | 1 | 0 |
-| `0x11850` | unnamed | 51 | 18 | 0 | 0 |
+| `0x11850` | `object_list_bind` (done) | 51 | 18 | 0 | 0 |
 | `0x117fc` | unnamed | 51 | 18 | 0 | 0 |
 | `0x117a0` | unnamed | 51 | 18 | 0 | 0 |
 | `0x1ec48` | unnamed | 50 | 24 | 3 | 0 |
@@ -690,7 +690,7 @@ This table starts Phase Z.
 
 ## Position
 
-Four hundred and thirty-five modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and thirty-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -972,5 +972,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `map_data_release` at `0x4cef4`, and the Phase Z module
 `player_physics_update` at `0x15a80`, and the Phase Z module
 `data_blit` at `0x102b0`, and the Phase Z module
-`cd_audio_stop` at `0x264b8`.
-The next unnamed function is `0x11850`.
+`cd_audio_stop` at `0x264b8`, and the Phase Z module
+`object_list_bind` at `0x11850`.
+The next unnamed function is `0x117fc`.

@@ -1,0 +1,33 @@
+{
+  "exe": "olb.exe",
+  "map": "object_list_bind.map",
+  "name": "object_list_bind",
+  "run": {
+    "command": "olb.exe > olb.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "olb.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_list_bind.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_list_bind_main.c"
+    }
+  ]
+}
