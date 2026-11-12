@@ -30695,3 +30695,61 @@ temporary `-od` recipe.
   inferred.  The V2 prologue order, the near data offsets, and the stack
   restore differ from the original, so the C build cannot reproduce the exact
   bytes.
+
+## The player_physics_update module at 0x15a80
+
+- Observation: the original body at `0x15a80` holds 17 instructions and 53
+  bytes up to the `ret` at `0x15ab4`.  The next entry starts at `0x15ab8`, so
+  the store record keeps the 56-byte extent and sets no separate function size.
+  The identity check uses 17 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15a80 --count
+  17` and `tools/rebuild/functions/0x15a80.json`.
+- Observation: the five view groups at `0x2003c`, `0x201d0`, `0x202c0`,
+  `0x20360`, and `0x203c4` call this function on the player object at object-3
+  offset `0xf91c` before the effect group at `0x15bac` and the step group at
+  `0x15ab8`.  The five callers are the view groups that the frame update at
+  `0x1ff70` runs in order.
+  Evidence: the direct call sweep for the target `0x15a80` and the five caller
+  records.
+- Observation: the object pointer arrives in `eax`.  The function runs the
+  race clock update at `0x18a14`, the engine speed update at `0x18db0`, the
+  throttle update at `0x160a4`, the brake update at `0x16150`, and the
+  steering update at `0x1629c` in order.
+  Evidence: the block at `0x15a80` through `0x15ab4` and the five callee
+  records.
+- Inference: the call order, the object forward, and the step set support the
+  name `player_physics_update`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.  The vehicle steps take the
+  section The vehicle state chain.
+  Evidence: the five callee records and the caller records above.
+- Observation: the original stores the argument to the frame and reloads it
+  before each call (`sub esp,4`, `mov [ebp-4],eax`, `mov eax,[ebp-4]`).  A
+  volatile local reproduces the store and the reload, as `error_report.c`
+  records for the same frame-local pattern.  The original has the EBP frame, so
+  the module builds with `-of+`.
+  Evidence: the prologue at `0x15a80` and `tools/rebuild/player_physics_update.c`.
+- Observation: the function holds no floating-point instruction and makes no
+  math call, so the module uses no FPU stub and no assembly body.  The module
+  implementation is C.
+  Evidence: the block at `0x15a80` through `0x15ab4` and
+  `tools/rebuild/player_physics_update.c`.
+- Observation: the harness holds one stub for each of the five callees.  The
+  three paths cover the object `0x1234`, the object `0x5678`, and the null
+  object.  Every path checks the forwarded pointer and the call order.  The
+  output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  player_physics_update` and `work/rebuild/pphys.txt`.
+- Observation: the rebuilt body holds 17 of 17 instructions and 43 of 53 bytes
+  equal.  The only differing operands are the five link-time call targets.
+  The build, identity, and behavior checks pass, so the store records
+  `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15a80 --count 17 --rebuilt work/rebuild/pphys.exe
+  --rebuilt-map work/rebuild/player_physics_update.map --rebuilt-symbol
+  player_physics_update_` and `python3 tools/rebuild/run.py run --function
+  0x15a80`.
+- Limit: the original has no symbol name.  The five callers and the five
+  vehicle steps support the name, and the name stays inferred.  The identity
+  check passes only because the direct call targets are link-time values.

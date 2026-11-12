@@ -1,0 +1,29 @@
+{
+  "exe": "pphys.exe",
+  "map": "player_physics_update.map",
+  "name": "player_physics_update",
+  "run": {
+    "command": "pphys.exe > pphys.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "pphys.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_physics_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_physics_update_main.c"
+    }
+  ]
+}
