@@ -33940,3 +33940,60 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The ISO descriptor fields, the
   request header, and the callers give the role, and the name
   `cd_volume_descriptor_read` stays inferred.
+
+## The cd_system_shutdown module at 0x25f14
+
+- Observation: the plan row holds 6 instructions and 15 bytes up to the `ret`
+  at `0x25f22`.  One padding byte at `0x25f23` precedes the next function at
+  `0x25f24`, so the store record keeps the 16-byte extent and sets no separate
+  function size.  The identity check uses 6 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25f14 --count 6` and
+  `tools/rebuild/functions/0x25f14.json`.
+- Observation: the only direct caller is `engine_shutdown` at `0x128ac` with
+  the call site at `0x128d9`.  `engine_shutdown` is the counterpart of
+  `engine_init` and tears the subsystems down, so the function runs at the end
+  of the program shutdown.
+  Evidence: the call site at `0x128d9`, the block at `0x128ac` through
+  `0x128df`, and `tools/rebuild/functions/0x128ac.json`.
+- Observation: the body calls `sound_driver_set` at `0x262a8` with 0 and then
+  `dpmi_free_dos` at `0x2666c`.  The first helper clears the HMI driver state.
+  The second helper frees the DOS memory block at `DAT_001666a2`.
+  Evidence: the block at `0x25f14` through `0x25f22`,
+  `tools/rebuild/functions/0x262a8.json`, and
+  `tools/rebuild/functions/0x2666c.json`.
+- Observation: the MSCDEX setup in `dpmi_real_int` at `0x25db0` allocates the
+  DOS block through the DPMI function `0x0100` at `0x26640` and builds the CD
+  request block on it.  `dpmi_free_dos` has no other caller.  The function
+  therefore releases the CD subsystem.
+  Evidence: the allocation call at `0x25df6`, the segment store at `0x2664f`,
+  and the only call site at `0x25f1c`.
+- Inference: the caller, the two helpers, and the CD setup support the name
+  `cd_system_shutdown`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: `tools/rebuild/cd_system_shutdown.c` and
+  `tools/rebuild/functions/0x25f14.json`.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x25f14` and
+  `tools/rebuild/cd_system_shutdown.c`.
+- Observation: the harness holds the two callee stubs.  The stubs record the
+  order and the argument.  The three paths cover one, two, and three runs, and
+  every path checks the sound call with 0 then the DPMI call.  The output holds
+  the markers `0` through `2` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/cd_system_shutdown_main.c`,
+  `python3 tools/rebuild/harness.py run --module cd_system_shutdown`, and
+  `work/rebuild/cdshut.txt`.
+- Observation: the identity check compares 6 instructions.  The rebuilt body
+  holds 0 of 6 instructions and 2 of 15 bytes equal, because C emits
+  `xor eax, eax` and a tail jump to `dpmi_free_dos` in place of the `pushal`
+  and `popal` frame and the second call.  The build and behavior checks pass,
+  so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25f14 --count 6 --rebuilt work/rebuild/cdshut.exe
+  --rebuilt-map work/rebuild/cd_system_shutdown.map --rebuilt-symbol
+  cd_system_shutdown_` and `python3 tools/rebuild/run.py run --function
+  0x25f14`.
+- Limit: the original has no symbol name.  The caller, the two helpers, and the
+  CD setup give the role, and the name `cd_system_shutdown` stays inferred.

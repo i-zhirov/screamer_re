@@ -1,0 +1,26 @@
+{
+  "exe": "cdshut.exe",
+  "map": "cd_system_shutdown.map",
+  "name": "cd_system_shutdown",
+  "run": {
+    "command": "cdshut.exe > cdshut.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "cdshut.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_system_shutdown.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_system_shutdown_main.c"
+    }
+  ]
+}
