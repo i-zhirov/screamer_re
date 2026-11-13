@@ -116,7 +116,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the four hundred and seventy-seven module recipes
+│   │   ├── modules/           # the four hundred and ninety-two module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -165,10 +165,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 519 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 515 checks.
+about 8 minutes plus the Ghidra import and reports 543 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 539 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 504 checks.  Both flags report 500 checks and take about 16
+run reports 528 checks.  Both flags report 524 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -338,8 +338,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 519 checks in the `cross-check` shell.  `--skip-cross`
-  gives 515 checks, `--skip-runtime` gives 504 checks, and both flags give 500
+- The full check reports 543 checks in the `cross-check` shell.  `--skip-cross`
+  gives 539 checks, `--skip-runtime` gives 528 checks, and both flags give 524
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - Stage 12 checks the program-map tables and the call graph for drift.  The
