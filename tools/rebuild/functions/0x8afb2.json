@@ -1,9 +1,114 @@
 {
   "address": "0x8afb2",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8afb2 holds 5 instructions and 18 bytes up to the ret at 0x8afc3; the next recorded function starts at 0x8afc4, so the store record keeps the 18-byte extent and sets no separate function size; the identity check uses 5 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body loads 0x7c in al and stores al to the bytes at linear 0x83853, 0x83907, and 0x83bc7; each byte is the opcode of a conditional jump in a tail block of sound_event_render at 0x836ac; 0x7c is the jl opcode and 0x7d is the jge opcode; the sibling at 0x8afa0 writes 0x7d to the same three bytes"
+    },
+    {
+      "kind": "note",
+      "text": "the on-disk operand of each store is the object-relative value 0x73853, 0x73907, and 0x73bc7, which le.py prints; the internal fixup adds the object 1 base 0x10000, so the run-time byte sits at 0x83853, 0x83907, and 0x83bc7; the Ghidra reference list names the cells uRam00083853, uRam00083907, and uRam00083bc7"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_source_frame_prepare at 0x8affc with the call site at 0x8b054; the caller runs this function on every path, and it calls the sibling 0x8afa0 at 0x8b062 when the sample offset at 0x74528 is not negative; the caller sits in object_update_all callees, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the three patched jl opcodes, the jge sibling, and the caller toggle support the name sound_render_branch_less; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and holds no floating-point instruction; the rebuild models the three code bytes as three globals, because the rebuilt sound_event_render uses C conditions; the module uses no assembly source and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three branch bytes; the four paths cover the zero bytes, the 0xff bytes, the sibling value 0x7d, and the mixed values; every path checks all three bytes; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 5 instructions; the rebuilt body holds 5 of 5 instructions, 9 of 18 bytes, and 3 of 3 relocation slots equal; the differing operands are the link-time addresses, so the identity verdict is the link-time-address match, and the store records verified"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_render_branch_less.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_render_branch_less_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_render_branch_less.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_render_branch_less module at 0x8afb2"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8afb2 --count 5"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8afb2 --count 5 --rebuilt work/rebuild/srbless.exe --rebuilt-map work/rebuild/sound_render_branch_less.map --rebuilt-symbol sound_render_branch_less_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_render_branch_less"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_render_branch_less"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8afb2"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_render_branch_less",
+  "name": "sound_render_branch_less",
   "notes": [],
   "object_offset": "0x7afb2",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 18,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 5,
+        "instructions_total": 5,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8afb2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:98c407fa29978235dcaab9eb7aa85ad60f3eb0438299b0b4211ad347a573dbd6",
+    "source_digest": "sha256:e6b698d2bb8dc3946c34c1abd618db163be239dd7f5a4bb6a67a2f4b7879bd3f",
+    "tool": "run.py"
+  },
+  "role": "Sets the three sound_event_render conditional jump opcodes at 0x83853, 0x83907, and 0x83bc7 to the signed-less comparison 0x7c.",
+  "section": "object_update_all callees",
   "size": 18,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "sound_render_branch_less_"
 }

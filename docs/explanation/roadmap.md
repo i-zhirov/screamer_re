@@ -408,8 +408,9 @@ current host.
    `gamespline_release` at `0x1b180`, and the Phase AB module
    `vga_dac_write` at `0x81a24`, and the Phase AB module
    `vga_retrace_wait` at `0x819f0`, and the Phase AB module
-   `dpmi_free_dos` at `0x2666c`;
-   thirty-nine modules are verified, one is matching, and four hundred and
+   `dpmi_free_dos` at `0x2666c`, and the Phase AB module
+   `sound_render_branch_less` at `0x8afb2`;
+   forty modules are verified, one is matching, and four hundred and
    forty-four rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
