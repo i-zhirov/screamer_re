@@ -1,0 +1,27 @@
+{
+  "exe": "srbgreat.exe",
+  "map": "sound_render_branch_greater.map",
+  "name": "sound_render_branch_greater",
+  "run": {
+    "command": "srbgreat.exe > srbgreat.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "srbgreat.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_render_branch_greater.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_render_branch_greater_main.c"
+    }
+  ]
+}

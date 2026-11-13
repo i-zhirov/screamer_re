@@ -746,7 +746,7 @@ reproduce the original bytes.
 | `0x819f0` | `vga_retrace_wait` (done) | 21 | 11 | 0 | 0 |
 | `0x2666c` | `dpmi_free_dos` (done) | 20 | 6 | 0 | 0 |
 | `0x8afb2` | `sound_render_branch_less` (done) | 18 | 5 | 0 | 0 |
-| `0x8afa0` | unnamed | 18 | 5 | 0 | 0 |
+| `0x8afa0` | `sound_render_branch_greater` (done) | 18 | 5 | 0 | 0 |
 | `0x27f80` | unnamed | 18 | 7 | 0 | 0 |
 | `0x26014` | unnamed | 16 | 7 | 0 | 0 |
 | `0x4cf2c` | unnamed | 15 | 6 | 2 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and eighty-four modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and eighty-five modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1089,5 +1089,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `vga_dac_write` at `0x81a24`, and the Phase AB module
 `vga_retrace_wait` at `0x819f0`, and the Phase AB module
 `dpmi_free_dos` at `0x2666c`, and the Phase AB module
-`sound_render_branch_less` at `0x8afb2`.
-The next unnamed function is `0x8afa0`.
+`sound_render_branch_less` at `0x8afb2`, and the Phase AB module
+`sound_render_branch_greater` at `0x8afa0`.
+The next unnamed function is `0x27f80`.

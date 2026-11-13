@@ -33711,3 +33711,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The three patched branch bytes and
   the sibling value give the role, and the name `sound_render_branch_less`
   stays inferred.
+
+## The sound_render_branch_greater module at 0x8afa0
+
+- Observation: the original body at `0x8afa0` holds 5 instructions and 18
+  bytes up to the `ret` at `0x8afb1`.  The next recorded function starts at
+  `0x8afb2`, so the store record keeps the 18-byte extent and sets no separate
+  function size.  The identity check uses 5 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8afa0 --count 5` and
+  `tools/rebuild/functions/0x8afa0.json`.
+- Observation: the body loads `0x7d` in `al` and stores `al` to the byte at
+  linear `0x83853`, `0x83907`, and `0x83bc7`.  Each byte is the opcode of a
+  conditional jump in a tail block of `sound_event_render` at `0x836ac`.
+  `0x7d` is the `jge` opcode and `0x7c` is the `jl` opcode.  The sibling at
+  `0x8afb2` writes `0x7c` to the same three bytes.
+  Evidence: the block at `0x8afa0` through `0x8afb1`, the blocks at `0x83853`,
+  `0x83907`, and `0x83bc7`, and the finding "The sound_event_render module at
+  0x836ac".
+- Observation: the on-disk operand of each store is the object-relative value
+  `0x73853`, `0x73907`, and `0x73bc7`, which `le.py` prints.  The internal
+  fixup adds the object 1 base `0x10000`, so the run-time byte sits at
+  `0x83853`, `0x83907`, and `0x83bc7`.  The Ghidra reference list names the
+  three cells `uRam00083853`, `uRam00083907`, and `uRam00083bc7`.
+  Evidence: the three internal fixups at `0x8afa3`, `0x8afa8`, and `0x8afad`
+  with object 1 target `0x73853`, `0x73907`, and `0x73bc7`, and the Ghidra
+  `FindReferences` output for the three cells.
+- Observation: the only direct caller is `sound_source_frame_prepare` at
+  `0x8affc` with the call site at `0x8b062`.  The caller runs the sibling at
+  `0x8afb2` on every path.  When the sample offset at `0x74528` is not
+  negative, the caller then calls this function.  The caller sits in the
+  section `object_update_all callees`, so the record takes the same section.
+  Evidence: the block at `0x8b052` through `0x8b073` and the finding "The
+  sound_source_frame_prepare module at 0x8affc".
+- Inference: the three patched `jge` opcodes, the `jl` sibling, and the caller
+  toggle support the name `sound_render_branch_greater`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/sound_render_branch_greater.c` and
+  `tools/rebuild/functions/0x8afa0.json`.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction.  The rebuild models the three code bytes as three globals,
+  because the rebuilt `sound_event_render` uses C conditions.  The module uses
+  no assembly source and no FPU stub.
+  Evidence: `tools/rebuild/sound_render_branch_greater.c` and
+  `tools/rebuild/modules/sound_render_branch_greater.json`.
+- Observation: the harness holds the three branch bytes.  The four paths cover
+  the zero bytes, the `0xff` bytes, the sibling value `0x7c`, and the mixed
+  values.  Every path checks all three bytes.  The output holds the markers `0`
+  through `3` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sound_render_branch_greater_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_render_branch_greater`,
+  and `work/rebuild/srbgreat.txt`.
+- Observation: the identity check compares 5 instructions.  The rebuilt body
+  holds 5 of 5 instructions, 9 of 18 bytes, and 3 of 3 relocation slots equal.
+  The differing operands are the link-time addresses, so the identity verdict
+  is the link-time-address match.  The build, identity, and behavior checks
+  pass, so the store records `verified`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8afa0 --count 5 --rebuilt work/rebuild/srbgreat.exe
+  --rebuilt-map work/rebuild/sound_render_branch_greater.map --rebuilt-symbol
+  sound_render_branch_greater_`.
+- Limit: the original has no symbol name.  The three patched branch bytes and
+  the sibling value give the role, and the name `sound_render_branch_greater`
+  stays inferred.
