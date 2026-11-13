@@ -729,7 +729,7 @@ reproduce the original bytes.
 
 | Address | Name | Size | Instructions | Calls | FPU |
 | --- | --- | --- | --- | --- | --- |
-| `0x81a05` | unnamed | 30 | 17 | 2 | 0 |
+| `0x81a05` | `palette_set` (done) | 30 | 17 | 2 | 0 |
 | `0x22d44` | unnamed | 30 | 11 | 1 | 0 |
 | `0x111b4` | unnamed | 29 | 13 | 0 | 0 |
 | `0x11148` | unnamed | 29 | 13 | 0 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and sixty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1072,5 +1072,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_request_submit` at `0x25f24`, and the Phase AA module
 `font_table_init` at `0x25620`, and the Phase AA module
 `sound_bank_release` at `0x1f6f8`, and the Phase AA module
-`player_previous_speed_set` at `0x15bfc`.
-The next unnamed function is `0x81a05`.
+`player_previous_speed_set` at `0x15bfc`, and the Phase AB module
+`palette_set` at `0x81a05`.
+The next unnamed function is `0x22d44`.

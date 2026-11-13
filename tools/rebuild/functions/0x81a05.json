@@ -1,9 +1,107 @@
 {
   "address": "0x81a05",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 17,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x81a05 holds 17 instructions and 30 bytes up to the ret at 0x81a22; the next function starts at 0x81a24, so the store record keeps the 31-byte extent and sets no separate function size; the identity check uses 17 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body saves all general registers and the segment registers DS, ES, FS, and GS, calls 0x819f0, restores EAX, moves ESI from EAX, calls 0x81a24, and restores the registers; the helper at 0x819f0 polls bit 3 of the input status port 0x3da, and the helper at 0x81a24 writes the DAC index 0 to port 0x3c8 and sends 0x300 bytes to port 0x3c9; the pointer arrives in EAX"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are cd_check_screen at 0x15874 with the call site at 0x15929 and the pointer 0xcf5c, video_present at 0x27ec8 with the call site at 0x27f35, loading_screen at 0x2a364 with the call site at 0x2a43b, race_results_screen at 0x2a558 with the call sites at 0x2a62e and 0x2aa34, and net_race_lobby at 0x2d7c4 with the call site at 0x2da15; those modules already declare the name palette_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function is a shared graphics helper for several screen paths, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds with the default frame option; the function holds no floating-point instruction, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the source palette and the two helper stubs; the retrace stub appends R to the event order, and the DAC stub appends D, records the pointer, and copies the 0x300 bytes; the three paths cover the ascending palette, the descending palette, and two calls in a row; every path checks the call counts, the event order, the pointer, and the copied bytes; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/palette_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/palette_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/palette_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The palette_set module at 0x81a05"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x81a05 --count 17"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x81a05 --count 17 --rebuilt work/rebuild/plset.exe --rebuilt-map work/rebuild/palette_set.map --rebuilt-symbol palette_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module palette_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module palette_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x81a05"
+    }
+  ],
+  "implementation": "c",
+  "module": "palette_set",
+  "name": "palette_set",
   "notes": [],
   "object_offset": "0x71a05",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 30,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 17,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81a05",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:857943abf395a42360bd48fc77990ca398c3ea595a19a08f76ea3f3d729ad6d2",
+    "source_digest": "sha256:7800563d7e1c2f621885c5909dff448eb96d3d066f3526222330c6795982b7e7",
+    "tool": "run.py"
+  },
+  "role": "Waits for the VGA retrace and writes the 768-byte palette to the VGA DAC.",
+  "section": "Program functions",
   "size": 31,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "palette_set_"
 }

@@ -32727,3 +32727,61 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The speed source, the previous-speed
   target, and the suspension consumer give the role, and the name
   `player_previous_speed_set` stays inferred.
+
+## The palette_set module at 0x81a05
+
+- Observation: the original body at `0x81a05` holds 17 instructions and 30
+  bytes up to the `ret` at `0x81a22`.  The next function starts at `0x81a24`,
+  so the store record keeps the 31-byte extent and sets no separate function
+  size.  The identity check uses 17 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81a05 --count 17` and
+  `tools/rebuild/functions/0x81a05.json`.
+- Observation: the body saves all general registers and the segment registers
+  DS, ES, FS, and GS.  It calls `0x819f0`, restores EAX, moves ESI from EAX,
+  calls `0x81a24`, and restores the registers.  The helper at `0x819f0` polls
+  bit 3 of the input status port `0x3da`.  The helper at `0x81a24` writes the
+  DAC index 0 to port `0x3c8` and sends `0x300` bytes to the DAC data port
+  `0x3c9`.  The palette pointer arrives in EAX.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x819f0 --count 11` and
+  `python3 tools/le.py disasm STARTH.EXE 0x81a24 --count 9`.
+- Observation: the direct callers are `cd_check_screen` at `0x15874` with the
+  call site at `0x15929` and the pointer `0xcf5c`, `video_present` at `0x27ec8`
+  with the call site at `0x27f35`, `loading_screen` at `0x2a364` with the call
+  site at `0x2a43b`, `race_results_screen` at `0x2a558` with the call sites at
+  `0x2a62e` and `0x2aa34`, and `net_race_lobby` at `0x2d7c4` with the call site
+  at `0x2da15`.  Those modules already declare the name `palette_set`.  The
+  original has no symbol, so the record keeps the name with the confidence
+  `inferred`.
+  Evidence: `tools/rebuild/callgraph.json` and the records of the callers.
+- Inference: the function is a shared graphics helper for several screen paths,
+  so the record takes the section Program functions.
+  Evidence: the caller list above.
+- Observation: the original has no EBP frame, so the module builds with the
+  default frame option.  The function holds no floating-point instruction, so
+  the module needs no FPU stub.  The module uses no assembly implementation.
+  Evidence: the prologue at `0x81a05` through `0x81a0c` and
+  `tools/rebuild/modules/palette_set.json`.
+- Observation: the harness holds the source palette and the two helper stubs.
+  The retrace stub appends `R` to the event order.  The DAC stub appends `D`,
+  records the pointer, and copies the `0x300` bytes.  The three paths cover the
+  ascending palette, the descending palette, and two calls in a row.  Every path
+  checks the call counts, the event order, the pointer, and the copied bytes.
+  The output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/palette_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module palette_set`,
+  `work/rebuild/plset.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x81a05`.
+- Observation: the rebuilt `palette_set` holds 7 instructions and 17 bytes.
+  The identity check decodes the 17-instruction window, so it reads the two
+  helper stubs after the rebuilt `ret`.  The window is equal at 1 of 17
+  instructions and 1 of 30 bytes.  The instruction sequence differs, because
+  Watcom V2 saves EDX in place of the full register set and the segment
+  registers.  The build and behavior checks pass, so the store records
+  `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81a05 --count 17 --rebuilt work/rebuild/plset.exe
+  --rebuilt-map work/rebuild/palette_set.map --rebuilt-symbol palette_set_`.
+- Limit: the original has no symbol name.  The two helper calls, the caller
+  list, and the name already used by the callers give the role, and the name
+  `palette_set` stays inferred.

@@ -1,0 +1,26 @@
+{
+  "exe": "plset.exe",
+  "map": "palette_set.map",
+  "name": "palette_set",
+  "run": {
+    "command": "plset.exe > plset.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "plset.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "palette_set.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "palette_set_main.c"
+    }
+  ]
+}
