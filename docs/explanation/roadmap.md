@@ -414,9 +414,10 @@ current host.
    `func_27f80` at `0x27f80`, the Phase AB module
    `cd_volume_descriptor_read` at `0x26014`, and the Phase AB module
    `map_material_data_release` at `0x4cf2c`, and the Phase AB module
-   `cd_system_shutdown` at `0x25f14`;
+   `cd_system_shutdown` at `0x25f14`, and the Phase AB module
+   `sprite_list_init` at `0x257a0`;
    forty-one modules are verified, one is matching, and four hundred and
-   forty-eight rebuilds hold the recorded difference; the `video_fill`,
+   forty-nine rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

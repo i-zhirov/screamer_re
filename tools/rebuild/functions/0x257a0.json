@@ -1,9 +1,110 @@
 {
   "address": "0x257a0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x257a0 holds 5 instructions and 15 bytes up to the ret at 0x257ae; one padding byte at 0x257af precedes the next function at 0x257b0, so the store record keeps the 16-byte extent and sets no separate function size; the identity check uses 5 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the list base 0x1cb14 in the pointer DAT_00015cd0; the fixup at the pointer slot points at object 1 offset 0x15cd0, and the fixup at the immediate points at object 3 offset 0x1cb14, so the loaded pointer is DAT_0011cb14; sprite_list_flush at 0x25af0 walks the 0x28-byte entries from this pointer, and hud_panel_show at 0x27a5c and panel_show at 0x2dfac write the active flag at 0x1cb14 and the fields up to 0x1cb24 before they flush the list"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct call sites are 0x133c4 in race_data_load at 0x131a8 and 0x29d5f in menu_space_init at 0x29d08; both callers run this initializer after font_table_init at 0x25620 and before the sprite load, so the function sets the sprite list base for the menu screen; the sprite-list modules sit in the section Program functions, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the pointer, the two callers, and the sprite-list flush support the name sprite_list_init; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the list base pointer DAT_00015cd0; the three paths cover the sentinel fill and one call, a second call, and two calls in a row; every path checks the pointer value 0x1cb14; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 5 instructions; the rebuilt body holds 6 instructions and 16 bytes, because V2 adds mov esp, ebp before the pop ebp and emits no fixup for the numeric constant; the rebuilt body holds 3 of 5 instructions and 10 of 15 bytes equal, and 0 of 2 relocation slots; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_list_init.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_list_init_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sprite_list_init.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sprite_list_init module at 0x257a0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x257a0 --count 5"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x257a0 --count 5 --rebuilt work/rebuild/slstinit.exe --rebuilt-map work/rebuild/sprite_list_init.map --rebuilt-symbol sprite_list_init_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sprite_list_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sprite_list_init"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x257a0"
+    }
+  ],
+  "implementation": "c",
+  "module": "sprite_list_init",
+  "name": "sprite_list_init",
   "notes": [],
   "object_offset": "0x157a0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 15,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 5,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x257a0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e878f13875ebfc98defd1e6433ffe909417923a6c5016242af9358ecfb3e90db",
+    "source_digest": "sha256:a0a3b4a199356c40869ed9510a93bfb8e92e9139ef7661304f1ee3e15f6c7913",
+    "tool": "run.py"
+  },
+  "role": "Sets the sprite list base pointer to the sprite entry array at 0x1cb14.",
+  "section": "Program functions",
   "size": 16,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sprite_list_init_"
 }

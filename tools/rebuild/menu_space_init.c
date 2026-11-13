@@ -5,7 +5,7 @@
  * buffers, the `NET_SPACE` resource request at 0x2eed0 with the size 0x2000, the
  * `choice_load` call at 0x1bbc8, the two zero stores at `DAT_0002082c` and
  * `DAT_0002087c`, the `state_cells_set` call at 0x8bd54 with 0xffff54e0, the
- * font table init at 0x25620, the sound slot init at 0x257a0, the rectangle
+ * font table init at 0x25620, the sprite list init at 0x257a0, the rectangle
  * constants at `DAT_00015ce4` through `DAT_00015cf0`, the four `sprintf` calls
  * at 0x4d32c for `%s\gfx\graf.dat`, `menu%c.spr`, `menu%c.fnt`, and
  * `%s\gfx\menu.dat`, the sprite load at 0x257b0, the font load at 0x25658, the

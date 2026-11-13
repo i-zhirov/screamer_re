@@ -33997,3 +33997,69 @@ temporary `-od` recipe.
   0x25f14`.
 - Limit: the original has no symbol name.  The caller, the two helpers, and the
   CD setup give the role, and the name `cd_system_shutdown` stays inferred.
+
+## The sprite_list_init module at 0x257a0
+
+- Observation: the plan row holds 5 instructions and 15 bytes up to the `ret`
+  at `0x257ae`.  One padding byte at `0x257af` precedes the next function at
+  `0x257b0`, so the store record keeps the 16-byte extent and sets no separate
+  function size.  The identity check uses 5 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x257a0 --count 5` and
+  `tools/rebuild/functions/0x257a0.json`.
+- Observation: the body stores the list base `0x1cb14` in the pointer
+  `DAT_00015cd0`.  The fixup at the pointer slot points at object 1 offset
+  `0x15cd0`.  The fixup at the immediate points at object 3 offset `0x1cb14`,
+  so the loaded pointer is `DAT_0011cb14`.
+  Evidence: the two fixup records at module linear `0x257a5` and `0x257a9`,
+  and `tools/le.py info STARTH.EXE`.
+- Observation: `sprite_list_flush` at `0x25af0` walks the 0x28-byte entries
+  from this pointer.  `hud_panel_show` at `0x27a5c` and `panel_show` at
+  `0x2dfac` write the active flag at `0x1cb14` and the fields up to `0x1cb24`
+  before they flush the list.
+  Evidence: the loads at `0x25af1` and `0x25af7`, the stores at `0x27c12`
+  through `0x27c1c`, the stores at `0x2dfd6` through `0x2dfe5`, and
+  `tools/rebuild/sprite_list_flush.c`.
+- Observation: the two direct call sites are `0x133c4` in `race_data_load` at
+  `0x131a8` and `0x29d5f` in `menu_space_init` at `0x29d08`.  Both callers run
+  this initializer after `font_table_init` at `0x25620` and before the sprite
+  load.  The function sets the sprite list base for the menu screen.  The
+  sprite-list modules sit in the section Program functions, so the record takes
+  that section.
+  Evidence: the call at `0x133c4` after the call at `0x133bf`, the call at
+  `0x29d5f` after the call at `0x29d5a`, and
+  `tools/rebuild/functions/0x25af0.json`.
+- Inference: the pointer, the two callers, and the sprite-list flush support the
+  name `sprite_list_init`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: `tools/rebuild/sprite_list_init.c` and
+  `tools/rebuild/functions/0x257a0.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x257a0` and
+  `tools/rebuild/sprite_list_init.c`.
+- Observation: the harness holds the list base pointer `DAT_00015cd0`.  The
+  three paths cover the sentinel fill and one call, a second call, and two
+  calls in a row.  Every path checks the pointer value `0x1cb14`.  The output
+  holds the markers `0` through `2` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/sprite_list_init_main.c`,
+  `python3 tools/rebuild/harness.py run --module sprite_list_init`, and
+  `work/rebuild/slstinit.txt`.
+- Observation: the identity check compares 5 instructions.  The rebuilt body
+  holds 6 instructions and 16 bytes, because V2 adds `mov esp, ebp` before the
+  `pop ebp` and emits no fixup for the numeric constant.  The rebuilt body
+  holds 3 of 5 instructions and 10 of 15 bytes equal, and 0 of 2 relocation
+  slots.  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x257a0 --count 5 --rebuilt work/rebuild/slstinit.exe
+  --rebuilt-map work/rebuild/sprite_list_init.map --rebuilt-symbol
+  sprite_list_init_` and `python3 tools/rebuild/run.py run --function 0x257a0`.
+- Observation: the earlier `menu_space_init` evidence named `0x257a0` the sound
+  slot init.  The pointer, the two fixup targets, and the sprite-list flush
+  show a sprite list base.  The record and the source comment now use the name
+  `sprite_list_init`.
+  Evidence: the corrected text of `tools/rebuild/functions/0x29d08.json` and
+  `tools/rebuild/menu_space_init.c`.
+- Limit: the original has no symbol name.  The pointer, the two callers, and the
+  sprite-list flush give the role, and the name `sprite_list_init` stays
+  inferred.
