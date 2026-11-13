@@ -1,6 +1,8 @@
 {
   "address": "0xe0725",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe0725"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "chdir",
+    "object_sha256": "sha256:b420b4190bbc5c50c39fcba7a51d73067d30f83d5c654060290d35060242875f",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "chdir_"
+  },
+  "name": "chdir",
   "notes": [],
   "object_offset": "0xd0725",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 31,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 15,
+        "instructions_total": 15,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe0725",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2beeb8582d93c3425b53067e4625c94695f1b4c7c192daa9bf0accc429f560b2",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:45acfeac169b5870d2b70331350f50c64474fd316de6266a3957cc5455401583",
+    "tool": "library.py"
+  },
   "size": 31,
-  "status": "unknown"
+  "status": "verified"
 }

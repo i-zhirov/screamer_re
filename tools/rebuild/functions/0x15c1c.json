@@ -76,7 +76,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15c1c",
     "date": "2026-11-13",
-    "fingerprint": "sha256:e1c167e962372ebfe5c913d77c299e58b05d77d6ac957caf9797ac7e80ac73d9",
+    "fingerprint": "sha256:9e3c07534db3bfc056185c52ad512cd0c93b9b36e97f44940e9c086f80910409",
     "mode": {
       "runtime": "run",
       "strict": true,

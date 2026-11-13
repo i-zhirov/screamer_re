@@ -331,6 +331,31 @@ class StageTwelveTestCase(unittest.TestCase):
             [name for name, _, _ in checks.results],
         )
 
+    def test_stage_twelve_checks_the_library_manifest(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        manifest_commands = [
+            command
+            for command in commands
+            if any("library.py" in part for part in command)
+            and "check-manifest" in command
+        ]
+        self.assertTrue(
+            manifest_commands, "the stage runs library.py check-manifest"
+        )
+        command = manifest_commands[0]
+        self.assertIn("--manifest", command)
+        self.assertIn(str(pipeline_check.library.LINK_DOCUMENT), command)
+        self.assertIn(
+            "stage 12: the library link manifest matches the records",
+            [name for name, _, _ in checks.results],
+        )
+
 
 class ImageGateTestCase(unittest.TestCase):
     """Stage 11 must skip the image gate until a whole image exists."""
@@ -432,6 +457,60 @@ class UnchangedResultTestCase(unittest.TestCase):
         self.assertEqual(len(checks.failures), 1)
         self.assertIn("0x300ec", checks.failures[0])
         self.assertIn("the stored result is FAIL", checks.results[0][2])
+
+
+class LibraryUnchangedTestCase(unittest.TestCase):
+    """Stage 11 must verify a library record with the record field."""
+
+    def library_field(self) -> dict:
+        return {
+            "file": "CLIB3R.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "mod",
+            "symbol": "malloc_",
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+
+    def record(self, fingerprint: str) -> dict:
+        return {
+            "address": "0xd1f25",
+            "library": self.library_field(),
+            "result": {"fingerprint": fingerprint},
+        }
+
+    def test_unchanged_is_verified_uses_the_library_entry(self) -> None:
+        record = self.record("sha256:stored")
+        with mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute, mock.patch.object(
+            pipeline_check.store_module,
+            "load_module",
+            side_effect=AssertionError("must not load a module"),
+        ):
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        self.assertIsNone(compute.call_args.args[1])
+        self.assertEqual(compute.call_args.kwargs["library"], record["library"])
+        self.assertEqual(
+            compute.call_args.kwargs["mode"],
+            pipeline_check.library.library_mode(),
+        )
+
+    def test_unchanged_is_verified_rejects_a_changed_library_entry(self) -> None:
+        record = self.record("sha256:stored")
+        with mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:other",
+        ):
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertFalse(verified)
 
 
 if __name__ == "__main__":

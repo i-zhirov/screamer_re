@@ -1,6 +1,8 @@
 {
   "address": "0xe092e",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe092e"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "dosret",
+    "object_sha256": "sha256:2dbba63e48b24bbb111e4426f86ff18e388e6acdb03df237f14496838c5a5b2f",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__set_errno_dos_"
+  },
+  "name": "__set_errno_dos",
   "notes": [],
   "object_offset": "0xd092e",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 88,
+        "bytes_total": 102,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 38,
+        "instructions_total": 38,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe092e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c971633f9086f7fdc763dc3b708ccd40c740ed6aa637a054839470128ec545ae",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:a400459358c30e958af516c4d28c7e940c95d1f7ea20eced02313fcc1aa347b2",
+    "tool": "library.py"
+  },
   "size": 102,
-  "status": "unknown"
+  "status": "verified"
 }

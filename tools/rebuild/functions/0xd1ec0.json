@@ -1,9 +1,7 @@
 {
   "address": "0xd1ec0",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -22,22 +20,25 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd1ec0"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "set386",
+    "object_sha256": "sha256:1375112f4506731219a65b00cc60b6528052ad6340b85c536d1bc4e55fb6f707",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "memset_"
+  },
   "module": "memset_runtime",
   "name": "memset",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
         "bytes_equal": 22,
         "bytes_total": 24,
@@ -48,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0xd1ec0",
+    "command": "python3 tools/rebuild/library.py verify --address 0xd1ec0",
     "date": "2026-11-13",
-    "fingerprint": "sha256:359a7c46769bf7dd327abb3d8e9b7527412e9e19d8425c015700afada77a6fa3",
+    "fingerprint": "sha256:57a53e2825e12567f0da400400ca3a4451f8a3b5dd91a9c01ca2b09c7935ba9a",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:710c8c8de6e0f25733b1888e2774cb2ac5960c182b63d4be2bc1fd6beccc8b56",
-    "tool": "run.py"
+    "source_digest": "sha256:6241a71f7246fa880d23a10a26771656c05a971dd39786e757a843a21354496a",
+    "tool": "library.py"
   },
   "role": "replicates the value byte over the dword and calls the run-time core at `0xe0860`",
   "section": "The runtime memory manager",

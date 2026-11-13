@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import library as lib  # noqa: E402
 import view  # noqa: E402
 
 
@@ -329,6 +330,57 @@ class ViewTestCase(unittest.TestCase):
         self.assertNotIn("⚠", chips[0])
         self.assertIn("⚠", chips[1])
         self.assertIn("1 stale", page)
+
+    def library_field(self, symbol: str = "malloc_") -> dict:
+        return {
+            "file": "CLIB3R.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "mod",
+            "symbol": symbol,
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+
+    def library_record(
+        self, address: str, field: dict | None = None, **overrides: object
+    ) -> dict:
+        field = field or self.library_field()
+        result = self.result()
+        result["source_digest"] = lib.source_digest(field)
+        name = field["symbol"][:-1] if field["symbol"].endswith("_") else field["symbol"]
+        base = self.record(
+            address,
+            name=name,
+            status="verified",
+            section="Program functions",
+            provenance="library",
+            checks=["identity"],
+            library=field,
+            result=result,
+        )
+        base.update(overrides)
+        return base
+
+    def test_page_marks_a_library_record_stale_by_the_library_field(self) -> None:
+        field = self.library_field()
+        current = self.library_record("0xd1f25", field=field)
+        changed = self.library_record("0xd1f30", field=field)
+        changed["library"] = self.library_field(symbol="free_")
+        page = view.render_page([current, changed], [], {})
+        rows = self.rows(page)
+        self.assertIn('data-stale="false"', rows[0])
+        self.assertIn('data-stale="true"', rows[1])
+        self.assertIn("1 stale", page)
+
+    def test_page_marks_a_library_record_by_the_library_field_not_the_module(
+        self,
+    ) -> None:
+        record = self.library_record("0xd1f25", module="malloc_rt")
+        page = view.render_page(
+            [record], [], {"malloc_rt": "sha256:" + "9" * 64}
+        )
+        rows = self.rows(page)
+        self.assertIn('data-stale="false"', rows[0])
+        self.assertNotIn('data-stale="true"', page)
 
     def test_page_has_no_external_reference(self) -> None:
         page = self.page()

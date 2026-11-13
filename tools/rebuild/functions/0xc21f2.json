@@ -1,6 +1,8 @@
 {
   "address": "0xc21f2",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc21f2"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "strnicmp",
+    "object_sha256": "sha256:e0ac0b43d0effb4a36dfc95f0efbd05bb654d32395df1f705065f5f5b0e6f195",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "strnicmp_"
+  },
+  "name": "strnicmp",
   "notes": [],
   "object_offset": "0xb21f2",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 87,
+        "bytes_total": 87,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 41,
+        "instructions_total": 41,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc21f2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0bca92f898323d2d8ea743ea0d70e15a648a6da64a3e9aa2e97e5c7c4ee68d79",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:4a5bb04b74bc788053c2174d76251e4fe7e86736f9dd0047acaa0a904794c066",
+    "tool": "library.py"
+  },
   "size": 88,
-  "status": "unknown"
+  "status": "verified"
 }

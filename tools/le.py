@@ -4,7 +4,8 @@
 The tool parses the MZ stub, the LE image header, the object table, and the
 object page table.  It reports header metadata, objects, the entry point, and the
 mapping from a linear address to a file offset.  An optional disassembly uses the
-capstone shared library through ctypes when that library is available.
+capstone shared library through ctypes when that library is available.  The byte
+decoder disassembles a byte slice at a base address.
 
 Usage:
     python3 tools/le.py info <file>
@@ -646,6 +647,41 @@ def decode(exe: LinearExecutable, address: int, max_instructions: int = 64) -> l
     return instructions
 
 
+def decode_bytes(
+    data: bytes,
+    base: int,
+    max_instructions: int = 64,
+    end: int | None = None,
+) -> list[Insn]:
+    """Decode up to max_instructions from a byte slice at a base address.
+
+    The slice is truncated at `end - base` when `end` is given.  An empty
+    slice gives an empty list.
+    """
+    if end is not None:
+        data = data[: max(end - base, 0)]
+    if not data:
+        return []
+    lib, handle = _capstone()
+    buffer = (ctypes.c_ubyte * len(data)).from_buffer_copy(data)
+    pointer = ctypes.POINTER(_CsInsn)()
+    count = lib.cs_disasm(
+        handle, buffer, len(data), base, max_instructions, ctypes.byref(pointer)
+    )
+    instructions = [
+        Insn(
+            address=pointer[index].address,
+            size=pointer[index].size,
+            mnemonic=pointer[index].mnemonic.decode(),
+            operands=pointer[index].op_str.decode(),
+            raw=bytes(pointer[index].bytes[: pointer[index].size]),
+        )
+        for index in range(count)
+    ]
+    lib.cs_free(pointer, count)
+    return instructions
+
+
 def _jump_target(insn: Insn) -> int | None:
     """Return the direct target of a jump or loop instruction."""
     if insn.mnemonic == "call":
@@ -870,7 +906,8 @@ def reachable_call_targets(
     """Return every direct call target reachable from the roots.
 
     The walk follows the call sites of `function_body`, so it stops at the same
-    terminators.  An indirect call has no target and is not added.  The roots
+    terminators.  An indirect call has no target and is not added.  A target
+    outside every object is not a function and is not added.  The roots
     themselves stay out of the result unless another call reaches them.
     """
     visited = set(roots)
@@ -881,6 +918,8 @@ def reachable_call_targets(
         body = function_body(exe, address, max_instructions)
         for site in call_sites(body):
             if site.target is None or site.target in targets:
+                continue
+            if exe.object_at(site.target) is None:
                 continue
             targets.add(site.target)
             if site.target not in visited:

@@ -1,6 +1,8 @@
 {
   "address": "0xe05f9",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe05f9"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fstrcpy",
+    "object_sha256": "sha256:9b3b73d9c13a970ba9c3088d86fb5e4d9aea6e6a68a8012ca54e55c7d513bf21",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "_fstrcpy_"
+  },
+  "name": "_fstrcpy",
   "notes": [],
   "object_offset": "0xd05f9",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 51,
+        "bytes_total": 51,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 25,
+        "instructions_total": 25,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe05f9",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4880afa97a921265647624db75d41954572c25d0cf0117ca4019cb44371f5b33",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:63ca69c1d9734f284f42446888c824173f0513361b874a4d5f76314cf9efd3cf",
+    "tool": "library.py"
+  },
   "size": 51,
-  "status": "unknown"
+  "status": "verified"
 }

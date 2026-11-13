@@ -1,6 +1,8 @@
 {
   "address": "0xeb30e",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb30e"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "_matherr",
+    "object_sha256": "sha256:eee4af1f703ee1b064a54bdbf78a36bf990df5a620218e37252e2351fc060b2d",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__rterrmsg_"
+  },
+  "name": "__rterrmsg",
   "notes": [],
   "object_offset": "0xdb30e",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 50,
+        "bytes_total": 72,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 25,
+        "instructions_total": 25,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeb30e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:38f8454e395bb904733840a86c9bb61a2c69c59589b18031b23bcece615a2369",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:e29f6ddcafcbc988278a0b1d7cd4d1bceb0e3c7863a8797d4390c21f0311c756",
+    "tool": "library.py"
+  },
   "size": 72,
-  "status": "unknown"
+  "status": "verified"
 }

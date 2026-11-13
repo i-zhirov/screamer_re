@@ -15,11 +15,17 @@ bytes are exact or the only differences are the link-time addresses.  With
 match and a reordered instruction sequence.  With `--recheck-record ADDR` the
 runner forces one fresh run and prints the full check output.
 
+A record with a `library` field runs the library object check instead of a
+module build.  The runner reads the parsed library document from
+`--library-dir`, compares the record with its stored `library` field, and uses
+the pinned library mode for the fingerprint, so the CLI strict and runtime
+flags do not change a library result.
+
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
         [--no-write] [--show] [--strict] [--allow-shape] [--skip-runtime]
-        [--skip-unchanged] [--original PATH]
+        [--skip-unchanged] [--original PATH] [--library-dir DIR]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -35,7 +41,10 @@ from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import le  # noqa: E402
+import library  # noqa: E402
 import store  # noqa: E402
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -287,6 +296,27 @@ def run_identity(
     return check["verdict"], check
 
 
+def run_library(
+    record: dict, original: Path, library_dir: Path
+) -> tuple[str, dict]:
+    """Run the library object check and return its verdict and its check.
+
+    The record `library` field names the object, so the runner resolves the
+    library file in the library directory and then in its parent.  It reads
+    the parsed library document and passes the record field to the
+    comparison.  The runner reads no index entry.
+    """
+    if not original.is_file():
+        raise ValueError(f"the original image {original} is missing")
+    library_path = library.resolve_library(
+        record["library"]["file"], library_dir
+    )
+    image = le.load(original)
+    document = library.read_library(library_path)
+    check = library.verify_entry(record, image, document, record["library"])
+    return check["verdict"], check
+
+
 def run_build(module: dict, show: bool = False) -> tuple[str, str]:
     """Run the build check and return its verdict and the captured output."""
     return _harness("build", module, show)
@@ -403,6 +433,15 @@ def _run_record(
         return {}, "SKIP", "no name", False
     if not target.get("checks"):
         return {}, "SKIP", "no checks declared", False
+    if record is not None and record.get("library"):
+        verdict, check_result = run_library(
+            target, arguments.original, arguments.library_dir
+        )
+        _log_output(log_lines, label, "identity", check_result.get("detail", ""))
+        checks = {"identity": check_result}
+        verdict = record_verdict(checks)
+        detail = record_detail(target, checks)
+        return checks, verdict, detail, verdict != "SKIP"
     module_name = target.get("module") if record is not None else target["name"]
     module = modules.get(module_name) if module_name is not None else None
     if module is None:
@@ -447,16 +486,19 @@ def _run_record(
 
 def _result(
     checks: dict[str, dict],
-    module: dict,
+    module: dict | None,
     command: str,
     fingerprint: str,
     mode: dict,
+    source_digest: str | None = None,
 ) -> dict:
+    if source_digest is None:
+        source_digest = store.source_digest(module)
     return {
         "date": date.today().isoformat(),
         "command": command,
         "tool": "run.py",
-        "source_digest": store.source_digest(module),
+        "source_digest": source_digest,
         "fingerprint": fingerprint,
         "mode": mode,
         "checks": checks,
@@ -478,6 +520,28 @@ def _write_result(
     mode: dict,
 ) -> None:
     target = record if record is not None else row
+    if record is not None and record.get("library"):
+        mode = library.library_mode()
+        fingerprint = store.compute_fingerprint(
+            target,
+            None,
+            library=record["library"],
+            original=original,
+            mode=mode,
+        )
+        store.save_result(
+            int(record["address"], 16),
+            _result(
+                checks,
+                None,
+                command,
+                fingerprint,
+                mode,
+                source_digest=library.source_digest(record["library"]),
+            ),
+            _next_status(record, row, checks),
+        )
+        return
     module_name = target.get("module") if record is not None else target["name"]
     module = store.load_module(module_name)
     fingerprint = store.compute_fingerprint(
@@ -534,10 +598,24 @@ def _current_fingerprint(
     original: Path,
     mode: dict,
 ) -> str | None:
-    """The fingerprint of one record, or None when its module is missing."""
-    module = _module_for(record, row, modules)
+    """The fingerprint of one record, or None when its module is missing.
+
+    A record with a `library` field uses the pinned library mode and no
+    module, so the CLI strict and runtime flags do not change its fingerprint.
+    """
     target = record if record is not None else row
-    if module is None or target is None:
+    if target is None:
+        return None
+    if record is not None and record.get("library"):
+        return store.compute_fingerprint(
+            target,
+            None,
+            library=record["library"],
+            original=original,
+            mode=library.library_mode(),
+        )
+    module = _module_for(record, row, modules)
+    if module is None:
         return None
     return store.compute_fingerprint(
         target, module, original=original, mode=mode
@@ -588,6 +666,15 @@ def command_run(arguments: argparse.Namespace) -> int:
     def stale_fn(record: dict) -> bool:
         if not record.get("result"):
             return False
+        if record.get("library"):
+            fingerprint = store.compute_fingerprint(
+                record,
+                None,
+                library=record["library"],
+                original=arguments.original,
+                mode=library.library_mode(),
+            )
+            return store.is_stale(record, fingerprint)
         if "address" in record:
             module = _module_for(record, None, modules)
         else:
@@ -766,6 +853,12 @@ def parse_arguments() -> argparse.Namespace:
         type=Path,
         default=store.DEFAULT_ORIGINAL,
         help="the original LE executable",
+    )
+    run_parser.add_argument(
+        "--library-dir",
+        type=Path,
+        default=library.DEFAULT_LIBRARY_DIR,
+        help="the directory that holds the period libraries",
     )
     return parser.parse_args()
 

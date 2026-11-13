@@ -1,6 +1,8 @@
 {
   "address": "0xea0dc",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea0dc"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "math2err",
+    "object_sha256": "sha256:a302f3c0ae3a3a8ed17bfb5f211d527c8695366d0506f654a2d94cbf39fb71d6",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__math2err_"
+  },
+  "name": "__math2err",
   "notes": [],
   "object_offset": "0xda0dc",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 207,
+        "bytes_total": 219,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 78,
+        "instructions_total": 78,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xea0dc",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:dfe13856f8ea61b0c07e5ea4b1e9f6743432110f6cb4544c49e2678bae420e77",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:de46f196664e71f68b2cd2ba6b0a97409d29da38ee9da596219206bbd11cdc97",
+    "tool": "library.py"
+  },
   "size": 219,
-  "status": "unknown"
+  "status": "verified"
 }

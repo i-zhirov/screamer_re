@@ -1,15 +1,52 @@
 {
   "address": "0x4d9ba",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
       "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4d9ba"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "stricmp",
+    "object_sha256": "sha256:a51a87e7a60b4ea86576d43dc7e3640604e301ce6c5b01b8f901fbd0f9234322",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "stricmp_"
+  },
+  "name": "stricmp",
   "notes": [],
   "object_offset": "0x3d9ba",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 57,
+        "bytes_total": 57,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 28,
+        "instructions_total": 28,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0x4d9ba",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4142ddd5a9c4e8a9e06755a905007473134b196b9bd74b959bb53f1d1390360e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:ea8e4ae6c164a68101ac72b6b8206407d956c7ea7a34242685d4d27d91562032",
+    "tool": "library.py"
+  },
   "size": 58,
-  "status": "unknown"
+  "status": "verified"
 }

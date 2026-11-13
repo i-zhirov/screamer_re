@@ -93,7 +93,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19678",
     "date": "2026-11-13",
-    "fingerprint": "sha256:202cdfa30c5b6a4ed78bc680ebddd34e177ec07c19b8b766749753b278918669",
+    "fingerprint": "sha256:22e880d6477dcca7be4aa7668f466af06989eb29ca6b28bb54a97e54592cd677",
     "mode": {
       "runtime": "run",
       "strict": true,

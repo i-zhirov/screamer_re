@@ -19,7 +19,7 @@ Stages:
     printed verdicts with the recorded results.  Then compare the rebuilt
     whole image with the original, when `--rebuilt-image` exists.
 12. check_store: prove the store, the seed, the generated tables, the status
-    page, and the provenance evidence.
+    page, the provenance evidence, and the library link manifest.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -55,6 +55,7 @@ import le as le_module  # noqa: E402
 from entry_probe import run_probe  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent / "rebuild"))
+import library  # noqa: E402
 import store as store_module  # noqa: E402
 
 TOOLS = (
@@ -81,6 +82,7 @@ TOOLS = (
     "rebuild/callgraph.py",
     "rebuild/triage.py",
     "rebuild/coverage.py",
+    "rebuild/library.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -727,12 +729,23 @@ def unchanged_is_verified(
     fingerprint.  The stage recomputes the fingerprint itself, so a forged or a
     stale store record fails even when the runner is skipped.  The strict mode
     and the toolchain enter the fingerprint.  The runtime mode does not, so a
-    stored runtime-run result still verifies under `--skip-runtime`.
+    stored runtime-run result still verifies under `--skip-runtime`.  A record
+    with a `library` field hashes its library entry with the pinned library
+    mode and no module, so the CLI strict and runtime flags do not change it.
     """
     result = record.get("result") or {}
     stored = result.get("fingerprint")
     if not stored:
         return False
+    if record.get("library"):
+        current = store_module.compute_fingerprint(
+            record,
+            None,
+            library=record["library"],
+            original=game_dir / "STARTH.EXE",
+            mode=library.library_mode(),
+        )
+        return stored == current
     module_name = record.get("module") or record.get("name")
     try:
         module = store_module.load_module(module_name)
@@ -862,11 +875,11 @@ def check_image(
 
 
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
-    """Prove the store, the seed, the tables, the page, and the provenance.
+    """Prove the store, the seed, the tables, the page, and the evidence.
 
     The store is the only module registry, so the stage runs the store check,
-    the seed check, the provenance evidence check, and the drift check, and it
-    renders the status page.
+    the seed check, the provenance evidence check, the library link manifest
+    check, and the drift check, and it renders the status page.
     """
     result = run(
         [
@@ -893,6 +906,20 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     )
     checks.check(
         "stage 12: the provenance evidence is complete",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/library.py",
+            "check-manifest",
+            "--manifest",
+            str(library.LINK_DOCUMENT),
+        ]
+    )
+    checks.check(
+        "stage 12: the library link manifest matches the records",
         result.returncode == 0,
         last_line(result.stdout) or last_line(result.stderr),
     )

@@ -1,6 +1,8 @@
 {
   "address": "0xe6919",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe6919"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "ltoa",
+    "object_sha256": "sha256:e8950e4387b2a91ac38e0d5be866e97460564166ddac89e7936d603bba528d49",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "ultoa_"
+  },
+  "name": "ultoa",
   "notes": [],
   "object_offset": "0xd6919",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 70,
+        "bytes_total": 73,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 33,
+        "instructions_total": 33,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe6919",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6326c46e3bdd075c7952f56be2373d5700be4624b4499626046d789316aa9379",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:463d4772a8ca8a1ed60d5056e06f2b721cf808ba56cbba0a9f0da902a96eabd4",
+    "tool": "library.py"
+  },
   "size": 73,
-  "status": "unknown"
+  "status": "verified"
 }

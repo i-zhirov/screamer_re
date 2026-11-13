@@ -9,7 +9,8 @@ The provenance panel summarizes the function records by provenance: the record
 count, the unknown count, the byte bar, and the verified, rebuilt, and exact byte
 split.  The progress bar and the header count the game function records only, so a
 library, compiler-helper, data, or not-a-function record stays out of the game
-denominator.
+denominator.  A record with a `library` field is stale when its `library` field
+changed, not when its module sources changed.
 
 Usage:
     python3 tools/rebuild/view.py html [--out PATH]
@@ -28,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import callgraph  # noqa: E402
 import coverage  # noqa: E402
 import docs  # noqa: E402
+import library  # noqa: E402
 import store  # noqa: E402
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -688,8 +690,15 @@ def _row_module(row: dict) -> str | None:
 
 
 def _is_stale(row: dict, digests: dict[str, str]) -> bool:
-    # The page marks a record whose module sources changed, because it must
-    # render without the game image.  The runner uses the full input fingerprint.
+    """Tell whether the page marks a row stale.
+
+    A row with a `library` field compares its recorded source digest with the
+    canonical digest of the `library` field.  The other rows compare with the
+    module source digest.  The page needs no game image.  The runner uses the
+    full input fingerprint.
+    """
+    if row.get("library"):
+        return store.source_is_stale(row, library.source_digest(row["library"]))
     return store.source_is_stale(row, digests.get(_row_module(row)))
 
 

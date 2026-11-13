@@ -1,6 +1,8 @@
 {
   "address": "0xea29c",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea29c"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "qwrit",
+    "object_sha256": "sha256:c6bc51c4eb8bed9aed93f6703ed21469bf9d67b418d1b23e4e554fec2dec63ba",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__qwrite_"
+  },
+  "name": "__qwrite",
   "notes": [],
   "object_offset": "0xda29c",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 112,
+        "bytes_total": 124,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 55,
+        "instructions_total": 55,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xea29c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f28f182a34b072d2b24dcfb2ad5574bd135822631c0d3edbc17948c508d6e202",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:3161d54c0c600e502a5d187e3c5cf7282d64d88047a97bb942a47334d36f055e",
+    "tool": "library.py"
+  },
   "size": 181,
-  "status": "unknown"
+  "status": "verified"
 }

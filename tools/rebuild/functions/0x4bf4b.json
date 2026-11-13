@@ -1,9 +1,7 @@
 {
   "address": "0x4bf4b",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "inferred",
   "evidence": [
@@ -18,22 +16,25 @@
     {
       "kind": "finding",
       "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4bf4b"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "intx386",
+    "object_sha256": "sha256:e97edb0e81b87d0ac140e5495f2f97a552043b23f9c04388ca9185036d6a2ca7",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "int386x_"
+  },
   "module": "dpmi_call",
   "name": "dpmi_call",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
         "bytes_equal": 22,
         "bytes_total": 25,
@@ -44,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x4bf4b",
+    "command": "python3 tools/rebuild/library.py verify --address 0x4bf4b",
     "date": "2026-11-13",
-    "fingerprint": "sha256:6ba71652446f037443ee1b1427924d050fdf4e4dff852578bcece27a2af125b9",
+    "fingerprint": "sha256:df6e8968ba897ecffa0a4d98814e719e1cef037d18cb9ba4121a50248e584a6d",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:db6f512b0f9d42336f79fa0889e0e187f9725f0f142a3f64ca6140b043cf7aba",
-    "tool": "run.py"
+    "source_digest": "sha256:f972e8b83c15776b78e5393917596e6518d2176f2e952a8c0550c418b9875fd8",
+    "tool": "library.py"
   },
   "role": "calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block",
   "section": "The resource layer",

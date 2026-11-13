@@ -50,7 +50,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2edad",
     "date": "2026-11-13",
-    "fingerprint": "sha256:4777826a208eca1e97cb2bb130e0a56deab479f4ded272935130421357fea7b6",
+    "fingerprint": "sha256:3011285a3fc4b541816d49d4bc3c5e3a018b9711df3a7aa892fd03d2defc8274",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -1,6 +1,8 @@
 {
   "address": "0xeaef2",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeaef2"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "ftos",
+    "object_sha256": "sha256:486412f9471ac862a1c118d0e06f18476aab93da84ec077daf56483f3d44f68a",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "_FtoS_"
+  },
+  "name": "_FtoS",
   "notes": [],
   "object_offset": "0xdaef2",
   "provenance": "library",
-  "size": 1052,
-  "status": "unknown"
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 514,
+        "bytes_total": 548,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 217,
+        "instructions_total": 217,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeaef2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8c46285c555f31b8d9742450c916aaeea227478e203bb85fe2ca47a69b917a22",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:8b2c164f556584c5a123edbcd7bfb06825d05f5f9b114f10a21da2b4d28bfd70",
+    "tool": "library.py"
+  },
+  "size": 592,
+  "status": "verified"
 }

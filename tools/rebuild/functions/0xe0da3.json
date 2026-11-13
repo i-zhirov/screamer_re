@@ -1,6 +1,8 @@
 {
   "address": "0xe0da3",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe0da3"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "grownear",
+    "object_sha256": "sha256:36e55732e20867cf5dc743dacae96e51b353dec9a0c015dffc02cec1af4993d7",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__LastFree_"
+  },
+  "name": "__LastFree",
   "notes": [],
   "object_offset": "0xd0da3",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 421,
+        "bytes_total": 464,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 178,
+        "instructions_total": 178,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe0da3",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:787529ac863cc2fdf73557dd430d58d0a16a0ae01ec38dac31a5aa69d6120298",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:31622cdf45fa91b6c647019ccb2fb93c6add72645acdb41f4ca24db2b3fbf5ac",
+    "tool": "library.py"
+  },
   "size": 78,
-  "status": "unknown"
+  "status": "verified"
 }

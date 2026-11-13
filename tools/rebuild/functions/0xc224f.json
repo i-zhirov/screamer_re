@@ -1,6 +1,8 @@
 {
   "address": "0xc224f",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc224f"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "atan387",
+    "object_sha256": "sha256:7900764dc50bff7bc8619931f07011ec7cc70b02046d9edcc9bbda0b8ef71fa9",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "IF@ATAN2"
+  },
+  "name": "IF@ATAN2",
   "notes": [],
   "object_offset": "0xb224f",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 5,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 3,
+        "instructions_total": 3,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc224f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f37606fc9cf2ae67de696ef796430498474d3866a6daaaa8cab7a2c136a52863",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:8dbc83953b1715bd5448ad9400e5fd6a44d2e3844d6465f7eb8899fa31c6ba9f",
+    "tool": "library.py"
+  },
   "size": 5,
-  "status": "unknown"
+  "status": "verified"
 }

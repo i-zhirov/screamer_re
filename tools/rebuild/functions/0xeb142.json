@@ -1,0 +1,56 @@
+{
+  "address": "0xeb142",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb142"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "i64ts386",
+    "object_sha256": "sha256:ffa7a1971bd938d7a982503751c2bbe5712ceb30514349cdd5173b6b37bc59ef",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__CmpBigInt"
+  },
+  "name": "__CmpBigInt",
+  "notes": [],
+  "object_offset": "0xdb142",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 58,
+        "bytes_total": 58,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 26,
+        "instructions_total": 26,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeb142",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:40a6a3b89fc52344ac579ba2c82766a986511e5e371aa75440e76cd302800129",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:0d2ca3dff9dd288be8b2609971ebd9464f648a0a0f573d368c3d32eaa347f79d",
+    "tool": "library.py"
+  },
+  "size": 58,
+  "status": "verified"
+}

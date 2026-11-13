@@ -1,6 +1,8 @@
 {
   "address": "0xc5e4e",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc5e4e"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fopen",
+    "object_sha256": "sha256:774ffa06c2b22fdb99d9ccff960976e4af59af0558af8056be1b90cd0f3e9cbd",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__open_flags_"
+  },
+  "name": "__open_flags",
   "notes": [],
   "object_offset": "0xb5e4e",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 352,
+        "bytes_total": 380,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 140,
+        "instructions_total": 140,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc5e4e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:87515f4ed58e8fbb9709335721553214747cc242395c4a1d1bef7182ae6ca182",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6c28503b66363a73dd7387ec4ae7b4b55cc7c27af2b9987f030e84689fa47d47",
+    "tool": "library.py"
+  },
   "size": 180,
-  "status": "unknown"
+  "status": "verified"
 }

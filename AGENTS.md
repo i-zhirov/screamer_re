@@ -120,7 +120,9 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── triage.py          # triage the records against the provenance evidence
 │   │   ├── coverage.py        # report the byte coverage and the provenance counts
+│   │   ├── library.py         # index the period libraries and verify their objects
 │   │   ├── provenance.json    # the provenance evidence document
+│   │   ├── library.json       # the link manifest of the verified library records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
 │   │   ├── modules/           # the two hundred and fifty-two module recipes
@@ -161,12 +163,17 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/rebuild/library.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --from 0x20000 --to 0x30000
 python3 tools/rebuild/coverage.py report --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py index --out work/rebuild/library-index.json
+python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py manifest --out tools/rebuild/library.json
+python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
@@ -176,10 +183,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 304 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 300 checks.
+about 8 minutes plus the Ghidra import and reports 431 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 427 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 289 checks.  Both flags report 285 checks and take about 16
+run reports 416 checks.  Both flags report 412 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -233,7 +240,8 @@ open ~/Documents/Screamer.app
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
       tools/rebuild/callgraph.py tools/rebuild/triage.py
-      tools/rebuild/coverage.py tools/pipeline_check.py` to check the syntax
+      tools/rebuild/coverage.py tools/rebuild/library.py
+      tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
@@ -314,6 +322,9 @@ open ~/Documents/Screamer.app
   `library`, `compiler_helper`, `not_a_function`, and `data`.  The value is a
   documentation field.  A `data` or `not_a_function` provenance requires the
   `not_a_function` status.
+- Library Identity: a library record holds its original object in the
+  `library` field.  The object bytes stay out of git.  The record keeps the
+  library digest and the object digest instead.
 
 Layers:
 
@@ -354,13 +365,13 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 304 checks in the `cross-check` shell.  `--skip-cross`
-  gives 300 checks, `--skip-runtime` gives 289 checks, and both flags give 285
+- The full check reports 431 checks in the `cross-check` shell.  `--skip-cross`
+  gives 427 checks, `--skip-runtime` gives 416 checks, and both flags give 412
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
-- Stage 12 checks the store, the seed, the provenance evidence, the program-map
-  tables, the call graph, and the status page.  The call graph check needs
-  capstone and the original executable.
+- Stage 12 checks the store, the seed, the provenance evidence, the library
+  link manifest, the program-map tables, the call graph, and the status page.
+  The call graph check needs capstone and the original executable.
 - A function record holds a `provenance` value from `game`, `library`,
   `compiler_helper`, `not_a_function`, and `data`.  The value is a
   documentation field, so it stays out of the input fingerprint.  A `data` or
@@ -377,6 +388,29 @@ through the store.
   unknown count, the byte span, the coverage, and the verified, rebuilt, and
   exact byte split.  The denominator is the code-object virtual size.  The
   status page shows the same provenance panel over the covered byte total.
+- `library.py index` walks the OMF records of the three period libraries and
+  writes `work/rebuild/library-index.json`.  The direct parser decodes LIDATA
+  and LIDATA32, detects the PharLap class `AA` 4-byte fields, reads the
+  dictionary size as 512-byte blocks, and masks the object fixup positions in
+  the prefix filter.  The parser needs no DOSBox-X and no `wlib`.  The
+  byte-decode tests skip when capstone is absent, so the syntax job runs
+  without it.
+- The library matcher tries the record symbol, the record name with a trailing
+  underscore, the record name, and the prefix digest matches, in that order.
+  The library identity gate is strict: only `exact-bytes` and
+  `exact-relocations` pass, and `--allow-shape` does not relax it.  The gate
+  masks the import target identity and still compares the slot offset and
+  width.
+- A library record holds its original object in the `library` field: `file`,
+  `sha256`, `module`, `symbol`, and `object_sha256`.  `library.py manifest`
+  writes `tools/rebuild/library.json`, the link manifest of the verified
+  library records, and `library.py check-manifest` proves that the manifest
+  agrees with the records.  Two identical entries for the same object are
+  valid reuse.
+- The input fingerprint of a library record covers the canonical `library`
+  field and the `library.py` tool.  The library mode is
+  `store.run_mode(True, False)`, so `--allow-shape` and `--skip-runtime` do not
+  change the library fingerprint.
 - The identity gate has two modes.  Strict is the default.  The strict gate
   accepts only the byte-identical verdict and the verdict whose differences are
   the link-time addresses.  `--allow-shape` restores the historical gate, which

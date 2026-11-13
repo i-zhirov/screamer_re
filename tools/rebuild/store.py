@@ -48,6 +48,7 @@ REPOSITORY_ROOT = REBUILD_DIR.parent.parent
 WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 TOOLS_DIR = REPOSITORY_ROOT / "tools"
 SHARED_SOURCES = ("chk.asm", "stack.asm", "cstart.c")
+# The participating tools whose sources are fingerprint inputs.
 TOOL_FILES = (
     "rebuild/run.py",
     "rebuild/harness.py",
@@ -55,6 +56,7 @@ TOOL_FILES = (
     "rebuild/oracle.py",
     "rebuild/store.py",
     "le.py",
+    "rebuild/library.py",
 )
 MISSING = b"<missing>"
 UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
@@ -422,12 +424,40 @@ def _file_bytes(path: Path) -> bytes:
 def _record_fields(record: dict) -> bytes:
     """The canonical bytes of the record fields that steer the declared checks.
 
-    The `size` field bounds the identity check, so it stays an input.
+    The `size` field bounds the identity check, so it stays an input.  The
+    `library` field names the original library object of a library-verified
+    record, so it stays an input too.  The `name` and `status` fields are
+    documentation, so they stay out of the hash.
     """
     fields = {
         key: record[key]
-        for key in ("address", "symbol", "count", "size", "checks", "module")
+        for key in (
+            "address",
+            "symbol",
+            "count",
+            "size",
+            "checks",
+            "module",
+            "library",
+        )
         if key in record
+    }
+    return json.dumps(fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _library_fields(library: dict | None) -> bytes:
+    """The canonical bytes of the five library fields, or a fixed marker.
+
+    The five fields are `file`, `sha256`, `module`, `symbol`, and
+    `object_sha256`.  A missing library entry contributes a fixed marker, so a
+    record without a stored library entry stays stable.  A partial entry raises
+    `KeyError` instead of hashing a smaller object.
+    """
+    if library is None:
+        return b"<none>"
+    fields = {
+        key: library[key]
+        for key in ("file", "sha256", "module", "symbol", "object_sha256")
     }
     return json.dumps(fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
@@ -472,8 +502,9 @@ def _mode_fields(mode: dict | None) -> bytes:
 
 def compute_fingerprint(
     record: dict,
-    module: dict,
+    module: dict | None,
     *,
+    library: dict | None = None,
     rebuild_dir: Path | None = None,
     work_dir: Path | None = None,
     tools_dir: Path | None = None,
@@ -483,13 +514,17 @@ def compute_fingerprint(
     """The SHA-256 over every input of the declared checks of one record.
 
     The inputs are, in order: the module recipe fields, the module sources by
-    file name, the shared harness sources, the record fields that steer the
-    checks, the strict mode and the toolchain, the participating tool sources,
-    the original image, and the built artifacts.  The runtime mode is a
-    reported value.  It is not hashed, so a run that skips the behavior check
-    does not invalidate a stored build and identity result.  Every file is
-    hashed by content, and a missing file contributes a fixed marker, so a
-    deleted artifact or a moved game makes the record stale instead of raising.
+    file name, and the shared harness sources, each only when a module is
+    present, then the record fields that steer the checks, the library fields,
+    the strict mode and the toolchain, the participating tool sources, the
+    original image, and the built artifacts when a module is present.  A record
+    without a module still hashes its record fields, its library fields, the
+    mode, the tools, and the original image, so a library-verified record has a
+    stable input set.  The runtime mode is a reported value.  It is not hashed,
+    so a run that skips the behavior check does not invalidate a stored build
+    and identity result.  Every file is hashed by content, and a missing file
+    contributes a fixed marker, so a deleted artifact or a moved game makes the
+    record stale instead of raising.
     """
     base = Path(rebuild_dir) if rebuild_dir is not None else REBUILD_DIR
     work = Path(work_dir) if work_dir is not None else WORK_DIR
@@ -502,20 +537,25 @@ def compute_fingerprint(
         digest.update(b"\x00")
         digest.update(data)
 
-    feed("recipe", _recipe_fields(module))
-    for source in sorted(module.get("sources", []), key=lambda entry: entry["file"]):
-        name = source["file"]
-        feed(f"source:{name}", _file_bytes(base / name))
-    for name in SHARED_SOURCES:
-        feed(f"shared:{name}", _file_bytes(base / name))
+    if module is not None:
+        feed("recipe", _recipe_fields(module))
+        for source in sorted(
+            module.get("sources", []), key=lambda entry: entry["file"]
+        ):
+            name = source["file"]
+            feed(f"source:{name}", _file_bytes(base / name))
+        for name in SHARED_SOURCES:
+            feed(f"shared:{name}", _file_bytes(base / name))
     feed("record", _record_fields(record))
+    feed("library", _library_fields(library))
     feed("mode", _mode_fields(mode))
     for name in TOOL_FILES:
         feed(f"tool:{name}", _file_bytes(tools / name))
     feed("original", _file_bytes(original_path))
-    feed(f"exe:{module['exe']}", _file_bytes(work / module["exe"]))
-    if "map" in module:
-        feed(f"map:{module['map']}", _file_bytes(work / module["map"]))
+    if module is not None:
+        feed(f"exe:{module['exe']}", _file_bytes(work / module["exe"]))
+        if "map" in module:
+            feed(f"map:{module['map']}", _file_bytes(work / module["map"]))
     return f"sha256:{digest.hexdigest()}"
 
 
@@ -649,7 +689,7 @@ def validate_record(
             )
         if not record.get("symbol"):
             violations.append(f"{path}: the module {module!r} requires a symbol")
-    if "identity" in checks:
+    if "identity" in checks and record.get("library") is None:
         if module is None:
             violations.append(f"{path}: the check identity requires a module")
         elif module_path(module).is_file():

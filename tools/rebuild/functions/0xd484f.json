@@ -1,6 +1,8 @@
 {
   "address": "0xd484f",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd484f"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fseek",
+    "object_sha256": "sha256:0c028f3a80079323ca6f9bc5052866721ae4b34d1b0bf80a9c6490ed9c00e971",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "fseek_"
+  },
+  "name": "fseek",
   "notes": [],
   "object_offset": "0xc484f",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 229,
+        "bytes_total": 252,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 101,
+        "instructions_total": 101,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xd484f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ec0d2182ca5630580d47e6fbe3fcce87ebecdc8cb6f056b624e89b1514611ada",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:d1277b091fe12350e2fbe4589231f11e809a67dde7531e75365c322d49462f63",
+    "tool": "library.py"
+  },
   "size": 252,
-  "status": "unknown"
+  "status": "verified"
 }

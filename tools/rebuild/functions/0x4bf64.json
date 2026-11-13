@@ -1,9 +1,7 @@
 {
   "address": "0x4bf64",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -18,46 +16,49 @@
     {
       "kind": "finding",
       "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4bf64"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fprintf",
+    "object_sha256": "sha256:00c5f82236a73f0d97cd31d40be19a24feafd121d257bd050aaa9bf18d279fb2",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "fprintf_"
+  },
   "module": "fprintf",
   "name": "fprintf",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 17,
+        "bytes_equal": 30,
         "bytes_total": 33,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 13,
         "instructions_total": 13,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x4bf64",
+    "command": "python3 tools/rebuild/library.py verify --address 0x4bf64",
     "date": "2026-11-13",
-    "fingerprint": "sha256:ac82c8d9e7bd97a84ef6759be0e72f5116109746579a5ff237f08ba02b6dac06",
+    "fingerprint": "sha256:a0cf34ed66aaad47eb05bf105c71fbbfed387a2df905f069be213493342b6aa3",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:d1d5b999cb3ed48bc26a15980b80bdc5baaa153ea116a4bdd39c6c9db14f34f5",
-    "tool": "run.py"
+    "source_digest": "sha256:1b8065198afadffb379990eb507e39974a18e006cd4b7b3850d7815fd143f774",
+    "tool": "library.py"
   },
   "role": "formats into a stream through the run-time `__fprtf` at `0xd429f`",
   "section": "Resource loader",
   "size": 36,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "fprintf_"
 }

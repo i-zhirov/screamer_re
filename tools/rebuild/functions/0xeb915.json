@@ -1,6 +1,8 @@
 {
   "address": "0xeb915",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,10 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb915"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "iobaddr",
+    "object_sha256": "sha256:13255f51a49815b734c32b9c32149a98415f55cb8807eff80f45819f6ec8a724",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__get_std_stream_"
+  },
+  "name": "__get_std_stream",
   "notes": [],
   "object_offset": "0xdb915",
   "provenance": "library",
-  "status": "unknown"
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 31,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 15,
+        "instructions_total": 15,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeb915",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:86de96d44f688ed05232bba61609feb51742948ee5191c6e4331fc1da7c90046",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:edff1cd28b176d735c97ffc40b65c669572ebe5b34494203a5f550c15adf7b79",
+    "tool": "library.py"
+  },
+  "size": 243,
+  "status": "verified"
 }

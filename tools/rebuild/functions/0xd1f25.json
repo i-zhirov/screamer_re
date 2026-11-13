@@ -1,9 +1,7 @@
 {
   "address": "0xd1f25",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -26,46 +24,49 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd1f25"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "nmalloc",
+    "object_sha256": "sha256:59021df45a39d61bf83b6c3f95b15b684211b7b6eba09678421c439c5bc18ff8",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "malloc_"
+  },
   "module": "malloc_rt",
   "name": "malloc",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 195,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 15,
-        "instructions_total": 70,
-        "match": "different",
-        "verdict": "fail"
+        "bytes_equal": 202,
+        "bytes_total": 227,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 84,
+        "instructions_total": 84,
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0xd1f25",
+    "command": "python3 tools/rebuild/library.py verify --address 0xd1f25",
     "date": "2026-11-13",
-    "fingerprint": "sha256:9583d7d81cc9b872202946b1d92ac835f4c12a3a857867ab33a7c4a4e8fad822",
+    "fingerprint": "sha256:6418ecdfcb6cd9bef196121313b49b0c9f04256988c5daca41530b2f553691db",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:f2d6e7b7f5e7f97c87071ec865f7eeeec79490a8b58185eaeb70212f1e0de9c0",
-    "tool": "run.py"
+    "source_digest": "sha256:88f8f7305a02170f8fea5cd304fcd9f2854649b8931527d4061fe5737d1945f8",
+    "tool": "library.py"
   },
   "role": "walks the free list, allocates a rounded block, grows the heap once, and returns the block or 0",
   "section": "The runtime memory manager",
   "size": 227,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "malloc_rt_"
 }

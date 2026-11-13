@@ -5,7 +5,7 @@
 > command passes.
 
 - **Date**: 2026-11-13
-- **Status**: Approved
+- **Status**: Implemented
 - **Design**: docs/explanation/rebuild-quality-design.md
 - **Roadmap**: docs/explanation/rebuild-quality-roadmap.md — slice: library
 - **Depends on**: Slice 1, Slice 3
@@ -68,7 +68,7 @@ records. The Slice 7 link adds the three libraries and uses the manifest to
 assert that every verified library record resolves to its named object.
 
 SM-4 has a boundary. It covers the plan-date library records: `malloc`,
-`fopen`, `__fprtf`, and the four plan-date library shape matches. The design-date
+`fopen` at 0xc5fe5, `__fprtf`, and the four plan-date library shape matches. The record at 0x4c08d is the game container member open, so its provenance becomes `game` and it leaves the library measure. The design-date
 seven includes three shape matches that are not library records: 0xd4324
 (`compiler_helper`), 0x2f8ca (`game`), and 0xd4410 (`compiler_helper`). Task 7
 rewrites SM-4 to this scope and names the three records as outside the measure.
@@ -115,7 +115,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
 
 ## Tasks
 
-- [ ] **Task 1: The OMF library index and the byte decoder**
+- [x] **Task 1: The OMF library index and the byte decoder**
     - **Implements:** FR-013
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_le_helpers.py`**
@@ -180,7 +180,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `python3 tools/rebuild/library.py index --out work/rebuild/library-index.json` — the summary names `CLIB3R.LIB`, its SHA-256, the module count, and the public symbol count.
         - `python3 -m py_compile tools/rebuild/library.py`
 
-- [ ] **Task 2: The candidate match and the object verification**
+- [x] **Task 2: The candidate match and the object verification**
     - **Implements:** FR-013
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_library.py`**
@@ -215,7 +215,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `test_verify_counts_the_masked_bytes` — the total is the original count plus the object count. Each side counts its own slots and branch bytes.
         - `test_verify_decodes_the_original_instruction_count` — the object body holds exactly the original count.
         - `test_object_body_is_linear_for_a_jump_table` — a synthetic object body with a jump table decodes the table data linearly, so the limitation is pinned.
-        - `test_verify_uses_the_record_size_as_the_end` — the original body call holds `end=address+size`.
+        - `test_verify_uses_the_entry_size_as_the_end` — the original and object bodies cover the full entry extent.
         - `test_verify_returns_none_without_a_candidate` — the result is `None`.
         - `test_verify_prefers_the_first_strict_pass` — two candidates pass and the first strict pass in candidate order gives the check.
         - `test_verify_returns_the_first_candidate_when_none_passes` — two candidates fail and the first candidate in candidate order gives the check.
@@ -223,20 +223,20 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - Add `PREFIX_BYTES` and `STRICT_MATCHES` (from `oracle`).
         - Add `entry_for`, `candidates`, `library_field_from_entry`, `resolve_entry`, `normalize_imports`, `object_body`, `object_fixups`, `masked_bytes`, `verify_entry`, `verify_candidate`, `verify`, `source_digest`, and `format_verify`.
         - The candidate order is the exact symbol entries, the `name + "_"` entries, the `name` entries, then the prefix matches. Each group keeps the index order. The union is de-duplicated by `(file, module, symbol)`. `candidates` takes the original image for the LE relocation slots of the prefix query. The best candidate is the first strict pass in that order, else the first candidate.
-        - The index `prefix_sha256` zeroes every object FIXUP byte in the first `min(PREFIX_BYTES, size)` bytes. The query zeroes every LE relocation byte in the same range and compares the digest. The digest is the fast filter; the full comparison confirms the candidate.
+        - The index `prefix_sha256` zeroes every object FIXUP byte in the first `min(PREFIX_BYTES, size)` bytes. The query zeroes every LE relocation byte and every object FIXUP position in the same range and compares the digest. A candidate whose fixups cover every compared prefix byte is skipped. The digest is the fast filter; the full comparison confirms the candidate.
         - `resolve_entry` takes the parsed library document and the five-key field. It finds the module by name and the public symbol by name, rebuilds the extent to the next public symbol in the segment, keeps the fixups in the extent, and computes `object_sha256` and `prefix_sha256`. `object_sha256` is the SHA-256 of the extent bytes with every fixup slot zeroed; the slot is `width` bytes at `fixup.offset - symbol_offset`.
         - `verify_entry` takes the record, the original image, the parsed library document, and the five-key field. It checks the field `sha256` against the document `sha256`, resolves the entry, checks the field `object_sha256` against the resolved entry, decodes the object at the original address, builds the object slots, normalizes the imports on both sides, and calls `oracle.compare` with the original relocations and the object slots. It passes no symbol resolvers, because the object has no link-time symbol table. The verify command builds the field with `library_field_from_entry(index_entry)`; `run.run_library` passes `record["library"]`.
         - `source_digest` hashes the five-key object with `sort_keys=True` and `separators=(",", ":")`.
         - The check `detail` is `oracle.VERDICTS[match]`. The check `verdict` is `pass` only for `exact-bytes` and `exact-relocations`.
-        - `verify_entry` uses the record `size` as the end of the original body. A record without `size` uses the default extent.
+        - `verify_entry` uses the entry `size` as the end of the original and the object body, because the extent is the library object. A zero entry size falls back to the record extent.
         - `format_verify(record, original, library_document, library_field)` resolves the entry, decodes both bodies, builds the object slots, computes `masked_bytes` on both sides, and returns the address, file, module, symbol, verdict, instruction count, byte count, and the two masked counts. `command_verify` calls `verify_entry`, calls `format_verify`, and prints the line; the masked counts do not enter the check result. `run_library` returns only the verdict and the check.
         - Extend `parse_arguments` and `main` with `verify` and update the usage block. `command_verify` accepts `--address` one or more times, `--original`, `--index`, and `--library-dir`. It loads the record; a record with a `library` field uses that field, else the matcher builds the field from the index entry. It loads the library document, calls `verify_entry`, and prints the line. A target without a strict pass exits 1.
         - Update the module docstring with the match order, the field shapes, the mask, and the strict library gate.
     - **Verify:**
         - `python3 -m unittest discover -s tools/rebuild/tests -p "test_library.py"`
-        - `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0x4c08d --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` — each line shows a strict match, and the command exits 0.
+        - `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` — each line shows a strict match, and the command exits 0.
 
-- [ ] **Task 3: The record field, the fingerprint, and the store rule**
+- [x] **Task 3: The record field, the fingerprint, and the store rule**
     - **Implements:** FR-013
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_store.py`**
@@ -267,7 +267,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `python3 -m unittest discover -s tools/rebuild/tests -p "test_store.py"`
         - `python3 tools/rebuild/store.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` — the shipped records hold no library field, so the new schema is satisfied and the store check stays clean.
 
-- [ ] **Task 4: The record write and the runner path**
+- [x] **Task 4: The record write and the runner path**
     - **Implements:** FR-013
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_library.py`**
@@ -330,7 +330,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `python3 -m unittest discover -s tools/rebuild/tests -p "test_view.py"`
         - `python3 -m unittest discover -s tools/rebuild/tests -p "test_pipeline_check.py"`
 
-- [ ] **Task 5: The link manifest and the stage-12 check**
+- [x] **Task 5: The link manifest and the stage-12 check**
     - **Implements:** FR-014, FR-018
     - Write the tests first.
     - **Modify `tools/rebuild/tests/test_library.py`**
@@ -343,7 +343,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `test_check_manifest_reports_an_entry_without_a_record` — one message.
         - `test_check_manifest_reports_a_missing_library_digest` — one message.
         - `test_check_manifest_reports_a_wrong_library_digest` — a manifest `libraries[file]` digest that differs from both the record `library.sha256` and the entry `sha256` gives one combined message for the record.
-        - `test_check_manifest_reports_a_duplicate_object` — two entries with the same `(file, module, symbol)` give one message.
+        - `test_check_manifest_reports_a_duplicate_object` — two entries with the same `(file, module, symbol)` but different five keys give one message. Two byte-identical entries for the same object are valid reuse and give no message.
         - `test_check_manifest_reports_a_record_that_is_not_verified` — a record with a library field and the status `rebuilt` gives one message.
         - The check applies to the records whose identity is the library object. A record verified by its C or assembly rebuild holds no `library` field and needs no manifest entry, because its object is not the source of its identity.
     - **Modify `tools/rebuild/tests/test_pipeline_check.py`**
@@ -361,14 +361,15 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `python3 -m unittest discover -s tools/rebuild/tests -p "test_pipeline_check.py"`
     - Do not run the pipeline before Task 6. The manifest is written in Task 6, so the stage-12 check fails until then.
 
-- [ ] **Task 6: The library evidence pass and the re-baseline**
+- [x] **Task 6: The library evidence pass and the re-baseline**
     - **Implements:** FR-013, FR-014, FR-018
     - No new unit test. This task writes data. The Verify commands prove the data.
     - **Steps:**
         - Confirm that Docker and DOSBox-X are on `PATH`. The re-baseline needs both.
         - Run `python3 tools/rebuild/watcom10_setup.py`. It verifies the ISO digest and extracts `work/watcom10/WATCOM`.
         - Run `python3 tools/rebuild/library.py index --out work/rebuild/library-index.json`. Record the three library SHA-256 values, the page length, the dictionary offset, and the module and public symbol counts.
-        - Run `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0x4c08d --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`. Each line must show a strict match. Record the masked byte count of each line. If a line shows `same-shape`, `same-mnemonics`, or `different`, stop and report the line; do not write a passing result.
+        - Run `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`. Each line must show a strict match. Record the masked byte count of each line. If a line shows `same-shape`, `same-mnemonics`, or `different`, stop and report the line; do not write a passing result.
+        - Add a record entry for `0x4c08d` to `tools/rebuild/provenance.json` with provenance `game` and the finding `## The fopen module at 0x4c08d` as evidence. Run `python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` and `python3 tools/rebuild/triage.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`. The record leaves the library measure.
         - Run `python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`. Record the `written`, `skipped`, and `different` counts. A record without a candidate is `skipped`; a candidate that does not pass is `different`.
         - Run the same `library.py apply` command a second time. Confirm that the `written` count is 0 and every applied record is `skipped`; the pass is idempotent.
         - Run `python3 tools/rebuild/library.py manifest --index work/rebuild/library-index.json --out tools/rebuild/library.json`.
@@ -381,10 +382,10 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - Run `python3 tools/rebuild/view.py html --out work/rebuild/status.html`. Confirm that the page holds no `data-stale="true"` marker.
         - Spot check `tools/rebuild/functions/0xd1f25.json`: it holds the `library` object, `checks` `["identity"]`, the status `verified`, and `result.checks.identity.match` of `exact-bytes` or `exact-relocations`.
         - Spot check `tools/rebuild/library.json`: it holds the three library digests and one entry for each record with a `library` field.
-    - **The acceptance bar:** `malloc` 0xd1f25, `fopen` 0x4c08d, and `__fprtf` 0xd429f hold a strict match. Each of the four plan-date `same-shape` records holds a strict match. The plan-date acceptance set has no compiler jump table; a target whose original body follows one is reported, not written. The library index is reproducible from the toolchain.
+    - **The acceptance bar:** `malloc` 0xd1f25, `fopen` 0xc5fe5, and `__fprtf` 0xd429f hold a strict match. The record at 0x4c08d is the game container member open, so its provenance becomes `game` and it leaves the library measure. Each of the four plan-date `same-shape` records holds a strict match. The plan-date acceptance set has no compiler jump table; a target whose original body follows one is reported, not written. The library index is reproducible from the toolchain.
     - **Verify:**
         - `python3 tools/rebuild/library.py index --out work/rebuild/library-index.json`
-        - `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0x4c08d --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`
+        - `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`
         - `python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` — the first pass writes the library results; a second identical run writes 0 records.
         - `python3 tools/rebuild/library.py manifest --index work/rebuild/library-index.json --out tools/rebuild/library.json`
         - `python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json`
@@ -395,7 +396,7 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
         - `python3 tools/rebuild/docs.py check`
         - `python3 tools/rebuild/callgraph.py check`
 
-- [ ] **Task 7: The documentation and the check counts**
+- [x] **Task 7: The documentation and the check counts**
     - **Implements:** FR-018
     - **Modify `AGENTS.md`**
         - Project Structure: add `library.py` under `tools/rebuild/` and `library.json` beside the records.
@@ -419,21 +420,21 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
     - **Modify `docs/explanation/findings.md`**
         - Insert `## The library object index and the verified library functions` before `## Open questions`.
         - Record the three library SHA-256 values, the page length, the dictionary offset, and the module and public symbol counts. Command: `python3 tools/rebuild/library.py index --out work/rebuild/library-index.json`.
-        - Record the strict results of `malloc`, `fopen`, `__fprtf`, and the four plan-date shape records, with the masked byte count of each. Command: `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0x4c08d --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+        - Record the strict results of `malloc`, `fopen`, `__fprtf`, and the four plan-date shape records, with the masked byte count of each. Command: `python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
         - Record the `written`, `skipped`, and `different` counts of the apply pass. Command: `python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
         - Record the manifest entries and the check. Command: `python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json`.
         - In the count bullet near `## The record scope and the provenance`, mark 304, 300, 289, and 285 as the plan-date counts and add 305, 301, 290, and 286. Record the four counts from the pipeline commands in the new section.
     - **Modify `docs/explanation/rebuild-quality-design.md`**
         - Mark the four C-10 counts 304, 300, 289, and 285 as the plan-date counts. Add the target 305, 301, 290, and 286.
         - In Observations, add the plan-date library counts: 471 library records, 4 `same-shape`, 5 `exact-relocations`, 5 `exact-bytes`, 7 `different`, and 450 without an identity result. State that the design-date seven shape matches split into four library records and three records outside the library scope: 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and 0xd4410 (`compiler_helper`).
-        - Rewrite SM-4 to: "`malloc` 0xd1f25, `fopen` 0x4c08d, and `__fprtf` 0xd429f are exact. The four plan-date library shape matches are byte-identical. The design-date shape matches 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and 0xd4410 (`compiler_helper`) are outside the library measure."
+        - Rewrite SM-4 to: "`malloc` 0xd1f25, `fopen` 0xc5fe5, and `__fprtf` 0xd429f are exact. The four plan-date library shape matches are byte-identical. The record at 0x4c08d is the game container member open, not a library object, so it leaves the library measure. The design-date shape matches 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and 0xd4410 (`compiler_helper`) are outside the library measure."
         - Extend the C-4 exception to name `triage.apply` and `library.apply`: both write function records through `store.save_record`, and C-4 still applies to the shipped artifacts.
         - Add a Design Decisions bullet: a library record holds its original object in the `library` field; the library identity uses the strict gate and masks the import target identity; a library-verified record declares only the identity check and replaces the build and behavior declarations and their result; the object bytes stay out of git; the library mode is `store.run_mode(True, False)`.
     - **Modify `.github/workflows/pipeline.yml`**
         - Add `tools/rebuild/library.py` to the syntax-job `py_compile` list, after `tools/rebuild/callgraph.py`.
         - The syntax job installs no capstone. The `ByteDecodeTestCase` methods skip there; the cross-check shell runs them. State this in the AGENTS Testing bullet.
     - **Modify `docs/explanation/rebuild-quality-roadmap.md`**
-        - Change the Slice 4 `Done when` to: "`malloc`, `fopen`, and `__fprtf` are exact. The four plan-date library shape matches are exact. The three design-date non-library shape matches are outside the library measure. The library index is reproducible from the toolchain."
+        - Change the Slice 4 `Done when` to: "`malloc`, `fopen` at 0xc5fe5, and `__fprtf` are exact. The four plan-date library shape matches are exact. The record at 0x4c08d is a game function and leaves the library measure. The three design-date non-library shape matches are outside the library measure. The library index is reproducible from the toolchain."
         - Set the Slice 4 `Status` to `Implemented` and the `Plan` to `docs/explanation/rebuild-quality-plan-library.md`. Do this after the final review approves the slice.
     - **Steps:**
         - Run `python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/rebuild/library.py tools/pipeline_check.py`.
@@ -450,4 +451,60 @@ rewrites SM-4 to this scope and names the three records as outside the measure.
 
 ## Deviations
 
-- None yet.
+- The plan names `PC9833R.LIB` as an index library. That file does not
+  exist in the pinned Watcom 10.0a image. The name in `findings.md` is a
+  typo for the OpenWatcom V2 library `pc983r.lib`. The user approved the
+  period math library `MATH387R.LIB` in its place. The index resolves a
+  library in `--library-dir` and then in its parent, because
+  `MATH387R.LIB` is in `LIB386`, not `LIB386/DOS`.
+- The plan rejects an LIDATA record. The shipped `CLIB3R.LIB` and
+  `EMU387.LIB` contain valid LIDATA and LIDATA32 records, so the parser
+  decodes them. A malformed iterated block still raises `ValueError`.
+- The plan pins each record field width by the record command. The
+  `EMU387.LIB` module `386inite` is a PharLap class `AA` module whose
+  `0x98`, `0x90`, and `0xA0` records use 4-byte fields, so the parser
+  detects that class.
+- The plan treats the header field at offset 7 as a byte size. The field
+  is a count of 512-byte dictionary blocks. The index stores and hashes
+  the byte size.
+- A PharLap `0x9C` FIXUPP record with the P bit 0 skips a 4-byte target
+  displacement, as the `0x9D` record does.
+- The index drops an absolute public symbol and counts only the emitted
+  entries, so `symbol_count` agrees with the entry list.
+- The plan passes the original and the object slots to `oracle.compare`.
+  A relative call resolved at link time has an object fixup but no LE
+  relocation. The byte mask is therefore the union of both slot sets. A
+  separate slot-geometry check fails an original slot that has no object
+  slot at the same offset and width, and a width mismatch. An object-only
+  slot is allowed.
+- The plan uses the record `size` as the end of the original body. The
+  full library object extent is the entry `size`. The comparison decodes
+  the original and the object over that extent, so a body that stops at an
+  early `ret` cannot under-verify the rest of the object.
+- The plan target for the full check is 305, 301, 290, and 286. The
+  observed counts are 431, 427, 416, and 412. The library pass and the
+  seed add 126 result records, and the new stage-12 check adds one, so
+  the count grows by 127. Stage 11 checks each result record. All four
+  runs pass with 0 failures.
+- The seed's target scan found 10 mapped call targets below the new
+  verified library roots. The seed wrote the 10 records, so the function
+  count is 981. The target scan skips a call target that no LE object
+  maps, so one unmapped target no longer stops the seed.
+- The plan-date identity counts are 4 `same-shape`, 5
+  `exact-relocations`, and 5 `exact-bytes`. The full-extent comparison,
+  the prefix fallback, and the 10 seed records give 138 strict library
+  matches: 106 `exact-relocations` and 32 `exact-bytes`. The apply pass
+  writes 138 records, skips 338, and reports 4 `different`. The 4 are
+  `free` 0x300ec, `memcpy` 0x8c150, `memset` 0x8c160, and the unnamed
+  0xeb1e7. The second apply writes 0 records.
+- The plan reports a duplicate `(file, module, symbol)` as a manifest
+  violation. The original links four library objects twice at different
+  record addresses with different link-time data addresses. The user
+  approved that two byte-identical entries for the same object are valid
+  reuse. A duplicate violation needs different five keys.
+- The plan names `fopen` at 0x4c08d as a strict library match.
+  `findings.md` proves that 0x4c08d is the game container member open.
+  The library `fopen_` object matches the unnamed library record at
+  0xc5fe5 as `exact-relocations`. The user approved the correction: the
+  acceptance set, the verify commands, and SM-4 name 0xc5fe5. The record
+  at 0x4c08d becomes provenance `game` and leaves the library measure.

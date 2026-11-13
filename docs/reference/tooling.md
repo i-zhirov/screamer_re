@@ -635,7 +635,7 @@ The files:
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
 | `modules/*.json` | the two hundred and fifty-two module records: the sources, the compiler, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the provenance field and its status rule, the extent guard, the optional implementation marker, and the 8.3 output-name check |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the provenance field and its status rule, the library field, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
@@ -647,6 +647,8 @@ The files:
 | `callgraph.json` | the direct call edges between named records |
 | `triage.py` | triage the records against the provenance evidence, and write it into the records |
 | `coverage.py` | report the byte coverage and the record counts by provenance |
+| `library.py` | index the period OMF libraries, verify the records, and write the link manifest |
+| `library.json` | the link manifest of the verified library records |
 | `provenance.json` | the provenance evidence document: the spans and the non-game record entries |
 | `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
 
@@ -683,7 +685,9 @@ count the game function records only. A library, compiler-helper, data, or
 not-a-function record stays in its provenance row and out of the game
 denominator. The filter row holds a provenance filter. The match counters stay
 over every row whose status is not `not_a_function` and that has a result, so a
-library record with a result stays in its match bucket.
+library record with a result stays in its match bucket. The status page marks a
+library record stale by the library source digest, not by the module source
+digest.
 
 `callgraph.py build` scans the body of each named record and resolves each
 direct call target to the record that starts at or before it. `check` writes
@@ -719,6 +723,12 @@ assembly` marks the source language of one record.  The value is `c` or
 function record holds a `provenance` field.  The value is a documentation
 field, so it stays out of the input fingerprint.  A `data` or `not_a_function`
 provenance requires the `not_a_function` status.
+
+A record with a `library` field holds its original object in that field: the
+file, the library digest, the module, the symbol, and the object digest.  The
+input fingerprint of a library record covers the canonical `library` field and
+the `library.py` tool.  The library mode is `store.run_mode(True, False)`, so
+`--allow-shape` and `--skip-runtime` do not change the library fingerprint.
 
 ### The provenance triage
 
@@ -766,6 +776,60 @@ The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
 `E0 0F`, `23 3F`, `43 01`, and `C0 01`, which match the original driver
 sequence at `0x14157`.
+
+### The library index
+
+`library.py index` reads the three period libraries `CLIB3R.LIB`,
+`MATH387R.LIB`, and `EMU387.LIB`, and writes
+`work/rebuild/library-index.json`.  `MATH387R.LIB` is in `LIB386`, not
+`LIB386/DOS`, so the tool resolves a library in `--library-dir` and then in
+its parent.  The parser walks the OMF records directly, so it needs no
+DOSBox-X and no `wlib`.  It decodes LIDATA and LIDATA32, detects the PharLap
+class `AA` 4-byte fields, reads the dictionary size as 512-byte blocks, and
+masks the object fixup positions in the prefix filter.
+
+The index holds the library digest, the size, the page length, the dictionary
+metadata, the module count, and the public symbol count.  An entry holds the
+module, the symbol, the segment, the offset, the size, the object digest, the
+prefix digest, and the fixups.
+
+The matcher tries the record symbol, the record name with a trailing
+underscore, the record name, and the prefix digest matches, in that order.
+The identity gate is strict: only `exact-bytes` and `exact-relocations` pass,
+and `--allow-shape` does not relax it.  The gate masks the import target
+identity and compares the slot offset and the width.  The library bytes stay
+out of git.  The index and the records keep the digests instead.
+
+```sh
+python3 tools/rebuild/library.py index --out work/rebuild/library-index.json
+python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+```
+
+The apply pass writes a strict library result into the record through
+`store.save_record`.  It sets the name, the `library` field, the identity
+check, the `verified` status, the result, the source digest, and the input
+fingerprint.  A target without a strict pass keeps its stored result.
+
+### The link manifest
+
+`library.py manifest` writes `tools/rebuild/library.json`.  The document holds
+`libraries` and `entries`.  `libraries` maps each library file to its digest.
+`entries` maps each record address with a `library` field to the five keys
+`file`, `sha256`, `module`, `symbol`, and `object_sha256`.
+
+`library.py check-manifest` proves that the manifest agrees with the records.
+Every library record has one entry and every entry has a record.  The five keys
+and the library digests agree.  Two entries that name the same object hold the
+same five keys.  Each library record is `verified`.  Two identical entries for
+the same object are valid reuse, because the original links four objects
+twice.  Slice 7 consumes the manifest: the whole-image link uses the manifest
+to assert that every verified library record resolves to its named object.
+
+```sh
+python3 tools/rebuild/library.py manifest --out tools/rebuild/library.json
+python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json
+```
 
 ## The period toolchain
 
@@ -1108,10 +1172,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 304 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 300 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 289 checks.  Both flags
-report 285 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 431 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 427 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 416 checks.  Both flags
+report 412 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

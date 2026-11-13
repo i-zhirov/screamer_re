@@ -1,6 +1,8 @@
 {
   "address": "0xddc79",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xddc79"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "allocfp",
+    "object_sha256": "sha256:236060ef783ce2f9ebe52906fdd3ddb663bee128387d1efb54ad82a2b5c11308",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__allocfp_"
+  },
+  "name": "__allocfp",
   "notes": [],
   "object_offset": "0xcdc79",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 136,
+        "bytes_total": 168,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 57,
+        "instructions_total": 57,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xddc79",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2a0e24bb214478942ffd6f1a8050d2025c1859d0ae563dc38a80380043edba96",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:293d042ecda0eea983086e41ca196b32a26882e7382097cefc3ea73dbad7b1a3",
+    "tool": "library.py"
+  },
   "size": 168,
-  "status": "unknown"
+  "status": "verified"
 }

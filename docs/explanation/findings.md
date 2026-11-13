@@ -1692,8 +1692,12 @@ records and the bytes by provenance.  Evidence:
   ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`, and
   `python3 tools/rebuild/store.py check --original
   ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
-- The full check reports 304 checks.  `--skip-cross` reports 300 checks,
-  `--skip-runtime` reports 289 checks, and both flags report 285 checks.
+- At the plan date, the full check reports 304 checks.  `--skip-cross` reports
+  300 checks, `--skip-runtime` reports 289 checks, and both flags report 285
+  checks.  The library pass adds 127 verified records, and stage 11 checks each
+  verified record, so the full check now reports 431 checks, `--skip-cross`
+  reports 427 checks, `--skip-runtime` reports 416 checks, and both flags
+  report 412 checks.  The new section records the four observed counts.
   Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game`,
   `nix develop .#cross-check --command python3 tools/pipeline_check.py
@@ -1703,6 +1707,92 @@ records and the bytes by provenance.  Evidence:
   and `python3 tools/pipeline_check.py --game-dir
   ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
   --skip-cross`.
+
+## The library object index and the verified library functions
+
+The library pass indexes the three period libraries, verifies the records
+against their original objects, and writes the link manifest.  Evidence:
+
+- The index holds three libraries.  The observed SHA-256 values, the sizes,
+  the page length, the dictionary offset and size, and the module and public
+  symbol counts are:
+
+  | Library | Bytes | SHA-256 | Page | Dictionary | Modules | Symbols |
+  | --- | ---: | --- | ---: | --- | ---: | ---: |
+  | `CLIB3R.LIB` | 187392 | `ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8` | 16 | `0x2a200` / 14848 | 394 | 632 |
+  | `EMU387.LIB` | 21504 | `5b150d1cdca625eb27747b7ac182e36f5a66571e4441ccc19caccc6fbf773b5c` | 16 | `0x5200` / 512 | 2 | 5 |
+  | `MATH387R.LIB` | 40960 | `97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c` | 16 | `0x9200` / 3584 | 78 | 165 |
+
+  The dictionary size is in bytes after the 512-byte block conversion.  The
+  dictionary offset is a file offset.  `MATH387R.LIB` is in `LIB386`, not
+  `LIB386/DOS`.  Evidence: `python3 tools/rebuild/library.py index --out
+  work/rebuild/library-index.json`.
+- The seven strict results are `exact-relocations`.  The masked count is the
+  masked bytes of the original body and the object body:
+
+  | Address | Name | Module | Symbol | Instructions | Bytes | Masked |
+  | --- | --- | --- | --- | ---: | ---: | ---: |
+  | `0xd1f25` | `malloc` | `nmalloc` | `malloc_` | 84 | 227 | 73/73 |
+  | `0xc5fe5` | `fopen` | `fopen` | `fopen_` | 48 | 114 | 36/36 |
+  | `0xd429f` | `__fprtf` | `fprtf` | `__fprtf_` | 52 | 133 | 20/20 |
+  | `0x3009b` | `printf` | `printf` | `printf_` | 13 | 34 | 8/8 |
+  | `0x4bf64` | `fprintf` | `fprintf` | `fprintf_` | 13 | 33 | 4/4 |
+  | `0x4d32c` | `sprintf` | `sprintf` | `sprintf_` | 18 | 48 | 8/8 |
+  | `0xd2008` | `free` | `nfree` | `free_` | 35 | 94 | 34/34 |
+
+  All seven objects are in `CLIB3R.LIB`.  Evidence: `python3
+  tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5
+  --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c
+  --address 0xd2008 --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The apply pass writes 138 records, skips 338 records, and reports 4
+  `different` records.  A second identical pass writes 0 records.  The four
+  `different` records are `free` at `0x300ec`, `memcpy` at `0x8c150`,
+  `memset` at `0x8c160`, and the unnamed `0xeb1e7`.
+  Evidence: `python3 tools/rebuild/library.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` twice.
+- The 138 library fields hold 106 `exact-relocations` and 32 `exact-bytes`
+  matches.  The provenance holds 480 `library` records, so 342 library
+  records have no identity result.
+  Evidence: `python3 tools/rebuild/store.py list --json`.
+- The manifest holds 3 libraries and 138 entries, and the check passes.
+  Evidence: `python3 tools/rebuild/library.py manifest --out
+  tools/rebuild/library.json` and `python3 tools/rebuild/library.py
+  check-manifest --manifest tools/rebuild/library.json`.
+- The record at `0x4c08d` is the game container member open, not a library
+  object.  The findings section "The fopen module at 0x4c08d" proves it.  Its
+  provenance is `game`, so it leaves the library measure.  The library `fopen`
+  is the record at `0xc5fe5`.
+  Evidence: `tools/rebuild/functions/0x4c08d.json` and the fopen section above.
+- The original links four library objects twice at different addresses:
+  `vsscanf` at `0xc1ffd` and `0xc65f1`, `sscanf` at `0xc2024` and `0xc6618`,
+  `itoa` at `0xe68c7` and `0xe6962`, and `__CVTBuffer` at `0xea1b7` and
+  `0xea1bd`.  Two identical entries for the same object are valid reuse.  The
+  manifest check reports only inconsistent duplicates.
+  Evidence: `tools/rebuild/library.json` and `python3
+  tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json`.
+- The seed found 10 new function records from the verified library roots:
+  `0xead7d`, `0xeae24`, `0xeb142`, `0xeb17c`, `0xeb1e7`, `0xeb251`,
+  `0xeb306`, `0xeb66a`, `0xeba08`, and `0xeba21`.  They are `library`
+  provenance.
+  Evidence: `python3 tools/rebuild/store.py seed --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The store now holds 981 function records and 252 module records, and
+  `store.py check` reports 1233 records and 0 violations.  The status holds
+  224 `rebuilt`, 569 `unknown`, 154 `verified`, 31 `named`, and 3
+  `not_a_function`.  The provenance holds 490 `game`, 480 `library`, 8
+  `compiler_helper`, and 3 `not_a_function`.
+  Evidence: `python3 tools/rebuild/store.py list --json`, `python3
+  tools/rebuild/store.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`, and `python3
+  tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The full check reports 431 checks, `--skip-cross` reports 427,
+  `--skip-runtime` reports 416, and both flags report 412.  All four runs pass
+  with 0 failures.  The count grew because the library pass adds 127 verified
+  records, and stage 11 checks each verified record.
+  Evidence: the four `tools/pipeline_check.py` commands in the record-scope
+  count bullet.
 
 ## Open questions
 

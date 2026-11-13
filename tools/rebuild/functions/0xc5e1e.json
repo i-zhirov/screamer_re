@@ -1,6 +1,8 @@
 {
   "address": "0xc5e1e",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc5e1e"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "acos387",
+    "object_sha256": "sha256:e4a358a4d06b46ab15cd19d223d9ec1e1f2b72508171b969b6711a966fbf4013",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "IF@DACOS"
+  },
+  "name": "IF@DACOS",
   "notes": [],
   "object_offset": "0xb5e1e",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 27,
+        "bytes_total": 36,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 13,
+        "instructions_total": 13,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc5e1e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8c022ac841f7813beb71471d613fd6cb0b71a344337141f974d7a8d8e56518a4",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:9df711291ac8918adfd012a35ebf0d31458b3d35017233ac887355e2d1ee30e2",
+    "tool": "library.py"
+  },
   "size": 36,
-  "status": "unknown"
+  "status": "verified"
 }

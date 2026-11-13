@@ -1,9 +1,7 @@
 {
   "address": "0x4bf23",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -18,22 +16,25 @@
     {
       "kind": "finding",
       "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4bf23"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "segread",
+    "object_sha256": "sha256:6418fee50561d422446d56ced569c55536d662c849169b47a816f0ee8a005f02",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "segread_"
+  },
   "module": "dpmi_fill_regs",
   "name": "dpmi_fill_regs",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
         "bytes_equal": 40,
         "bytes_total": 40,
@@ -44,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x4bf23",
+    "command": "python3 tools/rebuild/library.py verify --address 0x4bf23",
     "date": "2026-11-13",
-    "fingerprint": "sha256:7d0c4454394abf482ef9044f8794b9cd3c151be0c6d833bf3c3c13d2b3950660",
+    "fingerprint": "sha256:d5603b728e861031816f60219ff2a77e2502f5399eea2bfd474e73e338e76797",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:9849138b85472f59ed7e0aadf2590962f79a3431cdf78de98d1c7ed80abb83dd",
-    "tool": "run.py"
+    "source_digest": "sha256:a4a82a0b866ace7d0f4982c438857d4e05c96577e30043808d8b5a1e9d9592c7",
+    "tool": "library.py"
   },
   "role": "fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs",
   "section": "The resource layer",

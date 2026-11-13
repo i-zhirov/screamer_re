@@ -79,7 +79,26 @@
       "type": "array",
       "items": { "$ref": "#/$defs/note" }
     },
-    "result": { "$ref": "#/$defs/result" }
+    "result": { "$ref": "#/$defs/result" },
+    "library": {
+      "type": "object",
+      "description": "The original library object of a library-verified record.",
+      "additionalProperties": false,
+      "required": ["file", "sha256", "module", "symbol", "object_sha256"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "module": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string", "minLength": 1 },
+        "object_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
   },
   "$defs": {
     "evidence": {

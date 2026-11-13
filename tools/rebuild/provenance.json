@@ -402,6 +402,16 @@
     }
   ],
   "records": {
+    "0x4c08d": {
+      "provenance": "game",
+      "reason": "the engine container member open",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The fopen module at 0x4c08d"
+        }
+      ]
+    },
     "0xd1ed8": {
       "provenance": "not_a_function",
       "reason": "the body is a five-byte jump thunk to 0xe0903",

@@ -1,6 +1,8 @@
 {
   "address": "0xddfa8",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xddfa8"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "flush",
+    "object_sha256": "sha256:8058c423c0c9d5fc788ededf7691d64f13173774ea518717a5db8dcd1cd67974",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__flush_"
+  },
+  "name": "__flush",
   "notes": [],
   "object_offset": "0xcdfa8",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 184,
+        "bytes_total": 191,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 68,
+        "instructions_total": 68,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xddfa8",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ae50297c30192959acdf486518b46c0e8e36f40001edbd4e7679f79d1596e7a4",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:546e678b1987873467d62bfe536bd18301cd6f29a4f84aebb33c6e4baa6b5893",
+    "tool": "library.py"
+  },
   "size": 191,
-  "status": "unknown"
+  "status": "verified"
 }

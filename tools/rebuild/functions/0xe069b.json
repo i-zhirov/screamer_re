@@ -1,6 +1,8 @@
 {
   "address": "0xe069b",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe069b"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "gtcwd",
+    "object_sha256": "sha256:593387a2571b1f3a8de92ef58b153dd8886cf6423612bea740f5e0b4a188f60e",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "getcwd_"
+  },
+  "name": "getcwd",
   "notes": [],
   "object_offset": "0xd069b",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 128,
+        "bytes_total": 138,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 61,
+        "instructions_total": 61,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe069b",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4b1ac15cb9af98b195fa25c305e9880a83786a35939d3fb30cb1ef7a2bd88673",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:344c35147723d943f94d2c6c67d3442cf96a6221a49759a6c36b18a72bbd4cd6",
+    "tool": "library.py"
+  },
   "size": 138,
-  "status": "unknown"
+  "status": "verified"
 }

@@ -1,9 +1,7 @@
 {
   "address": "0x3009b",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -18,46 +16,49 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x3009b"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "printf",
+    "object_sha256": "sha256:6a57d98f158011150742376d421567c76169eb7d16b18ea137546269eed34d66",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "printf_"
+  },
   "module": "printf",
   "name": "printf",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 20,
+        "bytes_equal": 29,
         "bytes_total": 34,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 13,
         "instructions_total": 13,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x3009b",
+    "command": "python3 tools/rebuild/library.py verify --address 0x3009b",
     "date": "2026-11-13",
-    "fingerprint": "sha256:4aa33ad54f8c131e4520f12a384919d40ba96a80556b9c56ef1a16839a4a6851",
+    "fingerprint": "sha256:0b9f21c71020d3aca0a7e84c622968a9603d6f25742c28f699a85846679ff915",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:57c3fabaf075a7ce5bbbad81b461cc36c4cec7cef8bb76ad18be324949be63b9",
-    "tool": "run.py"
+    "source_digest": "sha256:3ea8f1fe03d7be4b37c8d072a64953bcc7c0bd7fa8241ad08a535a4d1733fad1",
+    "tool": "library.py"
   },
   "role": "holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions",
   "section": "Program functions",
   "size": 35,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "printf_"
 }

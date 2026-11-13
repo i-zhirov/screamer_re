@@ -86,6 +86,18 @@ class StoreTestCase(unittest.TestCase):
         base.update(overrides)
         return base
 
+    def library(self, **overrides: object) -> dict:
+        """A library entry with the five keys and valid digests."""
+        base = {
+            "file": "CLIB3R.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "malloc",
+            "symbol": "_malloc",
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+        base.update(overrides)
+        return base
+
     def result(self, checks: dict[str, tuple[str, str]]) -> dict:
         return {
             "date": "2026-10-26",
@@ -113,6 +125,7 @@ class StoreTestCase(unittest.TestCase):
             count=3,
             implementation="assembly",
             provenance="library",
+            library=self.library(),
         )
         record["result"] = self.result({"build": ("pass", "the module builds")})
         return record
@@ -185,12 +198,15 @@ class StoreTestCase(unittest.TestCase):
         tools: Path,
         original: Path,
         record: dict,
-        module: dict,
+        module: dict | None,
         mode: dict | None = None,
+        *,
+        library: dict | None = None,
     ) -> str:
         return store.compute_fingerprint(
             record,
             module,
+            library=library,
             rebuild_dir=rebuild,
             work_dir=work,
             tools_dir=tools,
@@ -592,6 +608,140 @@ class StoreTestCase(unittest.TestCase):
             ),
         )
 
+    def test_fingerprint_changes_with_the_library_entry(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        self.assertNotEqual(
+            self.fingerprint_of(
+                rebuild,
+                work,
+                tools,
+                original,
+                record,
+                module,
+                library=self.library(),
+            ),
+            self.fingerprint_of(
+                rebuild,
+                work,
+                tools,
+                original,
+                record,
+                module,
+                library=self.library(symbol="_malloc_r"),
+            ),
+        )
+
+    def test_fingerprint_without_a_module_is_stable(self) -> None:
+        rebuild, work, tools, original, _, _ = self.fingerprint_env()
+        record = self.record(checks=["identity"])
+        entry = self.library()
+        self.assertEqual(
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, None, library=entry
+            ),
+            self.fingerprint_of(
+                rebuild, work, tools, original, record, None, library=entry
+            ),
+        )
+
+    def test_fingerprint_without_a_module_changes_with_the_original(self) -> None:
+        rebuild, work, tools, original, _, _ = self.fingerprint_env()
+        record = self.record(checks=["identity"])
+        entry = self.library()
+        before = self.fingerprint_of(
+            rebuild, work, tools, original, record, None, library=entry
+        )
+        original.write_bytes(b"OTHER")
+        after = self.fingerprint_of(
+            rebuild, work, tools, original, record, None, library=entry
+        )
+        self.assertNotEqual(before, after)
+
+    def test_fingerprint_without_a_module_uses_the_record_library_field(
+        self,
+    ) -> None:
+        rebuild, work, tools, original, _, _ = self.fingerprint_env()
+        record = self.record(checks=["identity"], library=self.library())
+        before = self.fingerprint_of(
+            rebuild, work, tools, original, record, None
+        )
+        self.assertEqual(
+            before,
+            self.fingerprint_of(rebuild, work, tools, original, record, None),
+        )
+        changed = {
+            **record,
+            "library": self.library(symbol="_malloc_r"),
+        }
+        self.assertNotEqual(
+            before,
+            self.fingerprint_of(rebuild, work, tools, original, changed, None),
+        )
+
+    def test_library_fields_hashes_the_canonical_five_keys(self) -> None:
+        entry = self.library()
+        keys = ("file", "sha256", "module", "symbol", "object_sha256")
+        expected = json.dumps(
+            {key: entry[key] for key in keys},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        self.assertEqual(store._library_fields(entry), expected)
+        partial = self.library()
+        del partial["symbol"]
+        with self.assertRaises(KeyError):
+            store._library_fields(partial)
+
+    def test_library_field_is_a_record_input(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        first = self.fingerprint_of(
+            rebuild,
+            work,
+            tools,
+            original,
+            {**record, "library": self.library()},
+            module,
+        )
+        second = self.fingerprint_of(
+            rebuild,
+            work,
+            tools,
+            original,
+            {**record, "library": self.library(symbol="_malloc_r")},
+            module,
+        )
+        self.assertNotEqual(first, second)
+
+    def test_fingerprint_ignores_a_name_only_change(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertEqual(
+            before,
+            self.fingerprint_of(
+                rebuild,
+                work,
+                tools,
+                original,
+                {**record, "name": "another name"},
+                module,
+            ),
+        )
+
+    def test_fingerprint_ignores_a_status_only_change(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        before = self.fingerprint_of(rebuild, work, tools, original, record, module)
+        self.assertEqual(
+            before,
+            self.fingerprint_of(
+                rebuild,
+                work,
+                tools,
+                original,
+                {**record, "status": "verified"},
+                module,
+            ),
+        )
+
     def test_validate_record_address_mismatch(self) -> None:
         path = self.write_record(0x300EC, self.record(address="0x300f0"))
         violations = store.validate_record(path)
@@ -637,6 +787,36 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(len(violations), 1)
         self.assertIn("provenance", violations[0])
         self.assertIn("pascal", violations[0])
+
+    def test_schema_accepts_a_library_field(self) -> None:
+        violations = schema.validate(
+            self.full_record(),
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(violations, [])
+
+    def test_schema_rejects_a_library_without_the_symbol(self) -> None:
+        record = self.full_record()
+        del record["library"]["symbol"]
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("symbol", violations[0])
+
+    def test_schema_rejects_a_bad_library_digest(self) -> None:
+        record = self.full_record()
+        record["library"]["sha256"] = "a" * 64
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("sha256", violations[0])
 
     def test_validate_record_data_provenance_requires_not_a_function_status(
         self,
@@ -826,6 +1006,39 @@ class StoreTestCase(unittest.TestCase):
         path = self.write_record(
             0x300EC, self.record(checks=["build", "identity"])
         )
+        violations = store.validate_record(path)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("requires a module", violations[0])
+
+    def test_identity_with_a_library_field_needs_no_module(self) -> None:
+        record = self.record(checks=["identity"], library=self.library())
+        path = self.write_record(0x300EC, record)
+        self.assertEqual(store.validate_record(path), [])
+
+    def test_identity_with_a_module_and_a_library_field_needs_no_module_map(
+        self,
+    ) -> None:
+        self.write_module(
+            "driver",
+            {
+                "name": "driver",
+                "exe": "driver.exe",
+                "sources": [{"file": "driver.c", "compiler": "wcc386"}],
+            },
+        )
+        record = self.record(
+            module="driver",
+            symbol="driver_",
+            checks=["identity"],
+            library=self.library(),
+        )
+        path = self.write_record(0x300EC, record)
+        self.assertEqual(store.validate_record(path), [])
+
+    def test_identity_without_a_module_and_without_a_library_still_fails(
+        self,
+    ) -> None:
+        path = self.write_record(0x300EC, self.record(checks=["identity"]))
         violations = store.validate_record(path)
         self.assertEqual(len(violations), 1)
         self.assertIn("requires a module", violations[0])

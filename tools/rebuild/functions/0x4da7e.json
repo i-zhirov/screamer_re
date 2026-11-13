@@ -1,15 +1,52 @@
 {
   "address": "0x4da7e",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
       "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4da7e"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "trig387",
+    "object_sha256": "sha256:b2f970595761bf2a6c0340b7a4d597be75e58453565054840ec7e0950c6d7ea0",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "IF@TAN"
+  },
+  "name": "IF@TAN",
   "notes": [],
   "object_offset": "0x3da7e",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 5,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 3,
+        "instructions_total": 3,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0x4da7e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:421c30d1b0ff7504312b69d3d95ceba3b1340efadc32f3d3bd3a0096f5469dcc",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:2124f6b5133b044ca49a717691db9adcce4e9efb2afb00bd6f6daf403c161820",
+    "tool": "library.py"
+  },
   "size": 5,
-  "status": "unknown"
+  "status": "verified"
 }

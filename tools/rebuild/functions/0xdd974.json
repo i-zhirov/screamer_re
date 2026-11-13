@@ -1,6 +1,8 @@
 {
   "address": "0xdd974",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdd974"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "exp387",
+    "object_sha256": "sha256:ce75d8871c14d54c76175366354c5802a4cbf24969ebaefb22e6bf3462e3a140",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__@DEXP"
+  },
+  "name": "__@DEXP",
   "notes": [],
   "object_offset": "0xcd974",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 90,
+        "bytes_total": 98,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 44,
+        "instructions_total": 44,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xdd974",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b60c0873939b2d3ef17c73d59bd08918d6fb2451066ccbc3420bb9c754ca5c0d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:f5395d8bd4e364d8f5671d86c2b4bc883085131bd16edc52957ae756fe1b7a18",
+    "tool": "library.py"
+  },
   "size": 110,
-  "status": "unknown"
+  "status": "verified"
 }

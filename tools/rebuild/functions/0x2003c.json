@@ -85,7 +85,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2003c",
     "date": "2026-11-13",
-    "fingerprint": "sha256:c152b15da97b8b2412b6b13e6593a58cf04d09167955f47deceb938585343511",
+    "fingerprint": "sha256:3482b1d61beead49b290efc3b674800d470ae36b461a5e9d8a718d6ffc9ea076",
     "mode": {
       "runtime": "run",
       "strict": true,

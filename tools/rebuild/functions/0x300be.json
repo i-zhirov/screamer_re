@@ -1,9 +1,7 @@
 {
   "address": "0x300be",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -18,24 +16,27 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x300be"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "exit",
+    "object_sha256": "sha256:e10241f5b9bc31715343cc4f8fbfcc29583d2188c33113cdf7f90a6177f178f1",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "exit_"
+  },
   "module": "exit",
   "name": "exit",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 16,
+        "bytes_equal": 19,
         "bytes_total": 24,
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 8,
@@ -44,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x300be",
+    "command": "python3 tools/rebuild/library.py verify --address 0x300be",
     "date": "2026-11-13",
-    "fingerprint": "sha256:f5fe75e16e989d9e01ec10ae226950bd053069ff054d239a5e32a9c05a82a8ec",
+    "fingerprint": "sha256:40bea70764b3eb86435a00087f22873397e0d28bda5f347c9b344c1081bf2769",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:2f3da4b333f8665ba1630be7eeff8e23357275e9ebcc1c0f70f07c2e13713d3c",
-    "tool": "run.py"
+    "source_digest": "sha256:d95f3cba147a3a9adb418bca5d9efe1a9de4832f998ed9cdc8e7bf33732dd178",
+    "tool": "library.py"
   },
   "role": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code",
   "section": "Program functions",

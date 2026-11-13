@@ -26,12 +26,16 @@
     {
       "kind": "finding",
       "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The fopen module at 0x4c08d"
     }
   ],
   "module": "fopen",
   "name": "fopen",
   "notes": [],
-  "provenance": "library",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -54,7 +58,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c08d",
     "date": "2026-11-13",
-    "fingerprint": "sha256:15fb8cdf6a9c37050c4b7965a1a34dc637a9e921edbdb4c3eb70fbaa9e4c7316",
+    "fingerprint": "sha256:f812a491b4b39bfe9bb78f180c2af11170577c600ca1ef5440ab1a8718870eb3",
     "mode": {
       "runtime": "run",
       "strict": true,

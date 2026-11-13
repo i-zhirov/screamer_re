@@ -1,6 +1,8 @@
 {
   "address": "0xdcbe0",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdcbe0"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "scnf",
+    "object_sha256": "sha256:569ff2fc385df88248fa2649c9f519c694a2a3de496e4132f222e248ecd44b89",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__scnf_"
+  },
+  "name": "__scnf",
   "notes": [],
   "object_offset": "0xccbe0",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 2795,
+        "bytes_total": 2890,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 1059,
+        "instructions_total": 1059,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xdcbe0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e536b0732d19ada377635a06bab41d4367a26487205b230ea3c566ec536c828d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:ab405bf9fc67fc6f523e8ecc74fd0d3b7c824ba16be4ec67fbfd3c14e2f66dc0",
+    "tool": "library.py"
+  },
   "size": 545,
-  "status": "unknown"
+  "status": "verified"
 }

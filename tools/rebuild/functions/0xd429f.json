@@ -1,9 +1,7 @@
 {
   "address": "0xd429f",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -22,46 +20,49 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd429f"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fprtf",
+    "object_sha256": "sha256:b4f549c3e01414ae19c7436fa2999cb8a37587ba5cf321ebebca1c0cf22bc0c9",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__fprtf_"
+  },
   "module": "fprtf",
   "name": "__fprtf",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 6,
-        "bytes_total": 132,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 28,
+        "bytes_equal": 124,
+        "bytes_total": 133,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 52,
         "instructions_total": 52,
-        "match": "different",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0xd429f",
+    "command": "python3 tools/rebuild/library.py verify --address 0xd429f",
     "date": "2026-11-13",
-    "fingerprint": "sha256:5e73f34ebc794ee49c471438ffa45c64cfd06b55def73a0038e974f0c65be07c",
+    "fingerprint": "sha256:ade7c90347a223fa77b475e43333cfbecb909e83f955d2e55043061306adf140",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:24d15105dc06657cdbcb935bcfdbb3b1d93bc95081737239382339fb460005a0",
-    "tool": "run.py"
+    "source_digest": "sha256:6e3a691bfb36518ebb3afaa36e253a2915c263709587afb1d67551d86fb00018",
+    "tool": "library.py"
   },
   "role": "formats a stream through the run-time engine and manages the file flags",
   "section": "The runtime memory manager",
   "size": 133,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "__fprtf_"
 }

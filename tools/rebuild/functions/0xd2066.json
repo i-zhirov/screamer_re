@@ -1,9 +1,7 @@
 {
   "address": "0xd2066",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
@@ -22,22 +20,25 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd2066"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "memcpy",
+    "object_sha256": "sha256:ec802c5948e3fadafa0f5604100444f53e64602c9f993c3b04336813b3f249f7",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "memcpy_"
+  },
   "module": "memmove",
   "name": "memmove",
   "notes": [],
   "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
         "bytes_equal": 37,
         "bytes_total": 37,
@@ -48,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0xd2066",
+    "command": "python3 tools/rebuild/library.py verify --address 0xd2066",
     "date": "2026-11-13",
-    "fingerprint": "sha256:4ebe1f082e9680f6daabbd60c3c8aa3cc28a9a1691da97d01bfa069f3fcee3a9",
+    "fingerprint": "sha256:36756187ee641f3ab8dde257b6c3611d7dc17c351ea65bf93d2a7028c5f4d624",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:776faf10e22c2bd79ad8bb37b6abdff85e83f21b39fd3ac549facbbfdce3db42",
-    "tool": "run.py"
+    "source_digest": "sha256:f8ba301b94fca9e41c1998be964c22fc6062596ba9ec6f6d05d34d1bc83d6a07",
+    "tool": "library.py"
   },
   "role": "copies `count` bytes from the source to the destination and returns the destination",
   "section": "The runtime memory manager",

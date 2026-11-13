@@ -1,6 +1,8 @@
 {
   "address": "0xe07b0",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe07b0"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "cmp386",
+    "object_sha256": "sha256:e2de07c2e8ce74e666f01edb1271e76c31a6a73b59b63c5fc7fbc0628e6a21d5",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "strcmp_"
+  },
+  "name": "strcmp",
   "notes": [],
   "object_offset": "0xd07b0",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 161,
+        "bytes_total": 161,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 67,
+        "instructions_total": 67,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xe07b0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:641a87f9a05eabbb61be2c43ca11f267df05593184cd233c5f72860b08246e78",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:f3fddd6912d4f3bcd2986da43213632f4321bdf037c403b65fc73e2ecd0b8af4",
+    "tool": "library.py"
+  },
   "size": 176,
-  "status": "unknown"
+  "status": "verified"
 }

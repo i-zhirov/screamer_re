@@ -1,0 +1,55 @@
+{
+  "address": "0xeba21",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeba21"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "frexp",
+    "object_sha256": "sha256:9cc62b6af07e7e0f5ac09a256843b7b13db240a5ddff2b175f98e3b06798ea16",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "frexp_"
+  },
+  "name": "frexp",
+  "notes": [],
+  "object_offset": "0xdba21",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 111,
+        "bytes_total": 111,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 35,
+        "instructions_total": 35,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeba21",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:acbdb5f4a561c7b0a0544dffb572fa019d4fff448aabc9edbf88ad6b3ea48a0e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6ea235c5802b1ea3839978ea82a2152cbaa3814df4619c0eb1e35e05aae1e521",
+    "tool": "library.py"
+  },
+  "status": "verified"
+}

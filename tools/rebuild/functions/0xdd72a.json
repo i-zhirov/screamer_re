@@ -1,6 +1,8 @@
 {
   "address": "0xdd72a",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -9,11 +11,46 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdd72a"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "strtod",
+    "object_sha256": "sha256:dee394681bf6f12345833a33743b5c611ff19bf7e859e9cc578ec6548efd19bf",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "strtod_"
+  },
+  "name": "strtod",
   "notes": [],
   "object_offset": "0xcd72a",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 411,
+        "bytes_total": 425,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 167,
+        "instructions_total": 167,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xdd72a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f6dbbf3c2efd958f1f7fec848a88a7ede5563b4d194f0d4c2b8a1d4183d4a07d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:49d6e539ca08e0851223c6463031099521f3094f6355740b028d9bb215cbc947",
+    "tool": "library.py"
+  },
   "size": 425,
-  "status": "unknown"
+  "status": "verified"
 }

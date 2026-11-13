@@ -1,6 +1,8 @@
 {
   "address": "0xc6618",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc6618"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "sscanf",
+    "object_sha256": "sha256:00c5f82236a73f0d97cd31d40be19a24feafd121d257bd050aaa9bf18d279fb2",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "sscanf_"
+  },
+  "name": "sscanf",
   "notes": [],
   "object_offset": "0xb6618",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 29,
+        "bytes_total": 33,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 13,
+        "instructions_total": 13,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc6618",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:696a7ad0ea9a194dec5ce03b16e2683c3b7f0404072c9200348ead0d3cc880df",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6786df65938914f087bc6cf7211efc6b95ec9d7aae6cb6f5f0f6c7296afb5fb6",
+    "tool": "library.py"
+  },
   "size": 36,
-  "status": "unknown"
+  "status": "verified"
 }

@@ -33,6 +33,16 @@ pipeline can pass a record whose stored result is `fail`.
 - The original `malloc` at `0xd1f25` is byte-identical to the `nmalloc` module
   in the 10.0a `CLIB3R.LIB`. The library listing maps `malloc_`, `free_`,
   `printf_`, `memcpy_`, and `memset_` to named modules.
+- At the plan date, the store holds 471 `library` records. 4 are
+  `same-shape`, 5 are `exact-relocations`, 5 are `exact-bytes`, and 7 are
+  `different`. 450 have no identity result. The design-date seven shape
+  matches split into four library records and three records outside the
+  library scope: 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and
+  0xd4410 (`compiler_helper`).
+- The observed store holds 981 function records. The status holds 224
+  `rebuilt`, 569 `unknown`, 154 `verified`, 31 `named`, and 3
+  `not_a_function`. The provenance holds 490 `game`, 480 `library`, 8
+  `compiler_helper`, and 3 `not_a_function`.
 - `run.py --skip-unchanged` prints `PASS` for a record with a stored `fail`.
 - `pipeline_check.py` accepts that line when the fingerprint matches.
 - A failed build does not demote a `verified` record.
@@ -91,7 +101,7 @@ pipeline can pass a record whose stored result is `fail`.
 | SM-1 | A record with a stored `fail` cannot produce a `PASS` line. |
 | SM-2 | The strict and default verified counts are separate and reproducible. |
 | SM-3 | Every record has a provenance value. |
-| SM-4 | `malloc`, `fopen`, and `__fprtf` are exact. The seven library shape matches become byte-identical. |
+| SM-4 | `malloc` 0xd1f25, `fopen` 0xc5fe5, and `__fprtf` 0xd429f pass the strict gate as exact-relocations. The four plan-date library shape matches pass the strict gate. The record at 0x4c08d is the game container member open, not a library object, so it leaves the library measure. The design-date shape matches 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and 0xd4410 (`compiler_helper`) are outside the library measure. |
 | SM-5 | A rebuilt `STARTH.EXE` exists and `image_compare.py` reports a byte score. |
 
 ## Constraints
@@ -99,13 +109,13 @@ pipeline can pass a record whose stored result is `fail`.
 - C-1: Python 3.14.7. Use the standard library and the `ctypes` capstone binding only.
 - C-2: Tests use `unittest` under `tools/rebuild/tests/`.
 - C-3: A tool takes its configuration from the command line. It reads no environment variable.
-- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass writes the function records through `store.save_record`, and C-4 still applies to the shipped artifacts.
+- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass `triage.apply` and the library pass `library.apply` write the function records through `store.save_record`, and C-4 still applies to the shipped artifacts.
 - C-5: Prefer C. Use assembly only when C cannot reproduce the original bytes, and record the reason.
 - C-6: A harness output name stays within the 8.3 limit.
 - C-7: The 10.0a toolchain runs alongside OpenWatcom V2. Do not replace V2.
 - C-8: The status ladder stays `unknown`, `not_a_function`, `named`, `rebuilt`, `matching`, `verified`.
 - C-9: The identity verdict strings stay unchanged.
-- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date target is 304, 300, 289, and 285. Update these counts when a change adds or removes a check.
+- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. Update these counts when a change adds or removes a check.
 - C-11: Do not commit. The user commits.
 
 ## Non-Goals
@@ -146,3 +156,9 @@ pipeline can pass a record whose stored result is `fail`.
   library, compiler-helper, `data`, or `not_a_function` record stays in its
   provenance row and out of the analysis count. The byte coverage uses
   the code-object virtual size from the original image.
+- A library record holds its original object in the `library` field. The
+  library identity uses the strict gate and masks the import target identity.
+  A library-verified record declares only the identity check and replaces the
+  build and behavior declarations and their result. The object bytes stay out
+  of git. The library mode is `store.run_mode(True, False)`. Two identical
+  manifest entries for the same object are valid reuse.

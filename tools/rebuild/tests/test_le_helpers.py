@@ -280,12 +280,32 @@ class PageReadTestCase(unittest.TestCase):
 
 class ReachableCallTargetsTestCase(unittest.TestCase):
     def test_reachable_call_targets_walks_the_direct_calls(self) -> None:
-        image = StubImage(b"")
+        image = StubImage(b"\x90" * 0x300, base=0x100)
         sites = {
             0x100: [le.CallSite(0x101, 0x200, "call 0x200")],
             0x200: [
                 le.CallSite(0x201, 0x300, "call 0x300"),
                 le.CallSite(0x202, None, "call eax"),
+            ],
+        }
+        with mock.patch.object(
+            le,
+            "function_body",
+            side_effect=lambda exe, address, max_instructions=4000: [address],
+        ), mock.patch.object(
+            le, "call_sites", side_effect=lambda body: sites.get(body[0], [])
+        ):
+            self.assertEqual(
+                le.reachable_call_targets(image, [0x100]), [0x200, 0x300]
+            )
+
+    def test_reachable_call_targets_skips_an_unmapped_target(self) -> None:
+        image = StubImage(b"\x90" * 0x300, base=0x100)
+        sites = {
+            0x100: [le.CallSite(0x101, 0x200, "call 0x200")],
+            0x200: [
+                le.CallSite(0x201, 0x900, "call 0x900"),
+                le.CallSite(0x202, 0x300, "call 0x300"),
             ],
         }
         with mock.patch.object(
@@ -715,6 +735,44 @@ class NextFunctionStartTestCase(unittest.TestCase):
             ValueError, "the range is not mapped to a file offset"
         ):
             le._next_function_start(image, 0x10005)
+
+
+class ByteDecodeTestCase(unittest.TestCase):
+    @unittest.skipUnless(le.capstone_available(), "capstone is not available")
+    def test_decode_bytes_decodes_a_slice(self) -> None:
+        instructions = le.decode_bytes(b"\x55\x89\xe5\xc3", BASE)
+        self.assertEqual(len(instructions), 3)
+        self.assertEqual(instructions[0].address, BASE)
+        self.assertEqual(
+            [instruction.mnemonic for instruction in instructions],
+            ["push", "mov", "ret"],
+        )
+
+    @unittest.skipUnless(le.capstone_available(), "capstone is not available")
+    def test_decode_bytes_uses_the_base_address(self) -> None:
+        first = le.decode_bytes(b"\x55\x89\xe5\xc3", 0x10000)
+        second = le.decode_bytes(b"\x55\x89\xe5\xc3", 0x20000)
+        self.assertEqual(
+            [instruction.mnemonic for instruction in first],
+            [instruction.mnemonic for instruction in second],
+        )
+        self.assertEqual(
+            [instruction.address for instruction in second],
+            [0x20000, 0x20001, 0x20003],
+        )
+
+    @unittest.skipUnless(le.capstone_available(), "capstone is not available")
+    def test_decode_bytes_stops_at_the_end(self) -> None:
+        instructions = le.decode_bytes(
+            b"\x55\x89\xe5\xc3", BASE, end=BASE + 2
+        )
+        self.assertEqual(
+            [instruction.address for instruction in instructions], [BASE]
+        )
+
+    @unittest.skipUnless(le.capstone_available(), "capstone is not available")
+    def test_decode_bytes_returns_empty_for_empty_data(self) -> None:
+        self.assertEqual(le.decode_bytes(b"", BASE), [])
 
 
 class CapstoneAvailableTestCase(unittest.TestCase):

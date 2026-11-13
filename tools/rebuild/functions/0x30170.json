@@ -52,7 +52,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x30170",
     "date": "2026-11-13",
-    "fingerprint": "sha256:7c01510f00d5939727f6a346fb33349d8be7ea0933324d83b7ced1e799595711",
+    "fingerprint": "sha256:20276bb63c03ee27837b60be32b5d275686665199613e3a66784764b8ccca2fa",
     "mode": {
       "runtime": "run",
       "strict": true,

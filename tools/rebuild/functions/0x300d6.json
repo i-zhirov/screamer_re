@@ -17,8 +17,19 @@
     {
       "kind": "finding",
       "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x300d6"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "exit",
+    "object_sha256": "sha256:f5749efddb197407369de6f1cdeb1630a90c432af8500d3a201711c22b480bf9",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "_exit_"
+  },
   "module": "exit",
   "name": "exit_flush",
   "notes": [],
@@ -36,16 +47,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/run.py run --function 0x300d6",
+    "command": "python3 tools/rebuild/library.py verify --address 0x300d6",
     "date": "2026-11-13",
-    "fingerprint": "sha256:3f6d007bd84481911f3b4cfe5fb8c6c128539278e6de64cec0c22d3250159639",
+    "fingerprint": "sha256:06f361c8bed6b43d697c351d9c57f7306ff4d8fe608ed19e0565ee211d964a3a",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:2f3da4b333f8665ba1630be7eeff8e23357275e9ebcc1c0f70f07c2e13713d3c",
-    "tool": "run.py"
+    "source_digest": "sha256:5717ed550ebe305abb921e20a89ddb4de7b0f84eac551b01cc7f796ca82b5b32",
+    "tool": "library.py"
   },
   "role": "calls the flush and close handler slots and jumps to the run-time terminator; the helper of `exit`",
   "section": "Program functions",

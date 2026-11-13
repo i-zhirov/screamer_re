@@ -46,7 +46,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d030",
     "date": "2026-11-13",
-    "fingerprint": "sha256:938740a631adad525e8b4033291dcb915fbce0d0114d078dfae862df97d4fcc4",
+    "fingerprint": "sha256:d49d522bfa037a2f50f031eb51c221cd8870afe1cd6935a971e58dec962d941c",
     "mode": {
       "runtime": "run",
       "strict": true,

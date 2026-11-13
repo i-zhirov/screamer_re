@@ -1,0 +1,56 @@
+{
+  "address": "0xeb66a",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb66a"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "nan_inf",
+    "object_sha256": "sha256:7f91750c1d1b8e1346b28e6ab863c11dd5bb84c4041d950e7f7d20ba58165ef4",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__Nan_Inf_"
+  },
+  "name": "__Nan_Inf",
+  "notes": [],
+  "object_offset": "0xdb66a",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 128,
+        "bytes_total": 132,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 43,
+        "instructions_total": 43,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xeb66a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ac18638e0a51333cf96a31e6db0d9a9dc25f5b17bf4604ba095c5bf8233e49e1",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:e9a5a0b4b1cd68fbe1288c6d5b0e43cbd115af23727ff6340f972956118fa04e",
+    "tool": "library.py"
+  },
+  "size": 132,
+  "status": "verified"
+}

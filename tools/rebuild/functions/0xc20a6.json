@@ -1,6 +1,8 @@
 {
   "address": "0xc20a6",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc20a6"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "pow387",
+    "object_sha256": "sha256:9faf06c154e5b348da4fb0c91cd3188ef5160f6a2ef86b8a97bdb1e75548a5a8",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "IF@DPOW"
+  },
+  "name": "IF@DPOW",
   "notes": [],
   "object_offset": "0xb20a6",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 310,
+        "bytes_total": 316,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 132,
+        "instructions_total": 132,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc20a6",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9c3c4f4b2ce61289d19d89f5e5101d6b6b61d625c20a45cb2ca97850eca64d74",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:134dd5199dac4c5ba0018397db50b77e2ab02cf03e7e46b28348863bbffb4ff2",
+    "tool": "library.py"
+  },
   "size": 281,
-  "status": "unknown"
+  "status": "verified"
 }

@@ -35,6 +35,7 @@ jobs:
             tools/rebuild/view.py \
             tools/rebuild/docs.py \
             tools/rebuild/callgraph.py \
+            tools/rebuild/library.py \
             tools/cross_check.py \
             tools/pipeline_check.py
       - name: run the unit suite

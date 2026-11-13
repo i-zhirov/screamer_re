@@ -1,6 +1,8 @@
 {
   "address": "0xc6cf0",
-  "checks": [],
+  "checks": [
+    "identity"
+  ],
   "evidence": [
     {
       "kind": "finding",
@@ -13,11 +15,46 @@
     {
       "kind": "finding",
       "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc6cf0"
     }
   ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "sqrt387",
+    "object_sha256": "sha256:adb5d11fc80f80a929ff6a35ff838ce050a9c1bc500a3b6f7424748c6b5e880c",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__@DSQRT"
+  },
+  "name": "__@DSQRT",
   "notes": [],
   "object_offset": "0xb6cf0",
   "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 50,
+        "bytes_total": 53,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 24,
+        "instructions_total": 24,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/library.py verify --address 0xc6cf0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:343da8d1e03170743902e45f213ea001edc33ac9e5d435a3e8c409c39c0d7b72",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:dcffc61716a86b06a301cc657e1b8a0f4cf88d9b83176905c3b0e4d39241d423",
+    "tool": "library.py"
+  },
   "size": 64,
-  "status": "unknown"
+  "status": "verified"
 }

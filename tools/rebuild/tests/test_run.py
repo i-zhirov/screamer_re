@@ -19,6 +19,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import library as lib  # noqa: E402
 import run  # noqa: E402
 import store  # noqa: E402
 
@@ -1045,6 +1046,241 @@ class RunTestCase(unittest.TestCase):
         self.assertEqual(code, 0)
         identity.assert_called_once()
         self.assertIn("[1/1] 0x300ec free: PASS", output.getvalue())
+
+    def library_field(self) -> dict:
+        return {
+            "file": "TEST.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "mod",
+            "symbol": "printf_",
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+
+    def library_check(self) -> dict:
+        return {
+            "verdict": "pass",
+            "detail": "the modules are byte-identical",
+            "match": "exact-bytes",
+            "bytes_equal": 9,
+            "bytes_total": 9,
+            "instructions_equal": 3,
+            "instructions_total": 3,
+        }
+
+    def library_record(self, address: str = "0x3009b", **overrides: object) -> dict:
+        base = self.record(
+            address,
+            name="printf",
+            status="named",
+            checks=["identity"],
+            provenance="library",
+            library=self.library_field(),
+        )
+        base.update(overrides)
+        return base
+
+    def library_file(self) -> Path:
+        path = self.root / "TEST.LIB"
+        path.write_bytes(b"LIBRARY")
+        return path
+
+    def library_arguments(self) -> argparse.Namespace:
+        return argparse.Namespace(
+            original=self.original,
+            library_dir=self.root,
+            show=False,
+            skip_runtime=False,
+            strict=True,
+        )
+
+    def test_library_record_runs_the_object_check(self) -> None:
+        self.library_file()
+        record = self.library_record()
+        check = self.library_check()
+        with mock.patch.object(
+            run.le, "load", return_value=object()
+        ), mock.patch.object(
+            run.library, "read_library", return_value={"file": "TEST.LIB"}
+        ), mock.patch.object(
+            run.library, "verify_entry", return_value=check
+        ) as verify, mock.patch.object(
+            run, "run_build", side_effect=AssertionError("must not build")
+        ), mock.patch.object(
+            run, "run_behavior", side_effect=AssertionError("must not run")
+        ):
+            checks, verdict, _, write = run._run_record(
+                record, None, {}, self.library_arguments(), []
+            )
+        verify.assert_called_once()
+        self.assertEqual(set(checks), {"identity"})
+        self.assertEqual(verdict, "PASS")
+        self.assertTrue(write)
+
+    def test_library_record_writes_the_library_fingerprint(self) -> None:
+        record = self.library_record()
+        self.write_record(0x3009B, record)
+        with mock.patch.object(
+            run.store, "compute_fingerprint", return_value="sha256:" + "0" * 64
+        ) as compute:
+            run._write_result(
+                record,
+                None,
+                {"identity": self.library_check()},
+                "python3 tools/rebuild/run.py run --function 0x3009b",
+                self.original,
+                store.run_mode(True, False),
+            )
+        arguments = compute.call_args.args
+        keywords = compute.call_args.kwargs
+        self.assertEqual(arguments[0], record)
+        self.assertIsNone(arguments[1])
+        self.assertEqual(keywords["library"], record["library"])
+        self.assertEqual(keywords["mode"], lib.library_mode())
+        stored = store.load_record(0x3009B)
+        self.assertEqual(
+            stored["result"]["fingerprint"], "sha256:" + "0" * 64
+        )
+        self.assertEqual(
+            stored["result"]["source_digest"], lib.source_digest(record["library"])
+        )
+
+    def test_library_record_uses_the_record_field(self) -> None:
+        self.library_file()
+        record = self.library_record()
+        document = {
+            "file": "TEST.LIB",
+            "sha256": record["library"]["sha256"],
+            "modules": [],
+        }
+        with mock.patch.object(
+            run.le, "load", return_value=object()
+        ), mock.patch.object(
+            run.library, "read_library", return_value=document
+        ), mock.patch.object(
+            run.library, "verify_entry", return_value=self.library_check()
+        ) as verify:
+            run.run_library(record, self.original, self.root)
+        arguments = verify.call_args.args
+        self.assertIs(arguments[2], document)
+        self.assertEqual(arguments[3], record["library"])
+
+    def test_library_record_fingerprint_ignores_the_cli_mode(self) -> None:
+        record = self.library_record()
+        default = run._current_fingerprint(
+            record, None, {}, self.original, store.run_mode(True, False)
+        )
+        skipped = run._current_fingerprint(
+            record, None, {}, self.original, store.run_mode(True, True)
+        )
+        self.assertIsNotNone(default)
+        self.assertEqual(default, skipped)
+
+    def test_library_record_skip_unchanged(self) -> None:
+        record = self.library_record(status="verified")
+        check = self.library_check()
+        record["result"] = {
+            "date": "2026-11-13",
+            "command": "python3 tools/rebuild/library.py verify --address 0x3009b",
+            "tool": "library.py",
+            "source_digest": lib.source_digest(record["library"]),
+            "fingerprint": store.compute_fingerprint(
+                record,
+                None,
+                library=record["library"],
+                original=self.original,
+                mode=lib.library_mode(),
+            ),
+            "mode": lib.library_mode(),
+            "checks": {"identity": check},
+        }
+        self.write_record(0x3009B, record)
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x3009b",
+            "--skip-unchanged",
+            "--original",
+            str(self.original),
+        ]
+        output = io.StringIO()
+        with mock.patch.object(
+            run, "run_library", side_effect=AssertionError("must not verify")
+        ):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        self.assertIn(
+            "PASS (the inputs are unchanged since the previous run)",
+            output.getvalue(),
+        )
+
+    def test_library_record_failed_check_demotes(self) -> None:
+        record = self.library_record(status="named")
+        self.write_record(0x3009B, record)
+        failing = (
+            "fail",
+            {
+                "verdict": "fail",
+                "detail": "the instruction sequences differ",
+                "match": "different",
+            },
+        )
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x3009b",
+            "--original",
+            str(self.original),
+        ]
+        with mock.patch.object(run, "run_library", return_value=failing):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    code = run.main()
+        self.assertEqual(code, 1)
+        stored = store.load_record(0x3009B)
+        self.assertEqual(stored["status"], "rebuilt")
+        self.assertEqual(
+            stored["result"]["checks"]["identity"]["verdict"], "fail"
+        )
+
+    def test_library_record_resolves_a_library_in_the_parent_directory(
+        self,
+    ) -> None:
+        nested = self.root / "LIB386" / "DOS"
+        nested.mkdir(parents=True)
+        path = nested.parent / "MATH387R.LIB"
+        path.write_bytes(b"LIBRARY")
+        record = self.library_record()
+        record["library"] = dict(record["library"], file="MATH387R.LIB")
+        document = {
+            "file": "MATH387R.LIB",
+            "sha256": record["library"]["sha256"],
+            "modules": [],
+        }
+        with mock.patch.object(
+            run.le, "load", return_value=object()
+        ), mock.patch.object(
+            run.library, "read_library", return_value=document
+        ) as read, mock.patch.object(
+            run.library, "verify_entry", return_value=self.library_check()
+        ):
+            run.run_library(record, self.original, nested)
+        self.assertEqual(read.call_args.args[0], path)
+
+    def test_library_record_missing_library_raises(self) -> None:
+        record = self.library_record()
+        missing = self.root / "missing"
+        with mock.patch.object(run.le, "load", return_value=object()):
+            with self.assertRaises(ValueError):
+                run.run_library(record, self.original, missing)
+
+    def test_parse_arguments_accepts_the_library_dir(self) -> None:
+        parsed = self.parse("--all", "--library-dir", str(self.root))
+        self.assertIsInstance(parsed.library_dir, Path)
+        self.assertEqual(parsed.library_dir, self.root)
 
     def test_behavior_only_record_needs_no_original(self) -> None:
         self.write_module(
