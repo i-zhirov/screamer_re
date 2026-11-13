@@ -33593,3 +33593,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the VGA status port, and
   the retrace flag give the role, and the name `vga_retrace_wait` stays
   inferred.
+
+## The dpmi_free_dos module at 0x2666c
+
+- Observation: the original body at `0x2666c` holds 6 instructions and 20
+  bytes up to the `ret` at `0x2667f`.  The next record starts at `0x27700`, so
+  the store record keeps the 4244-byte extent and sets no separate function
+  size.  The identity check uses 6 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2666c --count 6` and
+  `tools/rebuild/functions/0x2666c.json`.
+- Observation: the body sets the DPMI function `0x0101` in `eax`, loads the
+  word at `DAT_001666a2` in `dx`, and returns at once when the word is zero.
+  Otherwise it runs INT 31h to free the DOS memory block and returns.
+  Evidence: the block at `0x2666c` through `0x2667f`.
+- Observation: the helper at `0x26640` allocates the real-mode block through
+  the DPMI function `0x0100` and stores the returned segment at
+  `DAT_001666a2`.  `dpmi_real_int` at `0x25db0` calls the helper at `0x25df6`.
+  Evidence: the block at `0x26640` through `0x26668` and the call at `0x25df6`.
+- Observation: the only direct caller is the wrapper at `0x25f14` with the
+  call site at `0x25f1c`.  The wrapper saves the registers, calls
+  `sound_driver_set(0)` at `0x262a8`, calls this function, restores the
+  registers, and returns.  `engine_shutdown` at `0x128ac` calls the wrapper at
+  `0x128d9`.
+  Evidence: the block at `0x25f14` through `0x25f22` and the call at `0x128d9`.
+- Inference: the paired allocator, the segment cell, and the DPMI function
+  support the name `dpmi_free_dos`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.  The shutdown caller gives the
+  section `Subsystem shutdown`.
+  Evidence: `tools/rebuild/dpmi_free_dos.c` and
+  `tools/rebuild/functions/0x2666c.json`.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction.  The module builds with the default frame option, needs no FPU
+  stub, and uses no assembly source.  C cannot issue the INT 31h instruction,
+  so the module calls the `dpmi_free_dos_block` helper.
+  Evidence: `tools/rebuild/dpmi_free_dos.c` and
+  `tools/rebuild/modules/dpmi_free_dos.json`.
+- Observation: the harness holds the segment cell and the
+  `dpmi_free_dos_block` stub.  The stub records the call count and the segment
+  of every call.  The five paths cover the zero segment, `0x1234`, `0xffff`,
+  `0x0001`, and two calls in order.  Every path checks the call count, the call
+  segments, and the cell.  The output holds the markers `0` through `4` and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/dpmi_free_dos_main.c`,
+  `python3 tools/rebuild/harness.py run --module dpmi_free_dos`, and
+  `work/rebuild/dpfree.txt`.
+- Observation: the identity check compares 6 instructions.  The rebuilt body
+  holds 2 of 6 instructions, 3 of 20 bytes, and 0 of 2 relocation slots equal,
+  because V2 reads the segment into `ax`, tests `ax`, and calls the helper
+  through `movzx` and a tail jump.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2666c --count 6 --rebuilt work/rebuild/dpfree.exe
+  --rebuilt-map work/rebuild/dpmi_free_dos.map --rebuilt-symbol
+  dpmi_free_dos_`.
+- Limit: the original has no symbol name.  The paired allocator, the segment
+  cell, and the DPMI function give the role, and the name `dpmi_free_dos` stays
+  inferred.
