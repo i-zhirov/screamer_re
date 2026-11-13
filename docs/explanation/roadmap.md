@@ -399,8 +399,9 @@ current host.
    `object_handle_release` at `0x11148`, and the Phase AB module
    `dpmi_alloc_dos` at `0x8be93`, and the Phase AB module
    `state_init_dispatch` at `0x2be94`, and the Phase AB module
-   `sound_effect_timer_clear` at `0x24d7c`;
-   thirty-nine modules are verified, one is matching, and four hundred and thirty-five
+   `sound_effect_timer_clear` at `0x24d7c`, and the Phase AB module
+   `video_bank_set` at `0x8c0fc`;
+   thirty-nine modules are verified, one is matching, and four hundred and thirty-six
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

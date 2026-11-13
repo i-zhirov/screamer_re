@@ -33130,3 +33130,63 @@ temporary `-od` recipe.
   sound_effect_timer_clear_`.
 - Limit: the original has no symbol name.  The caller and the effect timer data
   flow give the role, and the name `sound_effect_timer_clear` stays inferred.
+
+## The video_bank_set module at 0x8c0fc
+
+- Observation: the original body at `0x8c0fc` holds 10 instructions and 24
+  bytes up to the `ret` at `0x8c113`.  The next record starts at `0x8c150`, so
+  the store record keeps the 84-byte extent and sets no separate function size.
+  The extent also holds the sibling bank helpers at `0x8c114` and `0x8c12c`.
+  The identity check uses 10 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8c0fc --count 10` and
+  `tools/rebuild/functions/0x8c0fc.json`.
+- Observation: the bank index arrives in `al`.  The function zeroes `ebx`,
+  loads the bank shift `DAT_0007c18c` into `ecx`, shifts `al` left by `cl`,
+  clears `ah`, copies the zero-extended result to `edx`, sets `ax` to `0x4f05`,
+  and calls INT 10h AX=4F05h, the VBE display start control.  `dx` holds the
+  start of the bank.
+  Evidence: the block at `0x8c0fc` through `0x8c113`.
+- Observation: `vesa_set_mode` at `0x8bdec` stores the shift at `0x8be62` from
+  the VBE mode-info word at `+4` and the mask 7, so `DAT_0007c18c` holds the
+  bank shift that maps the bank index to the display start.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8bdec --count 70` and the
+  finding "The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules".
+- Observation: the direct callers are `video_copy` at `0x8beb8` with the call
+  sites at `0x8bed0`, `0x8bf31`, `0x8bf91`, `0x8bff1`, and `0x8c051`, and the
+  block at `0x8c08c` with the call site at `0x8c091`.  `video_copy` passes the
+  bank numbers 0 through 4, and the block passes 0.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8bec0 --count 210` and the
+  finding "The video_copy module at 0x8beb8".
+- Inference: the caller `video_copy` uses the name `video_bank_set` for the
+  callee.  The original has no symbol, so the record keeps the name with the
+  confidence `inferred`.  The callers sit in the section `race_loop callees`,
+  so the record takes the same section.
+  Evidence: `tools/rebuild/video_copy.c`, the caller list above, and
+  `tools/rebuild/functions/0x8c0fc.json`.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction, so the module builds without `-of+` and needs no FPU stub.  C
+  cannot inline INT 10h, so the module calls the `int386` helper with the VBE
+  function in `ax` and the bank start in `dx`.  The module uses no assembly
+  source.
+  Evidence: `tools/rebuild/video_bank_set.c` and
+  `tools/rebuild/modules/video_bank_set.json`.
+- Observation: the harness holds the bank shift and the `int386` stub.  The stub
+  records the interrupt number, the `ax` function, and the `dx` bank start of
+  every call.  The eight paths cover the shifts 0, 4, 5, 6, 7, and 8, the banks
+  0, 1, 3, 4, `0x12`, and `0xff`, and the two-call path.  The output holds the
+  markers `0` through `7` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/video_bank_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module video_bank_set`, and
+  `work/rebuild/vbs.txt`.
+- Observation: the identity check compares 10 instructions.  The rebuilt body
+  holds 16 instructions and 48 bytes, and the 10-instruction window holds 1 of
+  10 instructions, 0 of 24 bytes, and 0 of 2 relocation slots, because V2 saves
+  `ebx`, `ecx`, and `edx`, keeps the register set on the stack, loads the shift
+  as a byte, and calls the `int386` helper instead of the inline INT 10h.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8c0fc --count 10 --rebuilt work/rebuild/vbs.exe
+  --rebuilt-map work/rebuild/video_bank_set.map --rebuilt-symbol
+  video_bank_set_`.
+- Limit: the original has no symbol name.  The caller and the VBE bank data flow
+  give the role, and the name `video_bank_set` stays inferred.
