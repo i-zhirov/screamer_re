@@ -1,9 +1,111 @@
 {
   "address": "0x101f6",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x101f6 holds 13 instructions and 23 bytes up to the ret at 0x1020c; the next record starts at 0x10257, so the store record keeps the 97-byte extent and sets no separate function size; the extent also holds the keyboard and BIOS helpers at 0x101e9, 0x1020d, and 0x1021a; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the divisor arrives in eax; the function disables the interrupts, copies the divisor to ecx, writes the mode byte 0x36 to the command register 0x43, writes the low byte to channel 0 at 0x40, writes the high byte to the same port, enables the interrupts, and returns; the three jmp short instructions give the ISA bus time between the two writes"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is dos_datetime_set at 0x1fa2c with the call site at 0x1fa3c; it passes the divisor 0, so the timer keeps the default period of 65536 counts; the caller sits in the Subsystem initialisation section, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the caller names the callee timer_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and no floating-point instruction; C cannot emit the cli, the sti, or the inline port writes, so the module calls the outportb helper and leaves out the interrupt guard; the module needs no -of+, no assembly source, and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the outportb stub, which records the port and the value of every write in order; the six paths cover the divisors 0, 0x1234, 0xffff, 0x00ff, and 0xff00, and the two-call path; every path checks the write count, the port, and the value of every write; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 13 instructions; the rebuilt body holds 13 instructions and 48 bytes, and the 13-instruction window holds 1 of 13 instructions and 1 of 23 bytes equal, because V2 saves ecx and edx, builds the arguments in registers, and calls the outportb helper instead of the inline port writes, and it emits no cli, sti, or jmp short; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x101f6 --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x101f6 --count 13 --rebuilt work/rebuild/tmr.exe --rebuilt-map work/rebuild/timer_set.map --rebuilt-symbol timer_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module timer_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module timer_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x101f6"
+    },
+    {
+      "kind": "finding",
+      "text": "The timer_set module at 0x101f6"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/timer_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/timer_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/timer_set.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "timer_set",
+  "name": "timer_set",
   "notes": [],
   "object_offset": "0x1f6",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 23,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x101f6",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0e17569cd8badc6cdafde14476e0dd05cfe1c1a5bf50aa741e97acafe57661cf",
+    "source_digest": "sha256:520c53ac91869e1068af537283e5bee8641bdca7268c7d113b8e067f002f2122",
+    "tool": "run.py"
+  },
+  "role": "Programs the PIT channel 0 divisor for the system timer.",
+  "section": "Subsystem initialisation",
   "size": 97,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "timer_set_"
 }

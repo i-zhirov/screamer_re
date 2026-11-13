@@ -737,7 +737,7 @@ reproduce the original bytes.
 | `0x2be94` | `state_init_dispatch` (done) | 28 | 9 | 1 | 0 |
 | `0x24d7c` | `sound_effect_timer_clear` (done) | 27 | 12 | 0 | 0 |
 | `0x8c0fc` | `video_bank_set` (done) | 24 | 10 | 0 | 0 |
-| `0x101f6` | unnamed | 23 | 13 | 0 | 0 |
+| `0x101f6` | `timer_set` (done) | 23 | 13 | 0 | 0 |
 | `0x258b8` | unnamed | 22 | 9 | 1 | 0 |
 | `0x25640` | unnamed | 22 | 9 | 1 | 0 |
 | `0x1b58c` | unnamed | 22 | 9 | 1 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and seventy-five modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and seventy-six modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1080,5 +1080,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `dpmi_alloc_dos` at `0x8be93`, and the Phase AB module
 `state_init_dispatch` at `0x2be94`, and the Phase AB module
 `sound_effect_timer_clear` at `0x24d7c`, and the Phase AB module
-`video_bank_set` at `0x8c0fc`.
-The next unnamed function is `0x101f6`.
+`video_bank_set` at `0x8c0fc`, and the Phase AB module
+`timer_set` at `0x101f6`.
+The next unnamed function is `0x258b8`.

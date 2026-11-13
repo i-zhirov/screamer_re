@@ -33190,3 +33190,55 @@ temporary `-od` recipe.
   video_bank_set_`.
 - Limit: the original has no symbol name.  The caller and the VBE bank data flow
   give the role, and the name `video_bank_set` stays inferred.
+
+## The timer_set module at 0x101f6
+
+- Observation: the original body at `0x101f6` holds 13 instructions and 23
+  bytes up to the `ret` at `0x1020c`.  The next record starts at `0x10257`, so
+  the store record keeps the 97-byte extent and sets no separate function size.
+  The extent also holds the keyboard and BIOS helpers at `0x101e9`, `0x1020d`,
+  and `0x1021a`.  The identity check uses 13 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x101f6 --count 13` and
+  `tools/rebuild/functions/0x101f6.json`.
+- Observation: the divisor arrives in `eax`.  The function disables the
+  interrupts, copies the divisor to `ecx`, writes the mode byte 0x36 to the
+  command register 0x43, writes the low byte to channel 0 at 0x40, writes the
+  high byte to the same port, enables the interrupts, and returns.  The mode
+  byte selects channel 0, the lobyte/hibyte access, mode 3, and the binary
+  count.  The three `jmp short` instructions give the ISA bus time between the
+  two writes.
+  Evidence: the block at `0x101f6` through `0x1020c`.
+- Observation: the only direct caller is `dos_datetime_set` at `0x1fa2c` with
+  the call site at `0x1fa3c`.  It passes the divisor 0, so the timer keeps the
+  default period of 65536 counts.  The caller sits in the section Subsystem
+  initialisation, so the record takes the same section.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1fa2c --count 60` and the
+  finding "The dos_datetime_set module at 0x1fa2c".
+- Inference: the caller uses the name `timer_set` for the callee.  The original
+  has no symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/dos_datetime_set.c`.
+- Observation: the original has no EBP frame and no floating-point instruction.
+  C cannot emit the `cli`, the `sti`, or the inline port writes, so the module
+  calls the `outportb` helper and leaves out the interrupt guard.  The module
+  builds without `-of+` and needs no assembly source and no FPU stub.
+  Evidence: `tools/rebuild/timer_set.c` and
+  `tools/rebuild/modules/timer_set.json`.
+- Observation: the harness holds the `outportb` stub.  The stub records the port
+  and the value of every write in order.  The six paths cover the divisors 0,
+  `0x1234`, `0xffff`, `0x00ff`, and `0xff00`, and the two-call path.  Every path
+  checks the write count, the port, and the value of every write.  The output
+  holds the markers `0` through `5` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/timer_set_main.c`,
+  `python3 tools/rebuild/harness.py run --module timer_set`, and
+  `work/rebuild/tmr.txt`.
+- Observation: the identity check compares 13 instructions.  The rebuilt body
+  holds 13 instructions and 48 bytes, and the 13-instruction window holds 1 of
+  13 instructions and 1 of 23 bytes equal, because V2 saves `ecx` and `edx`,
+  builds the arguments in registers, and calls the `outportb` helper instead of
+  the inline port writes, and it emits no `cli`, `sti`, or `jmp short`.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x101f6 --count 13 --rebuilt work/rebuild/tmr.exe
+  --rebuilt-map work/rebuild/timer_set.map --rebuilt-symbol timer_set_`.
+- Limit: the original has no symbol name.  The caller and the PIT data flow give
+  the role, and the name `timer_set` stays inferred.
