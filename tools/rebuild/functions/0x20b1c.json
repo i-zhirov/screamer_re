@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x20b1c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "opponent_path_update",
   "notes": [],
   "object_offset": "0x10b1c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20b1c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e7661175c8995824335c7ac629e2def7d562e6fc3a2bb9970a36a51de10b70b7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:19faf182d9d32ca0ff24b2a66c15df7ab361f9fce79c3562444048fa24089b6b",
     "mode": {
       "runtime": "run",
       "strict": true,

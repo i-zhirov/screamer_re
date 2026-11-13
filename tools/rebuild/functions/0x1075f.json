@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "byte-swaps and swaps dwords between the front of the video buffer and the region `0x9f` dwords ahead, 80 passes of 400 dwords"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "video_block_swap_a",
   "name": "video_block_swap_a",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1075f",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9e8f369c900bf89fefaed60ce8848be8768d42473325bdafa85e232cb0417566",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:efdbedfada15bea794c38d9bf8d326371ae865c7de94e25f873c5432dcd5778c",
     "mode": {
       "runtime": "run",
       "strict": true,

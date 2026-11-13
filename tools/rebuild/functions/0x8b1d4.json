@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The sound_source_frame_select module at 0x8b1d4"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "sound_source_frame_select",
   "notes": [],
   "object_offset": "0x7b1d4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -95,8 +104,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8b1d4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9cf770c25f74a64c57a1796e70950d37925836adee370332bdc073f6327789ae",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:df7a34beb607895281feb8ea6cc7c5742a9b75b31bd95c382e58739a4085770c",
     "mode": {
       "runtime": "run",
       "strict": true,

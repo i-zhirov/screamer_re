@@ -4,14 +4,16 @@ The store holds one function record per candidate of STARTH.EXE under
 `functions/0x<address>.json` and one module record per build unit under
 `modules/<name>.json`.  This tool reads and writes a record, validates every
 invariant of the data model, seeds the candidate records from the original image,
-and edits one record from the command line.  A mutation that changes the set of
-record addresses recomputes every extent before the process ends.
+and edits one record from the command line.  A function record holds a
+`provenance` value: `game`, `library`, `compiler_helper`, `not_a_function`, or
+`data`.  A mutation that changes the set of record addresses recomputes every
+extent before the process ends.
 
 Usage:
     python3 tools/rebuild/store.py seed [--check] [--original PATH]
     python3 tools/rebuild/store.py set --function ADDR [--name NAME] [--role TEXT]
-        [--status STATUS] [--module NAME] [--symbol SYM] [--section NAME]
-        [--confidence C] [--check build|identity|behavior]
+        [--status STATUS] [--provenance VALUE] [--module NAME] [--symbol SYM]
+        [--section NAME] [--confidence C] [--check build|identity|behavior]
         [--evidence KIND TEXT] [--note TEXT]
     python3 tools/rebuild/store.py note --function ADDR --text TEXT [--date DATE]
     python3 tools/rebuild/store.py list [--status STATUS] [--module NAME] [--json]
@@ -64,6 +66,13 @@ STATUS_LADDER = (
     "rebuilt",
     "matching",
     "verified",
+)
+PROVENANCE = (
+    "game",
+    "library",
+    "compiler_helper",
+    "not_a_function",
+    "data",
 )
 CHECKS = ("build", "identity", "behavior")
 EVIDENCE_KINDS = ("command", "finding", "file", "note")
@@ -159,6 +168,15 @@ def save_result(address: int, result: dict, status: str | None) -> None:
     save_record(record)
 
 
+def provenance_of(record: dict) -> str:
+    """Return the provenance of a record; a record without the field is `game`.
+
+    A module record is a build unit and carries no provenance, so it takes
+    `game`.
+    """
+    return record.get("provenance") or "game"
+
+
 def load_module(name: str) -> dict:
     return _read_json(module_path(name))
 
@@ -221,28 +239,34 @@ def _jump_span(image: le.LinearExecutable, address: int, data: bytes) -> bool:
     return False
 
 
-def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
-    """The record addresses that are not a function entry, with the reason.
+def non_entry_reason(image: le.LinearExecutable, address: int) -> str | None:
+    """Return why `address` is not a function entry, or None for an entry.
 
     Three forms are caught: a stale candidate at the `push ebp` of a prologue
     that saves registers first, an address inside a run of alignment padding, and
     an address inside a jump or call instruction such as a thunk.
     """
+    data = image.read(address - 5, 12)
+    if data is None or len(data) != 12:
+        return None
+    if data[5:8] in le.PROLOGUE_PATTERNS and le.prologue_start(data[:8], 5) != 5:
+        return "sits inside a prologue"
+    if data[5] in PADDING_BYTES and (
+        data[4] in PADDING_BYTES or data[6] in PADDING_BYTES
+    ):
+        return "sits in alignment padding"
+    if _jump_span(image, address, data):
+        return "sits inside a jump"
+    return None
+
+
+def non_entry_addresses(image: le.LinearExecutable) -> list[tuple[int, str]]:
+    """The record addresses that are not a function entry, with the reason."""
     offenders: list[tuple[int, str]] = []
     for address in candidate_addresses():
-        data = image.read(address - 5, 12)
-        if data is None or len(data) != 12:
-            continue
-        if data[5:8] in le.PROLOGUE_PATTERNS and le.prologue_start(data[:8], 5) != 5:
-            offenders.append((address, "sits inside a prologue"))
-            continue
-        if data[5] in PADDING_BYTES and (
-            data[4] in PADDING_BYTES or data[6] in PADDING_BYTES
-        ):
-            offenders.append((address, "sits in alignment padding"))
-            continue
-        if _jump_span(image, address, data):
-            offenders.append((address, "sits inside a jump"))
+        reason = non_entry_reason(image, address)
+        if reason is not None:
+            offenders.append((address, reason))
     return offenders
 
 
@@ -534,6 +558,12 @@ def _status_violations(
             f"{path}: the status {status!r} is not a status ladder value"
         )
         return violations
+    provenance = provenance_of(record)
+    if provenance in ("not_a_function", "data") and status != "not_a_function":
+        violations.append(
+            f"{path}: the provenance {provenance} requires the "
+            f"not_a_function status"
+        )
     checks = record.get("checks", [])
     if status in ("named", "matching", "verified") and not record.get("name"):
         violations.append(f"{path}: the status {status} requires a name")
@@ -840,6 +870,7 @@ def seed(check: bool, original: Path) -> int:
     for address in added:
         record: dict = {
             "address": f"0x{address:x}",
+            "provenance": "game",
             "status": "unknown",
             "checks": [],
             "evidence": [],
@@ -867,6 +898,8 @@ def command_set(arguments: argparse.Namespace) -> int:
         record["role"] = arguments.role
     if arguments.status is not None:
         record["status"] = arguments.status
+    if arguments.provenance is not None:
+        record["provenance"] = arguments.provenance
     if arguments.module is not None:
         record["module"] = arguments.module
     if arguments.symbol is not None:
@@ -1014,7 +1047,16 @@ def command_check(original: Path | None) -> int:
         if not original.is_file():
             print(f"error: the original image {original} is missing", file=sys.stderr)
             return 2
+        records_by_address = {
+            int(record["address"], 16): record for record in records
+        }
         for address, reason in non_entry_addresses(le.load(original)):
+            record = records_by_address.get(address)
+            if record is not None and (
+                provenance_of(record) in ("not_a_function", "data")
+                or record.get("status") == "not_a_function"
+            ):
+                continue
             violations.append(f"{record_path(address)}: the address {reason}")
     for violation in violations:
         print(violation)
@@ -1063,6 +1105,11 @@ def parse_arguments() -> argparse.Namespace:
     set_parser.add_argument("--role", help="one sentence")
     set_parser.add_argument(
         "--status", choices=STATUS_LADDER, help="the status ladder value"
+    )
+    set_parser.add_argument(
+        "--provenance",
+        choices=PROVENANCE,
+        help="the origin class of the record",
     )
     set_parser.add_argument("--module", help="the module record name")
     set_parser.add_argument("--symbol", help="the linker map symbol")

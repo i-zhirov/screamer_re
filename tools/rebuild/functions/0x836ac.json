@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The sound_event_render module at 0x836ac"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "sound_event_render",
   "notes": [],
   "object_offset": "0x736ac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x836ac",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ae837cc644671f1988bf1308821c13ae217ce13993ec8f8ab10dcffb0fb83eb1",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3ce0dfc2cd8d54065402584bb56d079776adfc3ca5b19905eae92c17bc7a5a1f",
     "mode": {
       "runtime": "run",
       "strict": true,

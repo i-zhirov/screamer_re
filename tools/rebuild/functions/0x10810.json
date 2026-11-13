@@ -18,12 +18,21 @@
     {
       "kind": "note",
       "text": "the caller at 0x1286b in engine_init passes the record table 0x6530 in eax and the state word 0x6350 in edx"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "engine_interface_init",
   "name": "engine_interface_init",
   "notes": [],
   "object_offset": "0x810",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -45,8 +54,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10810",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:a6293950d0c6097962d808f2a80f55ad7bc13b356cb49abf8959cc4f19e516e5",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:81303479d8eb9824a34b9cef43da543a4d281c6a67cfeb49ac020c354a5b0b42",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "the state at +0x148 selects the full pitch projection or the flat yaw projection, and the flag at +0x108 selects the pitch path or the roll angle path"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_view_update",
   "name": "player_car_view_update",
   "notes": [],
   "object_offset": "0x6f34",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -53,8 +62,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16f34",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c55d8502fcdf787548cfd58fe40b050da5ac67cc94c8993ab46622b2aee99b91",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d5997a2a2ef3e2e9c9f03f46499fa61ee0b091a979fc820d499c382a6202f7b2",
     "mode": {
       "runtime": "run",
       "strict": true,

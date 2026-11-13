@@ -11,6 +11,14 @@
     {
       "kind": "note",
       "text": "releases the engine interface, restores the text mode and the keyboard handler, stops the music bank and the sound system, and syncs the DOS clock"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "assembly",
@@ -18,6 +26,7 @@
   "name": "engine_shutdown",
   "notes": [],
   "object_offset": "0x28ac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -39,8 +48,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128ac",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:78e0aa7b03c645e7814479e40da015f1c63901b77f74abc1b364dc02596def77",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:810566a3500228bfe52af6a51cef94a5c7ec5b6d38d3861d2313df4e50839ef9",
     "mode": {
       "runtime": "run",
       "strict": true,

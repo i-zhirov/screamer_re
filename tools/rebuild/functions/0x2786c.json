@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the five passes call object_transform at 0x1cd44, object_player_input at 0x1c760, object_physics at 0x1c810, object_prepare at 0x1c79c, and object_car_link at 0x1c84c on each record; the seven calls pass 1 to opponent_update, 0x109a0 to camera_update, and 0x6350 to sound_effects_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_update_all",
   "name": "object_update_all",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2786c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:19723ed3a425b90b2a029a7b7c31944e75f15c389c851eddf4dd17b561788b07",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:28943d55b98a8e2a9813bd9f50f12645a29f08190bc8fbf3b469219743b0bfa7",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_update",
   "name": "player_update",
   "notes": [],
   "object_offset": "0x9ab0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19ab0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9b3b5d998902e65c72927f6a3c80a8881906542aed78548a4d8c890328002708",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c81450919f5cd57502c51a6a3e9133a38155331d8e7a684e0968ee502639b9d1",
     "mode": {
       "runtime": "run",
       "strict": true,

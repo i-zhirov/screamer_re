@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
     }
   ],
   "module": "dpmi_fill_regs",
   "name": "dpmi_fill_regs",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4bf23",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4538deed2dd469221bab696005d7dd61665bd15222b3415c110b47cca3adb978",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7d0c4454394abf482ef9044f8794b9cd3c151be0c6d833bf3c3c13d2b3950660",
     "mode": {
       "runtime": "run",
       "strict": true,

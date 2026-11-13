@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The wheel_contact_update module at 0x11a30"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "wheel_contact_update",
   "notes": [],
   "object_offset": "0x1a30",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11a30",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:da7a0e8b6cdf8e82c99c2d9b7b54bb80b17949c3ad03d9558e76380deb901d2a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:cc59fb48b9d2fd0bb0af4a344b7e8476e7383917c5c6bbcd3df176d31736139e",
     "mode": {
       "runtime": "run",
       "strict": true,

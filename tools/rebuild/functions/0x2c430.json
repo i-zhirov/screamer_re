@@ -43,12 +43,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module name_entry_screen"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "name_entry_screen",
   "name": "name_entry_screen",
   "notes": [],
   "object_offset": "0x1c430",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -70,8 +79,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c430",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:216117b90ae727cbeeedb0132998323bcae13e6d8ea40e086b496001a15cbdb2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4018c7ab5f664fd7407ece4c44fe1a0f37f35919f0e56b719e175bd649fe14a1",
     "mode": {
       "runtime": "run",
       "strict": true,

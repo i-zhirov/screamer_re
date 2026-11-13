@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The object_revolution_matrix module at 0x1d55c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "object_revolution_matrix",
   "notes": [],
   "object_offset": "0xd55c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -75,8 +84,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d55c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4662ecd43e544007f2823ea9b92e5425b1129f7a3480111f623975c124aea593",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:28444d11ae3049c13e88e5fdb3e0d596e04591dfe03c210f49ec56b66df3e997",
     "mode": {
       "runtime": "run",
       "strict": true,

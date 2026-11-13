@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The hud_panel_show module at 0x27a5c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "hud_panel_show",
   "notes": [],
   "object_offset": "0x17a5c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27a5c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:22319af67df5963a031cf9dead83a5b4e273a2d74e25741142df52f303478c12",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:555c3cd908ca75270213d99020aafba8b09bc6636d77cdca500643f0c8589c7a",
     "mode": {
       "runtime": "run",
       "strict": true,

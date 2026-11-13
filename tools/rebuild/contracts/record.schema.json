@@ -4,7 +4,7 @@
   "description": "One record per function of STARTH.EXE. The file name is the module linear address, for example functions/0x300ec.json. An optional field is absent, never null.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["address", "status", "checks", "evidence", "notes"],
+  "required": ["address", "provenance", "status", "checks", "evidence", "notes"],
   "properties": {
     "address": {
       "type": "string",
@@ -34,6 +34,10 @@
     "status": {
       "enum": ["unknown", "not_a_function", "named", "rebuilt", "matching", "verified"],
       "description": "The status ladder."
+    },
+    "provenance": {
+      "enum": ["game", "library", "compiler_helper", "not_a_function", "data"],
+      "description": "The origin class of the record."
     },
     "confidence": {
       "enum": ["observed", "derived", "inferred"]

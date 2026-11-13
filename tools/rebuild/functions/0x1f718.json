@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "returns the table entry for the index when the table flag is set, and `-1` otherwise"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "table_lookup",
   "name": "table_lookup",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f718",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:8d08f7ccfcd8ab63d754aabf11fe7832036bc88db79d800b15a3547514ecc8e5",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:561d07d77b90fa507968b175b418ca3401be958bc6051500d8b816c525d5e171",
     "mode": {
       "runtime": "run",
       "strict": true,

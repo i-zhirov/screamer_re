@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "builds a record with the argument and calls interrupt 10h through the run-time"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "bios_video",
   "name": "bios_video",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x108e4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:af752e123fb3dc2fe37965640abda11f4b75c419ed41975ff26dd8e2b06b4d41",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:40cab6870cf38bd6eb653bd10292215833285de23184bb77585c9dc44d361fda",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -39,6 +39,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module lzw_bit_read"
+    },
+    {
+      "kind": "finding",
+      "text": "## The lzw_block module at 0x4d4c4"
+    },
+    {
+      "kind": "finding",
+      "text": "## The graphics decoder"
     }
   ],
   "implementation": "c",
@@ -46,6 +54,7 @@
   "name": "lzw_bit_read",
   "notes": [],
   "object_offset": "0x3d844",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -67,8 +76,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d844",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:6159904da5bbca85fa4e4e5183926802c879da4cd3f81153a325122e8eb85ada",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2c15842560bf5c78632ffbe202d9a48dc1b24b5345a63c53c0552ddafa86180a",
     "mode": {
       "runtime": "run",
       "strict": true,

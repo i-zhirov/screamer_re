@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x128e0` holds 239 instructions and 810 bytes up to the second error return and extends to `0x12c0b` (812 bytes): it sets `_DAT_00118e1c` to 0x102, calls `0x131a8`, sets `DAT_0011521c` to 0x1234 and `_DAT_0011cb14` to 1, clears five state globals, calls `0x13580` and `0x13540`, dispatches the game mode `DAT_0011d260` to the handlers `0x12c0c` for the modes 1 and 2, `0x12e18` for 4, `0x12d0c` for 0x10, `0x13120` for 0x20, `0x130a0` for 0x40, and `0x12f50` for 0x100, takes the default path `view_move(0, 0, 0)` at `0x1f94c` and `0x21da8(value ^ 1)` for every other mode including 3, then runs the frame setup and clears the state words"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_session_start",
   "name": "race_session_start",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x128e0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:252f374093a4efbfc4fea3c0d1cd8ca6dfdd2a07a1e880e4a202069c6da994c4",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c6bdcc099c2116f8a448ad67ad30f362b49952321acb49a61d7b26bd2b2d7bfc",
     "mode": {
       "runtime": "run",
       "strict": true,

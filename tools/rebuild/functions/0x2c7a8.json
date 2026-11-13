@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the behavior harness uses the empty list path, because a non-empty pointer table needs an absolute pointer that the minimal image does not relocate; the empty list still runs the sentinel check and the group start store"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "championship_screen_init",
   "notes": [],
   "object_offset": "0x1c7a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c7a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:61d6f8bb194f092bafd835dc7539b77ae131c8c864388dcd29c65f4d1a23cb86",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ce924d06e4269d833011332f008deef67d4e7657e0647781a799447b882142f4",
     "mode": {
       "runtime": "run",
       "strict": true,

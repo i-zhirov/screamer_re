@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The opponent_curve_eval module at 0x22378"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "opponent_curve_eval",
   "notes": [],
   "object_offset": "0x12378",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22378",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:779c1e8f0485bd5409f4447d9155b2ba9eccadcadceefd434e50bc6bf4369cd8",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6e7ed464dd8b58c21ebc152351abe64260aab38a539393bb6b96b3536bc4fefd",
     "mode": {
       "runtime": "run",
       "strict": true,

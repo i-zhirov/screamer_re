@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The cd_check_screen module at 0x15874"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "cd_check_screen",
   "notes": [],
   "object_offset": "0x5874",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15874",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ff119513fa1267f692a06a1a590bfbb231b46d90e8e5a42f6021585e65d274d0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8e0eea599ed711a66f38190ac454316e2b41ad676624b500468d95d5a587ecea",
     "mode": {
       "runtime": "run",
       "strict": true,

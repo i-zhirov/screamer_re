@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The player_car_spin_update module at 0x188b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "player_car_spin_update",
   "notes": [],
   "object_offset": "0x88b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x188b8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5719cd55b9266b2c3bf37f3e3874afcd98a8497ee5e6df26926d2c0e463b30a3",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3179e333d022cab687dc9331d28b5a6f119c675ecbc63498c78c8ca4fb17af9c",
     "mode": {
       "runtime": "run",
       "strict": true,

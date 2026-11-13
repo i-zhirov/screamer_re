@@ -34,12 +34,21 @@
     {
       "kind": "command",
       "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2cf68 --count 370"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "championship_screen",
   "name": "championship_screen",
   "notes": [],
   "object_offset": "0x1cf68",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -61,8 +70,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cf68",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:22c74faa4ef630830088b68ef051499cd477142e5f671861cf5af68f5410901d",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:57298e224655738c3e8c6522eb7e2fdbc07fc1ee268675f2ac10c709d018d539",
     "mode": {
       "runtime": "run",
       "strict": true,

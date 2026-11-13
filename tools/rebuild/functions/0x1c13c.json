@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The quad_point_test module at 0x1c13c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "quad_point_test",
   "notes": [],
   "object_offset": "0xc13c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c13c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0fca9fe42ed8103f7d93096aab414de29f6bf76135303dd26b71fe9e981a38d9",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:cc4a8d8ac76c9a54340e41577d9720ef249f05315198dcb5248d73ca31eb94b1",
     "mode": {
       "runtime": "run",
       "strict": true,

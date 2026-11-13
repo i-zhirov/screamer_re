@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The championship_result_apply module at 0x29bac"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "championship_result_apply",
   "notes": [],
   "object_offset": "0x19bac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29bac",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:170ae45b2ffb76c651c140a7412f48b59ca989a1b91f3fbb250d151cb95cda7b",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:17bbc072227cce819ddcd990073a894fc96afb68204f0ae6bc40bfad331a8167",
     "mode": {
       "runtime": "run",
       "strict": true,

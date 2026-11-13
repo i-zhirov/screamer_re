@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the proximity check, the drive step gated on the state at `+0x2f8` and the input bits `DAT_00118e1c`, and the revolution step"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_player_input",
   "name": "object_player_input",
   "notes": [],
   "object_offset": "0xc760",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c760",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:372b9b1b438f7ab57769344820eb4e79a262aa097720f6f1a6a552c192aaab9d",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:edd759c4dd5c49c8e95b5c50f5cd21cbd6e886f10864443701c62418a5012734",
     "mode": {
       "runtime": "run",
       "strict": true,

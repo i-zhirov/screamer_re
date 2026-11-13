@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The dos_datetime_set module at 0x1fa2c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "dos_datetime_set",
   "notes": [],
   "object_offset": "0xfa2c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1fa2c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c74695527e4fd6f5f940e531942f8f3defa9a514ea2652710781e15ebc306b58",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b4308e6be636ade77cd7f0811ccb7bd39590f9efc1eef4b026e41a03def1419e",
     "mode": {
       "runtime": "run",
       "strict": true,

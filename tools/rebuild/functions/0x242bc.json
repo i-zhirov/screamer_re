@@ -43,12 +43,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module car_sound_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "car_sound_update",
   "name": "car_sound_update",
   "notes": [],
   "object_offset": "0x142bc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -70,8 +79,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x242bc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ee8ddd6cd8b0ed9fb1a89b64b22fb70e06d7976c8c8f52b9c71f0604b7286b2f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:96f2c2c95c7d9107dcbe8519fa5cd4f883b226a59caaa005873d825aeb15040a",
     "mode": {
       "runtime": "run",
       "strict": true,

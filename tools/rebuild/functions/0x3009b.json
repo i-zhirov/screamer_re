@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "module": "printf",
   "name": "printf",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x3009b",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:2277d81c9d54a855e0448972baead7d06bf0e21f72904ee83831dbdc10d8449e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4aa33ad54f8c131e4520f12a384919d40ba96a80556b9c56ef1a16839a4a6851",
     "mode": {
       "runtime": "run",
       "strict": true,

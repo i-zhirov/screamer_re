@@ -10,11 +10,24 @@
     {
       "kind": "note",
       "text": "the original at `0xd2008` holds 35 instructions and 94 bytes: it walks the free list from `DAT_001031d0`, stops before the next free block, releases the block through the heap routine at `0xe0a84`, keeps the largest free size in `DAT_001031d8`, and clears the heap flag at `0x27de5`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "module": "runtime_free",
   "name": "free",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd2008",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ab778b75b15ca6330bb2d4006cd2bceb61729f95152ab07aea9a5b68e2bb3728",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c7c21a111526f09f46575ca5d1cefbca4bc2395bf9606326d27f36d464cec452",
     "mode": {
       "runtime": "run",
       "strict": true,

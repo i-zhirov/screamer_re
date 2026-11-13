@@ -31,12 +31,21 @@
     {
       "kind": "note",
       "text": "the harness covers the deceleration path, the large and small slip, the two amplitude clamps, the gate above the limit, the two early flags, and the input bit 0x40; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_skid_update",
   "name": "player_car_skid_update",
   "notes": [],
   "object_offset": "0x7d14",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -58,8 +67,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x17d14",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:65c4b89df7d17ae0ce545da0f710375bd026943a26c218056a4d8da4f7350ea0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:bf74c0b8fdd1e72bbb5da405d92bf660b0068dcb924c483fb3b20d02c5a4175e",
     "mode": {
       "runtime": "run",
       "strict": true,

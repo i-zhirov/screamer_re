@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The car_proximity_pass module at 0x17408"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "car_proximity_pass",
   "notes": [],
   "object_offset": "0x7408",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x17408",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d681de8446be3ae1755e71a807ebd8f729953487482b4cf5cf4b80bf5ac6adae",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:594e2564468c87596a12ba377699292f527c57a8ac2c6f7bc49b98377bc44ec4",
     "mode": {
       "runtime": "run",
       "strict": true,

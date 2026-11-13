@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "formats into a stream through the run-time `__fprtf` at `0xd429f`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
     }
   ],
   "module": "fprintf",
   "name": "fprintf",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4bf64",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:17e33a067159cbc9b836f3a01e620257714e001f090ad7abc3f306731a3f1849",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ac82c8d9e7bd97a84ef6759be0e72f5116109746579a5ff237f08ba02b6dac06",
     "mode": {
       "runtime": "run",
       "strict": true,

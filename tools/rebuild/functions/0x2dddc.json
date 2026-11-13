@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at 0x2dddc holds 111 instructions and 394 bytes: it calls the slot source at 0xc6fbc, stores the argument and the index at +0x04 and +0x08 of the 0x38-byte record array at object-3 offset 0x2099c, copies the name from DAT_001203cc at +0x0c, stores the cells DAT_001203c4 and DAT_001203c8 at +0x10 and +0x14, reads the context pointer DAT_00102dec for +0x18 and the lookup at +0x1c, stores DAT_0011d274 and DAT_0011d230 at +0x20 and +0x24, copies the default block at 0xc7100 to +0x28, calls the register routine at 0xc7478 with (record, 0xc, name, 0x74, 9), and returns the index"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "net_player_add",
   "name": "net_player_add",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2dddc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:a450761de751c4bf4868b66b30dced31ae999064eece8470e7b8a30145db9834",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:251adde8385ccf676f5bcedf17e8a93b7e84d621640afbb0bd573b28a5cd825d",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The replay_load module at 0x1b840"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "replay_load",
   "notes": [],
   "object_offset": "0xb840",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -95,8 +104,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b840",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:53cc9c9c1a47e84a1cdbf613c535375b4f066230a86aa68ebaf93044023be348",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0de041a5caf3be0441f8bed7268076ff787bc8fcb27a2aaacc18c658aa522324",
     "mode": {
       "runtime": "run",
       "strict": true,

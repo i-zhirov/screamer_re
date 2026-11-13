@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_0002f40b` calls interrupt 31h with the function 0x101 and the block address"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "dos_memory_free",
   "notes": [],
   "object_offset": "0x1f40b",
+  "provenance": "game",
   "role": "frees the DOS memory block through INT 31h AX=0x0101",
   "section": "The resource layer",
   "size": 101,

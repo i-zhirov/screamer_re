@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the original has no symbol name for this function; the module name and the callee names in the harness stay inferred"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "race_finish_update",
   "notes": [],
   "object_offset": "0x11058",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -95,8 +104,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21058",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e3bec5666639e67b10c7be693f0e06efd996b6af23b880e9ef8866008f15235a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:1473bb5a9c4d738d45cc9253b14ed203819f244aec997bfe843d604307db5580",
     "mode": {
       "runtime": "run",
       "strict": true,

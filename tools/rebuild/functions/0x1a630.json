@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module player_route_camera"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "player_route_camera",
   "notes": [],
   "object_offset": "0xa630",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a630",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:78b44b71937ad7afe61c9d4c08c44d8a320c2bea2799162d5694378e6f3e89b4",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:26d8822b2f01021c13eb5e1f31e174edd87d19139428905fe5ad5a81512d5f47",
     "mode": {
       "runtime": "run",
       "strict": true,

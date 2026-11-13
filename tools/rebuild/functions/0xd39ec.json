@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000d39ec` calls `FUN_000e2f41` and `FUN_000d3c8a` and fills the tables at `DAT_00124e10` and `DAT_00122388`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "sound_channel_setup",
   "notes": [],
   "object_offset": "0xc39ec",
+  "provenance": "library",
   "role": "reads the instrument header from the far pointer, stores the driver pointers, and fills the voice table",
   "section": "The HMI sound driver",
   "size": 670,

@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "a non-zero angle gives the turn radius wheelbase/tan(angle) at +0x2f8, the yaw step +0x50c * 0x118e04 / radius at +0x2f4, adds it to the heading at +0x4cc, and stores the rotated position difference at +0x1c and +0x24"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_steering_update",
   "name": "player_steering_update",
   "notes": [],
   "object_offset": "0x629c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -53,8 +62,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1629c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:19193114d15121f97aca0581c568af0f9422f4b993ab6b50527b69a289a52a7a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e3088b1a106fac18e00a3e4ae8073749bfb89a8ce43033e0b32733879ca6d880",
     "mode": {
       "runtime": "run",
       "strict": true,

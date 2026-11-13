@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "computes the frame delta between `DAT_000107fd` and `DAT_0011d228`, and sets the timeout flag `DAT_00101e04` when the delta is greater than 1000"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_timeout",
   "name": "race_timeout",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27f44",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:43d58143989d43f41cdc724bb6055a7cd4eb51f9d30ec728dfc3202924cfd47e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c319dc56e64ed3f80bd23ee2496a5c75817e505b42a7223b8510dc336e5fbe97",
     "mode": {
       "runtime": "run",
       "strict": true,

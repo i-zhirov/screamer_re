@@ -11,12 +11,21 @@
     {
       "kind": "note",
       "text": "dispatches on the code through a jump table to one message stub per code"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "error_report",
   "name": "error_report",
   "notes": [],
   "object_offset": "0x978",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -38,8 +47,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:6f76114d484bab2124fcba822aeefe68076f9755c02dacdca2f47cfad884c8ad",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:610559eb42b1b2b326088f92c4b33bd2aaf6ffe8c95a696b01729f90120ec4f0",
     "mode": {
       "runtime": "run",
       "strict": true,

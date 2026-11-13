@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The func_1e914 module at 0x1e914"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "func_1e914",
   "notes": [],
   "object_offset": "0xe914",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e914",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:69b42be19ea138d68f3b9b0916ce4692a5ebf05337fe966a27437e4ce6392097",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:a58c71aa24539ad0aaa6863717df0a7b6c9a32dde6d4f73f39b80d035136b7f7",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module player_car_reset_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "player_car_reset_update",
   "notes": [],
   "object_offset": "0x8528",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x18528",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:6a2f66004476abb99e3146ec1b8ecb63bb2fb31bcd1405b669cd3e8547a81896",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:56a04ee958041b9b89f7de569bb375363eb8f21101350c40cd8ffb1f7bd33fe3",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -1,0 +1,436 @@
+{
+  "spans": [
+    {
+      "from": "0x10000",
+      "to": "0x30050",
+      "provenance": "game",
+      "reason": "the game program code of object 1",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## Program map"
+        },
+        {
+          "kind": "finding",
+          "text": "## Function names"
+        }
+      ]
+    },
+    {
+      "from": "0x30050",
+      "to": "0x300f8",
+      "provenance": "library",
+      "reason": "the Watcom C run-time output, exit, and memory helpers",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        },
+        {
+          "kind": "finding",
+          "text": "## The period Watcom 10.0a toolchain"
+        }
+      ]
+    },
+    {
+      "from": "0x300f8",
+      "to": "0x30389",
+      "provenance": "compiler_helper",
+      "reason": "the Watcom C/C++32 DOS-extender start routine and its entry jump",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The startup module at 0x30170"
+        },
+        {
+          "kind": "finding",
+          "text": "## Function names"
+        }
+      ]
+    },
+    {
+      "from": "0x30389",
+      "to": "0x4bee0",
+      "provenance": "compiler_helper",
+      "reason": "the startup message writer",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The startup module at 0x30170"
+        }
+      ]
+    },
+    {
+      "from": "0x4bee0",
+      "to": "0x4bf23",
+      "provenance": "game",
+      "reason": "a game camera coordinate helper that reads the game data at 0x7a844 and wraps three offsets at 0x7ff",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The resource layer and the DPMI services"
+        },
+        {
+          "kind": "command",
+          "text": "python3 tools/le.py disasm STARTH.EXE 0x4bee0 --count 30"
+        }
+      ]
+    },
+    {
+      "from": "0x4bf23",
+      "to": "0x4bf88",
+      "provenance": "library",
+      "reason": "the Watcom DPMI and formatted-output helpers",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        },
+        {
+          "kind": "finding",
+          "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
+        }
+      ]
+    },
+    {
+      "from": "0x4bf88",
+      "to": "0x4c08d",
+      "provenance": "game",
+      "reason": "the engine file-error report",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The file_error_report module at 0x4bf88"
+        }
+      ]
+    },
+    {
+      "from": "0x4c08d",
+      "to": "0x4c810",
+      "provenance": "library",
+      "reason": "the Watcom C stream library",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The stream_close module"
+        },
+        {
+          "kind": "finding",
+          "text": "## The stream_read module at 0x4c4e5"
+        },
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        }
+      ]
+    },
+    {
+      "from": "0x4c810",
+      "to": "0x4d32c",
+      "provenance": "game",
+      "reason": "the game resource, table, and float-table loader functions",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The resource layer and the DPMI services"
+        },
+        {
+          "kind": "finding",
+          "text": "## Program map"
+        }
+      ]
+    },
+    {
+      "from": "0x4d32c",
+      "to": "0x4d360",
+      "provenance": "library",
+      "reason": "the Watcom C formatted-output helper",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The first Phase B modules"
+        }
+      ]
+    },
+    {
+      "from": "0x4d360",
+      "to": "0x4d4c4",
+      "provenance": "game",
+      "reason": "the game object helpers and the LZW expander entry",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## Program map"
+        }
+      ]
+    },
+    {
+      "from": "0x4d4c4",
+      "to": "0x4d9ba",
+      "provenance": "game",
+      "reason": "the game LZW decoder",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The lzw_block module at 0x4d4c4"
+        },
+        {
+          "kind": "finding",
+          "text": "## The graphics decoder"
+        }
+      ]
+    },
+    {
+      "from": "0x4d9ba",
+      "to": "0x4d9f4",
+      "provenance": "library",
+      "reason": "a library string helper",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        }
+      ]
+    },
+    {
+      "from": "0x4d9f4",
+      "to": "0x4da26",
+      "provenance": "compiler_helper",
+      "reason": "the Watcom FPU truncate helper",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        }
+      ]
+    },
+    {
+      "from": "0x4da26",
+      "to": "0x4da83",
+      "provenance": "library",
+      "reason": "the Watcom FPU and math helpers",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        }
+      ]
+    },
+    {
+      "from": "0x4da83",
+      "to": "0x819f0",
+      "provenance": "library",
+      "reason": "the Watcom FPU emulator and math library",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        },
+        {
+          "kind": "finding",
+          "text": "## The period Watcom 10.0a toolchain"
+        }
+      ]
+    },
+    {
+      "from": "0x819f0",
+      "to": "0x81a70",
+      "provenance": "library",
+      "reason": "the sound library port and palette helpers",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The instrument field order needs the HMI driver"
+        },
+        {
+          "kind": "finding",
+          "text": "## The reachable unknown candidates"
+        }
+      ]
+    },
+    {
+      "from": "0x81a70",
+      "to": "0x843a8",
+      "provenance": "game",
+      "reason": "the game sound, camera, and matrix functions",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The object pipeline and the race frame"
+        },
+        {
+          "kind": "finding",
+          "text": "## Program map"
+        }
+      ]
+    },
+    {
+      "from": "0x843a8",
+      "to": "0x8a848",
+      "provenance": "library",
+      "reason": "the HMI sound driver",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The reachable unknown candidates"
+        },
+        {
+          "kind": "finding",
+          "text": "## The instrument field order needs the HMI driver"
+        }
+      ]
+    },
+    {
+      "from": "0x8a848",
+      "to": "0x8c150",
+      "provenance": "game",
+      "reason": "the game sound and video functions",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The object pipeline and the race frame"
+        },
+        {
+          "kind": "finding",
+          "text": "## Program map"
+        }
+      ]
+    },
+    {
+      "from": "0x8c150",
+      "to": "0xc1ffd",
+      "provenance": "library",
+      "reason": "the Watcom memory helpers at 0x8c150 and 0x8c160",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The Phase A library modules match byte for byte"
+        },
+        {
+          "kind": "finding",
+          "text": "## The reachable unknown candidates"
+        }
+      ]
+    },
+    {
+      "from": "0xc1ffd",
+      "to": "0xd4324",
+      "provenance": "library",
+      "reason": "the HMI sound driver, the math library, and the Watcom run-time",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The reachable unknown candidates"
+        },
+        {
+          "kind": "finding",
+          "text": "## The OPL register write sequence in the HMI driver"
+        },
+        {
+          "kind": "finding",
+          "text": "## The malloc module at 0xd1f25"
+        }
+      ]
+    },
+    {
+      "from": "0xd4324",
+      "to": "0xd4374",
+      "provenance": "compiler_helper",
+      "reason": "the main invoker",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The startup module at 0x30170"
+        },
+        {
+          "kind": "finding",
+          "text": "## Function names"
+        }
+      ]
+    },
+    {
+      "from": "0xd4374",
+      "to": "0xd43bf",
+      "provenance": "compiler_helper",
+      "reason": "the run-time initializer",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The startup module at 0x30170"
+        }
+      ]
+    },
+    {
+      "from": "0xd43bf",
+      "to": "0xd4410",
+      "provenance": "compiler_helper",
+      "reason": "the run-time finalizer",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The startup module at 0x30170"
+        }
+      ]
+    },
+    {
+      "from": "0xd4410",
+      "to": "0xd4448",
+      "provenance": "compiler_helper",
+      "reason": "the DPMI INT 31h entry",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The period Watcom 10.0a toolchain"
+        }
+      ]
+    },
+    {
+      "from": "0xd4448",
+      "to": "0xeba93",
+      "provenance": "library",
+      "reason": "the HMI sound driver and the Watcom run-time",
+      "evidence": [
+        {
+          "kind": "finding",
+          "text": "## The reachable unknown candidates"
+        },
+        {
+          "kind": "finding",
+          "text": "## The period Watcom 10.0a toolchain"
+        }
+      ]
+    }
+  ],
+  "records": {
+    "0xd1ed8": {
+      "provenance": "not_a_function",
+      "reason": "the body is a five-byte jump thunk to 0xe0903",
+      "evidence": [
+        {
+          "kind": "command",
+          "text": "python3 tools/le.py disasm STARTH.EXE 0xd1ed8 --count 3"
+        }
+      ]
+    },
+    "0xeab1d": {
+      "provenance": "not_a_function",
+      "reason": "the body is a five-byte jump thunk to 0xde0d8",
+      "evidence": [
+        {
+          "kind": "command",
+          "text": "python3 tools/le.py disasm STARTH.EXE 0xeab1d --count 3"
+        }
+      ]
+    },
+    "0xd6e52": {
+      "provenance": "not_a_function",
+      "reason": "the body is a call-through-pointer thunk and a return",
+      "evidence": [
+        {
+          "kind": "command",
+          "text": "python3 tools/le.py disasm STARTH.EXE 0xd6e52 --count 3"
+        }
+      ]
+    }
+  }
+}

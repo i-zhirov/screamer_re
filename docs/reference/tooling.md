@@ -635,16 +635,19 @@ The files:
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
 | `modules/*.json` | the two hundred and fifty-two module records: the sources, the compiler, the link, and the run expectations |
-| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
+| `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the provenance field and its status rule, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
 | `oracle.py` | compare two function bodies with the fixup slots and the direct branch targets normalized |
 | `image_compare.py` | compare a rebuilt whole image with the original by region and by byte |
-| `view.py` | render the self-contained status page of the store: the board, the table, the address-space map, the treemap, and the call graph |
+| `view.py` | render the self-contained status page of the store: the provenance panel, the board, the table, the address-space map, the treemap, and the call graph |
 | `docs.py` | render the `program-map.md` tables and check the drift |
 | `callgraph.py` | build the named call graph from the store and the original executable, and check the drift |
 | `callgraph.json` | the direct call edges between named records |
+| `triage.py` | triage the records against the provenance evidence, and write it into the records |
+| `coverage.py` | report the byte coverage and the record counts by provenance |
+| `provenance.json` | the provenance evidence document: the spans and the non-game record entries |
 | `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
 
 ```sh
@@ -671,6 +674,16 @@ function on an axis of the module address space and groups the functions by
 section. The treemap sizes each section and function by the byte span. The call
 graph places the named functions in columns by call depth. The five views share
 the filters, the selection, and the detail pane.
+
+The page holds a provenance panel above the views. The panel shows one row per
+provenance with the record count, the unknown count, the byte bar, and the
+verified, rebuilt, and exact byte split. The panel uses the covered byte total,
+because the page renders without the game image. The progress bar and the header
+count the game function records only. A library, compiler-helper, data, or
+not-a-function record stays in its provenance row and out of the game
+denominator. The filter row holds a provenance filter. The match counters stay
+over every row whose status is not `not_a_function` and that has a result, so a
+library record with a result stays in its match bucket.
 
 `callgraph.py build` scans the body of each named record and resolves each
 direct call target to the record that starts at or before it. `check` writes
@@ -702,7 +715,47 @@ forces one fresh run and prints the full check output.  `store.py check`
 validates every record and module against the JSON Schema contracts, in addition
 to the semantic checks.  `store.py set --function 0x2ed77 --implementation
 assembly` marks the source language of one record.  The value is `c` or
-`assembly`.  The status page shows `asm` for `assembly` and `C` for `c`.
+`assembly`.  The status page shows `asm` for `assembly` and `C` for `c`.  A
+function record holds a `provenance` field.  The value is a documentation
+field, so it stays out of the input fingerprint.  A `data` or `not_a_function`
+provenance requires the `not_a_function` status.
+
+### The provenance triage
+
+The evidence document `tools/rebuild/provenance.json` names the spans and the
+records whose provenance is not `game`.  A span holds the address fields `from`
+and `to`.  A record entry names the address and carries a `provenance`, a
+`reason`, and at least one `finding`, `file`, or `command` evidence item.
+
+The provenance value is one of `game`, `library`, `compiler_helper`,
+`not_a_function`, and `data`.
+
+```sh
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --from 0x20000 --to 0x30000
+python3 tools/rebuild/triage.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+```
+
+`check` proves the evidence document and every record.  The bounded form checks
+only the records inside `[--from, --to)` and the entries and spans that
+intersect the range.  `apply` runs only after a clean `check` and writes the
+provenance and the entry evidence into the records through
+`store.save_record`.  The analysis count is the `unknown` records with
+provenance `game`.  A library or compiler-helper record without a name keeps
+the `unknown` status and stays out of the analysis count.
+
+### The coverage report
+
+`coverage.py report` reads the function records and the original image.  It
+prints one row per provenance with the columns `provenance`, `records`,
+`unknown`, `bytes`, `coverage`, `verified`, `rebuilt`, and `exact`, and one
+total line.  The byte span of a record reaches the next record, and the last
+record uses its `size`, or one byte.  The denominator is the virtual size of
+the code object in the original image.
+
+```sh
+python3 tools/rebuild/coverage.py report --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+```
 
 `image_compare.py` is the whole-image gate.  It reports the equal byte count,
 one score per region (stub, header, loader tables, fixup section, object pages,
@@ -1055,10 +1108,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 303 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 299 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 288 checks.  Both flags
-report 284 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 304 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 300 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 289 checks.  Both flags
+report 285 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

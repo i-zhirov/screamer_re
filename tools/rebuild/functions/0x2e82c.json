@@ -30,12 +30,21 @@
     {
       "kind": "note",
       "text": "the input word DAT_00118e1c gates the save: the bits 0x1020 return before any table write"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_record_save",
   "name": "race_record_save",
   "notes": [],
   "object_offset": "0x1e82c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -57,8 +66,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2e82c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5a83150650d49977da085cb5b60950a02174b4c2426f634405591ce648eda02c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d21c476031e69e17a76129b268c859bd69c5d586dff5116b7b44d785c94ee947",
     "mode": {
       "runtime": "run",
       "strict": true,

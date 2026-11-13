@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the preparation steps, gated on the state at `+0x414`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_prepare",
   "name": "object_prepare",
   "notes": [],
   "object_offset": "0xc79c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c79c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:fd1c82800894c78fe3484133a24506862861763089c79eaab371b290e43e6eaa",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:a06f629d8ac329f14cef43feb19dac280a379a42e9d058b58a1c1055e66b38a5",
     "mode": {
       "runtime": "run",
       "strict": true,

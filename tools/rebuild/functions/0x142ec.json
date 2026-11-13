@@ -14,12 +14,21 @@
     {
       "kind": "note",
       "text": "the original at `0x142ec` holds 226 bytes and 65 instructions up to the early `ret` at `0x143cd`: the frame, the index store at `+0`, the load-flag gate, the three signed compares on `DAT_0000f8f0`, `DAT_0000d6dc`, and `DAT_0011d2a0`, the two `0x11060` calls with the names at 0x5dc and `0xd25c + index * 0x40`, the model index store at `+0x2e0`, and the two error returns; the full body continues to the `ret` at `0x1496c`, so the store keeps the 1668-byte extent and sets no size"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "car_setup",
   "name": "car_setup",
   "notes": [],
   "object_offset": "0x42ec",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +50,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x142ec",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:87fe47c294d371138fa0aaa273191d64efdf773d2ac04e5bb55b1c4d0d155944",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:942e51c7dc997e15076f3380a984c35ca5ef4696db1f32c307edb970303a469c",
     "mode": {
       "runtime": "run",
       "strict": true,

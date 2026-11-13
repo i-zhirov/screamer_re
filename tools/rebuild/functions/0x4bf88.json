@@ -14,12 +14,17 @@
     {
       "kind": "note",
       "text": "the original at 0x4bf88 holds 82 instructions and 241 bytes: it reads the status at [arg+0xac], dispatches through the five-entry jump table at 0x4c04c, prints the five file strings and the default interface string through the printer at 0x4bf64 with the stream 0x2fd2, passes the name at +0x78, and calls exit(-2) at 0x300be; the string immediates 0x1608, 0x1622, 0x1644, 0x1653, 0x1667, and 0x1685 are object-3 offsets"
+    },
+    {
+      "kind": "finding",
+      "text": "## The file_error_report module at 0x4bf88"
     }
   ],
   "module": "file_error_report",
   "name": "file_error_report",
   "notes": [],
   "object_offset": "0x3bf88",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4bf88",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:2f553a6fe195ece2b3bd4a2964ba53d544ea7be2db639afd9a06753af19f0fb0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0839418e92ce3b512d4c6a7e7c5988aeb81641625d1e56701e8ef1d92dd59b0f",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The race_session_run module at 0x1fd70"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "race_session_run",
   "notes": [],
   "object_offset": "0xfd70",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1fd70",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:01267fef37e2f0eec2a08501a8d9b74f9fc12ad12ab329f0af0d4c599c9bb1f9",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9d8b2e6eb9364bf4263711b4625fad25345f3d55deba7985b077a368ab54212b",
     "mode": {
       "runtime": "run",
       "strict": true,

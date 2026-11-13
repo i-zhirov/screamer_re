@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "module": "free",
   "name": "free",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x300ec",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:60a714e0c796ea79ad14e36e8985bb144c6d757c34388ef5bba3adb12c565932",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b7946095425ab20415e50535be3f9b989179a80062be0165a32475d7dce8e59c",
     "mode": {
       "runtime": "run",
       "strict": true,

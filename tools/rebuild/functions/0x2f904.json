@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "pool_init",
   "name": "pool_init",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f904",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:22562e9f77bc06924b01555d73d7ea962cd091c166b6e1a4acf0d1ba4a0abedd",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:fe0404b1728e8bd396dfb571d1c156da146da7071fa78fc179d9a1d24a4e6bd0",
     "mode": {
       "runtime": "run",
       "strict": true,

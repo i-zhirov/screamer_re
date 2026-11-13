@@ -22,11 +22,20 @@
     {
       "kind": "note",
       "text": "the harness covers the disabled gate, the release path, the scan hit and miss, both default ids, the distance and type compares, the four state flags, the copy at `+0x418`, the negative angle, and the three collision value stores; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_collision",
   "name": "object_collision",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -48,8 +57,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e00c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:883bd484566e0e6ec25f65b5e924df213be9d7f48498f4978274c830b81eed93",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8f7c610b37564e353510fb4940b7e9d75a729bbf990cc764cc1e5f6cb11e845d",
     "mode": {
       "runtime": "run",
       "strict": true,

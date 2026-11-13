@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The quit_confirm_screen module at 0x219ec"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "quit_confirm_screen",
   "notes": [],
   "object_offset": "0x119ec",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x219ec",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ec829be52114dde0e1956db307a813c95cb857084d601ad889fab0f75a7ea227",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d30c4f569f6fd94e88730e1cbeced3a46e1300820031c278af1c9a5d66665c4a",
     "mode": {
       "runtime": "run",
       "strict": true,

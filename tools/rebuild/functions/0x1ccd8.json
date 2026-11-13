@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x1ccd8` holds 29 instructions and 105 bytes: it copies the four dword fields at `+0x454`, `+0x45c`, `+0x498`, and `+0x4a0` into `+0x160`, `+0x168`, `+0x16c`, and `+0x174`, and the float at `+0x418` into `+0x178`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_state_save",
   "name": "object_state_save",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1ccd8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d8f76d861a3aa76543f085f6c4f9b5c010e8618329285548e419d4bf101dacf5",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:fe6b02f6fbd7c5be555f15d17227098ad565f9e1f5196d6c9afadb437331ef67",
     "mode": {
       "runtime": "run",
       "strict": true,

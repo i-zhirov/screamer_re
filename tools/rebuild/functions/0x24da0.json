@@ -15,11 +15,20 @@
     {
       "kind": "note",
       "text": "the record keeps the 640-byte extent to the next entry, so the identity check uses `--original-end 0x25020`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "joystick_update",
   "name": "joystick_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +50,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x24da0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:82de6942bb2fa81983a610cdf974d420f87a6be7221de1a6b579787fa7c0b9c5",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:63e22f66b0f9c4e60acc1e00e5f16e4fd9a8afcb9271e03f843dc7f608e1d4a9",
     "mode": {
       "runtime": "run",
       "strict": true,

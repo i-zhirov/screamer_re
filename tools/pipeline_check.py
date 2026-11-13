@@ -18,8 +18,8 @@ Stages:
     unchanged records against their stored fingerprint, and compare the
     printed verdicts with the recorded results.  Then compare the rebuilt
     whole image with the original, when `--rebuilt-image` exists.
-12. check_store: prove the store, the seed, the generated tables, and the
-    status page.
+12. check_store: prove the store, the seed, the generated tables, the status
+    page, and the provenance evidence.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -79,6 +79,8 @@ TOOLS = (
     "rebuild/view.py",
     "rebuild/docs.py",
     "rebuild/callgraph.py",
+    "rebuild/triage.py",
+    "rebuild/coverage.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -860,10 +862,11 @@ def check_image(
 
 
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
-    """Prove the store, the seed, the generated tables, and the page.
+    """Prove the store, the seed, the tables, the page, and the provenance.
 
     The store is the only module registry, so the stage runs the store check,
-    the seed check, and the drift check, and it renders the status page.
+    the seed check, the provenance evidence check, and the drift check, and it
+    renders the status page.
     """
     result = run(
         [
@@ -876,6 +879,20 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     )
     checks.check(
         "stage 12: the store holds no violation",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/triage.py",
+            "check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
+    checks.check(
+        "stage 12: the provenance evidence is complete",
         result.returncode == 0,
         last_line(result.stdout) or last_line(result.stderr),
     )

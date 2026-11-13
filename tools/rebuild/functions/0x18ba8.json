@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The sla_marker_check module at 0x18ba8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "sla_marker_check",
   "notes": [],
   "object_offset": "0x8ba8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x18ba8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4bfe6f9ae64e9ea7333bbb7e6a3482d9e1763e011cf714cf3b02d0bf65b0ae9f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d6fe1b5594c068429ea1e15735bcf13b7ac1cc0d947bd819900a186bbd66fc97",
     "mode": {
       "runtime": "run",
       "strict": true,

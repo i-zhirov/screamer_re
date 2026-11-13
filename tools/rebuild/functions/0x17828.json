@@ -39,6 +39,14 @@
     {
       "kind": "finding",
       "text": "The car_collision_response module at 0x17828"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -46,6 +54,7 @@
   "name": "car_collision_response",
   "notes": [],
   "object_offset": "0x7828",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -67,8 +76,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x17828",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:a5bc36754a9a5465ff6994c21cd2cbd1733309b44a7e3681f930e35e448add16",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:947265d780077bfac70cd1204a6a0dcb9db377dc0e061323c5b60ff9a5eeca88",
     "mode": {
       "runtime": "run",
       "strict": true,

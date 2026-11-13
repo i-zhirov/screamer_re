@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x4cc10 holds 120 instructions and 396 bytes: the index bound at 0x3e8, the message call at 0xc656e, the handle table read at 0x21540, the object field stores at +0x00 through +0x38, the 0x20-byte chunk records at object + 0x40 from the file count at +0x14 and the offset table at +0x18, and the end marker -1"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "object_init_from_file",
   "name": "object_init_from_file",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4cc10",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d9d791b783546914b334145d3dfda50e1ea17c4241bd0480003eb713e22512f7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2be5ea43337dc1e34f49e1c85a9ffa554336c4130e2699c9fb98acf081f8d1bf",
     "mode": {
       "runtime": "run",
       "strict": true,

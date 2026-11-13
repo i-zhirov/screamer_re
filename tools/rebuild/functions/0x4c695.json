@@ -55,6 +55,18 @@
     {
       "kind": "finding",
       "text": "The stream_read_text module at 0x4c695"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "c",
@@ -62,6 +74,7 @@
   "name": "stream_read_text",
   "notes": [],
   "object_offset": "0x3c695",
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c695",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c14f3f8ac334b41f8d1553ee40df21292de469488cd6c417d93b7ba52196f834",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b412f19f306063d221097f0cb63b7f6adb16071a43b3cb2bcf79bcafdba941a6",
     "mode": {
       "runtime": "run",
       "strict": true,

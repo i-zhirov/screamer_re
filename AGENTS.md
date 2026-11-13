@@ -118,6 +118,9 @@ screamer_re/
 │   │   ├── docs.py            # render the program-map tables
 │   │   ├── callgraph.py       # build and check the named call graph
 │   │   ├── callgraph.json     # the direct call edges between named records
+│   │   ├── triage.py          # triage the records against the provenance evidence
+│   │   ├── coverage.py        # report the byte coverage and the provenance counts
+│   │   ├── provenance.json    # the provenance evidence document
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
 │   │   ├── modules/           # the two hundred and fifty-two module recipes
@@ -158,9 +161,12 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --from 0x20000 --to 0x30000
+python3 tools/rebuild/coverage.py report --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
@@ -170,10 +176,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 303 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 299 checks.
+about 8 minutes plus the Ghidra import and reports 304 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 300 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 288 checks.  Both flags report 284 checks and take about 16
+run reports 289 checks.  Both flags report 285 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -226,7 +232,8 @@ open ~/Documents/Screamer.app
       tools/rebuild/image_compare.py tools/rebuild/harness.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
-      tools/rebuild/callgraph.py tools/pipeline_check.py` to check the syntax
+      tools/rebuild/callgraph.py tools/rebuild/triage.py
+      tools/rebuild/coverage.py tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
@@ -303,6 +310,10 @@ open ~/Documents/Screamer.app
   `data-key`, `data-address`, `data-name`, `data-module`, `data-status`,
   `data-stale`, and `data-match`. The filter and the selection use these
   attributes, so a new view adds no separate filter or selection code.
+- Provenance: a function record holds a `provenance` value from `game`,
+  `library`, `compiler_helper`, `not_a_function`, and `data`.  The value is a
+  documentation field.  A `data` or `not_a_function` provenance requires the
+  `not_a_function` status.
 
 Layers:
 
@@ -343,12 +354,29 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 303 checks in the `cross-check` shell.  `--skip-cross`
-  gives 299 checks, `--skip-runtime` gives 288 checks, and both flags give 284
+- The full check reports 304 checks in the `cross-check` shell.  `--skip-cross`
+  gives 300 checks, `--skip-runtime` gives 289 checks, and both flags give 285
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
-- Stage 12 checks the program-map tables and the call graph for drift.  The
-  call graph check needs capstone and the original executable.
+- Stage 12 checks the store, the seed, the provenance evidence, the program-map
+  tables, the call graph, and the status page.  The call graph check needs
+  capstone and the original executable.
+- A function record holds a `provenance` value from `game`, `library`,
+  `compiler_helper`, `not_a_function`, and `data`.  The value is a
+  documentation field, so it stays out of the input fingerprint.  A `data` or
+  `not_a_function` provenance requires the `not_a_function` status.
+- The provenance evidence document `tools/rebuild/provenance.json` names the
+  spans and the records whose provenance is not `game`.  `triage.py check`
+  proves the evidence, and `triage.py apply` writes it into the records through
+  `store.save_record`.  A record needs a `finding`, `file`, or `command` item.
+- The analysis count is the `unknown` records with provenance `game`.  The
+  progress total and the header count the game function records only.  A
+  library or compiler-helper record without a name keeps the `unknown` status
+  and stays out of the analysis count.
+- `coverage.py report` prints one row per provenance with the record count, the
+  unknown count, the byte span, the coverage, and the verified, rebuilt, and
+  exact byte split.  The denominator is the code-object virtual size.  The
+  status page shows the same provenance panel over the covered byte total.
 - The identity gate has two modes.  Strict is the default.  The strict gate
   accepts only the byte-identical verdict and the verdict whose differences are
   the link-time addresses.  `--allow-shape` restores the historical gate, which

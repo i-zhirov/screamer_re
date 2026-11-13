@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the harness holds the object record, the three entry pairs of the 28-byte table, the render arrays, and the six constant globals; it covers the state copy, the two flag bits, the angle threshold, the negative truncation, the 11-bit mask, and the table selection; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_car_link",
   "name": "object_car_link",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c84c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:76a23adb4d2852393a9935c26905dd8d39e77089e44007875d8e222a669052bd",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3c4f83ecd6fad7d208f998eb5921f9de62ac55e8332192fe56797067770d80e7",
     "mode": {
       "runtime": "run",
       "strict": true,

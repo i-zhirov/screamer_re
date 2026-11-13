@@ -47,6 +47,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x23420"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "race_hud_draw",
   "notes": [],
   "object_offset": "0x13420",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -75,8 +84,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23420",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b63165607fc396317cfda2b6830297dab9ef1c54543753fea262b33fcc6a5af7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2046f2d2c0f21df72d9dba306ef122308f31bd41efaf8cbcd50f05acf7ce9b45",
     "mode": {
       "runtime": "run",
       "strict": true,

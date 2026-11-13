@@ -43,12 +43,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module name_entry_letter_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "name_entry_letter_update",
   "name": "name_entry_letter_update",
   "notes": [],
   "object_offset": "0x1b660",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -70,8 +79,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2b660",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:da46cd93964b29f0463707986cbb7b91a3fd55801669fa1f1eff00a1ed647b04",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c0c42a655ffd97515301bf0bfc30a733ad8320ab8a9ac207745018178f091cb6",
     "mode": {
       "runtime": "run",
       "strict": true,

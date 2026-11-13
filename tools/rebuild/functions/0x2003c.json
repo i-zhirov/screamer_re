@@ -47,6 +47,14 @@
     {
       "kind": "note",
       "text": "the original has no symbol name for this function; the module name and the callee names in the harness stay inferred"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "race_simulation_update",
   "notes": [],
   "object_offset": "0x1003c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -75,8 +84,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2003c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:2fe491d1f0b84bd647c7bd806d46419af5e48fe05241be69d90383392a69ad64",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c152b15da97b8b2412b6b13e6593a58cf04d09167955f47deceb938585343511",
     "mode": {
       "runtime": "run",
       "strict": true,

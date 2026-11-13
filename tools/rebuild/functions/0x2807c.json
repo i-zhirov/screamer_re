@@ -26,11 +26,20 @@
     {
       "kind": "note",
       "text": "the identity check stays open: the rebuilt module uses an if chain instead of the compiler jump table and saves the registers in another order, so 10 of 48 instructions and 23 of 189 bytes match"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_frame",
   "name": "race_frame",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -52,8 +61,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2807c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:51e2af70fc8e66d1a9d74f1ae38fd292acb8d6c9f5932983e7cadc126b919007",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ea3e7a439894c5375c0fa85b641c8e1ad1efa34c133dc8aa34d88fb82316c76e",
     "mode": {
       "runtime": "run",
       "strict": true,

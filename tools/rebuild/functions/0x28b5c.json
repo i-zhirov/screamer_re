@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "saves `DAT_0011fb58`, clears the fade `DAT_0011d224`, sets `DAT_0011fb64` to -1, calls `menu_frame`, and restores the saved value"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "menu_enter",
   "name": "menu_enter",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x28b5c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:3f41ea725972ccf043ae9180e68416037d72b3c3db826e5ffcd70c714174d222",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2745be40ff795d3cb61df6bceba5f81e064c1a25a9c343d56d691a7455911806",
     "mode": {
       "runtime": "run",
       "strict": true,

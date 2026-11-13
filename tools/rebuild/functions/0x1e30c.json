@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x1e30c holds 83 instructions and 262 bytes up to the first `ret`: the two absolute-value guards at 35000 units on `+0x498` and `+0x4a0`, the deltas scaled by 0.1 and truncated with the helper at 0x4d9f4, the squared sum, the `sqrt` call at 0x22bec, the scale by 10.0, and the gate store from the float at `+0x4e4` against 35000.0 at 0x100b98; the rebuild keeps the extent 264 and uses a module-local FPU stub with a truncating `__CHP`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_proximity_check",
   "name": "object_proximity_check",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e30c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:24c44c8e780887204b373ad6acf2f5fa9f1bd57d253ab71da33735c9d5fddb17",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:66ef718de44d092e7fc3da05f8ac17226838ffd6c4c7be0908465743303f4da4",
     "mode": {
       "runtime": "run",
       "strict": true,

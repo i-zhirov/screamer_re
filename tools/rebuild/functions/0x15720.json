@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the body at `0x15720` holds 55 instructions and 152 bytes: the frame, the outer loop over 50 rows, the inner loop over 100 columns, the row base `0x80e8 + 400 * i`, the ramp value `j * 0.005f + 0.5`, the exponent `50.0 / (i + 1)`, the call at `0xc21e2`, the float store, and the epilogue. The `fadd qword ptr [0x66e]` reads the double 0.5 and the `fdivr qword ptr [0x676]` reads the double 50.0. The call at `0xc21e2` reaches the power routine at `0xc20a6`, which uses `fyl2x` and the `f2xm1` loop at `0xc21bf`; the rebuild calls `pow` and keeps the identity open because the shared toolchain differs"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "palette_build",
   "name": "palette_build",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15720",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:99e931858e7b052671f54de818fa80e159d1b69d3cc9f1dae478de1e0d6c91df",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ae75d163e14d3a25f1d3a9fba961600395b93d7e3033f89333d84cb801608ba3",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -11,12 +11,21 @@
     {
       "kind": "note",
       "text": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "assembly",
   "module": "video_fill",
   "name": "video_fill",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -38,8 +47,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2aa98",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:afd2d4570328e599575bf2e84ff8fd535cf9c94a6c9577b3ac6e3d700de9ff11",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:395513356ca0caba75225cd8f49833f329bafbca7de19b52be442d6296609d1d",
     "mode": {
       "runtime": "run",
       "strict": true,

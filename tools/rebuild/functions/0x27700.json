@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x27700` holds 34 instructions and 110 bytes: it calls `race_start` at `0x27770`, returns a non-zero start result, and otherwise runs the loop body `motion_update`, `default_data_copy`, `joystick_update`, the gated `input_poll`, `frame_timer`, `input_map`, `object_update_all`, and `video_fill` until `DAT_0011ce44` reaches 4, then calls `race_end` at `0x279a4` and returns 0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_loop",
   "name": "race_loop",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27700",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:271b8ba75c49301620a7ed1c556431423681b16b3d412d080d3c5caac515799d",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6f4e5d65b5a11d4228f8564f43823982b031b6cf37a27b88d735ada88614693d",
     "mode": {
       "runtime": "run",
       "strict": true,

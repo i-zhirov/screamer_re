@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000d38e6` calls `FUN_000c86dc`, `FUN_000e3adb`, and `FUN_000d39ec` and clears the channel record"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "sound_channel_free",
   "notes": [],
   "object_offset": "0xc38e6",
+  "provenance": "library",
   "role": "stops the channel timer and releases the driver voice when the index is below 8",
   "section": "The HMI sound driver",
   "size": 262,

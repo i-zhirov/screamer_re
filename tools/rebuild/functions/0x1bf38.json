@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x1bf38` holds 46 instructions and 155 bytes: it opens `screamer.cfg` with the mode `rt` through `fopen` at `0xc5fe5`, reports `Files damaged. Re-install Screamer.` through `0xc656e` and exits with -1 on failure, reads `%s%s%s` into `DAT_00007edc`, `DAT_00007f10`, and `DAT_00007f44` and two `%c` values through `fscanf` at `0xc6618`, sets `DAT_00007f78` to 1 when the second character is `n`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "config_load",
   "name": "config_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1bf38",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:00f9e979b2cdcce07dca5fa3e6f5dec7981187e92b2275879010bd7940512a20",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e81eead00864b50fcf42af4649598320652b3aafa364cb74d35a0a8fe0cde17e",
     "mode": {
       "runtime": "run",
       "strict": true,

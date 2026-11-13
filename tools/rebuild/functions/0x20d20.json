@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module race_intro_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "race_intro_update",
   "notes": [],
   "object_offset": "0x10d20",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20d20",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:57f731010594b2b4e291fba8ee2999303e499408f7eb64023d4841b31ca087c7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:70c0b0517d407c5b8c7c60511105519fdb0f4d8dbfa03ce339f245d1524d558b",
     "mode": {
       "runtime": "run",
       "strict": true,

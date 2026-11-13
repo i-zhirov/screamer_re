@@ -1,9 +1,19 @@
 {
   "address": "0x8affc",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    }
+  ],
   "notes": [],
   "object_offset": "0x7affc",
+  "provenance": "game",
   "size": 236,
   "status": "unknown"
 }

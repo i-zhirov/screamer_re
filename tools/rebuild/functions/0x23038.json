@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The path_playback_update module at 0x23038"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "path_playback_update",
   "notes": [],
   "object_offset": "0x13038",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23038",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:243498e1b8ab3b7bf0ea98c2d5e45f5fe1cbbe86ac90224aab47bf025c00af26",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:de6b3c4de1d47c2a0ab81db9b56c24cb05ff236a8bee703e4b2db64c8d9a1b05",
     "mode": {
       "runtime": "run",
       "strict": true,

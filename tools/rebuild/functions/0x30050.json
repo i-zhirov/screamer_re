@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "allocates the size and retries through the two out-of-memory handlers when the allocator fails; the size 0 becomes 1"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "module": "memory_alloc",
   "name": "memory_alloc",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x30050",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d9a302aa392f11ee468fa7616e48aafa97f99e59898a6ee62c71956651f5f66f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9cdf34b21b5dcfc806bb3b2cfe5d122d17a5b23828794b04587c17a2181c5ce8",
     "mode": {
       "runtime": "run",
       "strict": true,

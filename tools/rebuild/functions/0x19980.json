@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The player_car_wheel_effect_update module at 0x19980"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "player_car_wheel_effect_update",
   "notes": [],
   "object_offset": "0x9980",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -95,8 +104,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19980",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0a94636e7680fb633da0b3e741383820d8bf5563859b02942de920c807f2344c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6fa5fd132113d864d7c5afdfc6a9b5576856ae69bf44275b134f55111bfe4bb9",
     "mode": {
       "runtime": "run",
       "strict": true,

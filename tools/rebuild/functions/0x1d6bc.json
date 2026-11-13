@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the harness covers the integration, the factor clamp, the dwell accumulation, the snap, both truncation directions, the threshold boundary, and the damping reduction; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_integrate",
   "name": "object_integrate",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -44,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d6bc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:363d20d38889e1425af16966c0c41124ee7a4243970b83be8ee58ecbf439a8ac",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c9df9d17744c85723bd004b866893089e5a76dd3b4417826a4a438ab41fbf09e",
     "mode": {
       "runtime": "run",
       "strict": true,

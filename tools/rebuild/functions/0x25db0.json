@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "dpmi_real_int",
   "name": "dpmi_real_int",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25db0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9ea9e5b7381b1ad2af22e00477015e09b71461be7b37687c1aae6c4d341c1a04",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e23e49991bce77de0ac943f00677e74a43a4ea7e2ef176d35ccc37691cc9a0ad",
     "mode": {
       "runtime": "run",
       "strict": true,

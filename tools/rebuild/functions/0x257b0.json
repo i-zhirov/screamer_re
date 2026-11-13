@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The sprite_load module at 0x257b0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "sprite_load",
   "notes": [],
   "object_offset": "0x157b0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x257b0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:8a9285523442774c31a13c6475a3e8f3190ceb29624b4a083fcd807a07675784",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f10febe4d91a4ad77eb461d16cf8ad981e858d415c653c7f7549101443c050a2",
     "mode": {
       "runtime": "run",
       "strict": true,

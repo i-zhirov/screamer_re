@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1b394"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "member_list_load",
   "notes": [],
   "object_offset": "0xb394",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b394",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:df04377634162830d34134b608f0f5b595d13382b9d1a5c57526c0dddaca6453",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b638bbe3e9e17c204506a747cc7356718a8e0e87ee286b3523fbad7eda8d2d1a",
     "mode": {
       "runtime": "run",
       "strict": true,

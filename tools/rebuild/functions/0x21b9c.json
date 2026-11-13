@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The sound_emitter_update module at 0x21b9c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "sound_emitter_update",
   "notes": [],
   "object_offset": "0x11b9c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21b9c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:1f964afc7186ba53ec83cd084770dfba437199bdd48343d6e9202882b01c7bb1",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3cbaf63802ab942fa3035772fb67f82eafb76e0cc7fe26532002c3c13df6829e",
     "mode": {
       "runtime": "run",
       "strict": true,

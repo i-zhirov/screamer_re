@@ -11,6 +11,14 @@
     {
       "kind": "note",
       "text": "clears the fields `+0x04`, `+0x10`, and `+0x14` of the music bank struct"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "assembly",
@@ -18,6 +26,7 @@
   "name": "music_bank_reset",
   "notes": [],
   "object_offset": "0x1f9b0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -39,8 +48,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f9b0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f7627979494f6a06414f5d25b84e60f4f9c9452b916c62ac089489b0ee3125d3",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:48c57ac0cc2a0ddc84657d9b9d4883b33961d2441dc7d93b45fc2474963c805d",
     "mode": {
       "runtime": "run",
       "strict": true,

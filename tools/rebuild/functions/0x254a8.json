@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The text_measure module at 0x254a8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "text_measure",
   "notes": [],
   "object_offset": "0x154a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x254a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:08acd1402aa3acb622d1c0899bd0920e6571c0146fbca98cfcfb2ffab7f6cdc2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:a8723d9e2cba8aab3cefc46c3c2e44d2289b5ff39948e221fc37cbe71aa2b8a4",
     "mode": {
       "runtime": "run",
       "strict": true,

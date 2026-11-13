@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the function builds %s\\gfx\\%s%c.dat from DAT_00007f44, DAT_0011d294, and the letter H or L from DAT_0011d2b8, loads the five lists OSTACLES, TRACK_DATA, OPPONENTS, ANIMATIONS, and CARS_DATA, sets the screen mode 0x140 by 0x190 with the value 0x104, copies the TRACK_DATA color to PTR_DAT_0008a844 + 0x10, and starts the music through 0x2fcec behind DAT_0011d2cc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_data_load",
   "name": "race_data_load",
   "notes": [],
   "object_offset": "0x31a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -49,8 +58,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x131a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0e0afc4e23158db2f0cbf2e3c511c5b6127e215797c2568b673558ee7d538585",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:67d23165c644ef0d63a18c017c2c852b40ed156b5691a6acd42fac6825eea9ce",
     "mode": {
       "runtime": "run",
       "strict": true,

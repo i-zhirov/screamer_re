@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the function reads the 0x38-byte player records at object-3 offset 0x2099c, draws the local player and the remote players through panel_draw_centered at 0x2e7cc, text_draw at 0x25020, and panel_show at 0x2dfac, processes the network events through 0xc739c, 0xc8208, 0xc712c, 0xc6fc8, 0xc7248, 0xc71dc, and 0xc76f0, calls net_player_add at 0x2dddc with 0x8844, and loads menu3h.pcx from gfx\\graf.dat with the palette; so the module names the function net_race_lobby"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "net_race_lobby",
   "name": "net_race_lobby",
   "notes": [],
   "object_offset": "0x1d7c4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -49,8 +58,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2d7c4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b1a60fc6ab00f45456511e31b9d8c88fbf32be97575e219859d99ba52d0fc2e2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f09b8a2a1d3bf3ce60231c14342ba291116ccd9730ea8660dc8686fe170e1489",
     "mode": {
       "runtime": "run",
       "strict": true,

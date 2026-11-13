@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the first-return body at `0x28ba4` holds 34 instructions and 118 bytes: the state guard, the menu index and the two table reads, the menu-id switch, and the epilogue; the case bodies extend to `0x293a7` (646 instructions and 2052 bytes), and the state 2 overlay body starts at `0x28fd6`.  The rebuild keeps the dispatcher and represents the case bodies and the overlay body as step functions"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "net_race_screen",
   "name": "net_race_screen",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x28ba4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:922216a5e9eb09b4c43273197724d15664da0b1c89a426831028b5124e1f7c55",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4dde262fd4d7dc070873819e3a652ab9a5d4c1dc3c8aaa2cac9e28ad2f0cf6ef",
     "mode": {
       "runtime": "run",
       "strict": true,

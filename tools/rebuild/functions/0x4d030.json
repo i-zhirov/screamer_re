@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x4d030` holds 31 instructions and 101 bytes: it opens `TABS\\VIS.TAB` with the mode `rb` through `fopen` at `0xc5fe5`, runs the error report, BIOS video, and exit path with the value `0x16` on failure, reads `0x27500` bytes into the buffer at `DAT_0007c1c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "vis_tab_load",
   "name": "vis_tab_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d030",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:1bab817202dacaf2ea30ff963ca53f4449a84e82ec505dffb283af7151cbba15",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:938740a631adad525e8b4033291dcb915fbce0d0114d078dfae862df97d4fcc4",
     "mode": {
       "runtime": "run",
       "strict": true,

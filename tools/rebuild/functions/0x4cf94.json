@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at `0x4cf94` holds 43 instructions and 155 bytes: it opens `TABS\\persp01.tab` with the mode `rb` through `fopen` at `0xc5fe5`, runs the BIOS video call with 3, the error report with `0x16`, and the exit with `0x16` on failure, calls `resource_read` at `0x2efc2` with the second argument `0x1747` and the size `0x40740`, stores the result in `DAT_000214ec`, reports a null result through `0x2edad`, reads `0x40740` bytes through `fread` at `0xc607b`, advances the cell by `0x40000`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "persptab_load",
   "name": "persptab_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4cf94",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e0c7b78f17f189beb3f045934ac5222e67d0a52e797dd381f5c7c00fb5f24bfe",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4986d696350d28e4d57b3b3f1934d2f5b3cc24ef9835795c2b6acd6478d58476",
     "mode": {
       "runtime": "run",
       "strict": true,

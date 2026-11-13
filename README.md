@@ -24,6 +24,9 @@ Initial reconnaissance is complete.  The project has:
   to GitHub Pages at <https://i-zhirov.github.io/screamer_re/>,
 - a generated program map with a drift check (`tools/rebuild/docs.py`),
 - a named call graph with a drift check (`tools/rebuild/callgraph.py`),
+- a provenance value on every function record, a triage evidence document, and
+  a byte-coverage report (`tools/rebuild/triage.py` and
+  `tools/rebuild/coverage.py`),
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
@@ -144,9 +147,9 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-303 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 299 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 288 checks.  Both flags report 284 checks.
+304 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 300 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 289 checks.  Both flags report 285 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  Strict is the default identity gate: the

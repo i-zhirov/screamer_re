@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The track_nearest_node module at 0x120c0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "track_nearest_node",
   "notes": [],
   "object_offset": "0x20c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x120c0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:6ab09a749f91ce1553b0a67517e614b2b78e1734985fbd9482818ffb70d59892",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b515c25e81ed3859cc68204038c6d1951c890feab16b143389feb7ab6af54411",
     "mode": {
       "runtime": "run",
       "strict": true,

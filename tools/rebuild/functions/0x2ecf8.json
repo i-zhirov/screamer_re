@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2ecf8` holds 46 instructions and 127 bytes: it calls `pool_init` at `0x2f904`, allocates `count * 0x1c` bytes through `malloc` at `0xd1f25`, stores the pointer at `+0`, the cursor 0 at `+4`, and the count at `+8`, zeroes the block through `memset` at `0xd1ec0`, and returns the list pointer; a failed allocation stores the pointer 0 and the count 0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "list_create",
   "name": "list_create",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ecf8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f81a1ddf965179ba8c3ff67de34a8f6288dfaec1ff8dd11ef04c8077a5f0cb3f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9cf3b6b341ab6f58aebded77c99f3916c903044da306c4361ea240ebd45a91ab",
     "mode": {
       "runtime": "run",
       "strict": true,

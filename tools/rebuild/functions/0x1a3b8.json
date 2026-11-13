@@ -51,6 +51,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1a3b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "player_view_orbit",
   "notes": [],
   "object_offset": "0xa3b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a3b8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:80571acff94cf7017864c5a69949febbb22e6ec075dd7e96d06bd49a0656d693",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:5be30b1bb4cae437b4c5f8a72b4851e97bcf23332d5ad80e6a0b823bbd064b0c",
     "mode": {
       "runtime": "run",
       "strict": true,

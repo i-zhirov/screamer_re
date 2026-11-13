@@ -1655,6 +1655,55 @@ Evidence:
   pipeline commands still report 303, 299, 288, and 284 checks, as the
   baseline section records.
 
+## The record scope and the provenance
+
+Every function record now holds a provenance value, and the report counts the
+records and the bytes by provenance.  Evidence:
+
+- The plan-date snapshot holds 971 function records, 688 `unknown`, 31 `named`,
+  230 `rebuilt`, 22 `verified`, 0 `matching`, and 252 module records.  The
+  design's counts (935 function records, 30 `verified`, 652 `unknown`, 31
+  `named`, 221 `rebuilt`, and 1 `matching`) are the historical design-date
+  values.
+  Evidence: `python3 tools/rebuild/store.py list --json` and the design page.
+- The evidence pass moved three pure thunks to `not_a_function`, so the
+  `unknown` count falls from 688 to 685.  The final status holds 685 `unknown`,
+  3 `not_a_function`, 31 `named`, 230 `rebuilt`, 22 `verified`, and 0
+  `matching`.
+  Evidence: `python3 tools/rebuild/triage.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The analysis count is the `unknown` records with provenance `game`, and it is
+  251.  A library or compiler-helper record without a name keeps the `unknown`
+  status and leaves the analysis count.
+  Evidence: `python3 tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The provenance counts are 489 `game`, 471 `library`, 8 `compiler_helper`, 3
+  `not_a_function`, and 0 `data`.  The coverage report prints `total: 971
+  records, 685 unknown, 899334 bytes, 100% coverage, 221835 verified bytes,
+  113816 rebuilt bytes, 6074 exact bytes`.
+  Evidence: `python3 tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The evidence document `tools/rebuild/provenance.json` names the spans and the
+  records whose provenance is not `game`.  `triage.py check` proves it, and
+  `triage.py apply` writes it into the records through `store.save_record`.
+  Evidence: `python3 tools/rebuild/triage.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`,
+  `python3 tools/rebuild/triage.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`, and
+  `python3 tools/rebuild/store.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The full check reports 304 checks.  `--skip-cross` reports 300 checks,
+  `--skip-runtime` reports 289 checks, and both flags report 285 checks.
+  Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game`,
+  `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross`,
+  `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime`,
+  and `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
+  --skip-cross`.
+
 ## Open questions
 
 ### Entry alignment (resolved)

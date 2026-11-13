@@ -1,9 +1,15 @@
 {
   "address": "0xd4374",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The startup module at 0x30170"
+    }
+  ],
   "notes": [],
   "object_offset": "0xc4374",
+  "provenance": "compiler_helper",
   "size": 75,
   "status": "unknown"
 }

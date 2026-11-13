@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2ff14` holds 39 instructions and 111 bytes: a negative word at `+0x04` sets the state 6, a zero ready result from `0xd4239` sets the state 5, and otherwise the function starts the track through `0xd38e6`, selects it through `0x2febc` when the word at `+0x0c` is 1, and sets the state 0; it returns the state it wrote"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "music_play",
   "name": "music_play",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ff14",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9cc1faa502546418bcba04078e4b2186aefd4fac6f03346634c33cecd92097a0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8eafbc8ebaa1cafab34fc8433d06d969adb667831e435a3bdc877f2024880078",
     "mode": {
       "runtime": "run",
       "strict": true,

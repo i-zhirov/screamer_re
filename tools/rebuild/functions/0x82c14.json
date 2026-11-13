@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The camera_project module at 0x82c14"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "camera_project",
   "notes": [],
   "object_offset": "0x72c14",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x82c14",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5e01726a59869cdc64077a807f8527e8c6e9b5620e4bb96cc12c737d7f7ecbf0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d8c9adb90097adeb5fb994b2af6a7626eb1cb05609bef39966010934b0eba8b0",
     "mode": {
       "runtime": "run",
       "strict": true,

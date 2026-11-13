@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The player_lap_progress_update module at 0x194a0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "player_lap_progress_update",
   "notes": [],
   "object_offset": "0x94a0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x194a0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c9c8e7b89699a2ebef7fa5e35f1143b9b31126befa00e38d7ff363a83b7c705b",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:1fb415f75fd25850ef8908c7b20284a9a6d689df4f8e013a2a3006bba06e5b8f",
     "mode": {
       "runtime": "run",
       "strict": true,

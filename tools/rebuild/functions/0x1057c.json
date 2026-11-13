@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 505 bytes and 145 decoded instructions; the identity check stays open at 24 of 145 instructions, 15 of 481 bytes, and 2 of 54 relocation slots because V2 pushes esi, edi, and ebp and makes a stack frame instead of pushal, keeps the loop cursors in stack slots, computes the cell offset with lea, and uses another register order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "radar_world_draw",
   "notes": [],
   "object_offset": "0x57c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1057c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:40267cd1d6b52b3aac7ea6a00ed0788989572cfedb06007d569e9650be0ee25e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:be33083dfea5f0af2e026d4a48bf7bf0ed998cdad35941a023f014a1d44afbdd",
     "mode": {
       "runtime": "run",
       "strict": true,

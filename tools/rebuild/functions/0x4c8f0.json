@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "loads the `VIDEO_BUF` resource through `resource_get`, stores the pointer in `DAT_00021504` and `DAT_00121528`, and releases the stream on failure"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "video_buf_load",
   "name": "video_buf_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c8f0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:21d69f2ae6937c3029163249ac5dde3b83c15bb7c636d8151142f8e045e13711",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e781eb4a5be92e707292df5bf4dc83f5c2331c692ad4581ecca0f527fd40ad46",
     "mode": {
       "runtime": "run",
       "strict": true,

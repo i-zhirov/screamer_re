@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 243 bytes and 65 decoded instructions; the identity check stays open at 15 of 65 instructions and 27 of 243 bytes because V2 saves the frame pointer first, uses another prologue order, and uses a register loop counter; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "track_select_update",
   "notes": [],
   "object_offset": "0x1cc98",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cc98",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ed30bc037626f2272606d6a3cdb680f2fb189d54caa50d2d8aaeae66cd58aa4c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3bacfbcb73ef00c6bf9e6943e5f21cb1fe4927051f1cfe079762ccfde5fb953a",
     "mode": {
       "runtime": "run",
       "strict": true,

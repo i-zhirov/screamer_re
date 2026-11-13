@@ -39,12 +39,21 @@
     {
       "kind": "finding",
       "text": "The race_records_screen module at 0x2d4b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_records_screen",
   "name": "race_records_screen",
   "notes": [],
   "object_offset": "0x1d4b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -66,8 +75,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2d4b8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:3a436948b4d4e46855304c8a0577f6099dd3367f43bd372d10ed4875a90c9e0a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:52980c9dab783248d736ecd49023cc5e9df4936615661ee649a682dfd1106944",
     "mode": {
       "runtime": "run",
       "strict": true,

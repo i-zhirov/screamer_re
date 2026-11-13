@@ -23,12 +23,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module options_screen"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "options_screen",
   "name": "options_screen",
   "notes": [],
   "object_offset": "0x11338",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -50,8 +59,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21338",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:831f057b5ef4563ec1c36374ca5294727e3a5f644af555357cd94ba84c2b34dc",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f7ce5d9e12ceb37feb55899bd77cfe0956cb154b3e2ce9bca211dd98bde4bb90",
     "mode": {
       "runtime": "run",
       "strict": true,

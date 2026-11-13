@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2f0fc` holds 41 instructions and 118 bytes: it sets `0x0100` at result word 0, sets the paragraph count `(size >> 4) + 1` at word 1, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status, and otherwise returns the segment word times 16 and stores the selector word at the third argument"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "dos_memory_alloc",
   "name": "dos_memory_alloc",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f0fc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f345ccfeb0530736b7de2971787d689980b56a4aca88bc2dc0e6aaffa202101a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9d509cc979a88c9301b690bac7def976412d257bedb9a08e26e25d1910112c3a",
     "mode": {
       "runtime": "run",
       "strict": true,

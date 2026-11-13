@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The player_brake_update module at 0x16150"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "player_brake_update",
   "notes": [],
   "object_offset": "0x6150",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16150",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9f3e39958717ce23720b7115a7ac8762f5856eec33331e85746bfc13cf534892",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ff69f24567f275713555346931823b4c5f5420bd889101331c0db8d88dad02ee",
     "mode": {
       "runtime": "run",
       "strict": true,

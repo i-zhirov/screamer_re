@@ -47,12 +47,21 @@
     {
       "kind": "finding",
       "text": "The spline_interpolate module at 0x22744"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "spline_interpolate",
   "name": "spline_interpolate",
   "notes": [],
   "object_offset": "0x12744",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -74,8 +83,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22744",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:7b10bd962c740ba198890966deeefa1c9d1796ee53095aa89207812b820cd751",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6e7dd247a57920e8c360174bf60c1491a9b68c6505af86e8f0c6d7cde26ab646",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -9,12 +9,21 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000300d6` calls the slots `PTR_FUN_00102f88` and `PTR_FUN_00102f8c` and ends in the interrupt 21h AH=0x4C terminator"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "module": "exit",
   "name": "exit_flush",
   "notes": [],
   "object_offset": "0x200d6",
+  "provenance": "library",
   "result": {
     "checks": {
       "identity": {
@@ -28,8 +37,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x300d6",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:2a1edd1613841b4fd2cd41cb721bf2a5f25223960cac9768427e67a146dd97f4",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3f6d007bd84481911f3b4cfe5fb8c6c128539278e6de64cec0c22d3250159639",
     "mode": {
       "runtime": "run",
       "strict": true,

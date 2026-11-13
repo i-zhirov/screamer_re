@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_gear_state",
   "name": "object_gear_state",
   "notes": [],
   "object_offset": "0xdb38",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1db38",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b596c1be3d677a55ab8212a41a13d0d4929988131991ccb86588c35a4e6d000a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:53b9479a58ae9bf805a23b0dc473136e0068425c936cdcff621721d98e347dce",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x27ec8` holds 40 instructions and 122 bytes: the frame, the 0x310-byte local area, the loop over the 0x300 source bytes at `DAT_0010cf5c` from `0xcf5c` to `0xd25c`, the arithmetic `(byte - offset) * scale + offset` with the `0x4d9f4` rounding helper, the `palette_set` call at `0x81a05`, and the `ret 8` epilogue; the scale and the offset arrive on the stack"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "video_present",
   "name": "video_present",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27ec8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:035c6832e9e4e8d2726f345954c21b8dcf8bd3b2ef0cec8517630a6d21e9b6fd",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:55c1cbfc36e21f9239e01f96c0ee70030f4a1a8d817df4851dc9a98d93b345eb",
     "mode": {
       "runtime": "run",
       "strict": true,

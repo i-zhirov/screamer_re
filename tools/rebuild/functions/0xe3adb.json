@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000e3adb` calls the table at `DAT_001231f8` with the register values 0x7b, 0x79, 0x40, and 0x07"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "name": "sound_notes_apply",
   "notes": [],
   "object_offset": "0xd3adb",
+  "provenance": "library",
   "role": "writes the OPL voice registers of the active notes through the driver function table",
   "section": "The HMI sound driver",
   "size": 987,

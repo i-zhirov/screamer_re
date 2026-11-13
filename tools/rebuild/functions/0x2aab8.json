@@ -39,12 +39,21 @@
     {
       "kind": "finding",
       "text": "The menu_objects_init module at 0x2aab8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "menu_objects_init",
   "name": "menu_objects_init",
   "notes": [],
   "object_offset": "0x1aab8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -66,8 +75,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2aab8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:23671cdb4d8ce1288faf3c974ca4178a030cc4366219865dbdc93fc98cb26598",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4abbbf1110373186d50fd73f023aa1a650f28b4e2421f1200ebe99dd03e8df4b",
     "mode": {
       "runtime": "run",
       "strict": true,

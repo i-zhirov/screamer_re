@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 16 of 103 instructions and 9 of 294 bytes equal, and 0 of 4 relocation slots equal; V2 saves ebp first, keeps the point and the doubled centre in registers, and calls the local stub functions, while the original stores each corner in a distinct stack slot; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "gauge_marker_draw",
   "notes": [],
   "object_offset": "0x1392c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2392c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c4de708559519ba835374eb019a03d9da88f2d41b15513b99e54aebea3f53db7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c90249017e35da4cf6a26fc52f0ca94902417b3a97958b8a39cf40010b53c960",
     "mode": {
       "runtime": "run",
       "strict": true,

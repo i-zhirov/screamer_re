@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "copies 32 dwords from `DAT_00010113` in object 1 into `DAT_000f0002` in object 2"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "default_data_copy",
   "name": "default_data_copy",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10193",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f665099468d58ee56f74f7e807804d30bfa03bf97dfe04797f4e5a998a7f79e7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e3a1286ce99f9d6180fa28470b61db99caeab55ca2ae77d5432cd0cf839d0547",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the only caller is `race_loop` at `0x27761`, after the loop exit test; the plan row records 141 bytes, 36 instructions, 13 calls, and 0 FPU"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_end",
   "name": "race_end",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -44,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x279a4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:7a8f759e1eb07cd181ecdbcfdff524e88129ab6f6c7506e6c0fe3a83665b0be7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:dbde86ddfab5865f010c1263137bd57800bcf5540f0648d2a3d5221a04599632",
     "mode": {
       "runtime": "run",
       "strict": true,

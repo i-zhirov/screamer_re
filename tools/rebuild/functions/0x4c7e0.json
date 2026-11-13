@@ -11,12 +11,25 @@
     {
       "kind": "note",
       "text": "returns the word at `stream + 0x70`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "assembly",
   "module": "stream_status",
   "name": "stream_status",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -38,8 +51,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c7e0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:333de266d9816177f8296cb8abe1730aa93ffdfb278e5290ee8c4c80ee308a23",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:67f4b7019189474ef1d95f6755f9f488f605012397a42e801533901e4d71c791",
     "mode": {
       "runtime": "run",
       "strict": true,

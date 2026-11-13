@@ -14,12 +14,21 @@
     {
       "kind": "note",
       "text": "the original at `0x10020` holds 56 instructions and 194 bytes: the frame, the allocation of `0x4c` bytes, the list of `0x96` records at `DAT_000062ac`, the memory check against `0x61a800`, the two low-memory messages at object 3 offsets 4 and 0x29, `engine_init`, the `race_loop` and `frame_update` loop on `DAT_00007ed8`, the error path through `bios_video(3)`, `error_report`, and `exit`, `engine_shutdown`, and the cleanup"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "game_main",
   "name": "main",
   "notes": [],
   "object_offset": "0x20",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +50,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10020",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:93abc62bb3dfbac9e4543af192fada4f19272ec2d6624ad11d4335eaf1bbd9a1",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b795dfa9cf74211279a63d6540a3f19b4437557780ebb17e3630cfd363b30cac",
     "mode": {
       "runtime": "run",
       "strict": true,

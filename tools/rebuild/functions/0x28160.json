@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the first-return body at `0x28160` holds 42 instructions and 152 bytes: the option-flag test at `DAT_000f0002`, the mode check against `0x20`, the state switch through the compiler table at `cs:[eax*4 + 0x1813c]`, the case 0 stack pop, and the epilogue; the case targets are `0x281ab`, `0x281f8`, `0x282a2`, `0x282e6`, `0x28358`, `0x2837d`, and `0x283da`, and the full function extends to `0x289bc` (2140 bytes). The rebuild keeps the dispatcher, implements case 0, and represents the other case bodies as step functions"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "overlay_dispatch",
   "name": "overlay_dispatch",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x28160",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:cedf4fd05e9cf9a7545880887cd363364db67ad98bf32f4789b17fbcddd77a56",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:75e22fa21d31c1acf62ca14cba0f92de389b25a2d693c0e0c73828ff2684dd6c",
     "mode": {
       "runtime": "run",
       "strict": true,

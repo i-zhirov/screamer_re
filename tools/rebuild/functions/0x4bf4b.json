@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The vesa_set_mode, memset_runtime, dpmi_call, and fprintf modules"
     }
   ],
   "module": "dpmi_call",
   "name": "dpmi_call",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4bf4b",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4ce066d3551ff5593ae3cc683c3c2bbf8e95c949aaf7f6434b2c5777b28b85d6",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:6ba71652446f037443ee1b1427924d050fdf4e4dff852578bcece27a2af125b9",
     "mode": {
       "runtime": "run",
       "strict": true,

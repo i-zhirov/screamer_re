@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "stores the stream pointer, clears the state word, and runs the six stream layer setup calls"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "stream_layer_init",
   "name": "stream_layer_init",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c810",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ed264e9926c54987e4658b856ee3f2e556da44f58861682685dec713dafb63d3",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ef23af83868c9230b5fa904cce5d384da6e926116f034db67b1a57a84bb4a112",
     "mode": {
       "runtime": "run",
       "strict": true,

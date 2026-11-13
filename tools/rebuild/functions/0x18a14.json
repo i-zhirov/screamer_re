@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The race_clock_update module at 0x18a14"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "race_clock_update",
   "notes": [],
   "object_offset": "0x8a14",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x18a14",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:268f44256bd14d515dbdf259602948255c6bd9efd8cbfd0afa67b8ad0e650793",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:35b9bfabf9abb31bd81c11c119e9deaa6a01dc005ee11278afbaa0b52d6c8a28",
     "mode": {
       "runtime": "run",
       "strict": true,

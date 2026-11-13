@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 77 decoded instructions and 277 bytes; the identity check stays open at 19 of 77 instructions and 10 of 277 bytes, and 0 of 32 relocation slots match, because V2 saves ebx, ecx, and edx, keeps the body in ecx and the part in ebx, computes the entry offset with imul, keeps the record in edx, and reads the constants through near data operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "traffic_object_link",
   "notes": [],
   "object_offset": "0xef68",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1ef68",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:118d386d69538de7ff144f5d3302d39d0a052154f0af5cb985e161e9b4bff981",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:1e150bd65799489f963adefd450ec9bb3fc981ffbcd512b9fee91f880b82d3b8",
     "mode": {
       "runtime": "run",
       "strict": true,

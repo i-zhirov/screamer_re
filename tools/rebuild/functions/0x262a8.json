@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "builds the HMI request block at `DAT_001166a4` from the argument and the state words, and calls the sound driver when the driver state is set"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "sound_driver_set",
   "name": "sound_driver_set",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x262a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:3da2be8e18c38b7ddb80c3599d07ada35284db52c2d86f457ee40fdcfc9e066a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ba0fa6ced82c9f423b70ee7b58416c4cbf69cfb11bcf0334644f54aab0e835a7",
     "mode": {
       "runtime": "run",
       "strict": true,

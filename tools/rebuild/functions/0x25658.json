@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The font_load module at 0x25658"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "font_load",
   "notes": [],
   "object_offset": "0x15658",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25658",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4e71fbd7446b2eea2f84ea6f8edada7fa10779a810887c1ed6bccfa757e8ea56",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:669e5d102478bc4219ed3193dd1a7ecface2ca3cb6a76e3942cebf286b85c8b4",
     "mode": {
       "runtime": "run",
       "strict": true,

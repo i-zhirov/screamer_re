@@ -26,11 +26,20 @@
     {
       "kind": "note",
       "text": "the two integer conversions use the local truncating __CHP stub in frame_timer_fpu.asm, because the shared fpu_stub.asm leaves round-to-nearest and the original helper at 0x4d9f4 truncates toward zero"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "frame_timer",
   "name": "frame_timer",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -52,8 +61,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1fc38",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:bb4f735a97a36db107068dd5c2528b6759f6f42ca3de47f04241070f4307745c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9c351b754003cbaf384f8e78c50367e4e9af25e2bddd1bd0c65e26fc50318258",
     "mode": {
       "runtime": "run",
       "strict": true,

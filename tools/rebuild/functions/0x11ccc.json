@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The collision_cell_test module at 0x11ccc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "collision_cell_test",
   "notes": [],
   "object_offset": "0x1ccc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11ccc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f1fd4fcd8e167d3838736b460500e0a580719d9510e3787e7152e571ff577979",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ced2a4f1f610df6d4fb1115bcad69862898edccd2b1d1fdeca2218c048d40dcc",
     "mode": {
       "runtime": "run",
       "strict": true,

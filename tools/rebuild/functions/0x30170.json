@@ -15,12 +15,21 @@
     {
       "kind": "note",
       "text": "the record keeps the 537-byte extent to the next entry at `0x30389`, so the identity check uses `--original-end 0x30389`; the C rebuild moves the DOS and DPMI services, the extender records, the command line, the environment, and the runtime calls behind harness helpers, and the harness runs the Phar Lap, Rational zero-base, Rational non-zero-base, CauseWay, unknown, and message paths"
+    },
+    {
+      "kind": "finding",
+      "text": "## The startup module at 0x30170"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "startup",
   "name": "startup",
   "notes": [],
   "object_offset": "0x20170",
+  "provenance": "compiler_helper",
   "result": {
     "checks": {
       "behavior": {
@@ -42,8 +51,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x30170",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:183ae6ab607a428fdf4dc0f339260990cdedea2e3e77c1f435ea43199a830720",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7c01510f00d5939727f6a346fb33349d8be7ea0933324d83b7ced1e799595711",
     "mode": {
       "runtime": "run",
       "strict": true,

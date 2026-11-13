@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The championship_record_select module at 0x293a8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "championship_record_select",
   "notes": [],
   "object_offset": "0x193a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x293a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0598a2483ff3fd262e9719eac093afbc07f341ada35a2e3910dd85d0160f65ad",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7f4b28522f2a62906a9ec4d274fbbabb7da7df1ce503cf8a39f917c70379a141",
     "mode": {
       "runtime": "run",
       "strict": true,

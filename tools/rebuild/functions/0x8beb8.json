@@ -51,6 +51,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 937 bytes and 330 decoded instructions; the identity check stays open at 9 of 114 instructions and 21 of 389 bytes because V2 pushes ecx, esi, edi, and ebp and reserves 8 stack bytes instead of cld, pushal, and popal, keeps the row step in a stack slot, uses div instead of idiv, and copies with a dword loop instead of rep movsd; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -87,6 +95,7 @@
     }
   ],
   "object_offset": "0x7beb8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -108,8 +117,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8beb8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:38353a4c6510b6a42c82eded6328609613785ad903ea70df340a2dbbfcf6abee",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7440cb56e5d611fcc8aaab930808b498a63d7a1499ac583ab5bcd01877195857",
     "mode": {
       "runtime": "run",
       "strict": true,

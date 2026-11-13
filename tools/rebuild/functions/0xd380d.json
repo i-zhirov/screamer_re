@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000d380d` clears `DAT_001233c0` and returns 10 for an index of 8 or more"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "sound_channel_clear",
   "notes": [],
   "object_offset": "0xc380d",
+  "provenance": "library",
   "role": "clears the 6-byte channel record and returns 10 when the index is 8 or more",
   "section": "The HMI sound driver",
   "size": 74,

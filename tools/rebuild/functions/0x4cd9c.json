@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The material_load module at 0x4cd9c"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "material_load",
   "notes": [],
   "object_offset": "0x3cd9c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -95,8 +104,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4cd9c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9aad58885d6cf5dc6aa29719f86433dc4a918b8c9619012f5815d6ff8d5356ff",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:a1353da11a7df588041fb439088aa611f23c659631523205fb17a651889fe30c",
     "mode": {
       "runtime": "run",
       "strict": true,

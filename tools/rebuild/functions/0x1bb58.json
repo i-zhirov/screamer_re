@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x1bb58` holds 35 instructions and 111 bytes: it builds `%s\\config\\setup.cfg` with the base path at `DAT_00007edc` through `sprintf` at `0x4d32c`, opens the path with the mode `rb` through `fopen` at `0xc5fe5`, reports `Run SETUP before.` through `0xc656e` and exits with -1 on failure, reads `0x90` bytes into the buffer at `DAT_00008058` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "setup_load",
   "name": "setup_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1bb58",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:46a0a7055be50a5936ab0f8343c34795b0d02b3fa45044ca8d6ee5d8ddd89fba",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:86af3e89fd06199eccd34bc12b12c281dae9093e7e492c58b302e0da1e755b78",
     "mode": {
       "runtime": "run",
       "strict": true,

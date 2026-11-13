@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x1cd44 holds 61 instructions and 244 bytes: it calls object_integrate at 0x1d6bc and object_state_save at 0x1ccd8, writes the world position at +0x498 and +0x4a0 from +0x258 and +0x260 plus +0x454 and +0x45c, copies +0x238 to +0x49c while +0x2f8 is zero, writes the float sums at +0x4a4, +0x4a8, and +0x4ac, stores +0x238 minus 2 at +0x2c4, and stores +0x4a8 plus +0x4c8 at +0x4bc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_transform",
   "name": "object_transform",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cd44",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:60c6d90d5682d80094aa2629e19cfacc1a0ba18ed7b194da38a7ec277647c5a2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b148d91a573b596369e1de50742d9912a6c1c3cb088ecc92a38367773537bb68",
     "mode": {
       "runtime": "run",
       "strict": true,

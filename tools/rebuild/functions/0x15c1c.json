@@ -39,12 +39,21 @@
     {
       "kind": "finding",
       "text": "The player_car_link module at 0x15c1c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_link",
   "name": "player_car_link",
   "notes": [],
   "object_offset": "0x5c1c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -66,8 +75,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15c1c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:566de7de4261175ec8300c743211bfcf22117fa01f2531075193cdbd508839fe",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e1c167e962372ebfe5c913d77c299e58b05d77d6ac957caf9797ac7e80ac73d9",
     "mode": {
       "runtime": "run",
       "strict": true,

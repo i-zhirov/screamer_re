@@ -5,6 +5,12 @@ holds no function record.  The board groups the records by the section names of 
 program map, then by module, then by the records without a section.  The style and
 the script are inline, so the page needs no server and no external reference.
 
+The provenance panel summarizes the function records by provenance: the record
+count, the unknown count, the byte bar, and the verified, rebuilt, and exact byte
+split.  The progress bar and the header count the game function records only, so a
+library, compiler-helper, data, or not-a-function record stays out of the game
+denominator.
+
 Usage:
     python3 tools/rebuild/view.py html [--out PATH]
 
@@ -20,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import callgraph  # noqa: E402
+import coverage  # noqa: E402
 import docs  # noqa: E402
 import store  # noqa: E402
 
@@ -179,6 +186,39 @@ h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem; }
 }
 .legend-swatch-verified { background: var(--success); }
 .legend-swatch-rebuilt { background: var(--error); }
+.provenance-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.provenance-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.provenance-name { font-weight: 600; min-width: 8rem; }
+.provenance-bar {
+  display: inline-block;
+  flex: 1;
+  min-width: 3rem;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.provenance-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
 .counters { color: var(--text-secondary); font-size: 0.8rem; white-space: nowrap; }
 .content { display: flex; gap: 0.75rem; align-items: flex-start; }
 .board-column { flex: 2.1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
@@ -494,6 +534,7 @@ function showDetail(key) {
 function applyFilters() {
   const status = document.getElementById("status-filter").value;
   const module = document.getElementById("module-filter").value;
+  const provenance = document.getElementById("provenance-filter").value;
   const search = document.getElementById("search-filter").value.trim().toLowerCase();
   const staleOnly = document.getElementById("stale-filter").checked;
   const counts = {};
@@ -506,6 +547,7 @@ function applyFilters() {
     const name = target.dataset.name.toLowerCase();
     const match = (status === "" || target.dataset.status === status)
       && (module === "" || target.dataset.module === module)
+      && (provenance === "" || target.dataset.provenance === provenance)
       && (search === "" || name.includes(search)
         || target.dataset.address.toLowerCase().includes(search))
       && (!staleOnly || target.dataset.stale === "true");
@@ -516,14 +558,16 @@ function applyFilters() {
   }
   for (const data of seen.values()) {
     if (data.status !== "not_a_function") {
-      visible += 1;
-      if (data.status === "verified") {
-        verified += 1;
-      } else if (data.status === "rebuilt") {
-        rebuilt += 1;
-      }
       if (data.match) {
         buckets[data.match] = (buckets[data.match] || 0) + 1;
+      }
+      if (data.provenance === "game" && data.address !== "") {
+        visible += 1;
+        if (data.status === "verified") {
+          verified += 1;
+        } else if (data.status === "rebuilt") {
+          rebuilt += 1;
+        }
       }
     }
     counts[data.status] = (counts[data.status] || 0) + 1;
@@ -593,6 +637,7 @@ document.getElementById("view-treemap").addEventListener("click", () => setView(
 document.getElementById("view-calls").addEventListener("click", () => setView("calls"));
 document.getElementById("status-filter").addEventListener("input", applyFilters);
 document.getElementById("module-filter").addEventListener("input", applyFilters);
+document.getElementById("provenance-filter").addEventListener("input", applyFilters);
 document.getElementById("search-filter").addEventListener("input", applyFilters);
 document.getElementById("stale-filter").addEventListener("input", applyFilters);
 applyFilters();
@@ -680,8 +725,24 @@ def _counters(rows: list[dict]) -> str:
 
 
 def _counted_rows(rows: list[dict]) -> list[dict]:
-    """The rows that count toward the progress total."""
+    """The rows whose status is not `not_a_function`."""
     return [row for row in rows if row.get("status") != "not_a_function"]
+
+
+def _denominator_rows(rows: list[dict]) -> list[dict]:
+    """The rows that count toward the progress total and the header count.
+
+    A row counts when it has an address, its provenance is `game`, and its
+    status is not `not_a_function`.  A module row has no address, so it stays
+    out.
+    """
+    return [
+        row
+        for row in rows
+        if row.get("address")
+        and store.provenance_of(row) == "game"
+        and row.get("status") != "not_a_function"
+    ]
 
 
 def _match(record: dict) -> str:
@@ -714,9 +775,38 @@ def _match_counters(rows: list[dict]) -> str:
     )
 
 
+def _provenance_panel(records: list[dict]) -> str:
+    """The per-provenance summary of the function records.
+
+    One row per provenance holds the record count, the unknown count, the byte
+    bar, and the verified, rebuilt, and exact byte split.  The records are
+    function records, because a module record carries no provenance.
+    """
+    rows = coverage.provenance_rows(records, None)
+    items = []
+    for row in rows:
+        provenance = _escaped(row["provenance"])
+        percent = round(100 * row["coverage"])
+        items.append(
+            f'<div class="provenance-row" data-provenance="{provenance}">'
+            f'<span class="provenance-name">{provenance}</span>'
+            f"<span>{row['count']} {provenance} · "
+            f"{row['unknown']} unknown</span>"
+            '<span class="provenance-bar">'
+            f'<span class="provenance-fill" style="width: {percent}%"></span>'
+            "</span>"
+            f"<span>{percent}% · {row['bytes']} bytes</span>"
+            f"<span>verified {row['verified_bytes']} · "
+            f"rebuilt {row['rebuilt_bytes']} · "
+            f"exact {row['exact_bytes']}</span>"
+            "</div>"
+        )
+    return f'<div class="provenance-panel">{"".join(items)}</div>'
+
+
 def _progress_widths(rows: list[dict]) -> tuple[str, str]:
     """The verified and rebuilt percentages of the progress total."""
-    counted = _counted_rows(rows)
+    counted = _denominator_rows(rows)
     if not counted:
         return "0%", "0%"
     verified = sum(1 for row in counted if row.get("status") == "verified")
@@ -764,6 +854,7 @@ def _chip(
     module: str,
     status: str,
     stale: bool,
+    provenance: str,
     lang: str = "",
     match: str = "",
 ) -> str:
@@ -777,6 +868,7 @@ def _chip(
         f' data-name="{_escaped(name)}" data-module="{_escaped(module)}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-provenance="{_escaped(provenance)}"'
         f' data-match="{_escaped(match)}">'
         f'<span class="chip-label">{_escaped(label)}</span>'
         f' <span class="chip-status">{_escaped(status)}</span>{mark_html}'
@@ -796,6 +888,7 @@ def _function_chip(record: dict, stale: bool) -> str:
         module=record.get("module", ""),
         status=record.get("status", "unknown"),
         stale=stale,
+        provenance=store.provenance_of(record),
         lang=_language_label(record),
         match=_match(record),
     )
@@ -811,6 +904,7 @@ def _module_chip(module: dict, stale: bool) -> str:
         module=name,
         status=module.get("status", "unknown"),
         stale=stale,
+        provenance="game",
         match=_match(module),
     )
 
@@ -890,6 +984,7 @@ def _table_row(record: dict, stale: bool) -> str:
         f' data-address="{_escaped(address)}" data-name="{_escaped(name or "")}"'
         f' data-module="{_escaped(module)}" data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-provenance="{_escaped(store.provenance_of(record))}"'
         f' data-match="{_escaped(_match(record))}">'
         f'<td class="cell-address">{_escaped(address)}</td>'
         f'<td class="cell-name">{_escaped(name) if name else MISSING_NAME}</td>'
@@ -910,6 +1005,7 @@ def _module_table_row(module: dict, stale: bool) -> str:
         f'<tr class="{classes}" data-key="{_escaped(name)}" data-address=""'
         f' data-name="{_escaped(name)}" data-module="{_escaped(name)}"'
         f' data-status="{_escaped(status)}" data-stale="{str(stale).lower()}"'
+        f' data-provenance="game"'
         f' data-match="{_escaped(_match(module))}">'
         f'<td class="cell-address">{UNDEFINED}</td>'
         f'<td class="cell-name">{_escaped(name)}</td>'
@@ -941,18 +1037,11 @@ def _table(records: list[dict], rows: list[dict], digests: dict[str, str]) -> st
 def _map_sizes(records: list[dict]) -> tuple[dict[str, int], int, int]:
     """The byte span of each record, the low address, and the total span.
 
-    A record reaches the next record, because the stored `size` is that
-    distance.  The last record reaches its own `size`, or one byte.
+    The size map comes from `coverage.record_spans`.  A record reaches the next
+    record, and the last record reaches its own `size`, or one byte.
     """
+    sizes = coverage.record_spans(records)
     ordered = _sorted_records(records)
-    sizes: dict[str, int] = {}
-    for index, record in enumerate(ordered):
-        address = int(record["address"], 16)
-        if index + 1 < len(ordered):
-            end = int(ordered[index + 1]["address"], 16)
-        else:
-            end = address + max(record.get("size") or 0, 1)
-        sizes[record["address"]] = max(end - address, 1)
     low = int(ordered[0]["address"], 16)
     high = max(
         int(record["address"], 16) + sizes[record["address"]]
@@ -987,6 +1076,7 @@ def _map_block(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-provenance="{_escaped(store.provenance_of(record))}"'
         f' data-match="{_escaped(_match(record))}"'
         f' style="left: {left:.3f}%; width: {width:.3f}%"'
         f' title="{_escaped(title)}">'
@@ -1149,6 +1239,7 @@ def _treemap_block(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-provenance="{_escaped(store.provenance_of(record))}"'
         f' data-match="{_escaped(_match(record))}"'
         f' style="left: {100 * x / group_width:.3f}%;'
         f" top: {100 * y / group_height:.3f}%;"
@@ -1407,6 +1498,7 @@ def _graph_node(
         f' data-module="{_escaped(record.get("module", ""))}"'
         f' data-status="{_escaped(status)}"'
         f' data-stale="{str(stale).lower()}"'
+        f' data-provenance="{_escaped(store.provenance_of(record))}"'
         f' data-match="{_escaped(_match(record))}"'
         ' tabindex="0" role="button">'
         f"<title>{_escaped(title)}</title>"
@@ -1622,7 +1714,7 @@ def _details(records: list[dict], rows: list[dict], digests: dict[str, str]) -> 
 
 
 def _header(records: list[dict], rows: list[dict], stale_count: int) -> str:
-    counted = _counted_rows(records)
+    counted = _denominator_rows(records)
     count_text = "1 function" if len(counted) == 1 else f"{len(counted)} functions"
     return (
         '<header class="page-header">'
@@ -1648,6 +1740,10 @@ def _filter_row(module_names: list[str]) -> str:
         f'<option value="{_escaped(name)}">{_escaped(name)}</option>'
         for name in module_names
     )
+    provenances = "".join(
+        f'<option value="{provenance}">{provenance}</option>'
+        for provenance in store.PROVENANCE
+    )
     return (
         '<div class="filter-row">'
         '<label class="filter">status '
@@ -1656,6 +1752,9 @@ def _filter_row(module_names: list[str]) -> str:
         '<label class="filter">module '
         f'<select id="module-filter"><option value="">all</option>'
         f"{modules}</select></label>"
+        '<label class="filter">provenance '
+        f'<select id="provenance-filter"><option value="">all</option>'
+        f"{provenances}</select></label>"
         '<input id="search-filter" class="filter" type="search"'
         ' placeholder="search…">'
         '<label class="filter"><input id="stale-filter" type="checkbox">'
@@ -1740,6 +1839,7 @@ def render_page(
             _header(functions, rows, stale_count),
             _filter_row(_module_names(functions, rows)),
             _progress_row(all_rows),
+            _provenance_panel(functions),
             '<div class="content">',
             '<div class="board-column">',
             f'<div id="board" class="board">{_board(functions, rows, digests)}</div>',

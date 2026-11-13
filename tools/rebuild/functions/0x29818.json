@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the body at `0x29818` holds 48 instructions and 154 bytes: the five register saves, the frame, the state read from `DAT_0011fac8`, the fade-in path, the fade-out path, the `video_present` call at `0x27ec8`, and the `ret 4` epilogue. State 0 does nothing. State 1 adds `DAT_0018e08 * delta` and clamps at 1.0. The other states subtract the same product and clamp at 0.0. A clamp clears the state. The active paths call `video_present(fade, 0)`."
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "fade_update",
   "name": "fade_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29818",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:8ddf5a56558ae386438504f8e95c5316e3a29a80dd4f797c2fc36e047367d293",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:fc24c124c3a1c87c64bb0944f62cc6502af0d0d5fb088f9545d25cf5f9f88174",
     "mode": {
       "runtime": "run",
       "strict": true,

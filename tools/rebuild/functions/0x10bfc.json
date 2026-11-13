@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the plan row records 232 bytes and 69 instructions for the first block; the merged record keeps the 728-byte extent"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_load",
   "name": "object_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -44,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10bfc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:dc35fbb9bc27468b0321ffad42f3db59f744069c0e3cb3ef10202f9505c6ba35",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:a7e7acbd0357257cb552cd0071e2b579c6adddbb093d29ab70bfbc17dd4dc532",
     "mode": {
       "runtime": "run",
       "strict": true,

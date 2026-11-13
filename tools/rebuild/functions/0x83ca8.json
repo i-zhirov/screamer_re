@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The background_scale module at 0x83ca8"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "background_scale",
   "notes": [],
   "object_offset": "0x73ca8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x83ca8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9bf325481e2a62b223964daa052ba2525d5dc7200b7b5d27b314aee51cdae02e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d28b88bf68012685709f11f68c4d026b9268b6f8885e5e9131e639810e917cff",
     "mode": {
       "runtime": "run",
       "strict": true,

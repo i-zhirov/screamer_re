@@ -22,11 +22,20 @@
     {
       "kind": "note",
       "text": "the harness simulates the keyboard controller and the two DPMI calls; it prints the markers 0 through 4 and D for the first-acknowledge install, the one-retry install, the four-attempt install, the uninstall, and the BIOS flag mask"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "keyboard_hook",
   "name": "keyboard_hook",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -48,8 +57,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x14e20",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:7c77a241428973678c04bd5e9c1dc7865045fc4b2ce968d3017dbd0836fd6675",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d87c36f03f5c649290e9c2f4fa51215782ae5ccd505655fe3a17992063c4c8f2",
     "mode": {
       "runtime": "run",
       "strict": true,

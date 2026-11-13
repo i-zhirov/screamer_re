@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the physics and collision steps, gated on the state at `+0x414`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_physics",
   "name": "object_physics",
   "notes": [],
   "object_offset": "0xc810",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c810",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d959e93177df5c047b2a2cb5b69758931b2abe65cad7e4e99132b6d7fe67f9f6",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:98c7e83e414bf751ccc66492a30eb37d6c4d838f55df5ec50fca5bcf341ca9cf",
     "mode": {
       "runtime": "run",
       "strict": true,

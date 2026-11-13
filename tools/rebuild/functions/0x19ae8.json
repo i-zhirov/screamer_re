@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the function selects a slot from the seven 0x14-byte slots at DAT_00101da4 by the kind flag byte DAT_000f003d, the input bytes DAT_00118e1c and DAT_00118e1d, and the chosen flag, sets the screen mode through 0x4c850, starts the renderer at 0x19e78 or the car camera at 0x1a930, and copies the car position and angle into the view, so the module names the function player_view_setup"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_view_setup",
   "name": "player_view_setup",
   "notes": [],
   "object_offset": "0x9ae8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -49,8 +58,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19ae8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0654978cc7c9fd4b180c9a14e760015f820f9d5fb93a1cde2e1b811821561e72",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ef46f0ff6ccc688edc3f76b291659986911ba9bfdd16747a055f1f824e76444c",
     "mode": {
       "runtime": "run",
       "strict": true,

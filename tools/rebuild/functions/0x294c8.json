@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x294c8` holds 35 instructions and 117 bytes: it stores the constants 2.0, 0.6, 1.0, 20000, and -12.566371 at `DAT_00120378`, `DAT_00120380`, `DAT_0012037c`, `DAT_001203b0`, and `DAT_0012038c`, sets `DAT_0011fac8` to -1, copies the old state into `DAT_001203b8`, stores the parameter at `DAT_0011facc`, and sets `DAT_0011fac4` to 1"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_state_begin",
   "name": "race_state_begin",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x294c8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5e508e0b6763ce57b02b00cd2176cd3f701847356e06ddaf3822cb0260406d3c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e48c1e53fb37a0b0095ec2c2c0ab3a5565acd637bbda835f2e799844109c2c47",
     "mode": {
       "runtime": "run",
       "strict": true,

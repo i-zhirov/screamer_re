@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the harness covers the accelerate branch, both clamps, the brake set and no-set paths, the equal-speed path, the inactive mode, and the negative-throttle bound; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_drive_step",
   "name": "object_drive_step",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -44,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cee0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0bae94a2d6beddc0561f395cb5e3f8a3e1dec8b59e7e9e929f837152cdcbdfb2",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:286ea10ea400349bdaf29136f3fd1f69027ea78da65f49e43a52a25d7bb728df",
     "mode": {
       "runtime": "run",
       "strict": true,

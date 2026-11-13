@@ -31,6 +31,20 @@ class FakeImage:
         return None
 
 
+class PrologueImage:
+    """A byte image that answers the entry probes of the non-entry test."""
+
+    def __init__(self, data: bytes, code: range) -> None:
+        self.data = data
+        self.code = code
+
+    def read(self, address: int, count: int) -> bytes:
+        return bytes(self.data[address : address + count])
+
+    def object_at(self, target: int) -> object | None:
+        return object() if target in self.code else None
+
+
 class StoreTestCase(unittest.TestCase):
     """A test case with a temporary store and a temporary evidence root."""
 
@@ -43,6 +57,7 @@ class StoreTestCase(unittest.TestCase):
         store.MODULES_DIR = self.root / "modules"
 
     def tearDown(self) -> None:
+        store.sync_extents()
         store.FUNCTIONS_DIR = self.saved_functions
         store.MODULES_DIR = self.saved_modules
         self.temporary.cleanup()
@@ -62,6 +77,7 @@ class StoreTestCase(unittest.TestCase):
     def record(self, **overrides: object) -> dict:
         base = {
             "address": "0x300ec",
+            "provenance": "game",
             "status": "unknown",
             "checks": [],
             "evidence": [],
@@ -96,6 +112,7 @@ class StoreTestCase(unittest.TestCase):
             symbol="free_",
             count=3,
             implementation="assembly",
+            provenance="library",
         )
         record["result"] = self.result({"build": ("pass", "the module builds")})
         return record
@@ -566,6 +583,7 @@ class StoreTestCase(unittest.TestCase):
             "evidence": [{"kind": "note", "text": "a note"}],
             "notes": [{"date": "2026-10-26", "text": "a note"}],
             "implementation": "assembly",
+            "provenance": "library",
         }
         self.assertEqual(
             before,
@@ -596,6 +614,51 @@ class StoreTestCase(unittest.TestCase):
         )
         self.assertEqual(len(violations), 1)
         self.assertIn("implementation", violations[0])
+
+    def test_schema_rejects_a_missing_provenance(self) -> None:
+        record = self.full_record()
+        del record["provenance"]
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("provenance", violations[0])
+
+    def test_schema_rejects_an_unknown_provenance(self) -> None:
+        record = self.full_record()
+        record["provenance"] = "pascal"
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("provenance", violations[0])
+        self.assertIn("pascal", violations[0])
+
+    def test_validate_record_data_provenance_requires_not_a_function_status(
+        self,
+    ) -> None:
+        path = self.write_record(0x300EC, self.record(provenance="data"))
+        violations = store.validate_record(path)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("not_a_function", violations[0])
+
+    def test_validate_record_not_a_function_provenance_requires_not_a_function_status(
+        self,
+    ) -> None:
+        path = self.write_record(
+            0x300EC, self.record(provenance="not_a_function")
+        )
+        violations = store.validate_record(path)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("not_a_function", violations[0])
+
+    def test_validate_record_library_provenance_accepts_any_status(self) -> None:
+        path = self.write_record(0x300EC, self.record(provenance="library"))
+        self.assertEqual(store.validate_record(path), [])
 
     def test_schema_accepts_a_result_with_a_mode(self) -> None:
         record = self.full_record()
@@ -940,6 +1003,91 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(added, [0x300EC])
         self.assertEqual(lost, [0x300F0])
 
+    def test_seed_writes_the_game_provenance(self) -> None:
+        original = self.root / "STARTH.EXE"
+        original.write_bytes(b"ORIGINAL")
+        with mock.patch.object(
+            store, "scan_candidates", return_value=[0x300EC]
+        ), mock.patch.object(store.le, "load", return_value=FakeImage()), (
+            contextlib.redirect_stdout(io.StringIO())
+        ):
+            self.assertEqual(store.seed(False, original), 0)
+        self.assertEqual(store.load_record(0x300EC)["provenance"], "game")
+
+    def test_parse_arguments_accepts_the_provenance(self) -> None:
+        with mock.patch.object(
+            sys,
+            "argv",
+            [
+                "store.py",
+                "set",
+                "--function",
+                "0x300ec",
+                "--provenance",
+                "library",
+            ],
+        ):
+            arguments = store.parse_arguments()
+        self.assertEqual(arguments.provenance, "library")
+
+    def test_set_writes_the_provenance(self) -> None:
+        self.write_record(0x300EC, self.record())
+        arguments = argparse.Namespace(
+            function=0x300EC,
+            clear_evidence=False,
+            name=None,
+            role=None,
+            status=None,
+            module=None,
+            symbol=None,
+            section=None,
+            confidence=None,
+            implementation=None,
+            check=[],
+            evidence=[],
+            note=[],
+            provenance="library",
+        )
+        self.assertEqual(store.command_set(arguments), 0)
+        self.assertEqual(store.load_record(0x300EC)["provenance"], "library")
+
+    def test_command_check_skips_a_non_entry_violation_for_a_non_function_record(
+        self,
+    ) -> None:
+        original = self.root / "STARTH.EXE"
+        original.write_bytes(b"ORIGINAL")
+        cases = (
+            ("game", "unknown", True),
+            ("data", "not_a_function", False),
+            ("game", "not_a_function", False),
+        )
+        for provenance, status, reports in cases:
+            with self.subTest(provenance=provenance, status=status):
+                store.record_path(0x300EC).unlink(missing_ok=True)
+                self.write_record(
+                    0x300EC,
+                    self.record(provenance=provenance, status=status),
+                )
+                with mock.patch.object(
+                    store,
+                    "non_entry_addresses",
+                    return_value=[(0x300EC, "sits inside a prologue")],
+                ), mock.patch.object(
+                    store.le, "load", return_value=FakeImage()
+                ):
+                    output = io.StringIO()
+                    with contextlib.redirect_stdout(output):
+                        code = store.command_check(original)
+                self.assertEqual(code, 1 if reports else 0)
+                if reports:
+                    self.assertIn(
+                        "sits inside a prologue", output.getvalue()
+                    )
+                else:
+                    self.assertNotIn(
+                        "sits inside a prologue", output.getvalue()
+                    )
+
 
 class PrologueTestCase(unittest.TestCase):
     """A function record must sit at the entry, not inside the prologue.
@@ -962,25 +1110,27 @@ class PrologueTestCase(unittest.TestCase):
         self.assertEqual(store.le.prologue_start(b"\x53\x55\x89\xe5", 1), 0)
         self.assertEqual(store.le.prologue_start(b"\x52\x53\x55\x89\xe5", 2), 1)
 
-    def test_non_entry_addresses_reports_each_form(self) -> None:
-        class Image:
-            def __init__(self, data: bytes, code: range) -> None:
-                self.data = data
-                self.code = code
-
-            def read(self, address: int, count: int) -> bytes:
-                return bytes(self.data[address : address + count])
-
-            def object_at(self, target: int) -> object | None:
-                return object() if target in self.code else None
-
+    def non_entry_image(self) -> PrologueImage:
+        """The image of the non-entry test, with one form at each address."""
         data = bytearray(b"\x40" * 0x200)
         data[0x104] = 0x53
         data[0x105:0x108] = b"\x55\x89\xe5"
         data[0x10F:0x112] = b"\x00\x00\x00"
         data[0x11F] = 0xE9
         data[0x120:0x124] = struct.pack("<i", 0x140 - (0x11F + 5))
-        image = Image(data, range(0x100, 0x200))
+        return PrologueImage(data, range(0x100, 0x200))
+
+    def test_non_entry_reason_returns_the_prologue_reason(self) -> None:
+        self.assertEqual(
+            store.non_entry_reason(self.non_entry_image(), 0x105),
+            "sits inside a prologue",
+        )
+
+    def test_non_entry_reason_returns_none_for_an_entry(self) -> None:
+        self.assertIsNone(store.non_entry_reason(self.non_entry_image(), 0x130))
+
+    def test_non_entry_addresses_reports_each_form(self) -> None:
+        image = self.non_entry_image()
         saved = store.candidate_addresses
         try:
             store.candidate_addresses = lambda: [0x105, 0x110, 0x120, 0x130]
@@ -1019,9 +1169,28 @@ class PrologueTestCase(unittest.TestCase):
     @unittest.skipUnless(
         store.DEFAULT_ORIGINAL.is_file(), "the original image is absent"
     )
-    def test_no_record_sits_outside_an_entry(self) -> None:
+    def test_no_game_record_sits_outside_an_entry(self) -> None:
+        """Every game record sits inside an entry.
+
+        The check skips a record whose provenance is `not_a_function` or
+        `data`, or whose status is `not_a_function`, because such a record is
+        not a function entry.
+        """
         image = store.le.load(store.DEFAULT_ORIGINAL)
-        self.assertEqual(store.non_entry_addresses(image), [])
+        excluded = set()
+        for address in store.candidate_addresses():
+            record = store.load_record(address)
+            if (
+                store.provenance_of(record) in ("not_a_function", "data")
+                or record.get("status") == "not_a_function"
+            ):
+                excluded.add(address)
+        offenders = [
+            (address, reason)
+            for address, reason in store.non_entry_addresses(image)
+            if address not in excluded
+        ]
+        self.assertEqual(offenders, [])
 
 
 class ExtentTestCase(unittest.TestCase):
@@ -1035,6 +1204,7 @@ class ExtentTestCase(unittest.TestCase):
         store.FUNCTIONS_DIR.mkdir(parents=True)
 
     def tearDown(self) -> None:
+        store.sync_extents()
         store.FUNCTIONS_DIR = self.saved
         self.temporary.cleanup()
 

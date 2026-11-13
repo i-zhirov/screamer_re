@@ -307,6 +307,31 @@ class StageEightTestCase(unittest.TestCase):
         self.assertIn("0xd4364", command)
 
 
+class StageTwelveTestCase(unittest.TestCase):
+    """Stage 12 must run the provenance evidence check."""
+
+    def test_stage_twelve_checks_the_provenance_evidence(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        self.assertTrue(
+            any(
+                any("triage.py" in part for part in command)
+                and "check" in command
+                for command in commands
+            ),
+            "the stage runs triage.py check",
+        )
+        self.assertIn(
+            "stage 12: the provenance evidence is complete",
+            [name for name, _, _ in checks.results],
+        )
+
+
 class ImageGateTestCase(unittest.TestCase):
     """Stage 11 must skip the image gate until a whole image exists."""
 

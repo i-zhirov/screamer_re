@@ -14,12 +14,21 @@
     {
       "kind": "note",
       "text": "the original at 0x1b5a4 holds 108 instructions and 401 bytes: the sprintf call at 0x4d32c, the fopen call at 0x4c08d, the two seek calls at 0x4c5c7, the palette read and the 0x300-byte shift loop, the 0x80-byte header read, the size arithmetic, the RLE decode loop, and the stream_close call at 0x4c38d"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "pcx_load",
   "name": "pcx_load",
   "notes": [],
   "object_offset": "0xb5a4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +50,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b5a4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:75bbc0c119cfb4fcee9c2b634c8f6ef0bf073466c2d2801a1a60f421c69b7f10",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ea9292c537b8d5c4ef062e816fb3d09a1f3e1974d056ec1868e0a35f7c6e819c",
     "mode": {
       "runtime": "run",
       "strict": true,

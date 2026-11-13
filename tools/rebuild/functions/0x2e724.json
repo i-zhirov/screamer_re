@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x2e724 holds 50 instructions and 167 bytes: it reads the title pointer at DAT_0011fc38, calls panel_draw_centered at 0x2e7cc with the y 2, the font 3, and the color 2, formats the name at DAT_001203cc with the format \\001%s through sprintf at 0x4d32c, draws the buffer at (0x106, 0x98), shifts x by 21 pixels for each unit of DAT_0011d244, and draws the separator \\001- at (2 * (0x83 + DAT_0011d244 * 21), 0xb0) through draw at 0x25020"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_panel_4",
   "name": "race_panel_4",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2e724",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:244c54ec273f834bb487ac2583f61fe06e376737c61ba2487f1c7a3c4040bd23",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b702c388c178db9fc59f3b7a743db7f31aa92913c24e7d7d1aebca5dbbfc9966",
     "mode": {
       "runtime": "run",
       "strict": true,

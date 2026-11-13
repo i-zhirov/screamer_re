@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "the original at `0x2e7cc` holds 34 instructions and 93 bytes: it measures the text through `0x254a8`, halves the measured width with a signed division, centers the half width on the `0x140` screen width, and draws through `0x25020` with the doubled position"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "panel_draw_centered",
   "name": "panel_draw_centered",
   "notes": [],
   "object_offset": "0x1e7cc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2e7cc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:fa97f2d4cd3f884db12f69ccd138e309fe91388181d07e91a609cf681cd5af4f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e93d27b8fd4c898c46f80bc5af0dad63d1ae789b1e4f6c42da7b1c01cb793dd0",
     "mode": {
       "runtime": "run",
       "strict": true,

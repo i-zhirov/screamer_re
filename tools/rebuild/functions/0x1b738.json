@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The replay_save module at 0x1b738"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "replay_save",
   "notes": [],
   "object_offset": "0xb738",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -87,8 +96,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b738",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e9f1aa38e4c78a69b9073bec0fdd2452aade2f520369a760a4a5fc59c54c421b",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:afd4b88837d61de61c1829bc8a93f6ad825714514ec6851a15e2a63d92b342dc",
     "mode": {
       "runtime": "run",
       "strict": true,

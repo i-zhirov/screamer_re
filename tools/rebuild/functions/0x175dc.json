@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The traffic_collision_pass module at 0x175dc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "traffic_collision_pass",
   "notes": [],
   "object_offset": "0x75dc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x175dc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:d5f3b32a2c32ab4465a6ccf298f4c41514ea17b2095291e49cb9c2923edcf1a4",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e63f79b27bccd38a6696965a744b85bed8089b204f0aba73cabc9165c122b25b",
     "mode": {
       "runtime": "run",
       "strict": true,

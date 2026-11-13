@@ -10,11 +10,16 @@
     {
       "kind": "note",
       "text": "rounds the value on the FPU stack to an integer"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "module": "fp_helper",
   "name": "fp_helper",
   "notes": [],
+  "provenance": "compiler_helper",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +41,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d9f4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:4da2c2cf7ba155ef15606337d55cd152dfd51592f1121a0ea9bd39e260003b69",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:8b72ece2444abcf616f4a862ce066e2eeebfea62d6d35d9fb9bee8d00fe32d51",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -51,6 +51,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module player_track_node_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "player_track_node_update",
   "notes": [],
   "object_offset": "0x821c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1821c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:676be2a95bc1a37a9c2d539bcacfdc5e358050056b099cd7c9d3a73c9b08d29f",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e1d635b3fed985cd1ff5fb5b09bd75db8bf0985f4280fa9609247c2586a3bee3",
     "mode": {
       "runtime": "run",
       "strict": true,

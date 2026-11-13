@@ -39,6 +39,14 @@
     {
       "kind": "finding",
       "text": "The menu_text_update module at 0x29918"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -46,6 +54,7 @@
   "name": "menu_text_update",
   "notes": [],
   "object_offset": "0x19918",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -67,8 +76,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29918",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:151a976053aad63e0ea8de6dc65c1577b9d41fa6732076ad6684f8e449bbfe03",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f136771b3667cb1d90a6e2c22331986cec918ffc7070d5d61605e28ecabd875f",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The terrain_contact_update module at 0x1cbac"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "terrain_contact_update",
   "notes": [],
   "object_offset": "0xcbac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cbac",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9a326561b588c4d616bf047fbfb5403f86882e44d51f0c8f3521ecde7bcc452e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:26b2a40193eb1e3f490dcbeadb4cdcb4d35a25e0c4098835c6e2288609513890",
     "mode": {
       "runtime": "run",
       "strict": true,

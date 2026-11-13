@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the harness holds the object record, the two globals, the damping table, and the four constant globals. It covers the state 1 and state 2 integration, the two wrap branches, the counter reset, the negative truncation, the two state 3 and state 4 branches, and the default path. The behavior check passes. The module uses an if-else chain because the V2 switch jump table faults in the harness. It uses a local truncating FPU stub because the shared stub rounds to nearest."
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_gear_step",
   "name": "object_gear_step",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d834",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:05456fe16d01f17091c890f7e0d7d787f159acd846d8af6863ca4cfbf0861eb3",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c4634a0097338c994587f8c4aedc93352060a72528775cf07b1e30acae1e3d31",
     "mode": {
       "runtime": "run",
       "strict": true,

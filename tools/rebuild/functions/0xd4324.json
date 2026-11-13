@@ -9,12 +9,21 @@
     {
       "kind": "note",
       "text": "aligns the stack, grows the stack, calls the game main with the argument pair, and calls the exit function"
+    },
+    {
+      "kind": "finding",
+      "text": "## The startup module at 0x30170"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "main_invoker",
   "name": "main invoker",
   "notes": [],
   "object_offset": "0xc4324",
+  "provenance": "compiler_helper",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd4324",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:a262f88400cf25d20114eebbbd92c020e9067b71f0474929cd19d74f0e1cae3d",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:18b35d7676e331a1e43c0f50293ed69aaf17387163f4eaa26c1525828630c0ef",
     "mode": {
       "runtime": "run",
       "strict": true,

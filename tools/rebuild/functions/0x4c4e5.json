@@ -14,11 +14,24 @@
     {
       "kind": "note",
       "text": "the original at `0x4c4e5` holds 80 instructions and 226 bytes: the register saves, the frame, the three argument slots, the flag test at `stream + 0x10`, the two clamp branches, the expander call at `0x4d3fc`, the raw `fread` call at `0xc607b`, and the return"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "module": "stream_read",
   "name": "stream_read",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c4e5",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:6498083ab45e9b72859af011ef2f94883179fe4443f258ec4f0b41347c906f35",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:59e2711ebd79103104dbf53984ce4799584b4e5daa971f3273a5a54eb05143e9",
     "mode": {
       "runtime": "run",
       "strict": true,

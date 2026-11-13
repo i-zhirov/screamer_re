@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The car_select_update module at 0x2cb20"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "car_select_update",
   "notes": [],
   "object_offset": "0x1cb20",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cb20",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e3a2c43091b4bb97d01f5cf6e3d6e0843e459ca6ec013469955e9a9ffe6b6c0e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f444610b3bfad739fa26772b6b5783c020711011f567ff582e06ee42b514796f",
     "mode": {
       "runtime": "run",
       "strict": true,

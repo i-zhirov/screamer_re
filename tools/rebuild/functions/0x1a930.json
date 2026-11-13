@@ -35,12 +35,21 @@
     {
       "kind": "finding",
       "text": "The car_camera module at 0x1a930"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "car_camera",
   "name": "car_camera",
   "notes": [],
   "object_offset": "0xa930",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -62,8 +71,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a930",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:3c2c4c82d2c7a5348f0d52e0953d98399a3a36dc657f85890092993e8e9e83ae",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e62b962878918f349782c6197cd66bda77c67f2380ccc7f6264f7bae47755950",
     "mode": {
       "runtime": "run",
       "strict": true,

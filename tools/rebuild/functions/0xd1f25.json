@@ -14,11 +14,24 @@
     {
       "kind": "note",
       "text": "the original at `0xd1f25` holds 84 instructions and 227 bytes: the nine register saves, the frame, the four-byte local area, the size checks at `0xd1f35` and `0xd1f39`, the round-up at `0xd1f4a`, the free-list walk from `0x31d0`, the helper calls at `0xe09dc`, `0xe0f73`, and `0xe112e`, the largest-free update in `0x31d8`, the cursor in `0x31d4`, the heap flag clear at `0x27de5`, and the epilogue"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "module": "malloc_rt",
   "name": "malloc",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +53,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd1f25",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:618f1a30615cb25af64a58c2e4f918103de0d61f384024717031445981baa579",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9583d7d81cc9b872202946b1d92ac835f4c12a3a857867ab33a7c4a4e8fad822",
     "mode": {
       "runtime": "run",
       "strict": true,

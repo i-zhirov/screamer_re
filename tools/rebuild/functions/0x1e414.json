@@ -47,12 +47,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1e414"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "opponent_avoid_player",
   "name": "opponent_avoid_player",
   "notes": [],
   "object_offset": "0xe414",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -74,8 +83,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e414",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:46397c05507ba66ac0b3cd71b532ff11bbf517061baceaf95fcb897eaa35bf96",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9e98c6086368119f65082e4033dc42f82c98765a52a0e9f0dbfd4bee39e0b364",
     "mode": {
       "runtime": "run",
       "strict": true,

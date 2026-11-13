@@ -5,11 +5,20 @@
     {
       "kind": "note",
       "text": "`jmp short +0x76` over the banner string"
+    },
+    {
+      "kind": "finding",
+      "text": "## The startup module at 0x30170"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "entry jump",
   "notes": [],
   "object_offset": "0x200f8",
+  "provenance": "compiler_helper",
   "role": "`jmp short +0x76` over the banner string",
   "section": "Startup path",
   "size": 120,

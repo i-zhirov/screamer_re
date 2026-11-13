@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at 0x29610 holds 136 instructions and 519 bytes over the full extent; the ret is at 0x29816; it scales DAT_00120388, DAT_00120394, DAT_00120384, and DAT_0012038c by the float 1024.0 at object-3 offset 0xf33 and the float pi at 0xf37, truncates toward zero through 0x4d9f4, and masks with 0x7ff; the first two headings wrap by 0x800 when they differ by at least 0x400; a set DAT_0011d240 makes the factor the power of DAT_0012037c raised to 2.0 through 0xc21e2, and a clear flag copies DAT_0012037c; the four outputs land at DAT_00109a0, DAT_00109a4, DAT_00109a8, DAT_00109ac, DAT_00109b0, and DAT_00109b4 from DAT_0012038c and from the three integer pairs 0x2039c/0x203a8, 0x203a0/0x203ac, and 0x203a4/0x203b0; a zero DAT_0012037c returns, and a negative value after DAT_0012037c - DAT_00118e08 * DAT_00120380 copies DAT_00120394 into DAT_00120388, copies the three second integers into the first ones, and clears DAT_0012037c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_heading_update",
   "name": "race_heading_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29610",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:0a8e50928549a26652d5d3c1c60a9137a086eae77c08fc26a52fc8c27db69f45",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:1a4eedca91e4c8af90401a126f3c1c76d5d441446d902e9ea83563d7c83dfbd9",
     "mode": {
       "runtime": "run",
       "strict": true,

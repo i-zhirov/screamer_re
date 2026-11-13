@@ -47,12 +47,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module race_radar"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_radar",
   "name": "race_radar",
   "notes": [],
   "object_offset": "0x13a94",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -74,8 +83,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23a94",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:9ae50bfbfa54abeb544dbea34308cb22ac285f9f5158ce598e7686d70a579c1a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:20d3cf4bd162c42b5488d69a544bf6ddd751f7ccce0aab42abe38e66b5180f9e",
     "mode": {
       "runtime": "run",
       "strict": true,

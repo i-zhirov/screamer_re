@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "formats into a buffer through the run-time `vsprintf` and writes the terminator"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The first Phase B modules"
     }
   ],
   "module": "sprintf",
   "name": "sprintf",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d32c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:79918b203b92b9c9bf7560bc7af4a3ab437f1f1beb07a677edb8db677fd0dc2e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:268c3450b3ad1397a26592f6e2d657546681a4bde5f313ba3923a0305ba0afac",
     "mode": {
       "runtime": "run",
       "strict": true,

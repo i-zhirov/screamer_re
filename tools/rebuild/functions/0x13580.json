@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The race_view_reset module at 0x13580"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "race_view_reset",
   "notes": [],
   "object_offset": "0x3580",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x13580",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ecc13656ed45115c6a93f56576c12a0b006d1086a2b6afa5a94d8a6a97f363a7",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3975dbca3cfb9659830f75d4b7a9e70a7b5520748e6d856ad21c431c052ec115",
     "mode": {
       "runtime": "run",
       "strict": true,

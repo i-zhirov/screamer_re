@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The race_lap_complete module at 0x19678"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "race_lap_complete",
   "notes": [],
   "object_offset": "0x9678",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19678",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:76c0d5a0828fabbc06c38ef59ce99cebabcedd1674e091fa2c6e9068f0c621fc",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:202cdfa30c5b6a4ed78bc680ebddd34e177ec07c19b8b766749753b278918669",
     "mode": {
       "runtime": "run",
       "strict": true,

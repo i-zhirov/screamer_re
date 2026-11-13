@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "the screen index comes from the chosen player record at 0x2099c field +0x14 and a value above 5 drops by 6 and sets the flag 0x08; the input word DAT_00118e1c bits 0x1020 skip the results, and the wait loop exits on the bytes at 3 and 0x1e or polls the input behind DAT_0011d2c0 and DAT_0011d2cc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_results_screen",
   "name": "race_results_screen",
   "notes": [],
   "object_offset": "0x1a558",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -53,8 +62,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2a558",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b3529c3aceab1932dc99986eb97a6c0f5ecd38891f012ba8f1a59bfd584dfeae",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:eb75cb89d3f74dddc0e88ad2d919f64545ae85f46bdf275abaa037f48b2f81db",
     "mode": {
       "runtime": "run",
       "strict": true,

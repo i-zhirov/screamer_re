@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The opponent_start module at 0x124c0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "opponent_start",
   "notes": [],
   "object_offset": "0x24c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x124c0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:a314d4de7540b2f9108f2201af1a3479ac80a5fe434cf7cf4c6dca4385c77e3b",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:76ce33f232576a31416890b4b3f09d27dad556e849cd0feadeee166c2a75ab9d",
     "mode": {
       "runtime": "run",
       "strict": true,

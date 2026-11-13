@@ -43,12 +43,21 @@
     {
       "kind": "finding",
       "text": "The map_object_update module at 0x2b9cc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "map_object_update",
   "name": "map_object_update",
   "notes": [],
   "object_offset": "0x1b9cc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -70,8 +79,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2b9cc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ac7c903475a2f46ba13ff5dfa7272f5f561b52899d1909801a0bbe9d0c1bf7bf",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f6d2eb7c7409bb3684cfc6dd10889ab394f4c759382b85b270f9f95dfcd54838",
     "mode": {
       "runtime": "run",
       "strict": true,

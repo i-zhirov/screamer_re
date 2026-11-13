@@ -1,9 +1,23 @@
 {
   "address": "0x4c128",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    }
+  ],
   "notes": [],
   "object_offset": "0x3c128",
+  "provenance": "library",
   "size": 613,
   "status": "unknown"
 }

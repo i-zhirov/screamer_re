@@ -1,9 +1,19 @@
 {
   "address": "0x212d0",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
+    }
+  ],
   "notes": [],
   "object_offset": "0x112d0",
+  "provenance": "game",
   "size": 104,
   "status": "unknown"
 }

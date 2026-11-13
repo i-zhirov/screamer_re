@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The path_keyframe_append module at 0x231f0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "path_keyframe_append",
   "notes": [],
   "object_offset": "0x131f0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x231f0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b01f66dc6a9bc373cb8ed53c381c1a48137c63eb4c1fb478694ff90510a701d6",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7b80d6e138ea765bcc4440e9e2ff61869c62136c82bbbd14322c1f512a9ee0ea",
     "mode": {
       "runtime": "run",
       "strict": true,

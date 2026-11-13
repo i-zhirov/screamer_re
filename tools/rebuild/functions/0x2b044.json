@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The map_object_place module at 0x2b044"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "map_object_place",
   "notes": [],
   "object_offset": "0x1b044",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2b044",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:3b6445a05dceb2b8e16e9b4001ca3c5ad6c83fad9c4e9f619a920f0e308ac4dc",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:650aed75ac29e0c1a1597ead607d9e41cd5e1d4b08baa3276b633114637da67b",
     "mode": {
       "runtime": "run",
       "strict": true,

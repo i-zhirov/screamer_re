@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The view_transition_update module at 0x19f00"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "view_transition_update",
   "notes": [],
   "object_offset": "0x9f00",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -75,8 +84,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19f00",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e572b78f5bd3cbe876de22f335334c7aea12ad2354f87867a837700ac46c4b2e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:34c58c971eebd8f0d14df605203479868034870e5dbb6ddf3ac56df3022d89e6",
     "mode": {
       "runtime": "run",
       "strict": true,

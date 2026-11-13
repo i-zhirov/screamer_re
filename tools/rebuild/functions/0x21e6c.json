@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x21e6c holds 53 instructions and 202 bytes: the frame, the 0xc-byte local area, the guard on the time base below zero, the three scaled values with the helper at 0x4d9f4, the view_move call at 0x1f94c, the video_present call at 0x27ec8, the advance by DAT_00118e08 times the 2.0 constant at 0x100d51, and the wrap at 1.0 that sets the time base to -1.0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "motion_update",
   "name": "motion_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21e6c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:bf932cb29b7f331a02f8130b4ba4b379e5c929fd3ecb91fc970db32e0f8468ab",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:08721782033237a3cfeacb8e4ec11f5689295c6db6df20e2a9a7dba680ec0fe6",
     "mode": {
       "runtime": "run",
       "strict": true,

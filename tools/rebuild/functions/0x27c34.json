@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The credits_scroll module at 0x27c34"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "credits_scroll",
   "notes": [],
   "object_offset": "0x17c34",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -79,8 +88,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27c34",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:fe9cf38e588128b94f94c17c628d1737d1a0bd5b1a2f20ee71c98eff5ad54a0c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:180e264a0cb5d1ff22eb651cba40a8b88f28c8ad4c8f5f8b2a0be5afb0992728",
     "mode": {
       "runtime": "run",
       "strict": true,

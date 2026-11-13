@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "allocates a DOS block, builds the real-mode register set for the VBE mode info call, and sets the mode through INT 10h"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "vesa_set_mode",
   "name": "vesa_set_mode",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8bdec",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:ed1204234beabc083dbecb4fad977a50fca842ea5bdb7d3c1741514bcd992571",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:673953ec0f7ba28f22b59a386482162d1cebabaeacde4800d1b275a2efa75848",
     "mode": {
       "runtime": "run",
       "strict": true,

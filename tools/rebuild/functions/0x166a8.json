@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x166a8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "player_car_contact_update",
   "notes": [],
   "object_offset": "0x66a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x166a8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f5bcf53aa9fc657b6cb83c3ee7c9df3c213525a0cc6d9ba7eceeb10ab9349bad",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:71a7ed35c7a8e3e39c600b750f06c45d84dc2db3a3ec5752f78e11b316f72fd5",
     "mode": {
       "runtime": "run",
       "strict": true,

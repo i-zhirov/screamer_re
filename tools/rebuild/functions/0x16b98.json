@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The player_segment_apply module at 0x16b98"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "player_segment_apply",
   "notes": [],
   "object_offset": "0x6b98",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16b98",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:077bd8c4f395a06d78a3c5512f0e3c817c8d497b51a6285504be717af8ccbe27",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3055bcb585a3a4f6d7a6ba4fbbb82ca602b8340837e00a954e9dd13334b077d3",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The choice_load module at 0x1bbc8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "choice_load",
   "notes": [],
   "object_offset": "0xbbc8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -71,8 +80,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1bbc8",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:076cf43fcb16ec9278f754d7a683865e7666bdc881fa717da9b71bb1e20b1f47",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:05357381989d8fbb831951c6f88d30ba73d2a487126b8fc79daf573caa419d2b",
     "mode": {
       "runtime": "run",
       "strict": true,

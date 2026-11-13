@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the harness holds the object record, the two globals, the gear table, and the four callee stubs; it covers the no-wrap path, the wrap with gear 0 and gear 1, the negative truncation, the exact 1.0 boundary, and the distance argument; the behavior check passes, and the module uses a local truncating FPU stub because the shared stub rounds to nearest"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_revolution_step",
   "name": "object_revolution_step",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d30c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:671758ecc5ebb3fd5fa602398c7add153b1bdcc28472973ec0d06954b404254d",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:982afc395704769e7f6855212f92787627e36a87ad6816bb965cda99f67a674a",
     "mode": {
       "runtime": "run",
       "strict": true,

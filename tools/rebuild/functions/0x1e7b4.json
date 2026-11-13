@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The func_1e7b4 module at 0x1e7b4"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "func_1e7b4",
   "notes": [],
   "object_offset": "0xe7b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e7b4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:08e101ef75658edb7ab5609b4958953ef284f610c273ff261d85287b138948ef",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:011a6f94275050e58fd3481dda2b2f82c028140da9f9ef6333462d27d85fdc9d",
     "mode": {
       "runtime": "run",
       "strict": true,

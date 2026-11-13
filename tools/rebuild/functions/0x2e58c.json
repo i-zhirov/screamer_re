@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x2e58c holds 120 instructions and 408 bytes: it draws the title pointer DAT_0011fc34 at y 2 with the font 3 and the color 2 through panel_draw_centered at 0x2e7cc, measures the text at +0x14 of the 0x34-byte record that the index DAT_001203c8 selects from the table at 0x1d908 through text_measure at 0x254a8, halves the measured width and height with a signed division, centers the half width on the 0x140 screen width, sets y to 0xc8 minus the doubled half height, draws the doubled position with the font 2 and the color 2 through text_draw at 0x25020, draws the title pointer DAT_0011fc54 at y 0x20 with the font 1 and the color 2 when DAT_0012081c stays below DAT_00120818 and the low six bits of DAT_000007fd stay below 0x20, draws the panel at (8, 0x64) with the size 2 when the index is not zero and DAT_0012039c stays below DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 0 otherwise, and draws the panel at (0xee, 0x64) with the size 3 when DAT_00120818 plus 2 differs from the index and DAT_0012039c stays above DAT_001203a8 and DAT_0012037c stays above 0.6 and with the size 1 otherwise through panel_show at 0x2dfac; the threshold 0.6 is the double constant at object-3 offset 0x12ef"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_panel_3",
   "name": "race_panel_3",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2e58c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:aa8eba426785abd3c078386478572894d328b003bb387bbb7718af385f3d0330",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:3f0ebb78f91123e1565c7a17ac52d982b19504562d0e8d120e47efeee0fa3ae9",
     "mode": {
       "runtime": "run",
       "strict": true,

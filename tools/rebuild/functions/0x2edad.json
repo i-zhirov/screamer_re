@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x2edad holds 97 instructions and 291 bytes: it reads the status at [arg+0xc], prints the six memory format strings at 0x1394, 0x13c4, 0x13f9, 0x1415, 0x1444, 0x1475, and 0x14a2 through the printer at 0x4bf64 with the stream 0x2fd2, passes the name at +0x10 and the slot count at +0x08, and calls exit(-1) at 0x300be"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "memory_error_report",
   "name": "memory_error_report",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2edad",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:08a2e36dbbb68593b76f52319b3d8b242794b977212022c75193fcf987328a5a",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4777826a208eca1e97cb2bb130e0a56deab479f4ded272935130421357fea7b6",
     "mode": {
       "runtime": "run",
       "strict": true,

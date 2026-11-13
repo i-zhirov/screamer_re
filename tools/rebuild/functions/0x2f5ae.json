@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_0002f5ae` halves the probe size and keeps the largest block that `FUN_000d1f25` returns"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "heap_block_largest",
   "notes": [],
   "object_offset": "0x1f5ae",
+  "provenance": "game",
   "role": "finds the largest single heap block with a halving search over `malloc`",
   "section": "The runtime memory manager",
   "size": 190,

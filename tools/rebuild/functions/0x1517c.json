@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1517c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "opponent_route_setup",
   "notes": [],
   "object_offset": "0x517c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -83,8 +92,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1517c",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:8690fbefc128e07e60aad4cfa5bb347c114bbb9e2f8d66f8ee00253237ad7004",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:9fa6732eeb88858afeeb87b712e88e63dd854c28a92d6362ed0389fe99aeb72b",
     "mode": {
       "runtime": "run",
       "strict": true,

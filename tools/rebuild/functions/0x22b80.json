@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "applies the one-pole filter `*p = (*p - f) * table[i] + f` with the table pointer `DAT_0010cf08`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "filter_update",
   "name": "filter_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22b80",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:f00bfd18f59a58c1617f91bfa9fab9e78011d3a9f4a04c2dde18d413bbf63d69",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e74adc3f2bc25286cf80eafddc5148112eac1b33fc77e28014df5b1900790524",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the rebuild covers the 87-instruction prefix; the zero load flag returns 0 and the success path returns 0 after the two object loads; the state reset after 0x13dcf is not in the module"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_init",
   "name": "player_car_init",
   "notes": [],
   "object_offset": "0x36cc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -49,8 +58,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x136cc",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e0c60d31c02330965e8d371ccc14d276ae30018cfd8eac232e258ed69389823e",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c056a91ff5e87199e55b1a0c46ff539c957ee52fedee6f2d99267a57a0e8cd35",
     "mode": {
       "runtime": "run",
       "strict": true,

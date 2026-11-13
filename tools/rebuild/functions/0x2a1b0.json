@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2a1b0` holds 24 instructions and 97 bytes: the frame, the twelve cleanup calls at `0x264ec`, `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`, `0x2f326`, `0x1f6f8`, and `0x2fe68`, and the epilogue; the two argument call pairs receive the imported data addresses and the last two calls receive the pointer at `DAT_000062ac` and the address `DAT_000062b0`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_cleanup",
   "name": "race_cleanup",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -36,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2a1b0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5394f88ffaf056ca1da05f2c66fe51d3a72ecf5cd7c298a359cc1f92f8f9b380",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0a481d63b5a0b9fe1b9b0e37eadafbf15480afb706d781acc9e6cf6255bab35a",
     "mode": {
       "runtime": "run",
       "strict": true,

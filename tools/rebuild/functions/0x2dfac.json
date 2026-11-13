@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "panel_show",
   "name": "panel_show",
   "notes": [],
   "object_offset": "0x1dfac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -37,8 +46,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2dfac",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:139a46a16ca7b46bf5b7fce0b6c0b7ac738ef499862dc327140dd0e69c3ea772",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ea56e056b8883bc657b6f409384c602b8b9ed95ef72c140d0d5c26ca92ef77e3",
     "mode": {
       "runtime": "run",
       "strict": true,

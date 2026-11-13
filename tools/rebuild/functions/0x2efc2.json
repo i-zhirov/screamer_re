@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2efc2` holds 56 instructions and 160 bytes: it compares the count at resource + 0x04 with the limit at resource + 0x08, sets the status at + 0x0c to 2 and copies the name to resource + 0x10 through `sprintf` at `0x4d32c` when the count equals the limit, selects the record at `*resource + count * 0x1c`, calls `memory_alloc_small` at `0x2f172` with the size and the record cell at + 0x10, clears the flag at + 0x18, and calls the cache routine at `0x2f062` with the resource, the record, the allocation result, the name, and the size"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "resource_read",
   "name": "resource_read",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2efc2",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5b6edc1f53055e2f838e851ab594044689daece26cc6e87039979d8313810566",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:daae84f994be9174f3dd9c1402fbb0f2bbe9dd1e4404d0deb40668124f0ded7a",
     "mode": {
       "runtime": "run",
       "strict": true,

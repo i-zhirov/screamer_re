@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The player_segment_update module at 0x11f98"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "player_segment_update",
   "notes": [],
   "object_offset": "0x1f98",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -91,8 +100,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11f98",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e13cb7d770e7185da50a5485f735266f184f2331ae144541d045368a7e439a90",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0d25d4825ba725f8a4dba1da3f68ff71c965f2631d1cef1dd0be88c34ea17f51",
     "mode": {
       "runtime": "run",
       "strict": true,

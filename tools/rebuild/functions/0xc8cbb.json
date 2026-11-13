@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000c8cbb` calls `FUN_000de9be` 17 times and returns 5 on the first failure"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "music_driver_lock",
   "notes": [],
   "object_offset": "0xb8cbb",
+  "provenance": "library",
   "role": "locks the 17 music driver memory regions through DPMI AX=0x0601 and returns 5 when a lock fails",
   "section": "The HMI sound driver",
   "size": 710,

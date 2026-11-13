@@ -1,9 +1,15 @@
 {
   "address": "0x4da72",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    }
+  ],
   "notes": [],
   "object_offset": "0x3da72",
+  "provenance": "library",
   "size": 12,
   "status": "unknown"
 }

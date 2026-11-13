@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the rebuild copies the 0x74-byte record template, reads every member through the `SOUND_FX` resource at `0x2eed0`, and maps the high nibble of `+0x20` to the type 0, 2, 1, and 3; the five behavior paths cover the setup gate, the two records, the four status values, the two failed opens, and the zero resource"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "sound_bank_load",
   "name": "sound_bank_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -40,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f2e0",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:c0134f96b44506d24cc593f688ae2fac37d7b9c92f4f50769755eb7a2c5911ff",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7bca5cc357545b578f5db62341759f835ae9ad2696173107fd1d93f9757ed85f",
     "mode": {
       "runtime": "run",
       "strict": true,

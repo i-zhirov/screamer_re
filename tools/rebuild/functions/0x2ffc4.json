@@ -14,12 +14,21 @@
     {
       "kind": "note",
       "text": "the only caller is `engine_init` at `0x1284d`, after `music_bank_load` at `0x1283f`; `music_bank_load` writes the status at `0x2f9e0` and `music_bank_reset` clears it at `0x2f9b0`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "music_start",
   "name": "music_start",
   "notes": [],
   "object_offset": "0x1ffc4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -41,8 +50,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ffc4",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:20bd7f8571e27f55dea76744a5110767bdeac10f5fe8a0233a6d1b89a5701217",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:e9b0aecf6f2482a5c3014a4aaed901249269d16c6722a474658b3e7417cbcabe",
     "mode": {
       "runtime": "run",
       "strict": true,
