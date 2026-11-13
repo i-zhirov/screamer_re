@@ -33428,3 +33428,66 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The resource, the callers, and the
   sibling loader give the role, and the name `text_data_release` stays
   inferred.
+
+## The gamespline_release module at 0x1b180
+
+- Observation: the original body at `0x1b180` holds 9 instructions and 22
+  bytes up to the `ret` at `0x1b195`.  The next record `track_marker_load`
+  starts at `0x1b198` after the two padding bytes at `0x1b196` and `0x1b197`,
+  so the store record keeps the 24-byte extent and sets no separate function
+  size.  The identity check uses 9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b180 --count 9` and
+  `tools/rebuild/functions/0x1b180.json`.
+- Observation: the function frees the `GAMESPLINE` resource at object-3 offset
+  0x967 from the archive `DAT_000062ac` through `resource_free_name` at
+  `0x2f326`.  The string at linear `0x100967` holds `GAMESPLINE`.  The function
+  loads the name pointer in `edx` and the archive context in `eax` before the
+  call.
+  Evidence: the block at `0x1b180` through `0x1b195` and the string at linear
+  `0x100967`.
+- Observation: the direct callers are `race_data_release` at `0x156a8` with
+  the call site at `0x1570a` and `race_end` at `0x279a4` with the call site at
+  `0x279cc`.  Both callers run the function in a teardown.
+  Evidence: the call sites above and the finding "The race_data_release module
+  at 0x156a8".
+- Observation: the sibling `spline_load` at `0x1af70` gets the `GAMESPLINE`
+  resource at object-3 offset 0x95c, so the two functions form the game spline
+  data load and release pair.  The loader sits in the section Resource loader,
+  so the module takes the same section.  The distinct `SPLINE` resource at
+  linear `0x100960` belongs to another loader, so the name keeps the full
+  `game` prefix.
+  Evidence: the `resource_get` call in `spline_load`, the finding "The
+  spline_load module at 0x1af70", the string at linear `0x100960`, and
+  `tools/rebuild/functions/0x1af70.json`.
+- Inference: the `GAMESPLINE` resource, the caller group, and the sibling
+  loader support the name `gamespline_release`.  The original has no symbol, so
+  the record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/gamespline_release.c` and
+  `tools/rebuild/functions/0x1b180.json`.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction.  The module builds with `-of+`, needs no FPU stub, and uses no
+  assembly source.
+  Evidence: `tools/rebuild/gamespline_release.c` and
+  `tools/rebuild/modules/gamespline_release.json`.
+- Observation: the harness holds the archive context `DAT_000062ac` and the
+  resource free stub.  The stub records the call count, the context, and the
+  name pointer.  The three paths cover the first context, a second context, and
+  a sentinel context.  Every path checks the call count, the context, and the
+  `GAMESPLINE` name.  The output holds the markers `0` through `2` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/gamespline_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module gamespline_release`, and
+  `work/rebuild/gspl.txt`.
+- Observation: the identity check compares 9 instructions.  The rebuilt body
+  holds 9 instructions and 24 bytes, and the 9-instruction window holds 5 of 9
+  instructions, 6 of 22 bytes, and 0 of 2 relocation slots equal, because V2
+  saves `ebp` before `edx`, loads the archive context before the name pointer,
+  and restores the stack with `lea esp, [ebp - 4]`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b180 --count 9 --rebuilt work/rebuild/gspl.exe
+  --rebuilt-map work/rebuild/gamespline_release.map --rebuilt-symbol
+  gamespline_release_`.
+- Limit: the original has no symbol name.  The resource, the callers, and the
+  sibling loader give the role, and the name `gamespline_release` stays
+  inferred.

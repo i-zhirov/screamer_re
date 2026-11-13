@@ -1,0 +1,29 @@
+{
+  "exe": "gspl.exe",
+  "map": "gamespline_release.map",
+  "name": "gamespline_release",
+  "run": {
+    "command": "gspl.exe > gspl.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "gspl.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "gamespline_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "gamespline_release_main.c"
+    }
+  ]
+}
