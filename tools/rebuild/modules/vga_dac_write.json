@@ -1,0 +1,26 @@
+{
+  "exe": "vdac.exe",
+  "map": "vga_dac_write.map",
+  "name": "vga_dac_write",
+  "run": {
+    "command": "vdac.exe > vdac.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "vdac.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "vga_dac_write.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "vga_dac_write_main.c"
+    }
+  ]
+}

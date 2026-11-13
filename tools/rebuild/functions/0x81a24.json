@@ -1,9 +1,111 @@
 {
   "address": "0x81a24",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 9,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x81a24 holds 9 instructions and 21 bytes up to the ret at 0x81a38; the next record starts at 0x81a70, so the store record keeps the 76-byte extent and sets no separate function size; the identity check uses 9 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the palette pointer arrives in ESI; the function clears the direction flag, writes the DAC write index 0 to port 0x3c8, loads the DAC data port 0x3c9 in dx and the count 0x300 in ecx, and sends 0x300 bytes from [esi] to the port with the outsb and loop pair"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is palette_set at 0x81a05 with the call site at 0x81a15; it passes the palette pointer in ESI, so the record takes the name vga_dac_write with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function is a shared graphics helper for the palette path, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds with the default frame option; the function holds no floating-point instruction, so the module needs no FPU stub; C cannot emit the outsb instruction, so the module calls the outportb helper once per byte and uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the outportb stub; the stub records the port and the value of every write in order; the three paths cover the ascending palette, the descending palette, and two calls in a row; every path checks the write count, the port, and the value of every write; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 instructions and 22 bytes; the identity check stays open at 1 of 9 instructions, 2 of 21 bytes, and 0 of 0 relocation slots; C expands the outsb loop into outportb calls; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/vga_dac_write.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/vga_dac_write_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/vga_dac_write.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The vga_dac_write module at 0x81a24"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x81a24 --count 9"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x81a24 --count 9 --rebuilt work/rebuild/vdac.exe --rebuilt-map work/rebuild/vga_dac_write.map --rebuilt-symbol vga_dac_write_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module vga_dac_write"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module vga_dac_write"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x81a24"
+    }
+  ],
+  "implementation": "c",
+  "module": "vga_dac_write",
+  "name": "vga_dac_write",
   "notes": [],
   "object_offset": "0x71a24",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 21,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 9,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81a24",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:14174ee6735e77fed3cdedfaac7f2ca2e742e9783031bfd85c13a71839ab70c1",
+    "source_digest": "sha256:20e04406bd57932f2fbed96e3c7a22cc2900b7008b203f1f13965f53a49fd685",
+    "tool": "run.py"
+  },
+  "role": "Writes the 768-byte palette to the VGA DAC.",
+  "section": "Program functions",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "vga_dac_write_"
 }

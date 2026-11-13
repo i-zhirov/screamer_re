@@ -742,7 +742,7 @@ reproduce the original bytes.
 | `0x25640` | `font_data_release` (done) | 22 | 9 | 1 | 0 |
 | `0x1b58c` | `text_data_release` (done) | 22 | 9 | 1 | 0 |
 | `0x1b180` | `gamespline_release` (done) | 22 | 9 | 1 | 0 |
-| `0x81a24` | unnamed | 21 | 9 | 0 | 0 |
+| `0x81a24` | `vga_dac_write` (done) | 21 | 9 | 0 | 0 |
 | `0x819f0` | unnamed | 21 | 11 | 0 | 0 |
 | `0x2666c` | unnamed | 20 | 6 | 0 | 0 |
 | `0x8afb2` | unnamed | 18 | 5 | 0 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and eighty modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and eighty-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1085,5 +1085,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `sprite_data_release` at `0x258b8`, and the Phase AB module
 `font_data_release` at `0x25640`, and the Phase AB module
 `text_data_release` at `0x1b58c`, and the Phase AB module
-`gamespline_release` at `0x1b180`.
-The next unnamed function is `0x81a24`.
+`gamespline_release` at `0x1b180`, and the Phase AB module
+`vga_dac_write` at `0x81a24`.
+The next unnamed function is `0x819f0`.

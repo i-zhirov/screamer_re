@@ -405,9 +405,10 @@ current host.
    `sprite_data_release` at `0x258b8`, and the Phase AB module
    `font_data_release` at `0x25640`, and the Phase AB module
    `text_data_release` at `0x1b58c`, and the Phase AB module
-   `gamespline_release` at `0x1b180`;
+   `gamespline_release` at `0x1b180`, and the Phase AB module
+   `vga_dac_write` at `0x81a24`;
    thirty-nine modules are verified, one is matching, and four hundred and
-   forty-one rebuilds hold the recorded difference; the `video_fill`,
+   forty-two rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

@@ -33491,3 +33491,54 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The resource, the callers, and the
   sibling loader give the role, and the name `gamespline_release` stays
   inferred.
+
+## The vga_dac_write module at 0x81a24
+
+- Observation: the original body at `0x81a24` holds 9 instructions and 21
+  bytes up to the `ret` at `0x81a38`.  The next record starts at `0x81a70`, so
+  the store record keeps the 76-byte extent and sets no separate function size.
+  The identity check uses 9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x81a24 --count 9` and
+  `tools/rebuild/functions/0x81a24.json`.
+- Observation: the palette pointer arrives in ESI.  The function clears the
+  direction flag, writes the DAC write index 0 to port `0x3c8`, loads the DAC
+  data port `0x3c9` in DX and the count `0x300` in ECX, and sends `0x300` bytes
+  from `[esi]` to the port with the `outsb` and `loop` pair.
+  Evidence: the block at `0x81a24` through `0x81a38`.
+- Observation: the only direct caller is `palette_set` at `0x81a05` with the
+  call site at `0x81a15`.  It passes the palette pointer in ESI.
+  Evidence: `tools/rebuild/callgraph.json` and the finding "The palette_set
+  module at 0x81a05".
+- Inference: the caller, the palette pointer, and the DAC ports support the
+  name `vga_dac_write`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: `tools/rebuild/vga_dac_write.c` and
+  `tools/rebuild/functions/0x81a24.json`.
+- Inference: the function is a shared graphics helper for the palette path, so
+  the record takes the section Program functions.
+  Evidence: the caller `palette_set` above.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction.  The module builds with the default frame option, needs no FPU
+  stub, and uses no assembly source.
+  Evidence: `tools/rebuild/vga_dac_write.c` and
+  `tools/rebuild/modules/vga_dac_write.json`.
+- Observation: the harness holds the `outportb` stub.  The stub records the
+  port and the value of every write in order.  The three paths cover the
+  ascending palette, the descending palette, and two calls in a row.  Every
+  path checks the write count, the port, and the value of every write.  The
+  output holds the markers `0`, `1`, `2`, and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/vga_dac_write_main.c`,
+  `python3 tools/rebuild/harness.py run --module vga_dac_write`, and
+  `work/rebuild/vdac.txt`.
+- Observation: the identity check compares 9 instructions.  The rebuilt body
+  holds 9 instructions and 22 bytes, and the 9-instruction window holds 1 of 9
+  instructions, 2 of 21 bytes, and 0 of 0 relocation slots equal, because C
+  cannot emit `outsb` and expands the byte loop into `outportb` calls.  The
+  build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x81a24 --count 9 --rebuilt work/rebuild/vdac.exe
+  --rebuilt-map work/rebuild/vga_dac_write.map --rebuilt-symbol
+  vga_dac_write_`.
+- Limit: the original has no symbol name.  The caller, the palette pointer, and
+  the DAC ports give the role, and the name `vga_dac_write` stays inferred.
