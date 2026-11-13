@@ -402,8 +402,9 @@ current host.
    `sound_effect_timer_clear` at `0x24d7c`, and the Phase AB module
    `video_bank_set` at `0x8c0fc`, and the Phase AB module
    `timer_set` at `0x101f6`, and the Phase AB module
-   `sprite_data_release` at `0x258b8`;
-   thirty-nine modules are verified, one is matching, and four hundred and thirty-eight
+   `sprite_data_release` at `0x258b8`, and the Phase AB module
+   `font_data_release` at `0x25640`;
+   thirty-nine modules are verified, one is matching, and four hundred and thirty-nine
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

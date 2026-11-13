@@ -33304,3 +33304,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The resource, the callers, and the
   sibling loader give the role, and the name `sprite_data_release` stays
   inferred.
+
+## The font_data_release module at 0x25640
+
+- Observation: the original body at `0x25640` holds 9 instructions and 22
+  bytes up to the `ret` at `0x25655`.  The next record `font_load` starts at
+  `0x25658` after the two padding bytes at `0x25656` and `0x25657`, so the
+  store record keeps the 24-byte extent and sets no separate function size.
+  The identity check uses 9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25640 --count 9` and
+  `tools/rebuild/functions/0x25640.json`.
+- Observation: the function frees the `FONTS` resource at object-3 offset
+  0xea4 from the archive `DAT_000062ac` through `resource_free_name` at
+  `0x2f326`.  The string at linear `0x100ea4` holds `FONTS`.  The function
+  loads the name pointer in `edx` and the archive context in `eax` before the
+  call.
+  Evidence: the block at `0x25640` through `0x25655` and the string at linear
+  `0x100ea4`.
+- Observation: the direct callers are `screen_setup_cleanup` at `0x15150` with
+  the call site at `0x15164`, `race_data_release` at `0x156a8` with the call
+  site at `0x156f9`, `race_end` at `0x279a4` with the call site at `0x27a0d`,
+  and `race_cleanup` at `0x2a1b0` with the call site at `0x2a1be`.  Every
+  caller runs the function in a teardown.
+  Evidence: the call sites above and the finding "The race_data_release module
+  at 0x156a8".
+- Observation: the sibling `font_load` at `0x25658` gets the same `FONTS`
+  resource at object-3 offset 0xead, so the two functions form the font data
+  load and release pair.  The module sits with the graphics decoders, so it
+  takes the section The graphics decoders.
+  Evidence: the finding "The font_load module at 0x25658" and
+  `tools/rebuild/font_load.c`.
+- Inference: the `FONTS` resource, the caller group, and the sibling loader
+  support the name `font_data_release`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/font_data_release.c` and
+  `tools/rebuild/functions/0x25640.json`.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction.  The module builds with `-of+`, needs no FPU stub, and uses no
+  assembly source.
+  Evidence: `tools/rebuild/font_data_release.c` and
+  `tools/rebuild/modules/font_data_release.json`.
+- Observation: the harness holds the archive context `DAT_000062ac` and the
+  resource free stub.  The stub records the call count, the context, and the
+  name pointer.  The three paths cover the first context, a second context, and
+  a sentinel context.  Every path checks the call count, the context, and the
+  `FONTS` name.  The output holds the markers `0` through `2` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/font_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module font_data_release`, and
+  `work/rebuild/fntrel.txt`.
+- Observation: the identity check compares 9 instructions.  The rebuilt body
+  holds 9 instructions and 24 bytes, and the 9-instruction window holds 5 of 9
+  instructions, 7 of 22 bytes, and 0 of 2 relocation slots equal, because V2
+  saves `ebp` before `edx`, loads the archive context before the name pointer,
+  and restores the stack with `lea esp, [ebp - 4]`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25640 --count 9 --rebuilt work/rebuild/fntrel.exe
+  --rebuilt-map work/rebuild/font_data_release.map --rebuilt-symbol
+  font_data_release_`.
+- Limit: the original has no symbol name.  The resource, the callers, and the
+  sibling loader give the role, and the name `font_data_release` stays
+  inferred.

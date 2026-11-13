@@ -739,7 +739,7 @@ reproduce the original bytes.
 | `0x8c0fc` | `video_bank_set` (done) | 24 | 10 | 0 | 0 |
 | `0x101f6` | `timer_set` (done) | 23 | 13 | 0 | 0 |
 | `0x258b8` | `sprite_data_release` (done) | 22 | 9 | 1 | 0 |
-| `0x25640` | unnamed | 22 | 9 | 1 | 0 |
+| `0x25640` | `font_data_release` (done) | 22 | 9 | 1 | 0 |
 | `0x1b58c` | unnamed | 22 | 9 | 1 | 0 |
 | `0x1b180` | unnamed | 22 | 9 | 1 | 0 |
 | `0x81a24` | unnamed | 21 | 9 | 0 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and seventy-seven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and seventy-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1082,5 +1082,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `sound_effect_timer_clear` at `0x24d7c`, and the Phase AB module
 `video_bank_set` at `0x8c0fc`, and the Phase AB module
 `timer_set` at `0x101f6`, and the Phase AB module
-`sprite_data_release` at `0x258b8`.
-The next unnamed function is `0x25640`.
+`sprite_data_release` at `0x258b8`, and the Phase AB module
+`font_data_release` at `0x25640`.
+The next unnamed function is `0x1b58c`.
