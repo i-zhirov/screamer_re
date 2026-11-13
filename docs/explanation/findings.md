@@ -33366,3 +33366,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The resource, the callers, and the
   sibling loader give the role, and the name `font_data_release` stays
   inferred.
+
+## The text_data_release module at 0x1b58c
+
+- Observation: the original body at `0x1b58c` holds 9 instructions and 22
+  bytes up to the `ret` at `0x1b5a1`.  The next record `pcx_load` starts at
+  `0x1b5a4` after the two padding bytes at `0x1b5a2` and `0x1b5a3`, so the
+  store record keeps the 24-byte extent and sets no separate function size.
+  The identity check uses 9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1b58c --count 9` and
+  `tools/rebuild/functions/0x1b58c.json`.
+- Observation: the function frees the `TEXT` resource at object-3 offset
+  0x9ea from the archive `DAT_000062ac` through `resource_free_name` at
+  `0x2f326`.  The string at linear `0x1009ea` holds `TEXT`.  The function
+  loads the name pointer in `edx` and the archive context in `eax` before the
+  call.
+  Evidence: the block at `0x1b58c` through `0x1b5a1` and the string at linear
+  `0x1009ea`.
+- Observation: the direct callers are `race_data_release` at `0x156a8` with
+  the call site at `0x156ef`, `race_end` at `0x279a4` with the call site at
+  `0x27a08`, and `race_cleanup` at `0x2a1b0` with the call site at `0x2a1f0`.
+  Every caller runs the function in a teardown.
+  Evidence: the call sites above and the finding "The race_data_release module
+  at 0x156a8".
+- Observation: the sibling `member_list_load` at `0x1b394` gets the `TEXT`
+  resource at object-3 offset 0x9e5, so the two functions form the text data
+  load and release pair.  The loader sits in the section frame_update callees,
+  so the module takes the same section.
+  Evidence: the `resource_get` call at `0x1b455` in `member_list_load`, the
+  finding "The member_list_load module at 0x1b394", and
+  `tools/rebuild/functions/0x1b394.json`.
+- Inference: the `TEXT` resource, the caller group, and the sibling loader
+  support the name `text_data_release`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/text_data_release.c` and
+  `tools/rebuild/functions/0x1b58c.json`.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction.  The module builds with `-of+`, needs no FPU stub, and uses no
+  assembly source.
+  Evidence: `tools/rebuild/text_data_release.c` and
+  `tools/rebuild/modules/text_data_release.json`.
+- Observation: the harness holds the archive context `DAT_000062ac` and the
+  resource free stub.  The stub records the call count, the context, and the
+  name pointer.  The three paths cover the first context, a second context, and
+  a sentinel context.  Every path checks the call count, the context, and the
+  `TEXT` name.  The output holds the markers `0` through `2` and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/text_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module text_data_release`, and
+  `work/rebuild/txtrel.txt`.
+- Observation: the identity check compares 9 instructions.  The rebuilt body
+  holds 9 instructions and 24 bytes, and the 9-instruction window holds 5 of 9
+  instructions, 6 of 22 bytes, and 0 of 2 relocation slots equal, because V2
+  saves `ebp` before `edx`, loads the archive context before the name pointer,
+  and restores the stack with `lea esp, [ebp - 4]`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x1b58c --count 9 --rebuilt work/rebuild/txtrel.exe
+  --rebuilt-map work/rebuild/text_data_release.map --rebuilt-symbol
+  text_data_release_`.
+- Limit: the original has no symbol name.  The resource, the callers, and the
+  sibling loader give the role, and the name `text_data_release` stays
+  inferred.
