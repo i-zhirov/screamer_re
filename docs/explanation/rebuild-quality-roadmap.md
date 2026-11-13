@@ -71,14 +71,15 @@ Verify the object byte for byte. Mark the record as `library`. Link the original
 objects in the whole-image build. Do not rewrite a runtime function that the
 library already holds.
 
-- **Status:** Unplanned
+- **Status:** Planned
 - **Depends on:** Slice 1, Slice 3
 - **Requirements:** FR-013, FR-014, FR-018
 - **Manual prerequisites:** The period Watcom 10.0a toolchain.
-- **Plan:** —
-- **Done when:** `malloc`, `fopen`, and `__fprtf` are exact. The seven library
-  shape matches are byte-identical. The library index is reproducible from the
-  toolchain.
+- **Plan:** docs/explanation/rebuild-quality-plan-library.md
+- **Done when:** `malloc`, `fopen`, and `__fprtf` are exact. The four plan-date
+  library shape matches are exact. The three design-date non-library shape
+  matches are outside the library measure. The library index is reproducible
+  from the toolchain.
 
 ### Slice 5 — toolchain
 
