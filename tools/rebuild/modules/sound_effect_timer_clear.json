@@ -1,0 +1,31 @@
+{
+  "exe": "setclr.exe",
+  "map": "sound_effect_timer_clear.map",
+  "name": "sound_effect_timer_clear",
+  "run": {
+    "command": "setclr.exe > setclr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "setclr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_effect_timer_clear.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_effect_timer_clear_main.c"
+    }
+  ]
+}

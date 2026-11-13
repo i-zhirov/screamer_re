@@ -1,9 +1,111 @@
 {
   "address": "0x24d7c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 12,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24d7c holds 12 instructions and 27 bytes up to the ret at 0x24d96; nine pad bytes follow the ret, and the next record starts at 0x24da0, so the store record keeps the 36-byte extent and sets no separate function size; the identity check uses 12 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the integer argument arrives in the Watcom register order: eax holds the effect index; the function stores the value 0 into the cell of the index in the array at 0x1922c and holds no other effect"
+    },
+    {
+      "kind": "note",
+      "text": "the array at DAT_001922c holds one timer per effect; sound_reset at 0x2471c clears the whole array, and sound_effect_delay at 0x24c4c, sound_effect_repeat at 0x24cc8, and sound_effect_trigger at 0x24d30 read and write one cell each; a cell at 0 is re-armed, so the effect can fire again after the next delay"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is track_timer_update at 0x1960c with the call site at 0x1966b; it loads the index 0x16 into eax and calls this function, so the effect timer at index 0x16 restarts when the track timer updates; the caller sits in The vehicle state chain, but the function clears a sound effect timer, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the array index, the single-cell store, and the caller support the name sound_effect_timer_clear; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the per-effect timer array with one extra sentinel entry; the five paths cover the first cell, a middle cell, the last cell 26, a cell that already holds 0, and two calls that clear two cells; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24d7c --count 12"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24d7c --count 12 --rebuilt work/rebuild/setclr.exe --rebuilt-map work/rebuild/sound_effect_timer_clear.map --rebuilt-symbol sound_effect_timer_clear_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_effect_timer_clear"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24d7c"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_effect_timer_clear module at 0x24d7c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_timer_clear.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_timer_clear_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_effect_timer_clear.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 instructions and 19 bytes; the identity window holds 12 instructions and 27 bytes and stays open at 2 of 12 instructions, 0 of 27 bytes, and 0 of 4 relocation slots, because V2 pushes ebp first, saves edx after the frame setup, folds the frame slot and the spill and reload into one scaled store, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    }
+  ],
+  "implementation": "c",
+  "module": "sound_effect_timer_clear",
+  "name": "sound_effect_timer_clear",
   "notes": [],
   "object_offset": "0x14d7c",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 27,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 12,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24d7c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:f21fe582dc39e42934d5f87630842a8c98cad414bd68925a5d30c2968f566acc",
+    "source_digest": "sha256:cca565ff36e35a5e870d563314d6b1c6fe14dfb29a8fe932d3f423f8a60f2e85",
+    "tool": "run.py"
+  },
+  "role": "Clears the effect timer at one index to zero so the effect can fire again.",
+  "section": "Program functions",
   "size": 36,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_effect_timer_clear_"
 }

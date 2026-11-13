@@ -33071,3 +33071,62 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the jump table, and the
   seven initializers give the role, and the name `state_init_dispatch` stays
   inferred.
+
+## The sound_effect_timer_clear module at 0x24d7c
+
+- Observation: the original body at `0x24d7c` holds 12 instructions and 27
+  bytes up to the `ret` at `0x24d96`.  Nine pad bytes follow the `ret`, and the
+  next record starts at `0x24da0`, so the store record keeps the 36-byte extent
+  and sets no separate function size.  The identity check uses 12 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24d7c --count 12` and
+  `tools/rebuild/functions/0x24d7c.json`.
+- Observation: the integer argument arrives in the Watcom register order.
+  `eax` holds the effect index.  The function stores the value 0 into the cell
+  of the index in the array at `0x1922c` and holds no other effect.
+  Evidence: the block at `0x24d7c` through `0x24d96`.
+- Observation: the array at `DAT_001922c` holds one timer per effect.
+  `sound_reset` at `0x2471c` clears the whole array, and `sound_effect_delay`
+  at `0x24c4c`, `sound_effect_repeat` at `0x24cc8`, and
+  `sound_effect_trigger` at `0x24d30` read and write one cell each.  A cell at
+  0 is re-armed, so the effect can fire again after the next delay.
+  Evidence: the findings "The sound_reset module at 0x2471c", "The
+  sound_effect_delay module at 0x24c4c", "The sound_effect_repeat module at
+  0x24cc8", and "The sound_effect_trigger module at 0x24d30".
+- Observation: the only direct caller is `track_timer_update` at `0x1960c`,
+  with the call site at `0x1966b`.  It loads the index `0x16` into `eax` and
+  calls this function, so the effect timer at index `0x16` restarts when the
+  track timer updates.  The caller sits in `The vehicle state chain`, but the
+  function clears a sound effect timer, so the record takes the section
+  `Program functions`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x1960c --count 32`, the
+  call at `0x1966b`, and the finding "The track_timer_update module at
+  0x1960c".
+- Inference: the array index, the single-cell store, and the caller support the
+  name `sound_effect_timer_clear`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the data flow above and the caller list.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and no call, so the
+  module needs no FPU stub and no assembly source.
+  Evidence: `tools/rebuild/sound_effect_timer_clear.c` and
+  `tools/rebuild/modules/sound_effect_timer_clear.json`.
+- Observation: the harness holds the per-effect timer array with one extra
+  sentinel entry.  The five paths cover the first cell, a middle cell, the last
+  cell 26, a cell that already holds 0, and two calls that clear two cells.
+  The output holds the markers `0` through `4` and `D`, and the behavior check
+  passes.
+  Evidence: `tools/rebuild/sound_effect_timer_clear_main.c`,
+  `python3 tools/rebuild/harness.py run --module sound_effect_timer_clear`,
+  and `work/rebuild/setclr.txt`.
+- Observation: the rebuilt body holds 9 instructions and 19 bytes.  The
+  identity window holds 12 instructions and 27 bytes and stays open at 2 of 12
+  instructions, 0 of 27 bytes, and 0 of 4 relocation slots, because V2 pushes
+  ebp first, saves edx after the frame setup, folds the frame slot and the
+  spill and reload into one scaled store, and restores the stack with `lea`.
+  The build and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24d7c --count 12 --rebuilt work/rebuild/setclr.exe
+  --rebuilt-map work/rebuild/sound_effect_timer_clear.map --rebuilt-symbol
+  sound_effect_timer_clear_`.
+- Limit: the original has no symbol name.  The caller and the effect timer data
+  flow give the role, and the name `sound_effect_timer_clear` stays inferred.
