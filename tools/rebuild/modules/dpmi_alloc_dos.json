@@ -1,0 +1,26 @@
+{
+  "exe": "dpados.exe",
+  "map": "dpmi_alloc_dos.map",
+  "name": "dpmi_alloc_dos",
+  "run": {
+    "command": "dpados.exe > dpados.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "dpados.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_alloc_dos.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_alloc_dos_main.c"
+    }
+  ]
+}

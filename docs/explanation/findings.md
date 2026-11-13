@@ -32965,3 +32965,54 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the field layout, and
   the release pair give the role, and the name `object_handle_release` stays
   inferred.
+
+## The dpmi_alloc_dos module at 0x8be93
+
+- Observation: the original entry path at `0x8be93` holds 11 instructions and
+  28 bytes up to the `ret` at `0x8beae`.  The failure branch at `0x8beaf` holds
+  `mov eax,1` and `ret`.  The next function starts at `0x8beb8`, so the store
+  record keeps the 37-byte extent and sets no separate function size.  The
+  identity check uses 11 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8be93 --count 11`.
+- Observation: the only direct caller is `vesa_set_mode` at `0x8bdec` with the
+  call site at `0x8bdf7`.  It passes the size `0x100` in `eax`, tests the
+  status in `eax`, and uses the block address in `edi`.  The caller stores the
+  address at `DAT_0007c188` and runs the VBE mode info call against the block.
+  Evidence: the call at `0x8bdf7` and the store at `0x8be02`.
+- Observation: the function copies the size from `eax` to `ebx` and sets the
+  DPMI function `0x0100` in `eax`.  The paragraph count is `(size >> 4) + 1`.
+  The function runs INT 31h.  On a carry it returns 1.  Otherwise it masks the
+  segment to 16 bits, shifts it into a linear address, stores the address in
+  `edi`, and returns 0.
+  Evidence: the block at `0x8be93` through `0x8beae`.
+- Inference: the caller and the data flow support the name `dpmi_alloc_dos`.
+  The original has no symbol, so the record keeps the name with the confidence
+  `inferred`.  The caller sits in the section Subsystem initialisation, so the
+  record takes the same section.
+  Evidence: the caller at `0x8bdec` and the record.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction.  The C rebuild holds the interrupt in one `#pragma aux` helper
+  and passes the linear address through the second argument, because C cannot
+  return a second value in `edi`.  The module uses no assembly source and no
+  FPU stub.
+  Evidence: `tools/rebuild/dpmi_alloc_dos.c` and
+  `tools/rebuild/modules/dpmi_alloc_dos.json`.
+- Observation: the harness calls the real DPMI INT 31h path under DOSBox-X.
+  The three paths cover the size `0x100` success, the size 0 success, and the
+  size `0xfffe0` that requests `0xffff` paragraphs and fails.  The failure
+  keeps the sentinel address.  The output holds the markers `0`, `1`, `2`, and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/dpmi_alloc_dos_main.c`,
+  `python3 tools/rebuild/harness.py run --module dpmi_alloc_dos`, and
+  `work/rebuild/dpados.txt`.
+- Observation: the rebuilt body holds 1 of 11 instructions and 0 of 19 bytes
+  equal.  The instruction sequence differs, because Watcom V2 saves EBX, ECX,
+  ESI, and EDI, builds a frame temporary for the status, and places the
+  interrupt path after the prologue.  The build and behavior checks pass, so
+  the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x8be93 --count 11 --rebuilt work/rebuild/dpados.exe
+  --rebuilt-map work/rebuild/dpmi_alloc_dos.map --rebuilt-symbol
+  dpmi_alloc_dos_`.
+- Limit: the original has no symbol name.  The caller and the DPMI data flow
+  give the role, and the name `dpmi_alloc_dos` stays inferred.

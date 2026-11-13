@@ -1,9 +1,111 @@
 {
   "address": "0x8be93",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original entry path at 0x8be93 holds 11 instructions and 28 bytes up to the ret at 0x8beae; the failure branch at 0x8beaf holds the mov eax,1 and the ret, and the next function starts at 0x8beb8, so the store record keeps the 37-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is vesa_set_mode at 0x8bdec with the call site at 0x8bdf7; it passes the size 0x100 in eax, tests the status in eax, and uses the block address in edi; the caller stores the address at DAT_0007c188 and runs the VBE mode info call against the block"
+    },
+    {
+      "kind": "note",
+      "text": "the entry copies the size from eax to ebx and sets the DPMI function 0x0100 in eax; it shifts the size into paragraphs and adds one, so the paragraph count is (size >> 4) + 1; it runs INT 31h and branches on the carry flag; on a carry it returns 1, and otherwise it masks the segment to 16 bits, shifts it into a linear address, stores the address in edi, and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the caller and the data flow support the name dpmi_alloc_dos; the original has no symbol, so the record keeps the name with the confidence inferred; the caller sits in the section Subsystem initialisation, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and holds no floating-point instruction; the C rebuild holds the interrupt in one #pragma aux helper and passes the linear address through the second argument, because C cannot return a second value in edi; the module needs no assembly source and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness calls the real DPMI INT 31h path under DOSBox-X; the three paths cover the size 0x100 success, the size 0 success, and the size 0xfffe0 that requests 0xffff paragraphs and fails, and the failure keeps the sentinel address; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 11 instructions; the rebuilt body holds 1 of 11 instructions and 0 of 19 bytes equal, because V2 saves ebx, ecx, esi, and edi, builds a frame temporary for the status, and places the interrupt path after the prologue; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/dpmi_alloc_dos.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/dpmi_alloc_dos_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/dpmi_alloc_dos.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The dpmi_alloc_dos module at 0x8be93"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8be93 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8be93 --count 11 --rebuilt work/rebuild/dpados.exe --rebuilt-map work/rebuild/dpmi_alloc_dos.map --rebuilt-symbol dpmi_alloc_dos_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module dpmi_alloc_dos"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module dpmi_alloc_dos"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8be93"
+    }
+  ],
+  "implementation": "c",
+  "module": "dpmi_alloc_dos",
+  "name": "dpmi_alloc_dos",
   "notes": [],
   "object_offset": "0x7be93",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 19,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8be93",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:b00a408ab4dcfcb315e5b8856cfbcc1e8d001019b4505e98911df7b15ebc6678",
+    "source_digest": "sha256:53c7eb0aea690249e8f8e1c7d6e0fac5f52eb4f79e898b07c4f8fa71415231c8",
+    "tool": "run.py"
+  },
+  "role": "Allocates a DOS memory block through DPMI function 0x0100 and returns the real-mode segment times 16 with the status.",
+  "section": "Subsystem initialisation",
   "size": 37,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "dpmi_alloc_dos_"
 }
