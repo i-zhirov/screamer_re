@@ -30696,6 +30696,55 @@ temporary `-od` recipe.
   restore differ from the original, so the C build cannot reproduce the exact
   bytes.
 
+## The map_material_data_release module at 0x4cf2c
+
+- Observation: the original body at `0x4cf2c` holds 6 instructions and 15
+  bytes up to the `ret` at `0x4cf3a`.  The padding byte at `0x4cf3b` precedes
+  the next function at `0x4cf3c`, so the store record keeps the 16-byte extent
+  and sets no separate function size.  The identity check uses 6 instructions.
+  Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cf2c --count
+  6` and `tools/rebuild/functions/0x4cf2c.json`.
+- Observation: the two direct callers are `race_data_release` at `0x156a8`
+  with the call site at `0x156e5` and `race_end` at `0x279a4` with the call
+  site at `0x279fe`.  Both callers run during a shutdown, so the function
+  releases the map and material data at the end of a race.
+  Evidence: the call sweep for `0x4cf2c` and the two caller records.
+- Observation: the function calls `material_data_release` at `0x4cecc` and
+  then `map_data_release` at `0x4cef4` with no arguments.  The first helper
+  frees the `MATERIALS` resource and the material record.  The second helper
+  frees the `OBJ_LST` and `UNR_FILE` resources and the map grid record.
+  Evidence: the calls at `0x4cf2f` and `0x4cf34`, and the two helper records.
+- Inference: the two callers, the two helpers, and the sibling names support
+  the name `map_material_data_release`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.  The callers span
+  several sections, so the record takes the section Resource loader.
+  Evidence: the data flow above and the caller records.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  uses no FPU stub and no assembly body.  The module implementation is C.
+  Evidence: the prologue at `0x4cf2c` and
+  `tools/rebuild/map_material_data_release.c`.
+- Observation: the harness holds the two callee stubs.  The three paths cover
+  one, two, and three runs, and every path checks the order material then map.
+  The output holds the markers `0` through `2` and `D`, and the behavior check
+  passes.
+  Evidence: `python3 tools/rebuild/harness.py run --module
+  map_material_data_release` and `work/rebuild/mmdrl.txt`.
+- Observation: the identity check compares 6 instructions.  The rebuilt body
+  holds 4 of 6 instructions and 5 of 15 bytes equal, and 0 of 0 relocation
+  slots.  V2 adds `mov esp, ebp` before `pop ebp`, and the call operands are
+  the rebuilt link-time addresses.  The build and behavior checks pass, so the
+  store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x4cf2c --count 6 --rebuilt work/rebuild/mmdrl.exe
+  --rebuilt-map work/rebuild/map_material_data_release.map --rebuilt-symbol
+  map_material_data_release_` and `python3 tools/rebuild/run.py run --function
+  0x4cf2c`.
+- Limit: the original has no symbol name.  The two callers and the two helpers
+  support the name, and the name stays inferred.  The V2 epilogue differs from
+  the original, so the C build cannot reproduce the exact bytes.
+
 ## The player_physics_update module at 0x15a80
 
 - Observation: the original body at `0x15a80` holds 17 instructions and 53

@@ -749,7 +749,7 @@ reproduce the original bytes.
 | `0x8afa0` | `sound_render_branch_greater` (done) | 18 | 5 | 0 | 0 |
 | `0x27f80` | `func_27f80` (done) | 18 | 7 | 0 | 0 |
 | `0x26014` | `cd_volume_descriptor_read` (done) | 16 | 7 | 0 | 0 |
-| `0x4cf2c` | unnamed | 15 | 6 | 2 | 0 |
+| `0x4cf2c` | `map_material_data_release` (done) | 15 | 6 | 2 | 0 |
 | `0x25f14` | unnamed | 15 | 6 | 2 | 0 |
 | `0x257a0` | unnamed | 15 | 5 | 0 | 0 |
 | `0x24080` | unnamed | 15 | 5 | 0 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and eighty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and eighty-eight modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1091,6 +1091,7 @@ module `func_11974` at `0x11974`, and the Phase X module
 `dpmi_free_dos` at `0x2666c`, and the Phase AB module
 `sound_render_branch_less` at `0x8afb2`, and the Phase AB module
 `sound_render_branch_greater` at `0x8afa0`, and the Phase AB module
-`func_27f80` at `0x27f80`, and the Phase AB module
-`cd_volume_descriptor_read` at `0x26014`.
-The next unnamed function is `0x4cf2c`.
+`func_27f80` at `0x27f80`, the Phase AB module
+`cd_volume_descriptor_read` at `0x26014`, and the Phase AB module
+`map_material_data_release` at `0x4cf2c`.
+The next unnamed function is `0x25f14`.
