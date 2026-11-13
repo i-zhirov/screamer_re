@@ -34063,3 +34063,57 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The pointer, the two callers, and the
   sprite-list flush give the role, and the name `sprite_list_init` stays
   inferred.
+
+## The race_finish_time_ghost_update module at 0x24080
+
+- Observation: the original body holds 5 instructions and 15 bytes up to the
+  `ret` at `0x2408e`.  The next function starts at `0x24090`, so the store
+  record keeps the 16-byte extent and sets no separate function size.  The
+  identity check uses 5 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24080 --count 5` and
+  `tools/rebuild/functions/0x24080.json`.
+- Observation: the only direct caller is `race_finish_time_update` at
+  `0x20f98` with the call site at `0x20ff4`.  That function selects one finish
+  handler from the mode byte `DAT_0011d260` after the time limit expires, and
+  this handler runs on mode 4.  The mode 4 handler in the final-lap path is
+  `race_finish_ghost_update` at `0x23f50`, so mode 4 is the ghost mode.  No
+  named function sits between the caller and the target, so the record takes
+  the section Program functions.
+  Evidence: the mode switch at `0x20fc5` through `0x20ff9` and
+  `tools/rebuild/functions/0x23f50.json`.
+- Observation: the handler stores the finish position 2 in `DAT_000ffa4`.  The
+  time limit expires in the ghost mode, so the player loses the race and takes
+  the second position.  The other five mode handlers at `0x24068`, `0x24070`,
+  `0x24078`, `0x24090`, and `0x24098` are empty stubs.
+  Evidence: the store at `0x24083` and the stub bodies at the five addresses.
+- Inference: the caller, the mode 4 selection, and the finish position support
+  the name `race_finish_time_ghost_update`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/race_finish_time_ghost_update.c` and
+  `tools/rebuild/functions/0x24080.json`.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction, so the module
+  needs no FPU stub and no assembly implementation.
+  Evidence: the prologue at `0x24080` and
+  `tools/rebuild/race_finish_time_ghost_update.c`.
+- Observation: the harness holds the finish position `DAT_000ffa4`.  The three
+  paths cover the sentinel fill and one call, a zero fill and call, and two
+  calls in a row.  Every path checks the position value 2.  The output holds
+  the markers `0` through `2` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/race_finish_time_ghost_update_main.c`,
+  `python3 tools/rebuild/harness.py run --module
+  race_finish_time_ghost_update`, and `work/rebuild/rftghost.txt`.
+- Observation: the identity check compares 5 instructions.  The rebuilt body
+  holds 5 instructions and 16 bytes in the window, because V2 adds
+  `mov esp, ebp` before the `pop ebp` and addresses the global through a near
+  operand at the DGROUP offset 8.  The rebuilt body holds 3 of 5 instructions
+  and 11 of 15 bytes equal, and 1 of 1 relocation slot.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x24080 --count 5 --rebuilt work/rebuild/rftghost.exe
+  --rebuilt-map work/rebuild/race_finish_time_ghost_update.map
+  --rebuilt-symbol race_finish_time_ghost_update_` and
+  `python3 tools/rebuild/run.py run --function 0x24080`.
+- Limit: the original has no symbol name.  The caller, the mode 4 selection,
+  and the finish position give the role, and the name
+  `race_finish_time_ghost_update` stays inferred.

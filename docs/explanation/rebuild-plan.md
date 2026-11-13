@@ -752,13 +752,13 @@ reproduce the original bytes.
 | `0x4cf2c` | `map_material_data_release` (done) | 15 | 6 | 2 | 0 |
 | `0x25f14` | `cd_system_shutdown` (done) | 15 | 6 | 2 | 0 |
 | `0x257a0` | `sprite_list_init` (done) | 15 | 5 | 0 | 0 |
-| `0x24080` | unnamed | 15 | 5 | 0 | 0 |
+| `0x24080` | `race_finish_time_ghost_update` (done) | 15 | 5 | 0 | 0 |
 
 This table starts Phase AB.
 
 ## Position
 
-Four hundred and ninety modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and ninety-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1095,5 +1095,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `cd_volume_descriptor_read` at `0x26014`, and the Phase AB module
 `map_material_data_release` at `0x4cf2c`, and the Phase AB module
 `cd_system_shutdown` at `0x25f14`, and the Phase AB module
-`sprite_list_init` at `0x257a0`.
-The next unnamed function is `0x24080`.
+`sprite_list_init` at `0x257a0`, and the Phase AB module
+`race_finish_time_ghost_update` at `0x24080`.
+The next unnamed function is `0x10010`.

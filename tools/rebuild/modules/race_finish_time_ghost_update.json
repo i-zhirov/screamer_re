@@ -1,0 +1,29 @@
+{
+  "exe": "rftghost.exe",
+  "map": "race_finish_time_ghost_update.map",
+  "name": "race_finish_time_ghost_update",
+  "run": {
+    "command": "rftghost.exe > rftghost.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rftghost.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_time_ghost_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_time_ghost_update_main.c"
+    }
+  ]
+}
