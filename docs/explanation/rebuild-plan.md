@@ -722,6 +722,40 @@ reproduce the original bytes.
 
 This table completes Phase AA.
 
+### Phase AB: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x81a05` | unnamed | 30 | 17 | 2 | 0 |
+| `0x22d44` | unnamed | 30 | 11 | 1 | 0 |
+| `0x111b4` | unnamed | 29 | 13 | 0 | 0 |
+| `0x11148` | unnamed | 29 | 13 | 0 | 0 |
+| `0x8be93` | unnamed | 28 | 11 | 0 | 0 |
+| `0x2be94` | unnamed | 28 | 9 | 1 | 0 |
+| `0x24d7c` | unnamed | 27 | 12 | 0 | 0 |
+| `0x8c0fc` | unnamed | 24 | 10 | 0 | 0 |
+| `0x101f6` | unnamed | 23 | 13 | 0 | 0 |
+| `0x258b8` | unnamed | 22 | 9 | 1 | 0 |
+| `0x25640` | unnamed | 22 | 9 | 1 | 0 |
+| `0x1b58c` | unnamed | 22 | 9 | 1 | 0 |
+| `0x1b180` | unnamed | 22 | 9 | 1 | 0 |
+| `0x81a24` | unnamed | 21 | 9 | 0 | 0 |
+| `0x819f0` | unnamed | 21 | 11 | 0 | 0 |
+| `0x2666c` | unnamed | 20 | 6 | 0 | 0 |
+| `0x8afb2` | unnamed | 18 | 5 | 0 | 0 |
+| `0x8afa0` | unnamed | 18 | 5 | 0 | 0 |
+| `0x27f80` | unnamed | 18 | 7 | 0 | 0 |
+| `0x26014` | unnamed | 16 | 7 | 0 | 0 |
+| `0x4cf2c` | unnamed | 15 | 6 | 2 | 0 |
+| `0x25f14` | unnamed | 15 | 6 | 2 | 0 |
+| `0x257a0` | unnamed | 15 | 5 | 0 | 0 |
+| `0x24080` | unnamed | 15 | 5 | 0 | 0 |
+
+This table starts Phase AB.
+
 ## Position
 
 Four hundred and sixty-seven modules carry a recipe and a result: the twelve Phase A modules,
