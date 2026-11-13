@@ -393,8 +393,9 @@ current host.
    `font_table_init` at `0x25620`, and the Phase AA module
    `sound_bank_release` at `0x1f6f8`, and the Phase AA module
    `player_previous_speed_set` at `0x15bfc`, and the Phase AB module
-   `palette_set` at `0x81a05`;
-   thirty-nine modules are verified, one is matching, and four hundred and twenty-nine
+   `palette_set` at `0x81a05`, and the Phase AB module
+   `replay_frame_buffer_release` at `0x22d44`;
+   thirty-nine modules are verified, one is matching, and four hundred and thirty
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

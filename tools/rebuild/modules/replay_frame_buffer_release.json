@@ -1,0 +1,29 @@
+{
+  "exe": "rplrel.exe",
+  "map": "replay_frame_buffer_release.map",
+  "name": "replay_frame_buffer_release",
+  "run": {
+    "command": "rplrel.exe > rplrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "rplrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_frame_buffer_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_frame_buffer_release_main.c"
+    }
+  ]
+}

@@ -32785,3 +32785,59 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The two helper calls, the caller
   list, and the name already used by the callers give the role, and the name
   `palette_set` stays inferred.
+
+## The replay_frame_buffer_release module at 0x22d44
+
+- Observation: the original body at `0x22d44` holds 11 instructions and 30
+  bytes up to the `ret` at `0x22d61`.  The next recorded function
+  `attack_data_release` starts at `0x22d64`, so the store record keeps the
+  32-byte extent and sets no separate function size.  The identity check uses
+  11 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x22d44 --count 11` and
+  `tools/rebuild/functions/0x22d44.json`.
+- Observation: the only direct caller is `race_data_release` at `0x156a8`
+  with the call site at `0x156fe`.  It calls this function after the `FONTS`
+  release at `0x25640` and before the `ATTACK` release at `0x22d64`.  The
+  function frees the `REPLAY` resource at object-3 offset `0xdba` from the
+  archive `DAT_000062ac` through `resource_free_name` at `0x2f326`.  It then
+  clears the replay frame buffer pointer `DAT_0018e5c`.  The string at linear
+  `0x100dba` holds `REPLAY`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x156a8 --count 29`,
+  `tools/rebuild/callgraph.json`, and the record of `race_data_release`.
+- Observation: `replay_frame_buffer_init` at `0x22c30` loads the same
+  `REPLAY` resource at object-3 offset `0xdac` and stores the pointer at
+  `DAT_0018e5c`.  The load and release pair and the replay records support the
+  name `replay_frame_buffer_release`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.
+  Evidence: the record of `0x22c30` and `tools/rebuild/replay_frame_buffer_init.c`.
+- Inference: the function belongs to the replay data, so the record takes the
+  section The replay records.
+  Evidence: the caller list and the sibling loader above.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls one
+  resource helper, so the module needs no FPU stub.  The module uses no
+  assembly implementation.
+  Evidence: the prologue at `0x22d44` through `0x22d48` and
+  `tools/rebuild/modules/replay_frame_buffer_release.json`.
+- Observation: the harness holds the archive context, the replay frame buffer
+  pointer, and the resource free stub.  The stub records the call count, the
+  context, and the name pointer.  The three paths cover the first values, other
+  values, and the sentinel context and buffer.  Every path checks the call
+  count, the context, the `REPLAY` name, and the cleared buffer.  The output
+  holds the markers `0`, `1`, `2`, and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/replay_frame_buffer_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module replay_frame_buffer_release`,
+  `work/rebuild/rplrel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x22d44`.
+- Observation: the rebuilt body holds 7 of 11 instructions, 8 of 30 bytes, and
+  0 of 3 relocation slots equal.  The instruction sequence differs, because
+  Watcom V2 puts `push edx` after `mov ebp, esp`, loads EAX before EDX, keeps
+  the zero in EAX, and restores the stack with `lea esp, [ebp-4]`.  The build
+  and behavior checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x22d44 --count 11 --rebuilt work/rebuild/rplrel.exe
+  --rebuilt-map work/rebuild/replay_frame_buffer_release.map --rebuilt-symbol
+  replay_frame_buffer_release_`.
+- Limit: the original has no symbol name.  The `REPLAY` resource, the cleared
+  buffer pointer, and the loader give the role, and the name
+  `replay_frame_buffer_release` stays inferred.
