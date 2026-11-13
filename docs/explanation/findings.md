@@ -33242,3 +33242,65 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/timer_set.map --rebuilt-symbol timer_set_`.
 - Limit: the original has no symbol name.  The caller and the PIT data flow give
   the role, and the name `timer_set` stays inferred.
+
+## The sprite_data_release module at 0x258b8
+
+- Observation: the original body at `0x258b8` holds 9 instructions and 22
+  bytes up to the `ret` at `0x258cc`.  The next record starts at `0x258d0`
+  after the two padding bytes at `0x258ce` and `0x258cf`, so the store record
+  keeps the 24-byte extent and sets no separate function size.  The identity
+  check uses 9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x258b8 --count 9` and
+  `tools/rebuild/functions/0x258b8.json`.
+- Observation: the function frees the `SPRITES` resource at object-3 offset
+  0xec7 from the archive `DAT_000062ac` through `resource_free_name` at
+  `0x2f326`.  The string at linear `0x100ec7` holds `SPRITES`.  The function
+  loads the name pointer in `edx` and the archive context in `eax` before the
+  call.
+  Evidence: the block at `0x258b8` through `0x258cc` and the string at linear
+  `0x100ec7`.
+- Observation: the direct callers are `screen_setup_cleanup` at `0x15150` with
+  the call site at `0x15169`, `race_data_release` at `0x156a8` with the call
+  site at `0x156f4`, `race_end` at `0x279a4` with the call site at `0x27a12`,
+  and `race_cleanup` at `0x2a1b0` with the call site at `0x2a1c3`.  Every
+  caller runs the function in a teardown.
+  Evidence: the call sites above and the finding "The race_data_release module
+  at 0x156a8".
+- Observation: the sibling `sprite_load` at `0x257b0` gets the same `SPRITES`
+  resource at object-3 offsets 0xeb7 and 0xebf, so the two functions form the
+  sprite load and release pair.  The module sits with the graphics decoders, so
+  it takes the section The graphics decoders.
+  Evidence: the finding "The sprite_load module at 0x257b0" and
+  `tools/rebuild/sprite_load.c`.
+- Inference: the `SPRITES` resource, the caller group, and the sibling loader
+  support the name `sprite_data_release`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/sprite_data_release.c` and
+  `tools/rebuild/functions/0x258b8.json`.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction.  The module builds with `-of+`, needs no FPU stub, and uses no
+  assembly source.
+  Evidence: `tools/rebuild/sprite_data_release.c` and
+  `tools/rebuild/modules/sprite_data_release.json`.
+- Observation: the harness holds the archive context `DAT_000062ac` and the
+  resource free stub.  The stub records the call count, the context, and the
+  name pointer.  The three paths cover the first context, a second context, and
+  a sentinel context.  Every path checks the call count, the context, and the
+  `SPRITES` name.  The output holds the markers `0` through `2` and `D`, and
+  the behavior check passes.
+  Evidence: `tools/rebuild/sprite_data_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module sprite_data_release`, and
+  `work/rebuild/sprrel.txt`.
+- Observation: the identity check compares 9 instructions.  The rebuilt body
+  holds 10 instructions and 25 bytes, and the 9-instruction window holds 5 of 9
+  instructions, 7 of 22 bytes, and 0 of 2 relocation slots equal, because V2
+  saves `ebp` before `edx`, loads the archive context before the name pointer,
+  and restores the stack with `lea esp, [ebp - 4]`.  The build and behavior
+  checks pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x258b8 --count 9 --rebuilt work/rebuild/sprrel.exe
+  --rebuilt-map work/rebuild/sprite_data_release.map --rebuilt-symbol
+  sprite_data_release_`.
+- Limit: the original has no symbol name.  The resource, the callers, and the
+  sibling loader give the role, and the name `sprite_data_release` stays
+  inferred.

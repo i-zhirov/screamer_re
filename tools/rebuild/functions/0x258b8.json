@@ -1,9 +1,115 @@
 {
   "address": "0x258b8",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 9,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x258b8 holds 9 instructions and 22 bytes up to the ret at 0x258cc; the next record starts at 0x258d0 after the two padding bytes at 0x258ce and 0x258cf, so the store record keeps the 24-byte extent and sets no separate function size; the identity check uses 9 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the SPRITES resource at object-3 offset 0xec7 from the archive DAT_000062ac through resource_free_name at 0x2f326; the string at linear 0x100ec7 holds SPRITES; the function loads the name pointer in edx and the archive context in eax before the call"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are screen_setup_cleanup at 0x15150 with the call site at 0x15169, race_data_release at 0x156a8 with the call site at 0x156f4, race_end at 0x279a4 with the call site at 0x27a12, and race_cleanup at 0x2a1b0 with the call site at 0x2a1c3; every caller runs the function in a teardown"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling sprite_load at 0x257b0 gets the same SPRITES resource at object-3 offsets 0xeb7 and 0xebf, so the two functions form the sprite load and release pair; the module sits with the graphics decoders, so it takes the section The graphics decoders"
+    },
+    {
+      "kind": "note",
+      "text": "the SPRITES resource, the caller group, and the sibling loader support the name sprite_data_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive context DAT_000062ac and the resource free stub; the stub records the call count, the context, and the name pointer; the three paths cover the first context, a second context, and a sentinel context; every path checks the call count, the context, and the SPRITES name; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 9 instructions; the rebuilt body holds 10 instructions and 25 bytes, and the 9-instruction window holds 5 of 9 instructions, 7 of 22 bytes, and 0 of 2 relocation slots equal, because V2 saves ebp before edx, loads the archive context before the name pointer, and restores the stack with lea esp, [ebp - 4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x258b8 --count 9"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x258b8 --count 9 --rebuilt work/rebuild/sprrel.exe --rebuilt-map work/rebuild/sprite_data_release.map --rebuilt-symbol sprite_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sprite_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sprite_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x258b8"
+    },
+    {
+      "kind": "finding",
+      "text": "The sprite_data_release module at 0x258b8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sprite_data_release.json"
+    }
+  ],
+  "implementation": "c",
+  "module": "sprite_data_release",
+  "name": "sprite_data_release",
   "notes": [],
   "object_offset": "0x158b8",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 22,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 9,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x258b8",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:ead46202796ec57a5625663d856eddb1a0f52a74f40bcf340ba87f108d6e2f74",
+    "source_digest": "sha256:b25d8136a82498c0abe48e2799d2f80b55068ed83559e1811ac5fce5fa79c413",
+    "tool": "run.py"
+  },
+  "role": "frees the SPRITES resource from the archive DAT_000062ac during a teardown",
+  "section": "The graphics decoders",
   "size": 24,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sprite_data_release_"
 }
