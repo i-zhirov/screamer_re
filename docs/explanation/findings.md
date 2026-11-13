@@ -33773,3 +33773,51 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The three patched branch bytes and
   the sibling value give the role, and the name `sound_render_branch_greater`
   stays inferred.
+
+## The func_27f80 module at 0x27f80
+
+- Observation: the original body at `0x27f80` holds 7 instructions and 18
+  bytes up to the `ret` at `0x27f91`.  Two pad bytes follow the `ret`, and the
+  next recorded function starts at `0x27f94`, so the store record keeps the
+  20-byte extent and sets no separate function size.  The identity check uses
+  7 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x27f80 --count 7` and
+  `tools/rebuild/functions/0x27f80.json`.
+- Observation: the body reads the race context pointer at the object-3 offset
+  `0x2dec`, adds `0x18`, and stores the sum in the global at the object-3
+  offset `0x2e88`.  The context field at `+0x18` holds the mode word that
+  `race_menu_handler` at `0x2a214` tests.  The global therefore receives the
+  address of the mode field.
+  Evidence: the block at `0x27f80` through `0x27f91`, the internal fixups at
+  `0x27f84` and `0x27f8c` with object 3 target `0x2dec` and `0x2e88`, and the
+  finding "The race_menu_handler module at 0x2a214".
+- Observation: the only relocation to the body is the pointer slot at object-3
+  offset `0x6278` (linear `0x106278`).  The slot sits in the 6-byte record
+  table at `0x106272`.  The body has no direct call.
+  Evidence: the internal fixup at `0x106278` with object 1 target `0x17f80`,
+  the relocation slots at `0x106272` through `0x1062a8`, and the block at
+  `0x106270` through `0x1062a8`.
+- Inference: the body has no confirmed name, so the record uses the fallback
+  name `func_27f80`.  The original has no symbol, so the record keeps the name
+  with the confidence `inferred`.
+  Evidence: `tools/rebuild/func_27f80.c` and
+  `tools/rebuild/functions/0x27f80.json`.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction.  The module builds with `-of+`.  V2 adds the `mov esp, ebp`
+  epilogue, so the identity check finds 5 of 7 instructions and 13 of 18 bytes
+  equal.  The build and behavior checks pass, so the store records `rebuilt`.
+  The module uses no assembly source and no FPU stub.
+  Evidence: `tools/rebuild/func_27f80.c`,
+  `tools/rebuild/modules/func_27f80.json`, and
+  `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27f80 --count 7 --rebuilt work/rebuild/f27f80.exe
+  --rebuilt-map work/rebuild/f27f80.map --rebuilt-symbol func_27f80_`.
+- Observation: the harness holds the context pointer and the result pointer.
+  The five paths cover two context blocks, the null context, a context offset,
+  and two calls in order.  Every path checks the result pointer.  The output
+  holds the markers `0` through `4` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/func_27f80_main.c`,
+  `python3 tools/rebuild/harness.py run --module func_27f80`, and
+  `work/rebuild/f27f80.txt`.
+- Limit: the original has no symbol name and no direct call.  The data flow
+  gives the role, and the name `func_27f80` stays a fallback.

@@ -1,9 +1,106 @@
 {
   "address": "0x27f80",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x27f80 holds 7 instructions and 18 bytes up to the ret at 0x27f91; two pad bytes follow the ret, and the next recorded function starts at 0x27f94, so the store record keeps the 20-byte extent and sets no separate function size; the identity check uses 7 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body reads the race context pointer at the object-3 offset 0x2dec, adds 0x18, and stores the sum in the global at the object-3 offset 0x2e88; the context field at +0x18 holds the mode word that race_menu_handler at 0x2a214 tests, so the global receives the address of the mode field"
+    },
+    {
+      "kind": "note",
+      "text": "the only relocation to the body is the pointer slot at object-3 offset 0x6278 (linear 0x106278); the slot sits in the 6-byte record table at 0x106272; the body has no direct call"
+    },
+    {
+      "kind": "note",
+      "text": "the body has no confirmed name, so the record uses the fallback name func_27f80; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and holds no floating-point instruction; the module builds with -of+; V2 adds the mov esp, ebp epilogue, so the identity check finds 5 of 7 instructions and 13 of 18 bytes equal and records rebuilt; the module uses no assembly source and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the context pointer and the result pointer; the five paths cover two context blocks, the null context, a context offset, and two calls in order; every path checks the result pointer; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_27f80.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_27f80_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_27f80.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_27f80 module at 0x27f80"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x27f80 --count 7"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x27f80 --count 7 --rebuilt work/rebuild/f27f80.exe --rebuilt-map work/rebuild/f27f80.map --rebuilt-symbol func_27f80_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module func_27f80"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module func_27f80"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x27f80"
+    }
+  ],
+  "implementation": "c",
+  "module": "func_27f80",
+  "name": "func_27f80",
   "notes": [],
   "object_offset": "0x17f80",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 13,
+        "bytes_total": 18,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 7,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x27f80",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:4950ffbc3381cd2b01fc0b851f2ea456cea500ec0f2eb4595159e257b0d5782c",
+    "source_digest": "sha256:60a900d6cfac3c1ee11fa3cc35ec60ed45eb705f2ceb874df37b82b584c39374",
+    "tool": "run.py"
+  },
+  "role": "Stores the address of the race context field at +0x18 in the global DAT_00002e88.",
+  "section": "Program functions",
   "size": 20,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_27f80_"
 }
