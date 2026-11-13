@@ -50,19 +50,19 @@ count after the change.
 
 ### Slice 3 — scope
 
-Add a provenance value to every record. Triage the 652 `unknown` records.
+Add a provenance value to every record. Triage the unknown records.
 Separate game functions, library functions, compiler helpers, non-functions,
 and data. Report byte coverage and counts by provenance. This slice fixes the
 denominator before more C work.
 
-- **Status:** Unplanned
+- **Status:** Implemented
 - **Depends on:** Slice 1
 - **Requirements:** FR-010, FR-011, FR-012, FR-018
-- **Manual prerequisites:** The Ghidra dev shell and the game directory.
-- **Plan:** —
-- **Done when:** Every record has a provenance value. The `unknown` count falls
-  to the set that needs analysis. The report shows byte coverage and provenance
-  counts.
+- **Manual prerequisites:** The Ghidra dev shell, Docker, DOSBox-X, and the game directory.
+- **Plan:** docs/explanation/rebuild-quality-plan-scope.md
+- **Done when:** Every record has a provenance value. The analysis count falls
+  to the `unknown` records with provenance `game`. The report shows byte
+  coverage and provenance counts.
 
 ### Slice 4 — library
 

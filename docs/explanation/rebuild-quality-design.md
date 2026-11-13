@@ -6,21 +6,24 @@
 
 ## Problem
 
-The verified share of the rebuild store is low. The store holds 935 function
-records. It holds 30 `verified` records. Only 23 of the 30 pass the strict
-gate. The report is also not trustworthy, because the pipeline can pass a
-record whose stored result is `fail`.
+The verified share of the rebuild store is low. At the design date, the store
+holds 935 function records. It holds 30 `verified` records. Only 23 of the 30
+pass the strict gate. At the plan date, the store holds 971 function records
+and 22 `verified` records. The report is also not trustworthy, because the
+pipeline can pass a record whose stored result is `fail`.
 
 ## Observations
 
-- The store holds 652 `unknown`, 31 `named`, 221 `rebuilt`, 1 `matching`, and
-  30 `verified` records.
-- The 23 strict records are 20 hand-written assembly modules and 3 Watcom
-  library C functions (`exit`, `exit_flush`, and `free`).
+- At the design date, the store holds 652 `unknown`, 31 `named`, 221 `rebuilt`,
+  1 `matching`, and 30 `verified` records. At the plan date, the store holds
+  971 function records, 688 `unknown`, 31 `named`, 230 `rebuilt`, 0 `matching`,
+  22 `verified`, and 252 module records.
+- At the design date, the 23 strict records are 20 hand-written assembly
+  modules and 3 Watcom library C functions (`exit`, `exit_flush`, and `free`).
 - No game function written in C is a strict match.
 - The median rebuilt module matches 21.4% of instructions and 5.9% of bytes.
-- Only 119 of 935 records declare a `count`. The other records stop at the
-  first `ret`.
+- At the design date, only 119 of 935 records declare a `count`. The other
+  records stop at the first `ret`.
 - The period Watcom 10.0a compiler and OpenWatcom V2 produce nearly the same
   code for six sampled high-match modules when they use the same flags.
 - The period compiler improves some modules. `lzw_bit_read` moves from 27 to
@@ -49,9 +52,9 @@ record whose stored result is `fail`.
 | ID | Cause | Evidence |
 | --- | --- | --- |
 | RC-1 | The reconstruction is decompiled C, not the original C source. | The period and V2 compilers agree on six sampled modules with the same flags. |
-| RC-2 | The record scope mixes game functions, library functions, and untriaged candidates. | 652 records are `unknown`. 13 named records match library symbols. |
+| RC-2 | The record scope mixes game functions, library functions, and untriaged candidates. | At the design date, 652 records are `unknown`. 13 named records match library symbols. |
 | RC-3 | The verification pipeline has false accepts. | A stored `fail` prints `PASS` under `--skip-unchanged`. A failed build keeps `verified`. |
-| RC-4 | The default identity gate accepts shape matches. | 7 of 30 `verified` records are shape matches. |
+| RC-4 | The default identity gate accepts shape matches. | At the design date, 7 of 30 `verified` records are shape matches. |
 | RC-5 | The oracle does not verify branch targets, internal fixup targets, or full function extents. | `oracle.py:90`, `oracle.py:127`, `le.py:607`. |
 | RC-6 | The period toolchain is not in the verification loop. | `run.py` always calls `harness.py`. No module holds `period_flags`. |
 | RC-7 | Module recipes encode per-module flag guesses, mostly `-of+`. | 191 C sources use `-of+`. The original prologue census shows a large registers-first family. |
@@ -72,7 +75,7 @@ record whose stored result is `fail`.
 | FR-008 | A function extent must cover all reachable code. It must not stop at the first `ret` when more code belongs to the function. |
 | FR-009 | `le.read` must stitch LE pages. |
 | FR-010 | Every record must hold a provenance value: `game`, `library`, `compiler_helper`, `not_a_function`, or `data`. |
-| FR-011 | The project must triage the 652 `unknown` records. |
+| FR-011 | The project must triage the unknown records. |
 | FR-012 | The project must report byte coverage and counts by provenance. |
 | FR-013 | The project must index the 10.0a libraries and verify a library function against its original object. |
 | FR-014 | The whole-image build must link the original library objects. |
@@ -96,13 +99,13 @@ record whose stored result is `fail`.
 - C-1: Python 3.14.7. Use the standard library and the `ctypes` capstone binding only.
 - C-2: Tests use `unittest` under `tools/rebuild/tests/`.
 - C-3: A tool takes its configuration from the command line. It reads no environment variable.
-- C-4: A tool writes only under `work/` or to an explicit output path.
+- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass writes the function records through `store.save_record`, and C-4 still applies to the shipped artifacts.
 - C-5: Prefer C. Use assembly only when C cannot reproduce the original bytes, and record the reason.
 - C-6: A harness output name stays within the 8.3 limit.
 - C-7: The 10.0a toolchain runs alongside OpenWatcom V2. Do not replace V2.
 - C-8: The status ladder stays `unknown`, `not_a_function`, `named`, `rebuilt`, `matching`, `verified`.
 - C-9: The identity verdict strings stay unchanged.
-- C-10: The full check reports 303 checks today. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. Update these counts when a change adds or removes a check.
+- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date target is 304, 300, 289, and 285. Update these counts when a change adds or removes a check.
 - C-11: Do not commit. The user commits.
 
 ## Non-Goals
@@ -134,3 +137,12 @@ record whose stored result is `fail`.
   where the nearest preceding `cmp` holds the bound `N`. Each table entry is
   a 4-byte object-relative code address. An indirect jump without the
   compiler table pattern stops the block, because the target is unknown.
+- A function record holds a `provenance` value from `game`, `library`,
+  `compiler_helper`, `not_a_function`, and `data`. The value is a
+  documentation field, so it stays out of the fingerprint. A `data` or
+  `not_a_function` provenance requires the `not_a_function` status.
+- The analysis count is the `unknown` records with provenance `game`.
+  The progress total and the header count the game function records only. A
+  library, compiler-helper, `data`, or `not_a_function` record stays in its
+  provenance row and out of the analysis count. The byte coverage uses
+  the code-object virtual size from the original image.
