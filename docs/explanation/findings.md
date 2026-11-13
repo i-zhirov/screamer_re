@@ -33016,3 +33016,58 @@ temporary `-od` recipe.
   dpmi_alloc_dos_`.
 - Limit: the original has no symbol name.  The caller and the DPMI data flow
   give the role, and the name `dpmi_alloc_dos` stays inferred.
+
+## The state_init_dispatch module at 0x2be94
+
+- Observation: the original entry path at `0x2be94` holds 9 instructions and
+  28 bytes up to the `ret` at `0x2beaf`.  The other case blocks follow the
+  `ret` and end at the next record at `0x2bedc`, so the store record keeps the
+  72-byte extent and sets no separate function size.  The identity check uses
+  9 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x2be94 --count 9` and
+  `tools/rebuild/functions/0x2be94.json`.
+- Observation: the only direct caller at `0x295c9` is case 1 of
+  `race_state_update` at `0x29564`.  `race_state_update` is a `race_frame`
+  callee at `0x2807c`, so the record takes the section `race_frame callees`.
+  Evidence: the call sweep for `0x2be94`, the call at `0x295c9`, and the call
+  at `0x2807c`.
+- Observation: the function reads the state word at `DAT_0011fac4`, rejects a
+  value above 8, and jumps through the table at linear `0x2be70`.  The table
+  maps the state 0 to `menu_frame` at `0x29f80`, the state 2 to
+  `car_select_screen` at `0x2bedc`, the state 3 to `track_select_screen` at
+  `0x2c188`, the state 4 to `name_entry_screen` at `0x2c430`, the state 5 to
+  `championship_screen_init` at `0x2c7a8`, the state 6 to
+  `race_records_screen_init` at `0x2c954`, and the state 8 to
+  `net_race_lobby_init` at `0x2ca40`.  The states 1 and 7 and the default
+  path call nothing.
+  Evidence: the jump table at linear `0x2be70`, the case blocks at `0x2bea9`
+  through `0x2bed3`, and `tools/le.py disasm STARTH.EXE 0x2be94 --count 45`.
+- Inference: the state word, the jump table, and the seven screen initializers
+  support the name `state_init_dispatch`.  The original has no symbol, so the
+  record keeps the name with the confidence `inferred`.
+  Evidence: the caller `race_state_update`, the jump table, and the seven
+  initializer records.
+- Observation: the original has the EBP frame and holds no floating-point
+  instruction, so the module builds with `-of+` and links no FPU stub and no
+  assembly source.
+  Evidence: `tools/rebuild/state_init_dispatch.c` and
+  `tools/rebuild/modules/state_init_dispatch.json`.
+- Observation: the harness holds the state word and one stub for each of the
+  seven initializers.  The eleven paths cover the states 0 through 9 and the
+  exit.  Every path checks that only the expected initializer runs.  The output
+  holds the markers `0` through `9` and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/state_init_dispatch_main.c`,
+  `python3 tools/rebuild/harness.py run --module state_init_dispatch`, and
+  `work/rebuild/sidisp.txt`.
+- Observation: the rebuilt body holds 5 of 9 instructions, 9 of 28 bytes, and
+  1 of 2 relocation slots equal.  The instruction sequence differs, because
+  Watcom V2 uses the if/else dispatch, emits a near conditional jump, and reads
+  the state word through the harness address.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2be94 --count 9 --rebuilt work/rebuild/sidisp.exe
+  --rebuilt-map work/rebuild/state_init_dispatch.map --rebuilt-symbol
+  state_init_dispatch_`.
+- Limit: the original has no symbol name.  The caller, the jump table, and the
+  seven initializers give the role, and the name `state_init_dispatch` stays
+  inferred.
