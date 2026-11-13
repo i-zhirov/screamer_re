@@ -395,8 +395,9 @@ current host.
    `player_previous_speed_set` at `0x15bfc`, and the Phase AB module
    `palette_set` at `0x81a05`, and the Phase AB module
    `replay_frame_buffer_release` at `0x22d44`, and the Phase AB module
-   `object_handle_pair_release` at `0x111b4`;
-   thirty-nine modules are verified, one is matching, and four hundred and thirty-one
+   `object_handle_pair_release` at `0x111b4`, and the Phase AB module
+   `object_handle_release` at `0x11148`;
+   thirty-nine modules are verified, one is matching, and four hundred and thirty-two
    rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match

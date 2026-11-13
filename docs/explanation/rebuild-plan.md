@@ -732,7 +732,7 @@ reproduce the original bytes.
 | `0x81a05` | `palette_set` (done) | 30 | 17 | 2 | 0 |
 | `0x22d44` | `replay_frame_buffer_release` (done) | 30 | 11 | 1 | 0 |
 | `0x111b4` | `object_handle_pair_release` (done) | 29 | 13 | 0 | 0 |
-| `0x11148` | unnamed | 29 | 13 | 0 | 0 |
+| `0x11148` | `object_handle_release` (done) | 29 | 13 | 0 | 0 |
 | `0x8be93` | unnamed | 28 | 11 | 0 | 0 |
 | `0x2be94` | unnamed | 28 | 9 | 1 | 0 |
 | `0x24d7c` | unnamed | 27 | 12 | 0 | 0 |
@@ -758,7 +758,7 @@ This table starts Phase AB.
 
 ## Position
 
-Four hundred and seventy modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and seventy-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -1075,5 +1075,6 @@ module `func_11974` at `0x11974`, and the Phase X module
 `player_previous_speed_set` at `0x15bfc`, and the Phase AB module
 `palette_set` at `0x81a05`, and the Phase AB module
 `replay_frame_buffer_release` at `0x22d44`, and the Phase AB module
-`object_handle_pair_release` at `0x111b4`.
-The next unnamed function is `0x11148`.
+`object_handle_pair_release` at `0x111b4`, and the Phase AB module
+`object_handle_release` at `0x11148`.
+The next unnamed function is `0x8be93`.

@@ -1,9 +1,111 @@
 {
   "address": "0x11148",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 13,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x11148 holds 13 instructions and 29 bytes up to the early ret at 0x11164; the full body continues at 0x11165 through the second return to the ret at 0x111b2, and the next recorded function object_handle_pair_release starts at 0x111b4, so the store record keeps the 108-byte extent and sets no separate function size; the identity check uses 13 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is func_11230 at 0x11230 with the call site at 0x112b3; it selects the object-list entry by the playback index and passes the entry in eax; a handle at +0x14 shared with another entry runs this function, and any other handle runs the two-handle release at 0x111b4; the two functions form the one-handle and two-handle release pair"
+    },
+    {
+      "kind": "note",
+      "text": "the entry holds the flag byte at +0x00, the first handle at +0x0c, the field +0x10, the second handle at +0x14, and the field +0x18; the function returns 9 when the first handle is zero and returns 0xb when the field +0x18 is not -1; otherwise it frees the first handle from the resource list DAT_0000801c through resource_find at 0x2f25f, clears the flag and the fields +0x0c, +0x10, and +0x14, and returns 0; the field +0x18 stays unchanged"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the field layout, and the release pair support the name object_handle_release; the original has no symbol, so the record keeps the name with the confidence inferred; the module sits with the object handles, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls one resource helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the object entry, the resource list pointer, and the resource find stub; the stub records the call order, the context, and the key; the four paths cover the zero first handle, the field +0x18 that is not -1, one non-zero first handle, and a sentinel context with another first handle; every path checks the entry bytes, the call count, the context, and the key; the output holds the markers 0, 1, 2, 3, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 13 instructions; the rebuilt body holds 2 of 13 instructions, 1 of 29 bytes, and 0 of 0 relocation slots equal; V2 saves ebp first, pushes ecx and edx, keeps the entry in ecx, and jumps to a shared epilogue; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_handle_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_handle_release module at 0x11148"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x11148 --count 13"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x11148 --count 13 --rebuilt work/rebuild/objhrel.exe --rebuilt-map work/rebuild/object_handle_release.map --rebuilt-symbol object_handle_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module object_handle_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module object_handle_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x11148"
+    }
+  ],
+  "implementation": "c",
+  "module": "object_handle_release",
+  "name": "object_handle_release",
   "notes": [],
   "object_offset": "0x1148",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 29,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 2,
+        "instructions_total": 13,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x11148",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:283b3a68e0db36e2352f0e07a9e9cd8c90aa26662b27481eec72d59da289207d",
+    "source_digest": "sha256:5961652a3ab391cfa2a64e991f35797070709b5ae5d70193854cbce9b185d67f",
+    "tool": "run.py"
+  },
+  "role": "Releases the first object handle of an object-list entry and clears its flag and handle fields.",
+  "section": "Resource loader",
   "size": 108,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_handle_release_"
 }

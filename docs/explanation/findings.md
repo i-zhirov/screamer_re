@@ -32903,3 +32903,65 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the field layout, and
   the release pair give the role, and the name `object_handle_pair_release`
   stays inferred.
+
+## The object_handle_release module at 0x11148
+
+- Observation: the original body at `0x11148` holds 13 instructions and 29
+  bytes up to the early `ret` at `0x11164`.  The full body continues at
+  `0x11165` through the second return to the `ret` at `0x111b2`.  The next
+  recorded function `object_handle_pair_release` starts at `0x111b4`, so the
+  store record keeps the 108-byte extent and sets no separate function size.
+  The identity check uses 13 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11148 --count 13` and
+  `tools/rebuild/functions/0x11148.json`.
+- Observation: the only direct caller is `func_11230` at `0x11230` with the
+  call site at `0x112b3`.  The caller selects the object-list entry by the
+  playback index and passes the entry in `eax`.  A handle at `+0x14` shared
+  with another entry runs this function.  Any other handle runs the two-handle
+  release at `0x111b4`, so the two functions form the one-handle and two-handle
+  release pair.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x11230 --count 71`,
+  `tools/rebuild/callgraph.json`, and the record of `func_11230`.
+- Observation: the entry holds the flag byte at `+0x00`, the first handle at
+  `+0x0c`, the field `+0x10`, the second handle at `+0x14`, and the field
+  `+0x18`.  The function returns 9 when the first handle is zero and returns
+  `0xb` when the field `+0x18` is not -1.  Otherwise it frees the first handle
+  from the resource list `DAT_0000801c` through `resource_find` at `0x2f25f`.
+  It then clears the flag byte and the fields `+0x0c`, `+0x10`, and `+0x14`,
+  and it returns 0.  The field `+0x18` stays unchanged.
+  Evidence: the blocks at `0x11152` through `0x111b2` and
+  `tools/rebuild/resource_find.c`.
+- Inference: the caller, the field layout, and the release pair support the
+  name `object_handle_release`.  The original has no symbol, so the record
+  keeps the name with the confidence `inferred`.  The function sits with the
+  object handles, so the record takes the section Resource loader.
+  Evidence: the caller list, the sibling release at `0x111b4`, and the record.
+- Observation: the original has the EBP frame, so the module builds with
+  `-of+`.  The function holds no floating-point instruction and calls one
+  resource helper, so the module needs no FPU stub.  The module uses no
+  assembly implementation.
+  Evidence: the prologue at `0x11148` through `0x1114f` and
+  `tools/rebuild/modules/object_handle_release.json`.
+- Observation: the harness holds the object entry, the resource list pointer,
+  and the `resource_find` stub.  The stub records the call order, the context,
+  and the key.  The four paths cover the zero first handle, the field `+0x18`
+  that is not -1, one non-zero first handle, and a sentinel context with
+  another first handle.  Every path checks the entry bytes, the call count, the
+  context, and the key.  The output holds the markers `0`, `1`, `2`, `3`, and
+  `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/object_handle_release_main.c`,
+  `python3 tools/rebuild/harness.py run --module object_handle_release`,
+  `work/rebuild/objhrel.txt`, and
+  `python3 tools/rebuild/run.py run --function 0x11148`.
+- Observation: the rebuilt body holds 2 of 13 instructions, 1 of 29 bytes, and
+  0 of 0 relocation slots equal.  The instruction sequence differs, because
+  Watcom V2 saves EBP first, pushes ECX and EDX, keeps the entry in ECX, and
+  jumps to a shared epilogue.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x11148 --count 13 --rebuilt work/rebuild/objhrel.exe
+  --rebuilt-map work/rebuild/object_handle_release.map --rebuilt-symbol
+  object_handle_release_`.
+- Limit: the original has no symbol name.  The caller, the field layout, and
+  the release pair give the role, and the name `object_handle_release` stays
+  inferred.
