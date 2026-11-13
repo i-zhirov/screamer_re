@@ -1,9 +1,111 @@
 {
   "address": "0x819f0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x819f0 holds 11 instructions and 21 bytes up to the ret at 0x81a04; the next record starts at 0x81a05, so the store record keeps the 21-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body saves all general registers, loads the VGA input status port 0x3da in dx from 0x3d0 plus 0xa, waits while bit 3 stays set, then waits while bit 3 stays clear, restores the registers, and returns; bit 3 is the vertical retrace flag"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is palette_set at 0x81a05 with the call site at 0x81a0d; that module already declares the name vga_retrace_wait, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the function is a shared graphics helper for the palette path, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds with the default frame option; the function holds no floating-point instruction, so the module needs no FPU stub; C cannot hold the port in dx across the loops, so the module calls the inportb helper for each read and uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the scripted inportb stub; the stub records the port and the read count; the three paths cover four reads, two reads, and seven reads; every path checks the read count and the port of every read; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 0 of 11 instructions equal, 3 of 21 bytes equal, and 0 of 1 relocation slots equal; V2 moves the port into eax for each read and calls the inportb helper instead of the single in al, dx read; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/vga_retrace_wait.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/vga_retrace_wait_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/vga_retrace_wait.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The vga_retrace_wait module at 0x819f0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x819f0 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x819f0 --count 11 --rebuilt work/rebuild/vret.exe --rebuilt-map work/rebuild/vga_retrace_wait.map --rebuilt-symbol vga_retrace_wait_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module vga_retrace_wait"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module vga_retrace_wait"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x819f0"
+    }
+  ],
+  "implementation": "c",
+  "module": "vga_retrace_wait",
+  "name": "vga_retrace_wait",
   "notes": [],
   "object_offset": "0x719f0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 21,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 0,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x819f0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:d302bfdedcf056e037707824b18624d1b2acf33f9d3e0df611d2ffbc9085f7b9",
+    "source_digest": "sha256:959914bbf9f9598e481c83e6b4186985197f5dee3f0ab9b5cf74d2860f8a2763",
+    "tool": "run.py"
+  },
+  "role": "Waits for the VGA vertical retrace before a palette write.",
+  "section": "Program functions",
   "size": 21,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "vga_retrace_wait_"
 }

@@ -33542,3 +33542,54 @@ temporary `-od` recipe.
   vga_dac_write_`.
 - Limit: the original has no symbol name.  The caller, the palette pointer, and
   the DAC ports give the role, and the name `vga_dac_write` stays inferred.
+
+## The vga_retrace_wait module at 0x819f0
+
+- Observation: the original body at `0x819f0` holds 11 instructions and 21
+  bytes up to the `ret` at `0x81a04`.  The next record starts at `0x81a05`, so
+  the store record keeps the 21-byte extent and sets no separate function size.
+  The identity check uses 11 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x819f0 --count 11` and
+  `tools/rebuild/functions/0x819f0.json`.
+- Observation: the body saves all general registers, loads the VGA input
+  status port `0x3da` in DX from `0x3d0` plus `0xa`, waits while bit 3 stays
+  set, then waits while bit 3 stays clear, restores the registers, and returns.
+  Bit 3 is the vertical retrace flag.
+  Evidence: the block at `0x819f0` through `0x81a04`.
+- Observation: the only direct caller is `palette_set` at `0x81a05` with the
+  call site at `0x81a0d`.
+  Evidence: `tools/rebuild/callgraph.json` and the finding "The palette_set
+  module at 0x81a05".
+- Inference: the caller, the VGA status port, and the retrace flag support the
+  name `vga_retrace_wait`.  The original has no symbol, so the record keeps the
+  name with the confidence `inferred`.
+  Evidence: `tools/rebuild/vga_retrace_wait.c` and
+  `tools/rebuild/functions/0x819f0.json`.
+- Inference: the function is a shared graphics helper for the palette path, so
+  the record takes the section Program functions.
+  Evidence: the caller `palette_set` above.
+- Observation: the original has no EBP frame and holds no floating-point
+  instruction.  The module builds with the default frame option, needs no FPU
+  stub, and uses no assembly source.
+  Evidence: `tools/rebuild/vga_retrace_wait.c` and
+  `tools/rebuild/modules/vga_retrace_wait.json`.
+- Observation: the harness holds the scripted `inportb` stub.  The stub
+  records the port and the read count.  The three paths cover four reads, two
+  reads, and seven reads.  Every path checks the read count and the port of
+  every read.  The output holds the markers `0`, `1`, `2`, and `D`, and the
+  behavior check passes.
+  Evidence: `tools/rebuild/vga_retrace_wait_main.c`,
+  `python3 tools/rebuild/harness.py run --module vga_retrace_wait`, and
+  `work/rebuild/vret.txt`.
+- Observation: the identity check compares 11 instructions.  The rebuilt body
+  holds 0 of 11 instructions, 3 of 21 bytes, and 0 of 1 relocation slots equal,
+  because C cannot hold the port in DX across the loops and calls the `inportb`
+  helper for each read.  The build and behavior checks pass, so the store
+  records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x819f0 --count 11 --rebuilt work/rebuild/vret.exe
+  --rebuilt-map work/rebuild/vga_retrace_wait.map --rebuilt-symbol
+  vga_retrace_wait_`.
+- Limit: the original has no symbol name.  The caller, the VGA status port, and
+  the retrace flag give the role, and the name `vga_retrace_wait` stays
+  inferred.
