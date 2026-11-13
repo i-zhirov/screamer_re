@@ -1,9 +1,115 @@
 {
   "address": "0x26014",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 7,
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the plan row holds the first 16 bytes and 7 instructions up to the ret at 0x26023; the nonzero path continues in the block at 0x26024 and ends at the ret at 0x26067, and the second request builder starts at 0x26068, so the store record keeps the 140-byte extent and sets no separate function size; the identity check uses 7 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body tests the word at the object-3 offset 0x1668c; the setup at 0x25dd5 stores the MSCDEX start drive letter there; a zero word returns 0 and the nonzero path builds the read-long request header at DAT_001666a4"
+    },
+    {
+      "kind": "note",
+      "text": "the request header holds the length 0x1a, the subunit DAT_00166680, the command 0x80 (read long), the addressing mode 0, the sector count 1 at +0x12, the start sector 0x10 at +0x14, and the reserved dword 0 at +0x18; the function runs the request through cd_request_submit at 0x25f24 and returns DAT_001666a4 plus 0x40"
+    },
+    {
+      "kind": "note",
+      "text": "the start sector 0x10 is the ISO 9660 primary volume descriptor; the caller cd_check at 0x157b8 reads the system identifier at +8, the volume identifier at +0x28, the publisher identifier at +0x13e, and the application identifier at +0x23e; the extracted data track holds PC, SCREAMER, VIE, and SCREAMER at those offsets, so the function reads the volume descriptor"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are cd_check at 0x157c8 and the setup at 0x25e8c; cd_check sits in the race_loop callees chain, so the module takes the section race_loop callees; the data flow and the ISO descriptor support the name cd_volume_descriptor_read; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction; the module uses no assembly and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the driver word, the subunit, the request pointer, two request buffers, and the cd_request_submit stub; the five paths cover the zero word, the first buffer, the second buffer, the sentinel bytes, and two calls in order; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 7 instructions; the rebuilt body holds 2 of 16 bytes and 0 of 7 instructions equal, and 0 of 2 relocation slots, because V2 saves edx instead of all registers, uses cmp against zero, and keeps the guard in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_volume_descriptor_read.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_volume_descriptor_read_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_volume_descriptor_read.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_volume_descriptor_read module at 0x26014"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x26014 --count 7"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x26014 --count 7 --rebuilt work/rebuild/cdvolr.exe --rebuilt-map work/rebuild/cdvolr.map --rebuilt-symbol cd_volume_descriptor_read_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_volume_descriptor_read"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_volume_descriptor_read"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x26014"
+    }
+  ],
+  "implementation": "c",
+  "module": "cd_volume_descriptor_read",
+  "name": "cd_volume_descriptor_read",
   "notes": [],
   "object_offset": "0x16014",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 16,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 0,
+        "instructions_total": 7,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x26014",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0e8198018341badb4e418c05ff30e66e3f87c56342e44414f02107261881b01d",
+    "source_digest": "sha256:6b7e2277dc4b8604313a13a9e50f15fe235d134b2249a2a16041f9dd9b589524",
+    "tool": "run.py"
+  },
+  "role": "Reads the ISO 9660 primary volume descriptor through the MSCDEX read-long request and returns the response buffer.",
+  "section": "race_loop callees",
   "size": 140,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_volume_descriptor_read_"
 }

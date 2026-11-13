@@ -24675,7 +24675,7 @@ temporary `-od` recipe.
   values 0x34 and 0xCD, the zero low bytes, the device byte 0x77, and the equal
   pair.  Every path checks the bytes outside the written fields.
   Evidence: `python3 tools/rebuild/harness.py run --module
-  cd_audio_volume_set` and `work/rebuild/cdvol.txt`.
+  cd_audio_volume_set` and `work/rebuild/cdvolr.txt`.
 - Observation: the rebuilt body holds 43 decoded instructions and 146 bytes.
   The identity check stays open at 12 of 43 instructions, 13 of 132 bytes, and
   0 of 13 relocation slots, because V2 saves the registers in another order,
@@ -24683,7 +24683,7 @@ temporary `-od` recipe.
   shifts and ors, and orders the tail in another shape.  The build and behavior
   checks pass, so the store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x265b4 --count 43 --rebuilt work/rebuild/cdvol.exe
+  --original-address 0x265b4 --count 43 --rebuilt work/rebuild/cdvolr.exe
   --rebuilt-map work/rebuild/cd_audio_volume_set.map --rebuilt-symbol
   cd_audio_volume_set_` and `python3 tools/rebuild/run.py run --function
   0x265b4`.
@@ -33821,3 +33821,73 @@ temporary `-od` recipe.
   `work/rebuild/f27f80.txt`.
 - Limit: the original has no symbol name and no direct call.  The data flow
   gives the role, and the name `func_27f80` stays a fallback.
+
+## The cd_volume_descriptor_read module at 0x26014
+
+- Observation: the plan row holds the first 16 bytes and 7 instructions up to
+  the `ret` at `0x26023`.  The nonzero path continues in the block at
+  `0x26024` and ends with the `ret` at `0x26067`.  The second request builder
+  starts at `0x26068`, so the store record keeps the 140-byte extent and sets
+  no separate function size.  The identity check uses 7 instructions.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x26014 --count 7` and
+  `tools/rebuild/functions/0x26014.json`.
+- Observation: the body tests the word at the object-3 offset `0x1668c`.  The
+  setup at `0x25dd5` stores the MSCDEX start drive letter there.  A zero word
+  returns 0.  The nonzero path builds the read-long request header at
+  `DAT_001666a4`.
+  Evidence: the block at `0x26014` through `0x26067`, the store at `0x25ddd`,
+  and the store at `0x25dea`.
+- Observation: the request header holds the length `0x1a`, the subunit
+  `DAT_00166680`, the command `0x80` (read long), the addressing mode 0, the
+  sector count 1 at `+0x12`, the start sector `0x10` at `+0x14`, and the
+  reserved dword 0 at `+0x18`.  The function runs the request through
+  `cd_request_submit` at `0x25f24` and returns `DAT_001666a4` plus `0x40`.
+  Evidence: the block at `0x26024` through `0x26067` and the finding
+  "The cd_request_submit module at 0x25f24".
+- Observation: the start sector `0x10` is the ISO 9660 primary volume
+  descriptor.  The caller `cd_check` at `0x157b8` reads the system identifier
+  at `+8`, the volume identifier at `+0x28`, the publisher identifier at
+  `+0x13e`, and the application identifier at `+0x23e`.  The extracted data
+  track holds `PC`, `SCREAMER`, `VIE`, and `SCREAMER` at those offsets, so the
+  function reads the volume descriptor.
+  Evidence: the field pointers at `0x157e1` through `0x15801`, the values at
+  offset `0x8000` of `work/entry/screamer_data_track.iso`, and the finding
+  "The cd_check module at 0x157b8".
+- Observation: the direct callers are `cd_check` at `0x157c8` and the setup at
+  `0x25e8c`.  `cd_check` sits in the `race_loop callees` chain, so the module
+  takes the section `race_loop callees`.
+  Evidence: the call sites at `0x157c8` and `0x25e8c`,
+  `tools/rebuild/functions/0x157b8.json`, and
+  `tools/rebuild/functions/0x25db0.json`.
+- Inference: the ISO descriptor read, the request header, and the response
+  buffer support the name `cd_volume_descriptor_read`.  The original has no
+  symbol, so the record keeps the name with the confidence `inferred`.
+  Evidence: `tools/rebuild/cd_volume_descriptor_read.c` and
+  `tools/rebuild/functions/0x26014.json`.
+- Observation: the original has no EBP frame and saves the registers with
+  `pushal`, so the module builds without `-of+`.  The function holds no
+  floating-point instruction, so the module needs no FPU stub and no assembly
+  implementation.
+  Evidence: the prologue at `0x26014` and
+  `tools/rebuild/cd_volume_descriptor_read.c`.
+- Observation: the harness holds the driver word, the subunit, the request
+  pointer, two request buffers, and the `cd_request_submit` stub.  The five
+  paths cover the zero word, the first buffer, the second buffer, the sentinel
+  bytes, and two calls in order.  The output holds the markers `0` through `4`
+  and `D`, and the behavior check passes.
+  Evidence: `tools/rebuild/cd_volume_descriptor_read_main.c`,
+  `python3 tools/rebuild/harness.py run --module
+  cd_volume_descriptor_read`, and `work/rebuild/cdvolr.txt`.
+- Observation: the identity check compares 7 instructions.  The rebuilt body
+  holds 0 of 7 instructions and 2 of 16 bytes equal, and 0 of 2 relocation
+  slots, because V2 saves `edx` instead of all registers, uses `cmp` against
+  zero, and orders the guard in another shape.  The build and behavior checks
+  pass, so the store records `rebuilt`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x26014 --count 7 --rebuilt work/rebuild/cdvolr.exe
+  --rebuilt-map work/rebuild/cdvolr.map --rebuilt-symbol
+  cd_volume_descriptor_read_` and `python3 tools/rebuild/run.py run
+  --function 0x26014`.
+- Limit: the original has no symbol name.  The ISO descriptor fields, the
+  request header, and the callers give the role, and the name
+  `cd_volume_descriptor_read` stays inferred.

@@ -411,9 +411,10 @@ current host.
    `dpmi_free_dos` at `0x2666c`, and the Phase AB module
    `sound_render_branch_less` at `0x8afb2`, and the Phase AB module
    `sound_render_branch_greater` at `0x8afa0`, and the Phase AB module
-   `func_27f80` at `0x27f80`;
+   `func_27f80` at `0x27f80`, and the Phase AB module
+   `cd_volume_descriptor_read` at `0x26014`;
    forty-one modules are verified, one is matching, and four hundred and
-   forty-five rebuilds hold the recorded difference; the `video_fill`,
+   forty-six rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).
