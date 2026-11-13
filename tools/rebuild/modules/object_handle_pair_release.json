@@ -1,0 +1,30 @@
+{
+  "exe": "objhpr.exe",
+  "map": "object_handle_pair_release.map",
+  "name": "object_handle_pair_release",
+  "run": {
+    "command": "objhpr.exe > objhpr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "objhpr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_pair_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_pair_release_main.c"
+    }
+  ]
+}
