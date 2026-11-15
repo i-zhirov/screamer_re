@@ -29,6 +29,8 @@ Initial reconnaissance is complete.  The project has:
   `tools/rebuild/coverage.py`),
 - a library object index, a strict library identity check, and a link manifest
   for the whole-image build (`tools/rebuild/library.py`),
+- a toolchain matrix that records the best measured compiler and flags for each
+  module (`tools/rebuild/toolchain.py`),
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
@@ -149,9 +151,9 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-431 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 427 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 416 checks.  Both flags report 412 checks.
+432 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 428 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 417 checks.  Both flags report 413 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  Strict is the default identity gate: the

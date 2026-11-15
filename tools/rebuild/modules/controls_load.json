@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "controls_load.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "controls_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "controls_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

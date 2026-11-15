@@ -77,22 +77,22 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
+        "bytes_equal": 39,
         "bytes_total": 649,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 73,
+        "instructions_equal": 53,
         "instructions_total": 207,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x830c8",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:22e4b82934542ea73e320bb7b919cd1f0ae904e4e996aacaac964ed5f3afbbe8",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7d61484ba38e00379447d77c573c57ea8fd32382914efd454dd33dd858099511",
     "mode": {
       "runtime": "run",
       "strict": true,
-      "toolchain": "v2"
+      "toolchain": "watcom10"
     },
     "source_digest": "sha256:e607b7723c1d8ed9a74fdeadaeda71d48a93688e45f4a8037c2a2326453dc58b",
     "tool": "run.py"

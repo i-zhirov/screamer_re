@@ -35,7 +35,7 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
+        "bytes_equal": 28,
         "bytes_total": 652,
         "detail": "the instruction sequences differ",
         "instructions_equal": 21,
@@ -45,8 +45,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x205c4",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:6dcf0fa4ae67804008a2c147824efedd9073cc5869f1ab7b21dda87be4653c64",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fb7a1ef64b3a9185b8e8a8ef5b6fb221cc58979290274a5c27288b6bf37736b3",
     "mode": {
       "runtime": "run",
       "strict": true,

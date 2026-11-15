@@ -45,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x4bf23",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:d5603b728e861031816f60219ff2a77e2502f5399eea2bfd474e73e338e76797",
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf23",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:37c5fbc4b8d22054ad7d6217611533b877b04bf64e58ef6d2cdc1494ad669e85",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:a4a82a0b866ace7d0f4982c438857d4e05c96577e30043808d8b5a1e9d9592c7",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "fills the 12-byte real-mode segment set with es, cs, ss, ds, fs, and gs",
   "section": "The resource layer",

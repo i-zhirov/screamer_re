@@ -1047,6 +1047,178 @@ class RunTestCase(unittest.TestCase):
         identity.assert_called_once()
         self.assertIn("[1/1] 0x300ec free: PASS", output.getvalue())
 
+    def period_module(self, name: str = "free", **overrides: object) -> dict:
+        return self.module(name, toolchain="watcom10", **overrides)
+
+    def test_harness_for_selects_the_v2_harness(self) -> None:
+        self.assertEqual(run.harness_for("v2"), run.HARNESS_TOOL)
+
+    def test_harness_for_selects_the_period_harness(self) -> None:
+        self.assertEqual(run.harness_for("watcom10"), run.HARNESS_DOS_TOOL)
+
+    def test_harness_for_rejects_an_unknown_toolchain(self) -> None:
+        with self.assertRaises(ValueError):
+            run.harness_for("nope")
+
+    def test_run_build_selects_the_period_harness(self) -> None:
+        module = self.period_module()
+        with mock.patch.object(
+            run, "_harness", return_value=("pass", "")
+        ) as harness:
+            run.run_build(module)
+        harness.assert_called_once_with(
+            run.HARNESS_DOS_TOOL, "build", module, False, ()
+        )
+
+    def test_run_build_uses_the_v2_harness_without_a_field(self) -> None:
+        module = self.module()
+        with mock.patch.object(
+            run, "_harness", return_value=("pass", "")
+        ) as harness:
+            run.run_build(module)
+        harness.assert_called_once_with(
+            run.HARNESS_TOOL, "build", module, False, ()
+        )
+
+    def test_run_behavior_uses_the_v2_harness(self) -> None:
+        module = self.period_module()
+        with mock.patch.object(
+            run, "_harness", return_value=("pass", "")
+        ) as harness:
+            run.run_behavior(module)
+        harness.assert_called_once_with(
+            run.HARNESS_TOOL, "run", module, False, ()
+        )
+
+    def test_build_module_passes_the_recipe_option(self) -> None:
+        module = self.module()
+        recipe = self.root / "recipe.json"
+        with mock.patch.object(
+            run, "_harness", return_value=("pass", "")
+        ) as harness:
+            run.build_module(module, recipe=recipe)
+        harness.assert_called_once_with(
+            run.HARNESS_TOOL, "build", module, False, ("--recipe", str(recipe))
+        )
+
+    def test_run_mode_takes_the_toolchain(self) -> None:
+        arguments = argparse.Namespace(strict=True, skip_runtime=False)
+        mode = run.run_mode(arguments, "watcom10")
+        self.assertEqual(mode["toolchain"], "watcom10")
+        self.assertTrue(mode["strict"])
+        self.assertEqual(mode["runtime"], "run")
+
+    def test_mode_for_module_replaces_the_toolchain(self) -> None:
+        mode = store.run_mode(True, False)
+        module = self.period_module()
+        resolved = run._mode_for_module(mode, module)
+        self.assertEqual(resolved["toolchain"], "watcom10")
+        self.assertTrue(resolved["strict"])
+        self.assertEqual(resolved["runtime"], "run")
+
+    def test_mode_for_no_module_keeps_the_mode(self) -> None:
+        mode = store.run_mode(False, True)
+        self.assertEqual(run._mode_for_module(mode, None), mode)
+
+    def test_result_mode_records_the_module_toolchain(self) -> None:
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="named",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        self.write_record(196844, record)
+        self.write_module("free", self.period_module())
+        checks = {
+            "identity": {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "match": "exact-bytes",
+            }
+        }
+        run._write_result(
+            record,
+            None,
+            checks,
+            "python3 tools/rebuild/run.py run --function 0x300ec",
+            self.original,
+            store.run_mode(True, False),
+        )
+        stored = store.load_record(196844)
+        self.assertEqual(stored["result"]["mode"]["toolchain"], "watcom10")
+
+    def test_period_module_fingerprint_covers_the_toolchain(self) -> None:
+        record = self.record(
+            "0x300ec",
+            name="free",
+            status="named",
+            module="free",
+            symbol="free_",
+            checks=["identity"],
+        )
+        self.write_record(196844, record)
+        checks = {
+            "identity": {
+                "verdict": "pass",
+                "detail": "the modules are byte-identical",
+                "match": "exact-bytes",
+            }
+        }
+        self.write_module("free", self.module())
+        run._write_result(
+            record,
+            None,
+            checks,
+            "python3 tools/rebuild/run.py run --function 0x300ec",
+            self.original,
+            store.run_mode(True, False),
+        )
+        v2 = store.load_record(196844)["result"]["fingerprint"]
+        self.write_module("free", self.period_module())
+        run._write_result(
+            record,
+            None,
+            checks,
+            "python3 tools/rebuild/run.py run --function 0x300ec",
+            self.original,
+            store.run_mode(True, False),
+        )
+        period = store.load_record(196844)["result"]["fingerprint"]
+        self.assertNotEqual(v2, period)
+
+    def test_library_record_keeps_the_pinned_library_mode(self) -> None:
+        record = self.library_record()
+        self.write_record(0x3009B, record)
+        with mock.patch.object(
+            run.store, "compute_fingerprint", return_value="sha256:" + "0" * 64
+        ):
+            run._write_result(
+                record,
+                None,
+                {"identity": self.library_check()},
+                "python3 tools/rebuild/run.py run --function 0x3009b",
+                self.original,
+                store.run_mode(False, True, "watcom10"),
+            )
+        stored = store.load_record(0x3009B)
+        self.assertEqual(stored["result"]["mode"], store.run_mode(True, False))
+        self.assertEqual(stored["result"]["mode"]["toolchain"], "v2")
+
+    def test_build_module_clears_the_artifacts(self) -> None:
+        module = self.module()
+        (store.WORK_DIR / "M.MAP").write_bytes(b"OLD")
+
+        def cleared(*_args: object, **_kwargs: object) -> tuple[str, str]:
+            self.assertFalse((store.WORK_DIR / "free.exe").exists())
+            self.assertFalse((store.WORK_DIR / "free.map").exists())
+            self.assertFalse((store.WORK_DIR / "M.MAP").exists())
+            return "pass", ""
+
+        with mock.patch.object(run, "_harness", side_effect=cleared):
+            run.build_module(module)
+
     def library_field(self) -> dict:
         return {
             "file": "TEST.LIB",

@@ -53,16 +53,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xd1f25",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:6418ecdfcb6cd9bef196121313b49b0c9f04256988c5daca41530b2f553691db",
+    "command": "python3 tools/rebuild/run.py run --function 0xd1f25",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fc8d1691249677d475977b15aa3db1764d90bfbaaaa7a7daa7495570c6e66350",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:88f8f7305a02170f8fea5cd304fcd9f2854649b8931527d4061fe5737d1945f8",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "walks the free list, allocates a rounded block, grows the heap once, and returns the block or 0",
   "section": "The runtime memory manager",

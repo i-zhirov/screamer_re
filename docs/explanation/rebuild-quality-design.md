@@ -109,13 +109,13 @@ pipeline can pass a record whose stored result is `fail`.
 - C-1: Python 3.14.7. Use the standard library and the `ctypes` capstone binding only.
 - C-2: Tests use `unittest` under `tools/rebuild/tests/`.
 - C-3: A tool takes its configuration from the command line. It reads no environment variable.
-- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass `triage.apply` and the library pass `library.apply` write the function records through `store.save_record`, and C-4 still applies to the shipped artifacts.
+- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass `triage.apply` and the library pass `library.apply` write the function records through `store.save_record`. The toolchain matrix writes the module records through `store.save_module`. C-4 still applies to the shipped artifacts.
 - C-5: Prefer C. Use assembly only when C cannot reproduce the original bytes, and record the reason.
 - C-6: A harness output name stays within the 8.3 limit.
 - C-7: The 10.0a toolchain runs alongside OpenWatcom V2. Do not replace V2.
 - C-8: The status ladder stays `unknown`, `not_a_function`, `named`, `rebuilt`, `matching`, `verified`.
 - C-9: The identity verdict strings stay unchanged.
-- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. Update these counts when a change adds or removes a check.
+- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. The observed counts after the toolchain pass are 432, 428, 417, and 413. Update these counts when a change adds or removes a check.
 - C-11: Do not commit. The user commits.
 
 ## Non-Goals
@@ -162,3 +162,11 @@ pipeline can pass a record whose stored result is `fail`.
   build and behavior declarations and their result. The object bytes stay out
   of git. The library mode is `store.run_mode(True, False)`. Two identical
   manifest entries for the same object are valid reuse.
+- A module recipe holds an optional `toolchain` value with the default `v2`.
+  The runner selects the harness by the module toolchain. The behavior check
+  always uses the V2 harness. The matrix records the best measured candidate
+  for every measured module. The ranking is the match order, then fewer
+  differing bytes, then fewer differing instructions, then the earlier
+  candidate. A strict match is preferred but not required. A module with no
+  identity record is unmeasured and keeps its recipe. The full report stays
+  under `work/rebuild/` and the committed manifest is the stage-12 input.

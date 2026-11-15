@@ -18,11 +18,20 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_voice_setup.c"
+      "file": "sound_voice_setup.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_voice_setup_main.c"
+      "file": "sound_voice_setup_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

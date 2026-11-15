@@ -649,6 +649,8 @@ The files:
 | `coverage.py` | report the byte coverage and the record counts by provenance |
 | `library.py` | index the period OMF libraries, verify the records, and write the link manifest |
 | `library.json` | the link manifest of the verified library records |
+| `toolchain.py` | measure the toolchain and flag candidates of each module and write the manifest |
+| `toolchain.json` | the toolchain and flag manifest of the measured modules |
 | `provenance.json` | the provenance evidence document: the spans and the non-game record entries |
 | `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
 
@@ -710,8 +712,8 @@ accepted and selects the default gate.  The identity check result holds a
 `relocation-only`, `shape`, and `behavior-only`.  The `same-mnemonics` match
 counts in `shape`.  The input fingerprint covers the record fields that steer
 the checks (`address`, `symbol`, `count`, `size`, `checks`, `module`), the
-strict mode, and the toolchain.  The result records the runtime mode.  The
-runtime mode does not enter the fingerprint, so `--skip-runtime` does not
+strict mode, and the module toolchain.  The result records the runtime mode.
+The runtime mode does not enter the fingerprint, so `--skip-runtime` does not
 invalidate a stored result.
 `--skip-unchanged` prints the stored verdict, so a stored `fail` prints `FAIL`.
 `--recheck-record ADDR`
@@ -729,6 +731,11 @@ file, the library digest, the module, the symbol, and the object digest.  The
 input fingerprint of a library record covers the canonical `library` field and
 the `library.py` tool.  The library mode is `store.run_mode(True, False)`, so
 `--allow-shape` and `--skip-runtime` do not change the library fingerprint.
+
+A module recipe holds an optional `toolchain` value, `v2` or `watcom10`.  An
+absent value means `v2`.  The value enters the recipe and the input fingerprint.
+The period harness tools `harness_dos.py`, `watcom10_setup.py`, and
+`toolchain.py` are tool inputs of the fingerprint.
 
 ### The provenance triage
 
@@ -976,6 +983,46 @@ module whose `run.output` does not fit 8.3, and it rejects a `run.command` whose
 redirect target differs from the output.  The unit suite checks every shipped
 recipe.
 
+## The toolchain matrix
+
+`toolchain.py` records the best measured compiler and flags for each module.  A
+module recipe holds an optional `toolchain` value: `v2` for the pinned OpenWatcom
+V2 harness and `watcom10` for the period harness.  An absent value means `v2`.
+The runner selects the harness from this field.  The behavior check always uses
+the V2 harness, because the period harness has no run command.
+
+The matrix tries the existing source flags first, then five default flag sets:
+`-of+`, `-od`, `-of+ -oi`, `-of+ -ot`, and the empty set.  It drops a duplicate
+of the existing per-source flag list.  It tries `v2` first and `watcom10`
+second, and it stops a toolchain at the first byte-identical match.
+
+The rank is the match value, then fewer differing bytes, then fewer differing
+instructions, then the earlier candidate.  A strict match is preferred but not
+required, so a shape or different row can win when it is the best measured row.
+A failed or skipped build ranks after every measured identity result.  The
+matrix writes the winner through `store.save_module`.
+
+The full report stays under `work/rebuild/toolchain-matrix.json`.  The committed
+manifest is `tools/rebuild/toolchain.json`.  It holds one row per measured
+module and one `unmeasured` row for a module with an identity record and no
+measured result.  A module with no identity record has no row.  Stage 12 runs
+`toolchain.py check-matrix`, so it needs no Docker, no DOSBox-X, and no period
+toolchain.
+
+The matrix needs Docker, DOSBox-X, and the period toolchain.  Use `--only-missing`
+with `--resume MANIFEST` to continue an interrupted pass.  `--dry-run` writes the
+report and no module.
+
+```sh
+python3 tools/rebuild/toolchain.py migrate [--check]
+python3 tools/rebuild/toolchain.py matrix (--module NAME | --all) \
+    [--toolchain NAME] [--manifest PATH] [--only-missing] [--resume PATH] \
+    [--original PATH] [--timeout SECONDS] [--dry-run] [--out PATH]
+python3 tools/rebuild/toolchain.py report
+python3 tools/rebuild/toolchain.py manifest --report work/rebuild/toolchain-matrix.json
+python3 tools/rebuild/toolchain.py check-matrix --manifest tools/rebuild/toolchain.json
+```
+
 ## The compiler options
 
 The original game files were built with the Watcom stack-frame option `-of+`, and the
@@ -1172,10 +1219,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 431 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 427 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 416 checks.  Both flags
-report 412 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 432 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 428 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 417 checks.  Both flags
+report 413 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts.
 
 The checks and the status page run in these places:

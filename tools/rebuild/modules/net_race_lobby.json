@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "net_race_lobby_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

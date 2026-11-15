@@ -20,7 +20,8 @@
       "compiler": "wcc386",
       "file": "player_car_contact_update.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -29,7 +30,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "player_car_contact_update_main.c"
+      "file": "player_car_contact_update_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

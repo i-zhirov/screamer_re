@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "background_scale_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

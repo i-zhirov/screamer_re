@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "replay_save.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "replay_save.c"
     },
     {
       "compiler": "wcc386",
       "file": "replay_save_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

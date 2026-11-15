@@ -22,10 +22,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_lap_complete.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_lap_complete.c"
     },
     {
       "compiler": "wasm",
@@ -35,5 +32,6 @@
       "compiler": "wcc386",
       "file": "race_lap_complete_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

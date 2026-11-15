@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "overlay_queue_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "overlay_queue_update.c"
     },
     {
       "compiler": "wcc386",
       "file": "overlay_queue_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

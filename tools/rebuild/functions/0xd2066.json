@@ -49,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xd2066",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:36756187ee641f3ab8dde257b6c3611d7dc17c351ea65bf93d2a7028c5f4d624",
+    "command": "python3 tools/rebuild/run.py run --function 0xd2066",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f517da4e63c38a097a626612b56dfaf60b4a346e7c6cc39682b9f2150ed8ab41",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:f8ba301b94fca9e41c1998be964c22fc6062596ba9ec6f6d05d34d1bc83d6a07",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "copies `count` bytes from the source to the destination and returns the destination",
   "section": "The runtime memory manager",

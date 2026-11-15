@@ -17,12 +17,16 @@
       "compiler": "wcc386",
       "file": "memory_free.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "memory_free_main.c"
+      "file": "memory_free_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

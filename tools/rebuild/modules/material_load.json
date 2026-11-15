@@ -19,13 +19,16 @@
       "compiler": "wcc386",
       "file": "material_load.c",
       "flags": [
-        "-of+",
-        "-dMATERIAL_LOAD_HARNESS"
+        "-of+"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "material_load_main.c"
+      "file": "material_load_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

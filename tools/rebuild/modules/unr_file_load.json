@@ -16,15 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "unr_file_load.c",
-      "flags": [
-        "-of+",
-        "-dUNR_FILE_LOAD_HARNESS"
-      ]
+      "file": "unr_file_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "unr_file_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

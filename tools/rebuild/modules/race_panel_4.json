@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "race_panel_4_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

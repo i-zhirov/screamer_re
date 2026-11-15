@@ -21,10 +21,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_gear_step.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_gear_step.c"
     },
     {
       "compiler": "wasm",
@@ -34,5 +31,6 @@
       "compiler": "wcc386",
       "file": "object_gear_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

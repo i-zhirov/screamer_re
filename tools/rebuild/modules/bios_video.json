@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "bios_video.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "bios_video.c"
     },
     {
       "compiler": "wcc386",
       "file": "bios_video_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

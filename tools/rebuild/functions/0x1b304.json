@@ -39,18 +39,18 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 138,
+        "bytes_equal": 28,
+        "bytes_total": 131,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 36,
-        "instructions_total": 40,
+        "instructions_equal": 18,
+        "instructions_total": 38,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b304",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:f041d319fab2a1bf7de6515cda94baf19db752345ff644c6cd87ea7de34e75af",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4328c827b95b1819325cf23a5d997e15150dca610acea22c2f1635ef993bd6f0",
     "mode": {
       "runtime": "run",
       "strict": true,

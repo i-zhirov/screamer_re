@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_init_from_file.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_init_from_file.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_init_from_file_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

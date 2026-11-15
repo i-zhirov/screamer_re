@@ -6,9 +6,12 @@ the DOSBox-X debugger through `tools/dosboxx_control.py`.  It writes only under
 `work/rebuild/` and never modifies the shipped artifacts.
 
 Usage:
-    python3 tools/rebuild/harness.py build --module NAME
+    python3 tools/rebuild/harness.py build --module NAME [--recipe PATH]
     python3 tools/rebuild/harness.py run --module NAME [--show]
     python3 tools/rebuild/harness.py digest --module NAME
+
+The build command reads the stored module record by default.  With `--recipe`,
+it reads the module recipe from the explicit path instead.
 
 Exit code 0 on success, 1 on a compile, a link, or an output difference, 2 on a
 missing module record or a missing run recipe, and 3 when Docker or DOSBox-X is
@@ -131,8 +134,24 @@ def clear_output(path: Path) -> None:
     path.unlink(missing_ok=True)
 
 
-def command_build(name: str) -> int:
-    module = store.load_module(name)
+def load_recipe(name: str, recipe: Path | None) -> dict:
+    """Read a module record from the store or from an explicit recipe path.
+
+    Raise `ValueError` when the record name differs from `name`.
+    """
+    module = (
+        store.load_module(name) if recipe is None else store.load_module_file(recipe)
+    )
+    if module.get("name") != name:
+        raise ValueError(
+            f"the recipe name {module.get('name')!r} differs from the"
+            f" expected name {name!r}"
+        )
+    return module
+
+
+def command_build(name: str, recipe: Path | None = None) -> int:
+    module = load_recipe(name, recipe)
     if shutil.which(DOCKER) is None:
         print(f"skip: the {DOCKER} command is missing; install Docker to build {name}")
         return 3
@@ -238,6 +257,12 @@ def parse_arguments() -> argparse.Namespace:
         "build", help="build one module in the pinned container"
     )
     build_parser.add_argument("--module", required=True, help="the module record name")
+    build_parser.add_argument(
+        "--recipe",
+        type=Path,
+        default=None,
+        help="build an explicit module recipe instead of the stored record",
+    )
     run_parser = subparsers.add_parser(
         "run", help="run one module under DOSBox-X"
     )
@@ -256,7 +281,7 @@ def main() -> int:
     arguments = parse_arguments()
     try:
         if arguments.command == "build":
-            return command_build(arguments.module)
+            return command_build(arguments.module, arguments.recipe)
         if arguments.command == "run":
             return command_run(arguments.module, arguments.show)
         return command_digest(arguments.module)

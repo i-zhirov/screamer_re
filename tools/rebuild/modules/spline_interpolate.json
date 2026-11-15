@@ -35,5 +35,6 @@
       "compiler": "wcc386",
       "file": "spline_interpolate_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

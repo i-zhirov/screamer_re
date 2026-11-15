@@ -28,10 +28,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_finish_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_finish_update.c"
     },
     {
       "compiler": "wasm",
@@ -41,5 +38,6 @@
       "compiler": "wcc386",
       "file": "race_finish_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -29,30 +29,30 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "error: the output lacks 'D'",
-        "verdict": "fail"
+        "detail": "the output holds every marker",
+        "verdict": "pass"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 56,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 11,
-        "instructions_total": 17,
-        "match": "different",
+        "bytes_equal": 418,
+        "bytes_total": 554,
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "instructions_equal": 171,
+        "instructions_total": 171,
+        "match": "same-shape",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10978",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:05199d9abd82bed6724958e1d25310a8978c579ce39c75d118ad35c04836b977",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c542bba365a00189b328372bc43af5afff75d52643b4f1560927ed470b2faea8",
     "mode": {
       "runtime": "run",
       "strict": true,
-      "toolchain": "v2"
+      "toolchain": "watcom10"
     },
     "source_digest": "sha256:ff990c492fca9b60bcc52b2a2ac5e76da9bd652586840528cd087320ad3f610c",
     "tool": "run.py"

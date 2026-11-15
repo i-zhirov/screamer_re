@@ -148,6 +148,7 @@ class StoreTestCase(unittest.TestCase):
                 "output": "free_out.txt",
                 "expect": ["DONE"],
             },
+            toolchain="watcom10",
             status="named",
             checks=["build"],
         )
@@ -220,6 +221,38 @@ class StoreTestCase(unittest.TestCase):
         self.assertEqual(run["toolchain"], "v2")
         self.assertEqual(run["runtime"], "run")
         self.assertEqual(store.run_mode(False, True)["runtime"], "skip")
+
+    def test_run_mode_takes_the_toolchain(self) -> None:
+        self.assertEqual(
+            store.run_mode(True, False, "watcom10")["toolchain"], "watcom10"
+        )
+        self.assertEqual(store.run_mode(True, False)["toolchain"], "v2")
+
+    def test_module_toolchain_defaults_to_v2(self) -> None:
+        self.assertEqual(store.module_toolchain({"name": "free"}), "v2")
+
+    def test_module_toolchain_reads_the_field(self) -> None:
+        module = {"name": "free", "toolchain": "watcom10"}
+        self.assertEqual(store.module_toolchain(module), "watcom10")
+
+    def test_save_module_writes_through_the_store(self) -> None:
+        module = self.module_record()
+        store.save_module(module)
+        self.assertEqual(store.load_module("free"), module)
+        text = store.module_path("free").read_text()
+        self.assertEqual(text, json.dumps(module, indent=2, sort_keys=True) + "\n")
+
+    def test_load_module_file_reads_a_module(self) -> None:
+        module = self.module_record()
+        path = self.root / "recipe.json"
+        path.write_text(json.dumps(module))
+        self.assertEqual(store.load_module_file(path), module)
+
+    def test_load_module_file_rejects_a_missing_file(self) -> None:
+        path = self.root / "missing.json"
+        with self.assertRaises(ValueError) as context:
+            store.load_module_file(path)
+        self.assertIn(str(path), str(context.exception))
 
     def test_advance_status_build_passes(self) -> None:
         self.assertEqual(
@@ -483,6 +516,23 @@ class StoreTestCase(unittest.TestCase):
                 rebuild, work, tools, original, record, module, other
             ),
         )
+
+    def test_fingerprint_changes_with_the_module_toolchain(self) -> None:
+        rebuild, work, tools, original, record, module = self.fingerprint_env()
+        v2 = {**module, "toolchain": "v2"}
+        period = {**module, "toolchain": "watcom10"}
+        self.assertNotEqual(
+            self.fingerprint_of(rebuild, work, tools, original, record, v2),
+            self.fingerprint_of(rebuild, work, tools, original, record, period),
+        )
+
+    def test_tool_files_include_the_period_harness(self) -> None:
+        for name in (
+            "rebuild/harness_dos.py",
+            "rebuild/watcom10_setup.py",
+            "rebuild/toolchain.py",
+        ):
+            self.assertIn(name, store.TOOL_FILES)
 
     def test_mode_fields_mark_a_missing_mode(self) -> None:
         self.assertEqual(store._mode_fields(None), b"<none>")
@@ -853,6 +903,57 @@ class StoreTestCase(unittest.TestCase):
             base_dir=store.CONTRACTS_DIR,
         )
         self.assertEqual(violations, [])
+
+    def test_schema_accepts_a_module_toolchain(self) -> None:
+        module = self.full_module()
+        self.assertEqual(
+            schema.validate(
+                module,
+                self.schema("module.schema.json"),
+                base_dir=store.CONTRACTS_DIR,
+            ),
+            [],
+        )
+
+    def test_schema_rejects_an_unknown_module_toolchain(self) -> None:
+        module = self.full_module()
+        module["toolchain"] = "watcom11"
+        violations = schema.validate(
+            module,
+            self.schema("module.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("toolchain", violations[0])
+
+    def test_schema_accepts_a_result_mode_with_watcom10(self) -> None:
+        record = self.full_record()
+        record["result"]["mode"] = {
+            "strict": True,
+            "toolchain": "watcom10",
+            "runtime": "run",
+        }
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(violations, [])
+
+    def test_schema_rejects_an_unknown_result_toolchain(self) -> None:
+        record = self.full_record()
+        record["result"]["mode"] = {
+            "strict": True,
+            "toolchain": "other",
+            "runtime": "run",
+        }
+        violations = schema.validate(
+            record,
+            self.schema("record.schema.json"),
+            base_dir=store.CONTRACTS_DIR,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("toolchain", violations[0])
 
     def test_schema_rejects_an_unknown_runtime_mode(self) -> None:
         record = self.full_record()

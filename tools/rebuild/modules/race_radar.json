@@ -22,10 +22,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_radar.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_radar.c"
     },
     {
       "compiler": "wasm",
@@ -35,5 +32,6 @@
       "compiler": "wcc386",
       "file": "race_radar_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

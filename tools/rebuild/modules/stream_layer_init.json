@@ -14,14 +14,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "stream_layer_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "stream_layer_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "stream_layer_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

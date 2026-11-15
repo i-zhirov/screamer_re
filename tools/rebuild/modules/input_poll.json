@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "input_poll.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "input_poll.c"
     },
     {
       "compiler": "wcc386",
       "file": "input_poll_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

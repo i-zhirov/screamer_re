@@ -26,7 +26,7 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
+        "bytes_equal": 18,
         "bytes_total": 56,
         "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 28,
@@ -36,12 +36,12 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd4410",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:b7a7e6eb09ea2d0496c444120d5fcb6ce0d5888dbe8515f6c0e4798406d65634",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:3c0e353093c52a44e486795c9fd2aa34d12905df038b20bb2590bbf099260e31",
     "mode": {
       "runtime": "run",
       "strict": true,
-      "toolchain": "v2"
+      "toolchain": "watcom10"
     },
     "source_digest": "sha256:c2edc390f20bf08a7f59f5dc6bdeb06ecda34dd1c151292344eb49bf3650db82",
     "tool": "run.py"

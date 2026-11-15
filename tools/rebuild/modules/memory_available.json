@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "memory_available_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

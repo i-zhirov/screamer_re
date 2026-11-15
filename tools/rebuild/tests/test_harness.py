@@ -5,10 +5,12 @@ Usage:
 """
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -36,6 +38,50 @@ class HarnessTestCase(unittest.TestCase):
         }
         base.update(overrides)
         return base
+
+    def write_recipe(self, directory: str, **overrides: object) -> Path:
+        path = Path(directory) / "recipe.json"
+        path.write_text(json.dumps(self.module(**overrides)))
+        return path
+
+    def test_load_recipe_reads_the_record(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.write_recipe(directory)
+            self.assertEqual(harness.load_recipe("free", path), self.module())
+
+    def test_load_recipe_rejects_a_name_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.write_recipe(directory, name="other")
+            with self.assertRaises(ValueError):
+                harness.load_recipe("free", path)
+
+    def test_parse_arguments_accepts_a_recipe(self) -> None:
+        arguments = [
+            "harness.py",
+            "build",
+            "--module",
+            "free",
+            "--recipe",
+            "recipe.json",
+        ]
+        with mock.patch.object(sys, "argv", arguments):
+            parsed = harness.parse_arguments()
+        self.assertEqual(parsed.recipe, Path("recipe.json"))
+
+    def test_main_passes_the_recipe_to_build(self) -> None:
+        arguments = [
+            "harness.py",
+            "build",
+            "--module",
+            "free",
+            "--recipe",
+            "recipe.json",
+        ]
+        with mock.patch.object(sys, "argv", arguments):
+            with mock.patch.object(harness, "command_build", return_value=0) as build:
+                code = harness.main()
+        self.assertEqual(code, 0)
+        build.assert_called_once_with("free", Path("recipe.json"))
 
     def test_constants(self) -> None:
         self.assertEqual(

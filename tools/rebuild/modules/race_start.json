@@ -17,12 +17,18 @@
       "compiler": "wcc386",
       "file": "race_start.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "race_start_main.c"
+      "file": "race_start_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

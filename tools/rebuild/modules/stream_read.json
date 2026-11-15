@@ -20,12 +20,16 @@
       "compiler": "wcc386",
       "file": "stream_read.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "stream_read_main.c"
+      "file": "stream_read_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

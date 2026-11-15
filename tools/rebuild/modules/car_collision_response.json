@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "car_collision_response_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

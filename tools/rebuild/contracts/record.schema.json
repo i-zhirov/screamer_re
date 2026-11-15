@@ -172,7 +172,7 @@
       "required": ["strict", "toolchain", "runtime"],
       "properties": {
         "strict": { "type": "boolean" },
-        "toolchain": { "enum": ["v2"] },
+        "toolchain": { "enum": ["v2", "watcom10"] },
         "runtime": { "enum": ["run", "skip"] }
       }
     }

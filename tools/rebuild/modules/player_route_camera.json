@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "player_route_camera_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

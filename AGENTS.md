@@ -121,8 +121,10 @@ screamer_re/
 │   │   ├── triage.py          # triage the records against the provenance evidence
 │   │   ├── coverage.py        # report the byte coverage and the provenance counts
 │   │   ├── library.py         # index the period libraries and verify their objects
+│   │   ├── toolchain.py       # measure the candidate toolchains and write the manifest
 │   │   ├── provenance.json    # the provenance evidence document
 │   │   ├── library.json       # the link manifest of the verified library records
+│   │   ├── toolchain.json     # the toolchain and flag manifest of the measured modules
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
 │   │   ├── modules/           # the two hundred and fifty-two module recipes
@@ -163,7 +165,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/rebuild/library.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/rebuild/library.py tools/rebuild/toolchain.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
@@ -174,6 +176,12 @@ python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --ad
 python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/rebuild/library.py manifest --out tools/rebuild/library.json
 python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json
+python3 tools/rebuild/toolchain.py migrate
+python3 tools/rebuild/toolchain.py matrix --module free --dry-run
+python3 tools/rebuild/toolchain.py matrix --all --toolchain v2
+python3 tools/rebuild/toolchain.py report
+python3 tools/rebuild/toolchain.py manifest --report work/rebuild/toolchain-matrix.json
+python3 tools/rebuild/toolchain.py check-matrix --manifest tools/rebuild/toolchain.json
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
@@ -183,10 +191,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 431 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 427 checks.
+about 8 minutes plus the Ghidra import and reports 432 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 428 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 416 checks.  Both flags report 412 checks and take about 16
+run reports 417 checks.  Both flags report 413 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists.  The image check is a skip until a whole image is
 built, so it does not change these counts:
@@ -241,7 +249,7 @@ open ~/Documents/Screamer.app
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
       tools/rebuild/callgraph.py tools/rebuild/triage.py
       tools/rebuild/coverage.py tools/rebuild/library.py
-      tools/pipeline_check.py` to check the syntax
+      tools/rebuild/toolchain.py tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
@@ -325,6 +333,10 @@ open ~/Documents/Screamer.app
 - Library Identity: a library record holds its original object in the
   `library` field.  The object bytes stay out of git.  The record keeps the
   library digest and the object digest instead.
+- Module Toolchain: a module recipe holds an optional `toolchain` value,
+  `v2` or `watcom10`.  The default is `v2`.  A measured module records its
+  best measured toolchain and flags.  A module with no identity record is
+  unmeasured and keeps its recipe.
 
 Layers:
 
@@ -365,13 +377,14 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 431 checks in the `cross-check` shell.  `--skip-cross`
-  gives 427 checks, `--skip-runtime` gives 416 checks, and both flags give 412
+- The full check reports 432 checks in the `cross-check` shell.  `--skip-cross`
+  gives 428 checks, `--skip-runtime` gives 417 checks, and both flags give 413
   checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
   and the tool preflight.
 - Stage 12 checks the store, the seed, the provenance evidence, the library
-  link manifest, the program-map tables, the call graph, and the status page.
-  The call graph check needs capstone and the original executable.
+  link manifest, the toolchain manifest, the program-map tables, the call
+  graph, and the status page.  The call graph check needs capstone and the
+  original executable.
 - A function record holds a `provenance` value from `game`, `library`,
   `compiler_helper`, `not_a_function`, and `data`.  The value is a
   documentation field, so it stays out of the input fingerprint.  A `data` or
@@ -407,6 +420,29 @@ through the store.
   library records, and `library.py check-manifest` proves that the manifest
   agrees with the records.  Two identical entries for the same object are
   valid reuse.
+- A module recipe holds an optional `toolchain` value from `v2` and
+  `watcom10`.  The default is `v2`.  `toolchain.py migrate` writes the
+  default into every recipe that has no field.  The module toolchain enters
+  the recipe and the result mode, so the stored fingerprint covers it.
+- The runner selects the build harness from the module toolchain: the V2
+  harness for `v2` and the period harness for `watcom10`.  The behavior
+  check always uses the V2 harness, because the period harness has no run
+  command.  The selected toolchain enters the result mode and the input
+  fingerprint.
+- The matrix measures the existing flag set and the five default flag sets
+  for each selected toolchain.  It tries `v2` first and `watcom10` second.
+  The rank is the match value, then fewer differing bytes, then fewer
+  differing instructions, then the earlier candidate.  A strict match is
+  preferred but not required.
+- `toolchain.py manifest` writes the committed manifest
+  `tools/rebuild/toolchain.json`.  It holds one row per measured module and
+  one `unmeasured` row for a module with an identity record and no measured
+  result.  A module with no identity record has no row.  `toolchain.py
+  check-matrix` is the stage-12 check, so it runs in CI without Docker or
+  DOSBox-X.
+- The matrix needs Docker, DOSBox-X, and the period toolchain.  The unit
+  suite needs none of them, and the stage-12 check reads the committed
+  manifest only.
 - The input fingerprint of a library record covers the canonical `library`
   field and the `library.py` tool.  The library mode is
   `store.run_mode(True, False)`, so `--allow-shape` and `--skip-runtime` do not
@@ -481,8 +517,8 @@ through the store.
   fields that steer the checks (including `size`), the participating tools
   (`run.py`, `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original
   image, and the built artifacts.  The fingerprint also covers the strict mode
-  and the toolchain.  It does not cover the runtime mode, so `--skip-runtime`
-  does not invalidate a stored result.  The fingerprint lives in the
+  and the module toolchain.  It does not cover the runtime mode, so
+  `--skip-runtime` does not invalidate a stored result.  The fingerprint lives in the
   `result.fingerprint` of the record, `store.compute_fingerprint` computes it,
   and `run.py --skip-unchanged` uses it.  `pipeline_check.py` verifies the
   stored fingerprint of an unchanged record itself.  A documentation-only

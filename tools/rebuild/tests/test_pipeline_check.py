@@ -197,6 +197,13 @@ class ToolPreflightTestCase(unittest.TestCase):
         run_mock.assert_not_called()
 
 
+class ToolListTestCase(unittest.TestCase):
+    """The pipeline tool list must hold every tool the stages run."""
+
+    def test_tools_include_the_toolchain_tool(self) -> None:
+        self.assertIn("rebuild/toolchain.py", pipeline_check.TOOLS)
+
+
 class StageEnabledTestCase(unittest.TestCase):
     """The two flags must select the stages each mode runs."""
 
@@ -356,6 +363,31 @@ class StageTwelveTestCase(unittest.TestCase):
             [name for name, _, _ in checks.results],
         )
 
+    def test_stage_twelve_checks_the_toolchain_matrix(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        matrix_commands = [
+            command
+            for command in commands
+            if any("toolchain.py" in part for part in command)
+            and "check-matrix" in command
+        ]
+        self.assertTrue(
+            matrix_commands, "the stage runs toolchain.py check-matrix"
+        )
+        command = matrix_commands[0]
+        self.assertIn("--manifest", command)
+        self.assertIn(str(pipeline_check.toolchain.MANIFEST_DOCUMENT), command)
+        self.assertIn(
+            "stage 12: the toolchain matrix matches the module recipes",
+            [name for name, _, _ in checks.results],
+        )
+
 
 class ImageGateTestCase(unittest.TestCase):
     """Stage 11 must skip the image gate until a whole image exists."""
@@ -457,6 +489,53 @@ class UnchangedResultTestCase(unittest.TestCase):
         self.assertEqual(len(checks.failures), 1)
         self.assertIn("0x300ec", checks.failures[0])
         self.assertIn("the stored result is FAIL", checks.results[0][2])
+
+
+class ModuleUnchangedTestCase(unittest.TestCase):
+    """Stage 11 must verify a module record with the module toolchain."""
+
+    def record(self, fingerprint: str = "sha256:stored") -> dict:
+        return {
+            "address": "0x300ec",
+            "module": "free",
+            "result": {"fingerprint": fingerprint},
+        }
+
+    def test_unchanged_is_verified_uses_the_module_toolchain(self) -> None:
+        record = self.record()
+        module = {"name": "free", "toolchain": "watcom10"}
+        with mock.patch.object(
+            pipeline_check.store_module, "load_module", return_value=module
+        ), mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute:
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        mode = compute.call_args.kwargs["mode"]
+        self.assertEqual(mode["toolchain"], "watcom10")
+        self.assertIs(mode["strict"], True)
+        self.assertEqual(mode["runtime"], "run")
+
+    def test_unchanged_is_verified_uses_the_default_toolchain(self) -> None:
+        record = self.record()
+        module = {"name": "free"}
+        with mock.patch.object(
+            pipeline_check.store_module, "load_module", return_value=module
+        ), mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute:
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        mode = compute.call_args.kwargs["mode"]
+        self.assertEqual(mode["toolchain"], "v2")
 
 
 class LibraryUnchangedTestCase(unittest.TestCase):

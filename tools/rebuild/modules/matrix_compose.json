@@ -18,11 +18,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "matrix_compose.c"
+      "file": "matrix_compose.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "matrix_compose_main.c"
+      "file": "matrix_compose_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

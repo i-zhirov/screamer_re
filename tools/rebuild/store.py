@@ -6,8 +6,9 @@ The store holds one function record per candidate of STARTH.EXE under
 invariant of the data model, seeds the candidate records from the original image,
 and edits one record from the command line.  A function record holds a
 `provenance` value: `game`, `library`, `compiler_helper`, `not_a_function`, or
-`data`.  A mutation that changes the set of record addresses recomputes every
-extent before the process ends.
+`data`.  A module record holds an optional `toolchain` value, `v2` or
+`watcom10`; absent means `v2`.  A mutation that changes the set of record
+addresses recomputes every extent before the process ends.
 
 Usage:
     python3 tools/rebuild/store.py seed [--check] [--original PATH]
@@ -48,7 +49,8 @@ REPOSITORY_ROOT = REBUILD_DIR.parent.parent
 WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 TOOLS_DIR = REPOSITORY_ROOT / "tools"
 SHARED_SOURCES = ("chk.asm", "stack.asm", "cstart.c")
-# The participating tools whose sources are fingerprint inputs.
+# The participating tools whose sources are fingerprint inputs.  The period
+# harness tools are inputs because the fingerprint covers the toolchain.
 TOOL_FILES = (
     "rebuild/run.py",
     "rebuild/harness.py",
@@ -57,10 +59,14 @@ TOOL_FILES = (
     "rebuild/store.py",
     "le.py",
     "rebuild/library.py",
+    "rebuild/harness_dos.py",
+    "rebuild/watcom10_setup.py",
+    "rebuild/toolchain.py",
 )
 MISSING = b"<missing>"
 UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
 TOOLCHAIN = "v2"
+TOOLCHAINS = ("v2", "watcom10")
 STATUS_LADDER = (
     "unknown",
     "not_a_function",
@@ -181,6 +187,27 @@ def provenance_of(record: dict) -> str:
 
 def load_module(name: str) -> dict:
     return _read_json(module_path(name))
+
+
+def module_toolchain(module: dict) -> str:
+    """Return the compiler toolchain of a module record.
+
+    A module record without the field uses the default `v2`.
+    """
+    return module.get("toolchain", TOOLCHAIN)
+
+
+def load_module_file(path: Path) -> dict:
+    """Read one module JSON file from an explicit path.
+
+    Raises `ValueError` with the path on a missing file or broken JSON.
+    """
+    return _read_json(path)
+
+
+def save_module(module: dict) -> None:
+    """Write a module record through the store writer at its name."""
+    _write_json(module_path(module["name"]), module)
 
 
 def save_module_result(name: str, result: dict, status: str | None) -> None:
@@ -472,16 +499,19 @@ def _recipe_fields(module: dict) -> bytes:
     return json.dumps(recipe, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
-def run_mode(strict: bool, skip_runtime: bool) -> dict:
+def run_mode(
+    strict: bool, skip_runtime: bool, toolchain: str = TOOLCHAIN
+) -> dict:
     """Return the mode of a run with its strict flag, toolchain, and runtime.
 
+    The toolchain argument selects the compiler toolchain and defaults to `v2`.
     The runtime field stays in the object for reporting.  The fingerprint does
     not hash it, so a run that skips the behavior check keeps the stored build
     and identity results valid.
     """
     return {
         "strict": strict,
-        "toolchain": TOOLCHAIN,
+        "toolchain": toolchain,
         "runtime": "skip" if skip_runtime else "run",
     }
 

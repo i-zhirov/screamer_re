@@ -45,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x4bf64",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:a0cf34ed66aaad47eb05bf105c71fbbfed387a2df905f069be213493342b6aa3",
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf64",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:216dabc8fcf70c9a2a93009ff9840de4e0f4a5abf2efc586f77b5999177a82fc",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:1b8065198afadffb379990eb507e39974a18e006cd4b7b3850d7815fd143f774",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "formats into a stream through the run-time `__fprtf` at `0xd429f`",
   "section": "Resource loader",

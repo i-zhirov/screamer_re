@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "dpmi_real_int_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

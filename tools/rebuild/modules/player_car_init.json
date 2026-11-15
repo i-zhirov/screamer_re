@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_car_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_car_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "player_car_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

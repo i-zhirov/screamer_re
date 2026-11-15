@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "table_lookup.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "table_lookup.c"
     },
     {
       "compiler": "wcc386",
       "file": "table_lookup_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

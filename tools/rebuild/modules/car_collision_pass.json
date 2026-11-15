@@ -25,10 +25,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_collision_pass.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_collision_pass.c"
     },
     {
       "compiler": "wasm",
@@ -38,5 +35,6 @@
       "compiler": "wcc386",
       "file": "car_collision_pass_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

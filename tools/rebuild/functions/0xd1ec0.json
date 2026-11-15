@@ -49,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xd1ec0",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:57a53e2825e12567f0da400400ca3a4451f8a3b5dd91a9c01ca2b09c7935ba9a",
+    "command": "python3 tools/rebuild/run.py run --function 0xd1ec0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f8edf99804f3beb7c63c4b72a345b1f5d6d5f9b952d358c4d84683147999b18f",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:6241a71f7246fa880d23a10a26771656c05a971dd39786e757a843a21354496a",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "replicates the value byte over the dword and calls the run-time core at `0xe0860`",
   "section": "The runtime memory manager",

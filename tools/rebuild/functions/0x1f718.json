@@ -36,17 +36,17 @@
       },
       "identity": {
         "bytes_equal": 4,
-        "bytes_total": 54,
+        "bytes_total": 49,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 5,
-        "instructions_total": 21,
+        "instructions_equal": 4,
+        "instructions_total": 20,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f718",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:4fe61594279de1969daf172302b826e216a22dbfd7fb8b06c2e52510e6e286bb",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:41025fb827e455dc5c09566d8d251d35c3bacd1ca6a8f318ea3de7cfd40793dc",
     "mode": {
       "runtime": "run",
       "strict": true,

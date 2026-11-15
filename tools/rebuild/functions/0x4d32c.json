@@ -45,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x4d32c",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:2ecd42f2ab043cdf0df660a915722e2fd5251f573d59d1e33b641c63150d6c78",
+    "command": "python3 tools/rebuild/run.py run --function 0x4d32c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:87f4cf88bee1c42319b69fc1ba7690c5ee7efe6c77d62e8949d8aeb10d5a5354",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:030ff98d9d472f2d2dc601b3a924dff1c32fdd012d38ae35d86d1ca4e012ddb7",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "formats into a buffer through the run-time `vsprintf` and writes the terminator",
   "section": "Resource loader",

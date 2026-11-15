@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "race_results_screen_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

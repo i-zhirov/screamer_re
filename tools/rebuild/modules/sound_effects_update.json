@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "sound_effects_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

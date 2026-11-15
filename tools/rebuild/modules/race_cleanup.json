@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "race_cleanup_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

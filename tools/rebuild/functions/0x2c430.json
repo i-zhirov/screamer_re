@@ -69,7 +69,7 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 28,
+        "bytes_equal": 29,
         "bytes_total": 734,
         "detail": "the instruction sequences differ",
         "instructions_equal": 44,
@@ -79,8 +79,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c430",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:14fe86de352b09d77670ae7e0d698f5c478b7a53f08bb76fc75300e763b4686f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4d2c54ef08a7047bdda5e95b968669d9bb2bddc50413c4ab9c3f2a4ef56d79e9",
     "mode": {
       "runtime": "run",
       "strict": true,

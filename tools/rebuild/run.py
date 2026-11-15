@@ -21,6 +21,13 @@ module build.  The runner reads the parsed library document from
 the pinned library mode for the fingerprint, so the CLI strict and runtime
 flags do not change a library result.
 
+The runner selects the build harness from the module `toolchain` field.  A
+module without the field builds with the pinned V2 harness, and a `watcom10`
+module builds with the period harness.  The behavior check always uses the V2
+harness, because the period harness has no run command.  The selected
+toolchain enters the result mode and the fingerprint, so a change of the
+toolchain makes the stored result stale.
+
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
@@ -53,6 +60,7 @@ WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 LOG_DIR = WORK_DIR / "logs"
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
+HARNESS_DOS_TOOL = REBUILD_DIR / "harness_dos.py"
 MATCHES = (
     "exact-bytes",
     "exact-relocations",
@@ -238,9 +246,43 @@ def identity_accepted(match: str, strict: bool) -> bool:
     return match in accepted
 
 
-def run_mode(arguments: argparse.Namespace) -> dict:
+def run_mode(
+    arguments: argparse.Namespace, toolchain: str = store.TOOLCHAIN
+) -> dict:
     """The mode of the run: the strict flag, the toolchain, and the runtime."""
-    return store.run_mode(arguments.strict, arguments.skip_runtime)
+    return store.run_mode(arguments.strict, arguments.skip_runtime, toolchain)
+
+
+def _mode_for_module(mode: dict, module: dict | None) -> dict:
+    """Return a copy of the mode with the module toolchain, or the mode.
+
+    A `None` module keeps the mode, and a module without the field resolves the
+    default toolchain.
+    """
+    if module is None:
+        return dict(mode)
+    return dict(mode, toolchain=store.module_toolchain(module))
+
+
+def harness_for(toolchain: str) -> Path:
+    """The build harness of a toolchain."""
+    if toolchain == "v2":
+        return HARNESS_TOOL
+    if toolchain == "watcom10":
+        return HARNESS_DOS_TOOL
+    raise ValueError(f"unknown module toolchain: {toolchain}")
+
+
+def clear_artifacts(module: dict) -> None:
+    """Delete the build outputs a previous build may have left behind.
+
+    A failed build must not leave an old artifact for the identity check to
+    compare.
+    """
+    (store.WORK_DIR / module["exe"]).unlink(missing_ok=True)
+    if module.get("map"):
+        (store.WORK_DIR / module["map"]).unlink(missing_ok=True)
+    (store.WORK_DIR / "M.MAP").unlink(missing_ok=True)
 
 
 def run_identity(
@@ -317,24 +359,56 @@ def run_library(
     return check["verdict"], check
 
 
+def build_module(
+    module: dict,
+    toolchain: str | None = None,
+    recipe: Path | None = None,
+    show: bool = False,
+    timeout: int | None = None,
+) -> tuple[str, str]:
+    """Build one module with its harness and return the verdict and output.
+
+    A `None` toolchain uses the module toolchain.  A recipe path passes through
+    to the harness.  The timeout applies to the period harness only.
+    """
+    resolved = (
+        toolchain if toolchain is not None else store.module_toolchain(module)
+    )
+    tool = harness_for(resolved)
+    clear_artifacts(module)
+    extra: list[str] = []
+    if recipe is not None:
+        extra += ["--recipe", str(recipe)]
+    if resolved == "watcom10" and timeout is not None:
+        extra += ["--timeout", str(timeout)]
+    return _harness(tool, "build", module, show, tuple(extra))
+
+
 def run_build(module: dict, show: bool = False) -> tuple[str, str]:
     """Run the build check and return its verdict and the captured output."""
-    return _harness("build", module, show)
+    return build_module(module, show=show)
 
 
 def run_behavior(module: dict, show: bool = False) -> tuple[str, str]:
     """Run the behavior check and return its verdict and the captured output."""
-    return _harness("run", module, show)
+    return _harness(HARNESS_TOOL, "run", module, show, ())
 
 
-def _harness(command: str, module: dict, show: bool) -> tuple[str, str]:
+def _harness(
+    tool: Path,
+    command: str,
+    module: dict,
+    show: bool,
+    extra: tuple[str, ...] = (),
+) -> tuple[str, str]:
     completed = subprocess.run(
         [
             sys.executable,
-            str(HARNESS_TOOL),
+            str(tool),
             command,
             "--module",
             module["name"],
+            *extra,
         ],
         capture_output=True,
         text=True,
@@ -544,6 +618,7 @@ def _write_result(
         return
     module_name = target.get("module") if record is not None else target["name"]
     module = store.load_module(module_name)
+    mode = _mode_for_module(mode, module)
     fingerprint = store.compute_fingerprint(
         target, module, original=original, mode=mode
     )
@@ -617,6 +692,7 @@ def _current_fingerprint(
     module = _module_for(record, row, modules)
     if module is None:
         return None
+    mode = _mode_for_module(mode, module)
     return store.compute_fingerprint(
         target, module, original=original, mode=mode
     )
@@ -681,8 +757,9 @@ def command_run(arguments: argparse.Namespace) -> int:
             module = _module_for(None, record, modules)
         if module is None:
             return False
+        module_mode = _mode_for_module(mode, module)
         fingerprint = store.compute_fingerprint(
-            record, module, original=arguments.original, mode=mode
+            record, module, original=arguments.original, mode=module_mode
         )
         return store.is_stale(record, fingerprint)
 

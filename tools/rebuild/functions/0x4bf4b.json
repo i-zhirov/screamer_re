@@ -45,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x4bf4b",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:df6e8968ba897ecffa0a4d98814e719e1cef037d18cb9ba4121a50248e584a6d",
+    "command": "python3 tools/rebuild/run.py run --function 0x4bf4b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:be9bfb2cfa3568da75bfa69135712154a214236ca43dcd3ebfc3953cd751745a",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:f972e8b83c15776b78e5393917596e6518d2176f2e952a8c0550c418b9875fd8",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "calls the DPMI INT 31h entry at `0xd4410` with the interrupt number, the register block, the result block, and the segment set, and returns the value from the result block",
   "section": "The resource layer",

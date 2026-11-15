@@ -47,16 +47,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x300d6",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:06f361c8bed6b43d697c351d9c57f7306ff4d8fe608ed19e0565ee211d964a3a",
+    "command": "python3 tools/rebuild/run.py run --function 0x300d6",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d5fd74bb7f6172bc6f6934a1e5d489b87aa11e1a3dd58808980ccaf0314e1974",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:5717ed550ebe305abb921e20a89ddb4de7b0f84eac551b01cc7f796ca82b5b32",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "calls the flush and close handler slots and jumps to the run-time terminator; the helper of `exit`",
   "section": "Program functions",

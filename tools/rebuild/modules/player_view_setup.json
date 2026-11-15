@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "player_view_setup_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

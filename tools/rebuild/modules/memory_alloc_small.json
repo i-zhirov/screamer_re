@@ -17,12 +17,16 @@
       "compiler": "wcc386",
       "file": "memory_alloc_small.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "memory_alloc_small_main.c"
+      "file": "memory_alloc_small_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

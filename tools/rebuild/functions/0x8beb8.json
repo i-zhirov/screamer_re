@@ -99,30 +99,30 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '1'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
+        "bytes_equal": 37,
         "bytes_total": 389,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 9,
+        "instructions_equal": 12,
         "instructions_total": 114,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8beb8",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:053938ea4f4877b9a979ad658d27bfc93d35d7539030f89492fb0d502934bbd5",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:887b3dd1fc42d51ee89e282fb7aa3348b1c5ed01b434a6bc9ab326073d4ad1c6",
     "mode": {
       "runtime": "run",
       "strict": true,
-      "toolchain": "v2"
+      "toolchain": "watcom10"
     },
     "source_digest": "sha256:f8fb49a91ec91ef5096ba6e228790db092fa913bda47bc0242b30edcc830d4b8",
     "tool": "run.py"

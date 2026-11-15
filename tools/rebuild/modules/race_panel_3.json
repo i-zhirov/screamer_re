@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_panel_3.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_panel_3.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "race_panel_3_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

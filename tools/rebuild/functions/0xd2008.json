@@ -49,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xd2008",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:adc2a104d53ab2217fcae2d7f0a229a99740bf34789a0893b6ffd89604011c16",
+    "command": "python3 tools/rebuild/run.py run --function 0xd2008",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:31854c6e2e2bca06d947b3f5d00da2d193a64c2cb9d22f0a47d605c9dece09a9",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:d848fa7285b8abe8d3210c21e7e763533949fe9de85d4e62150022845d79e0ee",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "walks the free list, releases the block through the heap routine, and keeps the largest free size",
   "section": "The runtime memory manager",

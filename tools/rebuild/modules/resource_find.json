@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "resource_find.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "resource_find.c"
     },
     {
       "compiler": "wcc386",
       "file": "resource_find_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

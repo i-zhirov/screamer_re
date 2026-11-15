@@ -21,5 +21,6 @@
       "compiler": "wcc386",
       "file": "hud_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

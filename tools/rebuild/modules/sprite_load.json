@@ -17,15 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sprite_load.c",
-      "flags": [
-        "-of+",
-        "-dSPRITE_LOAD_HARNESS"
-      ]
+      "file": "sprite_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "sprite_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

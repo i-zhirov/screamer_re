@@ -17,12 +17,16 @@
       "compiler": "wcc386",
       "file": "dos_memory_alloc.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "dos_memory_alloc_main.c"
+      "file": "dos_memory_alloc_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

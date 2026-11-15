@@ -35,5 +35,6 @@
       "compiler": "wcc386",
       "file": "view_transition_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

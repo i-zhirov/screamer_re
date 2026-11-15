@@ -49,16 +49,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xd429f",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:ade7c90347a223fa77b475e43333cfbecb909e83f955d2e55043061306adf140",
+    "command": "python3 tools/rebuild/run.py run --function 0xd429f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7551d3af91e1a26e51a2a9d6d05e9a5af7fcc20a362082b30e5ace672a76f82b",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:6e3a691bfb36518ebb3afaa36e253a2915c263709587afb1d67551d86fb00018",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "formats a stream through the run-time engine and manages the file flags",
   "section": "The runtime memory manager",

@@ -45,16 +45,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0x3009b",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:0b9f21c71020d3aca0a7e84c622968a9603d6f25742c28f699a85846679ff915",
+    "command": "python3 tools/rebuild/run.py run --function 0x3009b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:53081732fac8cc07dddabf84fa7974d925b5c1c58fd239f912c67464b27ec986",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:3ea8f1fe03d7be4b37c8d072a64953bcc7c0bd7fa8241ad08a535a4d1733fad1",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "role": "holds the register-save prologue `push ebx`, `push edx`, `sub esp,4`, the `va_start` address of the first variable argument, the address of the standard-output entry, the format argument, and the print-engine call at `0xd429f`; the rebuilt module at `tools/rebuild/printf.c` holds the same 13 instructions",
   "section": "Program functions",

@@ -40,16 +40,16 @@
         "verdict": "pass"
       }
     },
-    "command": "python3 tools/rebuild/library.py verify --address 0xeb656",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:2b4f79111c26d8642d900fda176c1cee8b88d88c146a46f911a5e7bda7bbbb89",
+    "command": "python3 tools/rebuild/run.py run --function 0xeb656",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a7c2ef72c2ca5c2802cce6cc92b9967ef25e9661eba71c0de59926d520b8da39",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
     "source_digest": "sha256:c41b30f63e2e12e8016db46131ce1befa6484b1237cd631b7e05850f5d0384f2",
-    "tool": "library.py"
+    "tool": "run.py"
   },
   "size": 20,
   "status": "verified"

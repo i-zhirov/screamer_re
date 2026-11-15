@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "wheel_contact_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "wheel_contact_update.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "wheel_contact_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

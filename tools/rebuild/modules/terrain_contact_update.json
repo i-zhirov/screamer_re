@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "terrain_contact_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

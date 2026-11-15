@@ -1794,6 +1794,127 @@ against their original objects, and writes the link manifest.  Evidence:
   Evidence: the four `tools/pipeline_check.py` commands in the record-scope
   count bullet.
 
+## The toolchain matrix and the strict delta
+
+- The baseline report before the matrix pass holds 252 `v2` modules and 0
+  `watcom10` modules.  The `v2` row holds 27 strict (7 `exact-bytes` and 20
+  `exact-relocations`), 3 shape, 221 `different`, and 1 `no-result`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` before the V2 pass.
+- The V2 matrix pass measured 251 of the 252 modules.  It found 21 strict (7
+  `exact-bytes` and 14 `exact-relocations`), 7 `same-shape`, 223 `different`,
+  and 1 `no-result`.  The one unmeasured module is `driver`, which has no
+  identity record.  The pass changed 153 module recipes.
+  Evidence: `python3 tools/rebuild/toolchain.py matrix --all --toolchain v2
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --out work/rebuild/toolchain-v2.json`.
+- The period matrix pass measured every module without a strict V2 row.  The
+  winners are 191 `v2` and 60 `watcom10`.  The winners hold 22 strict (7
+  `exact-bytes` and 15 `exact-relocations`), 10 `same-shape`, 219 `different`,
+  and 1 `no-result`.
+  Evidence: `python3 tools/rebuild/toolchain.py matrix --all --toolchain
+  watcom10 --manifest work/rebuild/toolchain-v2-manifest.json --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --out
+  work/rebuild/toolchain-matrix.json`.
+- The strict delta is one module.  `main_invoker` moves from the V2 shape
+  result to the period `exact-relocations` result: 53 of 79 bytes and 26 of 26
+  instructions.  The report after the re-baseline holds 28 strict: 27 under
+  `v2` and 1 under `watcom10`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` after the period
+  pass and `python3 tools/rebuild/run.py run --all`.
+- The report groups a module by the toolchain of its identity record, not by
+  its recipe.  A `watcom10` recipe whose identity record is a library record
+  stays in the `v2` row until the library result changes.  The after report
+  holds 193 `v2` modules and 59 `watcom10` modules, while 60 recipes hold
+  `watcom10`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` and `python3
+  tools/rebuild/store.py list --json`.
+- The re-baseline reports 982 records: 156 pass, 223 fail, and 603 skip.  The
+  status holds 569 `unknown`, 223 `rebuilt`, 155 `verified`, 31 `named`, and 3
+  `not_a_function`.  The result modes hold 319 `v2`, 59 `watcom10`, and 603
+  with no result.
+  Evidence: `python3 tools/rebuild/run.py run --all` and `python3
+  tools/rebuild/run.py run --all --skip-unchanged`.
+- The period `wasm` needs `-fpi87` to assemble the FPU stubs.  Without the
+  flag, every module with an FPU stub fails with `Error! E003: Invalid
+  instruction with current CPU setting`.  A failed period build now returns
+  as soon as the DOSBox-X process exits, not at the timeout.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module
+  car_collision_pass` before and after the flag change.
+
+The 60 modules whose winning toolchain is `watcom10`:
+
+| Module | Flags | Match | Bytes | Instructions |
+| --- | --- | --- | --- | --- |
+| `bios_video` | `existing` | `different` | 5/44 | 6/17 |
+| `car_setup` | `existing` | `different` | 8/162 | 7/50 |
+| `cd_check_screen` | `existing` | `different` | 98/269 | 47/69 |
+| `dos_memory_alloc` | `existing` | `different` | 91/118 | 40/41 |
+| `dpmi_int31_entry` | `existing` | `same-shape` | 18/56 | 28/28 |
+| `error_report` | `existing` | `same-shape` | 418/554 | 171/171 |
+| `filter_update` | `existing` | `different` | 0/32 | 3/12 |
+| `fopen` | `-od` | `different` | 113/155 | 45/48 |
+| `fprtf` | `existing` | `different` | 31/130 | 22/50 |
+| `graphics_load` | `empty` | `different` | 4/29 | 4/10 |
+| `joystick_update` | `-of+` | `different` | 32/473 | 31/154 |
+| `list_create` | `-od` | `same-shape` | 102/127 | 46/46 |
+| `loading_screen` | `-od` | `different` | 105/491 | 55/124 |
+| `lzw_bit_read` | `existing` | `different` | 14/210 | 17/69 |
+| `main_invoker` | `existing` | `exact-relocations` | 53/79 | 26/26 |
+| `material_load` | `existing` | `different` | 13/286 | 28/81 |
+| `memory_alloc` | `existing` | `different` | 2/67 | 1/23 |
+| `memory_alloc_small` | `existing` | `same-shape` | 118/147 | 49/49 |
+| `menu_enter` | `existing` | `different` | 5/40 | 5/11 |
+| `menu_frame` | `existing` | `different` | 74/506 | 53/117 |
+| `mouse_init` | `existing` | `different` | 25/212 | 15/58 |
+| `music_bank_load` | `existing` | `different` | 35/563 | 38/143 |
+| `net_player_add` | `empty` | `different` | 25/170 | 17/54 |
+| `net_race_screen` | `existing` | `different` | 21/282 | 15/98 |
+| `object_drive_step` | `existing` | `different` | 15/211 | 10/54 |
+| `object_gear_state` | `existing` | `different` | 2/46 | 3/18 |
+| `object_init_from_file` | `existing` | `different` | 8/211 | 41/60 |
+| `object_physics` | `existing` | `different` | 6/40 | 6/13 |
+| `object_prepare` | `existing` | `different` | 1/33 | 2/11 |
+| `object_slide_step` | `existing` | `different` | 24/215 | 2/61 |
+| `object_state_save` | `existing` | `different` | 16/63 | 9/13 |
+| `palette_shade_build` | `existing` | `different` | 12/352 | 14/119 |
+| `persptab_load` | `existing` | `different` | 19/143 | 19/40 |
+| `player_brake_update` | `existing` | `different` | 31/277 | 9/72 |
+| `player_car_contact_update` | `existing` | `different` | 37/521 | 45/159 |
+| `player_segment_apply` | `existing` | `different` | 7/147 | 11/57 |
+| `player_track_node_update` | `existing` | `different` | 35/537 | 35/148 |
+| `pool_init` | `existing` | `same-shape` | 107/129 | 44/44 |
+| `quit_confirm_screen` | `existing` | `different` | 37/377 | 30/108 |
+| `race_lap_complete` | `existing` | `different` | 41/314 | 27/98 |
+| `race_loop` | `existing` | `different` | 6/85 | 6/21 |
+| `race_state_begin` | `existing` | `different` | 8/90 | 5/13 |
+| `race_state_update` | `existing` | `different` | 10/139 | 1/31 |
+| `radar_world_draw` | `empty` | `different` | 17/481 | 24/152 |
+| `replay_load` | `-of+ -ot` | `different` | 51/297 | 41/81 |
+| `setup_load` | `existing` | `different` | 15/105 | 12/34 |
+| `sound_effects_update` | `empty` | `different` | 28/201 | 27/51 |
+| `sound_event_render` | `empty` | `different` | 20/308 | 14/87 |
+| `sound_range_update` | `-of+ -ot` | `different` | 39/649 | 53/207 |
+| `spline_table_load` | `existing` | `different` | 36/274 | 27/69 |
+| `startup` | `existing` | `different` | 21/537 | 37/168 |
+| `stream_close` | `existing` | `different` | 3/43 | 2/15 |
+| `stream_layer_init` | `existing` | `different` | 2/46 | 3/12 |
+| `stream_read` | `-od` | `different` | 159/218 | 72/77 |
+| `terrain_contact_update` | `existing` | `different` | 35/257 | 18/69 |
+| `traffic_push_response` | `existing` | `different` | 18/182 | 6/38 |
+| `video_copy` | `empty` | `different` | 37/389 | 12/114 |
+| `video_present` | `existing` | `different` | 8/87 | 6/29 |
+| `view_move` | `existing` | `different` | 1/40 | 6/14 |
+| `vis_tab_load` | `existing` | `different` | 13/89 | 16/28 |
+
+- The only module with no identity record is `driver`.  It links without a map
+  and has no function record, so the matrix holds no row for it and keeps its
+  recipe.
+  Evidence: `work/rebuild/toolchain-matrix.json` and `tools/rebuild/toolchain.json`.
+- The four full-check counts after the toolchain pass are 432, 428, 417, and
+  413.  Each count is one more than the library-pass count, because stage 12
+  adds the toolchain manifest check.
+  Evidence: the four `tools/pipeline_check.py` commands in the testing section.
+
 ## Open questions
 
 ### Entry alignment (resolved)

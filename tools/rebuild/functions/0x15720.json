@@ -49,8 +49,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15720",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:1366bb9e5175ea024a6ce7b311a80248a1396a0745e0b5354632563ad9a30bf4",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f5e025d00490b5d57f67533e5ba813cac77d4290c7325e5e3285533262234f11",
     "mode": {
       "runtime": "run",
       "strict": true,

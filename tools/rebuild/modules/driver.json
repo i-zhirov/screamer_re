@@ -12,8 +12,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --module driver",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:7e6b62c1c2d11060e3faac2ec96a99e48cd43c65f27fb609bdb7637fe240c0df",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:3c21e8a0dc2d65caf0cba73b2c5465592b1fbf33cd500273f4be81f3f1d9fc79",
     "mode": {
       "runtime": "run",
       "strict": true,
@@ -43,5 +43,6 @@
       "file": "driver.c"
     }
   ],
-  "status": "verified"
+  "status": "verified",
+  "toolchain": "v2"
 }

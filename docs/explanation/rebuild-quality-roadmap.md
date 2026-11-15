@@ -88,14 +88,17 @@ Add toolchain selection to the runner. Search the compiler and flag
 combinations for each module. Record the best result. Use the period compiler
 where it wins and V2 where it wins. Keep the two harnesses side by side.
 
-- **Status:** Unplanned
+- **Status:** Implemented
 - **Depends on:** Slice 1
 - **Requirements:** FR-015, FR-018
 - **Manual prerequisites:** DOSBox-X and the period Watcom 10.0a toolchain.
-- **Plan:** —
-- **Done when:** Each module records its best compiler and flags. The strict
-  delta from the matrix is measured. The period toolchain runs in the store
-  path.
+  The matrix also needs Docker for the V2 harness and the installed Ghidra
+  loader for the full check.
+- **Plan:** docs/explanation/rebuild-quality-plan-toolchain.md
+- **Done when:** Each measured module records its best measured compiler and
+  flags. A module with no identity record is unmeasured and keeps its recipe.
+  The strict delta from the matrix is measured. The period toolchain runs in
+  the store path.
 
 ### Slice 6 — source form
 

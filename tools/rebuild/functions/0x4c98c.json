@@ -74,26 +74,26 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '2'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
+        "bytes_equal": 30,
         "bytes_total": 344,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 16,
-        "instructions_total": 96,
+        "instructions_equal": 32,
+        "instructions_total": 88,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c98c",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:271168e1d671f6f610c8de8e23eeb7c3cc5b731bfbc3a42444fb7bc7782cac47",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4582ce484583498c51cbf777947b291294b83530b43999187b08d3838cdb711b",
     "mode": {
       "runtime": "run",
       "strict": true,

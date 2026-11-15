@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "path_keyframe_append.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "path_keyframe_append.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "path_keyframe_append_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

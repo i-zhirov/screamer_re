@@ -38,5 +38,6 @@
       "compiler": "wcc386",
       "file": "name_entry_letter_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

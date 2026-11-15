@@ -20,10 +20,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "menu_text_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "menu_text_update.c"
     },
     {
       "compiler": "wasm",
@@ -33,5 +30,6 @@
       "compiler": "wcc386",
       "file": "menu_text_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

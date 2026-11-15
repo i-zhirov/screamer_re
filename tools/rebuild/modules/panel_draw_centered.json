@@ -18,12 +18,16 @@
       "compiler": "wcc386",
       "file": "panel_draw_centered.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "panel_draw_centered_main.c"
+      "file": "panel_draw_centered_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }
