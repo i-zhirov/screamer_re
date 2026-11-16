@@ -4,7 +4,7 @@
 > slice with the `executing-plans` skill.
 
 - **Date**: 2026-11-11
-- **Status**: Approved
+- **Status**: Implemented
 - **Design**: `docs/explanation/rebuild-quality-design.md`
 - **Strategy**: Make the reported number true first. Then widen the scope and
   remove work that the original libraries already solve. Then add the period
@@ -107,13 +107,15 @@ six rebuilt modules above 80% instruction match. Keep C first. Use assembly
 only after the exact toolchain, flags, and source forms fail, and record the
 reason.
 
-- **Status:** Unplanned
+- **Status:** Implemented
 - **Depends on:** Slice 2, Slice 5
 - **Requirements:** FR-016, FR-018
 - **Manual prerequisites:** Human review of the source idioms.
-- **Plan:** —
-- **Done when:** The six near-miss modules improve. The median instruction
-  match rises. The idiom catalogue is in the docs.
+- **Plan:** docs/explanation/rebuild-quality-plan-source-form.md
+- **Done when:** Each of the six near-miss modules holds a strict match or a
+  recorded source-form trait (C or assembly) with its first difference and its
+  reason. The first-difference report and the source-form idiom catalogue are
+  in the docs. The median byte match of the six does not fall.
 
 ### Slice 7 — whole image
 
@@ -121,13 +123,17 @@ Link the rebuilt objects in the original object order with the original
 libraries and data. Produce a rebuilt `STARTH.EXE`. Make
 `image_compare.py` a mandatory stage. Track the byte score for each region.
 
-- **Status:** Unplanned
+- **Status:** Implemented
 - **Depends on:** Slice 3, Slice 4, Slice 5
 - **Requirements:** FR-017, FR-018
-- **Manual prerequisites:** The data pipeline and the game directory.
-- **Plan:** —
+- **Manual prerequisites:** The game directory and the original image, Docker
+  for the V2 harness, DOSBox-X for the period harness, and the installed
+  Ghidra loader for the full check.
+- **Plan:** docs/explanation/rebuild-quality-plan-whole-image.md
 - **Done when:** A rebuilt `STARTH.EXE` exists. The whole-image stage reports a
-  byte score and is not a skip.
+  byte score and is not a skip. The build patches the modules that fit the
+  record size and skips the rest with a recorded reason. The findings hold the
+  measured patched, skipped, and byte counts.
 
 ## Definition Of Done
 

@@ -22,7 +22,12 @@
   ],
   "module": "memory_available",
   "name": "memory_available",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The direct return is rejected: it removed the named local and the identity fell to the different match with 22 of 25 instructions and 30 of 52 bytes. The kept source holds the recorded first difference `instruction 8: byte 2: 0xfc against 0xf4` and the idiom `local slot order`. The measured first difference is `instruction 8: byte 2: 0xfc against 0xf4`, and further differences are at instructions 9 and 12. The original stack slot layout is `[ebp-4]` = the argument `pool`, `[ebp-8]` = the sum, and `[ebp-0xc]` = the return temporary. The rebuilt stack slot layout is `[ebp-4]` = the sum, `[ebp-8]` = the return temporary, and `[ebp-0xc]` = the argument `pool`. The cause is `the compiler allocator local slot order`, and that cause is an inference from the measured pair."
+    }
+  ],
   "provenance": "game",
   "result": {
     "checks": {
@@ -46,7 +51,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
     "date": "2026-11-15",
-    "fingerprint": "sha256:f11032f6baa5a86eab9472052d5a54746b16bc00958965f2b26940d98c178b4f",
+    "fingerprint": "sha256:7256ba08e9c0f8171f748da7531e37319476c970b1b9531175f88e77497d225d",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -22,7 +22,12 @@
   ],
   "module": "list_create",
   "name": "list_create",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The named result `void *result; result = list; return result;` is rejected.  It gave the `different` match with 43 of 46 instructions and 94 of 127 bytes.  The kept source holds the first difference `instruction 7: byte 2: 0xf8 against 0xf4` and the idiom `local slot order`.  The original stack slots are `[ebp-8]` = `list`, `[ebp-4]` = `count`, and `[ebp-0xc]` = the return temporary.  The rebuilt stack slots are `[ebp-0xc]` = `list`, `[ebp-8]` = `count`, and `[ebp-4]` = the return temporary.  The behavior passes with the markers `0`, `1`, and `D`.  The cause is the compiler allocator local slot order, and that cause is an inference from the measured pair."
+    }
+  ],
   "provenance": "game",
   "result": {
     "checks": {
@@ -46,7 +51,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ecf8",
     "date": "2026-11-15",
-    "fingerprint": "sha256:4c9e961cd5fb31565334cf693d82d25f16100c79e9df0760e230f45c65c666e8",
+    "fingerprint": "sha256:af2cb510a7242191b1b850f3f1f0b3e47d55070ae847c6a2d7ffb511e5148215",
     "mode": {
       "runtime": "run",
       "strict": true,

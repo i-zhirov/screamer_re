@@ -16,8 +16,8 @@ Stages:
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
 11. check_run: run every recorded check of the changed records, verify the
     unchanged records against their stored fingerprint, and compare the
-    printed verdicts with the recorded results.  Then compare the rebuilt
-    whole image with the original, when `--rebuilt-image` exists.
+    printed verdicts with the recorded results.  Then score the rebuilt whole
+    image against the original.
 12. check_store: prove the store, the seed, the generated tables, the status
     page, the provenance evidence, the library link manifest, and the
     toolchain matrix.
@@ -86,6 +86,8 @@ TOOLS = (
     "rebuild/coverage.py",
     "rebuild/library.py",
     "rebuild/toolchain.py",
+    "rebuild/first_difference.py",
+    "rebuild/whole_image.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -116,6 +118,8 @@ NO_RESULT_DETAIL = "no recorded result"
 RUNTIME_DETAIL = "the runtime is skipped"
 # The detail the runner writes for a record whose inputs are unchanged.
 UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
+# The prefix of the byte-score line of the whole-image comparison.
+IMAGE_SCORE_PREFIX = "image compare: "
 
 
 class Checks:
@@ -848,19 +852,20 @@ def check_run(
 def check_image(
     checks: Checks, game_dir: Path, exe: str, rebuilt_image: Path
 ) -> None:
-    """Compare the rebuilt whole image with the original, when it exists.
+    """Score the rebuilt whole image against the original.
 
     The record checks compare one function or one module.  This stage is the
-    whole-image gate: the rebuilt `STARTH.EXE` must equal the original byte for
-    byte, including the stub, the header, the objects, the pages, and the fixup
-    section.  The stage reports a skip until a whole image is built, because the
-    module recipes build separate executables.
+    whole-image score gate: it always runs and adds one counted check.  A
+    missing or unreadable image fails.  A present image runs the image compare,
+    and exit 0 or exit 1 passes with the byte score in the detail, because a
+    differing image still reports a score.  The detail holds the first score
+    line when the tool prints one, else the last output line or the last error
+    line.  The exact oracle remains the tool's exit code: exit 0 means the
+    image is byte-identical and exit 1 means the images differ.
     """
+    name = "stage 11: the whole image reports a byte score"
     if not rebuilt_image.is_file():
-        checks.skip(
-            "stage 11: the whole image matches",
-            f"no rebuilt image at {rebuilt_image}",
-        )
+        checks.check(name, False, f"no rebuilt image at {rebuilt_image}")
         return
     result = run(
         [
@@ -872,11 +877,17 @@ def check_image(
             str(rebuilt_image),
         ]
     )
-    checks.check(
-        "stage 11: the whole image matches",
-        result.returncode == 0,
-        last_line(result.stdout) or last_line(result.stderr),
+    detail = next(
+        (
+            line.strip()
+            for line in result.stdout.splitlines()
+            if line.strip().startswith(IMAGE_SCORE_PREFIX)
+        ),
+        None,
     )
+    if detail is None:
+        detail = last_line(result.stdout) or last_line(result.stderr)
+    checks.check(name, result.returncode in (0, 1), detail)
 
 
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:

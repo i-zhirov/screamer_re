@@ -17,24 +17,28 @@
  * The module name is `memory_alloc_small`, because the `memory_alloc` recipe
  * belongs to the different function at `0x30050`.
  */
+struct dpmi_block {
+    unsigned int block[7];
+    unsigned int segments[3];
+};
+
 extern void dpmi_fill_regs(void *segments);
 extern int dpmi_call(int vector, void *regs, void *result, void *segments);
 
 int memory_alloc_small(int handle, int size, unsigned int *address)
 {
-    unsigned int block[7];
-    unsigned int segments[3];
+    struct dpmi_block regs;
     unsigned int value;
 
-    block[0] = 0x501;
-    block[1] = size >> 16;
-    block[2] = size & 0xffff;
-    dpmi_fill_regs(segments);
-    dpmi_call(0x31, block, block, segments);
-    if (block[6] != 0) {
+    regs.block[0] = 0x501;
+    regs.block[1] = size >> 16;
+    regs.block[2] = size & 0xffff;
+    dpmi_fill_regs(regs.segments);
+    dpmi_call(0x31, regs.block, regs.block, regs.segments);
+    if (regs.block[6] != 0) {
         return 0;
     }
-    *address = (block[4] << 16) | (block[5] & 0xffff);
-    value = (block[1] << 16) | (block[2] & 0xffff);
+    *address = (regs.block[4] << 16) | (regs.block[5] & 0xffff);
+    value = (regs.block[1] << 16) | (regs.block[2] & 0xffff);
     return value;
 }

@@ -78,6 +78,7 @@ Run the strict byte gate and the whole-image oracle:
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
+python3 tools/rebuild/whole_image.py --all
 python3 tools/rebuild/image_compare.py \
   --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE \
   --rebuilt work/rebuild/STARTH.EXE
@@ -106,13 +107,16 @@ python3 tools/inventory.py \
 ```
 
 Run the full pipeline end to end.  The check needs Docker, DOSBox-X, a built
-driver artifact, and the installed Ghidra loader, and takes about 8 minutes
-plus the Ghidra import:
+driver artifact, and the installed Ghidra loader.  The whole-image build stales
+the record fingerprints, because the module maps hold a build timestamp, so the
+record stage re-runs every record.  The run takes about 65 minutes:
 
 ```sh
 python3 tools/rebuild/harness.py build --module driver
+python3 tools/rebuild/whole_image.py --all
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
-  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
+  --record-timeout 7200
 ```
 
 Run the three-tool cross-check alone.  It prints four fact lines and writes the
@@ -151,9 +155,9 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-432 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 428 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 417 checks.  Both flags report 413 checks.
+433 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 429 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 418 checks.  Both flags report 414 checks.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  Strict is the default identity gate: the
@@ -165,8 +169,9 @@ reordered or shape-only match fails.
 reordered sequence.  `--recheck-record ADDR`
 forces one fresh run and prints the full check output.  `store.py check`
 validates every record and module against the JSON Schema contracts.  Stage 11
-also runs the whole-image oracle when `--rebuilt-image` exists, and reports a
-skip when no whole image is built.  CI runs the syntax gate and the unit suite
+always scores the rebuilt whole image and fails when it is missing or unreadable.
+It passes on a byte score.  Run `python3 tools/rebuild/whole_image.py --all`
+before the full check.  CI runs the syntax gate and the unit suite
 on every push and pull request, and the full check on a self-hosted runner.
 The pre-commit hook regenerates the status page; enable the hooks once per clone:
 
@@ -203,5 +208,6 @@ job.
   metadata.
 - [Program map](docs/reference/program-map.md) — the recovered startup
   path and the program functions.
+- [Source forms](docs/reference/source-forms.md) — the source-form idiom catalogue.
 - [File formats](docs/reference/file-formats.md) — observed data formats.
 - [Tooling](docs/reference/tooling.md) — tools, commands, and limits.

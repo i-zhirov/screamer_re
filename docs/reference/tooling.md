@@ -641,6 +641,7 @@ The files:
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
 | `oracle.py` | compare two function bodies with the fixup slots and the direct branch targets normalized |
 | `image_compare.py` | compare a rebuilt whole image with the original by region and by byte |
+| `whole_image.py` | build the rebuilt whole image from the original image and the rebuilt module bodies, and write its report |
 | `view.py` | render the self-contained status page of the store: the provenance panel, the board, the table, the address-space map, the treemap, and the call graph |
 | `docs.py` | render the `program-map.md` tables and check the drift |
 | `callgraph.py` | build the named call graph from the store and the original executable, and check the drift |
@@ -653,6 +654,7 @@ The files:
 | `toolchain.json` | the toolchain and flag manifest of the measured modules |
 | `provenance.json` | the provenance evidence document: the spans and the non-game record entries |
 | `diff_module.py` | the module diff; it calls the oracle on the rebuilt and original code |
+| `first_difference.py` | build the selected non-strict module-backed records and report the first oracle difference with its source-form idiom |
 
 ```sh
 python3 tools/rebuild/harness.py build --module free
@@ -661,11 +663,13 @@ python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
+python3 tools/rebuild/whole_image.py --all
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
+python3 tools/rebuild/first_difference.py report --module error_report --out work/rebuild/first-error-report.json
 ```
 
 `harness.py run` deletes the old output file before the DOSBox-X launch, so a
@@ -830,8 +834,9 @@ Every library record has one entry and every entry has a record.  The five keys
 and the library digests agree.  Two entries that name the same object hold the
 same five keys.  Each library record is `verified`.  Two identical entries for
 the same object are valid reuse, because the original links four objects
-twice.  Slice 7 consumes the manifest: the whole-image link uses the manifest
-to assert that every verified library record resolves to its named object.
+twice.  The records hold their original library object, the manifest proves
+them, and the whole-image build keeps the original bytes of a library-backed
+record.
 
 ```sh
 python3 tools/rebuild/library.py manifest --out tools/rebuild/library.json
@@ -1023,6 +1028,86 @@ python3 tools/rebuild/toolchain.py manifest --report work/rebuild/toolchain-matr
 python3 tools/rebuild/toolchain.py check-matrix --manifest tools/rebuild/toolchain.json
 ```
 
+## The first-difference report
+
+`first_difference.py` selects the module-backed function records whose identity
+check is not strict.  It builds each selected module, compares the rebuilt body
+with the original body through `oracle.py`, and reports the first difference
+with its source-form idiom.
+
+[Source forms](source-forms.md) is the source-form idiom catalogue.  It holds
+one section per known source form with the compiler and flag condition, the
+object-code effect, the census, the evidence, and the first-difference
+signature.
+
+The report document holds the date, the original path and its SHA-256 digest,
+and one row per selected module.  A row holds the module, the record address,
+the symbol, the toolchain, the sources, the build verdict, the match, the four
+counts, the first difference, the idiom, and the original and rebuilt
+instruction pair.  The row holds a null pair when the first difference has no
+instruction index.
+
+The eight idiom names are `local slot order`, `constant operand`,
+`instruction encoding`, `instruction selection`, `basic-block order`,
+`relocation target`, `match`, and `other`.  A `mask:` difference is a
+`constant operand`, and a relocation-slot difference also produces a `mask:`
+difference.  That overlap is a limitation of the classification.
+
+The tool writes `work/rebuild/first-differences.json` by default.  It writes no
+store record.  It is not a stage, so it adds no stage check.  The tool enters
+the syntax gate only.
+
+```sh
+python3 tools/rebuild/first_difference.py report \
+    (--module NAME | --all) [--original PATH] [--out PATH]
+```
+
+Exit code 0 when every selected row builds, 1 when a selected row fails or
+skips its build, and 2 on a bad input.
+
+## The whole-image build
+
+`whole_image.py` builds the rebuilt whole image from the original image and the
+rebuilt module bodies.  It is an in-place relocating build.  It uses the
+original `STARTH.EXE` as the container and keeps the stub, the header, the data
+objects, and the library bytes.  It places each rebuilt module body at its
+original address.
+
+The module order is the original address order of the lowest identity record of
+each module.  A module with no symbol record is excluded.
+
+The fit rule patches a module only when the sum of the rebuilt instruction sizes
+equals the record `size`.  The relocation rule rewrites only an internal 4-byte
+slot.  A non-internal slot, a width other than 4, or an instruction misalignment
+skips the module.  A direct branch target is relative and is not rewritten.  The
+original fixup section stays valid, so the build does not rewrite it.
+
+A record that carries a `library` field keeps the original library bytes.  The
+build skips it with the reason `the original library bytes stay` and does not
+read `library.json`, because the record field is the evidence and
+`library.py check-manifest` proves the records.
+
+A skipped module keeps the original bytes and records its reason.  The row holds
+`reason` with the fit text, the shape text, the library text, or the error text.
+A patched row holds no `reason`.
+
+The build writes `work/rebuild/STARTH.EXE` and `work/rebuild/whole-image.json`.
+The report holds the date, the original path and digest, the image path and
+digest, one row per module, the `patched`, `skipped`, and `relocated` counts, and
+the byte `score`.  A row holds the module, the address, the size, the toolchain,
+the sources, the build verdict, the fit, the fit reason, the rebuilt size, the
+relocated count, the outcome, and the reason of a skipped row.  The build writes
+no store record.
+
+Stage 11 is a score gate.  It always scores the rebuilt image and fails when the
+image is missing or unreadable.  It passes on a byte score, including when the
+images differ.  The exact oracle remains the tool exit code.
+
+```sh
+python3 tools/rebuild/whole_image.py --all
+python3 tools/rebuild/whole_image.py --module NAME [--module NAME]
+```
+
 ## The compiler options
 
 The original game files were built with the Watcom stack-frame option `-of+`, and the
@@ -1187,8 +1272,9 @@ and Ghidra.  It adds exactly four checks.  The check pins the reference values
 from the reference pages.  The tool exits with code 0 when every check passes.
 The record run is skipped when Docker is missing.  Stage 11 accepts a stored
 `fail` as the expected result and still shows `FAIL`.  After the record run,
-stage 11 compares the rebuilt whole image with the original when
-`--rebuilt-image` exists, and reports a skip when no whole image is built.
+stage 11 always scores the rebuilt whole image.  A missing or unreadable image
+is a failure.  Exit code 0 or 1 passes with the score, and exit 2 fails with
+the error line.
 The member probe stage
 caps the probe at the 55-open demo window and repeats it once when the control
 connection closes or times out before the first member, because that failure is
@@ -1204,8 +1290,10 @@ library, radare2, or Ghidra setup, unless `--skip-cross` is set.
 
 ```sh
 python3 tools/rebuild/harness.py build --module driver
+nix develop .#cross-check --command python3 tools/rebuild/whole_image.py --all
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
-  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
+  --record-timeout 7200
 ```
 
 The record run of stage 11 builds and runs every module record, so it needs
@@ -1215,15 +1303,17 @@ budget of that one subprocess; the default is 3000 seconds:
 ```sh
 python3 tools/pipeline_check.py \
   --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
-  --record-timeout 3600
+  --record-timeout 7200
 ```
 
-A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 432 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 428 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 417 checks.  Both flags
-report 413 checks and take about 16 seconds.  The whole-image check is a skip
-until `--rebuilt-image` exists, so it does not change these counts.
+A full run in the `cross-check` shell reports 433 checks.  `--skip-cross` skips
+stage 8 and the tool preflight, so the run reports 429 checks.  `--skip-runtime`
+skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 418
+checks.  Both flags report 414 checks and take about 16 seconds.  The
+whole-image build stales the record fingerprints, because the module maps hold
+a build timestamp, so the record stage re-runs every record.  The full and
+`--skip-cross` checks take about 65 minutes.  The whole-image stage adds one
+counted check.
 
 The checks and the status page run in these places:
 
@@ -1268,8 +1358,10 @@ radare2, Ghidra, `curl`, and `unzip`:
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 python3 tools/rebuild/harness.py build --module driver
+nix develop .#cross-check --command python3 tools/rebuild/whole_image.py --all
 nix develop .#cross-check --command python3 tools/pipeline_check.py \
-  --game-dir ~/Documents/Screamer.app/Contents/Resources/game
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game \
+  --record-timeout 7200
 ```
 
 ## Static cross-check with radare2

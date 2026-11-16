@@ -22,7 +22,12 @@
   ],
   "module": "memory_alloc_small",
   "name": "memory_alloc",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The struct local `struct dpmi_block regs;` is kept: it gave the `same-shape` match with 49 of 49 instructions and 120 of 147 bytes, against 118 of 147 bytes for the two-array form. The measured first difference is `instruction 6: byte 2: 0xf4 against 0xf0` and the idiom is `local slot order`. The original stack slot layout is `[ebp-4]` = the argument `address`, `[ebp-8]` = the argument `size`, `[ebp-0xc]` = the argument `handle`, `[ebp-0x10]` = the `value` local, `[ebp-0x14]` = the `block[6]` status, `[ebp-0x18]` = `block[5]`, `[ebp-0x1c]` = `block[4]`, `[ebp-0x24]` = `block[2]`, `[ebp-0x28]` = `block[1]`, `[ebp-0x2c]` = `block[0]`, `[ebp-0x38]` = the `segments` base, and `[ebp-0x3c]` = the return temporary. The rebuilt stack slot layout is `[ebp-4]` = the argument `address`, `[ebp-8]` = the `value` local, `[ebp-0xc]` = the return temporary, `[ebp-0x10]` = the argument `handle`, `[ebp-0x14]` = the argument `size`, `[ebp-0x20]` = the `segments` base, `[ebp-0x24]` = the `block[6]` status, `[ebp-0x28]` = `block[5]`, `[ebp-0x2c]` = `block[4]`, `[ebp-0x34]` = `block[2]`, `[ebp-0x38]` = `block[1]`, and `[ebp-0x3c]` = `block[0]`. The cause is `the compiler allocator local slot order`, and that cause is an inference from the measured pair."
+    }
+  ],
   "provenance": "game",
   "result": {
     "checks": {
@@ -35,7 +40,7 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 118,
+        "bytes_equal": 120,
         "bytes_total": 147,
         "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 49,
@@ -46,13 +51,13 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f172",
     "date": "2026-11-15",
-    "fingerprint": "sha256:c18f2d4d12216b976f7ab13555958e0df0a6dc611cb00fd25f0a5f0df62bc8d6",
+    "fingerprint": "sha256:e9940c052695a3188418a8fa4a7c1463fbfe5ce40ddde5091f33bdba3397ef0a",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:374fad8b9f5434e44863dd9792acb923f218d115fb32bbaf27e360cb042ad483",
+    "source_digest": "sha256:cf6c0834fab12b828d7836799793a7a93236220e14358a9d8d9149d33262c018",
     "tool": "run.py"
   },
   "role": "calls the DPMI function 0x0501 with the size words and stores the returned block address at the third argument",

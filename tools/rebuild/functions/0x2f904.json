@@ -22,7 +22,12 @@
   ],
   "module": "pool_init",
   "name": "pool_init",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The struct local `struct dpmi_block regs;` is rejected: it gave the `same-shape` match with 44 of 44 instructions and 107 of 129 bytes, the same as the kept source, so the tie keeps the two-array form. The kept source holds the recorded first difference `instruction 8: byte 2: 0xfc against 0xf8` and the idiom `local slot order`. The original stack slot layout is `[ebp-4]` = the argument `pool`, `[ebp-8]` = the return temporary, `[ebp-0xc]` = the `block[6]` status, `[ebp-0x10]` = `block[5]`, `[ebp-0x24]` = `block[0]`, and `[ebp-0x30]` = the `segments` base. The rebuilt stack slot layout is `[ebp-4]` = the return temporary, `[ebp-8]` = the argument `pool`, `[ebp-0x14]` = the `segments` base, `[ebp-0x18]` = the `block[6]` status, `[ebp-0x1c]` = `block[5]`, and `[ebp-0x30]` = `block[0]`. The cause is `the compiler allocator local slot order`, and that cause is an inference from the measured pair."
+    }
+  ],
   "provenance": "game",
   "result": {
     "checks": {
@@ -46,7 +51,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f904",
     "date": "2026-11-15",
-    "fingerprint": "sha256:40fff13045af0a76d3a70250a0db921f32b29fe61915029ad93b429e48ce2516",
+    "fingerprint": "sha256:5b2b66a079a82090476106db8a1efdc595d7b352f1d95e30b3206f639165d315",
     "mode": {
       "runtime": "run",
       "strict": true,

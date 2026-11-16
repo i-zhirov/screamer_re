@@ -1,7 +1,7 @@
 # Rebuild Quality Improvement Design
 
 - **Date**: 2026-11-11
-- **Status**: Approved
+- **Status**: Implemented
 - **Authority**: `docs/explanation/findings.md` holds the evidence.
 
 ## Problem
@@ -55,7 +55,8 @@ pipeline can pass a record whose stored result is `fail`.
 - `le.py` does not stitch LE pages.
 - The behavior check does not delete the old output. It accepts a line that
   ends with the expected text.
-- The whole-image oracle is a skip while no rebuilt `STARTH.EXE` exists.
+- At the design date, the whole-image oracle is a skip while no rebuilt
+  `STARTH.EXE` exists.
 
 ## Root Causes
 
@@ -69,7 +70,7 @@ pipeline can pass a record whose stored result is `fail`.
 | RC-6 | The period toolchain is not in the verification loop. | `run.py` always calls `harness.py`. No module holds `period_flags`. |
 | RC-7 | Module recipes encode per-module flag guesses, mostly `-of+`. | 191 C sources use `-of+`. The original prologue census shows a large registers-first family. |
 | RC-8 | Runtime library functions are reimplemented. | `malloc` at `0xd1f25` is byte-identical to `CLIB3R.LIB` module `nmalloc`. |
-| RC-9 | The whole-image gate is not exercised. | No rebuilt `STARTH.EXE` exists. Stage 11 reports a skip. |
+| RC-9 | The whole-image gate is not exercised. | At the design date, no rebuilt `STARTH.EXE` exists, so stage 11 reports a skip. |
 
 ## Requirements
 
@@ -109,13 +110,13 @@ pipeline can pass a record whose stored result is `fail`.
 - C-1: Python 3.14.7. Use the standard library and the `ctypes` capstone binding only.
 - C-2: Tests use `unittest` under `tools/rebuild/tests/`.
 - C-3: A tool takes its configuration from the command line. It reads no environment variable.
-- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass `triage.apply` and the library pass `library.apply` write the function records through `store.save_record`. The toolchain matrix writes the module records through `store.save_module`. C-4 still applies to the shipped artifacts.
+- C-4: A tool writes only under `work/` or to an explicit output path. The provenance evidence pass `triage.apply` and the library pass `library.apply` write the function records through `store.save_record`. The toolchain matrix writes the module records through `store.save_module`. The whole-image build writes the rebuilt image and its report under `work/`. C-4 still applies to the shipped artifacts.
 - C-5: Prefer C. Use assembly only when C cannot reproduce the original bytes, and record the reason.
 - C-6: A harness output name stays within the 8.3 limit.
 - C-7: The 10.0a toolchain runs alongside OpenWatcom V2. Do not replace V2.
 - C-8: The status ladder stays `unknown`, `not_a_function`, `named`, `rebuilt`, `matching`, `verified`.
 - C-9: The identity verdict strings stay unchanged.
-- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. The observed counts after the toolchain pass are 432, 428, 417, and 413. Update these counts when a change adds or removes a check.
+- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. The observed counts after the toolchain pass are 432, 428, 417, and 413. The whole-image stage adds one counted check, so the expected counts are 433, 429, 418, and 414. Update these counts when a change adds or removes a check.
 - C-11: Do not commit. The user commits.
 
 ## Non-Goals
@@ -170,3 +171,24 @@ pipeline can pass a record whose stored result is `fail`.
   candidate. A strict match is preferred but not required. A module with no
   identity record is unmeasured and keeps its recipe. The full report stays
   under `work/rebuild/` and the committed manifest is the stage-12 input.
+- The whole-image build is an in-place relocating build. It uses the original
+  `STARTH.EXE` as the container, keeps the stub, the header, the data objects,
+  and the library bytes, and writes each rebuilt module body at its original
+  address. The module order is the original address order of the lowest
+  identity record of each module. A module is patched only when its rebuilt
+  body size equals the record `size` and its instruction shapes align. The
+  build writes the original internal fixup target into each rebuilt slot. A
+  direct branch target is relative, so it stays valid when the body moves as a
+  unit. The original fixup section stays valid, so the build does not rewrite
+  it. A module that fails the build, the size fit, or the shape alignment is
+  skipped and recorded with the reason. The build writes the image and a
+  report under `work/rebuild/`. The library manifest proves that every verified
+  library record resolves to its named object, and the original library bytes
+  stay in place. The data pipeline is not needed, because the original data
+  objects stay in the image.
+- The whole-image stage is a score gate. It always runs and is counted in the
+  four modes. It fails when the rebuilt image is missing or unreadable. It
+  passes when `image_compare.py` prints a byte score, including when the
+  images differ. The detail holds the score. The exact oracle remains the
+  tool's exit code. The stage becomes an exact gate only after the image is
+  byte-identical.
