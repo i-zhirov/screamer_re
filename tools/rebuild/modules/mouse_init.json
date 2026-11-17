@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "mouse_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "mouse_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "mouse_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

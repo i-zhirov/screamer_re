@@ -39,5 +39,6 @@
       "compiler": "wcc386",
       "file": "race_position_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

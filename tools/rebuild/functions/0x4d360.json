@@ -63,6 +63,10 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/lzw_init.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -70,6 +74,7 @@
   "name": "lzw_init",
   "notes": [],
   "object_offset": "0x3d360",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

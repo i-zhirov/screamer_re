@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "memmove_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

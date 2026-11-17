@@ -10,11 +10,25 @@
     {
       "kind": "note",
       "text": "the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "pool_init",
   "name": "pool_init",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The struct local `struct dpmi_block regs;` is rejected: it gave the `same-shape` match with 44 of 44 instructions and 107 of 129 bytes, the same as the kept source, so the tie keeps the two-array form. The kept source holds the recorded first difference `instruction 8: byte 2: 0xfc against 0xf8` and the idiom `local slot order`. The original stack slot layout is `[ebp-4]` = the argument `pool`, `[ebp-8]` = the return temporary, `[ebp-0xc]` = the `block[6]` status, `[ebp-0x10]` = `block[5]`, `[ebp-0x24]` = `block[0]`, and `[ebp-0x30]` = the `segments` base. The rebuilt stack slot layout is `[ebp-4]` = the return temporary, `[ebp-8]` = the argument `pool`, `[ebp-0x14]` = the `segments` base, `[ebp-0x18]` = the `block[6]` status, `[ebp-0x1c]` = `block[5]`, and `[ebp-0x30]` = `block[0]`. The cause is `the compiler allocator local slot order`, and that cause is an inference from the measured pair."
+    }
+  ],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +40,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 103,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 19,
-        "instructions_total": 42,
+        "bytes_equal": 107,
+        "bytes_total": 129,
+        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "instructions_equal": 44,
+        "instructions_total": 44,
+        "match": "same-shape",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f904",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:848a59d09e586682b5ae5358eeed7c8d061165604cf475b8e72461eb171b33cc",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:5b2b66a079a82090476106db8a1efdc595d7b352f1d95e30b3206f639165d315",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:4b8e664b170495543fdc239f80b1406d8c8270b9b863b8e9f05b6d8534c02b1d",
     "tool": "run.py"
   },

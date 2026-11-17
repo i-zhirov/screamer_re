@@ -197,6 +197,19 @@ class ToolPreflightTestCase(unittest.TestCase):
         run_mock.assert_not_called()
 
 
+class ToolListTestCase(unittest.TestCase):
+    """The pipeline tool list must hold every tool the stages run."""
+
+    def test_tools_include_the_toolchain_tool(self) -> None:
+        self.assertIn("rebuild/toolchain.py", pipeline_check.TOOLS)
+
+    def test_tools_include_the_first_difference_tool(self) -> None:
+        self.assertIn("rebuild/first_difference.py", pipeline_check.TOOLS)
+
+    def test_tools_include_the_whole_image_tool(self) -> None:
+        self.assertIn("rebuild/whole_image.py", pipeline_check.TOOLS)
+
+
 class StageEnabledTestCase(unittest.TestCase):
     """The two flags must select the stages each mode runs."""
 
@@ -307,19 +320,100 @@ class StageEightTestCase(unittest.TestCase):
         self.assertIn("0xd4364", command)
 
 
-class ImageGateTestCase(unittest.TestCase):
-    """Stage 11 must skip the image gate until a whole image exists."""
+class StageTwelveTestCase(unittest.TestCase):
+    """Stage 12 must run the provenance evidence check."""
 
-    def test_missing_image_is_a_skip(self) -> None:
+    def test_stage_twelve_checks_the_provenance_evidence(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        self.assertTrue(
+            any(
+                any("triage.py" in part for part in command)
+                and "check" in command
+                for command in commands
+            ),
+            "the stage runs triage.py check",
+        )
+        self.assertIn(
+            "stage 12: the provenance evidence is complete",
+            [name for name, _, _ in checks.results],
+        )
+
+    def test_stage_twelve_checks_the_library_manifest(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        manifest_commands = [
+            command
+            for command in commands
+            if any("library.py" in part for part in command)
+            and "check-manifest" in command
+        ]
+        self.assertTrue(
+            manifest_commands, "the stage runs library.py check-manifest"
+        )
+        command = manifest_commands[0]
+        self.assertIn("--manifest", command)
+        self.assertIn(str(pipeline_check.library.LINK_DOCUMENT), command)
+        self.assertIn(
+            "stage 12: the library link manifest matches the records",
+            [name for name, _, _ in checks.results],
+        )
+
+    def test_stage_twelve_checks_the_toolchain_matrix(self) -> None:
+        result = subprocess.CompletedProcess([], 0, "", "")
+        checks = pipeline_check.Checks()
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ) as run_mock, contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_store(checks, Path("/game"), Path(temporary))
+        commands = [call.args[0] for call in run_mock.call_args_list]
+        matrix_commands = [
+            command
+            for command in commands
+            if any("toolchain.py" in part for part in command)
+            and "check-matrix" in command
+        ]
+        self.assertTrue(
+            matrix_commands, "the stage runs toolchain.py check-matrix"
+        )
+        command = matrix_commands[0]
+        self.assertIn("--manifest", command)
+        self.assertIn(str(pipeline_check.toolchain.MANIFEST_DOCUMENT), command)
+        self.assertIn(
+            "stage 12: the toolchain matrix matches the module recipes",
+            [name for name, _, _ in checks.results],
+        )
+
+
+class ImageGateTestCase(unittest.TestCase):
+    """Stage 11 must score the rebuilt image and fail only when it cannot read it."""
+
+    def test_a_missing_image_is_a_counted_failure(self) -> None:
+        path = Path("/missing/STARTH.EXE")
         checks = pipeline_check.Checks()
         with contextlib.redirect_stdout(io.StringIO()):
             pipeline_check.check_image(
                 checks,
                 Path("/game"),
                 "STARTH.EXE",
-                Path("/missing/STARTH.EXE"),
+                path,
             )
-        self.assertEqual(checks.results, [])
+        self.assertEqual(len(checks.results), 1)
+        name, ok, detail = checks.results[0]
+        self.assertFalse(ok)
+        self.assertEqual(detail, f"no rebuilt image at {path}")
+        self.assertEqual(checks.failures, [name])
+        self.assertEqual(name, "stage 11: the whole image reports a byte score")
 
     def test_present_image_runs_the_comparison(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -327,7 +421,11 @@ class ImageGateTestCase(unittest.TestCase):
             rebuilt.write_bytes(b"rebuilt")
             checks = pipeline_check.Checks()
             result = subprocess.CompletedProcess(
-                [], 0, "verdict: the images are byte-identical\n", ""
+                [],
+                0,
+                "image compare: 20 of 20 bytes equal\n"
+                "verdict: the images are byte-identical\n",
+                "",
             )
             with mock.patch.object(
                 pipeline_check, "run", return_value=result
@@ -336,18 +434,25 @@ class ImageGateTestCase(unittest.TestCase):
                     checks, Path("/game"), "STARTH.EXE", rebuilt
                 )
         self.assertEqual(len(checks.results), 1)
-        self.assertTrue(checks.results[0][1])
+        name, ok, detail = checks.results[0]
+        self.assertTrue(ok)
+        self.assertEqual(detail, "image compare: 20 of 20 bytes equal")
+        self.assertEqual(name, "stage 11: the whole image reports a byte score")
         self.assertTrue(
             any("image_compare.py" in part for part in run_mock.call_args.args[0])
         )
 
-    def test_a_differing_image_fails(self) -> None:
+    def test_a_differing_image_passes_with_its_score(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             rebuilt = Path(temporary) / "STARTH.EXE"
             rebuilt.write_bytes(b"rebuilt")
             checks = pipeline_check.Checks()
             result = subprocess.CompletedProcess(
-                [], 1, "verdict: the images differ\n", ""
+                [],
+                1,
+                "image compare: 10 of 20 bytes equal\n"
+                "verdict: the images differ\n",
+                "",
             )
             with mock.patch.object(
                 pipeline_check, "run", return_value=result
@@ -356,7 +461,181 @@ class ImageGateTestCase(unittest.TestCase):
                     checks, Path("/game"), "STARTH.EXE", rebuilt
                 )
         self.assertEqual(len(checks.results), 1)
-        self.assertFalse(checks.results[0][1])
+        name, ok, detail = checks.results[0]
+        self.assertTrue(ok)
+        self.assertEqual(detail, "image compare: 10 of 20 bytes equal")
+        self.assertEqual(name, "stage 11: the whole image reports a byte score")
+
+    def test_an_unreadable_image_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            rebuilt = Path(temporary) / "STARTH.EXE"
+            rebuilt.write_bytes(b"rebuilt")
+            checks = pipeline_check.Checks()
+            result = subprocess.CompletedProcess(
+                [], 2, "", "error: not an MZ image\n"
+            )
+            with mock.patch.object(
+                pipeline_check, "run", return_value=result
+            ), contextlib.redirect_stdout(io.StringIO()):
+                pipeline_check.check_image(
+                    checks, Path("/game"), "STARTH.EXE", rebuilt
+                )
+        self.assertEqual(len(checks.results), 1)
+        name, ok, detail = checks.results[0]
+        self.assertFalse(ok)
+        self.assertIn("error: not an MZ image", detail)
+        self.assertEqual(name, "stage 11: the whole image reports a byte score")
+
+
+class UnchangedResultTestCase(unittest.TestCase):
+    """Stage 11 must accept the stored verdict and verify the fingerprint."""
+
+    def record(self, verdict: str) -> dict:
+        return {
+            "address": "0x300ec",
+            "result": {
+                "fingerprint": "sha256:stored",
+                "checks": {"identity": {"verdict": verdict}},
+            },
+        }
+
+    def run_check_run(self, verdict: str, stored: str) -> pipeline_check.Checks:
+        record = self.record(stored)
+        line = f"[1/1] 0x300ec: {verdict} ({pipeline_check.UNCHANGED_DETAIL})\n"
+        result = subprocess.CompletedProcess([], 0, line, "")
+        checks = pipeline_check.Checks()
+        with mock.patch.object(
+            pipeline_check.shutil, "which", return_value="/usr/bin/docker"
+        ), mock.patch.object(
+            pipeline_check, "run", return_value=result
+        ), mock.patch.object(
+            pipeline_check, "recorded_records", return_value={"0x300ec": record}
+        ), mock.patch.object(
+            pipeline_check, "unchanged_is_verified", return_value=True
+        ), contextlib.redirect_stdout(io.StringIO()):
+            pipeline_check.check_run(checks, Path("/game"), False, 300.0)
+        return checks
+
+    def test_unchanged_matches_accepts_a_stored_pass(self) -> None:
+        record = self.record("pass")
+        self.assertTrue(pipeline_check.unchanged_matches(record, "PASS"))
+
+    def test_unchanged_matches_accepts_a_stored_fail(self) -> None:
+        record = self.record("fail")
+        self.assertTrue(pipeline_check.unchanged_matches(record, "FAIL"))
+
+    def test_check_run_accepts_a_stored_fail(self) -> None:
+        checks = self.run_check_run("FAIL", "fail")
+        self.assertEqual(checks.failures, [])
+
+    def test_check_run_fails_an_unchanged_record_with_the_wrong_verdict(
+        self,
+    ) -> None:
+        checks = self.run_check_run("PASS", "fail")
+        self.assertEqual(len(checks.failures), 1)
+        self.assertIn("0x300ec", checks.failures[0])
+        self.assertIn("the stored result is FAIL", checks.results[0][2])
+
+
+class ModuleUnchangedTestCase(unittest.TestCase):
+    """Stage 11 must verify a module record with the module toolchain."""
+
+    def record(self, fingerprint: str = "sha256:stored") -> dict:
+        return {
+            "address": "0x300ec",
+            "module": "free",
+            "result": {"fingerprint": fingerprint},
+        }
+
+    def test_unchanged_is_verified_uses_the_module_toolchain(self) -> None:
+        record = self.record()
+        module = {"name": "free", "toolchain": "watcom10"}
+        with mock.patch.object(
+            pipeline_check.store_module, "load_module", return_value=module
+        ), mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute:
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        mode = compute.call_args.kwargs["mode"]
+        self.assertEqual(mode["toolchain"], "watcom10")
+        self.assertIs(mode["strict"], True)
+        self.assertEqual(mode["runtime"], "run")
+
+    def test_unchanged_is_verified_uses_the_default_toolchain(self) -> None:
+        record = self.record()
+        module = {"name": "free"}
+        with mock.patch.object(
+            pipeline_check.store_module, "load_module", return_value=module
+        ), mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute:
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        mode = compute.call_args.kwargs["mode"]
+        self.assertEqual(mode["toolchain"], "v2")
+
+
+class LibraryUnchangedTestCase(unittest.TestCase):
+    """Stage 11 must verify a library record with the record field."""
+
+    def library_field(self) -> dict:
+        return {
+            "file": "CLIB3R.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "mod",
+            "symbol": "malloc_",
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+
+    def record(self, fingerprint: str) -> dict:
+        return {
+            "address": "0xd1f25",
+            "library": self.library_field(),
+            "result": {"fingerprint": fingerprint},
+        }
+
+    def test_unchanged_is_verified_uses_the_library_entry(self) -> None:
+        record = self.record("sha256:stored")
+        with mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:stored",
+        ) as compute, mock.patch.object(
+            pipeline_check.store_module,
+            "load_module",
+            side_effect=AssertionError("must not load a module"),
+        ):
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertTrue(verified)
+        self.assertIsNone(compute.call_args.args[1])
+        self.assertEqual(compute.call_args.kwargs["library"], record["library"])
+        self.assertEqual(
+            compute.call_args.kwargs["mode"],
+            pipeline_check.library.library_mode(),
+        )
+
+    def test_unchanged_is_verified_rejects_a_changed_library_entry(self) -> None:
+        record = self.record("sha256:stored")
+        with mock.patch.object(
+            pipeline_check.store_module,
+            "compute_fingerprint",
+            return_value="sha256:other",
+        ):
+            verified = pipeline_check.unchanged_is_verified(
+                record, Path("/game"), False
+            )
+        self.assertFalse(verified)
 
 
 if __name__ == "__main__":

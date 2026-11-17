@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the plan row records a 338-byte body and 107 instructions up to the first ret at 0x1c28d; the function continues through three more early exits and ends at the ret at 0x1c389; the next function starts at 0x1c38a, so the store record keeps the 590-byte extent and sets no function size; the identity check uses 107 instructions"
+      "text": "the plan row records a 338-byte body and 107 instructions over the full extent; the first ret is at 0x1c28d; the function continues through three more early exits and ends at the ret at 0x1c389; the next function starts at 0x1c38a, so the store record keeps the 590-byte extent and sets no function size; the identity check uses 134 instructions"
     },
     {
       "kind": "note",
@@ -34,7 +34,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 17 of 107 instructions and 13 of 338 bytes equal and 0 of 54 relocation slots equal; V2 emits a register prologue, a loop for the four points, and a compact box update, while the original saves no register, unrolls the four point builds, and sorts the four values with an exchange network; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 19 of 134 instructions and 19 of 470 bytes equal and 0 of 54 relocation slots equal; V2 emits a register prologue, a loop for the four points, and a compact box update, while the original saves no register, unrolls the four point builds, and sorts the four values with an exchange network; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The quad_point_test module at 0x1c13c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "quad_point_test",
   "notes": [],
   "object_offset": "0xc13c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 13,
-        "bytes_total": 338,
+        "bytes_equal": 19,
+        "bytes_total": 470,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 17,
-        "instructions_total": 107,
+        "instructions_equal": 19,
+        "instructions_total": 134,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c13c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:b8e10e92b4440977f71feb50f51f5e2402b5233a4667f56d412464c4376e9f6f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:5af44e94e24a1a782e2fb1a7486971735e63b849b5bde14ad0891f82ade3493e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:a5b196ad6865b288968231551a4a0b2dff4f1463ee6b0452a6efd1c565527bc0",
     "tool": "run.py"
   },

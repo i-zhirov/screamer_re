@@ -11,9 +11,9 @@
 ; into the block.
 ;
 ; The module is assembly, because the original is a run-time routine with the
-; segment and flag juggling.  The rebuild calls the dispatcher through the
-; external stub `dpmi_dispatch_`, so the only difference from the original is
-; the call displacement.
+; segment and flag juggling.  The rebuild calls the external stub
+; `dpmi_dispatch_` in place of the original dispatcher, and the period build
+; now matches the original bytes.
 .386
 .model flat
 public dpmi_int31_entry_
@@ -30,7 +30,7 @@ dpmi_int31_entry_ proc near
         push edi
         mov ebp, esp
         mov edi, dword ptr [ebp + 8]
-        mov ds, word ptr [ebp + 0xc]
+        db 8eh, 5dh, 0ch                ; mov ds, word ptr [ebp + 0xc], the three bytes 8e 5d 0c the original emits; the period assembler adds the 16-bit operand-size prefix
         mov dword ptr [edi], eax
         mov dword ptr [edi + 4], ebx
         mov dword ptr [edi + 8], ecx

@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The cockpit_load module at 0x1b23c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "cockpit_load",
   "notes": [],
   "object_offset": "0xb23c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

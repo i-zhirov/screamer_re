@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt function holds 46 decoded instructions and 154 bytes; the identity check stays open at 9 of 46 instructions and 17 of 154 bytes, because V2 uses a register prologue, computes the entry pointer from a byte offset, orders the hit block in another shape, and reads the globals through near data addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "point_height_probe",
   "notes": [],
   "object_offset": "0xbfd4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the physics and collision steps, gated on the state at `+0x414`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_physics",
   "name": "object_physics",
   "notes": [],
   "object_offset": "0xc810",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,17 +36,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 5,
-        "bytes_total": 47,
+        "bytes_equal": 6,
+        "bytes_total": 40,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 9,
-        "instructions_total": 17,
+        "instructions_equal": 6,
+        "instructions_total": 13,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c810",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a6415c818f6d1f81ccf51db06270744c14cec686556219db0d5df5f6950ea9ce",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fe802f282ada8aa97cf20935462ce55e8b850fb0cdcaf3f8d2cfc68cef9d33a7",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:049f928c5265967bc32ddd2f2d50099244f4dca7a46c8a6df3e6287c168dc7ff",
     "tool": "run.py"
   },

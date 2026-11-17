@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "track_select_screen.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "track_select_screen.c"
     },
     {
       "compiler": "wasm",
@@ -31,5 +28,6 @@
       "compiler": "wcc386",
       "file": "track_select_screen_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_push_response.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_push_response.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "traffic_push_response_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

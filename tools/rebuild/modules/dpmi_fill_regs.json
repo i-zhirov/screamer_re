@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "dpmi_fill_regs_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

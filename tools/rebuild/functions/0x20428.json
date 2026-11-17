@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the body runs from 0x20428 past the first ret at 0x2055b to the second ret at 0x205c0, so it holds 110 instructions and 409 bytes; the plan row and the identity check use the first 86 instructions and 308 bytes up to the first ret; the store record keeps the 412-byte extent and sets no separate function size"
+      "text": "the body runs from 0x20428 past the first ret at 0x2055b to the second ret at 0x205c0, so it holds 118 instructions and 409 bytes; the first-ret body holds 86 instructions and 308 bytes; the identity check uses the full reachable body bounded by the 412-byte extent; the store record keeps the 412-byte extent and sets no separate function size"
     },
     {
       "kind": "note",
@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The race_position_update module at 0x20428"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "race_position_update",
   "notes": [],
   "object_offset": "0x10428",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -78,16 +87,22 @@
       },
       "identity": {
         "bytes_equal": 34,
-        "bytes_total": 308,
+        "bytes_total": 321,
         "detail": "the instruction sequences differ",
         "instructions_equal": 21,
         "instructions_total": 86,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20428",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:d5719bbb7260ef2a6b30c73ea25b3552318048516cb4e42fdadde81173cb8eed",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:23dbe06f7f94c00b4f2d0869e642fecfe8270a6e19781ca6bcdc10342e81abae",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:b51ff65e070a03fedbb4985a4ccac560c71f64846bdb5a8ff817a09f276a8311",
     "tool": "run.py"
   },

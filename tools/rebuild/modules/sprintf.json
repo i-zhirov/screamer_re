@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "sprintf_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

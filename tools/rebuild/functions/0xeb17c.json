@@ -1,0 +1,56 @@
+{
+  "address": "0xeb17c",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb17c"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "i64ts386",
+    "object_sha256": "sha256:7f55997b3828bed04f5d2eaf33caf54496d8f83317a1fb5684c4f2e652339bb5",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__Rnd2Int"
+  },
+  "name": "__Rnd2Int",
+  "notes": [],
+  "object_offset": "0xdb17c",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 107,
+        "bytes_total": 107,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 48,
+        "instructions_total": 48,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xeb17c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a105a9c3ba9993049b4dff414ea9c43f6622311c398fa21e333647aaf3575e95",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:0c7f53f3d28f81577965413495a1f49633d2cb3211851dc3339154a68c28652d",
+    "tool": "run.py"
+  },
+  "size": 107,
+  "status": "verified"
+}

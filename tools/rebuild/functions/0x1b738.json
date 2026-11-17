@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1b738 holds 69 instructions and 263 bytes up to the ret at 0x1b83e; the next function starts at 0x1b840, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 69 instructions"
+      "text": "the original body at 0x1b738 holds 69 instructions and 263 bytes over the full extent; the ret is at 0x1b83e; the next function starts at 0x1b840, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 69 instructions"
     },
     {
       "kind": "note",
@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The replay_save module at 0x1b738"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "replay_save",
   "notes": [],
   "object_offset": "0xb738",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
-        "bytes_total": 251,
+        "bytes_equal": 29,
+        "bytes_total": 247,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 37,
-        "instructions_total": 69,
+        "instructions_equal": 35,
+        "instructions_total": 66,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b738",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:1612f95f50dd791b92c6f6bb06c08935334d5bc26c9281a81bdbe8a358bb375f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:ce8866402d1f9430c3318ad786a2ac3927012ea87ef79fa1d65463e2cd56e357",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:2ea5ba97c5544dac8453cee43978911a89d2d3d416530efec65b45e20c37fab6",
     "tool": "run.py"
   },

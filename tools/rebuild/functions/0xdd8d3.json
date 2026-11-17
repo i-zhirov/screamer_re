@@ -1,9 +1,56 @@
 {
   "address": "0xdd8d3",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdd8d3"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "pow87e",
+    "object_sha256": "sha256:21af22c5fe5b38739ea59d7bc6da1f46cf4387465f7efcee74303c3ff7b27f17",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__pow87_err_"
+  },
+  "name": "__pow87_err",
   "notes": [],
   "object_offset": "0xcd8d3",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 133,
+        "bytes_total": 135,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 57,
+        "instructions_total": 57,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xdd8d3",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:592e316ca40efebc512fa384b07b4d61b2478b133d7c4daa79c4af96b08d942f",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:bab21bcedce8d0a5a8a9c5107caab7964376cb6cc871b0c8ecc7159b272637fc",
+    "tool": "run.py"
+  },
   "size": 151,
-  "status": "unknown"
+  "status": "verified"
 }

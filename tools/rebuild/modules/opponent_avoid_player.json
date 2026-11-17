@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "opponent_avoid_player_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

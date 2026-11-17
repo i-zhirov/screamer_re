@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x2f0fc` holds 41 instructions and 118 bytes: it sets `0x0100` at result word 0, sets the paragraph count `(size >> 4) + 1` at word 1, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status, and otherwise returns the segment word times 16 and stores the selector word at the third argument"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "dos_memory_alloc",
   "name": "dos_memory_alloc",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 4,
-        "bytes_total": 86,
+        "bytes_equal": 91,
+        "bytes_total": 118,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 8,
-        "instructions_total": 32,
+        "instructions_equal": 40,
+        "instructions_total": 41,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f0fc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a76482bd1943cea17e4db8e0a4bb5b4f1edab249d8bc5730cdb709f6e59d3e0e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:33638ff587a228de8da138a7ca05a2058f2fe8add4c75a703ec9ce0419d57e48",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:cc39f4cb316dc11f32734ce7f7cdd1bafa23d1c014a20e69213c2959741a16fc",
     "tool": "run.py"
   },

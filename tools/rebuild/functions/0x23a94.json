@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x23a94 holds 208 instructions and 870 bytes up to the ret at 0x23df9, so the record keeps the 872-byte extent and sets no function size"
+      "text": "the original at 0x23a94 holds 208 instructions and 870 bytes over the full extent; the ret is at 0x23df9, so the record keeps the 872-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -47,12 +47,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module race_radar"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_radar",
   "name": "race_radar",
   "notes": [],
   "object_offset": "0x13a94",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -64,17 +73,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 69,
-        "bytes_total": 870,
+        "bytes_equal": 57,
+        "bytes_total": 536,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 52,
-        "instructions_total": 208,
+        "instructions_equal": 37,
+        "instructions_total": 120,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23a94",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:504c2436a6a7953fadac6a42d05676452b1304c1a79eb7edfd04205df47eb8c9",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c71bd99034508fdcb87071c6ebdbfb6e7aa0afb872ed8583f0afc659e23ddc12",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:ec4a2dda488185979ce1453c61d225cfb7c4001fc51dc474267622382f4ddccc",
     "tool": "run.py"
   },

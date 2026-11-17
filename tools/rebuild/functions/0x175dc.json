@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x175dc holds 165 instructions and 587 bytes up to the ret at 0x17826; the next function starts at 0x17828, so the store record keeps the 588-byte extent and sets no function size; the identity check uses 165 instructions"
+      "text": "the original body at 0x175dc holds 165 instructions and 587 bytes over the full extent; the ret is at 0x17826; the next function starts at 0x17828, so the store record keeps the 588-byte extent and sets no function size; the identity check uses 109 instructions"
     },
     {
       "kind": "note",
@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The traffic_collision_pass module at 0x175dc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "traffic_collision_pass",
   "notes": [],
   "object_offset": "0x75dc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 35,
-        "bytes_total": 560,
+        "bytes_equal": 27,
+        "bytes_total": 401,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 33,
-        "instructions_total": 165,
+        "instructions_equal": 24,
+        "instructions_total": 105,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x175dc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:8f862f94fb46eb21c22098bd7386429b4e80da81566be08e3a55819e6f62d10c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:1ec93de724f8bfc6df866aa1b461a9dff2b883e18387b2b088404ad91a9444cb",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:7a335e71936437c6a3471c235d83fa6e5df941e31778e83ce0e56be380bd5d20",
     "tool": "run.py"
   },

@@ -22,11 +22,20 @@
     {
       "kind": "note",
       "text": "the harness covers the disabled gate, the release path, the scan hit and miss, both default ids, the distance and type compares, the four state flags, the copy at `+0x418`, the negative angle, and the three collision value stores; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_collision",
   "name": "object_collision",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -38,17 +47,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 45,
-        "bytes_total": 635,
+        "bytes_equal": 54,
+        "bytes_total": 639,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 31,
-        "instructions_total": 160,
+        "instructions_equal": 29,
+        "instructions_total": 162,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e00c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:973dd400aec40d63b5e3d8633c388313059dde1d9aee433659d7d3f8b44e21a0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4cfbaaefb07716df6ae440108274813f59b4eab3a9756ae85e3c0392f9c712d9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:6e61af52a22e4a420c496e74f7e994b4a709d63285991ed38ff1f22ec359deec",
     "tool": "run.py"
   },

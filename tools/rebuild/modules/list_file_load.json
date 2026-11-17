@@ -17,9 +17,7 @@
       "compiler": "wcc386",
       "file": "list_file_load.c",
       "flags": [
-        "-of+",
-        "-oi",
-        "-dLIST_FILE_LOAD_HARNESS"
+        "-of+"
       ]
     },
     {
@@ -29,7 +27,10 @@
     {
       "compiler": "wcc386",
       "file": "list_file_load_main.c",
-      "flags": []
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

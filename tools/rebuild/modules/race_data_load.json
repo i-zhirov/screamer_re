@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_data_load.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_data_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "race_data_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

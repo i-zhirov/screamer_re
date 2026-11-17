@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000e2f41` stores the segment and offset arguments and returns the pair"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "name": "far_pointer_pack",
   "notes": [],
   "object_offset": "0xd2f41",
+  "provenance": "library",
   "role": "returns the far pointer built from the segment and offset arguments",
   "section": "The HMI sound driver",
   "size": 45,

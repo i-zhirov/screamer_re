@@ -1,0 +1,60 @@
+{
+  "address": "0xc6295",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc6295"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fclose",
+    "object_sha256": "sha256:fb2fe7f81d5a355f0fbe6ae19301f7d1abeee01762fbb098f4bf5c9e7bb419d4",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__MkTmpFile_"
+  },
+  "name": "__MkTmpFile",
+  "notes": [],
+  "object_offset": "0xb6295",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 91,
+        "bytes_total": 105,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 40,
+        "instructions_total": 40,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc6295",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:2c5c7d84f3e1c5e01fa7b9b40249d9dc7f171c14ea720f960ecd7da02f95d180",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:a7c3c50a85c3a4711e2fe117664463a6a396430782bbbb5b22ad06f30cd1f603",
+    "tool": "run.py"
+  },
+  "size": 105,
+  "status": "verified"
+}

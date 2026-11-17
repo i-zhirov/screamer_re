@@ -79,6 +79,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/object_chunk_find.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "object_chunk_find",
   "notes": [],
   "object_offset": "0x1410",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

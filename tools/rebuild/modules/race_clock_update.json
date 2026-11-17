@@ -23,10 +23,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_clock_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_clock_update.c"
     },
     {
       "compiler": "wasm",
@@ -36,5 +33,6 @@
       "compiler": "wcc386",
       "file": "race_clock_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

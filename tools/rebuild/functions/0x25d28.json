@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/shade_rect.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "shade_rect",
   "notes": [],
   "object_offset": "0x15d28",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

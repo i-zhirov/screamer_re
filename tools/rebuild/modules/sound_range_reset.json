@@ -17,11 +17,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_range_reset.c"
+      "file": "sound_range_reset.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_range_reset_main.c"
+      "file": "sound_range_reset_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

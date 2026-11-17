@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The replay_playback_start module at 0x14d2c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "replay_playback_start",
   "notes": [],
   "object_offset": "0x4d2c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the harness prints the markers 0, 1, 2, 3, and D: the full path with the input and music calls, the counter wrap that skips both, the input skip with the music call, and the three-turn loop; the behavior check passes, the rebuild holds 53 instructions and 189 bytes, and the identity check stays open at 19 of 189 bytes and 14 of 53 instructions because OpenWatcom V2 saves the registers in another order and uses registers for the key-clear loop"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "frame_update",
   "name": "frame_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -34,17 +43,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 19,
-        "bytes_total": 189,
+        "bytes_equal": 14,
+        "bytes_total": 182,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 53,
+        "instructions_equal": 12,
+        "instructions_total": 49,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27f94",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:1c320c05ddcc69f1c9a6cd87a799aabaf7d1516b4844bf43732bb983b614214b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:5fda97958a7979912113f4f2f7b508c0c6fde8073345dfdf536be41c913ce3f7",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:70fb1dcc84117bf46efb078364e3922436db0a09ec15296885fdff21dd5837a2",
     "tool": "run.py"
   },

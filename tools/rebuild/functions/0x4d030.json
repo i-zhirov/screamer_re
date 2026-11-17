@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x4d030` holds 31 instructions and 101 bytes: it opens `TABS\\VIS.TAB` with the mode `rb` through `fopen` at `0xc5fe5`, runs the error report, BIOS video, and exit path with the value `0x16` on failure, reads `0x27500` bytes into the buffer at `DAT_0007c1c4` through `fread` at `0xc607b`, and closes the handle through `0xc6245`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "vis_tab_load",
   "name": "vis_tab_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,16 +36,22 @@
       },
       "identity": {
         "bytes_equal": 13,
-        "bytes_total": 96,
+        "bytes_total": 89,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 25,
-        "instructions_total": 31,
+        "instructions_equal": 16,
+        "instructions_total": 28,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d030",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:142aa529a3cdfb31ee76595bff3f4e16a4169a3a08fa4299a2edc50197cf1a32",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7c9cd0f52ca49b90dcfd0eecd194a5094640bfd614ec5997a08131144510e1a9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:015e9ef86a2fd59c02cd8cdb76af5c0b09de43caff21348b30ba869908fd452d",
     "tool": "run.py"
   },

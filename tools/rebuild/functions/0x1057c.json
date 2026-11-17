@@ -26,7 +26,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1057c holds 154 instructions and 483 bytes up to the ret at 0x1075e; the next function starts at 0x1075f, so the store record keeps the 483-byte extent and sets no function size; the identity check uses 154 instructions"
+      "text": "the original body at 0x1057c holds 153 instructions and 481 bytes over the full extent; the ret is at 0x1075e; the next function starts at 0x1075f, so the store record keeps the 483-byte extent and sets no function size; the identity check uses 145 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 533 bytes and 154 decoded instructions; the identity check stays open at 27 of 154 instructions, 25 of 483 bytes, and 2 of 54 relocation slots because V2 pushes esi, edi, and ebp and makes a stack frame instead of pushal, keeps the loop cursors in stack slots, computes the cell offset with lea, and uses another register order; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 505 bytes and 145 decoded instructions; the identity check stays open at 24 of 145 instructions, 15 of 481 bytes, and 2 of 54 relocation slots because V2 pushes esi, edi, and ebp and makes a stack frame instead of pushal, keeps the loop cursors in stack slots, computes the cell offset with lea, and uses another register order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "radar_world_draw",
   "notes": [],
   "object_offset": "0x57c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 483,
+        "bytes_equal": 17,
+        "bytes_total": 481,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 27,
-        "instructions_total": 154,
+        "instructions_equal": 24,
+        "instructions_total": 152,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1057c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:14aa521c9940ed826ec09312ffaf855ec9e7d9291699434b7ec2a834d222d5ff",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:45e91349e9fbe0a9f4b73c780e58c20cea387ed08572e7ffcb45ce0a14d059b0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:0cf8cc9769a6b2b6fdb91fecf20a864b6ceb7197afbf3dedb499ee461e08cfbd",
     "tool": "run.py"
   },

@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x2392c holds 110 instructions and 344 bytes up to the ret 4 at 0x23a81; the next function starts at 0x23a94, so the store record keeps the 360-byte extent and sets no separate function size; the identity check uses 110 instructions"
+      "text": "the original body at 0x2392c holds 110 instructions and 344 bytes up to the ret 4 at 0x23a81; the next function starts at 0x23a94, so the store record keeps the 360-byte extent and sets no separate function size; the identity check uses 103 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 16 of 110 instructions and 9 of 304 bytes equal, and 0 of 4 relocation slots equal; V2 saves ebp first, keeps the point and the doubled centre in registers, and calls the local stub functions, while the original stores each corner in a distinct stack slot; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 16 of 103 instructions and 9 of 294 bytes equal, and 0 of 4 relocation slots equal; V2 saves ebp first, keeps the point and the doubled centre in registers, and calls the local stub functions, while the original stores each corner in a distinct stack slot; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "gauge_marker_draw",
   "notes": [],
   "object_offset": "0x1392c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -74,16 +83,22 @@
       },
       "identity": {
         "bytes_equal": 9,
-        "bytes_total": 304,
+        "bytes_total": 294,
         "detail": "the instruction sequences differ",
         "instructions_equal": 16,
-        "instructions_total": 110,
+        "instructions_total": 103,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2392c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:efd26812f48d1d90c046396b1344dce6ca72334a0108e5b3dcb1bb05987eadaa",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f991e70161915f800c63b756b4e04b54571ffc1f489a2ebd94184bb95f5596e5",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:3c64432dd164b3c7c02a546ce80759f4f3a4dca0c50ccb423bf9e9e76c015814",
     "tool": "run.py"
   },

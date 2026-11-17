@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x20d20 holds 106 instructions and 421 bytes up to the ret at 0x20ec4; the next function starts at 0x20ec8, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 106 instructions"
+      "text": "the original body at 0x20d20 holds 106 instructions and 421 bytes over the full extent; the ret is at 0x20ec4; the next function starts at 0x20ec8, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 85 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 106 decoded instructions and 416 bytes in the identity window; the identity check stays open at 13 of 106 instructions and 30 of 416 bytes because V2 saves the frame pointer first, uses another prologue and register order, and builds the sine argument from the local phase and amplitude; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 85 decoded instructions and 372 bytes in the identity window; the identity check stays open at 12 of 85 instructions and 29 of 372 bytes because V2 saves the frame pointer first, uses another prologue and register order, and builds the sine argument from the local phase and amplitude; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module race_intro_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "race_intro_update",
   "notes": [],
   "object_offset": "0x10d20",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 30,
-        "bytes_total": 416,
+        "bytes_equal": 29,
+        "bytes_total": 372,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 13,
-        "instructions_total": 106,
+        "instructions_equal": 12,
+        "instructions_total": 85,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20d20",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:7f963bc8539eaf69a861524f6f67e77f3de2fd1bf472784813dc2ed7b08b4609",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:13a56b8dc714b5429744199ca2810f5ac0721c27ae7ae543679c9afdb7ce582c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:a2a9566ecf97bc912cc4e961a4e77f4b8be1946d8404066f9d74f925248f1eb7",
     "tool": "run.py"
   },

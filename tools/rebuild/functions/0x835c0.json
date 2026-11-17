@@ -75,6 +75,14 @@
     {
       "kind": "finding",
       "text": "The sound_event_transform module at 0x835c0"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "sound_event_transform",
   "notes": [],
   "object_offset": "0x735c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

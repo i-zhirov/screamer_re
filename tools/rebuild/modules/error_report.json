@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "error_report_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

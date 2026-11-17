@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "stores the stream pointer, clears the state word, and runs the six stream layer setup calls"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "stream_layer_init",
   "name": "stream_layer_init",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 9,
-        "bytes_total": 53,
+        "bytes_equal": 2,
+        "bytes_total": 46,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 5,
-        "instructions_total": 16,
+        "instructions_equal": 3,
+        "instructions_total": 12,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c810",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:bc25bcd921c59f1a0527498ab7a0834c81d81224d70967451ee0618cf44aa09a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:3d0885e9cdb17830c20b2a5197a483bc208e200d119dda37dfef08a81f944b16",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:957d7f0c4d37bba819a2fe7bdf568ed21299c114fdbdfdb4bcb8e711f0f870ff",
     "tool": "run.py"
   },

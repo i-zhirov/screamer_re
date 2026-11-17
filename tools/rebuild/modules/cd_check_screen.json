@@ -25,7 +25,11 @@
     },
     {
       "compiler": "wcc386",
-      "file": "cd_check_screen_main.c"
+      "file": "cd_check_screen_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

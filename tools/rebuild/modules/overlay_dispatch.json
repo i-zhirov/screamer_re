@@ -24,14 +24,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "overlay_dispatch.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "overlay_dispatch.c"
     },
     {
       "compiler": "wcc386",
       "file": "overlay_dispatch_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

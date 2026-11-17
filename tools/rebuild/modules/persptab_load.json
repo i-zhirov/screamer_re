@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "persptab_load.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "persptab_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "persptab_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

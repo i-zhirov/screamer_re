@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "video_buf_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -1,9 +1,56 @@
 {
   "address": "0xdda2b",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdda2b"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "open",
+    "object_sha256": "sha256:c8be6ad9dd18ad29eb4e2e6fe313caf245e0b9441d7bd914e9768c8f7d97c3fa",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "open_"
+  },
+  "name": "open",
   "notes": [],
   "object_offset": "0xcda2b",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 36,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 16,
+        "instructions_total": 16,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xdda2b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9337172e37d927e94e7f2353ab19511fd065ee342bee8170b2cb084c96084315",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:5bd673a75214c3cec588516a1a0405e2e74f6e768e25398fe373ab121ac80a57",
+    "tool": "run.py"
+  },
   "size": 36,
-  "status": "unknown"
+  "status": "verified"
 }

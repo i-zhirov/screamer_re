@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x25658 holds 93 instructions and 324 bytes up to the ret at 0x2579b; the next function starts at 0x257a0 after four bytes of padding at 0x2579c, so the store record keeps the 328-byte extent and sets no separate function size; the identity check uses 93 instructions"
+      "text": "the original body at 0x25658 holds 93 instructions and 324 bytes over the full extent; the ret is at 0x2579b; the next function starts at 0x257a0 after four bytes of padding at 0x2579c, so the store record keeps the 328-byte extent and sets no separate function size; the identity check uses 93 instructions"
     },
     {
       "kind": "note",
@@ -58,11 +58,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 93 decoded instructions and 337 bytes; the identity check stays open at 15 of 93 instructions, 37 of 324 bytes, and 0 of 27 relocation slots, because V2 saves the frame first, builds the two constant texts in local buffers, keeps the arguments in registers, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 98 decoded instructions and 342 bytes; the identity check stays open at 15 of 93 instructions, 37 of 324 bytes, and 0 of 27 relocation slots, because V2 saves the frame first, builds the two constant texts in local buffers, keeps the arguments in registers, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
       "text": "The font_load module at 0x25658"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,28 +78,35 @@
   "name": "font_load",
   "notes": [],
   "object_offset": "0x15658",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '0'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 37,
-        "bytes_total": 324,
+        "bytes_equal": 20,
+        "bytes_total": 246,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 15,
-        "instructions_total": 93,
+        "instructions_equal": 20,
+        "instructions_total": 72,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25658",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:4b30072c9eaeb89010a87275231bf2da46f04155d5d2175f905e85db8428e966",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d81b60619dd89a25b660c361c3c63f7de39d9ffac69061fa0d9cad7a44ce61bd",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:c40720be8efe6cada3fae96d80830d109261ef7a0b4212171daf842cd01cc03a",
     "tool": "run.py"
   },

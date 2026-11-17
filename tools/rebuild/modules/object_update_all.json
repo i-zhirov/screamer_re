@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_update_all.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_update_all.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_update_all_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

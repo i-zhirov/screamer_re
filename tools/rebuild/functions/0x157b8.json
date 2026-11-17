@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The cd_check module at 0x157b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "cd_check",
   "notes": [],
   "object_offset": "0x57b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

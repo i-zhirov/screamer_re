@@ -1,48 +1,68 @@
 {
   "address": "0xd429f",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "the original at `0xd429f` holds 52 instructions and 133 bytes: it saves the file flag bits 0x30, clears them, allocates the buffer through `0xddda9` when the buffer pointer at `+8` is zero, changes the `+0xd` bit 2 to bit 0, formats through `0xd68c0` with the table `DAT_001c428e`, restores the flags and calls `0xddfa8`, returns -1 when the `+0xc` bit 0x20 is set, and restores the saved 0x30 bits; the call sites are `printf` at `0x3009b` and `fprintf` at `0x4bf64`, so this is the run-time `__fprtf`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd429f"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fprtf",
+    "object_sha256": "sha256:b4f549c3e01414ae19c7436fa2999cb8a37587ba5cf321ebebca1c0cf22bc0c9",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__fprtf_"
+  },
   "module": "fprtf",
   "name": "__fprtf",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 6,
-        "bytes_total": 132,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 28,
+        "bytes_equal": 124,
+        "bytes_total": 133,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 52,
         "instructions_total": 52,
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd429f",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:2315872f55577f0a87ccf4081c517cf717522870a5f13544c4afef753e4c9ff7",
-    "source_digest": "sha256:24d15105dc06657cdbcb935bcfdbb3b1d93bc95081737239382339fb460005a0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7551d3af91e1a26e51a2a9d6d05e9a5af7fcc20a362082b30e5ace672a76f82b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6e3a691bfb36518ebb3afaa36e253a2915c263709587afb1d67551d86fb00018",
     "tool": "run.py"
   },
   "role": "formats a stream through the run-time engine and manages the file flags",
   "section": "The runtime memory manager",
   "size": 133,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "__fprtf_"
 }

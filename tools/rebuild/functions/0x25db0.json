@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "dpmi_real_int",
   "name": "dpmi_real_int",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,23 +35,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 43,
-        "bytes_total": 58,
-        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
-        "instructions_equal": 17,
-        "instructions_total": 17,
-        "verdict": "pass"
+        "bytes_equal": 78,
+        "bytes_total": 354,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 88,
+        "instructions_total": 98,
+        "match": "different",
+        "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25db0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:eac413f546008031484fd83373d437245acafa65ec4e02d6b63491a7bbdc4ff9",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:962986f2524986b59f71f8de8f678be93b0145091f0ef8591fd1571270ed98c3",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:d36f8896dca9e2ba8ed71d4641eeb255d2d8656c871d123f34496039159491a0",
     "tool": "run.py"
   },
   "role": "sets the real-mode state, runs the DOS multiplexer call INT 2Fh AX=1500h, and drives the real-mode interrupt path",
   "section": "Subsystem initialisation",
   "size": 356,
-  "status": "verified",
+  "status": "rebuilt",
   "symbol": "dpmi_real_int_"
 }

@@ -9,16 +9,25 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x2786c holds 84 instructions and 309 bytes up to the ret at 0x279a0: the six register saves, the frame, the five loops over the DAT_0010f8ec records at DAT_00110ab8 with the 0x590-byte stride and the shared counter DAT_0010634c, the seven calls at 0x27f44, 0x19ab0, 0x205c4, 0x20954, 0x8ac78, 0x81ab0, and 0x27a34, and the epilogue"
+      "text": "the original at 0x2786c holds 84 instructions and 309 bytes over the full extent; the ret is at 0x279a0: the six register saves, the frame, the five loops over the DAT_0010f8ec records at DAT_00110ab8 with the 0x590-byte stride and the shared counter DAT_0010634c, the seven calls at 0x27f44, 0x19ab0, 0x205c4, 0x20954, 0x8ac78, 0x81ab0, and 0x27a34, and the epilogue"
     },
     {
       "kind": "note",
       "text": "the five passes call object_transform at 0x1cd44, object_player_input at 0x1c760, object_physics at 0x1c810, object_prepare at 0x1c79c, and object_car_link at 0x1c84c on each record; the seven calls pass 1 to opponent_update, 0x109a0 to camera_update, and 0x6350 to sound_effects_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_update_all",
   "name": "object_update_all",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -30,17 +39,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 285,
+        "bytes_equal": 26,
+        "bytes_total": 281,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 69,
+        "instructions_equal": 11,
+        "instructions_total": 67,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2786c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:f00f69985d2e1041b92da1f63ff4ebf5806f9d58a8d992df46e851ac2dd4a33a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d26d37805ada828b7d95ef073b49939ed0a74e7cb8c95b7df88f79f356851741",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:5cab9d7fbcce1d6e362ab92af80691995773b24b49466ccb97b5728caf43b84e",
     "tool": "run.py"
   },

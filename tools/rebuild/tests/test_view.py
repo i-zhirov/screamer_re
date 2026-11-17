@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import library as lib  # noqa: E402
 import view  # noqa: E402
 
 
@@ -22,6 +23,7 @@ class ViewTestCase(unittest.TestCase):
         base: dict = {
             "address": address,
             "status": "unknown",
+            "provenance": "game",
             "checks": [],
             "evidence": [],
             "notes": [],
@@ -29,7 +31,7 @@ class ViewTestCase(unittest.TestCase):
         base.update(overrides)
         return base
 
-    def result(self, **counts: object) -> dict:
+    def result(self, match: str | None = None, **counts: object) -> dict:
         identity = {
             "verdict": "pass",
             "detail": "the instruction sequences match",
@@ -39,11 +41,14 @@ class ViewTestCase(unittest.TestCase):
             "bytes_total": 9,
         }
         identity.update(counts)
+        if match is not None:
+            identity["match"] = match
         return {
             "date": "2026-10-27",
             "command": "python3 tools/rebuild/run.py run --name free",
             "tool": "run.py",
             "source_digest": "sha256:" + "1" * 64,
+            "mode": {"strict": True, "toolchain": "v2", "runtime": "run"},
             "checks": {"identity": identity},
         }
 
@@ -104,6 +109,33 @@ class ViewTestCase(unittest.TestCase):
         return re.findall(
             r'<button class="chip[^"]*"[^>]*>.*?</button>', page, re.DOTALL
         )
+
+    def provenance_rows(self, page: str) -> list[str]:
+        return re.findall(
+            r'<div class="provenance-row"[^>]*>.*?</div>', page, re.DOTALL
+        )
+
+    def provenance_row(self, page: str, provenance: str) -> str:
+        match = re.search(
+            rf'<div class="provenance-row" data-provenance="{provenance}"'
+            r"[^>]*>.*?</div>",
+            page,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, f"no provenance row for {provenance}")
+        return match.group(0)
+
+    def game_progress_block(self, script: str) -> str:
+        match = re.search(
+            r'if \(data\.provenance === "game" && data\.address !== ""\) \{'
+            r".*?\n      \}",
+            script,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(
+            match, "the script holds no game denominator condition"
+        )
+        return match.group(0)
 
     def detail(self, page: str, key: str) -> str:
         match = re.search(
@@ -299,6 +331,57 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn("⚠", chips[1])
         self.assertIn("1 stale", page)
 
+    def library_field(self, symbol: str = "malloc_") -> dict:
+        return {
+            "file": "CLIB3R.LIB",
+            "sha256": "sha256:" + "a" * 64,
+            "module": "mod",
+            "symbol": symbol,
+            "object_sha256": "sha256:" + "b" * 64,
+        }
+
+    def library_record(
+        self, address: str, field: dict | None = None, **overrides: object
+    ) -> dict:
+        field = field or self.library_field()
+        result = self.result()
+        result["source_digest"] = lib.source_digest(field)
+        name = field["symbol"][:-1] if field["symbol"].endswith("_") else field["symbol"]
+        base = self.record(
+            address,
+            name=name,
+            status="verified",
+            section="Program functions",
+            provenance="library",
+            checks=["identity"],
+            library=field,
+            result=result,
+        )
+        base.update(overrides)
+        return base
+
+    def test_page_marks_a_library_record_stale_by_the_library_field(self) -> None:
+        field = self.library_field()
+        current = self.library_record("0xd1f25", field=field)
+        changed = self.library_record("0xd1f30", field=field)
+        changed["library"] = self.library_field(symbol="free_")
+        page = view.render_page([current, changed], [], {})
+        rows = self.rows(page)
+        self.assertIn('data-stale="false"', rows[0])
+        self.assertIn('data-stale="true"', rows[1])
+        self.assertIn("1 stale", page)
+
+    def test_page_marks_a_library_record_by_the_library_field_not_the_module(
+        self,
+    ) -> None:
+        record = self.library_record("0xd1f25", module="malloc_rt")
+        page = view.render_page(
+            [record], [], {"malloc_rt": "sha256:" + "9" * 64}
+        )
+        rows = self.rows(page)
+        self.assertIn('data-stale="false"', rows[0])
+        self.assertNotIn('data-stale="true"', page)
+
     def test_page_has_no_external_reference(self) -> None:
         page = self.page()
         self.assertNotIn("http", page)
@@ -331,6 +414,97 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn("verified", detail)
         self.assertIn("run.py run --module driver", detail)
 
+    def test_page_reports_match_buckets(self) -> None:
+        behavior = self.result()
+        behavior["checks"] = {"behavior": {"verdict": "pass"}}
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+            self.record(
+                "0x300f0",
+                name="exit_flush",
+                status="verified",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="exact-relocations"),
+            ),
+            self.record(
+                "0x300f4",
+                name="exit",
+                status="rebuilt",
+                section="Program functions",
+                module="free",
+                checks=["build", "identity"],
+                result=self.result(match="same-shape"),
+            ),
+        ]
+        modules = [
+            self.module("driver", checks=["behavior"], result=behavior),
+        ]
+        page = view.render_page(
+            records, modules, {"free": "sha256:" + "1" * 64}
+        )
+        self.assertIn('data-bucket="exact">1 exact</span>', page)
+        self.assertIn(
+            'data-bucket="relocation-only">1 relocation-only</span>', page
+        )
+        self.assertIn('data-bucket="shape">1 shape</span>', page)
+        self.assertIn('data-bucket="behavior-only">1 behavior-only</span>', page)
+
+    def test_page_targets_carry_the_match_bucket(self) -> None:
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                size=12,
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+        ]
+        page = view.render_page(records, [], {"free": "sha256:" + "1" * 64})
+        targets = {
+            "chip": r'<button class="chip[^"]*"[^>]*>',
+            "table row": r'<tr class="record-row[^"]*"[^>]*>',
+            "map block": r'<button class="map-block[^"]*"[^>]*>',
+            "treemap block": r'<button class="treemap-block[^"]*"[^>]*>',
+            "graph node": r'<g class="graph-node[^"]*"[^>]*>',
+        }
+        for label, pattern in targets.items():
+            match = re.search(pattern, page, re.DOTALL)
+            self.assertIsNotNone(match, f"the page holds no {label}")
+            self.assertIn('data-match="exact"', match.group(0), label)
+        module = self.module(
+            "driver",
+            checks=["identity"],
+            result=self.result(match="exact-bytes"),
+        )
+        page = view.render_page(
+            records,
+            [module],
+            {"free": "sha256:" + "1" * 64, "driver": "sha256:" + "1" * 64},
+        )
+        module_chip = re.search(
+            r'<button class="chip[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_chip, "the page holds no module chip")
+        self.assertIn('data-match="exact"', module_chip.group(0))
+        module_row = re.search(
+            r'<tr class="record-row[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_row, "the page holds no module row")
+        self.assertIn('data-match="exact"', module_row.group(0))
+
     def test_page_filters_and_switch(self) -> None:
         page = self.page()
         script = self.script(page)
@@ -354,6 +528,10 @@ class ViewTestCase(unittest.TestCase):
         )
         self.assertIn("document.querySelectorAll(TARGETS)", script)
         self.assertIn('document.querySelectorAll(".counter")', script)
+        self.assertIn("buckets[data.match]", script)
+        self.assertIn('document.querySelectorAll(".match-counter")', script)
+        self.assertIn('document.querySelectorAll(".match-counter")', script)
+        self.assertIn("counter.dataset.bucket", script)
         self.assertIn('getElementById("progress-verified")', script)
         self.assertIn('getElementById("progress-rebuilt")', script)
         self.assertIn("function setView", script)
@@ -484,6 +662,256 @@ class ViewTestCase(unittest.TestCase):
         self.assertIn("run.py run --name free", detail)
         self.assertNotIn("<form", page)
         self.assertNotIn("window.location", script)
+
+    def test_page_holds_the_provenance_panel(self) -> None:
+        page = self.page()
+        self.assertIn('<div class="provenance-panel">', page)
+        rows = self.provenance_rows(page)
+        self.assertEqual(len(rows), len(view.store.PROVENANCE))
+
+    def test_page_reports_provenance_counts(self) -> None:
+        records = [
+            self.record("0x300ec", name="free", status="verified"),
+            self.record(
+                "0x300f0", name="strlen", status="verified", provenance="library"
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn("1 game", self.provenance_row(page, "game"))
+        self.assertIn("1 library", self.provenance_row(page, "library"))
+
+    def test_page_reports_the_unknown_count(self) -> None:
+        records = [self.record("0x300ec", name="free", status="unknown")]
+        page = view.render_page(records, [], {})
+        self.assertIn("1 unknown", self.provenance_row(page, "game"))
+
+    def test_page_reports_byte_coverage(self) -> None:
+        page = self.page()
+        row = self.provenance_row(page, "game")
+        self.assertIn('class="provenance-bar"', row)
+        self.assertIn('class="provenance-fill"', row)
+        self.assertIn("100%", row)
+
+    def test_page_targets_carry_the_provenance(self) -> None:
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                section="Program functions",
+                module="free",
+                size=12,
+                result=self.result(match="exact-bytes"),
+            ),
+        ]
+        page = view.render_page(records, [], {"free": "sha256:" + "1" * 64})
+        targets = {
+            "chip": r'<button class="chip[^"]*"[^>]*>',
+            "table row": r'<tr class="record-row[^"]*"[^>]*>',
+            "map block": r'<button class="map-block[^"]*"[^>]*>',
+            "treemap block": r'<button class="treemap-block[^"]*"[^>]*>',
+            "graph node": r'<g class="graph-node[^"]*"[^>]*>',
+        }
+        for label, pattern in targets.items():
+            match = re.search(pattern, page, re.DOTALL)
+            self.assertIsNotNone(match, f"the page holds no {label}")
+            self.assertIn('data-provenance="game"', match.group(0), label)
+        module = self.module(
+            "driver",
+            checks=["identity"],
+            result=self.result(match="exact-bytes"),
+        )
+        page = view.render_page(
+            records,
+            [module],
+            {"free": "sha256:" + "1" * 64, "driver": "sha256:" + "1" * 64},
+        )
+        module_chip = re.search(
+            r'<button class="chip[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_chip, "the page holds no module chip")
+        self.assertIn('data-provenance="game"', module_chip.group(0))
+        module_row = re.search(
+            r'<tr class="record-row[^"]*"[^>]*data-key="driver"[^>]*>', page
+        )
+        self.assertIsNotNone(module_row, "the page holds no module row")
+        self.assertIn('data-provenance="game"', module_row.group(0))
+
+    def test_page_filters_by_provenance(self) -> None:
+        page = self.page()
+        script = self.script(page)
+        self.assertIn('id="provenance-filter"', page)
+        for provenance in view.store.PROVENANCE:
+            self.assertIn(f'<option value="{provenance}">', page)
+        self.assertIn('getElementById("provenance-filter")', script)
+
+    def test_page_binds_the_provenance_filter(self) -> None:
+        script = self.script(self.page())
+        self.assertIn(
+            'document.getElementById("provenance-filter")'
+            '.addEventListener("input", applyFilters);',
+            script,
+        )
+
+    def test_page_script_uses_the_denominator(self) -> None:
+        script = self.script(self.page())
+        self.assertIn('data.provenance === "game"', script)
+        self.assertIn('data.address !== ""', script)
+        self.assertIn('data.status !== "not_a_function"', script)
+        block = self.game_progress_block(script)
+        self.assertIn("visible += 1;", block)
+        self.assertIn("verified += 1;", block)
+        self.assertIn("rebuilt += 1;", block)
+        self.assertLess(
+            block.index("visible += 1;"), block.index("verified += 1;")
+        )
+        self.assertLess(
+            block.index("verified += 1;"), block.index("rebuilt += 1;")
+        )
+
+    def test_page_progress_excludes_library_and_compiler_helper_records(
+        self,
+    ) -> None:
+        records = [
+            self.record("0x300ec", name="free", status="verified"),
+            self.record(
+                "0x300f0",
+                name="strlen",
+                status="rebuilt",
+                provenance="library",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+            self.record(
+                "0x300f4",
+                name="memcpy",
+                status="rebuilt",
+                provenance="compiler_helper",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn(
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 100%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 0%"',
+            page,
+        )
+        self.assertIn("1 game", self.provenance_row(page, "game"))
+        self.assertIn("1 library", self.provenance_row(page, "library"))
+        self.assertIn(
+            "1 compiler_helper",
+            self.provenance_row(page, "compiler_helper"),
+        )
+
+    def test_page_match_counters_keep_a_library_record(self) -> None:
+        records = [
+            self.record(
+                "0x300ec",
+                name="free",
+                status="verified",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+            self.record(
+                "0x300f0",
+                name="strlen",
+                status="rebuilt",
+                provenance="library",
+                checks=["build", "identity"],
+                result=self.result(match="exact-bytes"),
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn('data-bucket="exact">2 exact</span>', page)
+        self.assertIn(
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 100%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 0%"',
+            page,
+        )
+
+    def test_page_script_match_bucket_ignores_provenance(self) -> None:
+        script = self.script(self.page())
+        increment = "buckets[data.match] = (buckets[data.match] || 0) + 1;"
+        self.assertEqual(script.count(increment), 1)
+        match = re.search(
+            r'if \(data\.status !== "not_a_function"\) \{(.*?)\n    \}',
+            script,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "the script holds no not_a_function guard")
+        block = match.group(1)
+        self.assertIn(increment, block)
+        self.assertIn('data.provenance === "game" && data.address !== ""', block)
+        self.assertLess(
+            block.index(increment),
+            block.index('data.provenance === "game" && data.address !== ""'),
+        )
+        progress = self.game_progress_block(script)
+        self.assertIn("visible += 1;", progress)
+        self.assertIn("verified += 1;", progress)
+        self.assertIn("rebuilt += 1;", progress)
+
+    def test_page_progress_excludes_a_module_row(self) -> None:
+        records = [self.record("0x300ec", name="free", status="rebuilt")]
+        page = view.render_page(
+            records,
+            [self.module("driver", status="verified")],
+            {"driver": "sha256:" + "1" * 64},
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 100%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 0%"',
+            page,
+        )
+
+    def test_page_excludes_data_from_the_total(self) -> None:
+        records = [
+            self.record("0x300ec", name="free", status="verified"),
+            self.record(
+                "0x300f0",
+                name="table",
+                status="not_a_function",
+                provenance="data",
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn(
+            'id="progress-verified" class="progress-fill progress-fill-verified"'
+            ' style="width: 100%"',
+            page,
+        )
+        self.assertIn(
+            'id="progress-rebuilt" class="progress-fill progress-fill-rebuilt"'
+            ' style="width: 0%"',
+            page,
+        )
+
+    def test_page_header_counts_the_game_records(self) -> None:
+        records = [
+            self.record("0x300ec", name="free", status="verified"),
+            self.record("0x300f0", name="exit", status="verified"),
+            self.record(
+                "0x300f4", name="strlen", status="verified", provenance="library"
+            ),
+        ]
+        page = view.render_page(records, [], {})
+        self.assertIn("<b>Screamer rebuild</b> · 2 functions</span>", page)
 
 
 if __name__ == "__main__":

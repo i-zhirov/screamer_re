@@ -1,9 +1,56 @@
 {
   "address": "0xe09dc",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe09dc"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "memalloc",
+    "object_sha256": "sha256:d7612a34176a8652888a565e47880de947f63e4c71fcdf4577de1058052a9f47",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__MemAllocator"
+  },
+  "name": "__MemAllocator",
   "notes": [],
   "object_offset": "0xd09dc",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 168,
+        "bytes_total": 168,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 74,
+        "instructions_total": 74,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xe09dc",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:b882dd2353562776e2970a65a2f905407fcc6022c48dee632c788f463fdf37e6",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:94864ee6dd0b949f6467d6c99aa61bed2322992442a032d2c1c44aa611ea326c",
+    "tool": "run.py"
+  },
   "size": 168,
-  "status": "unknown"
+  "status": "verified"
 }

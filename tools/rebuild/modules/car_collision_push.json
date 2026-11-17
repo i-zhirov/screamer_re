@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "car_collision_push_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

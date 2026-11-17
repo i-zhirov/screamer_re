@@ -1,0 +1,975 @@
+{
+  "entries": {
+    "0x3009b": {
+      "file": "CLIB3R.LIB",
+      "module": "printf",
+      "object_sha256": "sha256:6a57d98f158011150742376d421567c76169eb7d16b18ea137546269eed34d66",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "printf_"
+    },
+    "0x300be": {
+      "file": "CLIB3R.LIB",
+      "module": "exit",
+      "object_sha256": "sha256:e10241f5b9bc31715343cc4f8fbfcc29583d2188c33113cdf7f90a6177f178f1",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "exit_"
+    },
+    "0x300d6": {
+      "file": "CLIB3R.LIB",
+      "module": "exit",
+      "object_sha256": "sha256:f5749efddb197407369de6f1cdeb1630a90c432af8500d3a201711c22b480bf9",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_exit_"
+    },
+    "0x4bf23": {
+      "file": "CLIB3R.LIB",
+      "module": "segread",
+      "object_sha256": "sha256:6418fee50561d422446d56ced569c55536d662c849169b47a816f0ee8a005f02",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "segread_"
+    },
+    "0x4bf4b": {
+      "file": "CLIB3R.LIB",
+      "module": "intx386",
+      "object_sha256": "sha256:e97edb0e81b87d0ac140e5495f2f97a552043b23f9c04388ca9185036d6a2ca7",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "int386x_"
+    },
+    "0x4bf64": {
+      "file": "CLIB3R.LIB",
+      "module": "fprintf",
+      "object_sha256": "sha256:00c5f82236a73f0d97cd31d40be19a24feafd121d257bd050aaa9bf18d279fb2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fprintf_"
+    },
+    "0x4d32c": {
+      "file": "CLIB3R.LIB",
+      "module": "sprintf",
+      "object_sha256": "sha256:342eefbab24f90d29065ce5381d648023370e3befedb06a6d6fd4ecfc2a6cde8",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "sprintf_"
+    },
+    "0x4d9ba": {
+      "file": "CLIB3R.LIB",
+      "module": "stricmp",
+      "object_sha256": "sha256:a51a87e7a60b4ea86576d43dc7e3640604e301ce6c5b01b8f901fbd0f9234322",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "stricmp_"
+    },
+    "0x4da26": {
+      "file": "MATH387R.LIB",
+      "module": "trig387",
+      "object_sha256": "sha256:cd5ed5a82e10635251d2d4e88bf44a00610fe4d557dbe4cef4451ed50fe46be4",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@COS"
+    },
+    "0x4da66": {
+      "file": "MATH387R.LIB",
+      "module": "trig387",
+      "object_sha256": "sha256:43a444f8d826bccf9ff2d532c7b4c1d75e982a868dfde2187e5484216b3d9724",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "cos_"
+    },
+    "0x4da72": {
+      "file": "MATH387R.LIB",
+      "module": "trig387",
+      "object_sha256": "sha256:2909f08a9dc61ceeddd6314782c5868e12ee6da5f0b7f46ab1148b69956e9cc5",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "sin_"
+    },
+    "0x4da7e": {
+      "file": "MATH387R.LIB",
+      "module": "trig387",
+      "object_sha256": "sha256:b2f970595761bf2a6c0340b7a4d597be75e58453565054840ec7e0950c6d7ea0",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@TAN"
+    },
+    "0xc1ffd": {
+      "file": "CLIB3R.LIB",
+      "module": "sscanf",
+      "object_sha256": "sha256:442ee8b0dbf64a2dbc7e2cdfb490aed0d0796c3ed77f5b0a39cf961119add062",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "vsscanf_"
+    },
+    "0xc2024": {
+      "file": "CLIB3R.LIB",
+      "module": "sscanf",
+      "object_sha256": "sha256:00c5f82236a73f0d97cd31d40be19a24feafd121d257bd050aaa9bf18d279fb2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "sscanf_"
+    },
+    "0xc2045": {
+      "file": "CLIB3R.LIB",
+      "module": "atoi",
+      "object_sha256": "sha256:027111dcb71bcdb84d3b9636ff2c9adf6be9f1d2085d9f44315213ff52224776",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "atoi_"
+    },
+    "0xc209c": {
+      "file": "MATH387R.LIB",
+      "module": "atof",
+      "object_sha256": "sha256:84e157067b9a7e6ba416d5f26a4fc4c6f2bf18d0a0b6c8845487f37b9d93a087",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "atof_"
+    },
+    "0xc20a6": {
+      "file": "MATH387R.LIB",
+      "module": "pow387",
+      "object_sha256": "sha256:9faf06c154e5b348da4fb0c91cd3188ef5160f6a2ef86b8a97bdb1e75548a5a8",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@DPOW"
+    },
+    "0xc21e2": {
+      "file": "MATH387R.LIB",
+      "module": "pow387",
+      "object_sha256": "sha256:b04107ad3196d0acf4ccdc7954b829fa3d59dd4e03c6b2d8cfbca5eb6fab29f2",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "pow_"
+    },
+    "0xc21f2": {
+      "file": "CLIB3R.LIB",
+      "module": "strnicmp",
+      "object_sha256": "sha256:e0ac0b43d0effb4a36dfc95f0efbd05bb654d32395df1f705065f5f5b0e6f195",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strnicmp_"
+    },
+    "0xc224a": {
+      "file": "MATH387R.LIB",
+      "module": "atan387",
+      "object_sha256": "sha256:0c0ffa5af02b8d761e377d5d80b6a22a8611d86aba2a32127895d09af0dc2fdb",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@ATAN"
+    },
+    "0xc224f": {
+      "file": "MATH387R.LIB",
+      "module": "atan387",
+      "object_sha256": "sha256:7900764dc50bff7bc8619931f07011ec7cc70b02046d9edcc9bbda0b8ef71fa9",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@ATAN2"
+    },
+    "0xc5e1e": {
+      "file": "MATH387R.LIB",
+      "module": "acos387",
+      "object_sha256": "sha256:e4a358a4d06b46ab15cd19d223d9ec1e1f2b72508171b969b6711a966fbf4013",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "IF@DACOS"
+    },
+    "0xc5e42": {
+      "file": "MATH387R.LIB",
+      "module": "acos387",
+      "object_sha256": "sha256:d0387a493e204da301176f054adb6a9db21b2bba081fc4de51c80e3fdc0901fd",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "acos_"
+    },
+    "0xc5e4e": {
+      "file": "CLIB3R.LIB",
+      "module": "fopen",
+      "object_sha256": "sha256:774ffa06c2b22fdb99d9ccff960976e4af59af0558af8056be1b90cd0f3e9cbd",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__open_flags_"
+    },
+    "0xc5fca": {
+      "file": "CLIB3R.LIB",
+      "module": "fopen",
+      "object_sha256": "sha256:155f71895f1306a19da482df8ff7bc50a4ce1c87ddb2f1a4c5fe8293b8cbc9c6",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_fsopen_"
+    },
+    "0xc5fe5": {
+      "file": "CLIB3R.LIB",
+      "module": "fopen",
+      "object_sha256": "sha256:0b6fee8cff52b6f34a4d001b96a06fe08cee7d231cd16d97c6f507e58238eb86",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fopen_"
+    },
+    "0xc607b": {
+      "file": "CLIB3R.LIB",
+      "module": "fread",
+      "object_sha256": "sha256:c11dadf3c6b9df41474a45cab5b93ea40bd186208c884b0b7e6d3659a274f5c6",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fread_"
+    },
+    "0xc6245": {
+      "file": "CLIB3R.LIB",
+      "module": "fclose",
+      "object_sha256": "sha256:c9754d783b71759cf33f2078d86a72ab15735e5ffe6c40837875b52af6588a06",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fclose_"
+    },
+    "0xc6274": {
+      "file": "CLIB3R.LIB",
+      "module": "fclose",
+      "object_sha256": "sha256:0bcc099774c0ca376c27be42079cb15e625e1fde657f9d9f86c7f4c5ac1e4220",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__shutdown_stream_"
+    },
+    "0xc6295": {
+      "file": "CLIB3R.LIB",
+      "module": "fclose",
+      "object_sha256": "sha256:fb2fe7f81d5a355f0fbe6ae19301f7d1abeee01762fbb098f4bf5c9e7bb419d4",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__MkTmpFile_"
+    },
+    "0xc62fe": {
+      "file": "CLIB3R.LIB",
+      "module": "fclose",
+      "object_sha256": "sha256:0493bb22d0ee136b4738fd9fc3c46c1442411225568f98e933811ecb8a20fa23",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__doclose_"
+    },
+    "0xc6387": {
+      "file": "CLIB3R.LIB",
+      "module": "fwrite",
+      "object_sha256": "sha256:6f33ad79d71226be104783483d47c6e319e6c89d733a10af053fd1ec03da2d81",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fwrite_"
+    },
+    "0xc656e": {
+      "file": "CLIB3R.LIB",
+      "module": "puts",
+      "object_sha256": "sha256:9cad290a0c50b4c8e2d15108cc7a404702161e2ac3bd7eb2ec90e313ae6849c8",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "puts_"
+    },
+    "0xc65f1": {
+      "file": "CLIB3R.LIB",
+      "module": "sscanf",
+      "object_sha256": "sha256:442ee8b0dbf64a2dbc7e2cdfb490aed0d0796c3ed77f5b0a39cf961119add062",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "vsscanf_"
+    },
+    "0xc6618": {
+      "file": "CLIB3R.LIB",
+      "module": "sscanf",
+      "object_sha256": "sha256:00c5f82236a73f0d97cd31d40be19a24feafd121d257bd050aaa9bf18d279fb2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "sscanf_"
+    },
+    "0xc6cbe": {
+      "file": "MATH387R.LIB",
+      "module": "sqrt387",
+      "object_sha256": "sha256:783c9a9354973d0358298be82780180173a06f8559c1b48242ed234d6911d72f",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "sqrt_"
+    },
+    "0xc6cf0": {
+      "file": "MATH387R.LIB",
+      "module": "sqrt387",
+      "object_sha256": "sha256:adb5d11fc80f80a929ff6a35ff838ce050a9c1bc500a3b6f7424748c6b5e880c",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__@DSQRT"
+    },
+    "0xd1d44": {
+      "file": "CLIB3R.LIB",
+      "module": "stat",
+      "object_sha256": "sha256:bda7bb649cccda1132ee36551b2a7742aca06b0dec2707080d59b2adcb0c7696",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "stat_"
+    },
+    "0xd1ec0": {
+      "file": "CLIB3R.LIB",
+      "module": "set386",
+      "object_sha256": "sha256:1375112f4506731219a65b00cc60b6528052ad6340b85c536d1bc4e55fb6f707",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "memset_"
+    },
+    "0xd1edd": {
+      "file": "CLIB3R.LIB",
+      "module": "renam",
+      "object_sha256": "sha256:b31e48e0be8bfcc66e813589a39cdbb6ae0983ffa573fbe7c14f8e466e2bbc6a",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "rename_"
+    },
+    "0xd1f25": {
+      "file": "CLIB3R.LIB",
+      "module": "nmalloc",
+      "object_sha256": "sha256:59021df45a39d61bf83b6c3f95b15b684211b7b6eba09678421c439c5bc18ff8",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "malloc_"
+    },
+    "0xd2008": {
+      "file": "CLIB3R.LIB",
+      "module": "nfree",
+      "object_sha256": "sha256:f872cf9e9cc4681fe34a5b1ea5bced4a588cdb14bf3e3fedcaa35349f2d240f0",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "free_"
+    },
+    "0xd2066": {
+      "file": "CLIB3R.LIB",
+      "module": "memcpy",
+      "object_sha256": "sha256:ec802c5948e3fadafa0f5604100444f53e64602c9f993c3b04336813b3f249f7",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "memcpy_"
+    },
+    "0xd429f": {
+      "file": "CLIB3R.LIB",
+      "module": "fprtf",
+      "object_sha256": "sha256:b4f549c3e01414ae19c7436fa2999cb8a37587ba5cf321ebebca1c0cf22bc0c9",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__fprtf_"
+    },
+    "0xd47ee": {
+      "file": "CLIB3R.LIB",
+      "module": "strcpy",
+      "object_sha256": "sha256:8c05089d4f927f7113c961ee898d082d5b911b7bd41912ce0b9a12959a23501c",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strcpy_"
+    },
+    "0xd484f": {
+      "file": "CLIB3R.LIB",
+      "module": "fseek",
+      "object_sha256": "sha256:0c028f3a80079323ca6f9bc5052866721ae4b34d1b0bf80a9c6490ed9c00e971",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fseek_"
+    },
+    "0xd494b": {
+      "file": "CLIB3R.LIB",
+      "module": "strchr",
+      "object_sha256": "sha256:fb36736229a954d46bf70890417441883148e2164888016209f9412ccef78930",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strchr_"
+    },
+    "0xd4965": {
+      "file": "CLIB3R.LIB",
+      "module": "fgets",
+      "object_sha256": "sha256:7effe042f42b0bce6d7cfda3f1df1cbb620c6a3d50fbccd802f53e4e6dcdca55",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fgets_"
+    },
+    "0xd49c8": {
+      "file": "CLIB3R.LIB",
+      "module": "strlen",
+      "object_sha256": "sha256:4c798122763f9874160c5dc53566012220eda9e35b62470f74efa9be02db64d5",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strlen_"
+    },
+    "0xd4b70": {
+      "file": "CLIB3R.LIB",
+      "module": "int386",
+      "object_sha256": "sha256:37ac3f94b05649d1673185d170899f76dcb9c12a836f8d0cb3e0ae75533f2ac7",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "int386_"
+    },
+    "0xd68c0": {
+      "file": "CLIB3R.LIB",
+      "module": "prtf",
+      "object_sha256": "sha256:bfa35de0052d2a26299bfdae5703e3f613c7f85fd8b63bc74639f25c1e92f7ef",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__prtf_"
+    },
+    "0xdcbe0": {
+      "file": "CLIB3R.LIB",
+      "module": "scnf",
+      "object_sha256": "sha256:569ff2fc385df88248fa2649c9f519c694a2a3de496e4132f222e248ecd44b89",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__scnf_"
+    },
+    "0xdd72a": {
+      "file": "MATH387R.LIB",
+      "module": "strtod",
+      "object_sha256": "sha256:dee394681bf6f12345833a33743b5c611ff19bf7e859e9cc578ec6548efd19bf",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "strtod_"
+    },
+    "0xdd8d3": {
+      "file": "MATH387R.LIB",
+      "module": "pow87e",
+      "object_sha256": "sha256:21af22c5fe5b38739ea59d7bc6da1f46cf4387465f7efcee74303c3ff7b27f17",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__pow87_err_"
+    },
+    "0xdd974": {
+      "file": "MATH387R.LIB",
+      "module": "exp387",
+      "object_sha256": "sha256:ce75d8871c14d54c76175366354c5802a4cbf24969ebaefb22e6bf3462e3a140",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__@DEXP"
+    },
+    "0xdd9e2": {
+      "file": "CLIB3R.LIB",
+      "module": "tolower",
+      "object_sha256": "sha256:12faceab764ccdbbbeeaffb3213def7775e07263b5d2a97f620a888f07514172",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "tolower_"
+    },
+    "0xdd9f0": {
+      "file": "CLIB3R.LIB",
+      "module": "seterrno",
+      "object_sha256": "sha256:f3643b811ac192b56926129299682d69c17b9e57b06b8b4a84f096e11e1924c2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__set_EDOM_"
+    },
+    "0xdd9f5": {
+      "file": "CLIB3R.LIB",
+      "module": "seterrno",
+      "object_sha256": "sha256:930501633ef1d6966071f218757ec49f5d2644d78c0824e24681da2eca8cc00d",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__set_errno_"
+    },
+    "0xdda2b": {
+      "file": "CLIB3R.LIB",
+      "module": "open",
+      "object_sha256": "sha256:c8be6ad9dd18ad29eb4e2e6fe313caf245e0b9441d7bd914e9768c8f7d97c3fa",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "open_"
+    },
+    "0xdda4f": {
+      "file": "CLIB3R.LIB",
+      "module": "open",
+      "object_sha256": "sha256:44e9fa325d331cb3372a65468c8280780b6f198acbc4527c6c3a28a0a80851f1",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "sopen_"
+    },
+    "0xddc79": {
+      "file": "CLIB3R.LIB",
+      "module": "allocfp",
+      "object_sha256": "sha256:236060ef783ce2f9ebe52906fdd3ddb663bee128387d1efb54ad82a2b5c11308",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__allocfp_"
+    },
+    "0xddd21": {
+      "file": "CLIB3R.LIB",
+      "module": "allocfp",
+      "object_sha256": "sha256:35a39e05742a9225d5f52a27fd5259fbda2d848266020371e10899fbc9dcdd87",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__freefp_"
+    },
+    "0xddd78": {
+      "file": "CLIB3R.LIB",
+      "module": "chktty",
+      "object_sha256": "sha256:eacc9dd0d262e890bf7ad4809c2d8ba156c01a72273b353db6113cd62951cf56",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__chktty_"
+    },
+    "0xddda9": {
+      "file": "CLIB3R.LIB",
+      "module": "ioalloc",
+      "object_sha256": "sha256:d5ccef22890823f368540e83f2300103a023857c87d2c2f61b0d3dd66059ae18",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__ioalloc_"
+    },
+    "0xdde20": {
+      "file": "CLIB3R.LIB",
+      "module": "qread",
+      "object_sha256": "sha256:c80edfc9e236d36f52228005b2c5b67cedb7ebbccb16e4865ae1c8269a11854e",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__qread_"
+    },
+    "0xdde3f": {
+      "file": "CLIB3R.LIB",
+      "module": "fgetc",
+      "object_sha256": "sha256:29498a4cabf6e4868046dcde4a937141693f9a875dba2837747f273fb28514f8",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fgetc_"
+    },
+    "0xddec8": {
+      "file": "CLIB3R.LIB",
+      "module": "fgetc",
+      "object_sha256": "sha256:91b087e4e7e176ae425cac326408b22078885aaf71c7447821186db00982ea36",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__filbuf_"
+    },
+    "0xddef7": {
+      "file": "CLIB3R.LIB",
+      "module": "fgetc",
+      "object_sha256": "sha256:4175ca00495fe681dff9a6f4d767fb8df48ba84e0170eb4fd4966050e79bb1b8",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__fill_buffer_"
+    },
+    "0xddfa2": {
+      "file": "CLIB3R.LIB",
+      "module": "execaddr",
+      "object_sha256": "sha256:76811197299fd7215ff45276752d25eaa8889353ee70ada1fd839c8a55d34ffc",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__execaddr_"
+    },
+    "0xddfa8": {
+      "file": "CLIB3R.LIB",
+      "module": "flush",
+      "object_sha256": "sha256:8058c423c0c9d5fc788ededf7691d64f13173774ea518717a5db8dcd1cd67974",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__flush_"
+    },
+    "0xde067": {
+      "file": "CLIB3R.LIB",
+      "module": "ftell",
+      "object_sha256": "sha256:380620836d9403b6c3fa4759a6fdc6462e2020dc7b8145fb91e7ce9899ac6bd2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "ftell_"
+    },
+    "0xde097": {
+      "file": "CLIB3R.LIB",
+      "module": "lseek",
+      "object_sha256": "sha256:c4f35fb6e78401398d5c275dfc3983483da00d0ec484a7f6d6c10571890b7fba",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "lseek_"
+    },
+    "0xde0d8": {
+      "file": "CLIB3R.LIB",
+      "module": "_clse",
+      "object_sha256": "sha256:b20c59184cbb80416164b953ad2e5757c275e96329759beae79f84a79441c826",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__close_"
+    },
+    "0xde10a": {
+      "file": "CLIB3R.LIB",
+      "module": "write",
+      "object_sha256": "sha256:2eb156b781efd11b5f5206b15af6f5c0be63614b99201ab91c5d47906108a229",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "write_"
+    },
+    "0xde2db": {
+      "file": "CLIB3R.LIB",
+      "module": "fputc",
+      "object_sha256": "sha256:6070f2d3adc6343139c15fe0afe1e6f670166b9c5f503a7704696baed36c0561",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fputc_"
+    },
+    "0xde37f": {
+      "file": "CLIB3R.LIB",
+      "module": "fputs",
+      "object_sha256": "sha256:7e1ec2b2d1717b77d7e12eb8684b2509d69558c92370e17b2598bd7c3ec5877f",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "fputs_"
+    },
+    "0xde484": {
+      "file": "MATH387R.LIB",
+      "module": "math87e",
+      "object_sha256": "sha256:0416c53a91bb791245eba320840bb7916560204b62cb1e7394e7eeca89d6dec5",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__math87_err_"
+    },
+    "0xde537": {
+      "file": "CLIB3R.LIB",
+      "module": "gmtime",
+      "object_sha256": "sha256:87cd1b16e869a1c1233a112f382b7d63232441cef65458779ac26cccf33c9c9f",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__brktime_"
+    },
+    "0xe05f9": {
+      "file": "CLIB3R.LIB",
+      "module": "fstrcpy",
+      "object_sha256": "sha256:9b3b73d9c13a970ba9c3088d86fb5e4d9aea6e6a68a8012ca54e55c7d513bf21",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_fstrcpy_"
+    },
+    "0xe062c": {
+      "file": "CLIB3R.LIB",
+      "module": "fmemcpy",
+      "object_sha256": "sha256:d28745805611dbde0ea991db7f6fd3fcf64df5104e66c2d107d788b5763500a4",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_fmemcpy_"
+    },
+    "0xe0654": {
+      "file": "CLIB3R.LIB",
+      "module": "strpbrk",
+      "object_sha256": "sha256:b1b0d06b7e67b859f4bfc1e906cc807a428a13f70ed86a320684d5004ed225dc",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strpbrk_"
+    },
+    "0xe069b": {
+      "file": "CLIB3R.LIB",
+      "module": "gtcwd",
+      "object_sha256": "sha256:593387a2571b1f3a8de92ef58b153dd8886cf6423612bea740f5e0b4a188f60e",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "getcwd_"
+    },
+    "0xe0725": {
+      "file": "CLIB3R.LIB",
+      "module": "chdir",
+      "object_sha256": "sha256:b420b4190bbc5c50c39fcba7a51d73067d30f83d5c654060290d35060242875f",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "chdir_"
+    },
+    "0xe0744": {
+      "file": "CLIB3R.LIB",
+      "module": "d2ttime",
+      "object_sha256": "sha256:142dee88ae0f133190f18da4d6f0d11847de3a5836505083b0c243b23309758d",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_d2ttime_"
+    },
+    "0xe07b0": {
+      "file": "CLIB3R.LIB",
+      "module": "cmp386",
+      "object_sha256": "sha256:e2de07c2e8ce74e666f01edb1271e76c31a6a73b59b63c5fc7fbc0628e6a21d5",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strcmp_"
+    },
+    "0xe0860": {
+      "file": "CLIB3R.LIB",
+      "module": "__stos",
+      "object_sha256": "sha256:a90ce072d983ac3aae0caf1dda227c54fe347d777ff1f99691b47212c7b4cb5c",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__STOSB"
+    },
+    "0xe0897": {
+      "file": "CLIB3R.LIB",
+      "module": "__stos",
+      "object_sha256": "sha256:3c03f427d6c627dab0595d319b3ca81fc73e01c5838787422314b02b94658876",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__STOSD"
+    },
+    "0xe092e": {
+      "file": "CLIB3R.LIB",
+      "module": "dosret",
+      "object_sha256": "sha256:2dbba63e48b24bbb111e4426f86ff18e388e6acdb03df237f14496838c5a5b2f",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__set_errno_dos_"
+    },
+    "0xe0994": {
+      "file": "CLIB3R.LIB",
+      "module": "enterdb",
+      "object_sha256": "sha256:ec8f41fc80e1b5d312bee16156fa6db10587386f6e50d4cecea5b82059ea8fd0",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__EnterWVIDEO_"
+    },
+    "0xe09bf": {
+      "file": "CLIB3R.LIB",
+      "module": "xmsg",
+      "object_sha256": "sha256:be3d21e74984d72baa1300eb78cbc817e3b4331514905b2f7dc82014f1dda7a4",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__fatal_runtime_error_"
+    },
+    "0xe09dc": {
+      "file": "CLIB3R.LIB",
+      "module": "memalloc",
+      "object_sha256": "sha256:d7612a34176a8652888a565e47880de947f63e4c71fcdf4577de1058052a9f47",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__MemAllocator"
+    },
+    "0xe0a84": {
+      "file": "CLIB3R.LIB",
+      "module": "memalloc",
+      "object_sha256": "sha256:00943c920c48f4ed43a38c6dd875905ec41debf53a6b9e5ac323ef6124e179f3",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__MemFree"
+    },
+    "0xe0bce": {
+      "file": "CLIB3R.LIB",
+      "module": "grownear",
+      "object_sha256": "sha256:7493bbfea4337f374be00f2b7bff87ae46ebcbe86bd02e0b59c7c9bcba282a60",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__FreeDPMIBlocks_"
+    },
+    "0xe0da3": {
+      "file": "CLIB3R.LIB",
+      "module": "grownear",
+      "object_sha256": "sha256:36e55732e20867cf5dc743dacae96e51b353dec9a0c015dffc02cec1af4993d7",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__LastFree_"
+    },
+    "0xe0f73": {
+      "file": "CLIB3R.LIB",
+      "module": "grownear",
+      "object_sha256": "sha256:a1d2e4e9363e6bd7db4da1bd6b4550f48ec6905b6d17d545da7d17f70fba1fe1",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__ExpandDGROUP_"
+    },
+    "0xe6758": {
+      "file": "CLIB3R.LIB",
+      "module": "stack386",
+      "object_sha256": "sha256:7afafa8779082ace037ca40484713df7031ae8d2847506fe949c6fd3a739dc6f",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "stackavail_"
+    },
+    "0xe6847": {
+      "file": "CLIB3R.LIB",
+      "module": "tell",
+      "object_sha256": "sha256:dec07e54ff87f7625d56a84ba65515b42d6e088d61bc5ce0f52e9f56a355bf50",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "tell_"
+    },
+    "0xe687d": {
+      "file": "CLIB3R.LIB",
+      "module": "itoa",
+      "object_sha256": "sha256:34a94af2a0c057156f29416774ffb9fd00a4891909d6c7de3f3cac0a2dd8c5cb",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "utoa_"
+    },
+    "0xe68c7": {
+      "file": "CLIB3R.LIB",
+      "module": "itoa",
+      "object_sha256": "sha256:bddc3155bbc998cfbe855c8081b1e698a28db7f5966655a3cce521b60329f8b3",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "itoa_"
+    },
+    "0xe6919": {
+      "file": "CLIB3R.LIB",
+      "module": "ltoa",
+      "object_sha256": "sha256:e8950e4387b2a91ac38e0d5be866e97460564166ddac89e7936d603bba528d49",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "ultoa_"
+    },
+    "0xe6962": {
+      "file": "CLIB3R.LIB",
+      "module": "itoa",
+      "object_sha256": "sha256:bddc3155bbc998cfbe855c8081b1e698a28db7f5966655a3cce521b60329f8b3",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "itoa_"
+    },
+    "0xe9e32": {
+      "file": "CLIB3R.LIB",
+      "module": "fdfs386",
+      "object_sha256": "sha256:53e850581a80e6ab648259cfc4cd4cb0ce6318ad47b3434767e906a8c7ab8572",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__FDFS"
+    },
+    "0xe9f0e": {
+      "file": "CLIB3R.LIB",
+      "module": "amodf386",
+      "object_sha256": "sha256:bdc3e0801d1ee5d4bb1c6127f9a836ff2c5861be55be38c4ed030210e1bef972",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__ZBuf2F"
+    },
+    "0xe9faa": {
+      "file": "MATH387R.LIB",
+      "module": "scale",
+      "object_sha256": "sha256:ff099581ace615137d30c91b6af79778893ff2bfa4c737228d25cef93de1299d",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "_Scale_"
+    },
+    "0xe9feb": {
+      "file": "MATH387R.LIB",
+      "module": "scale",
+      "object_sha256": "sha256:76c29a6cc377bf7598fac100dcb9aa8e6373be3099d686313dfae2faefea5869",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "_Scale10V_"
+    },
+    "0xea0d2": {
+      "file": "MATH387R.LIB",
+      "module": "math2err",
+      "object_sha256": "sha256:a79c997133eda3b5919b6f0247c5c1479736812215af7043d012b56d2bc9d823",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__math1err_"
+    },
+    "0xea0dc": {
+      "file": "MATH387R.LIB",
+      "module": "math2err",
+      "object_sha256": "sha256:a302f3c0ae3a3a8ed17bfb5f211d527c8695366d0506f654a2d94cbf39fb71d6",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__math2err_"
+    },
+    "0xea1b7": {
+      "file": "CLIB3R.LIB",
+      "module": "cvtbuf",
+      "object_sha256": "sha256:fc9727eae305b45d1df8a58191610014e9104fa57b472dca0dbbded60cb84d82",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__CVTBuffer_"
+    },
+    "0xea1bd": {
+      "file": "CLIB3R.LIB",
+      "module": "cvtbuf",
+      "object_sha256": "sha256:fc9727eae305b45d1df8a58191610014e9104fa57b472dca0dbbded60cb84d82",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__CVTBuffer_"
+    },
+    "0xea1c3": {
+      "file": "CLIB3R.LIB",
+      "module": "isatt",
+      "object_sha256": "sha256:8f2d3c01b2fc268d70bf9edd4e5674e8fb7a2bde9d4d6ed4c7fce65ebf52c483",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "isatty_"
+    },
+    "0xea1e1": {
+      "file": "CLIB3R.LIB",
+      "module": "iomode",
+      "object_sha256": "sha256:a8d28ffa719ccf0a4a677d393abf0e1139ff7ed6e67b9517ca4a533b8cdf0fbc",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__IOMode_"
+    },
+    "0xea236": {
+      "file": "CLIB3R.LIB",
+      "module": "iomode",
+      "object_sha256": "sha256:ad1eab87afec30c204a9204a6c3ae8bed4c889268f17774f3fd2915768e9fc53",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__SetIOMode_"
+    },
+    "0xea250": {
+      "file": "CLIB3R.LIB",
+      "module": "flushall",
+      "object_sha256": "sha256:76802ecf7ce8822c689afbf7984ef6bbc20c003ed1325f1eb40884eb179ff400",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__flushall_"
+    },
+    "0xea27f": {
+      "file": "CLIB3R.LIB",
+      "module": "gtche",
+      "object_sha256": "sha256:ee4a0b7461e93a6e6d0fdf27e744af2a05b4ec1225fcde6b80c59277ad2ce4d1",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "getche_"
+    },
+    "0xea29c": {
+      "file": "CLIB3R.LIB",
+      "module": "qwrit",
+      "object_sha256": "sha256:c6bc51c4eb8bed9aed93f6703ed21469bf9d67b418d1b23e4e554fec2dec63ba",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__qwrite_"
+    },
+    "0xea423": {
+      "file": "CLIB3R.LIB",
+      "module": "mktime",
+      "object_sha256": "sha256:3c874995c5453c204a4c0cb10aa89d195ca7588f8ff4d74db02612526b73c835",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "mktime_"
+    },
+    "0xea577": {
+      "file": "CLIB3R.LIB",
+      "module": "timeutil",
+      "object_sha256": "sha256:30ebfdc9c6a811e556f03497aca9fdec30cc389e8be5d9d839dabb1f28832a8c",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__leapyear_"
+    },
+    "0xea6bf": {
+      "file": "CLIB3R.LIB",
+      "module": "timeutil",
+      "object_sha256": "sha256:2abbfb8997601f31e0c8b6705a4778a2631943b1c5ffb2e8a3f40e147bc43faf",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__isindst_"
+    },
+    "0xea9a2": {
+      "file": "CLIB3R.LIB",
+      "module": "strcat",
+      "object_sha256": "sha256:d546178fb1e6e75e4f39972428bf820eb516e06ebace06ce88042dfff461dc4c",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strcat_"
+    },
+    "0xea9d9": {
+      "file": "CLIB3R.LIB",
+      "module": "read",
+      "object_sha256": "sha256:b42dbc5d6b08810210549dad917ed9d9e4c7ac7fbb5f5427bcbc7858445dd089",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "read_"
+    },
+    "0xeaaec": {
+      "file": "CLIB3R.LIB",
+      "module": "io386",
+      "object_sha256": "sha256:9532d5103101bb750f97b98535473c0e1bbe65e7c76e48172f89540b99adb452",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "_dos_read_"
+    },
+    "0xeab22": {
+      "file": "CLIB3R.LIB",
+      "module": "getenv",
+      "object_sha256": "sha256:1806cb0a0c5e5c2daac86c7a0842ff95fd04fc4e6dbfb2e79b76834b753eff9d",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "getenv_"
+    },
+    "0xeab7c": {
+      "file": "CLIB3R.LIB",
+      "module": "bits",
+      "object_sha256": "sha256:3e3bd01b7fe37807b4916af02df35fcc2322d708ecda16a8a80857020380f36d",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__setbits_"
+    },
+    "0xeabba": {
+      "file": "CLIB3R.LIB",
+      "module": "strncpy",
+      "object_sha256": "sha256:591e290c35107ce4ac72f7618362d7ef94d2744102fc9b80516b62d88d974d96",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "strncpy_"
+    },
+    "0xeacae": {
+      "file": "CLIB3R.LIB",
+      "module": "sbrk386",
+      "object_sha256": "sha256:4b5ce7f8b876dfc05ba95844125793be7fa789af855433e309d6abef627a69f2",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__brk_"
+    },
+    "0xeaef2": {
+      "file": "MATH387R.LIB",
+      "module": "ftos",
+      "object_sha256": "sha256:486412f9471ac862a1c118d0e06f18476aab93da84ec077daf56483f3d44f68a",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "_FtoS_"
+    },
+    "0xeb142": {
+      "file": "MATH387R.LIB",
+      "module": "i64ts386",
+      "object_sha256": "sha256:ffa7a1971bd938d7a982503751c2bbe5712ceb30514349cdd5173b6b37bc59ef",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__CmpBigInt"
+    },
+    "0xeb17c": {
+      "file": "MATH387R.LIB",
+      "module": "i64ts386",
+      "object_sha256": "sha256:7f55997b3828bed04f5d2eaf33caf54496d8f83317a1fb5684c4f2e652339bb5",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__Rnd2Int"
+    },
+    "0xeb30e": {
+      "file": "MATH387R.LIB",
+      "module": "_matherr",
+      "object_sha256": "sha256:eee4af1f703ee1b064a54bdbf78a36bf990df5a620218e37252e2351fc060b2d",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__rterrmsg_"
+    },
+    "0xeb356": {
+      "file": "MATH387R.LIB",
+      "module": "_matherr",
+      "object_sha256": "sha256:957ae681612f2bda38a22821090969a5c5123774e4cd391d88b489a4d570e2eb",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "_matherr_"
+    },
+    "0xeb386": {
+      "file": "CLIB3R.LIB",
+      "module": "tzset",
+      "object_sha256": "sha256:212221f144bee0eee542e3c2701f4c2918147d24ebd54f4438897d9da2441368",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "tzset_"
+    },
+    "0xeb656": {
+      "file": "CLIB3R.LIB",
+      "module": "error386",
+      "object_sha256": "sha256:19a5c6874eb0e9934abdb0d259fc4b48916b6d17a44a2300a27ac07203610703",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__doserror_"
+    },
+    "0xeb66a": {
+      "file": "MATH387R.LIB",
+      "module": "nan_inf",
+      "object_sha256": "sha256:7f91750c1d1b8e1346b28e6ab863c11dd5bb84c4041d950e7f7d20ba58165ef4",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__Nan_Inf_"
+    },
+    "0xeb6ee": {
+      "file": "MATH387R.LIB",
+      "module": "floor",
+      "object_sha256": "sha256:66c4168683bd91b69689f0f0b104305077a2a7d709fb06e4a44f325d62ac1331",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "floor_"
+    },
+    "0xeb72a": {
+      "file": "MATH387R.LIB",
+      "module": "cvt",
+      "object_sha256": "sha256:74f8839c9e188869171de2bee8d33d5694c71532328a2cf8f80bc7a175b9693c",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "__cvt_"
+    },
+    "0xeb915": {
+      "file": "CLIB3R.LIB",
+      "module": "iobaddr",
+      "object_sha256": "sha256:13255f51a49815b734c32b9c32149a98415f55cb8807eff80f45819f6ec8a724",
+      "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+      "symbol": "__get_std_stream_"
+    },
+    "0xeba08": {
+      "file": "MATH387R.LIB",
+      "module": "modf387",
+      "object_sha256": "sha256:79c93dc7414e0f351d29d222b7563ee5eac5670d18ab014d88f8b25e41050a2a",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "modf_"
+    },
+    "0xeba21": {
+      "file": "MATH387R.LIB",
+      "module": "frexp",
+      "object_sha256": "sha256:9cc62b6af07e7e0f5ac09a256843b7b13db240a5ddff2b175f98e3b06798ea16",
+      "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+      "symbol": "frexp_"
+    }
+  },
+  "libraries": {
+    "CLIB3R.LIB": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "EMU387.LIB": "sha256:5b150d1cdca625eb27747b7ac182e36f5a66571e4441ccc19caccc6fbf773b5c",
+    "MATH387R.LIB": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c"
+  }
+}

@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "fp_helper_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

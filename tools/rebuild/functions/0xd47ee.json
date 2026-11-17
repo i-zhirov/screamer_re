@@ -1,9 +1,56 @@
 {
   "address": "0xd47ee",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd47ee"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "strcpy",
+    "object_sha256": "sha256:8c05089d4f927f7113c961ee898d082d5b911b7bd41912ce0b9a12959a23501c",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "strcpy_"
+  },
+  "name": "strcpy",
   "notes": [],
   "object_offset": "0xc47ee",
-  "size": 97,
-  "status": "unknown"
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 31,
+        "bytes_total": 31,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 15,
+        "instructions_total": 15,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd47ee",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:bfebf430bfa6e0e6c6297cbc9b3d4f6e1fa5a7f6222cb203f086f131bdfa7e57",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:70756d67047b223a36719c1be86248f09ca379367a771bdb374a8dd848b1e71d",
+    "tool": "run.py"
+  },
+  "size": 31,
+  "status": "verified"
 }

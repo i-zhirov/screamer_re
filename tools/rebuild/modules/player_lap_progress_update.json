@@ -24,10 +24,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_lap_progress_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_lap_progress_update.c"
     },
     {
       "compiler": "wasm",
@@ -37,5 +34,6 @@
       "compiler": "wcc386",
       "file": "player_lap_progress_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

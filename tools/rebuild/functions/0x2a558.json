@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x2a558 holds 343 instructions and 1323 bytes up to the ret at 0x2aa82, so the record keeps the 1324-byte extent and sets no function size"
+      "text": "the original at 0x2a558 holds 343 instructions and 1323 bytes over the full extent; the ret is at 0x2aa82, so the record keeps the 1324-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "the screen index comes from the chosen player record at 0x2099c field +0x14 and a value above 5 drops by 6 and sets the flag 0x08; the input word DAT_00118e1c bits 0x1020 skip the results, and the wait loop exits on the bytes at 3 and 0x1e or polls the input behind DAT_0011d2c0 and DAT_0011d2cc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_results_screen",
   "name": "race_results_screen",
   "notes": [],
   "object_offset": "0x1a558",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -48,12 +57,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 47,
         "instructions_total": 256,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2a558",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a6de9c3244d8ecd7ff3e152291b9e70bcaebbce86055f06883945b9d9cb22257",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:8cbbf6a4166b714c9c8aaaf95510c2a89a3261df7a9faf429ef57814d712274f",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:1adc7c85a1d55bbea0b87e0c69b7bbd867e2a8e19a9e235d508e170fe6e926be",
     "tool": "run.py"
   },

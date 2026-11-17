@@ -14,8 +14,13 @@ The toolchain runs alongside the pinned OpenWatcom V2 container of
 `tools/rebuild/harness.py`; it does not replace it.
 
 Usage:
-    python3 tools/rebuild/harness_dos.py build --module NAME [--timeout SECONDS]
+    python3 tools/rebuild/harness_dos.py build --module NAME [--timeout SECONDS] [--recipe PATH]
     python3 tools/rebuild/harness_dos.py digest --module NAME
+
+The build command reads the stored module record by default.  With `--recipe`,
+it reads the module recipe from the explicit path instead.  The command removes
+the old outputs first, and it raises an error when the build log holds a
+compile or a link failure, so a failed build cannot look like a pass.
 
 Exit code 0 on success, 2 on a compile or a link failure or a missing module
 record, and 3 when DOSBox-X or the period toolchain is missing, because a
@@ -44,7 +49,7 @@ RSP_NAME = "dos_link.rsp"
 LOG_NAME = "dos_build.log"
 MAP_NAME = "M.MAP"
 WCC_FLAGS = ("-bt=dos", "-s", "-zq", "-i=C:\\WATCOM\\H")
-WASM_FLAGS = ("-bt=dos", "-zq")
+WASM_FLAGS = ("-bt=dos", "-zq", "-fpi87")
 
 
 def object_name(index: int) -> str:
@@ -109,19 +114,72 @@ def conf_text(module: dict, count: int) -> str:
     return "\n".join(lines) + "\n"
 
 
-def wait_for_artifacts(module: dict, timeout: int) -> bool:
+def artifacts_present(module: dict) -> bool:
+    """True when the exe and, for a module with a map, the map are on disk."""
+    if not (WORK_DIR / module["exe"]).is_file():
+        return False
+    return "map" not in module or (WORK_DIR / MAP_NAME).is_file()
+
+
+def wait_for_artifacts(
+    module: dict, timeout: int, process: subprocess.Popen | None = None
+) -> bool:
     deadline = time.time() + timeout
     while time.time() < deadline:
-        if (WORK_DIR / module["exe"]).is_file():
-            if "map" not in module or (WORK_DIR / MAP_NAME).is_file():
+        if artifacts_present(module):
+            time.sleep(2)
+            return True
+        if process is not None and process.poll() is not None:
+            if artifacts_present(module):
                 time.sleep(2)
                 return True
+            return False
         time.sleep(2)
     return False
 
 
-def command_build(name: str, timeout: int) -> int:
-    module = store.load_module(name)
+def load_recipe(name: str, recipe: Path | None) -> dict:
+    """Read a module record from the store or from an explicit recipe path.
+
+    Raise `ValueError` when the record name differs from `name`.
+    """
+    module = (
+        store.load_module(name) if recipe is None else store.load_module_file(recipe)
+    )
+    if module.get("name") != name:
+        raise ValueError(
+            f"the recipe name {module.get('name')!r} differs from the"
+            f" expected name {name!r}"
+        )
+    return module
+
+
+def clear_artifacts(module: dict) -> None:
+    """Delete the old outputs, so a failed build cannot keep an old artifact."""
+    names = [module["exe"]]
+    if "map" in module:
+        names.append(module["map"])
+    names.append(MAP_NAME)
+    for name in names:
+        (WORK_DIR / name).unlink(missing_ok=True)
+
+
+def log_failures(text: str) -> list[str]:
+    """Return the build log lines that hold a compile or a link failure.
+
+    A line is a failure when it starts with `error` or holds `error!`.  A
+    warning line is not a failure.
+    """
+    failures = []
+    for line in text.splitlines():
+        lowered = line.lower()
+        if lowered.startswith("error") or "error!" in lowered:
+            failures.append(line.strip())
+    return failures
+
+
+def command_build(name: str, timeout: int, recipe: Path | None = None) -> int:
+    module = load_recipe(name, recipe)
     if shutil.which(DOSBOX) is None:
         print(f"skip: the {DOSBOX} command is missing; install DOSBox-X to build {name}")
         return 3
@@ -133,6 +191,7 @@ def command_build(name: str, timeout: int) -> int:
         )
         return 3
     WORK_DIR.mkdir(parents=True, exist_ok=True)
+    clear_artifacts(module)
     for stale in WORK_DIR.glob("O*.OBJ"):
         stale.unlink()
     for index, source in enumerate(module["sources"]):
@@ -142,8 +201,7 @@ def command_build(name: str, timeout: int) -> int:
     (WORK_DIR / RSP_NAME).write_text(link_rsp(module, len(module["sources"])))
     (WORK_DIR / CONF_NAME).write_text(conf_text(module, len(module["sources"])))
     log_path = WORK_DIR / LOG_NAME
-    if log_path.is_file():
-        log_path.unlink()
+    log_path.unlink(missing_ok=True)
     process = subprocess.Popen(
         [DOSBOX, "-nogui", "-conf", CONF_NAME],
         cwd=WORK_DIR,
@@ -151,13 +209,19 @@ def command_build(name: str, timeout: int) -> int:
         stderr=subprocess.DEVNULL,
     )
     try:
-        if not wait_for_artifacts(module, timeout):
-            text = ""
-            if log_path.is_file():
-                text = log_path.read_text(errors="replace")
+        completed = wait_for_artifacts(module, timeout, process)
+        text = ""
+        if log_path.is_file():
+            text = log_path.read_text(errors="replace")
+        if not completed:
             if process.poll() is not None:
                 raise ValueError(f"the build of {name} failed\n{text}")
             raise ValueError(f"the build of {name} timed out\n{text}")
+        failures = log_failures(text)
+        if failures:
+            raise ValueError(
+                f"the build of {name} failed\n" + "\n".join(failures)
+            )
     finally:
         process.terminate()
         try:
@@ -194,6 +258,12 @@ def parse_arguments() -> argparse.Namespace:
         default=600,
         help="the build timeout in seconds (default: 600)",
     )
+    build_parser.add_argument(
+        "--recipe",
+        type=Path,
+        default=None,
+        help="build an explicit module recipe instead of the stored record",
+    )
     digest_parser = subparsers.add_parser(
         "digest", help="print the source digest of one module"
     )
@@ -205,7 +275,7 @@ def main() -> int:
     arguments = parse_arguments()
     try:
         if arguments.command == "build":
-            return command_build(arguments.module, arguments.timeout)
+            return command_build(arguments.module, arguments.timeout, arguments.recipe)
         return command_digest(arguments.module)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)

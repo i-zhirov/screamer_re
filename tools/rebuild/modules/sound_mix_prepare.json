@@ -23,7 +23,10 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_mix_prepare.c"
+      "file": "sound_mix_prepare.c",
+      "flags": [
+        "-od"
+      ]
     },
     {
       "compiler": "wasm",
@@ -31,7 +34,11 @@
     },
     {
       "compiler": "wcc386",
-      "file": "sound_mix_prepare_main.c"
+      "file": "sound_mix_prepare_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

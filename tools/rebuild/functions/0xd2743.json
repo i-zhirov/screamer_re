@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000d2743` calls `FUN_000d233c` and clears `DAT_001233f0` when the lock succeeds"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "sound_driver_reset",
   "notes": [],
   "object_offset": "0xc2743",
+  "provenance": "library",
   "role": "locks the sound driver memory regions through `0xd233c` and clears the state at `DAT_001233f0`; returns 5 when a lock fails",
   "section": "The HMI sound driver",
   "size": 64,

@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "sound_driver_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The spatial_grid_relocate module at 0x4cb4c"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "spatial_grid_relocate",
   "notes": [],
   "object_offset": "0x3cb4c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -79,6 +79,18 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/alfile_load.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "c",
@@ -86,6 +98,7 @@
   "name": "alfile_load",
   "notes": [],
   "object_offset": "0x3c3e6",
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {

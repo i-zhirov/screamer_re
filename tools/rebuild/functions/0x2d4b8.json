@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x2d4b8 holds 224 instructions and 779 bytes up to the ret at 0x2d7c2; the record keeps the 780-byte extent and sets no function size"
+      "text": "the original at 0x2d4b8 holds 224 instructions and 779 bytes over the full extent; the ret is at 0x2d7c2; the record keeps the 780-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -39,12 +39,21 @@
     {
       "kind": "finding",
       "text": "The race_records_screen module at 0x2d4b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_records_screen",
   "name": "race_records_screen",
   "notes": [],
   "object_offset": "0x1d4b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -56,17 +65,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 44,
-        "bytes_total": 631,
+        "bytes_equal": 41,
+        "bytes_total": 514,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 34,
-        "instructions_total": 224,
+        "instructions_equal": 31,
+        "instructions_total": 166,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2d4b8",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:cbe85d3685c0d1d26512abdcf0c043a002b4105cf7b1226a2e7ad7d2ebe7a77f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:201251ab4acf3169900884773e507077dc0f69db6451be25899680e6757e8d8d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:cc829d5ad2105bce3da94480923b367409cfd31ed9025c98ff38553a40ab7afd",
     "tool": "run.py"
   },

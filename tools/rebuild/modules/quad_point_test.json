@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "quad_point_test_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x21058 holds 114 instructions and 391 bytes up to the ret at 0x211de; the next function starts at 0x211e0, so the store record keeps the 392-byte extent and sets no function size; the identity check uses 114 instructions"
+      "text": "the original body at 0x21058 holds 114 instructions and 391 bytes over the full extent; the ret is at 0x211de; the next function starts at 0x211e0, so the store record keeps the 392-byte extent and sets no function size; the identity check uses 91 instructions"
     },
     {
       "kind": "note",
@@ -50,7 +50,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 114 decoded instructions and 396 bytes; the identity check stays open at 12 of 114 instructions, 15 of 391 bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer first, keeps the finished flag in ecx, uses other local offsets, reads the data globals through near operands, and emits an if chain for the mode switch; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 91 decoded instructions and 315 bytes; the identity check stays open at 10 of 91 instructions, 12 of 315 bytes, and 0 of 37 relocation slots, because V2 saves the frame pointer first, keeps the finished flag in ecx, uses other local offsets, reads the data globals through near operands, and emits an if chain for the mode switch; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the original has no symbol name for this function; the module name and the callee names in the harness stay inferred"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "race_finish_update",
   "notes": [],
   "object_offset": "0x11058",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -85,17 +94,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 391,
+        "bytes_equal": 28,
+        "bytes_total": 308,
         "detail": "the instruction sequences differ",
         "instructions_equal": 12,
-        "instructions_total": 114,
+        "instructions_total": 87,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x21058",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:052e331a55e3d842687427d35b937115cafcd2de9d4a8ee3aecd162fb4197e5b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f459ae9a4a2000c874e52d23eb5514ccc197f81b3f9b11d82d39d6a4ed2ae7c4",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:77ff2cb1ffd720d23e8c00dcc4fc0209db7b5ab34c4213833d247a2ec25e902c",
     "tool": "run.py"
   },

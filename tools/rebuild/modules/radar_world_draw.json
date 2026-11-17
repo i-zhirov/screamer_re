@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "radar_world_draw_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

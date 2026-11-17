@@ -1,9 +1,56 @@
 {
   "address": "0xea1bd",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea1bd"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "cvtbuf",
+    "object_sha256": "sha256:fc9727eae305b45d1df8a58191610014e9104fa57b472dca0dbbded60cb84d82",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__CVTBuffer_"
+  },
+  "name": "__CVTBuffer",
   "notes": [],
   "object_offset": "0xda1bd",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 6,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 2,
+        "instructions_total": 2,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xea1bd",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6f3729fb74e7bfa77b08f8003606ba96f1a1e607a99fe12413ddab69edad2a25",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:b48bf61d47d4187ef145a0569e3d87decc70bccdbf866dbbc0a5f2946c048fe2",
+    "tool": "run.py"
+  },
   "size": 6,
-  "status": "unknown"
+  "status": "verified"
 }

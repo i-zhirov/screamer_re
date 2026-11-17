@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The choice_save module at 0x1be6c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "choice_save",
   "notes": [],
   "object_offset": "0xbe6c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

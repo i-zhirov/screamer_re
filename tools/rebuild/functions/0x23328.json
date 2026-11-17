@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 238 bytes and 71 decoded instructions; the identity check stays open at 14 of 71 instructions and 20 of 238 bytes because V2 saves the frame first, keeps the view in edx and the object in ecx, uses imul for the object address, and reads the enable flag through a near data address; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "path_playback_apply",
   "notes": [],
   "object_offset": "0x13328",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

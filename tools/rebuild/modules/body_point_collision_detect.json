@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "body_point_collision_detect.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "body_point_collision_detect.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "body_point_collision_detect_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

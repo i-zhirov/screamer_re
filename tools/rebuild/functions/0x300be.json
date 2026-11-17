@@ -1,43 +1,59 @@
 {
   "address": "0x300be",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x300be"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "exit",
+    "object_sha256": "sha256:e10241f5b9bc31715343cc4f8fbfcc29583d2188c33113cdf7f90a6177f178f1",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "exit_"
+  },
   "module": "exit",
   "name": "exit",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 16,
+        "bytes_equal": 19,
         "bytes_total": 24,
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 8,
         "instructions_total": 8,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x300be",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a6295e8a89955ea2e6455f15c8f23fc927491e01f2ec4f413ab5feb06e2f3e36",
-    "source_digest": "sha256:2f3da4b333f8665ba1630be7eeff8e23357275e9ebcc1c0f70f07c2e13713d3c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:b7c78345ad30134e6d98c610c753d2963042445342709ce1f9ebc491dc8ebfd0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:d95f3cba147a3a9adb418bca5d9efe1a9de4832f998ed9cdc8e7bf33732dd178",
     "tool": "run.py"
   },
   "role": "calls the function-pointer slots at `0x2f84` and `0x2f88` and then the helper at `0x300d6`; the helper calls the slot `0x2f88` again and the slot `0x2f8c` and jumps to the terminator at `0x30387`; `main` calls it with the error code",

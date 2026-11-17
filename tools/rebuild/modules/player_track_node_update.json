@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "player_track_node_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

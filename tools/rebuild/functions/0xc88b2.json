@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000c88b2` stores the argument at `DAT_001045c8` and calls `FUN_000de6f5`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "music_timer_set",
   "notes": [],
   "object_offset": "0xb88b2",
+  "provenance": "library",
   "role": "stores the timer rate at `DAT_001045c8` and programs the PIT channel 0 through `0xde6f5`",
   "section": "The HMI sound driver",
   "size": 53,

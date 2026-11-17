@@ -23,14 +23,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_session_run.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_session_run.c"
     },
     {
       "compiler": "wcc386",
       "file": "race_session_run_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

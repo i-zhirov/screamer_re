@@ -23,7 +23,11 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_source_frame_select.c"
+      "file": "sound_source_frame_select.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     },
     {
       "compiler": "wasm",
@@ -31,7 +35,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "sound_source_frame_select_main.c"
+      "file": "sound_source_frame_select_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

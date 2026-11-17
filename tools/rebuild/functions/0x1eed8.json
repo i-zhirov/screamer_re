@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 11 of 54 instructions equal, 7 of 142 bytes equal, and 0 of 14 relocation slots; the identity check stays open because V2 saves the frame first, keeps the header and the record in registers, folds the stride into imul, and reads the data through near operands; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "traffic_event_read",
   "notes": [],
   "object_offset": "0xeed8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

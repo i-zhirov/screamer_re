@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1a630 holds 243 instructions and 768 bytes up to the ret at 0x1a92f; the record keeps the 768-byte extent, which ends at the next function car_camera at 0x1a930, and sets no function size; the identity check uses 243 instructions"
+      "text": "the original body at 0x1a630 holds 243 instructions and 768 bytes over the full extent; the ret is at 0x1a92f; the record keeps the 768-byte extent, which ends at the next function car_camera at 0x1a930, and sets no function size; the identity check uses 210 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module player_route_camera"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "player_route_camera",
   "notes": [],
   "object_offset": "0xa630",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -62,16 +71,22 @@
       },
       "identity": {
         "bytes_equal": 27,
-        "bytes_total": 768,
+        "bytes_total": 711,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 46,
-        "instructions_total": 243,
+        "instructions_equal": 45,
+        "instructions_total": 210,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a630",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:295917aba137c3473ffe937a557875c9369f3d7ddbf51380a73a051036413664",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9832ba3797c8369b79b4377008169a1a08eaf6b58f80bc813c5388e6a36ecfd4",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:116d2d28fddc7c7a7f8a0ec37bca3b5dec6f49a0dc09354d63a9744082778b6c",
     "tool": "run.py"
   },

@@ -16,10 +16,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_transform.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_transform.c"
     },
     {
       "compiler": "wasm",
@@ -29,5 +26,6 @@
       "compiler": "wcc386",
       "file": "object_transform_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

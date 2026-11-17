@@ -71,6 +71,14 @@
     {
       "kind": "finding",
       "text": "The tri_point_test module at 0x1c38a"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "tri_point_test",
   "notes": [],
   "object_offset": "0xc38a",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

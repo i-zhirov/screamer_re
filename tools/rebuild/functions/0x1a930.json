@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x1a930 holds 396 instructions and 1425 bytes up to the ret at 0x1aec0, so the record keeps the 1428-byte extent and sets no function size"
+      "text": "the original at 0x1a930 holds 396 instructions and 1425 bytes over the full extent; the ret is at 0x1aec0, so the record keeps the 1428-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -35,12 +35,21 @@
     {
       "kind": "finding",
       "text": "The car_camera module at 0x1a930"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "car_camera",
   "name": "car_camera",
   "notes": [],
   "object_offset": "0xa930",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -52,17 +61,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 71,
-        "bytes_total": 1383,
+        "bytes_equal": 64,
+        "bytes_total": 1222,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 67,
-        "instructions_total": 396,
+        "instructions_equal": 61,
+        "instructions_total": 328,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a930",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:b48829ef7a54711ddc1a99a4264263e21f021245095d3817206794b9091aa630",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a5d604663c542885d07d589900103425ed1893c6917ed53d0b673f41ebf08bdd",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:44bf187cb42d5f8ee338d24730f88bcfc9739152f37b9782347156554312dd79",
     "tool": "run.py"
   },

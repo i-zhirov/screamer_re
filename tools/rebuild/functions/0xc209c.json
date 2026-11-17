@@ -1,9 +1,60 @@
 {
   "address": "0xc209c",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc209c"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "atof",
+    "object_sha256": "sha256:84e157067b9a7e6ba416d5f26a4fc4c6f2bf18d0a0b6c8845487f37b9d93a087",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "atof_"
+  },
+  "name": "atof",
   "notes": [],
   "object_offset": "0xb209c",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 10,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 5,
+        "instructions_total": 5,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc209c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f6cebda965f2728a0c21e95d51a8cbc9c77dd7971ba91a9dd92b8d80b14993a5",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:2c4b5c8eed7e00e42c2f9d9a004e2960c18539f475d8d5a4e0845bd4afc0cb78",
+    "tool": "run.py"
+  },
   "size": 10,
-  "status": "unknown"
+  "status": "verified"
 }

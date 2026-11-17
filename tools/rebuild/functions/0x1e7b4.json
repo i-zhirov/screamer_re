@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1e7b4 holds 124 instructions and 350 bytes up to the ret 4 at 0x1e90f; the next function starts at 0x1e914, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 124 instructions"
+      "text": "the original body at 0x1e7b4 holds 124 instructions and 350 bytes up to the ret 4 at 0x1e90f; the next function starts at 0x1e914, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 100 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 124 instructions and 336 bytes; the identity check stays open at 14 of 124 instructions and 16 of 336 bytes, because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), uses fst for the second fraction, and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 100 instructions and 278 bytes; the identity check stays open at 12 of 100 instructions and 14 of 278 bytes, because V2 keeps the output pointer in ecx and the input pointer in edx, uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), uses fst for the second fraction, and places the two basis constants in the local data; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The func_1e7b4 module at 0x1e7b4"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "func_1e7b4",
   "notes": [],
   "object_offset": "0xe7b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 336,
+        "bytes_equal": 14,
+        "bytes_total": 278,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 124,
+        "instructions_equal": 12,
+        "instructions_total": 100,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e7b4",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:b24d8b4796779a2e3a0ab8c798cf24f1925915d773d5041bbc4eeb41c4cdb833",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:15844c2d00a9bfe2f44d50b7962b4bbfcde16e6f0a0b645ebec5eefd23679f3c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:003a80560b7e809a13d0f94687ab84dea6373b3697b3607daad382832bd62573",
     "tool": "run.py"
   },

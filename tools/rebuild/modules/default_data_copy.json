@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "default_data_copy_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

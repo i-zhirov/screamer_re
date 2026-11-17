@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x1629c holds 267 instructions and 997 bytes up to the ret at 0x16680, so the record keeps the 1036-byte extent and sets no function size"
+      "text": "the original at 0x1629c holds 279 instructions and 1035 bytes over the full extent; the ret is at 0x16680, so the record keeps the 1036-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "a non-zero angle gives the turn radius wheelbase/tan(angle) at +0x2f8, the yaw step +0x50c * 0x118e04 / radius at +0x2f4, adds it to the heading at +0x4cc, and stores the rotated position difference at +0x1c and +0x24"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_steering_update",
   "name": "player_steering_update",
   "notes": [],
   "object_offset": "0x629c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -48,12 +57,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 19,
         "instructions_total": 213,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1629c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:bc56d871c00d9a6606ff4284a2fcca47e0c966a761cf285fda8ac861a44dd133",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6fcf58c33da29c1defe8dcf5d78fdd27c93bcc86f0e07b750a946673f76e3e98",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:75ec21d4bd55a2028ec4be0a278f8ed603ab3cb4a0b044b39c688c5f40812bff",
     "tool": "run.py"
   },

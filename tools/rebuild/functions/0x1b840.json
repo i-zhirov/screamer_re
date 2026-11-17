@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1b840 holds 84 instructions and 306 bytes up to the ret at 0x1b971; the next function starts at 0x1b974, so the store record keeps the 308-byte extent and sets no separate function size; the identity check uses 84 instructions"
+      "text": "the original body at 0x1b840 holds 84 instructions and 306 bytes over the full extent; the ret is at 0x1b971; the next function starts at 0x1b974, so the store record keeps the 308-byte extent and sets no separate function size; the identity check uses 83 instructions"
     },
     {
       "kind": "note",
@@ -46,7 +46,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 84 decoded instructions and 301 bytes; the identity check stays open at 40 of 84 instructions and 29 of 301 bytes, because V2 saves the frame pointer first, keeps the stream in esi and edi, passes the string pointers as near data offsets, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 83 decoded instructions and 300 bytes; the identity check stays open at 40 of 83 instructions and 29 of 300 bytes, because V2 saves the frame pointer first, keeps the stream in esi and edi, passes the string pointers as near data offsets, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The replay_load module at 0x1b840"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "replay_load",
   "notes": [],
   "object_offset": "0xb840",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -85,17 +94,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 29,
-        "bytes_total": 301,
+        "bytes_equal": 51,
+        "bytes_total": 297,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 40,
-        "instructions_total": 84,
+        "instructions_equal": 41,
+        "instructions_total": 81,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b840",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:4587373d65e17d5bee68506cc5f9c3300b380d73c79223ae74f3d809e6edf00b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d9342d5dba7a535d34628c39cf1f9f52ce5aa8f151058dc3680d09c1f219d2a4",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:a86fe095c746a8e3bab7395309fce3c92068225a3901f386c76cd63b881be26c",
     "tool": "run.py"
   },

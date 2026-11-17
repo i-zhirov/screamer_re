@@ -1,9 +1,19 @@
 {
   "address": "0x4cecc",
   "checks": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    }
+  ],
   "notes": [],
   "object_offset": "0x3cecc",
+  "provenance": "game",
   "size": 40,
   "status": "unknown"
 }

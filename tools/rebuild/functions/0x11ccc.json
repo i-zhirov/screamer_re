@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x11ccc holds 127 instructions and 413 bytes up to the first ret at 0x11e68; the normal exit jumps to the second epilogue at 0x11e69, and the full body ends at the ret at 0x11e73; the next function starts at 0x11e74, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 127 instructions"
+      "text": "the original body at 0x11ccc holds 136 instructions and 424 bytes over the full extent; the first ret is at 0x11e68; the normal exit jumps to the second epilogue at 0x11e69, and the full body ends at the ret at 0x11e73; the next function starts at 0x11e74, so the store record keeps the 424-byte extent and sets no function size; the identity check uses 121 instructions"
     },
     {
       "kind": "note",
@@ -46,7 +46,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 397 bytes and 127 decoded instructions; the identity check stays open at 37 of 127 instructions, 28 of 397 bytes, and 3 of 42 relocation slots, because V2 saves ebp first, keeps the current record pointer in ecx, keeps the shape in ebx, stores the distance terms in other locals, and reads the globals through near data addresses; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 385 bytes and 121 decoded instructions; the identity check stays open at 37 of 121 instructions, 27 of 385 bytes, and 3 of 42 relocation slots, because V2 saves ebp first, keeps the current record pointer in ecx, keeps the shape in ebx, stores the distance terms in other locals, and reads the globals through near data addresses; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The collision_cell_test module at 0x11ccc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "collision_cell_test",
   "notes": [],
   "object_offset": "0x1ccc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -81,17 +90,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 28,
-        "bytes_total": 397,
+        "bytes_equal": 27,
+        "bytes_total": 385,
         "detail": "the instruction sequences differ",
         "instructions_equal": 37,
-        "instructions_total": 127,
+        "instructions_total": 121,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11ccc",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:9eae50685f3176e6da0526c6f74f43ceed9e896ab9fce4948a17d1275ff12b41",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:eff06cca93421d3e34133f25c555f37234c20ee00fadaf5cbc671f0a29f782e2",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:9fea6993169fb9281bad2e49378520357c53f72d77e309896a2a5643a122c382",
     "tool": "run.py"
   },

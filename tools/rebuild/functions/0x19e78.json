@@ -62,6 +62,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 41 decoded instructions in the identity window and 111 bytes; the identity check stays open at 12 of 41 instructions and 6 of 111 bytes, because V2 forms the dispatch as a compare tree instead of the jump table at 0x19e50, keeps the view pointer in a register, and saves the frame first; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -69,6 +77,7 @@
   "name": "view_mode_dispatch",
   "notes": [],
   "object_offset": "0x9e78",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

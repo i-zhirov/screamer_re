@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "track_select_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

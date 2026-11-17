@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x29bac holds 90 instructions and 348 bytes up to the ret at 0x29d07; the next function starts at 0x29d08, so the store record keeps the 348-byte extent and sets no function size; the identity check uses 90 instructions"
+      "text": "the original body at 0x29bac holds 90 instructions and 348 bytes over the full extent; the ret is at 0x29d07; the next function starts at 0x29d08, so the store record keeps the 348-byte extent and sets no function size; the identity check uses 46 instructions"
     },
     {
       "kind": "note",
@@ -34,7 +34,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 14 of 90 instructions and 24 of 344 bytes equal, and 1 of 57 relocation slots equal, because V2 uses another prologue, keeps values in registers, and fuses the table index; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 10 of 46 instructions and 16 of 173 bytes equal, and 1 of 57 relocation slots equal, because V2 uses another prologue, keeps values in registers, and fuses the table index; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The championship_result_apply module at 0x29bac"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "championship_result_apply",
   "notes": [],
   "object_offset": "0x19bac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 24,
-        "bytes_total": 344,
+        "bytes_equal": 13,
+        "bytes_total": 166,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 14,
-        "instructions_total": 90,
+        "instructions_equal": 4,
+        "instructions_total": 42,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29bac",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:ca60e8a9155bbdfbd1c80827f84c70ad7a9b651f1291900d8ddfe1f50b2d4ffb",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:436ee30e0c49dd99846e974a688eb5be8e355f41f93784f417f8fbab6902f849",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:a971d26a353e2f4958a3e81afeec0099d63e4682d09fda9c2b8b6b9cd0bd23eb",
     "tool": "run.py"
   },

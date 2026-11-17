@@ -18,12 +18,16 @@
       "compiler": "wcc386",
       "file": "pool_init.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "pool_init_main.c"
+      "file": "pool_init_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

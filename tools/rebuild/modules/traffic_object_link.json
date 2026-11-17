@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "traffic_object_link_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -14,33 +14,48 @@
     {
       "kind": "note",
       "text": "the rebuild copies the 0x74-byte record template, reads every member through the `SOUND_FX` resource at `0x2eed0`, and maps the high nibble of `+0x20` to the type 0, 2, 1, and 3; the five behavior paths cover the setup gate, the two records, the four status values, the two failed opens, and the zero resource"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "sound_bank_load",
   "name": "sound_bank_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '1'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 37,
-        "bytes_total": 726,
+        "bytes_equal": 31,
+        "bytes_total": 546,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 35,
-        "instructions_total": 223,
+        "instructions_equal": 26,
+        "instructions_total": 162,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f2e0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:253bd3ce76f624102f77bdac7bd3572647919963ce8129a69fc033dbb85473f6",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:859203a5fdf32e1a5605f30d93a929917567e3af06411a4a5993ca8e5dedff9d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:0b9889bbb9358ca5ddae074fb09a0a191105e24f314ca7d495a5ee43edc8bf5a",
     "tool": "run.py"
   },

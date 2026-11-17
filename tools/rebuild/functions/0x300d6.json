@@ -9,12 +9,32 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000300d6` calls the slots `PTR_FUN_00102f88` and `PTR_FUN_00102f8c` and ends in the interrupt 21h AH=0x4C terminator"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x300d6"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "exit",
+    "object_sha256": "sha256:f5749efddb197407369de6f1cdeb1630a90c432af8500d3a201711c22b480bf9",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "_exit_"
+  },
   "module": "exit",
   "name": "exit_flush",
   "notes": [],
   "object_offset": "0x200d6",
+  "provenance": "library",
   "result": {
     "checks": {
       "identity": {
@@ -23,13 +43,19 @@
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 6,
         "instructions_total": 6,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x300d6",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:38bfeeff177ef446fb72edef376338e43b54b1079f76caf0d5b0daba60d7c5a4",
-    "source_digest": "sha256:2f3da4b333f8665ba1630be7eeff8e23357275e9ebcc1c0f70f07c2e13713d3c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d5fd74bb7f6172bc6f6934a1e5d489b87aa11e1a3dd58808980ccaf0314e1974",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:5717ed550ebe305abb921e20a89ddb4de7b0f84eac551b01cc7f796ca82b5b32",
     "tool": "run.py"
   },
   "role": "calls the flush and close handler slots and jumps to the run-time terminator; the helper of `exit`",

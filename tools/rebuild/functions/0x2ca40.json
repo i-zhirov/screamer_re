@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The net_race_lobby_init module at 0x2ca40"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "net_race_lobby_init",
   "notes": [],
   "object_offset": "0x1ca40",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

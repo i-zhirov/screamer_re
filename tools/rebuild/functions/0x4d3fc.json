@@ -51,6 +51,10 @@
     {
       "kind": "finding",
       "text": "The lzw_expand module at 0x4d3fc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -58,6 +62,7 @@
   "name": "lzw_expand",
   "notes": [],
   "object_offset": "0x3d3fc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

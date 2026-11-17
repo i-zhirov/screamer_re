@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "engine_interface_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "engine_interface_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "engine_interface_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

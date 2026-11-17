@@ -1559,6 +1559,654 @@ reports 395 checks with `--skip-cross`, 384 checks with `--skip-runtime`, and
   `int 21` with `EAX=0x4b03` (`AH=0x4b`, `AL=0x03`, load overlay).  Evidence:
   the first log line.
 
+## The truthful verification baseline
+
+The verification baseline makes the reported number true.  A stored `fail`
+prints `FAIL`, a failed check demotes the record, the strict gate is the
+default, and the report separates the four result buckets.  Evidence:
+
+- The stored verdict reaches the progress line.  Command:
+  `python3 tools/rebuild/run.py run --function 0x2003c --skip-unchanged`.  The
+  command prints
+  `[1/1] 0x2003c race_simulation_update: FAIL (the inputs are unchanged since the previous run)`,
+  the summary holds `1 fail`, and the exit code is 1.
+- A failed check demotes the record.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_store.py" -k build_fails`.
+  The command reports 2 tests and OK.  A failed build gives `named` for a named
+  record and `unknown` for an unnamed record.
+- Every written result holds the mode.  Command:
+  `python3 tools/rebuild/store.py list --json`.  The store holds 1187 records.
+  253 records hold `result.mode`, and 252 records hold an identity `match`.
+  The mode holds `strict`, `toolchain` `v2`, and `runtime`.
+- The behavior run uses fresh output.  Command:
+  `python3 tools/rebuild/harness.py run --module driver`.  The command deletes
+  the old output and finds the eight complete marker lines.
+- The strict and default counts are separate.  The strict run prints
+  `24 pass`, and the run under `--allow-shape` prints `31 pass`.  The eight
+  shape matches pass the historical gate and fail the strict gate.  One shape
+  record also fails its behavior check, so the record verdict rises by seven.
+  Evidence: the summary line of each run.
+- A rebuild changes the input fingerprint even when the code is unchanged.  The
+  Open Watcom linker writes a creation time into the map file, and the
+  fingerprint covers the map.  Evidence: two builds of `free` produce the same
+  `free.exe` SHA-256 `32e3bc52...` and different `free.map` SHA-256 values
+  `6a497fbd...` and `6232e4a0...`.  The verification run therefore re-verifies
+  every record after a rebuild.  A stored result stays valid when no rebuild
+  occurs.
+- The full check reports 303 checks.  `--skip-cross` reports 299 checks,
+  `--skip-runtime` reports 288 checks, and both flags report 284 checks.
+  Evidence: the four pipeline commands.
+
+## The reachable extent and the symbol-aware oracle
+
+The identity oracle now compares what the report claims.  The function extent
+covers every reachable block, including the second exit path and the compiler
+jump-table cases.  The oracle compares an intra-function branch target by
+instruction position and an internal fixup target by symbol and addend.
+Evidence:
+
+- The extent reaches the second exit path.  Command:
+  `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8adac --max 400`.
+  The command reports 91 instructions and holds the first `ret` at `0x8aec2`
+  and the second exit at `0x8af05`.  The original body holds 91 instructions
+  and the rebuilt body holds 77; the record held 71 before the change.
+- The extent follows the compiler jump table.  Command:
+  `python3 tools/le.py calls ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2807c --max 400`.
+  The command reports 48 instructions and the case calls at `0x2e0b4`,
+  `0x2e21c`, `0x2e58c`, and `0x2e724`.  The Watcom table sits before the
+  function entry and holds `N + 1` object-relative 4-byte entries, where the
+  nearest preceding `cmp` holds `N`.  The pre-scaled form
+  `shl reg, 2; jmp dword ptr cs:[reg + disp]` uses the same table layout.
+  An indirect jump without the table pattern stops the block, because the
+  target is unknown.
+- The branch and symbol comparison is covered by tests.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_oracle.py"`.
+  The command reports 25 tests and OK.  The tests pin the index compare, the
+  outside-target mask, the call-target mask, the symbol and addend compare,
+  and the one-sided-symbol fallback.
+- The page reads and the reachable body are covered by tests.  Command:
+  `python3 -m unittest discover -s tools/rebuild/tests -p "test_le_helpers.py"`.
+  The command reports 50 tests and OK.  The tests pin the page stitch, the
+  zeroed page, the short page, the page without a file offset, the unmapped
+  start, the reachable body, the scaled jump table, and the pre-scaled jump
+  table.
+- The strict baseline is 23 pass.  The strict run prints
+  `972 records: 23 pass, 230 fail, 719 skip; exact 7, relocation-only 15, shape 7, behavior-only 1`.
+  The stored `match` values give the historical gate 30 pass: the strict 23
+  plus the seven shape matches.  The seven shape matches pass the historical
+  gate and fail the strict gate.  A second `--allow-shape` run would rebuild
+  the modules and invalidate the strict fingerprints, so the historical count
+  comes from the stored `match` values.
+- The strict count falls from the baseline 24 to 23.  The full extent adds 81
+  instructions to `dpmi_real_int` at `0x25db0`, so its former 17-instruction
+  `exact-relocations` match becomes a 98-instruction comparison with 88 equal
+  instructions and the verdict `different`.  The `free` and `exit_flush`
+  records stay `exact-relocations` once the rebuilt body is bounded by the next
+  map symbol; before that bound, the rebuilt body followed a tail jump into the
+  next function and the two records fell to `different`.  `error_report` at
+  `0x10978` moves from `same-shape` to `different`, so the shape bucket falls
+  from eight to seven.
+  Evidence: the records `0x25db0`, `0x300ec`, `0x300d6`, and `0x10978`.
+- The new extents add 36 candidate addresses.  Command:
+  `python3 tools/rebuild/store.py seed --check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+  The command reports `added: 36` before the seed and `no difference` after it.
+  The store holds 1223 records and 0 violations.  The seed writes the new
+  records with the status `unknown`; it does not rebuild a module.  The four
+  pipeline commands still report 303, 299, 288, and 284 checks, as the
+  baseline section records.
+
+## The record scope and the provenance
+
+Every function record now holds a provenance value, and the report counts the
+records and the bytes by provenance.  Evidence:
+
+- The plan-date snapshot holds 971 function records, 688 `unknown`, 31 `named`,
+  230 `rebuilt`, 22 `verified`, 0 `matching`, and 252 module records.  The
+  design's counts (935 function records, 30 `verified`, 652 `unknown`, 31
+  `named`, 221 `rebuilt`, and 1 `matching`) are the historical design-date
+  values.
+  Evidence: `python3 tools/rebuild/store.py list --json` and the design page.
+- The evidence pass moved three pure thunks to `not_a_function`, so the
+  `unknown` count falls from 688 to 685.  The final status holds 685 `unknown`,
+  3 `not_a_function`, 31 `named`, 230 `rebuilt`, 22 `verified`, and 0
+  `matching`.
+  Evidence: `python3 tools/rebuild/triage.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The analysis count is the `unknown` records with provenance `game`, and it is
+  251.  A library or compiler-helper record without a name keeps the `unknown`
+  status and leaves the analysis count.
+  Evidence: `python3 tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The provenance counts are 489 `game`, 471 `library`, 8 `compiler_helper`, 3
+  `not_a_function`, and 0 `data`.  The coverage report prints `total: 971
+  records, 685 unknown, 899334 bytes, 100% coverage, 221835 verified bytes,
+  113816 rebuilt bytes, 6074 exact bytes`.
+  Evidence: `python3 tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The evidence document `tools/rebuild/provenance.json` names the spans and the
+  records whose provenance is not `game`.  `triage.py check` proves it, and
+  `triage.py apply` writes it into the records through `store.save_record`.
+  Evidence: `python3 tools/rebuild/triage.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`,
+  `python3 tools/rebuild/triage.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`, and
+  `python3 tools/rebuild/store.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- At the plan date, the full check reports 304 checks.  `--skip-cross` reports
+  300 checks, `--skip-runtime` reports 289 checks, and both flags report 285
+  checks.  The library pass adds 127 verified records, and stage 11 checks each
+  verified record, so the full check now reports 431 checks, `--skip-cross`
+  reports 427 checks, `--skip-runtime` reports 416 checks, and both flags
+  report 412 checks.  The new section records the four observed counts.
+  Evidence: `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game`,
+  `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross`,
+  `nix develop .#cross-check --command python3 tools/pipeline_check.py
+  --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime`,
+  and `python3 tools/pipeline_check.py --game-dir
+  ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
+  --skip-cross`.
+
+## The library object index and the verified library functions
+
+The library pass indexes the three period libraries, verifies the records
+against their original objects, and writes the link manifest.  Evidence:
+
+- The index holds three libraries.  The observed SHA-256 values, the sizes,
+  the page length, the dictionary offset and size, and the module and public
+  symbol counts are:
+
+  | Library | Bytes | SHA-256 | Page | Dictionary | Modules | Symbols |
+  | --- | ---: | --- | ---: | --- | ---: | ---: |
+  | `CLIB3R.LIB` | 187392 | `ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8` | 16 | `0x2a200` / 14848 | 394 | 632 |
+  | `EMU387.LIB` | 21504 | `5b150d1cdca625eb27747b7ac182e36f5a66571e4441ccc19caccc6fbf773b5c` | 16 | `0x5200` / 512 | 2 | 5 |
+  | `MATH387R.LIB` | 40960 | `97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c` | 16 | `0x9200` / 3584 | 78 | 165 |
+
+  The dictionary size is in bytes after the 512-byte block conversion.  The
+  dictionary offset is a file offset.  `MATH387R.LIB` is in `LIB386`, not
+  `LIB386/DOS`.  Evidence: `python3 tools/rebuild/library.py index --out
+  work/rebuild/library-index.json`.
+- The seven strict results are `exact-relocations`.  The masked count is the
+  masked bytes of the original body and the object body:
+
+  | Address | Name | Module | Symbol | Instructions | Bytes | Masked |
+  | --- | --- | --- | --- | ---: | ---: | ---: |
+  | `0xd1f25` | `malloc` | `nmalloc` | `malloc_` | 84 | 227 | 73/73 |
+  | `0xc5fe5` | `fopen` | `fopen` | `fopen_` | 48 | 114 | 36/36 |
+  | `0xd429f` | `__fprtf` | `fprtf` | `__fprtf_` | 52 | 133 | 20/20 |
+  | `0x3009b` | `printf` | `printf` | `printf_` | 13 | 34 | 8/8 |
+  | `0x4bf64` | `fprintf` | `fprintf` | `fprintf_` | 13 | 33 | 4/4 |
+  | `0x4d32c` | `sprintf` | `sprintf` | `sprintf_` | 18 | 48 | 8/8 |
+  | `0xd2008` | `free` | `nfree` | `free_` | 35 | 94 | 34/34 |
+
+  All seven objects are in `CLIB3R.LIB`.  Evidence: `python3
+  tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5
+  --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c
+  --address 0xd2008 --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The apply pass writes 138 records, skips 338 records, and reports 4
+  `different` records.  A second identical pass writes 0 records.  The four
+  `different` records are `free` at `0x300ec`, `memcpy` at `0x8c150`,
+  `memset` at `0x8c160`, and the unnamed `0xeb1e7`.
+  Evidence: `python3 tools/rebuild/library.py apply --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` twice.
+- The 138 library fields hold 106 `exact-relocations` and 32 `exact-bytes`
+  matches.  The provenance holds 480 `library` records, so 342 library
+  records have no identity result.
+  Evidence: `python3 tools/rebuild/store.py list --json`.
+- The manifest holds 3 libraries and 138 entries, and the check passes.
+  Evidence: `python3 tools/rebuild/library.py manifest --out
+  tools/rebuild/library.json` and `python3 tools/rebuild/library.py
+  check-manifest --manifest tools/rebuild/library.json`.
+- The record at `0x4c08d` is the game container member open, not a library
+  object.  The findings section "The fopen module at 0x4c08d" proves it.  Its
+  provenance is `game`, so it leaves the library measure.  The library `fopen`
+  is the record at `0xc5fe5`.
+  Evidence: `tools/rebuild/functions/0x4c08d.json` and the fopen section above.
+- The original links four library objects twice at different addresses:
+  `vsscanf` at `0xc1ffd` and `0xc65f1`, `sscanf` at `0xc2024` and `0xc6618`,
+  `itoa` at `0xe68c7` and `0xe6962`, and `__CVTBuffer` at `0xea1b7` and
+  `0xea1bd`.  Two identical entries for the same object are valid reuse.  The
+  manifest check reports only inconsistent duplicates.
+  Evidence: `tools/rebuild/library.json` and `python3
+  tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json`.
+- The seed found 10 new function records from the verified library roots:
+  `0xead7d`, `0xeae24`, `0xeb142`, `0xeb17c`, `0xeb1e7`, `0xeb251`,
+  `0xeb306`, `0xeb66a`, `0xeba08`, and `0xeba21`.  They are `library`
+  provenance.
+  Evidence: `python3 tools/rebuild/store.py seed --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The store now holds 981 function records and 252 module records, and
+  `store.py check` reports 1233 records and 0 violations.  The status holds
+  224 `rebuilt`, 569 `unknown`, 154 `verified`, 31 `named`, and 3
+  `not_a_function`.  The provenance holds 490 `game`, 480 `library`, 8
+  `compiler_helper`, and 3 `not_a_function`.
+  Evidence: `python3 tools/rebuild/store.py list --json`, `python3
+  tools/rebuild/store.py check --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`, and `python3
+  tools/rebuild/coverage.py report --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- The full check reports 431 checks, `--skip-cross` reports 427,
+  `--skip-runtime` reports 416, and both flags report 412.  All four runs pass
+  with 0 failures.  The count grew because the library pass adds 127 verified
+  records, and stage 11 checks each verified record.
+  Evidence: the four `tools/pipeline_check.py` commands in the record-scope
+  count bullet.
+
+## The toolchain matrix and the strict delta
+
+- The baseline report before the matrix pass holds 252 `v2` modules and 0
+  `watcom10` modules.  The `v2` row holds 27 strict (7 `exact-bytes` and 20
+  `exact-relocations`), 3 shape, 221 `different`, and 1 `no-result`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` before the V2 pass.
+- The V2 matrix pass measured 251 of the 252 modules.  It found 21 strict (7
+  `exact-bytes` and 14 `exact-relocations`), 7 `same-shape`, 223 `different`,
+  and 1 `no-result`.  The one unmeasured module is `driver`, which has no
+  identity record.  The pass changed 153 module recipes.
+  Evidence: `python3 tools/rebuild/toolchain.py matrix --all --toolchain v2
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --out work/rebuild/toolchain-v2.json`.
+- The period matrix pass measured every module without a strict V2 row.  The
+  winners are 191 `v2` and 60 `watcom10`.  The winners hold 22 strict (7
+  `exact-bytes` and 15 `exact-relocations`), 10 `same-shape`, 219 `different`,
+  and 1 `no-result`.
+  Evidence: `python3 tools/rebuild/toolchain.py matrix --all --toolchain
+  watcom10 --manifest work/rebuild/toolchain-v2-manifest.json --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --out
+  work/rebuild/toolchain-matrix.json`.
+- The strict delta is one module.  `main_invoker` moves from the V2 shape
+  result to the period `exact-relocations` result: 53 of 79 bytes and 26 of 26
+  instructions.  The report after the re-baseline holds 28 strict: 27 under
+  `v2` and 1 under `watcom10`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` after the period
+  pass and `python3 tools/rebuild/run.py run --all`.
+- The report groups a module by the toolchain of its identity record, not by
+  its recipe.  A `watcom10` recipe whose identity record is a library record
+  stays in the `v2` row until the library result changes.  The after report
+  holds 193 `v2` modules and 59 `watcom10` modules, while 60 recipes hold
+  `watcom10`.
+  Evidence: `python3 tools/rebuild/toolchain.py report` and `python3
+  tools/rebuild/store.py list --json`.
+- The re-baseline reports 982 records: 156 pass, 223 fail, and 603 skip.  The
+  status holds 569 `unknown`, 223 `rebuilt`, 155 `verified`, 31 `named`, and 3
+  `not_a_function`.  The result modes hold 319 `v2`, 59 `watcom10`, and 603
+  with no result.
+  Evidence: `python3 tools/rebuild/run.py run --all` and `python3
+  tools/rebuild/run.py run --all --skip-unchanged`.
+- The period `wasm` needs `-fpi87` to assemble the FPU stubs.  Without the
+  flag, every module with an FPU stub fails with `Error! E003: Invalid
+  instruction with current CPU setting`.  A failed period build now returns
+  as soon as the DOSBox-X process exits, not at the timeout.
+  Evidence: `python3 tools/rebuild/harness_dos.py build --module
+  car_collision_pass` before and after the flag change.
+
+The 60 modules whose winning toolchain is `watcom10`.  The table is the
+toolchain-pass snapshot before the source-form changes.  The source-form
+outcomes are in the section "The six near-miss source-form outcomes".
+
+| Module | Flags | Match | Bytes | Instructions |
+| --- | --- | --- | --- | --- |
+| `bios_video` | `existing` | `different` | 5/44 | 6/17 |
+| `car_setup` | `existing` | `different` | 8/162 | 7/50 |
+| `cd_check_screen` | `existing` | `different` | 98/269 | 47/69 |
+| `dos_memory_alloc` | `existing` | `different` | 91/118 | 40/41 |
+| `dpmi_int31_entry` | `existing` | `same-shape` | 18/56 | 28/28 |
+| `error_report` | `existing` | `same-shape` | 418/554 | 171/171 |
+| `filter_update` | `existing` | `different` | 0/32 | 3/12 |
+| `fopen` | `-od` | `different` | 113/155 | 45/48 |
+| `fprtf` | `existing` | `different` | 31/130 | 22/50 |
+| `graphics_load` | `empty` | `different` | 4/29 | 4/10 |
+| `joystick_update` | `-of+` | `different` | 32/473 | 31/154 |
+| `list_create` | `-od` | `same-shape` | 102/127 | 46/46 |
+| `loading_screen` | `-od` | `different` | 105/491 | 55/124 |
+| `lzw_bit_read` | `existing` | `different` | 14/210 | 17/69 |
+| `main_invoker` | `existing` | `exact-relocations` | 53/79 | 26/26 |
+| `material_load` | `existing` | `different` | 13/286 | 28/81 |
+| `memory_alloc` | `existing` | `different` | 2/67 | 1/23 |
+| `memory_alloc_small` | `existing` | `same-shape` | 118/147 | 49/49 |
+| `menu_enter` | `existing` | `different` | 5/40 | 5/11 |
+| `menu_frame` | `existing` | `different` | 74/506 | 53/117 |
+| `mouse_init` | `existing` | `different` | 25/212 | 15/58 |
+| `music_bank_load` | `existing` | `different` | 35/563 | 38/143 |
+| `net_player_add` | `empty` | `different` | 25/170 | 17/54 |
+| `net_race_screen` | `existing` | `different` | 21/282 | 15/98 |
+| `object_drive_step` | `existing` | `different` | 15/211 | 10/54 |
+| `object_gear_state` | `existing` | `different` | 2/46 | 3/18 |
+| `object_init_from_file` | `existing` | `different` | 8/211 | 41/60 |
+| `object_physics` | `existing` | `different` | 6/40 | 6/13 |
+| `object_prepare` | `existing` | `different` | 1/33 | 2/11 |
+| `object_slide_step` | `existing` | `different` | 24/215 | 2/61 |
+| `object_state_save` | `existing` | `different` | 16/63 | 9/13 |
+| `palette_shade_build` | `existing` | `different` | 12/352 | 14/119 |
+| `persptab_load` | `existing` | `different` | 19/143 | 19/40 |
+| `player_brake_update` | `existing` | `different` | 31/277 | 9/72 |
+| `player_car_contact_update` | `existing` | `different` | 37/521 | 45/159 |
+| `player_segment_apply` | `existing` | `different` | 7/147 | 11/57 |
+| `player_track_node_update` | `existing` | `different` | 35/537 | 35/148 |
+| `pool_init` | `existing` | `same-shape` | 107/129 | 44/44 |
+| `quit_confirm_screen` | `existing` | `different` | 37/377 | 30/108 |
+| `race_lap_complete` | `existing` | `different` | 41/314 | 27/98 |
+| `race_loop` | `existing` | `different` | 6/85 | 6/21 |
+| `race_state_begin` | `existing` | `different` | 8/90 | 5/13 |
+| `race_state_update` | `existing` | `different` | 10/139 | 1/31 |
+| `radar_world_draw` | `empty` | `different` | 17/481 | 24/152 |
+| `replay_load` | `-of+ -ot` | `different` | 51/297 | 41/81 |
+| `setup_load` | `existing` | `different` | 15/105 | 12/34 |
+| `sound_effects_update` | `empty` | `different` | 28/201 | 27/51 |
+| `sound_event_render` | `empty` | `different` | 20/308 | 14/87 |
+| `sound_range_update` | `-of+ -ot` | `different` | 39/649 | 53/207 |
+| `spline_table_load` | `existing` | `different` | 36/274 | 27/69 |
+| `startup` | `existing` | `different` | 21/537 | 37/168 |
+| `stream_close` | `existing` | `different` | 3/43 | 2/15 |
+| `stream_layer_init` | `existing` | `different` | 2/46 | 3/12 |
+| `stream_read` | `-od` | `different` | 159/218 | 72/77 |
+| `terrain_contact_update` | `existing` | `different` | 35/257 | 18/69 |
+| `traffic_push_response` | `existing` | `different` | 18/182 | 6/38 |
+| `video_copy` | `empty` | `different` | 37/389 | 12/114 |
+| `video_present` | `existing` | `different` | 8/87 | 6/29 |
+| `view_move` | `existing` | `different` | 1/40 | 6/14 |
+| `vis_tab_load` | `existing` | `different` | 13/89 | 16/28 |
+
+- The only module with no identity record is `driver`.  It links without a map
+  and has no function record, so the matrix holds no row for it and keeps its
+  recipe.
+  Evidence: `work/rebuild/toolchain-matrix.json` and `tools/rebuild/toolchain.json`.
+- The four full-check counts after the toolchain pass are 432, 428, 417, and
+  413.  Each count is one more than the library-pass count, because stage 12
+  adds the toolchain manifest check.
+  Evidence: the four `tools/pipeline_check.py` commands in the testing section.
+
+## The six near-miss source-form outcomes
+
+The table records the source-form outcome of each selected near-miss module.  The
+first-difference column holds the value before the source change.  The match, the
+instruction count, and the byte count hold the value of the kept source.  The
+`n/a` stack-slot cells mean the module is not a local-slot form.  The
+`first_difference.py` `instructions_equal` is the oracle's fully-equal count and
+the stored identity instruction count is `diff_module.py`'s equal-shape count,
+so the two metrics differ.
+
+After the source-form changes the store holds 157 `verified` and 221 `rebuilt`
+records.  The earlier bullets that hold 154 `verified` and 224 `rebuilt` are the
+library-pass snapshot.  The earlier bullet that holds 155 `verified` and 223
+`rebuilt` is the toolchain-pass snapshot.
+
+| Module | Record | First difference before the change | Idiom | Source form | Final match | Instructions | Bytes | Original stack slots | Rebuilt stack slots | Outcome or reason |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `error_report` | 0x10978 | instruction 23: `mask: [1, 2, 3, 4] against []` | constant operand | relocatable `printer_data` symbol in place of the integer literal `0x7fe8` | `exact-relocations` | 171/171 | 402/554 | n/a | n/a | The relocatable symbol makes the compiler emit the long `push imm32` with a relocation, so the mask matches the original.  The behavior passes with the markers `R`, `R`, `R`, and `D`. |
+| `dpmi_int31_entry` | 0xd4410 | instruction 10: `size: 3 against 4` | instruction encoding | the explicit bytes `8e 5d 0c` in place of the 16-bit segment load `mov ds, word ptr [ebp + 0xc]` | `exact-bytes` | 28/28 | 56/56 | n/a | n/a | The explicit three bytes keep the 16-bit segment load without the operand-size prefix, so the bytes match the original.  The behavior passes with the markers `V` and `D`. |
+| `memory_available` | 0x2f8ca | instruction 8: `byte 2: 0xfc against 0xf4` | local slot order | the direct return `return probe_free(pool) + probe_size(pool);` in place of the `unsigned total;` local and the two statements | `same-shape` | 27/27 | 43/58 | `[ebp-4]` = the argument `pool`, `[ebp-8]` = the sum, `[ebp-0xc]` = the return temporary | `[ebp-4]` = the sum, `[ebp-8]` = the return temporary, `[ebp-0xc]` = the argument `pool` | The direct return is rejected.  It fell to the `different` match with 22 of 25 instructions and 30 of 52 bytes.  The kept source holds the first difference and the idiom.  The cause is the compiler allocator local slot order, as an inference from the measured pair.  The behavior passes with the markers `F`, `S`, `T`, and `D`. |
+| `list_create` | 0x2ecf8 | instruction 7: `byte 2: 0xf8 against 0xf4` | local slot order | the named result `void *result; result = list; return result;` at the end of the function | `same-shape` | 46/46 | 102/127 | `[ebp-8]` = the argument `list`, `[ebp-4]` = the argument `count`, `[ebp-0xc]` = the return temporary | `[ebp-0xc]` = the argument `list`, `[ebp-8]` = the argument `count`, `[ebp-4]` = the return temporary | The named result is rejected.  It fell to the `different` match with 43 of 46 instructions and 94 of 127 bytes.  The kept source holds the first difference and the idiom.  The cause is the compiler allocator local slot order, as an inference from the measured pair.  The behavior passes with the markers `0`, `1`, and `D`. |
+| `pool_init` | 0x2f904 | instruction 8: `byte 2: 0xfc against 0xf8` | local slot order | the struct local `struct dpmi_block { unsigned int block[7]; unsigned int segments[3]; }; struct dpmi_block regs;` in place of the two arrays | `same-shape` | 44/44 | 107/129 | `[ebp-4]` = the argument `pool`, `[ebp-8]` = the return temporary, `[ebp-0xc]` = the `block[6]` status, `[ebp-0x10]` = `block[5]`, `[ebp-0x24]` = `block[0]`, `[ebp-0x30]` = the `segments` base | `[ebp-4]` = the return temporary, `[ebp-8]` = the argument `pool`, `[ebp-0x14]` = the `segments` base, `[ebp-0x18]` = the `block[6]` status, `[ebp-0x1c]` = `block[5]`, `[ebp-0x30]` = `block[0]` | The struct local is rejected.  It held the same `same-shape` match with 44 of 44 instructions and 107 of 129 bytes, so the tie keeps the two-array form.  The kept source holds the first difference and the idiom.  The cause is the compiler allocator local slot order, as an inference from the measured pair.  The behavior passes with the markers `0`, `1`, `2`, and `D`. |
+| `memory_alloc_small` | 0x2f172 | instruction 6: `byte 2: 0xf4 against 0xf0` | local slot order | the struct local `struct dpmi_block { unsigned int block[7]; unsigned int segments[3]; }; struct dpmi_block regs;` in place of the two arrays, with the `unsigned int value;` local kept | `same-shape` | 49/49 | 120/147 | `[ebp-4]` = the argument `address`, `[ebp-8]` = the argument `size`, `[ebp-0xc]` = the argument `handle`, `[ebp-0x10]` = the `value` local, `[ebp-0x14]` = the `block[6]` status, `[ebp-0x18]` = `block[5]`, `[ebp-0x1c]` = `block[4]`, `[ebp-0x24]` = `block[2]`, `[ebp-0x28]` = `block[1]`, `[ebp-0x2c]` = `block[0]`, `[ebp-0x38]` = the `segments` base, `[ebp-0x3c]` = the return temporary | `[ebp-4]` = the argument `address`, `[ebp-8]` = the `value` local, `[ebp-0xc]` = the return temporary, `[ebp-0x10]` = the argument `handle`, `[ebp-0x14]` = the argument `size`, `[ebp-0x20]` = the `segments` base, `[ebp-0x24]` = the `block[6]` status, `[ebp-0x28]` = `block[5]`, `[ebp-0x2c]` = `block[4]`, `[ebp-0x34]` = `block[2]`, `[ebp-0x38]` = `block[1]`, `[ebp-0x3c]` = `block[0]` | The struct local is kept.  It gave the `same-shape` match with 49 of 49 instructions and 120 of 147 bytes, against 118 of 147 bytes for the two-array form.  The first difference and the idiom stay the same.  The cause is the compiler allocator local slot order, as an inference from the measured pair.  The behavior passes with the markers `0`, `1`, and `D`. |
+
+- The before report holds the row `instruction 23: mask: [1, 2, 3, 4]
+  against []` and the idiom `constant operand`:
+  `python3 tools/rebuild/first_difference.py report --module error_report --out work/rebuild/first-error-before.json`.
+- The before run holds the match `same-shape` and 418 of 554 bytes:
+  `python3 tools/rebuild/run.py run --function 0x10978`.
+- The after run holds the strict match `exact-relocations` and 402 of 554
+  bytes, and the behavior output holds `R`, `R`, `R`, and `D`:
+  `python3 tools/rebuild/run.py run --function 0x10978`.
+- The after report holds no row, because the module is strict:
+  `python3 tools/rebuild/first_difference.py report --module error_report --out work/rebuild/first-error-report.json`.
+- The before report holds the row `instruction 10: size: 3 against 4` and the
+  idiom `instruction encoding`: `python3
+  tools/rebuild/first_difference.py report --module dpmi_int31_entry --out
+  work/rebuild/first-dpmi-before.json`.
+- The before run holds the match `same-shape` and 18 of 56 bytes:
+  `python3 tools/rebuild/run.py run --function 0xd4410`.
+- The after run holds the strict match `exact-bytes` and 56 of 56 bytes:
+  `python3 tools/rebuild/run.py run --function 0xd4410`.
+- The extra behavior check writes the markers `V` and `D`: `python3
+  tools/rebuild/harness.py run --module dpmi_int31_entry`.
+- The after report holds no row, because the module is strict:
+  `python3 tools/rebuild/first_difference.py report --module
+  dpmi_int31_entry --out work/rebuild/first-dpmi-report.json`.
+- The before report holds the row `instruction 8: byte 2: 0xfc against 0xf4`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module memory_available --out
+  work/rebuild/first-memory-before.json`.
+- The before run holds the match `same-shape`, 27 of 27 instructions, and 43
+  of 58 bytes: `python3 tools/rebuild/run.py run --function 0x2f8ca`.
+- The after run of the direct return holds the match `different`, 22 of 25
+  instructions, and 30 of 52 bytes, and the behavior output holds `F`, `S`,
+  `T`, and `D`: `python3 tools/rebuild/run.py run --function 0x2f8ca`.
+- The after report of the direct return holds no difference and the idiom
+  `other`, because the instruction lists differ in length.  The kept-form
+  report overwrote the rejected report at the default path, so the record note
+  holds the rejected counts and the idiom.
+- The kept run holds the match `same-shape`, 27 of 27 instructions, and 43 of
+  58 bytes: `python3 tools/rebuild/run.py run --function 0x2f8ca`.
+- The kept report holds the row `instruction 8: byte 2: 0xfc against 0xf4`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module memory_available --out
+  work/rebuild/first-memory-available.json`.
+- The measured pair holds the first difference `instruction 8: byte 2: 0xfc
+  against 0xf4`, then instructions 9 and 12: `python3
+  tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2f8ca --original-end 0x2f904 --rebuilt
+  work/rebuild/mamod.exe --rebuilt-map work/rebuild/memory_available.map
+  --rebuilt-symbol memory_available_`.
+- The trait note is written through `python3 tools/rebuild/store.py set
+  --function 0x2f8ca --note TEXT`.
+- The before report holds the row `instruction 7: byte 2: 0xf8 against 0xf4`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module list_create --out
+  work/rebuild/first-list-before.json`.
+- The before run holds the match `same-shape`, 46 of 46 instructions, and 102
+  of 127 bytes: `python3 tools/rebuild/run.py run --function 0x2ecf8`.
+- The after run of the named result holds the match `different`, 43 of 46
+  instructions, and 94 of 127 bytes, and the behavior output holds `0`, `1`,
+  and `D`: `python3 tools/rebuild/run.py run --function 0x2ecf8`.
+- The after report of the named result holds no difference and the idiom
+  `other`, because the instruction lists differ in length: `python3
+  tools/rebuild/first_difference.py report --module list_create --out
+  work/rebuild/first-list-create-rejected.json`.  The rejected row stays at
+  `work/rebuild/first-list-create-rejected.json`.
+- The kept run holds the match `same-shape`, 46 of 46 instructions, and 102 of
+  127 bytes: `python3 tools/rebuild/run.py run --function 0x2ecf8`.
+- The kept report holds the row `instruction 7: byte 2: 0xf8 against 0xf4`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module list_create --out
+  work/rebuild/first-list-create.json`.
+- The measured pair holds the first difference `instruction 7: byte 2: 0xf8
+  against 0xf4`: `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2ecf8 --original-end 0x2ed77 --rebuilt
+  work/rebuild/lcrmod.exe --rebuilt-map work/rebuild/list_create.map
+  --rebuilt-symbol list_create_`.
+- The trait note is written through `python3 tools/rebuild/store.py set
+  --function 0x2ecf8 --note TEXT`.
+- The before report holds the row `instruction 8: byte 2: 0xfc against 0xf8`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module pool_init --out
+  work/rebuild/first-pool-before.json`.
+- The before run holds the match `same-shape`, 44 of 44 instructions, and 107
+  of 129 bytes: `python3 tools/rebuild/run.py run --function 0x2f904`.
+- The after run of the struct local holds the match `same-shape`, 44 of 44
+  instructions, and 107 of 129 bytes, and the behavior output holds `0`, `1`,
+  `2`, and `D`: `python3 tools/rebuild/run.py run --function 0x2f904`.
+- The after report of the struct local holds the row `instruction 8: byte 2:
+  0xfc against 0xf8` and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module pool_init --out
+  work/rebuild/first-pool-init.json`.  The rejected report is kept at
+  `work/rebuild/first-pool-struct-rejected.json`.
+- The kept run holds the match `same-shape`, 44 of 44 instructions, and 107
+  of 129 bytes: `python3 tools/rebuild/run.py run --function 0x2f904`.
+- The kept report holds the row `instruction 8: byte 2: 0xfc against 0xf8`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module pool_init --out
+  work/rebuild/first-pool-init.json`.
+- The measured pair holds the first difference `instruction 8: byte 2: 0xfc
+  against 0xf8`, then instructions 9 and 10: `python3
+  tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2f904 --original-end 0x2f985 --rebuilt
+  work/rebuild/pimod.exe --rebuilt-map work/rebuild/pool_init.map
+  --rebuilt-symbol pool_init_`.
+- The trait note is written through `python3 tools/rebuild/store.py set
+  --function 0x2f904 --note TEXT`.
+- The before report holds the row `instruction 6: byte 2: 0xf4 against 0xf0`
+  and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module memory_alloc_small --out
+  work/rebuild/first-mas-before.json`.
+- The before run holds the match `same-shape`, 49 of 49 instructions, and 118
+  of 147 bytes: `python3 tools/rebuild/run.py run --function 0x2f172`.
+- The after run of the struct local holds the match `same-shape`, 49 of 49
+  instructions, and 120 of 147 bytes, and the behavior output holds `0`, `1`,
+  and `D`: `python3 tools/rebuild/run.py run --function 0x2f172`.
+- The after report of the struct local holds the row `instruction 6: byte 2:
+  0xf4 against 0xf0` and the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module memory_alloc_small --out
+  work/rebuild/first-memory-alloc-small.json`.
+- The combined report holds the `pool_init` row `instruction 8: byte 2: 0xfc
+  against 0xf8` and the `memory_alloc_small` row `instruction 6: byte 2: 0xf4
+  against 0xf0`, both with the idiom `local slot order`: `python3
+  tools/rebuild/first_difference.py report --module pool_init --module
+  memory_alloc_small --out work/rebuild/first-struct-locals.json`.
+- The measured pair holds the first difference `instruction 6: byte 2: 0xf4
+  against 0xf0`, then instructions 7 and 9: `python3
+  tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x2f172 --original-end 0x2f205 --rebuilt
+  work/rebuild/masmod.exe --rebuilt-map work/rebuild/memory_alloc_small.map
+  --rebuilt-symbol memory_alloc_small_`.
+- The trait note is written through `python3 tools/rebuild/store.py set
+  --function 0x2f172 --note TEXT`.
+- The first-difference report command is `python3
+  tools/rebuild/first_difference.py report --module error_report --module
+  list_create --module memory_alloc_small --module memory_available --module
+  pool_init --module dpmi_int31_entry --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --out
+  work/rebuild/first-differences.json`.  The source-form idiom catalogue is
+  `docs/reference/source-forms.md`.
+- The before median byte match of the six is 0.7786 (77.9%).  It is the
+  median of the six before `bytes_equal / bytes_total` ratios: 18/56, 43/58,
+  418/554, 118/147, 102/127, and 107/129.  The sorted ratios are 0.3214,
+  0.7414, 0.7545, 0.8027, 0.8031, and 0.8295, and the median is the mean of the
+  third and fourth values.
+- The after median byte match of the six is 0.8097 (81.0%).  It is the
+  median of the six after `bytes_equal / bytes_total` ratios: 402/554, 56/56,
+  43/58, 102/127, 107/129, and 120/147.  The sorted ratios are 0.7256, 0.7414,
+  0.8031, 0.8163, 0.8295, and 1.0, and the median is the mean of the third and
+  fourth values.  The after median does not fall against the before median.
+- The four full-check counts are 432, 428, 417, and 413.  `first_difference.py`
+  is not a stage check, so the tool adds no stage check and the counts stay the
+  same.  Evidence: the four `tools/pipeline_check.py` commands in the testing
+  section.
+
+## The whole-image build and the score
+
+- Observation: the full build writes `work/rebuild/STARTH.EXE` and its report
+  `work/rebuild/whole-image.json`.  It patches 13 modules, skips 238 modules,
+  and rewrites 16 slots.  The summary line is `13 patched, 238 skipped, 16
+  slots relocated, 1034738 of 1034923 bytes equal`.
+  Evidence: `python3 tools/rebuild/whole_image.py --all`.
+- Observation: the original image is 1,034,923 bytes (0xfcaab).  The MZ stub
+  runs from 0x0 to 0x2a50, the LE header is at 0x2a50, the page size is 0x1000,
+  there are 227 pages, and the data pages start at 0x1a800.  Object 1 is code
+  at base 0x10000 with virtual size 0xdba93 and 220 pages.  Object 2 is BSS at
+  base 0xf0000 with virtual size 0x82 and 0 pages.  Object 3 is stack at base
+  0x100000 with virtual size 0x472c0 and 7 pages.  The image holds 11,259
+  internal fixup slots of width 4.
+  Evidence: `python3 tools/le.py info
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` and the
+  `original.relocations()` call.
+- Observation: the build places 251 module items.  The store holds 252 module
+  recipes.  `driver` has no symbol record, so the build excludes it.  `exit`
+  has two records, `exit_` at 0x300be and `exit_flush_` at 0x300d6, so the
+  lowest address 0x300be is the identity record.
+  Evidence: the report `modules` list and `tools/rebuild/functions/0x300be.json`.
+- Observation: the module order is the original address order of the lowest
+  identity record of each module.  The first row is `game_main` at 0x10020.
+  Evidence: `work/rebuild/whole-image.json`.
+- Observation: the in-place rule keeps the stub, the header, the data objects,
+  and the original library bytes.  The build rewrites only the internal 4-byte
+  slots of a patched body.  It does not rewrite the fixup section.
+  Evidence: `python3 tools/rebuild/library.py check-manifest --manifest
+  tools/rebuild/library.json` prints `tools/rebuild/library.json: the link
+  manifest matches the records`, and the region scores below.
+- Observation: 11 module items carry a `library` field on their identity
+  record, and the build skips each one with the reason `the original library
+  bytes stay`.  The five rows `exit` at 0x300be, `dpmi_fill_regs` at 0x4bf23,
+  `dpmi_call` at 0x4bf4b, `memset_runtime` at 0xd1ec0, and `runtime_free` at
+  0xd2008 held rebuilt bodies that changed bytes before the filter, and their
+  eight internal slots no longer relocate.  The other six rows `printf`,
+  `fprintf`, `sprintf`, `malloc_rt`, `memmove`, and `fprtf` already skipped on
+  the fit.  The build does not read the manifest: the record `library` field is
+  the evidence, and `library.py check-manifest` proves the records.
+  Evidence: `work/rebuild/whole-image.json` and `tools/rebuild/library.json`.
+- Observation: 227 skipped modules passed their build and 11 skipped rows hold
+  the `skip` build verdict of the library-backed records.  The skip group by
+  `build` holds no `fail` row.
+  Evidence: the report rows with `outcome` `skipped`.
+- Observation: the skip group by `fit` holds 225 modules whose rebuilt body sum
+  differs from the record span.  The first row is `game_main` at 0x10020 with
+  the reason `the rebuilt body holds 182 bytes against the recorded 371`.
+  Evidence: `work/rebuild/whole-image.json`.
+- Observation: the other `fit` group holds 2 modules whose rebuilt body sum
+  equals the record span but whose instructions do not align.  The first row is
+  `race_cleanup` at 0x2a1b0, and the second row is `video_buf_load` at 0x4c8f0.
+  Both hold the reason `the rebuilt body does not align with the original
+  body`.
+  Evidence: `work/rebuild/whole-image.json`.
+- Observation: 70 of the 251 module items hold an original instruction byte sum
+  that equals the record span.  `free` at 0x300ec holds a span of 12 bytes and
+  an original body of 9 bytes.  `error_report` at 0x10978 holds a span of 556
+  bytes and an original body of 554 bytes.  The fit rule compares the rebuilt
+  body to the span, so both modules are skipped.  The report rows hold `free`
+  9 against 12 and `error_report` 554 against 556.
+  Evidence: the read-only snippet below.
+
+  ```sh
+  python3 - <<'PY'
+  import pathlib, sys
+  sys.path.insert(0, 'tools'); sys.path.insert(0, 'tools/rebuild')
+  import diff_module, le, store, whole_image
+  original = le.load(pathlib.Path(store.DEFAULT_ORIGINAL))
+  items = whole_image.module_order(
+      whole_image._load_modules(), whole_image._load_records())
+  equal = 0
+  for item in items:
+      record = item['record']
+      start = int(record['address'], 16)
+      body = diff_module.original_body(
+          original, start, start + record['size'], record.get('count', 0))
+      equal += sum(insn.size for insn in body) == record['size']
+  print(f'{equal} of {len(items)} module items hold an original body equal to the span')
+  PY
+  ```
+
+- Observation: the exact oracle prints `image compare: 1034738 of 1034923 bytes
+  equal`.  The region scores are stub 10832/10832, header 196/196, loader
+  990/990, fixups 96278/96278, obj.1 900935/901120, and obj.3 25259/25259.  The
+  score is a byte score, not a correctness measure.
+  Evidence: `python3 tools/rebuild/image_compare.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  work/rebuild/STARTH.EXE`.  The oracle exits with 1 because the images differ.
+- Observation: the report holds `patched` 13, `skipped` 238, `relocated` 16,
+  and `score` equal 1034738 of total 1034923 with `exact` false.  The image
+  digest is
+  `8dbafcfbf8f7258e12f3b37ea7672cd3d070e46d51fccd205e149bead185f997`.
+  Evidence: `work/rebuild/whole-image.json`.
+- Observation: the four full-check counts are 433, 429, 418, and 414, and every
+  run reports 0 failures.  Stage 11 passes in each run with the byte score
+  `image compare: 1034738 of 1034923 bytes equal`.  The whole-image stage adds
+  one counted check.
+  Evidence: the four `tools/pipeline_check.py` commands in the testing section.
+- Open question: the fit can compare the record span, the original instruction
+  byte sum, or the rebuilt body span.  A direct branch target to a function
+  outside the rebuilt body stays relative and is not rewritten, and a runnable
+  image can need that target rewritten.  An absolute operand that holds no
+  fixup slot keeps the rebuilt link-time value, and a runnable image can need
+  that operand rewritten.
+- Limit: the current build follows the in-place rule and the agreed fit rule.
+  The image is a byte-score artifact, not a proven runnable image.
+- The image and the report stay under `work/rebuild/`.  Do not commit them.
+
 ## Open questions
 
 ### Entry alignment (resolved)
@@ -5595,19 +6243,16 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   the segment values back into the block.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0xd4410 --count 28`.
 - The module is assembly, because the original is a run-time routine with the segment and flag
-  juggling.  The diff reports 28 of 28 instructions equal and the verdict `the instruction
-  sequences match; the differing operands are the link-time addresses`, so the identity check
-  passes and the store records `verified`.
+  juggling.  The diff compares 56 of 56 bytes and 28 of 28 instructions and reports the verdict
+  `the modules are byte-identical`, so the identity check passes and the store records `verified`.
   Evidence: `tools/rebuild/dpmi_int31_entry.asm` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0xd4410
   --rebuilt work/rebuild/dpiexmod.exe --rebuilt-map work/rebuild/dpmi_int31_entry.map
   --rebuilt-symbol dpmi_int31_entry_`.
-- The behavior run is not included for this module.  The original writes the interrupt results
-  through the real-mode segment path: it loads `ds` from the block and writes to the
-  segment-relative address.  The flat harness cannot provide that path, and the run faults before
-  the markers, so the module record declares the build and the identity checks only.
+- The module record declares the build and the identity checks.  The extra behavior run passes and
+  prints the markers `V` and `D`.
   Evidence: `python3 tools/rebuild/harness.py run --module dpmi_int31_entry` and
-  `work/rebuild/dpiex_out.txt`.
+  `work/rebuild/dpi_out.txt`.
 
 ## The object_physics module
 
@@ -5630,14 +6275,16 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 
 ## The dpmi_real_int module
 
-- `dpmi_real_int` at `0x25db0` holds 17 compared instructions and 58 bytes plus the real-mode
+- `dpmi_real_int` at `0x25db0` holds 98 instructions and 354 bytes over the full extent.  The
+  first-return body held 17 instructions and 58 bytes.  The full body adds the real-mode
   interrupt path: the state flags, the DOS multiplexer call INT 2Fh AX=1500h, the success return,
   and the real-mode path through INT 31h with the register block at `DAT_001176c0`.
-  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25db0 --count 60`.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x25db0 --count 98` and the
+  finding "The reachable extent and the symbol-aware oracle".
 - The module is assembly, because the original is library-style code: it holds `pushad`/`popad`,
-  the direct INT 2Fh and INT 31h calls, and no EBP frame.  The diff reports 17 of 17 compared
-  instructions equal and the verdict `the instruction sequences match; the differing operands are
-  the link-time addresses`, so the identity check passes and the store records `verified`.
+  the direct INT 2Fh and INT 31h calls, and no EBP frame.  The full extent adds 81 instructions,
+  so the diff reports 88 of 98 compared instructions equal and the verdict `the instruction
+  sequences differ`; the identity check fails and the store records `rebuilt`.
   Evidence: `tools/rebuild/dpmi_real_int.asm` and
   `python3 tools/rebuild/diff_module.py --original STARTH.EXE --original-address 0x25db0
   --rebuilt work/rebuild/dprimod.exe --rebuilt-map work/rebuild/dpmi_real_int.map
@@ -10104,8 +10751,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
 ## The joystick_update module at 0x24da0
 
 - Observation: the original body at `0x24da0` holds 201 instructions and 630
-  bytes.  The plan row holds the same counts.  The record keeps the 2176-byte
-  extent to the next entry, so the identity check uses `--count 201`.
+  bytes.  The plan row holds the same counts.  The record keeps the 640-byte
+  extent to the next entry, so the identity check uses
+  `--original-end 0x25020`.
   Evidence: `python3 tools/le.py disasm STARTH.EXE 0x24da0 --count 201`,
   `docs/explanation/rebuild-plan.md`, and
   `tools/rebuild/functions/0x24da0.json`.
@@ -10142,14 +10790,14 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   0 or 2 tests the byte at `+2` of the state pointer at `+0x18` and stores
   1023 or 0.
   Evidence: the block at `0x24f50` through `0x24f9b`.
-- Observation: the rebuilt module holds 48 of 201 instructions and 13 of 630
-  bytes.  The identity check stays open.  The V2 toolchain saves fewer
-  registers, uses a different loop shape, and forms the record index with a
-  multiply.  The store records `rebuilt`.
+- Observation: the rebuilt module holds 138 instructions and 460 bytes, and 33
+  instructions and 8 bytes are equal.  The identity check stays open.  The V2
+  toolchain saves fewer registers, uses a different loop shape, and forms the
+  record index with a multiply.  The store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x24da0 --count 201 --rebuilt work/rebuild/joymod.exe
-  --rebuilt-map work/rebuild/joystick_update.map --rebuilt-symbol
-  joystick_update_`.
+  --original-address 0x24da0 --original-end 0x25020 --rebuilt
+  work/rebuild/joymod.exe --rebuilt-map work/rebuild/joystick_update.map
+  --rebuilt-symbol joystick_update_`.
 - Observation: the behavior check passes.  The harness prints the markers `0`
   through `9`, `A`, `B`, and `D`.  The paths cover the positive scale, the
   negative scale with the truncation toward zero, the dead zone, the high and
@@ -12755,6 +13403,9 @@ The bundled DOSBox 0.74-2 has no debugger, so the project uses DOSBox-X.
   The stage reports a skip when no whole image is built, so the documented
   check counts do not change.
   Evidence: `tools/pipeline_check.py`.
+  Note (2026-11-16): the whole-image stage is now a score gate.  A missing or
+  unreadable image fails.  The four counts are 433, 429, 418, and 414.  The
+  evidence is the `## The whole-image build and the score` section.
 
 ## The relocation-aware function oracle
 
@@ -19365,12 +20016,13 @@ temporary `-od` recipe.
 
 ## The sound_voice_setup module at 0x8adac
 
-- Observation: the original body at `0x8adac` holds 71 instructions and 279
-  bytes up to the first `ret` at `0x8aec2`.  The function has a second path
-  that ends at the `ret` at `0x8af05`.  The next function starts at `0x8af08`,
-  so the store record keeps the 348-byte extent and sets no separate function
-  size.  The identity check uses 71 instructions.
-  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8adac --count 71` and
+- Observation: the original body at `0x8adac` holds 91 instructions and 345
+  bytes up to the second `ret` at `0x8af05`.  The first `ret` is at
+  `0x8aec2`.  The next function starts at `0x8af08`, so the store record
+  keeps the 348-byte extent and sets no separate function size.  The identity
+  check uses the 91-instruction original body and the 77-instruction rebuilt
+  body.
+  Evidence: `python3 tools/le.py disasm STARTH.EXE 0x8adac --count 91` and
   `tools/rebuild/functions/0x8adac.json`.
 - Observation: the only direct caller is the frame prepare at `0x8af08`.  That
   helper runs in the per-frame loop of `sound_effects_update` at `0x81ab0`
@@ -19418,16 +20070,15 @@ temporary `-od` recipe.
   Evidence: `tools/rebuild/sound_voice_setup_main.c`,
   `python3 tools/rebuild/harness.py run --module sound_voice_setup`, and
   `work/rebuild/svsetup.txt`.
-- Observation: the rebuilt module holds 71 decoded instructions and 301 bytes.
-  The identity check stays open at 29 of 71 instructions, 21 of 279 bytes, and
-  0 of 38 relocation slots, because V2 saves four registers, keeps the context
-  base and the emitter in registers, builds the flag test in another shape,
-  and uses another branch layout.  The build and behavior checks pass, so the
-  store records `rebuilt`.
+- Observation: the rebuilt module holds 77 decoded instructions and 312 bytes.
+  The identity check stays open at 30 of 77 instructions and 22 of 312 bytes,
+  because V2 saves four registers, keeps the context base and the emitter in
+  registers, builds the flag test in another shape, and uses another branch
+  layout.  The build and behavior checks pass, so the store records `rebuilt`.
   Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
-  --original-address 0x8adac --count 71 --rebuilt work/rebuild/svsetup.exe
-  --rebuilt-map work/rebuild/sound_voice_setup.map --rebuilt-symbol
-  sound_voice_setup_` and
+  --original-address 0x8adac --original-end 0x8af08 --rebuilt
+  work/rebuild/svsetup.exe --rebuilt-map work/rebuild/sound_voice_setup.map
+  --rebuilt-symbol sound_voice_setup_` and
   `python3 tools/rebuild/run.py run --function 0x8adac`.
 - Inference: the voice entry list, the voice record, the emitter, and the
   basis builders support the name `sound_voice_setup`.  The original has no

@@ -12,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -60,6 +61,18 @@ class CallgraphTestCase(unittest.TestCase):
                 {"from": "0x10100", "site": "0x10105", "to": "0x10020"},
             ],
         )
+
+    def test_build_edges_uses_the_record_size_as_the_end(self) -> None:
+        records = [{**self.record("0x10000", "main"), "size": 0x20}]
+        with mock.patch.object(callgraph.le, "load", return_value=mock.Mock()):
+            with mock.patch.object(
+                callgraph.le, "function_body", return_value=[]
+            ) as function_body:
+                with mock.patch.object(
+                    callgraph.le, "call_sites", return_value=[]
+                ):
+                    callgraph.build_edges(Path("STARTH.EXE"), records)
+        function_body.assert_called_once_with(mock.ANY, 0x10000, end=0x10020)
 
     def test_write_and_load_edges(self) -> None:
         edges = [

@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_physics.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_physics.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_physics_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

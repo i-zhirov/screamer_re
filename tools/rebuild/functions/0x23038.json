@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x23038 holds 148 instructions and 437 bytes up to the ret at 0x231ec; the next function starts at 0x231f0, so the store record keeps the 440-byte extent and sets no function size; the identity check uses 148 instructions"
+      "text": "the original body at 0x23038 holds 148 instructions and 437 bytes over the full extent; the ret is at 0x231ec; the next function starts at 0x231f0, so the store record keeps the 440-byte extent and sets no function size; the identity check uses 100 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 428 bytes and 148 decoded instructions; the identity check stays open at 46 of 148 instructions and 21 of 428 bytes because V2 saves the frame pointer first, keeps the playback block in ebx, uses a shorter frame, multiplies the index by 40, and reads the enable flag through a near data address; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 283 bytes and 100 decoded instructions; the identity check stays open at 34 of 100 instructions and 14 of 283 bytes because V2 saves the frame pointer first, keeps the playback block in ebx, uses a shorter frame, multiplies the index by 40, and reads the enable flag through a near data address; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The path_playback_update module at 0x23038"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "path_playback_update",
   "notes": [],
   "object_offset": "0x13038",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
-        "bytes_total": 428,
+        "bytes_equal": 15,
+        "bytes_total": 283,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 46,
-        "instructions_total": 148,
+        "instructions_equal": 29,
+        "instructions_total": 98,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x23038",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:77a9ad0c7b912e200181590d1c05a2fe5a946acd0e4a59e6f6a224a4af2571d2",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:875b0a0497ee137fa639806c6bae4e1e4f976a328b8f11bd8f7b1e5bd1371ba7",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:b72599cfee13b772b5d4979ff76e1074ef42b611795ee0b2af6ec3a4e06c6b96",
     "tool": "run.py"
   },

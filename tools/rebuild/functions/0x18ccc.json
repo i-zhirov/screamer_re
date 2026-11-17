@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 69 instructions and 225 bytes; the identity check stays open at 12 of 69 instructions, 5 of 225 bytes, and 2 of 9 relocation slots, because V2 keeps the frame first, keeps the object in edx, keeps the world value in a register, and emits the two ratio computations in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "player_screen_offset",
   "notes": [],
   "object_offset": "0x8ccc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

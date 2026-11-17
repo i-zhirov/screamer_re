@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x194a0 holds 103 instructions and 363 bytes up to the ret at 0x1960a; the next function starts at 0x1960c, so the store record keeps the 364-byte extent and sets no separate function size; the identity check uses 103 instructions"
+      "text": "the original body at 0x194a0 holds 103 instructions and 363 bytes over the full extent; the ret is at 0x1960a; the next function starts at 0x1960c, so the store record keeps the 364-byte extent and sets no separate function size; the identity check uses 72 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 103 decoded instructions and 363 bytes; the identity check stays open at 21 of 103 instructions, 27 of 363 bytes, and 0 of 16 relocation slots because V2 saves ebp first, keeps the object in ecx, uses another local layout for the timer and the progress terms, and emits shorter compare branches; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 72 decoded instructions and 270 bytes; the identity check stays open at 15 of 72 instructions, 17 of 270 bytes, and 0 of 16 relocation slots because V2 saves ebp first, keeps the object in ecx, uses another local layout for the timer and the progress terms, and emits shorter compare branches; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The player_lap_progress_update module at 0x194a0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "player_lap_progress_update",
   "notes": [],
   "object_offset": "0x94a0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 363,
+        "bytes_equal": 32,
+        "bytes_total": 270,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
-        "instructions_total": 103,
+        "instructions_equal": 11,
+        "instructions_total": 69,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x194a0",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:bff8be6e6f730e48a71803a2f592275fe9ed34de9496870588fa4e9d958a0ae8",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7ce93aadcb278902d5fe89fa45411ea4fab0858ea4d1e1174a52ee361f4d2a0e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:d6c1afa7d45847de21f33309531b2a42f9cb983c218faf62880c8e4c52f64a5f",
     "tool": "run.py"
   },

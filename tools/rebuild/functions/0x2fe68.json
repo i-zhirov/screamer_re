@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_0002fe68` calls `FUN_000d38e6`, `FUN_000d380d`, and `FUN_0002f326` with `MIDI_MUSIC`, then clears the fields at `+0xc` and `+4`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "music_bank_stop",
   "notes": [],
   "object_offset": "0x1fe68",
+  "provenance": "game",
   "role": "stops the song through the driver, removes the `MIDI_MUSIC` resource, and clears the bank state",
   "section": "The sound loaders",
   "size": 84,

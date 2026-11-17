@@ -47,12 +47,21 @@
     {
       "kind": "finding",
       "text": "The spline_interpolate module at 0x22744"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "spline_interpolate",
   "name": "spline_interpolate",
   "notes": [],
   "object_offset": "0x12744",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -64,17 +73,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 55,
-        "bytes_total": 1030,
+        "bytes_equal": 50,
+        "bytes_total": 914,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 82,
-        "instructions_total": 360,
+        "instructions_equal": 80,
+        "instructions_total": 314,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22744",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:0d1532c1a01469c3abc6068d49ce925159fbea70f22b67614cda7d192367808b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c2a615ac3c3a41fcf3fdb0323bddccba20dc963dd838e260597d372ff4a8b90a",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:4e99c981c675bdaa6b2699d7a85d17fa18e29180e72160f9f93b889e06cf7335",
     "tool": "run.py"
   },

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2c7a8 holds 125 instructions and 425 bytes up to the ret at 0x2c950; the next function starts at 0x2c954, so the store record keeps the 428-byte extent and sets no function size; the identity check uses 125 instructions"
+      "text": "the original body at 0x2c7a8 holds 125 instructions and 425 bytes over the full extent; the ret is at 0x2c950; the next function starts at 0x2c954, so the store record keeps the 428-byte extent and sets no function size; the identity check uses 91 instructions"
     },
     {
       "kind": "note",
@@ -54,11 +54,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 125 decoded instructions; the identity check stays open at 28 of 125 instructions and 27 of 403 bytes because V2 uses another prologue and register order and the data constants arrive through globals; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 125 decoded instructions; the identity check stays open at 22 of 91 instructions and 23 of 330 bytes because V2 uses another prologue and register order and the data constants arrive through globals; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "note",
       "text": "the behavior harness uses the empty list path, because a non-empty pointer table needs an absolute pointer that the minimal image does not relocate; the empty list still runs the sentinel check and the group start store"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "championship_screen_init",
   "notes": [],
   "object_offset": "0x1c7a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 403,
+        "bytes_equal": 21,
+        "bytes_total": 323,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 28,
-        "instructions_total": 125,
+        "instructions_equal": 20,
+        "instructions_total": 88,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c7a8",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:bb8e08b26c0d8b648847acae5aea4a6f7d9b3d3db3dd7572652dd66c4903170e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a67ca51d0d081ea1de0e0b627c25b1b62d3d791bd5a5580347c200ac44a00b8e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:5da46f6a21a801f63e1b6ec2d1b5de7ffe38282431cb5b2394382d237bec177b",
     "tool": "run.py"
   },

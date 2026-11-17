@@ -27,7 +27,8 @@
       "compiler": "wcc386",
       "file": "car_proximity_pass.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -36,7 +37,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "car_proximity_pass_main.c"
+      "file": "car_proximity_pass_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

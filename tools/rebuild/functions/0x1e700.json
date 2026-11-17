@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The func_1e700 module at 0x1e700"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "func_1e700",
   "notes": [],
   "object_offset": "0xe700",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

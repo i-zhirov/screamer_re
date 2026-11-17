@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x15c1c holds 306 instructions and 1160 bytes up to the ret at 0x160a3, so the record keeps the 1160-byte extent and sets no function size"
+      "text": "the original at 0x15c1c holds 306 instructions and 1160 bytes over the full extent; the ret is at 0x160a3, so the record keeps the 1160-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -39,12 +39,21 @@
     {
       "kind": "finding",
       "text": "The player_car_link module at 0x15c1c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_link",
   "name": "player_car_link",
   "notes": [],
   "object_offset": "0x5c1c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -56,17 +65,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 67,
-        "bytes_total": 1133,
+        "bytes_equal": 49,
+        "bytes_total": 762,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 76,
-        "instructions_total": 306,
+        "instructions_equal": 57,
+        "instructions_total": 177,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15c1c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:b26e15b60e31c2c02cf4b3f749c287aa4ee18ed4571193d80b45a69ba4098de6",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:947673e57d4c23b4ef29e0a952f1ab10f9875a762d82c175920c7f957f3b8788",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:7eb02db69b2314ae04fef00eb73147c247bcb1c80a3d9c4705e93f9919c55af4",
     "tool": "run.py"
   },

@@ -51,6 +51,14 @@
     {
       "kind": "note",
       "text": "the rebuilt function holds 60 decoded instructions and 188 bytes; the identity check stays open at 7 of 60 instructions and 4 of 178 bytes, because V2 saves the frame first, keeps the record pointer and the index in registers, calls a local absolute helper in place of the inline sign extend, and uses another loop layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "car_nearby_mark",
   "notes": [],
   "object_offset": "0x26e4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the first-return body at `0x28ba4` holds 34 instructions and 118 bytes: the state guard, the menu index and the two table reads, the menu-id switch, and the epilogue; the case bodies extend to `0x293a7` (646 instructions and 2052 bytes), and the state 2 overlay body starts at `0x28fd6`.  The rebuild keeps the dispatcher and represents the case bodies and the overlay body as step functions"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "net_race_screen",
   "name": "net_race_screen",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 9,
-        "bytes_total": 118,
+        "bytes_equal": 21,
+        "bytes_total": 282,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 7,
-        "instructions_total": 34,
+        "instructions_equal": 15,
+        "instructions_total": 98,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x28ba4",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:d42efc4d037619f893504cae74ec5b77b8bf3808efc073deea2c0065a552bdca",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:87d5c0371cb0f1c5716a432de8a08e91f7c67ee79db11bada63eeb463698cc23",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:434d1e62c8eb34b62dd3a0da00c066b89bc950b57881822afa71d0f3930589f3",
     "tool": "run.py"
   },

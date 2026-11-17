@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at `0x1bbc8` holds 189 instructions and 673 bytes up to the `ret` at `0x1be68`; the next function starts at `0x1be6c`, so the store record keeps the 676-byte extent and sets no function size; the identity check uses 189 instructions"
+      "text": "the original body at `0x1bbc8` holds 189 instructions and 673 bytes up to the `ret` at `0x1be68`; the next function starts at `0x1be6c`, so the store record keeps the 676-byte extent and sets no function size; the identity check uses 119 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The choice_load module at 0x1bbc8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "choice_load",
   "notes": [],
   "object_offset": "0xbbc8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -61,17 +70,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 34,
-        "bytes_total": 628,
+        "bytes_equal": 30,
+        "bytes_total": 437,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 73,
-        "instructions_total": 189,
+        "instructions_equal": 44,
+        "instructions_total": 114,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1bbc8",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:4981263741e48f81bd077a6aecb74e552c79cc555e8e430246c3e23e7e5fe941",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:2e58be7182bf1b5ada3a73b5c3d74bbcf67afbc131d4401d8014b6568355b977",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:e9dfca660e1a9c5a2012ec920a609fef5f427319cd049d2af8b2c45610856af3",
     "tool": "run.py"
   },

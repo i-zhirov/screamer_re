@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x8b1d4 holds 103 instructions and 293 bytes up to the ret at 0x8b2f8; the next function starts at 0x8b2fc; the next recorded function starts at 0x8b610, so the store record keeps the 1084-byte extent and sets no separate function size; the identity check uses 103 instructions"
+      "text": "the original body at 0x8b1d4 holds 101 instructions and 290 bytes over the full extent; the ret is at 0x8b2f8; the next function starts at 0x8b2fc, so the store record keeps the 296-byte extent and sets no separate function size; the identity check uses 101 instructions"
     },
     {
       "kind": "note",
@@ -46,7 +46,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 103 instructions and 326 bytes; the identity check stays open at 12 of 103 instructions, 3 of 293 bytes, and 0 of 6 relocation slots, because V2 saves six registers and keeps the values in locals; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 124 instructions and 382 bytes; the identity check stays open at 12 of 101 instructions, 3 of 290 bytes, and 0 of 6 relocation slots, because V2 saves six registers and keeps the values in locals; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The sound_source_frame_select module at 0x8b1d4"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "sound_source_frame_select",
   "notes": [],
   "object_offset": "0x7b1d4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -85,23 +94,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 293,
+        "bytes_equal": 7,
+        "bytes_total": 290,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 12,
-        "instructions_total": 103,
+        "instructions_equal": 16,
+        "instructions_total": 101,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8b1d4",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:a3c3203e3f4ae5b9097f61e1de25e4e63ada9775f071d8bca2174ee9e17a46ba",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:cb70aa70e3a282d9f8d0949ba9592df1291f0063c20d04269f4c59778ff6d84b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:228ebd6b53dba7ce6a366dfb027b45945659af5670cf17297a6e6ef1a7df7e80",
     "tool": "run.py"
   },
   "role": "Selects the distance-band frame of a sound source, biases the distance from the source identifier, and stores the adjusted distance for the voice.",
   "section": "object_update_all callees",
-  "size": 1084,
+  "size": 296,
   "status": "rebuilt",
   "symbol": "sound_source_frame_select_"
 }

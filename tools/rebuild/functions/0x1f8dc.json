@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The mouse_release_wait module at 0x1f8dc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "mouse_release_wait",
   "notes": [],
   "object_offset": "0xf8dc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

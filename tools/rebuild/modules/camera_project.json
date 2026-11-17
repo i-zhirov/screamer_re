@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "camera_project_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

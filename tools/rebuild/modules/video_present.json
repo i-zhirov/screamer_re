@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "video_present_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

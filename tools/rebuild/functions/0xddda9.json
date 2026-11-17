@@ -1,9 +1,56 @@
 {
   "address": "0xddda9",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xddda9"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "ioalloc",
+    "object_sha256": "sha256:d5ccef22890823f368540e83f2300103a023857c87d2c2f61b0d3dd66059ae18",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__ioalloc_"
+  },
+  "name": "__ioalloc",
   "notes": [],
   "object_offset": "0xcdda9",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 111,
+        "bytes_total": 119,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 38,
+        "instructions_total": 38,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xddda9",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4090efd82b4634314c3d4c2d4745e51a4796f5306b05b9a4e2f37510e7d0832c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:df0bba89bbc013e13cbf2ab74c08509e440d9697e4f472c4cc253017cc1f4bb0",
+    "tool": "run.py"
+  },
   "size": 119,
-  "status": "unknown"
+  "status": "verified"
 }

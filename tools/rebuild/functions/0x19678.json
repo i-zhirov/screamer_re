@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x19678 holds 124 instructions and 431 bytes up to the ret at 0x19826; the next function starts at 0x19828, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 124 instructions"
+      "text": "the original body at 0x19678 holds 124 instructions and 431 bytes over the full extent; the ret is at 0x19826; the next function starts at 0x19828, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 97 instructions"
     },
     {
       "kind": "note",
@@ -50,11 +50,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 124 decoded instructions; the identity check stays open at 27 of 124 instructions, 26 of 377 bytes, and 0 of 17 relocation slots, because V2 saves the frame pointer first, inlines the __CHP truncation, and uses other registers for the index; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 124 decoded instructions; the identity check stays open at 23 of 97 instructions, 23 of 312 bytes, and 0 of 17 relocation slots, because V2 saves the frame pointer first, inlines the __CHP truncation, and uses other registers for the index; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
       "text": "The race_lap_complete module at 0x19678"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,28 +70,35 @@
   "name": "race_lap_complete",
   "notes": [],
   "object_offset": "0x9678",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '3'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 26,
-        "bytes_total": 377,
+        "bytes_equal": 41,
+        "bytes_total": 314,
         "detail": "the instruction sequences differ",
         "instructions_equal": 27,
-        "instructions_total": 124,
+        "instructions_total": 98,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19678",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:df0a62eb4407ce05e14f19ab77fa834d9ece7c23975516e05418c7bbcb5bc424",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7890a5bdebd74494a977dfe12a1dfd8b07ace645e8ee6a9bedc3591cf2648bca",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:628c7674986a4bfc714c904be54dcaa72ff51d1631c1751ed24e39baaf5dc4d4",
     "tool": "run.py"
   },

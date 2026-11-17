@@ -20,7 +20,8 @@
       "compiler": "wcc386",
       "file": "name_entry_screen.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -29,7 +30,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "name_entry_screen_main.c"
+      "file": "name_entry_screen_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

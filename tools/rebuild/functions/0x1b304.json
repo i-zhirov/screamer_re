@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the primary caller is `engine_init` at `0x127d4`; the other caller at `0x1fe17` runs when `DAT_0018e30` is non-zero; the plan row records 144 bytes, 40 instructions, 6 calls, and 0 FPU"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "controls_load",
   "name": "controls_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -30,17 +39,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 138,
+        "bytes_equal": 28,
+        "bytes_total": 131,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 36,
-        "instructions_total": 40,
+        "instructions_equal": 18,
+        "instructions_total": 38,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b304",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:8bdcee376598ae9a639c1209c38cde7d50a2d4e4f0e164d1145bc4e2168a373a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4328c827b95b1819325cf23a5d997e15150dca610acea22c2f1635ef993bd6f0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:052e0043725a2824fea88519782f30ba3f9a56f597cea12bfef9286a1e7cc82f",
     "tool": "run.py"
   },

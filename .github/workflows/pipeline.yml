@@ -35,6 +35,10 @@ jobs:
             tools/rebuild/view.py \
             tools/rebuild/docs.py \
             tools/rebuild/callgraph.py \
+            tools/rebuild/library.py \
+            tools/rebuild/toolchain.py \
+            tools/rebuild/first_difference.py \
+            tools/rebuild/whole_image.py \
             tools/cross_check.py \
             tools/pipeline_check.py
       - name: run the unit suite
@@ -93,9 +97,15 @@ jobs:
     runs-on: [self-hosted, macOS, screamer-artifacts]
     steps:
       - uses: actions/checkout@v7
+      - name: build the rebuilt whole image
+        env:
+          SCREAMER_GAME_DIR: ${{ vars.SCREAMER_GAME_DIR }}
+        run: |
+          GAME_DIR="${SCREAMER_GAME_DIR:-$HOME/Documents/Screamer.app/Contents/Resources/game}"
+          nix develop .#cross-check --command python3 tools/rebuild/whole_image.py --all --original "$GAME_DIR/STARTH.EXE"
       - name: run the pipeline check
         env:
           SCREAMER_GAME_DIR: ${{ vars.SCREAMER_GAME_DIR }}
         run: |
           GAME_DIR="${SCREAMER_GAME_DIR:-$HOME/Documents/Screamer.app/Contents/Resources/game}"
-          nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir "$GAME_DIR"
+          nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir "$GAME_DIR" --record-timeout 7200

@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "map_object_finish.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "map_object_finish.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "map_object_finish_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

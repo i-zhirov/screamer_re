@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x11a30 holds 141 instructions and 461 bytes up to the ret at 0x11bfc; the next function starts at 0x11c00, so the store record keeps the 464-byte extent and sets no function size; the identity check uses 141 instructions"
+      "text": "the original body at 0x11a30 holds 141 instructions and 461 bytes over the full extent; the ret is at 0x11bfc; the next function starts at 0x11c00, so the store record keeps the 464-byte extent and sets no function size; the identity check uses 100 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 455 bytes and 141 decoded instructions; the identity check stays open at 31 of 141 instructions and 15 of 455 bytes because V2 saves the frame first, keeps the object in ebx and the unit in ecx, and uses other local offsets; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 346 bytes and 100 decoded instructions; the identity check stays open at 24 of 100 instructions and 12 of 346 bytes because V2 saves the frame first, keeps the object in ebx and the unit in ecx, and uses other local offsets; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The wheel_contact_update module at 0x11a30"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "wheel_contact_update",
   "notes": [],
   "object_offset": "0x1a30",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 455,
+        "bytes_equal": 22,
+        "bytes_total": 354,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 31,
-        "instructions_total": 141,
+        "instructions_equal": 22,
+        "instructions_total": 97,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11a30",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:12e93f0547c4a834b20463491fa33e6783493cd9e36d26e05f3fee81fc150591",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6e3d0cc3b7f7e0fd34108258f50c6cd8bb366c06f3c0f6da9d5c77f3dfc70c45",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:d1bc9ee035f9709c7ff4ceef6fab21cfa2560fe5e780b82240c58b2a1218ce3a",
     "tool": "run.py"
   },

@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 45 instructions and 133 bytes; the identity window holds 32 instructions and 113 bytes and stays open at 3 of 113 bytes, 9 of 32 instructions, and 0 of 16 relocation slots, because V2 saves ebx, ecx, edx, and esi in its prologue, keeps the shape base in ebx, reads the globals through near data addresses, forms the entry pointer with a scaled index, and keeps the loop index in ecx; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "point_hit_probe",
   "notes": [],
   "object_offset": "0xc0ac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "replay_load_atk_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

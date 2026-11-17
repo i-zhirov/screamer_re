@@ -1,9 +1,60 @@
 {
   "address": "0xc656e",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc656e"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "puts",
+    "object_sha256": "sha256:9cad290a0c50b4c8e2d15108cc7a404702161e2ac3bd7eb2ec90e313ae6849c8",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "puts_"
+  },
+  "name": "puts",
   "notes": [],
   "object_offset": "0xb656e",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 35,
+        "bytes_total": 45,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 16,
+        "instructions_total": 16,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc656e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4d8e5da9dcc1a50f7ea9a957955d242959e3f8ab89248a2367dbf9bd368db2da",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:8c67fd20eab0c595db6bd4a447a2377a666ec3fc0fce709a1faa4ab21cfabdda",
+    "tool": "run.py"
+  },
   "size": 131,
-  "status": "unknown"
+  "status": "verified"
 }

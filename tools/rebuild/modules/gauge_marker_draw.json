@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "gauge_marker_draw_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

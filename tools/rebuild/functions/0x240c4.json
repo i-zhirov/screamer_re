@@ -62,6 +62,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x240c4 --count 39 --rebuilt work/rebuild/rfovl1.exe --rebuilt-map work/rebuild/race_finish_overlay_1.map --rebuilt-symbol race_finish_overlay_1_"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -69,6 +77,7 @@
   "name": "race_finish_overlay_1",
   "notes": [],
   "object_offset": "0x140c4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

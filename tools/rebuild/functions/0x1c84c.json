@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the harness holds the object record, the three entry pairs of the 28-byte table, the render arrays, and the six constant globals; it covers the state copy, the two flag bits, the angle threshold, the negative truncation, the 11-bit mask, and the table selection; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_car_link",
   "name": "object_car_link",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -30,17 +39,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 29,
-        "bytes_total": 578,
+        "bytes_equal": 66,
+        "bytes_total": 563,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 51,
-        "instructions_total": 152,
+        "instructions_equal": 36,
+        "instructions_total": 138,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1c84c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:211e591ae39318616a9dd923f0d7146f3cc752e717c0d9f2447acec364760095",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fd793969525718555019c52892d263d5e4487c49a2a3dc178bdbe88c4cacfa99",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:f54a7918da61b3e9656782f870df792f58dca6c554f57187168280d935198b81",
     "tool": "run.py"
   },

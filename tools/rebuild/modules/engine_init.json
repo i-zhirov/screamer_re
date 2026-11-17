@@ -19,12 +19,18 @@
       "compiler": "wcc386",
       "file": "engine_init.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "engine_init_main.c"
+      "file": "engine_init_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

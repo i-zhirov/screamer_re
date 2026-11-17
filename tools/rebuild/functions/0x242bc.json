@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x242bc holds 215 instructions and 829 bytes up to the ret at 0x245f8, so the record keeps the 836-byte extent and sets no function size; the identity check uses 215 instructions"
+      "text": "the original body at 0x242bc holds 215 instructions and 829 bytes over the full extent; the ret is at 0x245f8, so the record keeps the 836-byte extent and sets no function size; the identity check uses 174 instructions"
     },
     {
       "kind": "note",
@@ -43,12 +43,21 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module car_sound_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "car_sound_update",
   "name": "car_sound_update",
   "notes": [],
   "object_offset": "0x142bc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -60,17 +69,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 75,
-        "bytes_total": 785,
+        "bytes_equal": 72,
+        "bytes_total": 664,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 19,
-        "instructions_total": 215,
+        "instructions_equal": 17,
+        "instructions_total": 174,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x242bc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:1bba447aace316ce12e0f4bd344eba9701716c9374100e99b86a6072caff9259",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c6914de36ab8bd39c92a95399b6fbfb69e428b27e49c7173cca3cc079de4d8fd",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:9a0ad8583017c2cbf0f7b9aa2eb796298d5c0a95f112d5cca84865bcefaf2196",
     "tool": "run.py"
   },

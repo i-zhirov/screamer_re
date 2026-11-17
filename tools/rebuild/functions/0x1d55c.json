@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1d55c holds 103 instructions and 350 bytes up to the ret at 0x1d6b9; the next function starts at 0x1d6bc, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 103 instructions"
+      "text": "the original body at 0x1d55c holds 103 instructions and 350 bytes over the full extent; the ret is at 0x1d6b9; the next function starts at 0x1d6bc, so the store record keeps the 352-byte extent and sets no function size; the identity check uses 53 instructions"
     },
     {
       "kind": "note",
@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 52 instructions and 189 bytes up to the ret at 0x100bc; the identity check decodes 103 instructions from the symbol, so its range continues past the function, and the check stays open at 11 of 103 instructions and 21 of 340 bytes, because V2 reorders the control-point stores, fuses the two table lookups, and uses a shorter frame; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 53 instructions and 189 bytes over the full extent; the ret is at 0x100bc; the identity check decodes 103 instructions from the symbol, so its range continues past the function, and the check stays open at 5 of 53 instructions and 12 of 189 bytes, because V2 reorders the control-point stores, fuses the two table lookups, and uses a shorter frame; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The object_revolution_matrix module at 0x1d55c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "object_revolution_matrix",
   "notes": [],
   "object_offset": "0xd55c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -65,17 +74,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 21,
-        "bytes_total": 340,
+        "bytes_equal": 16,
+        "bytes_total": 182,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 11,
-        "instructions_total": 103,
+        "instructions_equal": 6,
+        "instructions_total": 49,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d55c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:9f8df1099dd414117bbf07e1767f3581bb7df8acfa0ddb430716e03fae947005",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:abb2949e9bdab0a22e02b530938bfa826bdc1debb793f6dc59b1ff1c47101402",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:794fadf6ca6c6886872392d0c185c09199d98e080f7e75f9f46a3087531d3bfd",
     "tool": "run.py"
   },

@@ -26,33 +26,48 @@
     {
       "kind": "note",
       "text": "the identity check stays open: the rebuilt module uses an if chain instead of the compiler jump table and saves the registers in another order, so 10 of 48 instructions and 23 of 189 bytes match"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_frame",
   "name": "race_frame",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks 'D'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 23,
-        "bytes_total": 189,
+        "bytes_equal": 10,
+        "bytes_total": 160,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 48,
+        "instructions_equal": 8,
+        "instructions_total": 40,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2807c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:354e3745f8a884e4eb1ef6f1ca3aa39fdcc7914e703d878ad7c1821b5557d9b7",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6dbebbd757f771f34ea8ab64d8bc5d61d95be8b5bcfd8286984f8ddcffd90a21",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:3ff9172ce78423a8f44fef82789c1bc6ccd54b9133c466faab2e232f960373b3",
     "tool": "run.py"
   },

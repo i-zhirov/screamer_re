@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "quit_confirm_screen.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "quit_confirm_screen.c"
     },
     {
       "compiler": "wcc386",
       "file": "quit_confirm_screen_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

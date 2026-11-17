@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the body continues past the first 72-instruction block to the full 688-byte extent: it opens melodic.bnk and drum.bnk, reads both through resource_read, installs them for the driver values 0xa002 and 0xa009, and reports the statuses 1, 2, and 3"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "music_bank_load",
   "name": "music_bank_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -30,17 +39,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 220,
+        "bytes_equal": 35,
+        "bytes_total": 563,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 19,
-        "instructions_total": 72,
+        "instructions_equal": 38,
+        "instructions_total": 143,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f9e0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ce5d2c635519ad922e14ecb042ee45a619c9888031ccc3fce2b2b8e8999c6973",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:17f8386f9c35e95865b201bae9d14c07df1d5b0bf0e2c3715f697ab923ca95dc",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:2446db94d2e225a4b73434d250a83fc9ce17d5f5f58e44eccb59e0ef119f471d",
     "tool": "run.py"
   },

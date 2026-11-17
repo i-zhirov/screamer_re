@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2fcec holds 99 instructions and 379 bytes up to the ret at 0x2fe66; the next function starts at 0x2fe68, so the store record keeps the 380-byte extent and sets no function size; the identity check uses 99 instructions"
+      "text": "the original body at 0x2fcec holds 99 instructions and 379 bytes over the full extent; the ret is at 0x2fe66; the next function starts at 0x2fe68, so the store record keeps the 380-byte extent and sets no function size; the identity check uses 75 instructions"
     },
     {
       "kind": "note",
@@ -46,7 +46,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 99 decoded instructions and 331 bytes; the identity check stays open at 22 of 99 instructions and 19 of 331 bytes, because V2 saves the frame pointer first, keeps the record in esi, passes the string pointers as near data offsets, uses another local layout, and builds the gate as a test and a jump; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 75 decoded instructions and 272 bytes; the identity check stays open at 18 of 75 instructions and 17 of 272 bytes, because V2 saves the frame pointer first, keeps the record in esi, passes the string pointers as near data offsets, uses another local layout, and builds the gate as a test and a jump; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -59,6 +59,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module music_load"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "music_load",
   "notes": [],
   "object_offset": "0x1fcec",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 19,
-        "bytes_total": 331,
+        "bytes_equal": 15,
+        "bytes_total": 252,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 22,
-        "instructions_total": 99,
+        "instructions_equal": 16,
+        "instructions_total": 72,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2fcec",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:b59eef17ff842f17e4f74bb6d80bd546c0345e4040871c5f89c8a06a56bd1035",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a8c0cd86dbb2022638d5c231671a98b58d72f09a25930117e7a74ff776dc7839",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:b178f4bfe2956f17a77043764a6b03eb109644b9b437ec52e11c7df151896b97",
     "tool": "run.py"
   },

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2003c holds 104 instructions and 404 bytes up to the ret at 0x201cf; the next function starts at 0x201d0, so the store record keeps the 404-byte extent and sets no further function size; the identity check uses 104 instructions"
+      "text": "the original body at 0x2003c holds 104 instructions and 404 bytes over the full extent; the ret is at 0x201cf; the next function starts at 0x201d0, so the store record keeps the 404-byte extent and sets no further function size; the identity check uses 87 instructions"
     },
     {
       "kind": "note",
@@ -42,11 +42,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function holds 375 bytes and 87 decoded instructions; the identity check stays open at 21 of 104 instructions, 28 of 404 bytes, and 3 of 59 relocation slots, because V2 saves ebp first, keeps the loop counters in registers on some passes, reads the counter and the count through near data addresses, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function holds 375 bytes and 87 decoded instructions; the identity check stays open at 19 of 87 instructions, 25 of 375 bytes, and 3 of 59 relocation slots, because V2 saves ebp first, keeps the loop counters in registers on some passes, reads the counter and the count through near data addresses, and uses another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "note",
       "text": "the original has no symbol name for this function; the module name and the callee names in the harness stay inferred"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "race_simulation_update",
   "notes": [],
   "object_offset": "0x1003c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -65,17 +74,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 28,
-        "bytes_total": 404,
+        "bytes_equal": 34,
+        "bytes_total": 372,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
-        "instructions_total": 104,
+        "instructions_equal": 8,
+        "instructions_total": 85,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2003c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:810e2cf6900de1ac9594d95daba8d2566b52b7b37bd7e37f516fa99c14a2c1c8",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6dfeb78d3288ecd8e2301a8debfc401e3944cdc96cc43c7fda146a91d0827d42",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:cc231e1a8b2cb007eced70e2f984c80a67e20e89664fad6cf29bcb374d88caae",
     "tool": "run.py"
   },

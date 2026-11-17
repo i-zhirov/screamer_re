@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "championship_record_select.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "championship_record_select.c"
     },
     {
       "compiler": "wcc386",
       "file": "championship_record_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

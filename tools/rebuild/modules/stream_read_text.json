@@ -23,14 +23,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "stream_read_text.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "stream_read_text.c"
     },
     {
       "compiler": "wcc386",
       "file": "stream_read_text_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

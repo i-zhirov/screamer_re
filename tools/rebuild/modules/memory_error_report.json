@@ -22,12 +22,18 @@
       "compiler": "wcc386",
       "file": "memory_error_report.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "memory_error_report_main.c"
+      "file": "memory_error_report_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

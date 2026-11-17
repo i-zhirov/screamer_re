@@ -67,6 +67,18 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 190 decoded instructions and 591 bytes; the identity check stays open at 59 of 190 instructions, 31 of 591 bytes, and 0 of 3 relocation slots, because V2 saves the frame first, keeps the stream in esi, keeps the name in a local, folds the seek, and emits another search loop; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "c",
@@ -74,6 +86,7 @@
   "name": "member_open",
   "notes": [],
   "object_offset": "0x3c128",
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {

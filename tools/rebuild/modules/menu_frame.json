@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "menu_frame.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "menu_frame.c"
     },
     {
       "compiler": "wasm",
@@ -31,5 +28,6 @@
       "compiler": "wcc386",
       "file": "menu_frame_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

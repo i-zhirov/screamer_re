@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x257b0 holds 67 instructions and 261 bytes up to the ret at 0x258b4; the next function starts at 0x258b8, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 67 instructions"
+      "text": "the original body at 0x257b0 holds 67 instructions and 261 bytes over the full extent; the ret is at 0x258b4; the next function starts at 0x258b8, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 67 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the diff reports 10 of 67 instructions and 27 of 251 bytes equal; the identity check stays open because V2 saves the frame pointer first, builds the harness constant texts in local buffers, keeps the two arguments in esi and edi, and uses imul for the record size; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the diff reports 10 of 67 instructions and 28 of 261 bytes equal; the identity check stays open because V2 saves the frame pointer first, builds the harness constant texts in local buffers, keeps the two arguments in esi and edi, and uses imul for the record size; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The sprite_load module at 0x257b0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,28 +78,35 @@
   "name": "sprite_load",
   "notes": [],
   "object_offset": "0x157b0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '0'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 251,
+        "bytes_equal": 14,
+        "bytes_total": 215,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 67,
+        "instructions_equal": 17,
+        "instructions_total": 58,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x257b0",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:c0b4860e92837ee14f042e41960c4e62b77b1b00232e048c3b7183a86f9ca7d1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a03ecee7548183f65128ccb861b5a1ce3a903c8a3509be8fd8db995ee3d0fedf",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:0666428eab50e414059b74e16d5b631f196da68d05c227fbc82aff4331e9901c",
     "tool": "run.py"
   },

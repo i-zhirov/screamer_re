@@ -14,10 +14,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "filter_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "filter_update.c"
     },
     {
       "compiler": "wasm",
@@ -27,5 +24,6 @@
       "compiler": "wcc386",
       "file": "filter_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x10ba4` holds 40 instructions and 88 bytes and copies the two name arguments into the object-3 buffers at offsets `0x7f80` and `0x7fb4`, which the loader relocates to linear `0x107f80` and `0x107fb4`; a buffer holds up to `0x33` characters and the terminator"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "graphics_load",
   "name": "graphics_load",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 1,
-        "bytes_total": 78,
+        "bytes_equal": 4,
+        "bytes_total": 29,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 37,
+        "instructions_equal": 4,
+        "instructions_total": 10,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10ba4",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a968efb790adf092de8fba3aa52a3a91bed992601fda00f89ab7e038acad6e33",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9fe85891d25d061f0c443cd8cf306b11cceb87f265fc852b54b3f0424cd67238",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:e73ed9246067a1573c3d836dd9c4ca7b1e00fcbdb887f4399fbb21d32f2ee5c8",
     "tool": "run.py"
   },

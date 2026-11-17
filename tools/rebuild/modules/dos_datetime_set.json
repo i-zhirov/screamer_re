@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "dos_datetime_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x16b98 holds 95 instructions and 262 bytes up to the ret at 0x16c9d; the next function starts at 0x16ca0, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 95 instructions"
+      "text": "the original body at 0x16b98 holds 95 instructions and 262 bytes over the full extent; the ret is at 0x16c9d; the next function starts at 0x16ca0, so the store record keeps the 264-byte extent and sets no separate function size; the identity check uses 63 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the diff reports 20 of 95 instructions and 7 of 235 bytes equal; the identity check stays open because V2 saves the frame pointer first, keeps the self pointer in edx and the slot pointer in eax, uses test and neg, and copies the float with mov; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the diff reports 13 of 63 instructions and 6 of 158 bytes equal; the identity check stays open because V2 saves the frame pointer first, keeps the self pointer in edx and the slot pointer in eax, uses test and neg, and copies the float with mov; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The player_segment_apply module at 0x16b98"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "player_segment_apply",
   "notes": [],
   "object_offset": "0x6b98",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -82,16 +91,22 @@
       },
       "identity": {
         "bytes_equal": 7,
-        "bytes_total": 235,
+        "bytes_total": 147,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 20,
-        "instructions_total": 95,
+        "instructions_equal": 11,
+        "instructions_total": 57,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16b98",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:69414e63e4a913dc5301a47e875759844032624b1c8d6fc01af7c74308a05076",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:ae10f9e3f6e4ebc52b875833f8772ac86cd4c96e1714cbd84013d9baffe70817",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:2d4a03f59c5fbf7b11b944201e6e0a5af3e103d219baf4bc4856ffead67b5991",
     "tool": "run.py"
   },

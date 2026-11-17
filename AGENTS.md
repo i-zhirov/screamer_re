@@ -76,13 +76,18 @@ screamer_re/
 ├── docs/
 │   ├── explanation/
 │   │   ├── findings.md        # evidence-backed observations and open questions
-│   │   └── roadmap.md         # milestones and next steps
+│   │   ├── roadmap.md         # milestones and next steps
+│   │   ├── rebuild-quality-design.md         # rebuild quality improvement design
+│   │   ├── rebuild-quality-roadmap.md        # the seven rebuild quality slices
+│   │   ├── rebuild-quality-plan-baseline.md  # the truthful verification baseline plan
+│   │   └── rebuild-quality-plan-oracle.md    # the reachable extent and symbol-aware oracle plan
 │   └── reference/
 │       ├── distribution.md    # GOG package and installed bundle layout
 │       ├── executables.md     # LE header metadata and runtime facts
 │       ├── file-formats.md    # observed data formats
 │       ├── inventory.md       # game files with sizes and SHA-256 digests
-│       ├── program-map.md      # the recovered startup path and functions
+│       ├── program-map.md     # the recovered startup path and functions
+│       ├── source-forms.md    # the source-form idiom catalogue
 │       └── tooling.md         # tools, commands, host tools, and limits
 ├── tools/
 │   ├── cross_check.py         # compare four identity facts across three tools
@@ -101,23 +106,32 @@ screamer_re/
 │   ├── pipeline_check.py      # run the pipeline end to end
 │   ├── sound_bank.py          # decode the ADLIB- banks, the samples, and the songs
 │   ├── rebuild/               # the rebuild framework and the two toolchain harnesses
-│   │   ├── store.py           # the function and module record store
-│   │   ├── harness.py         # the pinned container and DOSBox-X harness
-│   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
-│   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
-│   │   ├── run.py             # run the declared checks and print progress
-│   │   ├── oracle.py          # compare function bodies with relocations normalized
-│   │   ├── diff_module.py     # diff one rebuilt module against the original
-│   │   ├── image_compare.py   # compare a rebuilt whole image with the original
-│   │   ├── schema.py          # validate a record against the contract subset
-│   │   ├── view.py            # render the five status-page views
-│   │   ├── docs.py            # render the program-map tables
-│   │   ├── callgraph.py       # build and check the named call graph
-│   │   ├── callgraph.json     # the direct call edges between named records
-│   │   ├── contracts/         # the JSON Schema contracts of the records
-│   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the three hundred and forty-eight module recipes
-│   │   └── tests/             # the unittest suite of the pure logic
+│   │   ├── store.py            # the function and module record store
+│   │   ├── harness.py          # the pinned container and DOSBox-X harness
+│   │   ├── harness_dos.py      # the period Watcom 10.0a build under DOSBox-X
+│   │   ├── watcom10_setup.py   # fetch and extract the period Watcom 10.0a toolchain
+│   │   ├── run.py              # run the declared checks and print progress
+│   │   ├── oracle.py           # compare function bodies with relocations normalized
+│   │   ├── diff_module.py      # diff one rebuilt module against the original
+│   │   ├── first_difference.py # report the first oracle difference of a non-strict module
+│   │   ├── image_compare.py    # compare a rebuilt whole image with the original
+│   │   ├── whole_image.py      # build the rebuilt whole image and its report
+│   │   ├── schema.py           # validate a record against the contract subset
+│   │   ├── view.py             # render the five status-page views
+│   │   ├── docs.py             # render the program-map tables
+│   │   ├── callgraph.py        # build and check the named call graph
+│   │   ├── callgraph.json      # the direct call edges between named records
+│   │   ├── triage.py           # triage the records against the provenance evidence
+│   │   ├── coverage.py         # report the byte coverage and the provenance counts
+│   │   ├── library.py          # index the period libraries and verify their objects
+│   │   ├── toolchain.py        # measure the candidate toolchains and write the manifest
+│   │   ├── provenance.json     # the provenance evidence document
+│   │   ├── library.json        # the link manifest of the verified library records
+│   │   ├── toolchain.json      # the toolchain and flag manifest of the measured modules
+│   │   ├── contracts/          # the JSON Schema contracts of the records
+│   │   ├── functions/          # one record per function, 0x<address>.json
+│   │   ├── modules/            # the two hundred and fifty-two module recipes
+│   │   └── tests/              # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
 ```
@@ -133,9 +147,12 @@ python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/run.py run --all --strict
+python3 tools/rebuild/run.py run --all --allow-shape
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
+python3 tools/rebuild/whole_image.py --all
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
+python3 tools/rebuild/whole_image.py --module free --module error_report --module exit --out work/rebuild/STARTH-focused.EXE --report work/rebuild/whole-image-focused.json
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
@@ -153,33 +170,51 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/rebuild/triage.py tools/rebuild/coverage.py tools/rebuild/library.py tools/rebuild/toolchain.py tools/rebuild/first_difference.py tools/rebuild/whole_image.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
-python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/triage.py check --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --from 0x20000 --to 0x30000
+python3 tools/rebuild/coverage.py report --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py index --out work/rebuild/library-index.json
+python3 tools/rebuild/library.py verify --address 0xd1f25 --address 0xc5fe5 --address 0xd429f --address 0x3009b --address 0x4bf64 --address 0x4d32c --address 0xd2008 --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py apply --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+python3 tools/rebuild/library.py manifest --out tools/rebuild/library.json
+python3 tools/rebuild/library.py check-manifest --manifest tools/rebuild/library.json
+python3 tools/rebuild/toolchain.py migrate
+python3 tools/rebuild/toolchain.py matrix --module free --dry-run
+python3 tools/rebuild/toolchain.py matrix --all --toolchain v2
+python3 tools/rebuild/toolchain.py report
+python3 tools/rebuild/toolchain.py manifest --report work/rebuild/toolchain-matrix.json
+python3 tools/rebuild/toolchain.py check-matrix --manifest tools/rebuild/toolchain.json
+python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300be --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300d6 --count 6 --rebuilt work/rebuild/exitmod.exe --rebuilt-map work/rebuild/exit.map --rebuilt-symbol exit_flush_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x3009b --rebuilt work/rebuild/prtfmod.exe --rebuilt-map work/rebuild/printf.map --rebuilt-symbol printf_
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8c150 --rebuilt work/rebuild/memmod.exe --rebuilt-map work/rebuild/memcpy.map --rebuilt-symbol memcpy_
+python3 tools/rebuild/first_difference.py report --module error_report --out work/rebuild/first-error-report.json
 ```
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
-DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 399 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 395 checks.
-`--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 384 checks.  Both flags report 380 checks and take about 16
-seconds.  Stage 11 also compares the rebuilt whole image when
-`--rebuilt-image` exists.  The image check is a skip until a whole image is
-built, so it does not change these counts:
+DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It reports
+433 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 429 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 418 checks.  Both flags report 414 checks and
+take about 16 seconds.  The whole-image build stales the record fingerprints,
+because the module maps hold a build timestamp, so the record stage re-runs
+every record.  The full and `--skip-cross` checks take about 65 minutes.
+Stage 11 always scores the rebuilt whole image, and the four counts include its
+check.  A missing image is a failure, so
+`python3 tools/rebuild/whole_image.py --all` runs before the full check:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 python3 tools/rebuild/harness.py build --module driver
-nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game
-nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross
-nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime
-python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --skip-cross
+nix develop .#cross-check --command python3 tools/rebuild/whole_image.py --all
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --record-timeout 7200
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-cross --record-timeout 7200
+nix develop .#cross-check --command python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --record-timeout 7200
+python3 tools/pipeline_check.py --game-dir ~/Documents/Screamer.app/Contents/Resources/game --skip-runtime --skip-cross --record-timeout 7200
 nix develop .#cross-check --command python3 tools/cross_check.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --main 0x10020 --call-site 0xd4364 --work-root work
 ```
 
@@ -221,7 +256,11 @@ open ~/Documents/Screamer.app
       tools/rebuild/image_compare.py tools/rebuild/harness.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
-      tools/rebuild/callgraph.py tools/pipeline_check.py` to check the syntax
+      tools/rebuild/callgraph.py tools/rebuild/triage.py
+      tools/rebuild/coverage.py tools/rebuild/library.py
+      tools/rebuild/toolchain.py tools/rebuild/first_difference.py
+      tools/rebuild/whole_image.py
+      tools/pipeline_check.py` to check the syntax
     - `python3 tools/le.py info
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       LE parser
@@ -230,15 +269,18 @@ open ~/Documents/Screamer.app
       tool
     - `python3 tools/rebuild/diff_module.py --original
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
-      --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map
+      --original-address 0x300ec --original-end 0x300f8 --rebuilt work/rebuild/free.exe --rebuilt-map
       work/rebuild/free.map --rebuilt-symbol free_` to check the module diffs; the
       Build And Test Commands section holds the exit module commands
     - `python3 tools/rebuild/image_compare.py --original
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
       ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE` to check the
       whole-image oracle against itself
+    - `nix develop .#cross-check --command python3 tools/rebuild/whole_image.py --all`
+      to build the whole image before the full check
     - `python3 tools/pipeline_check.py --game-dir
-      ~/Documents/Screamer.app/Contents/Resources/game` to check every stage
+      ~/Documents/Screamer.app/Contents/Resources/game --record-timeout 7200`
+      to check every stage
 
 - You MUST run the changed tool against the shipped artifacts and
   confirm the output.
@@ -295,9 +337,24 @@ open ~/Documents/Screamer.app
 - Keep It Boring: the tools use the standard library and one
   `ctypes` binding to capstone.
 - Shared View Logic: every record element of the status page carries
-  `data-key`, `data-address`, `data-name`, `data-module`, `data-status`, and
-  `data-stale`. The filter and the selection use these attributes, so a new
-  view adds no separate filter or selection code.
+  `data-key`, `data-address`, `data-name`, `data-module`, `data-status`,
+  `data-stale`, and `data-match`. The filter and the selection use these
+  attributes, so a new view adds no separate filter or selection code.
+- Provenance: a function record holds a `provenance` value from `game`,
+  `library`, `compiler_helper`, `not_a_function`, and `data`.  The value is a
+  documentation field.  A `data` or `not_a_function` provenance requires the
+  `not_a_function` status.
+- Library Identity: a library record holds its original object in the
+  `library` field.  The object bytes stay out of git.  The record keeps the
+  library digest and the object digest instead.
+- Module Toolchain: a module recipe holds an optional `toolchain` value,
+  `v2` or `watcom10`.  The default is `v2`.  A measured module records its
+  best measured toolchain and flags.  A module with no identity record is
+  unmeasured and keeps its recipe.
+- Source Forms: `docs/reference/source-forms.md` names the source-form
+  idioms, and `first_difference.py` classifies the first oracle difference
+  with the same names.  A new idiom name updates both the catalogue and the
+  classifier.
 
 Layers:
 
@@ -338,30 +395,153 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 399 checks in the `cross-check` shell.  `--skip-cross`
-  gives 395 checks, `--skip-runtime` gives 384 checks, and both flags give 380
-  checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
-  and the tool preflight.
-- Stage 12 checks the program-map tables and the call graph for drift.  The
-  call graph check needs capstone and the original executable.
-- The identity gate has two modes.  The default gate accepts the three
-  historical verdicts.  `--strict` accepts only the byte-identical verdict and
-  the verdict whose differences are the link-time addresses.  A reordered
-  instruction sequence and a shape match are diagnostic, not exact.
+- The first-difference report (`python3 tools/rebuild/first_difference.py
+  report ...`) needs Docker, DOSBox-X, the period toolchain, and the game
+  directory, because it builds each selected module.  The pure tests in
+  `tools/rebuild/tests/test_first_difference.py` need none of them, because
+  they mock the build and the loader.
+- The catalogue sync test `test_catalogue_holds_every_idiom_name` reads
+  `docs/reference/source-forms.md` and checks every `IDIOMS` name.  The
+  companion `test_catalogue_holds_the_known_source_forms` checks the known
+  source-form headings.  A new idiom name or a renamed heading updates the
+  catalogue before the suite passes.
+- The source-form rule keeps C first.  Use assembly only after the exact
+  toolchain, flags, and source forms fail, and record the reason.  Leave a
+  module `rebuilt` when C is insufficient.  The module outcome rule keeps a
+  strict form when the behavior check passes.  Otherwise it keeps the
+  `same-shape` form with the higher `instructions_equal`, then the higher
+  `bytes_equal`, and records the trait, the measured first difference, and the
+  reason.  A recorded non-strict outcome is a pass.
+- The full check reports 433 checks in the `cross-check` shell.  `--skip-cross`
+  gives 429 checks, `--skip-runtime` gives 418 checks, and both flags give 414
+  checks.  The whole-image stage adds one counted check.  `--skip-runtime` still
+  runs stage 8.  `--skip-cross` skips stage 8 and the tool preflight.
+- The whole-image build `whole_image.py` places the rebuilt module bodies at
+  their original addresses, writes `work/rebuild/STARTH.EXE` and
+  `work/rebuild/whole-image.json`, and writes no store record.  A module is
+  patched only when its instruction byte sum equals the record `size` and its
+  instruction count, sizes, and fixup slots align.  A skipped module keeps the
+  original bytes and records the reason.  Stage 11 always scores the image and
+  fails when it is missing or unreadable.
+- Stage 12 checks the store, the seed, the provenance evidence, the library
+  link manifest, the toolchain manifest, the program-map tables, the call
+  graph, and the status page.  The call graph check needs capstone and the
+  original executable.
+- A function record holds a `provenance` value from `game`, `library`,
+  `compiler_helper`, `not_a_function`, and `data`.  The value is a
+  documentation field, so it stays out of the input fingerprint.  A `data` or
+  `not_a_function` provenance requires the `not_a_function` status.
+- The provenance evidence document `tools/rebuild/provenance.json` names the
+  spans and the records whose provenance is not `game`.  `triage.py check`
+  proves the evidence, and `triage.py apply` writes it into the records through
+  `store.save_record`.  A record needs a `finding`, `file`, or `command` item.
+- The analysis count is the `unknown` records with provenance `game`.  The
+  progress total and the header count the game function records only.  A
+  library or compiler-helper record without a name keeps the `unknown` status
+  and stays out of the analysis count.
+- `coverage.py report` prints one row per provenance with the record count, the
+  unknown count, the byte span, the coverage, and the verified, rebuilt, and
+  exact byte split.  The denominator is the code-object virtual size.  The
+  status page shows the same provenance panel over the covered byte total.
+- `library.py index` walks the OMF records of the three period libraries and
+  writes `work/rebuild/library-index.json`.  The direct parser decodes LIDATA
+  and LIDATA32, detects the PharLap class `AA` 4-byte fields, reads the
+  dictionary size as 512-byte blocks, and masks the object fixup positions in
+  the prefix filter.  The parser needs no DOSBox-X and no `wlib`.  The
+  byte-decode tests skip when capstone is absent, so the syntax job runs
+  without it.
+- The library matcher tries the record symbol, the record name with a trailing
+  underscore, the record name, and the prefix digest matches, in that order.
+  The library identity gate is strict: only `exact-bytes` and
+  `exact-relocations` pass, and `--allow-shape` does not relax it.  The gate
+  masks the import target identity and still compares the slot offset and
+  width.
+- A library record holds its original object in the `library` field: `file`,
+  `sha256`, `module`, `symbol`, and `object_sha256`.  `library.py manifest`
+  writes `tools/rebuild/library.json`, the link manifest of the verified
+  library records, and `library.py check-manifest` proves that the manifest
+  agrees with the records.  Two identical entries for the same object are
+  valid reuse.
+- A module recipe holds an optional `toolchain` value from `v2` and
+  `watcom10`.  The default is `v2`.  `toolchain.py migrate` writes the
+  default into every recipe that has no field.  The module toolchain enters
+  the recipe and the result mode, so the stored fingerprint covers it.
+- The runner selects the build harness from the module toolchain: the V2
+  harness for `v2` and the period harness for `watcom10`.  The behavior
+  check always uses the V2 harness, because the period harness has no run
+  command.  The selected toolchain enters the result mode and the input
+  fingerprint.
+- The matrix measures the existing flag set and the five default flag sets
+  for each selected toolchain.  It tries `v2` first and `watcom10` second.
+  The rank is the match value, then fewer differing bytes, then fewer
+  differing instructions, then the earlier candidate.  A strict match is
+  preferred but not required.
+- `toolchain.py manifest` writes the committed manifest
+  `tools/rebuild/toolchain.json`.  It holds one row per measured module and
+  one `unmeasured` row for a module with an identity record and no measured
+  result.  A module with no identity record has no row.  `toolchain.py
+  check-matrix` is the stage-12 check, so it runs in CI without Docker or
+  DOSBox-X.
+- The matrix needs Docker, DOSBox-X, and the period toolchain.  The unit
+  suite needs none of them, and the stage-12 check reads the committed
+  manifest only.
+- The input fingerprint of a library record covers the canonical `library`
+  field and the `library.py` tool.  The library mode is
+  `store.run_mode(True, False)`, so `--allow-shape` and `--skip-runtime` do not
+  change the library fingerprint.
+- The identity gate has two modes.  Strict is the default.  The strict gate
+  accepts only the byte-identical verdict and the verdict whose differences are
+  the link-time addresses.  `--allow-shape` restores the historical gate, which
+  also accepts a shape match and a reordered instruction sequence.  `--strict`
+  stays accepted and selects the default gate.  A reordered instruction
+  sequence and a shape match are diagnostic, not exact.
+- The identity check result holds a `match` value: `exact-bytes`,
+  `exact-relocations`, `same-shape`, `same-mnemonics`, or `different`.  The
+  report holds four buckets: `exact`, `relocation-only`, `shape`, and
+  `behavior-only`.  The `same-shape` and `same-mnemonics` matches count in
+  `shape`.  The status page shows one counter per bucket and updates the
+  counters with the filter.
+- A failed build or a failed behavior check demotes the record.  A failed build
+  sets `named` when the record has a name, else `unknown`.  A failed behavior
+  check sets `matching` when identity passes, else `named` or `unknown`.  The
+  failed result stays on the record.  `store.py check` rejects a status that is
+  stronger than the stored result supports.
+- A behavior run deletes the old output first.  A marker matches a complete
+  output line, so an embedded marker does not pass.
+- `--skip-unchanged` prints the stored verdict of a record whose inputs are
+  unchanged since the previous run.  A stored `fail` prints `FAIL`.
 - `oracle.py` masks every byte that an LE fixup slot controls and every byte
   that encodes a direct branch target.  It compares the remaining bytes in
-  instruction order.  An internal target compares by kind and width, because
-  the object number and the object offset are link-time values.  An imported
+  instruction order.  An intra-function branch target compares by instruction
+  position, and a target outside the body stays masked.  An internal target
+  compares by symbol and addend when both sides resolve a symbol.  An imported
   target compares by module and ordinal or name offset.  A relocation-only
   difference passes `--strict`, and a reordered, inserted, or non-relocation
   difference does not.
+- `le.read` stitches the LE pages: a zeroed page gives zeros, and a page
+  without a file offset stops the read.  `function_body` follows every direct
+  jump and loop target inside the bound, and it follows the compiler jump table.
+  It does not follow a call target.
 - `store.py check` validates every record against `contracts/record.schema.json`
   and every module against `contracts/module.schema.json`, in addition to the
   semantic checks.  The validator uses the standard library only.
-- The whole-image oracle `image_compare.py` is the final gate.  It compares the
+- The whole-image build `whole_image.py` is an in-place relocating build.  It
+  uses the original `STARTH.EXE` as the container and keeps the stub, the
+  header, the data objects, and the library bytes.  It places each rebuilt
+  module body at its original address in the original address order of the
+  lowest identity record of each module.  The fit rule patches a module only
+  when the rebuilt instruction byte sum equals the record `size`.  The
+  relocation rule rewrites only an internal 4-byte slot and skips a module on a
+  non-internal slot, a width other than 4, or an instruction misalignment.  A
+  direct branch target is relative and is not rewritten.  The original fixup
+  section stays valid, so the build does not rewrite it.  A record that carries
+  a `library` field is skipped, so the original library bytes stay in the
+  image.  The library manifest `tools/rebuild/library.json` proves the verified
+  records.  The whole-image oracle `image_compare.py` compares the
   stub, the header, the resident tables, the fixup section, every object, the
-  non-resident name table, and the whole file.  Stage 11 runs it when
-  `--rebuilt-image` exists and reports a skip when no whole image is built.
+  non-resident name table, and the whole file.  Stage 11 is a score gate: it
+  always scores the image, passes on a byte score, and fails when the image is
+  missing or unreadable.
 - `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.
@@ -389,16 +569,18 @@ through the store.
   skip a record whose inputs are unchanged since the previous run.  The input
   fingerprint of a record covers the module recipe, the module sources, the
   shared harness sources (`chk.asm`, `stack.asm`, `cstart.c`), the record
-  fields that steer the checks, the participating tools (`run.py`,
-  `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original image, and
-  the built artifacts.  The fingerprint lives in the `result.fingerprint` of
-  the record, `store.compute_fingerprint` computes it, and `run.py
-  --skip-unchanged` uses it.  `pipeline_check.py` verifies the stored
-  fingerprint of an unchanged record itself.  A documentation-only change to a
-  record (`evidence`, `notes`, `name`, `role`, `confidence`, `section`,
-  `implementation`) must not invalidate a result.  The optional `implementation`
-  field is `c` or `assembly`; the status page shows `asm` for `assembly` and
-  `C` for `c`.
+  fields that steer the checks (including `size`), the participating tools
+  (`run.py`, `harness.py`, `diff_module.py`, `store.py`, `le.py`), the original
+  image, and the built artifacts.  The fingerprint also covers the strict mode
+  and the module toolchain.  It does not cover the runtime mode, so
+  `--skip-runtime` does not invalidate a stored result.  The fingerprint lives in the
+  `result.fingerprint` of the record, `store.compute_fingerprint` computes it,
+  and `run.py --skip-unchanged` uses it.  `pipeline_check.py` verifies the
+  stored fingerprint of an unchanged record itself.  A documentation-only
+  change to a record (`evidence`, `notes`, `name`, `role`, `confidence`,
+  `section`, `implementation`) must not invalidate a result.  The optional
+  `implementation` field is `c` or `assembly`; the status page shows `asm` for
+  `assembly` and `C` for `c`.
 - A mutation that changes the record addresses must call `sync_extents()`.
   `save_record` marks a new address and `remove_record` marks a deletion, and
   the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,

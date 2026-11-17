@@ -27,6 +27,10 @@
       "items": { "$ref": "#/$defs/source" }
     },
     "run": { "$ref": "#/$defs/run" },
+    "toolchain": {
+      "enum": ["v2", "watcom10"],
+      "description": "The compiler toolchain. Absent means v2."
+    },
     "status": {
       "enum": ["unknown", "not_a_function", "named", "rebuilt", "matching", "verified"],
       "description": "Set for a module that holds no function record, for example the driver."

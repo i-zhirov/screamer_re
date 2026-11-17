@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/player_body_point_place.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "player_body_point_place",
   "notes": [],
   "object_offset": "0x7c6c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

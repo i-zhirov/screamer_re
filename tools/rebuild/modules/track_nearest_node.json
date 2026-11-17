@@ -24,10 +24,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "track_nearest_node.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "track_nearest_node.c"
     },
     {
       "compiler": "wasm",
@@ -37,5 +34,6 @@
       "compiler": "wcc386",
       "file": "track_nearest_node_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

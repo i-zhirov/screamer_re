@@ -1,9 +1,56 @@
 {
   "address": "0xe687d",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe687d"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "itoa",
+    "object_sha256": "sha256:34a94af2a0c057156f29416774ffb9fd00a4891909d6c7de3f3cac0a2dd8c5cb",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "utoa_"
+  },
+  "name": "utoa",
   "notes": [],
   "object_offset": "0xd687d",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 71,
+        "bytes_total": 74,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 35,
+        "instructions_total": 35,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xe687d",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:57acf8bb042746e137ffa247218049959783050d96942c6f81a41e4c444b296b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:82e3f1a982351662392b6a2402e615d8be812d67b78d07a8200fed6c8b09eddd",
+    "tool": "run.py"
+  },
   "size": 74,
-  "status": "unknown"
+  "status": "verified"
 }

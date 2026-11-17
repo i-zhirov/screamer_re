@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "video_block_swap_a_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

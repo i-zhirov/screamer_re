@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x166a8 holds 159 instructions and 524 bytes up to the ret at 0x168b3; the next function starts at 0x168b4, so the record keeps the 524-byte extent and sets no function size; the identity check uses 159 instructions"
+      "text": "the original body at 0x166a8 holds 159 instructions and 524 bytes over the full extent; the ret is at 0x168b3; the next function starts at 0x168b4, so the record keeps the 524-byte extent and sets no function size; the identity check uses 159 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x166a8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "player_car_contact_update",
   "notes": [],
   "object_offset": "0x66a8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -61,17 +70,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 12,
-        "bytes_total": 506,
+        "bytes_equal": 37,
+        "bytes_total": 521,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 46,
+        "instructions_equal": 45,
         "instructions_total": 159,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x166a8",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:7f4fd92fc95ae8c2ab717c5cc0a4420f3ee32e8eddad8428b8a0c3fa6dab6354",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:1841dd2889b136fe747ad0f0697a91714419e89785dd16734bc57891ae466eb0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:d2515f564f002b820b258a4cebb21d93dcc3fbe3a50a25828ac7a294823aa175",
     "tool": "run.py"
   },

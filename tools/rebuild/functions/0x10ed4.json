@@ -71,6 +71,14 @@
     {
       "kind": "finding",
       "text": "The object_duplicate module at 0x10ed4"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "object_duplicate",
   "notes": [],
   "object_offset": "0xed4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

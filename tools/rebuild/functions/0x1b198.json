@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The track_marker_load module at 0x1b198"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "track_marker_load",
   "notes": [],
   "object_offset": "0xb198",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

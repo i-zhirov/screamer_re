@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x1cbac holds 81 instructions and 297 bytes up to the ret at 0x1ccd4; the next function starts at 0x1ccd8, so the store record keeps the 300-byte extent and sets no separate function size; the identity check uses 81 instructions"
+      "text": "the original body at 0x1cbac holds 81 instructions and 297 bytes over the full extent; the ret is at 0x1ccd4; the next function starts at 0x1ccd8, so the store record keeps the 300-byte extent and sets no separate function size; the identity check uses 69 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 81 decoded instructions and 299 bytes; the identity check stays open at 23 of 81 instructions and 11 of 297 bytes because V2 saves ecx and edx first, keeps the object in ecx, addresses the globals as near data offsets, and saves the two angle fields to local slots; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 69 decoded instructions and 263 bytes; the identity check stays open at 20 of 69 instructions and 11 of 263 bytes because V2 saves ecx and edx first, keeps the object in ecx, addresses the globals as near data offsets, and saves the two angle fields to local slots; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The terrain_contact_update module at 0x1cbac"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "terrain_contact_update",
   "notes": [],
   "object_offset": "0xcbac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -81,17 +90,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 11,
-        "bytes_total": 297,
+        "bytes_equal": 35,
+        "bytes_total": 257,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 23,
-        "instructions_total": 81,
+        "instructions_equal": 18,
+        "instructions_total": 69,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cbac",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:8b7b1bdebd4c563ad7b12521e7bb5bbc7d1442a705882d27722c61598d19b837",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9709bcb4aca7381c1ddba4e6eaa29e620ca3046dbb32ab6101196cdb2e8d6b01",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:930bd529cbaf7965cbdbba8bc688277529ffa58492ae0120e59a4a281d3fd0ac",
     "tool": "run.py"
   },

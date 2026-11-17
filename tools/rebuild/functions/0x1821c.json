@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1821c holds 220 instructions and 756 bytes up to the ret at 0x1850f; the record keeps the 780-byte extent, which ends at the next function player_car_reset_update at 0x18528, and sets no function size; the identity check uses 220 instructions"
+      "text": "the original body at 0x1821c holds 220 instructions and 756 bytes over the full extent; the ret is at 0x1850f; the record keeps the 780-byte extent, which ends at the next function player_car_reset_update at 0x18528, and sets no function size; the identity check uses 151 instructions"
     },
     {
       "kind": "note",
@@ -51,6 +51,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/harness.py run --module player_track_node_update"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "player_track_node_update",
   "notes": [],
   "object_offset": "0x821c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 52,
-        "bytes_total": 756,
+        "bytes_equal": 35,
+        "bytes_total": 537,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 47,
-        "instructions_total": 220,
+        "instructions_equal": 35,
+        "instructions_total": 148,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1821c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:9ead28e1d317e8bad28d07a3cfb95b13d5f88201c9abf7d1a14a48d83d0848c1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:eea20a1f5d06d591c83b00df7e2d550bc2e78fbbc2f60961f817b14a36056fc5",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:156cfec346a1a52c57c4ef62eb0d92e86e31aaa8e89ecb3e7f12b8083ee1b975",
     "tool": "run.py"
   },

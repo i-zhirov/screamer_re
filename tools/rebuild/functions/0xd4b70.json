@@ -1,9 +1,56 @@
 {
   "address": "0xd4b70",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd4b70"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "int386",
+    "object_sha256": "sha256:37ac3f94b05649d1673185d170899f76dcb9c12a836f8d0cb3e0ae75533f2ac7",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "int386_"
+  },
+  "name": "int386",
   "notes": [],
   "object_offset": "0xc4b70",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 27,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 11,
+        "instructions_total": 11,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd4b70",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:3595cbfac55ccc553937fc80efba48e19e0cf71598eb2e2eb7288631d9cd611c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6318019cb6e4b4a88e4318c0febf62f3ad92a6338d1390c774fd18c9dada7019",
+    "tool": "run.py"
+  },
   "size": 7472,
-  "status": "unknown"
+  "status": "verified"
 }

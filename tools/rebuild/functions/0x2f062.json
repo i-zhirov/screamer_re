@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 33 instructions and 88 bytes; the shared toolchain keeps the resource in esi, the name in eax, and the record in edx, merges the two identical format literals into one, and reads the size from the frame argument at ebp + 8; the identity check window holds 53 instructions and stays open at 12 of 53 instructions and 4 of 139 decoded bytes, because the diff window decodes the following code after the rebuilt ret 4; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "cache_resource",
   "notes": [],
   "object_offset": "0x1f062",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

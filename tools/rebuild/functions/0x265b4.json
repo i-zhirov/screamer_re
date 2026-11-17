@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/cd_audio_volume_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "cd_audio_volume_set",
   "notes": [],
   "object_offset": "0x165b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -105,7 +114,7 @@
   },
   "role": "Sets the two CD audio output channel volumes through the MSCDEX audio channel control request at DAT_001666a4.",
   "section": "motion_update callees",
-  "size": 184,
+  "size": 140,
   "status": "rebuilt",
   "symbol": "cd_audio_volume_set_"
 }
