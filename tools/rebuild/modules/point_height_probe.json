@@ -1,0 +1,31 @@
+{
+  "exe": "phprobe.exe",
+  "map": "point_height_probe.map",
+  "name": "point_height_probe",
+  "run": {
+    "command": "phprobe.exe > phprobe.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "phprobe.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_height_probe.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_height_probe_main.c"
+    }
+  ]
+}

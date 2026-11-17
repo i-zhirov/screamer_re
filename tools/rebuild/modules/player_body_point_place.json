@@ -1,0 +1,36 @@
+{
+  "exe": "pbpp.exe",
+  "map": "player_body_point_place.map",
+  "name": "player_body_point_place",
+  "run": {
+    "command": "pbpp.exe > pbpp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pbpp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_body_point_place.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_body_point_place_main.c"
+    }
+  ]
+}

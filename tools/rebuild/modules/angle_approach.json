@@ -1,0 +1,39 @@
+{
+  "exe": "aang.exe",
+  "map": "angle_approach.map",
+  "name": "angle_approach",
+  "run": {
+    "command": "aang.exe > aang.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "aang.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "angle_approach.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "angle_approach_main.c"
+    }
+  ]
+}

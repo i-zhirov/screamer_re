@@ -1,0 +1,36 @@
+{
+  "exe": "prx.exe",
+  "map": "point_rotate_x.map",
+  "name": "point_rotate_x",
+  "run": {
+    "command": "prx.exe > prx.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "prx.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_x.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "point_rotate_x_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_x_main.c"
+    }
+  ]
+}

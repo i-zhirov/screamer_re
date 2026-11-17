@@ -1,0 +1,34 @@
+{
+  "exe": "sskmod.exe",
+  "map": "stream_seek.map",
+  "name": "stream_seek",
+  "run": {
+    "command": "sskmod.exe > ssk_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "ssk_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "stream_seek.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "stream_seek_main.c"
+    }
+  ]
+}

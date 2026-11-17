@@ -1,0 +1,33 @@
+{
+  "exe": "svsel.exe",
+  "map": "sound_variant_select.map",
+  "name": "sound_variant_select",
+  "run": {
+    "command": "svsel.exe > svsel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "svsel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_variant_select.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_variant_select_main.c"
+    }
+  ]
+}

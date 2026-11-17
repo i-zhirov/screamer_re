@@ -1,0 +1,29 @@
+{
+  "exe": "chcsave.exe",
+  "map": "choice_save.map",
+  "name": "choice_save",
+  "run": {
+    "command": "chcsave.exe > chs_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "chs_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "choice_save.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "choice_save_main.c"
+    }
+  ]
+}

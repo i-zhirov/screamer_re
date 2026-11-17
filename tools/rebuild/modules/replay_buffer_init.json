@@ -1,0 +1,32 @@
+{
+  "exe": "rplinit.exe",
+  "map": "replay_buffer_init.map",
+  "name": "replay_buffer_init",
+  "run": {
+    "command": "rplinit.exe > rplinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "rplinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_buffer_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_buffer_init_main.c"
+    }
+  ]
+}

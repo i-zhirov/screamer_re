@@ -1,0 +1,32 @@
+{
+  "exe": "ckptload.exe",
+  "map": "cockpit_load.map",
+  "name": "cockpit_load",
+  "run": {
+    "command": "ckptload.exe > ckpt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "ckpt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cockpit_load.c",
+      "flags": [
+        "-of+",
+        "-dCOCKPIT_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cockpit_load_main.c"
+    }
+  ]
+}

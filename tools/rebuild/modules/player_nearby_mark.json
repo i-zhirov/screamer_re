@@ -1,0 +1,36 @@
+{
+  "exe": "pnear.exe",
+  "map": "player_nearby_mark.map",
+  "name": "player_nearby_mark",
+  "run": {
+    "command": "pnear.exe > pnear.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "pnear.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_nearby_mark.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_nearby_mark_main.c"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "exe": "f11714.exe",
+  "map": "func_11714.map",
+  "name": "func_11714",
+  "run": {
+    "command": "f11714.exe > f11714.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "f11714.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_11714.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_11714_main.c"
+    }
+  ]
+}

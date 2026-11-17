@@ -1,0 +1,33 @@
+{
+  "exe": "objchf.exe",
+  "map": "object_chunk_find.map",
+  "name": "object_chunk_find",
+  "run": {
+    "command": "objchf.exe > objchf.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "objchf.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_chunk_find.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_chunk_find_main.c"
+    }
+  ]
+}

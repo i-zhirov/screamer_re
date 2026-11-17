@@ -1,0 +1,30 @@
+{
+  "exe": "smset.exe",
+  "map": "screen_mode_set.map",
+  "name": "screen_mode_set",
+  "run": {
+    "command": "smset.exe > smset.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "smset.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "screen_mode_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "screen_mode_set_main.c"
+    }
+  ]
+}

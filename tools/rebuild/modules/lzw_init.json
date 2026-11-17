@@ -1,0 +1,30 @@
+{
+  "exe": "lzwinit.exe",
+  "map": "lzw_init.map",
+  "name": "lzw_init",
+  "run": {
+    "command": "lzwinit.exe > lzwinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "lzwinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "lzw_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "lzw_init_main.c"
+    }
+  ]
+}

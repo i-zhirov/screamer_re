@@ -1,0 +1,32 @@
+{
+  "exe": "objreq.exe",
+  "map": "object_request.map",
+  "name": "object_request",
+  "run": {
+    "command": "objreq.exe > objreq.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "objreq.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_request.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_request_main.c"
+    }
+  ]
+}

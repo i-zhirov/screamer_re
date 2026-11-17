@@ -1,0 +1,33 @@
+{
+  "exe": "memopn.exe",
+  "map": "member_open.map",
+  "name": "member_open",
+  "run": {
+    "command": "memopn.exe > memopn.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "memopn.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "member_open.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "member_open_main.c"
+    }
+  ]
+}

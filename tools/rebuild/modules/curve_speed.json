@@ -1,0 +1,38 @@
+{
+  "exe": "curve.exe",
+  "map": "curve_speed.map",
+  "name": "curve_speed",
+  "run": {
+    "command": "curve.exe > curve.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "curve.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "curve_speed.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "curve_speed_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "curve_speed_main.c"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "exe": "bpp.exe",
+  "map": "body_point_place.map",
+  "name": "body_point_place",
+  "run": {
+    "command": "bpp.exe > bpp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "bpp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "body_point_place.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "body_point_place_main.c"
+    }
+  ]
+}

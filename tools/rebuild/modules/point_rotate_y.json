@@ -1,0 +1,36 @@
+{
+  "exe": "pry.exe",
+  "map": "point_rotate_y.map",
+  "name": "point_rotate_y",
+  "run": {
+    "command": "pry.exe > pry_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pry_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_y.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "point_rotate_y_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_rotate_y_main.c"
+    }
+  ]
+}

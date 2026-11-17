@@ -1,0 +1,26 @@
+{
+  "exe": "ssfprep.exe",
+  "map": "sound_source_frame_prepare.map",
+  "name": "sound_source_frame_prepare",
+  "run": {
+    "command": "ssfprep.exe > ssfprep.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ssfprep.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_source_frame_prepare.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_source_frame_prepare_main.c"
+    }
+  ]
+}

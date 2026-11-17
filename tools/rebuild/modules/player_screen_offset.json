@@ -1,0 +1,36 @@
+{
+  "exe": "pscrnofs.exe",
+  "map": "player_screen_offset.map",
+  "name": "player_screen_offset",
+  "run": {
+    "command": "pscrnofs.exe > pscrnofs.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "pscrnofs.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_screen_offset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "player_screen_offset_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_screen_offset_main.c"
+    }
+  ]
+}

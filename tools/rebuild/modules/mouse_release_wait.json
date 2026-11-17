@@ -1,0 +1,31 @@
+{
+  "exe": "mrw.exe",
+  "map": "mouse_release_wait.map",
+  "name": "mouse_release_wait",
+  "run": {
+    "command": "mrw.exe > mrw_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "mrw_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "mouse_release_wait.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "mouse_release_wait_main.c"
+    }
+  ]
+}

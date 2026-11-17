@@ -1,0 +1,30 @@
+{
+  "exe": "objunld.exe",
+  "map": "object_unload.map",
+  "name": "object_unload",
+  "run": {
+    "command": "objunld.exe > objunld.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "objunld.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_unload.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_unload_main.c"
+    }
+  ]
+}

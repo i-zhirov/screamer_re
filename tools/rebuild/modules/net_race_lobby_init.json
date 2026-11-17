@@ -1,0 +1,32 @@
+{
+  "exe": "nrlobby.exe",
+  "map": "net_race_lobby_init.map",
+  "name": "net_race_lobby_init",
+  "run": {
+    "command": "nrlobby.exe > nrlobby.txt",
+    "expect": [
+      "0",
+      "1",
+      "D"
+    ],
+    "output": "nrlobby.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "net_race_lobby_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "net_race_lobby_init_main.c"
+    }
+  ]
+}

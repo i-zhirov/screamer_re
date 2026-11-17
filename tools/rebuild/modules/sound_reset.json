@@ -1,0 +1,31 @@
+{
+  "exe": "sreset.exe",
+  "map": "sound_reset.map",
+  "name": "sound_reset",
+  "run": {
+    "command": "sreset.exe > sreset.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "sreset.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_reset.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_reset_main.c"
+    }
+  ]
+}

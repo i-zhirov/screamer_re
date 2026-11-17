@@ -1,0 +1,40 @@
+{
+  "exe": "senq.exe",
+  "map": "sound_enqueue.map",
+  "name": "sound_enqueue",
+  "run": {
+    "command": "senq.exe > senq.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "senq.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_enqueue.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_enqueue_main.c"
+    }
+  ]
+}

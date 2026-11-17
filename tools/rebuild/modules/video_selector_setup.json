@@ -1,0 +1,26 @@
+{
+  "exe": "vsel.exe",
+  "map": "video_selector_setup.map",
+  "name": "video_selector_setup",
+  "run": {
+    "command": "vsel.exe > vsel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "vsel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_selector_setup.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_selector_setup_main.c"
+    }
+  ]
+}

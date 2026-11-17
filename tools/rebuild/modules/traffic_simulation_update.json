@@ -1,0 +1,31 @@
+{
+  "exe": "tsim.exe",
+  "map": "traffic_simulation_update.map",
+  "name": "traffic_simulation_update",
+  "run": {
+    "command": "tsim.exe > tsim.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "tsim.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_simulation_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_simulation_update_main.c"
+    }
+  ]
+}

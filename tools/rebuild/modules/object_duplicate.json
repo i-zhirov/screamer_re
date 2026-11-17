@@ -1,0 +1,32 @@
+{
+  "exe": "objdup.exe",
+  "map": "object_duplicate.map",
+  "name": "object_duplicate",
+  "run": {
+    "command": "objdup.exe > objdup.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "objdup.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_duplicate.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_duplicate_main.c"
+    }
+  ]
+}

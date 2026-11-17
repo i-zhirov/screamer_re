@@ -1,0 +1,31 @@
+{
+  "exe": "alfload.exe",
+  "map": "alfile.map",
+  "name": "alfile_load",
+  "run": {
+    "command": "alfload.exe > alfload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "alfload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "alfile_load.c",
+      "flags": [
+        "-of+",
+        "-dALFILE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "alfile_load_main.c"
+    }
+  ]
+}
