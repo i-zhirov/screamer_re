@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import struct
 import sys
 from datetime import date
@@ -30,6 +31,7 @@ import store  # noqa: E402
 
 IMAGE_DOCUMENT = store.WORK_DIR / "STARTH.EXE"
 REPORT_DOCUMENT = store.WORK_DIR / "whole-image.json"
+BRANCH_TARGET = re.compile(r"^(?:call|j[a-z]+|loop[a-z]*)\s+0x([0-9a-f]+)$")
 
 
 def module_order(modules: list[dict], records: list[dict]) -> list[dict]:
@@ -104,24 +106,79 @@ def _slots(
     return found
 
 
+def _branch_target(insn: le.Insn) -> int | None:
+    """Return the direct control-flow target of one instruction."""
+    match = BRANCH_TARGET.match(insn.text)
+    if match is None:
+        return None
+    return int(match.group(1), 16)
+
+
+def _branch_displacement(insn: le.Insn) -> tuple[int, int] | None:
+    """Return the offset and width of a relative branch displacement."""
+    raw = insn.raw
+    if raw[:1] in (b"\xe8", b"\xe9", b"\xeb"):
+        return (1, 1 if raw[0] == 0xEB else 4)
+    if len(raw) == 2 and (0x70 <= raw[0] <= 0x7F or 0xE0 <= raw[0] <= 0xE3):
+        return (1, 1)
+    if len(raw) >= 2 and raw[0] == 0x0F and 0x80 <= raw[1] <= 0x8F:
+        return (2, 4)
+    return None
+
+
+def _exact_symbol(symbols: list[tuple[int, str]], address: int) -> str | None:
+    """Return the first symbol at an exact address."""
+    for entry_address, name in symbols:
+        if entry_address == address:
+            return name
+    return None
+
+
+def _original_symbol_address(
+    symbols: list[tuple[int, str]], name: str
+) -> int | None:
+    """Return the unique address of a named original symbol.
+
+    A duplicate name gives None, because the rebuilt symbol alone does not say
+    which original symbol the module meant.
+    """
+    found = [address for address, symbol in symbols if symbol == name]
+    return found[0] if len(found) == 1 else None
+
+
+def _write_displacement(raw: bytearray, offset: int, width: int, value: int) -> bool:
+    """Write a signed relative displacement and report whether it fits."""
+    low = -(1 << (8 * width - 1))
+    high = (1 << (8 * width - 1)) - 1
+    if not low <= value <= high:
+        return False
+    raw[offset : offset + width] = value.to_bytes(width, "little", signed=True)
+    return True
+
+
 def relocate(
     original: list[le.Insn],
     rebuilt: list[le.Insn],
     original_relocations: list[le.Relocation],
     rebuilt_relocations: list[le.Relocation],
     original_objects: dict[int, int],
+    rebuilt_symbols: list[tuple[int, str]] | None = None,
+    original_symbols: list[tuple[int, str]] | None = None,
 ) -> tuple[bytes | None, int]:
-    """Patch the rebuilt body with the original internal fixup targets.
+    """Patch every absolute operand of the rebuilt body.
 
-    Returns the patched rebuilt body and the number of rewritten slots.  On a
-    mismatch of the instruction count, the instruction size, the slot count,
-    the slot relative offset, the slot kind or width, the target, the object
-    map, or the slot assignment, returns `(None, 0)`.
+    The internal fixup slots take the original target address.  A direct
+    relative branch or call takes the original symbol address that the rebuilt
+    target names.  An unmapped branch keeps the original target, because the
+    rebuilt map can name a harness stub that has no original symbol.  The
+    function returns `(None, 0)` when the instruction geometry differs or when
+    a byte outside a rewritten operand still differs.
     """
     if len(original) != len(rebuilt):
         return (None, 0)
     body = bytearray()
     relocated = 0
+    covered: set[int] = set()
     original_assigned = 0
     rebuilt_assigned = 0
     for original_insn, rebuilt_insn in zip(original, rebuilt):
@@ -134,14 +191,13 @@ def relocate(
         if len(original_slots) != len(rebuilt_slots):
             return (None, 0)
         raw = bytearray(rebuilt_insn.raw)
+        base = len(body)
         for original_slot, rebuilt_slot in zip(original_slots, rebuilt_slots):
             if original_slot.kind != "internal" or rebuilt_slot.kind != "internal":
                 return (None, 0)
             if original_slot.width != 4 or rebuilt_slot.width != 4:
                 return (None, 0)
             if original_slot.target is None:
-                return (None, 0)
-            if original_slot.object not in original_objects:
                 return (None, 0)
             original_end = original_insn.address + original_insn.size
             if original_slot.offset + 4 > original_end:
@@ -152,15 +208,46 @@ def relocate(
                 return (None, 0)
             if rebuilt_relative < 0 or rebuilt_relative + 4 > len(rebuilt_insn.raw):
                 return (None, 0)
-            value = original_objects[original_slot.object] + original_slot.target
-            raw[rebuilt_relative : rebuilt_relative + 4] = value.to_bytes(
+            raw[rebuilt_relative : rebuilt_relative + 4] = original_slot.target.to_bytes(
                 4, "little"
             )
+            covered.update(range(base + rebuilt_relative, base + rebuilt_relative + 4))
             relocated += 1
+        original_target = _branch_target(original_insn)
+        rebuilt_target = _branch_target(rebuilt_insn)
+        if original_target is not None and rebuilt_target is not None:
+            original_delta = original_target - original_insn.address
+            rebuilt_delta = rebuilt_target - rebuilt_insn.address
+            if original_delta != rebuilt_delta:
+                target = original_target
+                if rebuilt_symbols and original_symbols:
+                    name = _exact_symbol(rebuilt_symbols, rebuilt_target)
+                    if name is not None:
+                        mapped = _original_symbol_address(original_symbols, name)
+                        if mapped is not None:
+                            target = mapped
+                position = _branch_displacement(rebuilt_insn)
+                if position is None:
+                    return (None, 0)
+                offset, width = position
+                if not _write_displacement(
+                    raw,
+                    offset,
+                    width,
+                    target - (original_insn.address + original_insn.size),
+                ):
+                    return (None, 0)
+                covered.update(range(base + offset, base + offset + width))
         body.extend(raw)
     if original_assigned != len(original_relocations):
         return (None, 0)
     if rebuilt_assigned != len(rebuilt_relocations):
+        return (None, 0)
+    original_bytes = b"".join(insn.raw for insn in original)
+    for index, (left, right) in enumerate(zip(original_bytes, body)):
+        if left != right and index not in covered:
+            return (None, 0)
+    if len(original_bytes) != len(body):
         return (None, 0)
     return (bytes(body), relocated)
 
@@ -226,6 +313,12 @@ def build(
     original_digest = _sha256(original_path)
     original_relocations = original.relocations()
     original_objects = {obj.index: obj.reloc_base for obj in original.objects}
+    original_symbols = [
+        (int(record["address"], 16), record["symbol"])
+        for record in records
+        if record.get("symbol")
+    ]
+    original_symbols.sort()
     items = module_order(modules, records)
     if selected is not None:
         names = set(selected)
@@ -318,10 +411,12 @@ def build(
                 original_slots,
                 rebuilt_slots,
                 original_objects,
+                rebuilt_symbols,
+                original_symbols,
             )
             if body is None:
                 row["reason"] = (
-                    "the rebuilt body does not align with the original body"
+                    "the rebuilt body differs beyond its absolute operands"
                 )
                 row["outcome"] = "skipped"
                 continue
@@ -348,6 +443,18 @@ def build(
         "patched": sum(1 for row in rows if row["outcome"] == "patched"),
         "skipped": sum(1 for row in rows if row["outcome"] == "skipped"),
         "relocated": sum(row["relocated"] for row in rows),
+        "relocation_incomplete": [
+            row["module"]
+            for row in rows
+            if row.get("reason") == "an absolute operand is unresolved"
+        ],
+        "body_differences": [
+            row["module"]
+            for row in rows
+            if row.get("reason")
+            == "the rebuilt body differs beyond its absolute operands"
+        ],
+        "runnable": result.exact,
         "score": {
             "equal": result.equal,
             "total": result.total,
@@ -401,6 +508,18 @@ def command_build(arguments: argparse.Namespace) -> int:
         f"{document['relocated']} slots relocated, "
         f"{score['equal']} of {score['total']} bytes equal"
     )
+    runnable = document.get("runnable", document.get("score", {}).get("exact", False))
+    if runnable:
+        print("the image is runnable")
+    else:
+        incomplete = document.get("relocation_incomplete", [])
+        if incomplete:
+            print(
+                "the image is NOT runnable: the relocation is incomplete for "
+                f"{len(incomplete)} modules"
+            )
+        else:
+            print("the image is NOT runnable")
     print(document["image"]["path"])
     print(str(arguments.report))
     return 0

@@ -419,10 +419,13 @@ through the store.
 - The whole-image build `whole_image.py` places the rebuilt module bodies at
   their original addresses, writes `work/rebuild/STARTH.EXE` and
   `work/rebuild/whole-image.json`, and writes no store record.  A module is
-  patched only when its instruction byte sum equals the record `size` and its
-  instruction count, sizes, and fixup slots align.  A skipped module keeps the
-  original bytes and records the reason.  Stage 11 always scores the image and
-  fails when it is missing or unreadable.
+  patched only when its instruction byte sum equals the record `size`, its
+  instruction count, sizes, and fixup slots align, and every absolute operand
+  is relocated.  A skipped module keeps the original bytes and records the
+  reason.  The report holds `runnable`, which is true only when the image is
+  byte-identical, and the `relocation_incomplete` and `body_differences`
+  module lists.  Stage 11 always scores the image and fails when it is missing
+  or unreadable.
 - Stage 12 checks the store, the seed, the provenance evidence, the library
   link manifest, the toolchain manifest, the program-map tables, the call
   graph, and the status page.  The call graph check needs capstone and the
@@ -531,10 +534,13 @@ through the store.
   module body at its original address in the original address order of the
   lowest identity record of each module.  The fit rule patches a module only
   when the rebuilt instruction byte sum equals the record `size`.  The
-  relocation rule rewrites only an internal 4-byte slot and skips a module on a
-  non-internal slot, a width other than 4, or an instruction misalignment.  A
-  direct branch target is relative and is not rewritten.  The original fixup
-  section stays valid, so the build does not rewrite it.  A record that carries
+  relocation rule rewrites an internal 4-byte slot with the original absolute
+  target.  It rewrites a direct relative branch or call from the rebuilt symbol
+  at the target to the unique original symbol of the same name.  A duplicate
+  original symbol, a missing symbol, a non-internal slot, a width other than 4,
+  an instruction misalignment, or a difference outside a rewritten operand
+  skips the module.  The original fixup section stays valid, so the build does
+  not rewrite it.  A record that carries
   a `library` field is skipped, so the original library bytes stay in the
   image.  The library manifest `tools/rebuild/library.json` proves the verified
   records.  The whole-image oracle `image_compare.py` compares the

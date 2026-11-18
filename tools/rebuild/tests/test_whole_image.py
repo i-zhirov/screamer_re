@@ -186,15 +186,15 @@ class FitTestCase(unittest.TestCase):
 
 class RelocateTestCase(unittest.TestCase):
     def test_relocate_writes_the_original_target(self) -> None:
-        original = [insn(0x300EC, "mov", "eax, 0", b"\x01\x02\x03\x04\x05\x06")]
+        original = [insn(0x300EC, "mov", "eax, 0", b"\x20\x00\x00\x00\x00\x00")]
         rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00\x00\x00\x00\x00\x00")]
         original_relocations = [
             le.Relocation(
-                offset=0x300EE, width=4, kind="internal", object=1, target=0x20
+                offset=0x300EC, width=4, kind="internal", object=1, target=0x20
             )
         ]
         rebuilt_relocations = [
-            le.Relocation(offset=0x10002, width=4, kind="internal")
+            le.Relocation(offset=0x10000, width=4, kind="internal")
         ]
 
         body, relocated = whole_image.relocate(
@@ -205,7 +205,7 @@ class RelocateTestCase(unittest.TestCase):
             {1: 0x10000},
         )
 
-        self.assertEqual(body, b"\x00\x00\x20\x00\x01\x00")
+        self.assertEqual(body, b"\x20\x00\x00\x00\x00\x00")
         self.assertEqual(relocated, 1)
 
     def test_relocate_counts_each_slot(self) -> None:
@@ -339,9 +339,9 @@ class RelocateTestCase(unittest.TestCase):
             (None, 0),
         )
 
-    def test_relocate_returns_none_for_an_unmapped_object(self) -> None:
-        original = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
-        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 4)]
+    def test_relocate_uses_the_absolute_internal_target(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x20\x00\x00\x00")]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00\x00\x00\x00")]
         original_relocations = [
             le.Relocation(
                 offset=0x10000, width=4, kind="internal", object=2, target=0x20
@@ -351,23 +351,23 @@ class RelocateTestCase(unittest.TestCase):
             le.Relocation(offset=0x20000, width=4, kind="internal")
         ]
 
-        self.assertEqual(
-            whole_image.relocate(
-                original,
-                rebuilt,
-                original_relocations,
-                rebuilt_relocations,
-                {1: 0x10000},
-            ),
-            (None, 0),
+        body, relocated = whole_image.relocate(
+            original,
+            rebuilt,
+            original_relocations,
+            rebuilt_relocations,
+            {1: 0x10000},
         )
+
+        self.assertEqual(body, b"\x20\x00\x00\x00")
+        self.assertEqual(relocated, 1)
 
     def test_relocate_returns_none_on_a_different_slot_offset(self) -> None:
         original = [insn(0x300EC, "mov", "eax, 0", b"\x00" * 8)]
         rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 8)]
         original_relocations = [
             le.Relocation(
-                offset=0x300EE, width=4, kind="internal", object=1, target=0x20
+                offset=0x300EC, width=4, kind="internal", object=1, target=0x20
             )
         ]
         rebuilt_relocations = [
@@ -409,6 +409,60 @@ class RelocateTestCase(unittest.TestCase):
 
         self.assertEqual(body, b"\x75\x10")
         self.assertEqual(relocated, 0)
+
+    def test_relocate_maps_a_rebuilt_branch_symbol(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original,
+            rebuilt,
+            [],
+            [],
+            {},
+            [(0x10020, "target_")],
+            [(0x300EC, "target_")],
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
+    def test_relocate_keeps_the_original_target_for_an_unmapped_branch(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original, rebuilt, [], [], {}, [], []
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
+    def test_relocate_keeps_the_original_target_for_an_ambiguous_symbol(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original,
+            rebuilt,
+            [],
+            [],
+            {},
+            [(0x10020, "target_")],
+            [(0x300EC, "target_"), (0x30100, "target_")],
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
+    def test_relocate_rejects_an_uncovered_difference(self) -> None:
+        original = [insn(0x300EC, "mov", "eax, 0", b"\x01\x02")]
+        rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x03\x04")]
+
+        self.assertEqual(
+            whole_image.relocate(original, rebuilt, [], [], {}),
+            (None, 0),
+        )
 
 
 class FakeObject:
@@ -519,7 +573,7 @@ class BuildTestCase(unittest.TestCase):
                 insn(0x10000, "mov", "eax, 1", b"\xaa\xbb\xcc\xdd")
             ],
             original_instructions=[
-                insn(0x10000, "mov", "eax, 1", b"\x01\x02\x03\x04")
+                insn(0x10000, "mov", "eax, 1", b"\xaa\xbb\xcc\xdd")
             ],
         )
 
@@ -533,7 +587,7 @@ class BuildTestCase(unittest.TestCase):
             objects=(FakeObject(1, 0x10000),),
             relocations=(
                 le.Relocation(
-                    offset=0x10002,
+                    offset=0x10000,
                     width=4,
                     kind="internal",
                     object=1,
@@ -545,7 +599,7 @@ class BuildTestCase(unittest.TestCase):
             b"",
             objects=(FakeObject(1, 0x10000),),
             relocations=(
-                le.Relocation(offset=0x10002, width=4, kind="internal"),
+                le.Relocation(offset=0x10000, width=4, kind="internal"),
             ),
         )
         modules = [module("free", ["free.c"], "v2")]
@@ -556,15 +610,15 @@ class BuildTestCase(unittest.TestCase):
             records,
             [self.original, rebuilt_image, FakeImage(b"")],
             rebuilt_instructions=[
-                insn(0x10000, "mov", "eax, 0", b"\x00" * 6)
+                insn(0x10000, "mov", "eax, 0", b"\x00\x00\x00\x00\x05\x06")
             ],
             original_instructions=[
-                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04\x05\x06")
+                insn(0x10000, "mov", "eax, 0", b"\x20\x00\x00\x00\x05\x06")
             ],
         )
 
         self.assertEqual(
-            self.out.read_bytes()[:6], b"\x00\x00\x20\x00\x01\x00"
+            self.out.read_bytes()[:6], b"\x20\x00\x00\x00\x05\x06"
         )
         self.assertEqual(document["modules"][0]["relocated"], 1)
 
@@ -646,8 +700,10 @@ class BuildTestCase(unittest.TestCase):
         self.assertTrue(row["fit"])
         self.assertEqual(
             row["reason"],
-            "the rebuilt body does not align with the original body",
+            "the rebuilt body differs beyond its absolute operands",
         )
+        self.assertFalse(document["runnable"])
+        self.assertEqual(document["body_differences"], ["free"])
 
     def test_build_selected_restricts_the_modules(self) -> None:
         modules = [
@@ -962,6 +1018,7 @@ class CommandBuildTestCase(unittest.TestCase):
             "patched": 1,
             "skipped": 1,
             "relocated": 2,
+            "runnable": False,
             "score": {"equal": 10, "total": 16, "exact": False},
         }
 

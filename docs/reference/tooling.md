@@ -1077,10 +1077,14 @@ The module order is the original address order of the lowest identity record of
 each module.  A module with no symbol record is excluded.
 
 The fit rule patches a module only when the sum of the rebuilt instruction sizes
-equals the record `size`.  The relocation rule rewrites only an internal 4-byte
-slot.  A non-internal slot, a width other than 4, or an instruction misalignment
-skips the module.  A direct branch target is relative and is not rewritten.  The
-original fixup section stays valid, so the build does not rewrite it.
+equals the record `size` and every absolute operand relocates.  An internal
+4-byte slot takes the original absolute target.  A direct relative branch or
+call takes the address of the unique original symbol that the rebuilt target
+names.  An unmapped or ambiguous branch symbol keeps the original branch
+target.  A non-internal slot, a width other than 4, an instruction
+misalignment, or a difference outside a rewritten operand skips the module as a
+body difference.  The original fixup section stays valid, so the build does not
+rewrite it.
 
 A record that carries a `library` field keeps the original library bytes.  The
 build skips it with the reason `the original library bytes stay` and does not
@@ -1093,11 +1097,13 @@ A patched row holds no `reason`.
 
 The build writes `work/rebuild/STARTH.EXE` and `work/rebuild/whole-image.json`.
 The report holds the date, the original path and digest, the image path and
-digest, one row per module, the `patched`, `skipped`, and `relocated` counts, and
-the byte `score`.  A row holds the module, the address, the size, the toolchain,
-the sources, the build verdict, the fit, the fit reason, the rebuilt size, the
-relocated count, the outcome, and the reason of a skipped row.  The build writes
-no store record.
+digest, one row per module, the `patched`, `skipped`, and `relocated` counts,
+the byte `score`, the `relocation_incomplete` and `body_differences` module
+lists, and `runnable`.  The `runnable` value is true only when the image is
+byte-identical.  A row holds the module, the address, the size,
+the toolchain, the sources, the build verdict, the fit, the fit reason, the
+rebuilt size, the relocated count, the outcome, and the reason of a skipped
+row.  The build writes no store record.
 
 Stage 11 is a score gate.  It always scores the rebuilt image and fails when the
 image is missing or unreadable.  It passes on a byte score, including when the

@@ -34768,3 +34768,56 @@ temporary `-od` recipe.
 - Limit: the original has no symbol name.  The caller, the mode 4 selection,
   and the finish position give the role, and the name
   `race_finish_time_ghost_update` stays inferred.
+
+## The whole-image relocation rewrites every absolute operand
+
+- Observation: the earlier whole-image build patched 12 modules and left 90
+  differing bytes.  The bytes changed data addresses, call targets, frame
+  slots, and one arithmetic opcode.  Ten modules held the differences.  The
+  old rule added the fixup object base to the original target, so a data
+  address gained `+0x100000`, and it copied a rebuilt relative call without a
+  symbol rewrite, so the call entered unrelated code.
+  Evidence: the byte diff of the original `STARTH.EXE` and the earlier
+  `work/rebuild/STARTH.EXE`, and the disassembly at `0x128ac`, `0x2aa84`,
+  `0x2f205`, `0x2f8ca`, and `0x8bdec`.
+- Observation: an LE internal fixup target is the absolute linear address, not
+  an object offset.  The original slot at `0x8afa3` holds `0x73853`, and the
+  object base is `0x10000`, so adding the base gave the wrong `0x83853`.
+  Evidence: `tools/rebuild/functions/0x8afa0.json` and
+  `work/rebuild/whole-image.json`.
+- Observation: `whole_image.py` writes the original absolute target into an
+  internal 4-byte slot.  It rewrites a direct relative branch or call from the
+  rebuilt symbol at the target to the unique original symbol of the same name.
+  An unmapped or ambiguous symbol keeps the original target, because the
+  rebuilt map names harness stubs such as `f1_` and duplicate library names
+  such as `free_`.  A difference outside a rewritten absolute operand skips the
+  module as a body difference.
+  Evidence: `shutdown` and `list_destroy` now patch.  The new tests
+  `test_relocate_keeps_the_original_target_for_an_unmapped_branch` and
+  `test_relocate_keeps_the_original_target_for_an_ambiguous_symbol` cover the
+  fallback.
+- Observation: 17 of the earlier 19 incomplete modules have no relocation
+  error.  Nine hold a different prologue, epilogue, or instruction count:
+  `screen_setup_cleanup`, `replay_frame_buffer_release`,
+  `replay_playback_begin`, `race_finish_overlay_4`, `cd_audio_tick`,
+  `func_27f80`, `race_cleanup`, `video_buf_load`, and `map_data_release`.
+  Eight hold a different stack-slot layout: `cng_view_update`,
+  `sla_view_update`, `list_create`, `dos_memory_alloc`, `memory_alloc_small`,
+  `memory_free`, `memory_available`, and `pool_init`.  These are compiler-form
+  differences, not link-time operands, so the build keeps the original bytes.
+  Evidence: the per-module instruction diff and the `body_differences` list in
+  `work/rebuild/whole-image.json`.
+- Observation: `python3 tools/rebuild/whole_image.py --all` now reports
+  11 patched, 473 skipped, 22 relocation slots, and
+  `1,034,923 of 1,034,923 bytes equal`.  `relocation_incomplete` is empty,
+  `body_differences` holds 17 modules, and `runnable` is true.
+  Evidence: `work/rebuild/whole-image.json` and
+  `python3 tools/rebuild/image_compare.py --original STARTH.EXE --rebuilt
+  work/rebuild/STARTH.EXE`.
+- Inference: the image is runnable when every patched body is byte-identical
+  and every other module keeps the original bytes.  A body difference is not a
+  relocation failure, and a byte score alone still does not prove a rebuilt
+  body.
+- Limit: nine modules keep a compiler-form difference and eight keep a
+  stack-slot difference.  A future change must not patch them without a
+  matching code form or a proven body transformation.
