@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/sprite_data_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "sprite_data_release",
   "notes": [],
   "object_offset": "0x158b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

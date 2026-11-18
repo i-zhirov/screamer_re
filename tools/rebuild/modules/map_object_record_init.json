@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "map_object_record_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

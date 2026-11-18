@@ -70,6 +70,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/angle_in_arc.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "angle_in_arc",
   "notes": [],
   "object_offset": "0x1254c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

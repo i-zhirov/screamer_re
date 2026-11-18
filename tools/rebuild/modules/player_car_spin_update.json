@@ -24,7 +24,8 @@
       "compiler": "wcc386",
       "file": "player_car_spin_update.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -33,7 +34,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "player_car_spin_update_main.c"
+      "file": "player_car_spin_update_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

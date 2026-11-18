@@ -18,12 +18,21 @@
     {
       "kind": "note",
       "text": "the caller at 0x1286b in engine_init passes the record table 0x6530 in eax and the state word 0x6350 in edx"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "engine_interface_init",
   "name": "engine_interface_init",
   "notes": [],
   "object_offset": "0x810",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -35,17 +44,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 10,
-        "bytes_total": 106,
+        "bytes_equal": 11,
+        "bytes_total": 99,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 31,
+        "instructions_equal": 9,
+        "instructions_total": 27,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10810",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:4f7ecb8c7a2a0e74f4c822c47f7f808e68c987c2dc7636fcc7262a892d8f4111",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:229be44e2f3f191167396b7248d0d04ea85b5ee595d072a23de22cd360f4a8bc",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:29bb6cd0bdb26b009894bc03a80cb8b9115089520c2df2a5fba9403243949dc8",
     "tool": "run.py"
   },

@@ -62,6 +62,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/replay_playback_begin.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -69,6 +77,7 @@
   "name": "replay_playback_begin",
   "notes": [],
   "object_offset": "0x12db8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

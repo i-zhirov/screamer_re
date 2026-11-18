@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/menu_line_value_next.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "menu_line_value_next",
   "notes": [],
   "object_offset": "0x198b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

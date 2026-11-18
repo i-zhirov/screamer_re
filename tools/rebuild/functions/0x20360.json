@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 21 of 23 instructions equal, 58 of 98 bytes equal, and 2 of 9 relocation slots equal; the identity check stays open because V2 appends the mov esp, ebp frame restore before pop ebp, so the last two instruction slots shift; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "cng_view_update",
   "notes": [],
   "object_offset": "0x10360",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

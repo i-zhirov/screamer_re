@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_resume_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

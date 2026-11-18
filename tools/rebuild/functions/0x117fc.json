@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/object_list_refresh.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "object_list_refresh",
   "notes": [],
   "object_offset": "0x17fc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

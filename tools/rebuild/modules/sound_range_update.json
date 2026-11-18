@@ -19,11 +19,20 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_range_update.c"
+      "file": "sound_range_update.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_range_update_main.c"
+      "file": "sound_range_update_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

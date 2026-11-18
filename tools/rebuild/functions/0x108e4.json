@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "builds a record with the argument and calls interrupt 10h through the run-time"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "bios_video",
   "name": "bios_video",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 6,
-        "bytes_total": 48,
+        "bytes_equal": 5,
+        "bytes_total": 44,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
-        "instructions_total": 20,
+        "instructions_equal": 6,
+        "instructions_total": 17,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x108e4",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:16be1e73b7882e6c9535213b02964dcfc899df1733cdc5f57365bf1ccc9ef1e3",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7b5ac38469f6e0dd697623713e370a63ddcba73438c85abd9aebaeceb167a12c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:e9bcde36812390ab95202efab32668589ba08804f961934df2510e4383fdc37c",
     "tool": "run.py"
   },

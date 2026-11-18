@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x120c0 holds 201 instructions and 695 bytes up to the ret at 0x12376; the record keeps the 696-byte extent to the next function at 0x12378 and sets no function size; the identity check uses 201 instructions"
+      "text": "the original body at 0x120c0 holds 201 instructions and 695 bytes over the full extent; the ret is at 0x12376; the record keeps the 696-byte extent to the next function at 0x12378 and sets no function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the identity check stays open at 39 of 201 instructions and 36 of 687 bytes, because V2 saves the frame pointer first, uses another register and local layout, and uses imul for the entry stride; the build and behavior checks pass, so the record status is rebuilt"
+      "text": "the identity check stays open at 25 of 127 instructions and 21 of 447 bytes, because V2 saves the frame pointer first, uses another register and local layout, and uses imul for the entry stride; the build and behavior checks pass, so the record status is rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The track_nearest_node module at 0x120c0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "track_nearest_node",
   "notes": [],
   "object_offset": "0x20c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 36,
-        "bytes_total": 687,
+        "bytes_equal": 30,
+        "bytes_total": 449,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 39,
-        "instructions_total": 201,
+        "instructions_equal": 30,
+        "instructions_total": 124,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x120c0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:13d13ff57a2fc57e091bfe8aa43268822414e2de21bb2dbe8aefb82b1e39ada4",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:1c6e9cf321a7cb528029d558368a8ceb1bcd3af0a8c613b525809ba395bc8da2",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:96a70dd209012b1a7a8bf87b83d7e48c96beab718bfb21c0dd6318fe35f19f83",
     "tool": "run.py"
   },

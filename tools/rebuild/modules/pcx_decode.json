@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "pcx_decode_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

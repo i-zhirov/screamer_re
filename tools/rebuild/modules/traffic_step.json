@@ -21,14 +21,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_step.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_step.c"
     },
     {
       "compiler": "wcc386",
       "file": "traffic_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

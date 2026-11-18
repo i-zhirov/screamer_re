@@ -6,9 +6,12 @@ the DOSBox-X debugger through `tools/dosboxx_control.py`.  It writes only under
 `work/rebuild/` and never modifies the shipped artifacts.
 
 Usage:
-    python3 tools/rebuild/harness.py build --module NAME
+    python3 tools/rebuild/harness.py build --module NAME [--recipe PATH]
     python3 tools/rebuild/harness.py run --module NAME [--show]
     python3 tools/rebuild/harness.py digest --module NAME
+
+The build command reads the stored module record by default.  With `--recipe`,
+it reads the module recipe from the explicit path instead.
 
 Exit code 0 on success, 1 on a compile, a link, or an output difference, 2 on a
 missing module record or a missing run recipe, and 3 when Docker or DOSBox-X is
@@ -117,21 +120,38 @@ def conf_text(module: dict, port: int) -> str:
 
 
 def missing_lines(expect: list[str], text: str) -> list[str]:
-    """The expect lines no output line equals and no output line ends with.
+    """The expect markers no complete output line equals.
 
-    A suffix match is needed because the first driver marker is embedded in a
-    longer print-buffer line.
+    A marker matches only an output line that equals it, so an embedded copy
+    in a longer line does not count.
     """
     lines = text.splitlines()
-    return [
-        line
-        for line in expect
-        if not any(out_line == line or out_line.endswith(line) for out_line in lines)
-    ]
+    return [line for line in expect if line not in lines]
 
 
-def command_build(name: str) -> int:
-    module = store.load_module(name)
+def clear_output(path: Path) -> None:
+    """Delete an old output file, so a run shows only its own output."""
+    path.unlink(missing_ok=True)
+
+
+def load_recipe(name: str, recipe: Path | None) -> dict:
+    """Read a module record from the store or from an explicit recipe path.
+
+    Raise `ValueError` when the record name differs from `name`.
+    """
+    module = (
+        store.load_module(name) if recipe is None else store.load_module_file(recipe)
+    )
+    if module.get("name") != name:
+        raise ValueError(
+            f"the recipe name {module.get('name')!r} differs from the"
+            f" expected name {name!r}"
+        )
+    return module
+
+
+def command_build(name: str, recipe: Path | None = None) -> int:
+    module = load_recipe(name, recipe)
     if shutil.which(DOCKER) is None:
         print(f"skip: the {DOCKER} command is missing; install Docker to build {name}")
         return 3
@@ -184,6 +204,8 @@ def command_run(name: str, show: bool) -> int:
     debug_path = WORK_DIR / f"run_{name}.dbg"
     conf_path.write_text(conf_text(module, port))
     debug_path.write_text(run_script_text())
+    output_path = WORK_DIR / recipe["output"]
+    clear_output(output_path)
     completed = subprocess.run(
         [
             sys.executable,
@@ -202,11 +224,11 @@ def command_run(name: str, show: bool) -> int:
         ],
         cwd=REPOSITORY_ROOT,
     )
-    text = ""
-    output_path = WORK_DIR / recipe["output"]
-    if output_path.is_file():
-        data = output_path.read_bytes().replace(b"\x00", b"")
-        text = data.decode("utf-8", "replace")
+    if not output_path.is_file():
+        print(f"error: the run of {name} wrote no output", file=sys.stderr)
+        return 1
+    data = output_path.read_bytes().replace(b"\x00", b"")
+    text = data.decode("utf-8", "replace")
     missing = missing_lines(recipe["expect"], text)
     if completed.returncode != 0 or missing:
         if completed.returncode != 0:
@@ -235,6 +257,12 @@ def parse_arguments() -> argparse.Namespace:
         "build", help="build one module in the pinned container"
     )
     build_parser.add_argument("--module", required=True, help="the module record name")
+    build_parser.add_argument(
+        "--recipe",
+        type=Path,
+        default=None,
+        help="build an explicit module recipe instead of the stored record",
+    )
     run_parser = subparsers.add_parser(
         "run", help="run one module under DOSBox-X"
     )
@@ -253,7 +281,7 @@ def main() -> int:
     arguments = parse_arguments()
     try:
         if arguments.command == "build":
-            return command_build(arguments.module)
+            return command_build(arguments.module, arguments.recipe)
         if arguments.command == "run":
             return command_run(arguments.module, arguments.show)
         return command_digest(arguments.module)

@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "malloc_rt.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "malloc_rt.c"
     },
     {
       "compiler": "wcc386",
       "file": "malloc_rt_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

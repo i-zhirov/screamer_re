@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_loop.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_loop.c"
     },
     {
       "compiler": "wcc386",
       "file": "race_loop_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_player_input.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_player_input.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_player_input_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

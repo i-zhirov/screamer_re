@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/cd_audio_tick.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "cd_audio_tick",
   "notes": [],
   "object_offset": "0x15f90",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

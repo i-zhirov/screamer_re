@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "car_nearby_mark_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

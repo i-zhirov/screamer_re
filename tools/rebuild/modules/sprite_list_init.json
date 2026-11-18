@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "sprite_list_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

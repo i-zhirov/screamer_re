@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "sound_source_collect_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

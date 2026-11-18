@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_track_query_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

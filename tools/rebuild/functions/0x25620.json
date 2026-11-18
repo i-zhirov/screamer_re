@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/font_table_init.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "font_table_init",
   "notes": [],
   "object_offset": "0x15620",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -74,6 +74,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x8afa0"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -81,6 +89,7 @@
   "name": "sound_render_branch_greater",
   "notes": [],
   "object_offset": "0x7afa0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

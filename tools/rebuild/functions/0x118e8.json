@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 4 of 46 instructions equal, 4 of 127 bytes equal, and 0 of 2 relocation slots; the identity check stays open because V2 saves only ebp, uses imul for the 0x1c stride, spills the frame to the stack for fild, calls __CHP through a near relative call, and shares the two return paths; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "func_118e8",
   "notes": [],
   "object_offset": "0x18e8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

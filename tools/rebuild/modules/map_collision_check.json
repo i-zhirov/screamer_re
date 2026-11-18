@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "map_collision_check_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

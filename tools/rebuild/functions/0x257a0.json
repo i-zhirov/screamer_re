@@ -70,6 +70,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x257a0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "sprite_list_init",
   "notes": [],
   "object_offset": "0x157a0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

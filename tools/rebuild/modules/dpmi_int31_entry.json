@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "dpmi_int31_entry_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

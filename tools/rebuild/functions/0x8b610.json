@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The basis_transform_build module at 0x8b610"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "basis_transform_build",
   "notes": [],
   "object_offset": "0x7b610",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -89,6 +89,96 @@ Interfaces, Inc.) drivers.  They carry driver banners and embedded
 programs, for example `gus8m.com` and `fmmidi.com`.  The format is not
 decoded yet.
 
+## OMF libraries
+
+The period Watcom libraries are OMF library files.  `library.py` decodes the
+three observed files `CLIB3R.LIB`, `MATH387R.LIB`, and `EMU387.LIB`.
+`MATH387R.LIB` is in `LIB386`, not `LIB386/DOS`.
+
+### The library header
+
+The file starts with the library header record `0xF0`.  The record header is
+three bytes: the command byte, then a 2-byte little-endian length.  The
+observed header holds four fields:
+
+| Offset | Size | Content |
+| --- | ---: | --- |
+| `0x00` | 1 | the record command `0xF0` |
+| `0x01` | 2 | the record length, the page length minus 3 |
+| `0x03` | 4 | the dictionary offset |
+| `0x07` | 2 | the dictionary size in 512-byte blocks |
+
+The page length is the record length plus the 3-byte record header.  The three
+observed libraries use the page length 16.  The dictionary size is the block
+count times 512, capped at the bytes after the dictionary offset.  Evidence:
+`python3 tools/rebuild/library.py index --out work/rebuild/library-index.json`.
+
+### The module page
+
+Each module starts on a page boundary at a THEADR record (`0x80`) and ends at a
+MODEND record (`0x8A` or `0x8B`).  The next module starts on the next page
+boundary.  The parser reads a module only when the page starts with THEADR.
+
+The module holds these records:
+
+| Record | Command | Content |
+| --- | --- | --- |
+| THEADR | `0x80` | the module name |
+| COMENT | `0x88` | the comment class |
+| LNAMES | `0x96`, `0xCA` | the name list |
+| SEGDEF, SEGDEF32 | `0x98`, `0x99` | the segment name, class, and size |
+| PUBDEF, PUBDEF32 | `0x90`, `0x91` | the public name, segment, and offset |
+| LEDATA, LEDATA32 | `0xA0`, `0xA1` | the segment index, the offset, and the bytes |
+| LIDATA, LIDATA32 | `0xA2`, `0xA3` | the segment index, the offset, and the iterated blocks |
+| FIXUPP, FIXUPP32 | `0x9C`, `0x9D` | the fixup threads and the fixup records |
+| MODEND | `0x8A`, `0x8B` | the module end |
+
+The record length includes the checksum byte.  A LIDATA record holds a repeat
+count and a block count.  A zero block count gives one literal block with a
+1-byte length.  A non-zero block count gives nested blocks.  A PharLap class
+`AA` module uses 4-byte offset fields in the SEGDEF, PUBDEF, and LEDATA
+records.  Evidence: `tools/rebuild/library.py` and
+`python3 tools/rebuild/library.py index`.
+
+### The fixup record
+
+A FIXUPP payload holds two record forms.  When the high bit of the first byte
+is 1, the form is a fixup.  The first two bytes are the LOCAT field.  The
+location type is bits 10 to 13.  The data-record offset is the low 10 bits.
+The next byte is the FixDat field: bit 7 the frame thread, bits 4 to 6 the
+frame method, bit 3 the target thread, bit 2 the P bit, and bits 0 to 1 the
+target.  A P bit of 0 adds a target displacement.  The `0x9D` and PharLap
+forms use 4 bytes.  The `0x9C` form uses 2 bytes.
+
+When the high bit of the first byte is 0, the form is a THREAD subrecord.  Bit
+6 selects the frame or the target thread, bits 2 to 4 are the method, and bits
+0 to 1 are the thread number.  A frame method and a target method 0 to 2 add
+an index.
+
+The target method class is 2 or 6 for an import, 3 for an entry, and any other
+value for an internal target.
+
+The location types and widths are:
+
+| Location | Width | Note |
+| ---: | ---: | --- |
+| 0 | 1 | specification set |
+| 1 | 2 | specification set |
+| 2 | 2 | specification set |
+| 3 | 4 | specification set |
+| 4 | 1 | specification set |
+| 5 | 4 | observed, the PharLap 32-bit offset |
+| 6 | 6 | specification set |
+| 9 | 4 | observed |
+| 11 | 6 | specification set |
+| 13 | 4 | specification set |
+
+The three indexed libraries use location 5 for 2 slots and location 9 for
+2483 slots.  The other types are the specification set.  An unknown location
+raises an error and does not skip the module.  Evidence: `python3
+tools/rebuild/library.py index --out work/rebuild/library-index.json` and the
+index entries.
+
 ## Configuration files
 
 | File | Bytes | Content |

@@ -25,7 +25,8 @@
       "compiler": "wcc386",
       "file": "object_collision.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -34,7 +35,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "object_collision_main.c"
+      "file": "object_collision_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "cd_request_submit_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

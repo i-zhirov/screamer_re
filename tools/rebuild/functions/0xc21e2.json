@@ -1,9 +1,60 @@
 {
   "address": "0xc21e2",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc21e2"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "pow387",
+    "object_sha256": "sha256:b04107ad3196d0acf4ccdc7954b829fa3d59dd4e03c6b2d8cfbca5eb6fab29f2",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "pow_"
+  },
+  "name": "pow",
   "notes": [],
   "object_offset": "0xb21e2",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 16,
+        "bytes_total": 16,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 4,
+        "instructions_total": 4,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc21e2",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:8e27aec814c16ae47749ec60e0f1f2f1cf947d6e656aca28d8bad8e57e598784",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:902af489506fe08ea4252fb0a3fffc439ba7dde081049835202554b1aa086244",
+    "tool": "run.py"
+  },
   "size": 16,
-  "status": "unknown"
+  "status": "verified"
 }

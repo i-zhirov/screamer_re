@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 8 of 24 instructions and 10 of 82 bytes equal, and 0 of 10 relocation slots equal; the identity check stays open because V2 pushes ebp first and saves edx after the frame, keeps the control byte in al instead of ah, keeps the marker count in edx, drops the ebx save, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "race_finish_sla_update",
   "notes": [],
   "object_offset": "0x13fc8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_hud_draw.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_hud_draw.c"
     },
     {
       "compiler": "wasm",
@@ -31,5 +28,6 @@
       "compiler": "wcc386",
       "file": "race_hud_draw_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

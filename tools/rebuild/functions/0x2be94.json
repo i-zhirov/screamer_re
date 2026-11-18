@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The state_init_dispatch module at 0x2be94"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "state_init_dispatch",
   "notes": [],
   "object_offset": "0x1be94",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

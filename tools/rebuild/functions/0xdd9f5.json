@@ -1,9 +1,56 @@
 {
   "address": "0xdd9f5",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdd9f5"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "seterrno",
+    "object_sha256": "sha256:930501633ef1d6966071f218757ec49f5d2644d78c0824e24681da2eca8cc00d",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__set_errno_"
+  },
+  "name": "__set_errno",
   "notes": [],
   "object_offset": "0xcd9f5",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 12,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 6,
+        "instructions_total": 6,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xdd9f5",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d3cc0c6dd7018ccf7ae33e12c0054efc7e8af1f2638972daafbdf45dd5179150",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:236f766138a3310aad0c9cf6c11e5157763ae1c788ba5a3339fdacd60d2ec780",
+    "tool": "run.py"
+  },
   "size": 12,
-  "status": "unknown"
+  "status": "verified"
 }

@@ -1,9 +1,60 @@
 {
   "address": "0xc5e42",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc5e42"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "acos387",
+    "object_sha256": "sha256:d0387a493e204da301176f054adb6a9db21b2bba081fc4de51c80e3fdc0901fd",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "acos_"
+  },
+  "name": "acos",
   "notes": [],
   "object_offset": "0xb5e42",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 12,
+        "bytes_total": 12,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 3,
+        "instructions_total": 3,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc5e42",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:be520799ee3d95039da2d87953952bef87ae2efd758354dd290b5cb3cc398a39",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:2740c82da74f6d49af72bc48aaabc4eb8c64fd0057381e7f074a25b6d17e715f",
+    "tool": "run.py"
+  },
   "size": 12,
-  "status": "unknown"
+  "status": "verified"
 }

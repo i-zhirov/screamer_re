@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 19 instructions up to the first ret and 93 bytes in the 25-instruction window; the identity check stays open at 11 of 25 instructions, 2 of 74 bytes, and 0 of 7 relocation slots, because V2 saves only the used register, keeps the request pointer in eax, folds the constant stores into immediate forms, returns from two blocks, and places the submit stub after the function; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "cd_audio_q_channel_read",
   "notes": [],
   "object_offset": "0x161e4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -109,7 +118,7 @@
   },
   "role": "Submits the CD audio Q-channel info request and returns the request status.",
   "section": "race_loop callees",
-  "size": 196,
+  "size": 136,
   "status": "rebuilt",
   "symbol": "cd_audio_q_channel_read_"
 }

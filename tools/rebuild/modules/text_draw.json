@@ -23,11 +23,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "text_draw.c"
+      "file": "text_draw.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "text_draw_main.c"
+      "file": "text_draw_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

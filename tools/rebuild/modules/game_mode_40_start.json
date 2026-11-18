@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "game_mode_40_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

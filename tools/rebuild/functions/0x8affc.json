@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The sound_source_frame_prepare module at 0x8affc"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "sound_source_frame_prepare",
   "notes": [],
   "object_offset": "0x7affc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -97,7 +106,7 @@
   },
   "role": "Prepares the per-source frame transform, composes the voice matrices, and selects the sound source frame.",
   "section": "object_update_all callees",
-  "size": 472,
+  "size": 236,
   "status": "rebuilt",
   "symbol": "sound_source_frame_prepare_"
 }

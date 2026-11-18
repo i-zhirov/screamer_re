@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "replay_playback_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

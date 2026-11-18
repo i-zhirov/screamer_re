@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/mmp_file_load.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "mmp_file_load",
   "notes": [],
   "object_offset": "0x3cae4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

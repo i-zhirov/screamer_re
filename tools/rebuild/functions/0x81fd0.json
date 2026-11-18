@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/basis_rotation_build.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "basis_rotation_build",
   "notes": [],
   "object_offset": "0x71fd0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

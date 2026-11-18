@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the rebuilt function holds 56 decoded instructions and 168 bytes; the identity check window holds 56 instructions and 155 bytes and stays open at 9 of 56 instructions and 7 of 155 bytes, because V2 saves ebp first, moves the player pointer to edx, keeps the record pointer in ebx and the index in esi, reads the record state with a memory compare, and calls a local absolute helper in place of the inline sign extend; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "traffic_nearby_mark",
   "notes": [],
   "object_offset": "0x2424",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

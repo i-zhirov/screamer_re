@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "state_cells_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

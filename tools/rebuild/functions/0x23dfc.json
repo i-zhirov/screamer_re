@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The volume_bar_draw module at 0x23dfc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "volume_bar_draw",
   "notes": [],
   "object_offset": "0x13dfc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

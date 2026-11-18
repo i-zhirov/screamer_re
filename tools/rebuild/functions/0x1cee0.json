@@ -18,11 +18,20 @@
     {
       "kind": "note",
       "text": "the harness covers the accelerate branch, both clamps, the brake set and no-set paths, the equal-speed path, the inactive mode, and the negative-throttle bound; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_drive_step",
   "name": "object_drive_step",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -35,16 +44,22 @@
       },
       "identity": {
         "bytes_equal": 15,
-        "bytes_total": 212,
+        "bytes_total": 211,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 7,
-        "instructions_total": 57,
+        "instructions_equal": 10,
+        "instructions_total": 54,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1cee0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:bc4689b12b7b2a23823399b25c9b3eec2b0a283626e5a8222925cfcc9f7b910e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:0253555f919b130f3d529957ef7adf031c99c7b3a392aaa23b6d0c43df35b81e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:ffc089210aceccfa17bc62b4a0ddb0256e8e488b548cc5714a8809684b23ccd3",
     "tool": "run.py"
   },

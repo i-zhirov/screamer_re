@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "race_frame_loop_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

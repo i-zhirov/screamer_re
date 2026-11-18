@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at 0x29f80 holds 151 instructions and 560 bytes: the six register saves, the frame, the 0x30c-byte local area, the pcx_load call at 0x1b5a4 with the file gfx\\graf.dat at object-3 offset 0xfe0 and the member menu1h.pcx at 0xfd5, the cleanup at 0x15150 on a non-zero result, the two video_present calls at 0x27ec8 with the scale 0 and the offset 0, the memcpy at 0x8c150 of 0x3e800 bytes from DAT_001fad0 to DAT_0021528, the video swaps at 0x1075f and 0x107a1 behind the flags 0x10 and 0x20 of DAT_001d274, the video_fill call at 0x2aa98, the constants at DAT_001d234, DAT_001fac0, DAT_001fac4, DAT_00203b8, DAT_0018e08 at 0.08, DAT_000007f9 at 8, DAT_001fab8 at 0x35e, DAT_001d240 at 1, DAT_0020378 and DAT_0020380 at 0.6, DAT_001fac8 at 1, and DAT_001fb64 at -1, the zero values at DAT_001fb58, DAT_001d224, DAT_001d248, DAT_00203a8, DAT_002039c, DAT_00203ac, DAT_00203a0, DAT_00109a0, DAT_0020384, DAT_00109a4, DAT_0020388, DAT_0020394, DAT_00109a8, DAT_002038c, and DAT_002037c, the two screen offsets at DAT_0020824 and DAT_0020828 from the fields at DAT_0015ccc +0x134 and +0x120 with the integer division by 2 and the constants 0x190 and 0x320, the longest of the strings at DAT_001fc1c, DAT_001fc20, and DAT_001fc24 at DAT_00203b4, the run init at 0x2dff4, and table_lookup at 0x1f718 with 0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "menu_frame",
   "name": "menu_frame",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 45,
-        "bytes_total": 490,
+        "bytes_equal": 74,
+        "bytes_total": 506,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 45,
-        "instructions_total": 116,
+        "instructions_equal": 53,
+        "instructions_total": 117,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29f80",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:585d7b9a6ea9a8c280998fbc1bd0ce9e6c2355ac3b61eb9f311a32d4729bdc37",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:e14a015f200a2b48939b68b248ae57216751c305fd396c23840a8f6e39b02b6a",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:78a34ecabba87073779a1a305448e7eee697fd513db0d20f2734a45736c80fa7",
     "tool": "run.py"
   },

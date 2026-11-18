@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 48 decoded instructions and 167 bytes; the identity check stays open at 7 of 48 instructions and 13 of 152 bytes, and 0 of 24 relocation slots match, because V2 saves the frame pointer first, keeps the status in edx, uses the small data offsets of the harness, and lays out the start and the pop in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_queue_update",
   "notes": [],
   "object_offset": "0x14880",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

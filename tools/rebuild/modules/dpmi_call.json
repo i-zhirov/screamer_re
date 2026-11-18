@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "dpmi_call_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/sound_effect_list_init.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "sound_effect_list_init",
   "notes": [],
   "object_offset": "0x14600",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

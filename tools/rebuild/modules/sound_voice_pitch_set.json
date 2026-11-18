@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "sound_voice_pitch_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

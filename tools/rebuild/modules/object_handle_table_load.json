@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "object_handle_table_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

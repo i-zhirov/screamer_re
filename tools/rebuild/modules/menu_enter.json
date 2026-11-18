@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "menu_enter.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "menu_enter.c"
     },
     {
       "compiler": "wcc386",
       "file": "menu_enter_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

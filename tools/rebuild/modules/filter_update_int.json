@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "filter_update_int_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

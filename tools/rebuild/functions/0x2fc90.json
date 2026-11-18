@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_0002fc90` tests the load flag at `+0x14`, calls `FUN_0002fe68`, `FUN_000d2cab`, `FUN_000d2743`, and `FUN_0002f326` with `MELODIC_BANK` and `DRUM_BANK`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "music_bank_free",
   "notes": [],
   "object_offset": "0x1fc90",
+  "provenance": "game",
   "role": "stops the song, releases the driver channel, and removes the `MELODIC_BANK` and `DRUM_BANK` resources",
   "section": "Subsystem shutdown",
   "size": 92,

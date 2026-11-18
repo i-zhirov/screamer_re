@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "object_list_link_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

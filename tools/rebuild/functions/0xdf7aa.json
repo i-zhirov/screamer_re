@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000df7aa` calls `FUN_000de9be` and then `FUN_000dea89` twice"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "name": "sound_voice_release_pair",
   "notes": [],
   "object_offset": "0xcf7aa",
+  "provenance": "library",
   "role": "releases the two driver voice buffers through the DPMI helpers",
   "section": "The HMI sound driver",
   "size": 155,

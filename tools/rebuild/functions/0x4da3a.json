@@ -1,107 +1,15 @@
 {
   "address": "0x4da3a",
-  "checks": [
-    "build",
-    "identity",
-    "behavior"
-  ],
-  "confidence": "inferred",
-  "count": 22,
+  "checks": [],
   "evidence": [
     {
-      "kind": "note",
-      "text": "the original body at 0x4da3a holds 22 instructions and 44 bytes up to the ret at 0x4da65; the next helper starts at 0x4da66, so the store record keeps the 44-byte extent and sets no separate function size; the identity check uses 22 instructions"
-    },
-    {
-      "kind": "note",
-      "text": "the two direct callers are the cosine core at 0x4da26 and the sine core at 0x4da30; each core computes fcos or fsin and then calls this helper, and the cosine helper at 0x4da66 and the sine helper at 0x4da72 load the double argument and call the two cores, so the helper is shared by the trig routines; the callers span several sections, so the record takes the section Program functions"
-    },
-    {
-      "kind": "note",
-      "text": "the helper reads the x87 status word; when C2 is clear it returns with the carry flag set; when C2 is set it loads the 80-bit 2 pi constant at object offset 0x3da1c, computes the remainder with fprem, repeats through the fnstsw test until the reduction is complete, clears the carry flag, and returns; the core repeats while the carry flag is clear, so a value out of the fsin or fcos range is reduced one turn at a time and tested again"
-    },
-    {
-      "kind": "note",
-      "text": "the data flow reduces the value modulo 2 pi and keeps the sign of the value, as fprem does; the cosine and sine cores and the fprem loop support the name trig_range_reduce; the original has no symbol, so the record keeps the name with the confidence inferred"
-    },
-    {
-      "kind": "note",
-      "text": "the C form computes the remainder with a subtraction loop; the x87 C2 gate and the carry-flag result belong to the core loop and have no C form; the original has the EBP frame, so the module builds with -of+; the 2 pi constant arrives through the global trig_two_pi, because the harness image does not load the constant segment; the shared fpu_stub.asm supplies the FPU run-time symbols and the float-used marker; the module uses no assembly implementation"
-    },
-    {
-      "kind": "note",
-      "text": "the harness builds every double from its bit pattern and holds the 2 pi constant; the eight paths cover 0.0, 1.0, -1.0, 2 pi, 7.0, -7.0, 20.0, and 2 pi plus 0.5; each path compares the result with a tolerance of 0.0001; the output holds the markers 0 through 7 and D; the behavior check passes"
-    },
-    {
-      "kind": "note",
-      "text": "the rebuilt body holds 4 of 22 instructions equal, 4 of 44 bytes equal, and 0 of 3 relocation slots equal; V2 copies the two argument dwords to frame locals, compares with the 2 pi global through a near operand, and builds the subtraction loop, while the original reads the x87 status word, gates on C2, and runs the fprem loop; the build and behavior checks pass, so the store records rebuilt"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4da3a --count 22"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4da3a --count 22 --rebuilt work/rebuild/trred.exe --rebuilt-map work/rebuild/trig_range_reduce.map --rebuilt-symbol trig_range_reduce_"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/harness.py build --module trig_range_reduce"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/harness.py run --module trig_range_reduce"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/run.py run --function 0x4da3a"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/trig_range_reduce.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/trig_range_reduce_main.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/modules/trig_range_reduce.json"
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
-  "implementation": "c",
-  "module": "trig_range_reduce",
-  "name": "trig_range_reduce",
   "notes": [],
   "object_offset": "0x3da3a",
-  "result": {
-    "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
-      "identity": {
-        "bytes_equal": 4,
-        "bytes_total": 44,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 4,
-        "instructions_total": 22,
-        "verdict": "fail"
-      }
-    },
-    "command": "python3 tools/rebuild/run.py run --function 0x4da3a",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:540be8b3d591058aa5447478714bc5562a33a81930f56f72ea81f1cdb218248d",
-    "source_digest": "sha256:a6bbc8cdef548d0bbc5dc6e25f8485ae5b29d8c6c2574661e5065b78e016d5f3",
-    "tool": "run.py"
-  },
-  "role": "Reduces the value on the FPU stack modulo 2 pi for the sine and cosine cores.",
-  "section": "Program functions",
+  "provenance": "library",
   "size": 44,
-  "status": "rebuilt",
-  "symbol": "trig_range_reduce_"
+  "status": "unknown"
 }

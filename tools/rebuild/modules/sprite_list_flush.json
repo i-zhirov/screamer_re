@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "sprite_list_flush_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

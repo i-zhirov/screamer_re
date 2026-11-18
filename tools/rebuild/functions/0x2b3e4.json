@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/map_object_progress_sum.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "map_object_progress_sum",
   "notes": [],
   "object_offset": "0x1b3e4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

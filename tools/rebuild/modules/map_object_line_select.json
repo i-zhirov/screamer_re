@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "map_object_line_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "forwards a non-null pointer to the run-time `free` at `0xd2008` and returns at once for a null pointer; the rebuilt module at `tools/rebuild/free.c` holds the same three instructions"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
     }
   ],
   "module": "free",
   "name": "free",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -31,12 +40,18 @@
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 3,
         "instructions_total": 3,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x300ec",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:9085f2a155633afea5fb405fba5c9a5a4ab326d578766084e85fd1bd44a21ef3",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:e8979a4fc4cf1ad4fe9369a2528d0bae4db79234b34ca9f272667d1c15ed57fa",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:23c621a4c467e30ea06fd288200b3483a8a5ae99fb80a7517a34f13e48514fcc",
     "tool": "run.py"
   },

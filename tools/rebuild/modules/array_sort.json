@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "array_sort_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

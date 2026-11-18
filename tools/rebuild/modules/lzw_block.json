@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "lzw_block.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "lzw_block.c"
     },
     {
       "compiler": "wcc386",
       "file": "lzw_block_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

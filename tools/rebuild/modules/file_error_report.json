@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "file_error_report.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "file_error_report.c"
     },
     {
       "compiler": "wcc386",
       "file": "file_error_report_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

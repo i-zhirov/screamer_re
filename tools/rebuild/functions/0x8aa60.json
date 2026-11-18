@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x8aa60 holds 155 instructions and 535 bytes up to the ret at 0x8ac76; the next function starts at 0x8ac78, so the store record keeps the 536-byte extent and sets no separate function size; the identity check uses 155 instructions"
+      "text": "the original body at 0x8aa60 holds 151 instructions and 527 bytes over the full extent; the ret is at 0x8ac76; the next function starts at 0x8ac78, so the store record keeps the 536-byte extent and sets no separate function size; the identity check uses 151 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the identity check stays open at 21 of 155 instructions, 6 of 535 bytes, and 0 of 32 relocation slots, because V2 saves the registers in another order, keeps the matrix in local slots instead of the patched immediates, and uses another loop shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the identity check stays open at 22 of 151 instructions, 12 of 527 bytes, and 0 of 32 relocation slots, because V2 saves the registers in another order, keeps the matrix in local slots instead of the patched immediates, and uses another loop shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The sound_mix_prepare module at 0x8aa60"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "sound_mix_prepare",
   "notes": [],
   "object_offset": "0x7aa60",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 6,
-        "bytes_total": 535,
+        "bytes_equal": 15,
+        "bytes_total": 527,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
-        "instructions_total": 155,
+        "instructions_equal": 24,
+        "instructions_total": 151,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x8aa60",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:b3143fd98f802f9bead1509a1af1effb22910e837eb652e53f1608d1f1514ce1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:e0fa17f1f282237b4ae532ea350bdee97cf8ba25f98999f8ecac57e4115980d9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:4e1354d477f7884cdcbb23550d7abd0d318065bbdd8d89326876a1126480f23b",
     "tool": "run.py"
   },

@@ -1,43 +1,63 @@
 {
   "address": "0xd2008",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "the original at `0xd2008` holds 35 instructions and 94 bytes: it walks the free list from `DAT_001031d0`, stops before the next free block, releases the block through the heap routine at `0xe0a84`, keeps the largest free size in `DAT_001031d8`, and clears the heap flag at `0x27de5`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd2008"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "nfree",
+    "object_sha256": "sha256:f872cf9e9cc4681fe34a5b1ea5bced4a588cdb14bf3e3fedcaa35349f2d240f0",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "free_"
+  },
   "module": "runtime_free",
   "name": "free",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 66,
+        "bytes_equal": 79,
         "bytes_total": 94,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 35,
         "instructions_total": 35,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd2008",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:f4b087abb61308076425ac19557935d4118ef1e8d3cf318b18625a011f460cf8",
-    "source_digest": "sha256:60836ee4588741f92d83a4ed89b97fc687238f61a9aa0ea6189e4a568ef61ebb",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:31854c6e2e2bca06d947b3f5d00da2d193a64c2cb9d22f0a47d605c9dece09a9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:d848fa7285b8abe8d3210c21e7e763533949fe9de85d4e62150022845d79e0ee",
     "tool": "run.py"
   },
   "role": "walks the free list, releases the block through the heap routine, and keeps the largest free size",

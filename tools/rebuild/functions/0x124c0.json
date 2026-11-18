@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x124c0 holds 164 instructions and 545 bytes up to the ret at 0x126e0. The next function starts at 0x126e4, so the store record keeps the 548-byte extent and sets no function size. The identity check uses 164 instructions"
+      "text": "the original body at 0x124c0 holds 164 instructions and 545 bytes over the full extent; the ret is at 0x126e0. The next function starts at 0x126e4, so the store record keeps the 548-byte extent and sets no function size. The identity check uses 100 instructions"
     },
     {
       "kind": "note",
@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The opponent_start module at 0x124c0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "opponent_start",
   "notes": [],
   "object_offset": "0x24c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 18,
-        "bytes_total": 509,
+        "bytes_equal": 28,
+        "bytes_total": 357,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 18,
-        "instructions_total": 164,
+        "instructions_equal": 14,
+        "instructions_total": 97,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x124c0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ef111fcad774a54e5bd99a48749c975f9ac2a643ec79b7f16df850889bac36f0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:147735b0f4a237114b3549434daadf228fcde141d912ad1dade94c918dd8e904",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:6c858d6a876a506a861452c82f7ddcda3a84d8faf900c2a66581b9029f8f4e52",
     "tool": "run.py"
   },

@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 38 decoded instructions and 134 bytes in the identity window; the identity check stays open at 6 of 38 instructions and 18 of 134 bytes, and 0 of 6 relocation slots, because V2 keeps the object in edx and ecx, saves esi, loads the harness globals from fixed addresses, and builds the sign select in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "player_throttle_update",
   "notes": [],
   "object_offset": "0x60a4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

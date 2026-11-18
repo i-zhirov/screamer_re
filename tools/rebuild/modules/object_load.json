@@ -19,14 +19,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_load.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

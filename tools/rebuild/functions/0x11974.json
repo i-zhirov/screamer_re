@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/func_11974.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "func_11974",
   "notes": [],
   "object_offset": "0x1974",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

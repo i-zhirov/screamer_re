@@ -36,7 +36,11 @@
     },
     {
       "compiler": "wcc386",
-      "file": "joystick_update_main.c"
+      "file": "joystick_update_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

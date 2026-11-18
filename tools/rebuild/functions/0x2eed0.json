@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x2eed0 holds 78 instructions and 242 bytes: the full-table test on the count at +0x04 and the limit at +0x08, the status write at +0x0c, the sprintf name copy at 0x4d32c, the record select at *resource + count * 0x1c, the size limit 0x96000, the DOS allocation at 0x2f0fc with the fallback at 0x2f172, the flag writes at +0x18, and the cache call at 0x2f062"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "resource_get",
   "name": "resource_get",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -30,17 +39,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 145,
+        "bytes_equal": 13,
+        "bytes_total": 136,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 15,
-        "instructions_total": 55,
+        "instructions_equal": 14,
+        "instructions_total": 51,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2eed0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:22dc59338c63a4a5a8737575d9e94434153e248e95eb8a69db81c2d9a6dd8e71",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c3ef6e3e4f56a2989f7963257cc4b945a19c7173bd8271cb417c6d5933a61e1c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:4ac12c19126b12659c0618238e90ae5b5c328115b5e18abacaf573c7e291c498",
     "tool": "run.py"
   },

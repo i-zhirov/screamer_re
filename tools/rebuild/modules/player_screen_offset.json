@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "player_screen_offset_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

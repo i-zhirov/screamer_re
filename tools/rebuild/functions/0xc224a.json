@@ -1,9 +1,60 @@
 {
   "address": "0xc224a",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc224a"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "atan387",
+    "object_sha256": "sha256:0c0ffa5af02b8d761e377d5d80b6a22a8611d86aba2a32127895d09af0dc2fdb",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "IF@ATAN"
+  },
+  "name": "IF@ATAN",
   "notes": [],
   "object_offset": "0xb224a",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 5,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 3,
+        "instructions_total": 3,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc224a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d46a6ad30f743af9b4d86dd8521fa948ee9832beda2a63e4101f27bef6b345f0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:085bc51a93e5c2f14b1c8c88f0f6ded597fb33856e0092116685ef92d179db83",
+    "tool": "run.py"
+  },
   "size": 5,
-  "status": "unknown"
+  "status": "verified"
 }

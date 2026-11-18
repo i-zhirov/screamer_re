@@ -87,6 +87,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/race_gauges.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -94,6 +102,7 @@
   "name": "race_gauges",
   "notes": [],
   "object_offset": "0x1369c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

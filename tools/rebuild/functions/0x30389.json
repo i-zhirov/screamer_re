@@ -1,98 +1,15 @@
 {
   "address": "0x30389",
-  "checks": [
-    "build",
-    "identity",
-    "behavior"
-  ],
-  "confidence": "inferred",
-  "count": 28,
+  "checks": [],
   "evidence": [
     {
-      "kind": "note",
-      "text": "the original body at 0x30389 holds 25 instructions and 62 bytes up to the DOS exit at 0x303bf. The plan row counts 28 instructions and 68 bytes to the ret at 0x303cc. The next record starts at 0x4bee0, so the store record keeps the extent and sets no separate function size. The identity check uses 28 instructions."
-    },
-    {
-      "kind": "note",
-      "text": "the body matches __do_exit_with_msg_ in bld/clib/startup/a/cstrt386.asm of OpenWatcom V2. It takes the message pointer in EAX and the exit code in EDX. It opens the console device con, writes the zero-terminated message, runs the finalizer routines with the priority 0xff, and terminates the process with the exit code. The original version writes no newline after the message, unlike the current OpenWatcom source."
-    },
-    {
-      "kind": "note",
-      "text": "the direct entry at 0xe09ba jumps to this function and the caller at 0xe09d4 calls it. The wrapper at 0xe09bf receives the run-time messages from 0xe67b0, 0xe68e3, and 0xea351. The messages are Not enough memory to allocate file structures, Floating-point support not loaded, and Stack Overflow!. The source match, the console device, the message write, and the terminator support the name exit_with_message."
-    },
-    {
-      "kind": "note",
-      "text": "the original has no EBP frame, so the module builds without -of+. The function uses no floating-point instruction, so the module links no FPU stub and uses no assembly implementation."
-    },
-    {
-      "kind": "note",
-      "text": "the harness supplies the console open, the message write, the finalizer, and the process terminator as stubs and records the device name, the handle, the text, the length, the call order, and the exit code. The four paths cover a message with a trailing CR and LF, an empty message, a long run-time message, and a negative exit code. The output holds the markers 0 through 3 and D. The behavior check passes."
-    },
-    {
-      "kind": "note",
-      "text": "the rebuilt body holds 6 of 28 instructions and 5 of 61 bytes equal. The relocation compare holds 0 of 3 slots equal. The identity check stays open because the C rebuild moves the DOS services and the finalizer behind helper calls and keeps the value in registers. The build and behavior checks pass, so the store records rebuilt."
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x30389 --count 28"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x30389 --count 28 --rebuilt work/rebuild/exitmsg.exe --rebuilt-map work/rebuild/exit_with_message.map --rebuilt-symbol exit_with_message_"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/run.py run --function 0x30389"
-    },
-    {
       "kind": "finding",
-      "text": "The exit_with_message module at 0x30389"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/exit_with_message.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/exit_with_message_main.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/modules/exit_with_message.json"
+      "text": "## The startup module at 0x30170"
     }
   ],
-  "implementation": "c",
-  "module": "exit_with_message",
-  "name": "exit_with_message",
   "notes": [],
   "object_offset": "0x20389",
-  "result": {
-    "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
-      "identity": {
-        "bytes_equal": 5,
-        "bytes_total": 61,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 6,
-        "instructions_total": 28,
-        "verdict": "fail"
-      }
-    },
-    "command": "python3 tools/rebuild/run.py run --function 0x30389",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e31b8c3d192dcbfb98cd0309cb911a09726af69883d0e4d3bfd2ad01af486e58",
-    "source_digest": "sha256:1e8909bd2763d413c94171c76080e78d98f8e9ac9f918111e53e3fd1e5958b33",
-    "tool": "run.py"
-  },
-  "section": "Program functions",
+  "provenance": "compiler_helper",
   "size": 113495,
-  "status": "rebuilt",
-  "symbol": "exit_with_message_"
+  "status": "unknown"
 }

@@ -54,7 +54,7 @@ current host.
 ### M3: Rebuild
 
 - Rebuild the program in C or C++ for 32-bit DOS with OpenWatcom V2 (in
-  progress: two hundred forty-two named modules are rebuilt with the harness and the
+  progress: four hundred and ninety-one named modules are rebuilt with the harness and the
   store in `tools/rebuild`: the eleven modules of the earlier batches, the
   twelve Phase A modules, the twenty-four Phase B modules from
   `music_bank_reset` at `0x2f9b0` through `main invoker` at `0xd4324`,
@@ -417,8 +417,8 @@ current host.
    `cd_system_shutdown` at `0x25f14`, and the Phase AB module
    `sprite_list_init` at `0x257a0`, and the Phase AB module
    `race_finish_time_ghost_update` at `0x24080`;
-   forty-one modules are verified, one is matching, and four hundred and
-   fifty rebuilds hold the recorded difference; the `video_fill`,
+   one hundred and sixty-eight records are verified, one is matching, and
+   four hundred and forty-three rebuilds hold the recorded difference; the `video_fill`,
   `frame_step`, `hud_update`, `music_bank_reset`, `stream_status`, and
   `engine_shutdown` modules use hand-written assembly oracles that match
   exactly).

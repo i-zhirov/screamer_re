@@ -62,6 +62,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 11 of 15 instructions and 14 of 53 bytes equal, and 2 of 6 relocation slots; the identity check stays open because V2 saves ebp before edx and restores the stack through lea, loads the two globals as near data offsets, and turns the two name pointers into the rebuilt data offsets 0 and 8; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -69,6 +77,7 @@
   "name": "map_data_release",
   "notes": [],
   "object_offset": "0x3cef4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -1,9 +1,56 @@
 {
   "address": "0xe0860",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe0860"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "__stos",
+    "object_sha256": "sha256:a90ce072d983ac3aae0caf1dda227c54fe347d777ff1f99691b47212c7b4cb5c",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__STOSB"
+  },
+  "name": "__STOSB",
   "notes": [],
   "object_offset": "0xd0860",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 55,
+        "bytes_total": 55,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 30,
+        "instructions_total": 30,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xe0860",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:ac35c8438cb79180bbb3f4d8e34a8a1664cfb68d5f464181729b50d831947ab2",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:4677967711dd4429e3f7b1283e91e4d3cd8e032475c433c1c26cd250e4618590",
+    "tool": "run.py"
+  },
   "size": 55,
-  "status": "unknown"
+  "status": "verified"
 }

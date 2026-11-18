@@ -79,6 +79,14 @@
     {
       "kind": "note",
       "text": "the rebuilt module holds 54 decoded instructions and 215 bytes in the identity window; the identity check stays open at 16 of 54 instructions and 18 of 169 bytes, because V2 saves the frame first, keeps the load flag and the result in registers, passes the data pointers as near offsets, and orders the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "game_mode_4_start",
   "notes": [],
   "object_offset": "0x2e18",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

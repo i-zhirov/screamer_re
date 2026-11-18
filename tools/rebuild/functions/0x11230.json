@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The func_11230 module at 0x11230"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "func_11230",
   "notes": [],
   "object_offset": "0x1230",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

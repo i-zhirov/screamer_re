@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "screen_object_lists_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

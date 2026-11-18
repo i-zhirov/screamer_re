@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "sound_voice_acquire_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

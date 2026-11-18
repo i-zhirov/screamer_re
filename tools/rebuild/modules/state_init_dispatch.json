@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "state_init_dispatch_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

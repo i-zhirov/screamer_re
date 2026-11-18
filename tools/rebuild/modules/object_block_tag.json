@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "object_block_tag_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "stores the doubled position pair and the size, sets the visible flag, clears the count, and updates the panel"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "panel_show",
   "name": "panel_show",
   "notes": [],
   "object_offset": "0x1dfac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,17 +36,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 5,
-        "bytes_total": 51,
+        "bytes_equal": 6,
+        "bytes_total": 44,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 7,
-        "instructions_total": 14,
+        "instructions_equal": 4,
+        "instructions_total": 9,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2dfac",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ae5510b986e315fc2b47c2697a2ebd02261b5c958cbd06559205c875bb39df0a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:cb131ecc0d6a5ad63b876219fdf10897b28694e7255fc030c9fb2146f953ee30",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:a8f36f263f32a0c7de728eba38244afe558e97c50bab3f8a8cb500edf4b3ff82",
     "tool": "run.py"
   },

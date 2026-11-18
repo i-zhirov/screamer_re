@@ -3,20 +3,36 @@
 The tool selects the function records and the module rows of the store, runs the
 declared checks of each one in address order, prints one progress line per record,
 and writes the result through `store.py`.  With `--skip-unchanged` a record whose
-input fingerprint still matches the fingerprint of its recorded result prints
-`PASS` and runs no check, so an unchanged module or function costs one hash and
-no build, no diff, and no DOSBox run.  The full log of the run stays under
-`work/rebuild/logs/`.
+input fingerprint still matches the fingerprint of its recorded result prints the
+stored verdict and runs no check, so an unchanged module or function costs one
+hash and no build, no diff, and no DOSBox run.  The runner prints `FAIL` for a
+stored `fail`, so an unchanged failing record cannot pass the gate.  The full log
+of the run stays under `work/rebuild/logs/`.
 
-With `--strict` the identity check passes only when the bytes are exact or the
-only differences are the link-time addresses.  With `--recheck-record ADDR` the
+The identity gate is strict by default: the identity check passes only when the
+bytes are exact or the only differences are the link-time addresses.  With
+`--allow-shape` the gate restores the historical rule and also accepts a shape
+match and a reordered instruction sequence.  With `--recheck-record ADDR` the
 runner forces one fresh run and prints the full check output.
+
+A record with a `library` field runs the library object check instead of a
+module build.  The runner reads the parsed library document from
+`--library-dir`, compares the record with its stored `library` field, and uses
+the pinned library mode for the fingerprint, so the CLI strict and runtime
+flags do not change a library result.
+
+The runner selects the build harness from the module `toolchain` field.  A
+module without the field builds with the pinned V2 harness, and a `watcom10`
+module builds with the period harness.  The behavior check always uses the V2
+harness, because the period harness has no run command.  The selected
+toolchain enters the result mode and the fingerprint, so a change of the
+toolchain makes the stored result stale.
 
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
-        [--no-write] [--show] [--strict] [--skip-runtime] [--skip-unchanged]
-        [--original PATH]
+        [--no-write] [--show] [--strict] [--allow-shape] [--skip-runtime]
+        [--skip-unchanged] [--original PATH] [--library-dir DIR]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -32,7 +48,10 @@ from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import le  # noqa: E402
+import library  # noqa: E402
 import store  # noqa: E402
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -41,16 +60,30 @@ WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 LOG_DIR = WORK_DIR / "logs"
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
-PASS_VERDICTS = (
-    "the modules are byte-identical",
-    "the instruction sequences match; the differing operands are the link-time addresses",
-    "the instruction shapes match; the differing bytes are not relocations",
-    "the modules hold the same instructions in a different order",
+HARNESS_DOS_TOOL = REBUILD_DIR / "harness_dos.py"
+MATCHES = (
+    "exact-bytes",
+    "exact-relocations",
+    "same-shape",
+    "same-mnemonics",
+    "different",
 )
-STRICT_VERDICTS = (
-    "the modules are byte-identical",
-    "the instruction sequences match; the differing operands are the link-time addresses",
+MATCH_BY_VERDICT = dict(
+    zip(
+        (
+            "the modules are byte-identical",
+            "the instruction sequences match; the differing operands are the "
+            "link-time addresses",
+            "the instruction shapes match; the differing bytes are not "
+            "relocations",
+            "the modules hold the same instructions in a different order",
+            "the instruction sequences differ",
+        ),
+        MATCHES,
+    )
 )
+STRICT_MATCHES = ("exact-bytes", "exact-relocations")
+DEFAULT_MATCHES = STRICT_MATCHES + ("same-shape", "same-mnemonics")
 BUILD_DETAIL = {
     "pass": "the module builds",
     "fail": "the module build failed",
@@ -155,11 +188,19 @@ def progress_line(index: int, total: int, label: str, verdict: str, detail: str)
     return f"[{index}/{total}] {label}: {verdict} ({detail})"
 
 
-def summarize(verdicts: list[str]) -> str:
+def summarize(verdicts: list[str], buckets: list[str | None]) -> str:
     passes = verdicts.count("PASS")
     fails = verdicts.count("FAIL")
     skips = verdicts.count("SKIP")
-    return f"{len(verdicts)} records: {passes} pass, {fails} fail, {skips} skip"
+    exact = buckets.count("exact")
+    relocation = buckets.count("relocation-only")
+    shape = buckets.count("shape")
+    behavior = buckets.count("behavior-only")
+    return (
+        f"{len(verdicts)} records: {passes} pass, {fails} fail, {skips} skip; "
+        f"exact {exact}, relocation-only {relocation}, shape {shape}, "
+        f"behavior-only {behavior}"
+    )
 
 
 def diff_verdict(text: str) -> str:
@@ -188,21 +229,70 @@ def parse_identity(text: str) -> dict[str, int]:
     return counts
 
 
-def identity_accepted(verdict: str, strict: bool) -> bool:
-    """Tell whether an identity verdict passes the gate.
+def match_of(verdict: str) -> str:
+    """The identity match of a diff verdict; an unknown verdict is `different`."""
+    return MATCH_BY_VERDICT.get(verdict, "different")
 
-    The default gate accepts the three historical verdicts.  The strict gate
-    accepts only the byte-identical verdict and the verdict whose differences are
-    the link-time addresses.  A reordered instruction sequence is not exact.
+
+def identity_accepted(match: str, strict: bool) -> bool:
+    """Tell whether an identity match passes the gate.
+
+    Strict is the default gate.  It accepts only the byte-identical match and
+    the match whose differences are the link-time addresses.  `--allow-shape`
+    restores the historical gate, which also accepts a shape match and a
+    reordered instruction sequence.  A different match never passes.
     """
-    accepted = STRICT_VERDICTS if strict else PASS_VERDICTS
-    return verdict in accepted
+    accepted = STRICT_MATCHES if strict else DEFAULT_MATCHES
+    return match in accepted
+
+
+def run_mode(
+    arguments: argparse.Namespace, toolchain: str = store.TOOLCHAIN
+) -> dict:
+    """The mode of the run: the strict flag, the toolchain, and the runtime."""
+    return store.run_mode(arguments.strict, arguments.skip_runtime, toolchain)
+
+
+def _mode_for_module(mode: dict, module: dict | None) -> dict:
+    """Return a copy of the mode with the module toolchain, or the mode.
+
+    A `None` module keeps the mode, and a module without the field resolves the
+    default toolchain.
+    """
+    if module is None:
+        return dict(mode)
+    return dict(mode, toolchain=store.module_toolchain(module))
+
+
+def harness_for(toolchain: str) -> Path:
+    """The build harness of a toolchain."""
+    if toolchain == "v2":
+        return HARNESS_TOOL
+    if toolchain == "watcom10":
+        return HARNESS_DOS_TOOL
+    raise ValueError(f"unknown module toolchain: {toolchain}")
+
+
+def clear_artifacts(module: dict) -> None:
+    """Delete the build outputs a previous build may have left behind.
+
+    A failed build must not leave an old artifact for the identity check to
+    compare.
+    """
+    (store.WORK_DIR / module["exe"]).unlink(missing_ok=True)
+    if module.get("map"):
+        (store.WORK_DIR / module["map"]).unlink(missing_ok=True)
+    (store.WORK_DIR / "M.MAP").unlink(missing_ok=True)
 
 
 def run_identity(
-    record: dict, module: dict, original: Path, strict: bool = False
+    record: dict, module: dict, original: Path, strict: bool = True
 ) -> tuple[str, dict]:
-    """Run the identity check and return its verdict and its check result."""
+    """Run the identity check and return its verdict and its check result.
+
+    The record `size` bounds the original body through `--original-end`, so the
+    body covers every reachable instruction.
+    """
     if not original.is_file():
         raise ValueError(f"the original image {original} is missing")
     command = [
@@ -221,6 +311,9 @@ def run_identity(
     ]
     if "count" in record:
         command += ["--count", str(record["count"])]
+    if "size" in record:
+        end = int(record["address"], 16) + record["size"]
+        command += ["--original-end", f"0x{end:x}"]
     completed = subprocess.run(command, capture_output=True, text=True)
     verdict = diff_verdict(completed.stdout)
     if not verdict:
@@ -230,37 +323,92 @@ def run_identity(
             if line.strip()
         ]
         verdict = error_lines[-1] if error_lines else "the diff tool printed no verdict"
+    match = match_of(verdict)
     check = {
         "verdict": (
             "pass"
             if completed.returncode == 0
-            and identity_accepted(verdict, strict)
+            and identity_accepted(match, strict)
             else "fail"
         ),
         "detail": verdict,
+        "match": match,
     }
     check.update(parse_identity(completed.stdout))
     return check["verdict"], check
 
 
+def run_library(
+    record: dict, original: Path, library_dir: Path
+) -> tuple[str, dict]:
+    """Run the library object check and return its verdict and its check.
+
+    The record `library` field names the object, so the runner resolves the
+    library file in the library directory and then in its parent.  It reads
+    the parsed library document and passes the record field to the
+    comparison.  The runner reads no index entry.
+    """
+    if not original.is_file():
+        raise ValueError(f"the original image {original} is missing")
+    library_path = library.resolve_library(
+        record["library"]["file"], library_dir
+    )
+    image = le.load(original)
+    document = library.read_library(library_path)
+    check = library.verify_entry(record, image, document, record["library"])
+    return check["verdict"], check
+
+
+def build_module(
+    module: dict,
+    toolchain: str | None = None,
+    recipe: Path | None = None,
+    show: bool = False,
+    timeout: int | None = None,
+) -> tuple[str, str]:
+    """Build one module with its harness and return the verdict and output.
+
+    A `None` toolchain uses the module toolchain.  A recipe path passes through
+    to the harness.  The timeout applies to the period harness only.
+    """
+    resolved = (
+        toolchain if toolchain is not None else store.module_toolchain(module)
+    )
+    tool = harness_for(resolved)
+    clear_artifacts(module)
+    extra: list[str] = []
+    if recipe is not None:
+        extra += ["--recipe", str(recipe)]
+    if resolved == "watcom10" and timeout is not None:
+        extra += ["--timeout", str(timeout)]
+    return _harness(tool, "build", module, show, tuple(extra))
+
+
 def run_build(module: dict, show: bool = False) -> tuple[str, str]:
     """Run the build check and return its verdict and the captured output."""
-    return _harness("build", module, show)
+    return build_module(module, show=show)
 
 
 def run_behavior(module: dict, show: bool = False) -> tuple[str, str]:
     """Run the behavior check and return its verdict and the captured output."""
-    return _harness("run", module, show)
+    return _harness(HARNESS_TOOL, "run", module, show, ())
 
 
-def _harness(command: str, module: dict, show: bool) -> tuple[str, str]:
+def _harness(
+    tool: Path,
+    command: str,
+    module: dict,
+    show: bool,
+    extra: tuple[str, ...] = (),
+) -> tuple[str, str]:
     completed = subprocess.run(
         [
             sys.executable,
-            str(HARNESS_TOOL),
+            str(tool),
             command,
             "--module",
             module["name"],
+            *extra,
         ],
         capture_output=True,
         text=True,
@@ -315,14 +463,19 @@ def record_detail(record: dict, checks: dict[str, dict]) -> str:
     return ", ".join(record.get("checks", []))
 
 
-def _next_status(declared: list[str], checks: dict[str, dict]) -> str | None:
+def _next_status(
+    record: dict | None, row: dict | None, checks: dict[str, dict]
+) -> str | None:
     """The status the run writes, or None to keep the stored one.
 
-    The verdicts go through `store.advance_status`, so a skip or a failed
-    build keeps the stored status, and a failed identity gives `rebuilt`.
+    A failed build or a failed behavior check demotes the record, and the
+    failed result stays on the record.  A skip keeps the stored status, and a
+    failed identity gives `rebuilt`.
     """
+    target = record if record is not None else row
+    declared = target.get("checks", [])
     verdicts = {name: check.get("verdict") for name, check in checks.items()}
-    return store.advance_status(declared, verdicts)
+    return store.advance_status(declared, verdicts, bool(target.get("name")))
 
 
 def _label(record: dict | None, row: dict | None) -> str:
@@ -354,6 +507,15 @@ def _run_record(
         return {}, "SKIP", "no name", False
     if not target.get("checks"):
         return {}, "SKIP", "no checks declared", False
+    if record is not None and record.get("library"):
+        verdict, check_result = run_library(
+            target, arguments.original, arguments.library_dir
+        )
+        _log_output(log_lines, label, "identity", check_result.get("detail", ""))
+        checks = {"identity": check_result}
+        verdict = record_verdict(checks)
+        detail = record_detail(target, checks)
+        return checks, verdict, detail, verdict != "SKIP"
     module_name = target.get("module") if record is not None else target["name"]
     module = modules.get(module_name) if module_name is not None else None
     if module is None:
@@ -397,14 +559,22 @@ def _run_record(
 
 
 def _result(
-    checks: dict[str, dict], module: dict, command: str, fingerprint: str
+    checks: dict[str, dict],
+    module: dict | None,
+    command: str,
+    fingerprint: str,
+    mode: dict,
+    source_digest: str | None = None,
 ) -> dict:
+    if source_digest is None:
+        source_digest = store.source_digest(module)
     return {
         "date": date.today().isoformat(),
         "command": command,
         "tool": "run.py",
-        "source_digest": store.source_digest(module),
+        "source_digest": source_digest,
         "fingerprint": fingerprint,
+        "mode": mode,
         "checks": checks,
     }
 
@@ -421,22 +591,48 @@ def _write_result(
     checks: dict[str, dict],
     command: str,
     original: Path,
+    mode: dict,
 ) -> None:
     target = record if record is not None else row
+    if record is not None and record.get("library"):
+        mode = library.library_mode()
+        fingerprint = store.compute_fingerprint(
+            target,
+            None,
+            library=record["library"],
+            original=original,
+            mode=mode,
+        )
+        store.save_result(
+            int(record["address"], 16),
+            _result(
+                checks,
+                None,
+                command,
+                fingerprint,
+                mode,
+                source_digest=library.source_digest(record["library"]),
+            ),
+            _next_status(record, row, checks),
+        )
+        return
     module_name = target.get("module") if record is not None else target["name"]
     module = store.load_module(module_name)
-    fingerprint = store.compute_fingerprint(target, module, original=original)
+    mode = _mode_for_module(mode, module)
+    fingerprint = store.compute_fingerprint(
+        target, module, original=original, mode=mode
+    )
     if record is not None:
         store.save_result(
             int(record["address"], 16),
-            _result(checks, module, command, fingerprint),
-            _next_status(record.get("checks", []), checks),
+            _result(checks, module, command, fingerprint, mode),
+            _next_status(record, row, checks),
         )
         return
     store.save_module_result(
         row["name"],
-        _result(checks, module, command, fingerprint),
-        _next_status(row.get("checks", []), checks),
+        _result(checks, module, command, fingerprint, mode),
+        _next_status(record, row, checks),
     )
 
 
@@ -475,13 +671,31 @@ def _current_fingerprint(
     row: dict | None,
     modules: dict[str, dict],
     original: Path,
+    mode: dict,
 ) -> str | None:
-    """The fingerprint of one record, or None when its module is missing."""
-    module = _module_for(record, row, modules)
+    """The fingerprint of one record, or None when its module is missing.
+
+    A record with a `library` field uses the pinned library mode and no
+    module, so the CLI strict and runtime flags do not change its fingerprint.
+    """
     target = record if record is not None else row
-    if module is None or target is None:
+    if target is None:
         return None
-    return store.compute_fingerprint(target, module, original=original)
+    if record is not None and record.get("library"):
+        return store.compute_fingerprint(
+            target,
+            None,
+            library=record["library"],
+            original=original,
+            mode=library.library_mode(),
+        )
+    module = _module_for(record, row, modules)
+    if module is None:
+        return None
+    mode = _mode_for_module(mode, module)
+    return store.compute_fingerprint(
+        target, module, original=original, mode=mode
+    )
 
 
 def _stored_fingerprint(record: dict | None, row: dict | None) -> str | None:
@@ -495,7 +709,11 @@ def _stored_fingerprint(record: dict | None, row: dict | None) -> str | None:
 
 
 def _is_unchanged(
-    record: dict | None, row: dict | None, modules: dict[str, dict], original: Path
+    record: dict | None,
+    row: dict | None,
+    modules: dict[str, dict],
+    original: Path,
+    mode: dict,
 ) -> bool:
     """Tell whether the recorded result matches the current inputs.
 
@@ -505,7 +723,7 @@ def _is_unchanged(
     stored = _stored_fingerprint(record, row)
     if stored is None:
         return False
-    fingerprint = _current_fingerprint(record, row, modules, original)
+    fingerprint = _current_fingerprint(record, row, modules, original, mode)
     return fingerprint is not None and stored == fingerprint
 
 
@@ -519,18 +737,29 @@ def command_run(arguments: argparse.Namespace) -> int:
     ]
     module_names = sorted(path.stem for path in store.MODULES_DIR.glob("*.json"))
     modules = {name: store.load_module(name) for name in module_names}
+    mode = run_mode(arguments)
 
     def stale_fn(record: dict) -> bool:
         if not record.get("result"):
             return False
+        if record.get("library"):
+            fingerprint = store.compute_fingerprint(
+                record,
+                None,
+                library=record["library"],
+                original=arguments.original,
+                mode=library.library_mode(),
+            )
+            return store.is_stale(record, fingerprint)
         if "address" in record:
             module = _module_for(record, None, modules)
         else:
             module = _module_for(None, record, modules)
         if module is None:
             return False
+        module_mode = _mode_for_module(mode, module)
         fingerprint = store.compute_fingerprint(
-            record, module, original=arguments.original
+            record, module, original=arguments.original, mode=module_mode
         )
         return store.is_stale(record, fingerprint)
 
@@ -556,17 +785,26 @@ def command_run(arguments: argparse.Namespace) -> int:
     ] + [(None, row) for row in rows]
     log_lines: list[str] = []
     verdicts: list[str] = []
+    buckets: list[str | None] = []
     failed = False
     for index, (record, row) in enumerate(entries, 1):
+        target = record if record is not None else row
         if arguments.skip_unchanged and _is_unchanged(
-            record, row, modules, arguments.original
+            record, row, modules, arguments.original, mode
         ):
-            verdicts.append("PASS")
+            stored_checks = (target.get("result") or {}).get("checks", {})
+            verdict = store.stored_verdict(target)
+            verdicts.append(verdict)
+            buckets.append(
+                store.result_bucket(stored_checks, target.get("checks", []))
+            )
+            if verdict == "FAIL":
+                failed = True
             line = progress_line(
                 index,
                 len(entries),
                 _label(record, row),
-                "PASS",
+                verdict,
                 store.UNCHANGED_DETAIL,
             )
             print(line)
@@ -576,18 +814,26 @@ def command_run(arguments: argparse.Namespace) -> int:
             record, row, modules, arguments, log_lines
         )
         verdicts.append(verdict)
+        buckets.append(
+            store.result_bucket(checks, target.get("checks", []))
+        )
         if verdict == "FAIL":
             failed = True
         if write and not arguments.no_write:
             _write_result(
-                record, row, checks, _command_text(record, row), arguments.original
+                record,
+                row,
+                checks,
+                _command_text(record, row),
+                arguments.original,
+                mode,
             )
         line = progress_line(
             index, len(entries), _label(record, row), verdict, detail
         )
         print(line)
         log_lines.append(line)
-    summary = summarize(verdicts)
+    summary = summarize(verdicts, buckets)
     print(summary)
     log_lines.append(summary)
     print(f"log: {_write_log(log_lines)}")
@@ -661,19 +907,35 @@ def parse_arguments() -> argparse.Namespace:
     run_parser.add_argument(
         "--skip-unchanged",
         action="store_true",
-        help="report a record whose inputs are unchanged since the previous "
-        "run, and run no check for it",
+        help="print the stored verdict of a record whose inputs are unchanged "
+        "since the previous run, and run no check for it",
     )
     run_parser.add_argument(
         "--strict",
+        dest="strict",
         action="store_true",
-        help="pass the identity check only for exact bytes or link-time operands",
+        default=True,
+        help="pass the identity check only for exact bytes or link-time "
+        "operands (the default)",
+    )
+    run_parser.add_argument(
+        "--allow-shape",
+        dest="strict",
+        action="store_false",
+        help="also pass a shape match and a reordered instruction sequence, "
+        "as the historical gate does",
     )
     run_parser.add_argument(
         "--original",
         type=Path,
         default=store.DEFAULT_ORIGINAL,
         help="the original LE executable",
+    )
+    run_parser.add_argument(
+        "--library-dir",
+        type=Path,
+        default=library.DEFAULT_LIBRARY_DIR,
+        help="the directory that holds the period libraries",
     )
     return parser.parse_args()
 

@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "func_11974_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

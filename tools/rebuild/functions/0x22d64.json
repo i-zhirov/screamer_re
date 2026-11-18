@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the identity check compares 12 instructions; the rebuilt body holds 8 of 12 instructions, 9 of 36 bytes, and 0 of 4 relocation slots equal; V2 puts push ebp before push edx, loads eax before edx, keeps the zero in eax, and restores the stack with lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "attack_data_release",
   "notes": [],
   "object_offset": "0x12d64",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

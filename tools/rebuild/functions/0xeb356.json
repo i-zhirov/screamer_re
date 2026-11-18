@@ -1,9 +1,56 @@
 {
   "address": "0xeb356",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb356"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "_matherr",
+    "object_sha256": "sha256:957ae681612f2bda38a22821090969a5c5123774e4cd391d88b489a4d570e2eb",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "_matherr_"
+  },
+  "name": "_matherr",
   "notes": [],
   "object_offset": "0xdb356",
-  "size": 768,
-  "status": "unknown"
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 33,
+        "bytes_total": 47,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xeb356",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:e48d0b47968188156f75a96557ad405f86313de8ba74e7de1b4fd3a96f083a66",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:4891632a03883f042c1d7599493b506aba00a9248c5083e7d2592c89123e35da",
+    "tool": "run.py"
+  },
+  "size": 48,
+  "status": "verified"
 }

@@ -16,10 +16,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "timing_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "timing_update.c"
     },
     {
       "compiler": "wasm",
@@ -29,5 +26,6 @@
       "compiler": "wcc386",
       "file": "timing_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

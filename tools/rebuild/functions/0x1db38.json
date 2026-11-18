@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "sets `+0x4e8` to 0, `0xff00`, or `0x8000` from the value at `+0x3f4`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_gear_state",
   "name": "object_gear_state",
   "notes": [],
   "object_offset": "0xdb38",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,17 +36,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 4,
-        "bytes_total": 47,
+        "bytes_equal": 2,
+        "bytes_total": 46,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 6,
-        "instructions_total": 16,
+        "instructions_equal": 3,
+        "instructions_total": 18,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1db38",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ff1c7ee32573aa9547f0a7c6d47bcee420ddea901c67d82e867453f1c2a2b8af",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fdd01916a554653eca711ce4bff41193b14642ff613256398d337ec4153c8eea",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:5a48cb0ff52d595b8ab3487bf50238eeb8ba398215e8480a0cd60bead99dd22c",
     "tool": "run.py"
   },

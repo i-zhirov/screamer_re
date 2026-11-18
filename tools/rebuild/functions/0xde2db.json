@@ -1,9 +1,56 @@
 {
   "address": "0xde2db",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xde2db"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fputc",
+    "object_sha256": "sha256:6070f2d3adc6343139c15fe0afe1e6f670166b9c5f503a7704696baed36c0561",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "fputc_"
+  },
+  "name": "fputc",
   "notes": [],
   "object_offset": "0xce2db",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 148,
+        "bytes_total": 164,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 66,
+        "instructions_total": 66,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xde2db",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:429289a906bccf3bebaf9101b25a629bab8d2a9f7de14d68cd53a17526f88c6b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:b70f2d62d8faa903036ef5777e219332585bfc4ae93ac51966912b834c6525ae",
+    "tool": "run.py"
+  },
   "size": 164,
-  "status": "unknown"
+  "status": "verified"
 }

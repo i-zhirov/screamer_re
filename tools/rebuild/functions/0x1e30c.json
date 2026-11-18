@@ -13,12 +13,21 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x1e30c holds 74 instructions and 241 bytes up to the first `ret`: the two absolute-value guards at 35000 units on `+0x498` and `+0x4a0`, the deltas scaled by 0.1 and truncated with the helper at 0x4d9f4, the squared sum, the `sqrt` call at 0x22bec, the scale by 10.0, and the gate store from the float at `+0x4e4` against 35000.0 at 0x100b98; the rebuild keeps the extent 264 and uses a module-local FPU stub with a truncating `__CHP`"
+      "text": "the original at 0x1e30c holds 83 instructions and 262 bytes up to the first `ret`: the two absolute-value guards at 35000 units on `+0x498` and `+0x4a0`, the deltas scaled by 0.1 and truncated with the helper at 0x4d9f4, the squared sum, the `sqrt` call at 0x22bec, the scale by 10.0, and the gate store from the float at `+0x4e4` against 35000.0 at 0x100b98; the rebuild keeps the extent 264 and uses a module-local FPU stub with a truncating `__CHP`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_proximity_check",
   "name": "object_proximity_check",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -35,12 +44,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 7,
         "instructions_total": 59,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e30c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:6fa60a34f183ea85adb6f2392c0d3e2c5e6d69e413a50bf8620977936b8e8079",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:418b7a6ef446c5e1ef278842f5a195bfb0e5cf204bf5bffe1af245bba67e5d1e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:ae393912de4d8572cff2494bced4bdd4ab96ed55dd2d9b0e6167642baa7f6ce8",
     "tool": "run.py"
   },

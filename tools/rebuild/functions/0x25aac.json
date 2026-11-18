@@ -59,6 +59,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/track_stream_open.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "track_stream_open",
   "notes": [],
   "object_offset": "0x15aac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

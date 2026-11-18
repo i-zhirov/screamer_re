@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/row_offset_table_build.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "row_offset_table_build",
   "notes": [],
   "object_offset": "0x3d2dc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

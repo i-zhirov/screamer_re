@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/traffic_reset.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "traffic_reset",
   "notes": [],
   "object_offset": "0xec7c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

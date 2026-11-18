@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "object_list_release_all_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

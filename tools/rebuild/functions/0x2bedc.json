@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2bedc holds 171 instructions and 682 bytes up to the ret at 0x2c185; the record keeps the 684-byte extent, which ends at the next function at 0x2c188, and sets no function size; the identity check uses 171 instructions"
+      "text": "the original body at 0x2bedc holds 171 instructions and 682 bytes over the full extent; the ret is at 0x2c185; the record keeps the 684-byte extent, which ends at the next function at 0x2c188, and sets no function size; the identity check uses 108 instructions"
     },
     {
       "kind": "note",
@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The car_select_screen module at 0x2bedc"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "car_select_screen",
   "notes": [],
   "object_offset": "0x1bedc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -65,17 +74,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 43,
-        "bytes_total": 682,
+        "bytes_equal": 34,
+        "bytes_total": 472,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 53,
-        "instructions_total": 171,
+        "instructions_equal": 42,
+        "instructions_total": 108,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2bedc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:62347974f5d39cfed5467bc091793b731463152e852e99cf55dd3a0d52fcb6b1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:25bd2cb63eada7939da2adbafcd73364983ec1f16eb389891bb08b1dc90ba8c7",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:de10ba671a125c6903ba9467ea1a10abfe5c3e74a28338e1d068de82f99b7928",
     "tool": "run.py"
   },

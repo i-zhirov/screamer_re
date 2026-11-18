@@ -18,12 +18,16 @@
       "compiler": "wcc386",
       "file": "fopen.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "fopen_main.c"
+      "file": "fopen_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

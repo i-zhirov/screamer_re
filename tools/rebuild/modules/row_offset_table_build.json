@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "row_offset_table_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

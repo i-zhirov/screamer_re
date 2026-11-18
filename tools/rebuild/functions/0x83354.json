@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 1 of 20 instructions equal, 1 of 74 bytes equal, and 0 of 11 relocation slots equal; the identity check stays open because V2 pushes the saved registers, keeps the row cursor and the output cursor in registers, forms the fill add with sub, and reloads the count from its stack slot; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "sound_sequence_prepare",
   "notes": [],
   "object_offset": "0x73354",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 17 instructions and 56 bytes; the identity window holds 18 instructions and 57 bytes and stays open at 5 of 18 instructions, 3 of 57 bytes, and 0 of 4 relocation slots, because V2 keeps the effect index in ecx and the variant mode in edx across the call, saves ecx instead of the two argument slots, and places the return 0 block inline; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_effect_trigger",
   "notes": [],
   "object_offset": "0x14d30",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -24,12 +24,16 @@
       "compiler": "wcc386",
       "file": "loading_screen.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "loading_screen_main.c"
+      "file": "loading_screen_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

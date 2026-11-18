@@ -1,9 +1,56 @@
 {
   "address": "0xdd9f0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xdd9f0"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "seterrno",
+    "object_sha256": "sha256:f3643b811ac192b56926129299682d69c17b9e57b06b8b4a84f096e11e1924c2",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__set_EDOM_"
+  },
+  "name": "__set_EDOM",
   "notes": [],
   "object_offset": "0xcd9f0",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 5,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 1,
+        "instructions_total": 1,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xdd9f0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:c6511a99dfd896ddea73f07c6ecd75e27ab4f523663eafc678d1376bf06ffb6e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:a6af18f5d0c808f2d87d2b7451a0eb60c7222a6348bb5f29f1957b745cd08132",
+    "tool": "run.py"
+  },
   "size": 5,
-  "status": "unknown"
+  "status": "verified"
 }

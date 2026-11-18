@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "object_revolution_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

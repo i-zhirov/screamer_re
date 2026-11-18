@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "calls the view helper with the second argument, the position setter with the constant `0x62b0` and the shifted third argument, and the position setter with the doubled and shifted first argument"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "view_move",
   "name": "view_move",
   "notes": [],
   "object_offset": "0xf94c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,17 +36,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 7,
-        "bytes_total": 47,
+        "bytes_equal": 1,
+        "bytes_total": 40,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 7,
-        "instructions_total": 18,
+        "instructions_equal": 6,
+        "instructions_total": 14,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f94c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:71a310a063eac02cf2aa735c70b976673f8364578702d6b4852d35af48443a72",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:650935efe5342f002c3d39a066bee24aec313044f80f290c8106d3040a8c31e1",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:dc089e120d265d84336ed192375e70f96fddf54937b604cea67ae8d63aa63526",
     "tool": "run.py"
   },

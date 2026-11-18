@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "frame_timer_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

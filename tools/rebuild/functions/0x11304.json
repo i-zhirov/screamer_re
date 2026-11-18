@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the identity check at 56 instructions holds 20 of 56 instructions, 13 of 184 bytes, and 2 of 13 relocation slots; the rebuilt function body itself holds 34 instructions and 117 bytes, so the 56-instruction sweep continues past its ret into the following harness stub; the identity check stays open because V2 saves the frame first, keeps the table in ecx, uses imul for the 0x1c stride, and clears the four fields through one base register; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "object_unload",
   "notes": [],
   "object_offset": "0x1304",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

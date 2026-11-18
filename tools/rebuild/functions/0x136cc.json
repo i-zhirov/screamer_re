@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the rebuild covers the 87-instruction prefix; the zero load flag returns 0 and the success path returns 0 after the two object loads; the state reset after 0x13dcf is not in the module"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_init",
   "name": "player_car_init",
   "notes": [],
   "object_offset": "0x36cc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -39,17 +48,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 9,
-        "bytes_total": 223,
+        "bytes_equal": 21,
+        "bytes_total": 210,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 12,
-        "instructions_total": 70,
+        "instructions_equal": 9,
+        "instructions_total": 64,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x136cc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a4ad26f6b0024fb9f1aa85d28394fcbc9f11d35a46d984fcde43b386bb53948d",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:0bb94392ee258a49fc6f8a0b4c06be1b2e10f6d2b49f44688ee8d9388233ecf7",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:f24c281a9ff8267182a4240860348d4ed537ba14725505733f23aaf46a2ac2f5",
     "tool": "run.py"
   },

@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_setup.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_setup.c"
     },
     {
       "compiler": "wcc386",
       "file": "car_setup_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

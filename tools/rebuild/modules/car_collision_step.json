@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "car_collision_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

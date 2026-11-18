@@ -30,12 +30,21 @@
     {
       "kind": "note",
       "text": "the input word DAT_00118e1c gates the save: the bits 0x1020 return before any table write"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_record_save",
   "name": "race_record_save",
   "notes": [],
   "object_offset": "0x1e82c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -47,17 +56,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 494,
+        "bytes_equal": 23,
+        "bytes_total": 473,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 33,
-        "instructions_total": 159,
+        "instructions_equal": 22,
+        "instructions_total": 151,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2e82c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:0f8da889a6d5326054cae46956ce9264043118aaad4762dc3da15237481c281d",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:756483a191abb60e651b66c129b32e7c234b99fd41b72f93f56f6f38f6e7f619",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:26f5db813b670b30a691a6e50bcae9b999e581b13790427d4e34c0ea832026e1",
     "tool": "run.py"
   },

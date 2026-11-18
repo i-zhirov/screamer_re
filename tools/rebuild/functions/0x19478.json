@@ -66,6 +66,14 @@
     {
       "kind": "finding",
       "text": "The player_effect_state_set module at 0x19478"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -73,6 +81,7 @@
   "name": "player_effect_state_set",
   "notes": [],
   "object_offset": "0x9478",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

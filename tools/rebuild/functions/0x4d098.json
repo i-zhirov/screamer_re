@@ -55,6 +55,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 105 instructions and 340 bytes up to the ret 4; the identity check uses the 40-instruction body sweep, so it compares the first 40 instructions; it stays open at 8 of 40 instructions and 8 of 139 bytes, because the harness build adds the two local constant buffers, V2 saves the frame with push esi and push edi and keeps the output pointer in edi, and V2 extends the signed header words to int in a different order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "pcx_decode",
   "notes": [],
   "object_offset": "0x3d098",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -59,6 +59,14 @@
     {
       "kind": "note",
       "text": "the rebuilt function holds 68 decoded instructions and 180 bytes; the identity check stays open at 13 of 68 instructions, 8 of 178 bytes, and 0 of 8 relocation slots, because V2 saves the frame first, keeps the name, the table, and the slot index in registers, builds the inline string copy in another order, and uses another scan loop and another return layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "object_request",
   "notes": [],
   "object_offset": "0x14b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

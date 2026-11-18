@@ -4,7 +4,7 @@
   "description": "One record per function of STARTH.EXE. The file name is the module linear address, for example functions/0x300ec.json. An optional field is absent, never null.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["address", "status", "checks", "evidence", "notes"],
+  "required": ["address", "provenance", "status", "checks", "evidence", "notes"],
   "properties": {
     "address": {
       "type": "string",
@@ -19,7 +19,7 @@
     "size": {
       "type": "integer",
       "minimum": 0,
-      "description": "The byte count of the original body."
+      "description": "The distance to the next entry; it bounds the identity check."
     },
     "name": {
       "type": "string",
@@ -34,6 +34,10 @@
     "status": {
       "enum": ["unknown", "not_a_function", "named", "rebuilt", "matching", "verified"],
       "description": "The status ladder."
+    },
+    "provenance": {
+      "enum": ["game", "library", "compiler_helper", "not_a_function", "data"],
+      "description": "The origin class of the record."
     },
     "confidence": {
       "enum": ["observed", "derived", "inferred"]
@@ -56,7 +60,7 @@
     "count": {
       "type": "integer",
       "minimum": 1,
-      "description": "The instruction count of the identity check, passed to diff_module.py --count. Set when the body sweep runs past the end of the function."
+      "description": "The instruction count of the identity check, passed to diff_module.py --count. The record size wins over the count when both are present, because --original-end bounds the original body. Set when the body sweep runs past the end of the function."
     },
     "implementation": {
       "enum": ["c", "assembly"],
@@ -75,7 +79,26 @@
       "type": "array",
       "items": { "$ref": "#/$defs/note" }
     },
-    "result": { "$ref": "#/$defs/result" }
+    "result": { "$ref": "#/$defs/result" },
+    "library": {
+      "type": "object",
+      "description": "The original library object of a library-verified record.",
+      "additionalProperties": false,
+      "required": ["file", "sha256", "module", "symbol", "object_sha256"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "module": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string", "minLength": 1 },
+        "object_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
   },
   "$defs": {
     "evidence": {
@@ -115,13 +138,14 @@
         "fingerprint": {
           "type": "string",
           "pattern": "^sha256:[0-9a-f]{64}$",
-          "description": "The SHA-256 over every input of the declared checks: the module recipe, the module sources, the shared harness sources, the record fields, the participating tools, the original image, and the built artifacts. Written by run.py."
+          "description": "The SHA-256 over every input of the declared checks: the module recipe, the module sources, the shared harness sources, the record fields, the strict mode and the toolchain, the participating tools, the original image, and the built artifacts. Written by run.py."
         },
         "checks": {
           "type": "object",
           "minProperties": 1,
           "additionalProperties": { "$ref": "#/$defs/check_result" }
-        }
+        },
+        "mode": { "$ref": "#/$defs/mode" }
       }
     },
     "check_result": {
@@ -131,10 +155,25 @@
       "properties": {
         "verdict": { "enum": ["pass", "fail"] },
         "detail": { "type": "string", "minLength": 1 },
+        "match": {
+          "enum": ["exact-bytes", "exact-relocations", "same-shape", "same-mnemonics", "different"],
+          "description": "The identity result class. Absent on a result that predates the field."
+        },
         "instructions_equal": { "type": "integer", "minimum": 0 },
         "instructions_total": { "type": "integer", "minimum": 0 },
         "bytes_equal": { "type": "integer", "minimum": 0 },
         "bytes_total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "description": "The mode of the run that wrote the result.",
+      "additionalProperties": false,
+      "required": ["strict", "toolchain", "runtime"],
+      "properties": {
+        "strict": { "type": "boolean" },
+        "toolchain": { "enum": ["v2", "watcom10"] },
+        "runtime": { "enum": ["run", "skip"] }
       }
     }
   }

@@ -1,9 +1,56 @@
 {
   "address": "0xe9feb",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe9feb"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "scale",
+    "object_sha256": "sha256:76c29a6cc377bf7598fac100dcb9aa8e6373be3099d686313dfae2faefea5869",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "_Scale10V_"
+  },
+  "name": "_Scale10V",
   "notes": [],
   "object_offset": "0xd9feb",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 213,
+        "bytes_total": 231,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 76,
+        "instructions_total": 76,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xe9feb",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:a282100104f705fc49593949b3c2cb2b0eb8b0fbe24cdf69fcc2bd51c7dd0cd1",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:bb51d48d011cff12f27a7fbf4236c01d16a8d068e9ad64cc2d727c4b454ff796",
+    "tool": "run.py"
+  },
   "size": 231,
-  "status": "unknown"
+  "status": "verified"
 }

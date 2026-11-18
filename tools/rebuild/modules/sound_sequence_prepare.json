@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "sound_sequence_prepare_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

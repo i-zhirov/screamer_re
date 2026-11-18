@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "music_bank_reset_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

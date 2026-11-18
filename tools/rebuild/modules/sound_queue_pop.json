@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "sound_queue_pop_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

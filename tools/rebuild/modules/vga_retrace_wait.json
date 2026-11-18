@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "vga_retrace_wait_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

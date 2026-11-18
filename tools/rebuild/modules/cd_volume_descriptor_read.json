@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "cd_volume_descriptor_read_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

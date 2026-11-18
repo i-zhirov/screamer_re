@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/cd_audio_resume.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "cd_audio_resume",
   "notes": [],
   "object_offset": "0x164f8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -1,9 +1,56 @@
 {
   "address": "0xea236",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea236"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "iomode",
+    "object_sha256": "sha256:ad1eab87afec30c204a9204a6c3ae8bed4c889268f17774f3fd2915768e9fc53",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__SetIOMode_"
+  },
+  "name": "__SetIOMode",
   "notes": [],
   "object_offset": "0xda236",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 21,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 9,
+        "instructions_total": 9,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xea236",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:2ea3d041572569c504f937ebba9c54a559a59fff3e0f581556ecf9ed03d4201d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:0ec76828dc94be13ae27b099489baac9c16e529c520eb31ccc8ce04b527b6849",
+    "tool": "run.py"
+  },
   "size": 26,
-  "status": "unknown"
+  "status": "verified"
 }

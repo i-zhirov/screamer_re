@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2c188 holds 164 instructions and 679 bytes up to the ret at 0x2c42e; the next function starts at 0x2c430, so the store record keeps the 680-byte extent and sets no function size; the identity check uses 164 instructions"
+      "text": "the original body at 0x2c188 holds 164 instructions and 679 bytes over the full extent; the ret is at 0x2c42e; the next function starts at 0x2c430, so the store record keeps the 680-byte extent and sets no function size; the identity check uses 108 instructions"
     },
     {
       "kind": "note",
@@ -47,6 +47,14 @@
     {
       "kind": "finding",
       "text": "The track_select_screen module at 0x2c188"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -54,6 +62,7 @@
   "name": "track_select_screen",
   "notes": [],
   "object_offset": "0x1c188",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -65,17 +74,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 40,
-        "bytes_total": 671,
+        "bytes_equal": 33,
+        "bytes_total": 468,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 50,
-        "instructions_total": 164,
+        "instructions_equal": 46,
+        "instructions_total": 107,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2c188",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:0665e9426e983bbb91dccb3b98242bac034f4688975a7e0e4f931da991016d28",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6eb7527f6e785237fa6ae1ed6b109f45e5d45c9a88fbdffcecdab13d11b3531a",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:3ca780714c803cd1ff4dd65bf0696c6e8aec79486a5971a4698061e07a71a6a8",
     "tool": "run.py"
   },

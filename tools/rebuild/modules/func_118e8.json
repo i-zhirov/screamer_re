@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "func_118e8_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

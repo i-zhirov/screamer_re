@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 30 decoded instructions and 85 bytes in the identity window; the identity check stays open at 11 of 30 instructions, 5 of 85 bytes, and 1 of 9 relocation slots, because V2 saves the frame and the registers in another order, keeps the largest in ebx and the count in ecx, loads the two globals through near data operands, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "replay_frame_buffer_init",
   "notes": [],
   "object_offset": "0x12c30",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

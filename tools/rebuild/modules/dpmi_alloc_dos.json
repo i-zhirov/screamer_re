@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "dpmi_alloc_dos_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

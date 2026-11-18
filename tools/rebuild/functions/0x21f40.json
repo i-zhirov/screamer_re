@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The angle_step module at 0x21f40"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "angle_step",
   "notes": [],
   "object_offset": "0x11f40",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

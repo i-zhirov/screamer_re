@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/race_finish_mode_1_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "race_finish_mode_1_update",
   "notes": [],
   "object_offset": "0x13ed8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

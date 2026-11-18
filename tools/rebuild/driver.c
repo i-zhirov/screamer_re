@@ -46,7 +46,6 @@ static void pair(unsigned char reg, unsigned char value)
 
 int main(void)
 {
-    print("REBUILT$");
     pair(0x20, 0x0F);
     pair(0x40, 0x3F);
     pair(0x60, 0x01);

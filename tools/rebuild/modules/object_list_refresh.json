@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "object_list_refresh_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

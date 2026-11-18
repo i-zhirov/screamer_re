@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "map_file_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

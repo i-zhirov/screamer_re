@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "screen_mode_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_table_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

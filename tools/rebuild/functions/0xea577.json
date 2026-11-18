@@ -1,0 +1,56 @@
+{
+  "address": "0xea577",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea577"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "timeutil",
+    "object_sha256": "sha256:30ebfdc9c6a811e556f03497aca9fdec30cc389e8be5d9d839dabb1f28832a8c",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__leapyear_"
+  },
+  "name": "__leapyear",
+  "notes": [],
+  "object_offset": "0xda577",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 300,
+        "bytes_total": 328,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 129,
+        "instructions_total": 129,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xea577",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:dd8c2ad9d80e38008050a0469d10f6e999c5413640743f6feeb0d48b040615a8",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:34ea3ff408e13809cf36370f61ca9e7bbb0f1ff8c5b434776dba956ee7cbb723",
+    "tool": "run.py"
+  },
+  "size": 59,
+  "status": "verified"
+}

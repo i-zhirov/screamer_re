@@ -14,12 +14,21 @@
     },
     {
       "kind": "note",
-      "text": "the record keeps the 2176-byte extent to the next entry, so the identity check uses `--count 201`"
+      "text": "the record keeps the 640-byte extent to the next entry, so the identity check uses `--original-end 0x25020`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "joystick_update",
   "name": "joystick_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -31,17 +40,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 13,
-        "bytes_total": 630,
+        "bytes_equal": 32,
+        "bytes_total": 473,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 48,
-        "instructions_total": 201,
+        "instructions_equal": 31,
+        "instructions_total": 154,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x24da0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:28b94c119ac6eeb50b940971e503e3c8a7fd2dc934bca82bb4e4fef50195da2e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:ff9fc78c99d1a175bfa2489c9500d3a15b6206d6c57bb6bf98d24d3a971eeebe",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:a08932c4307fc5b365f4672ef85cbf0f61c3e97b199706d34ffecad64abe2867",
     "tool": "run.py"
   },

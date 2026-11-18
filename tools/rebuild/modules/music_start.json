@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "music_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

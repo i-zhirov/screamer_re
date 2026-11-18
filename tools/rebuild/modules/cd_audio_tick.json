@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_tick_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -111,12 +112,18 @@ def structural_mask(insn: le.Insn) -> set[int]:
     return set()
 
 
-def slot_key(slot: le.Relocation) -> tuple:
+def slot_key(
+    slot: le.Relocation,
+    symbols: Callable[[le.Relocation], str | None] | None = None,
+) -> tuple:
     """A stable identity of a fixup slot.
 
-    An internal target is an object number and an object offset.  Both are
-    link-time values, so the key holds the kind and the width only.  An
-    imported target carries a stable module and ordinal or name offset.
+    An internal target is an object number and an object offset.  When both
+    images resolve the slot to a symbol, the key holds the symbol and the
+    addend, so a moved target stays equal.  A missing addend counts as zero.
+    A target that resolves on only one side is a documented limitation: the
+    two images have no common symbol table, so the key falls back to the kind.
+    An imported target carries a stable module and ordinal or name offset.
     """
     if slot.kind == "import-ordinal":
         return (slot.kind, slot.module, slot.ordinal)
@@ -124,6 +131,10 @@ def slot_key(slot: le.Relocation) -> tuple:
         return (slot.kind, slot.module, slot.name_offset)
     if slot.kind == "entry":
         return (slot.kind, slot.ordinal)
+    if symbols is not None:
+        symbol = symbols(slot)
+        if symbol is not None:
+            return (slot.kind, symbol, slot.addend or 0)
     return (slot.kind,)
 
 
@@ -156,6 +167,62 @@ def _mask_for(
     return masks
 
 
+def _bounds(instructions: list[le.Insn]) -> tuple[int, int]:
+    """The half-open address range of a function body."""
+    if not instructions:
+        return (0, 0)
+    last = instructions[-1]
+    return (instructions[0].address, last.address + last.size)
+
+
+def _index_by_address(instructions: list[le.Insn]) -> dict[int, int]:
+    """Map each instruction address to its position in the body."""
+    return {insn.address: index for index, insn in enumerate(instructions)}
+
+
+def _branch_target(insn: le.Insn) -> int | None:
+    """The direct jump or loop target, or None for a call or other instruction."""
+    mnemonic = insn.mnemonic.lower()
+    if not (mnemonic.startswith("j") or mnemonic.startswith("loop")):
+        return None
+    operand = insn.operands.strip()
+    if not operand.startswith("0x"):
+        return None
+    return int(operand, 16)
+
+
+def _branch_difference(
+    original: le.Insn,
+    rebuilt: le.Insn,
+    original_bounds: tuple[int, int],
+    rebuilt_bounds: tuple[int, int],
+    original_index: dict[int, int],
+    rebuilt_index: dict[int, int],
+) -> str | None:
+    """Compare two branch targets by their instruction position."""
+    original_target = _branch_target(original)
+    rebuilt_target = _branch_target(rebuilt)
+    if original_target is None or rebuilt_target is None:
+        return None
+    if not original_bounds[0] <= original_target < original_bounds[1]:
+        return None
+    if not rebuilt_bounds[0] <= rebuilt_target < rebuilt_bounds[1]:
+        return None
+    left = original_index.get(original_target)
+    if left is None:
+        return (
+            f"branch target: {original_target:#x} is not an instruction address"
+        )
+    right = rebuilt_index.get(rebuilt_target)
+    if right is None:
+        return (
+            f"branch target: {rebuilt_target:#x} is not an instruction address"
+        )
+    if left != right:
+        return f"branch target: instruction {left} against {right}"
+    return None
+
+
 def _instruction_difference(
     original: le.Insn,
     rebuilt: le.Insn,
@@ -163,6 +230,12 @@ def _instruction_difference(
     rebuilt_mask: set[int],
     original_slots: list[tuple[int, le.Relocation]],
     rebuilt_slots: list[tuple[int, le.Relocation]],
+    original_bounds: tuple[int, int],
+    rebuilt_bounds: tuple[int, int],
+    original_index: dict[int, int],
+    rebuilt_index: dict[int, int],
+    original_symbols: Callable[[le.Relocation], str | None] | None = None,
+    rebuilt_symbols: Callable[[le.Relocation], str | None] | None = None,
 ) -> str | None:
     """Return the first difference of one instruction pair, or None."""
     if original.mnemonic != rebuilt.mnemonic:
@@ -181,6 +254,16 @@ def _instruction_difference(
                 f"byte {index}: {original.raw[index]:#04x} against "
                 f"{rebuilt.raw[index]:#04x}"
             )
+    branch = _branch_difference(
+        original,
+        rebuilt,
+        original_bounds,
+        rebuilt_bounds,
+        original_index,
+        rebuilt_index,
+    )
+    if branch is not None:
+        return branch
     if len(original_slots) != len(rebuilt_slots):
         return (
             f"relocations: {len(original_slots)} against {len(rebuilt_slots)}"
@@ -195,8 +278,20 @@ def _instruction_difference(
             )
         if left.width != right.width:
             return f"relocation width: {left.width} against {right.width}"
-        if slot_key(left) != slot_key(right):
-            return f"relocation target: {slot_key(left)} against {slot_key(right)}"
+        left_symbol = (
+            original_symbols(left) if original_symbols is not None else None
+        )
+        right_symbol = (
+            rebuilt_symbols(right) if rebuilt_symbols is not None else None
+        )
+        if left_symbol is not None and right_symbol is not None:
+            left_key = slot_key(left, original_symbols)
+            right_key = slot_key(right, rebuilt_symbols)
+        else:
+            left_key = slot_key(left)
+            right_key = slot_key(right)
+        if left_key != right_key:
+            return f"relocation target: {left_key} against {right_key}"
     return None
 
 
@@ -206,18 +301,29 @@ def compare(
     *,
     original_relocations: list[le.Relocation] | None = None,
     rebuilt_relocations: list[le.Relocation] | None = None,
+    original_symbols: Callable[[le.Relocation], str | None] | None = None,
+    rebuilt_symbols: Callable[[le.Relocation], str | None] | None = None,
 ) -> OracleResult:
     """Compare two function bodies and classify the difference.
 
     A masked byte is a byte that a fixup slot or a direct branch target
     controls.  The comparison requires the same mask on both sides, compares
     every unmasked byte, and compares the relocation kind, width, and stable
-    target identity.  Instruction order is significant.
+    target identity.  An internal target compares by symbol and addend when
+    both sides resolve a symbol, and by kind otherwise.  A one-sided symbol is
+    a documented limitation: the two images have no common symbol table for it.
+    A branch target that stays inside its own function body compares by
+    instruction position; a target outside the body stays masked.  Instruction
+    order is significant.
     """
     original_slots = original_relocations or []
     rebuilt_slots = rebuilt_relocations or []
     original_masks = _mask_for(original, original_slots)
     rebuilt_masks = _mask_for(rebuilt, rebuilt_slots)
+    original_bounds = _bounds(original)
+    rebuilt_bounds = _bounds(rebuilt)
+    original_index = _index_by_address(original)
+    rebuilt_index = _index_by_address(rebuilt)
 
     original_bytes = b"".join(insn.raw for insn in original)
     rebuilt_bytes = b"".join(insn.raw for insn in rebuilt)
@@ -243,6 +349,12 @@ def compare(
                 rebuilt_masks[index],
                 left_slots,
                 right_slots,
+                original_bounds,
+                rebuilt_bounds,
+                original_index,
+                rebuilt_index,
+                original_symbols,
+                rebuilt_symbols,
             )
             if difference is None:
                 instructions_equal += 1

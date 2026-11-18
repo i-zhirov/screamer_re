@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/sound_frame_prepare.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_frame_prepare",
   "notes": [],
   "object_offset": "0x7af08",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

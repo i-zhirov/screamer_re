@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "point_rotation_flags_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x27c34 holds 133 instructions and 466 bytes up to the ret at 0x27e05; the next function starts at 0x27e08, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 133 instructions"
+      "text": "the original body at 0x27c34 holds 133 instructions and 466 bytes over the full extent; the ret is at 0x27e05; the next function starts at 0x27e08, so the store record keeps the 468-byte extent and sets no function size; the identity check uses 98 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function body holds 98 instructions and 370 bytes; the identity window uses the 133 original instructions, so the check stays open at 30 of 133 instructions and 22 of 466 bytes because V2 saves the frame pointer first, uses another prologue order, and uses integer immediates for the float constants; the build and behavior checks pass, so the store records rebuilt; the original has no symbol name for this function, so the module name and the callee names in the harness stay inferred"
+      "text": "the rebuilt function body holds 98 instructions and 370 bytes; the identity window uses the 133 original instructions, so the check stays open at 21 of 98 instructions and 21 of 370 bytes because V2 saves the frame pointer first, uses another prologue order, and uses integer immediates for the float constants; the build and behavior checks pass, so the store records rebuilt; the original has no symbol name for this function, so the module name and the callee names in the harness stay inferred"
     },
     {
       "kind": "command",
@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The credits_scroll module at 0x27c34"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "credits_scroll",
   "notes": [],
   "object_offset": "0x17c34",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 22,
-        "bytes_total": 466,
+        "bytes_equal": 20,
+        "bytes_total": 362,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 30,
-        "instructions_total": 133,
+        "instructions_equal": 18,
+        "instructions_total": 94,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27c34",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:3cf82460511afe225f23e459bed239fff385a45e828b8d26f6e6adc85e862677",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:65fd94aff2e34c99203c2ff3bf27a41953fd84d33a4930ac4e5766b6958cfb01",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:59d894c773ffc7b45c0f3cb320fe784075ce6011bf254a8887013e51c062241a",
     "tool": "run.py"
   },

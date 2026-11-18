@@ -23,7 +23,8 @@
       "compiler": "wcc386",
       "file": "player_view_orbit.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -32,7 +33,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "player_view_orbit_main.c"
+      "file": "player_view_orbit_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

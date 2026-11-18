@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x16f34 holds 318 instructions and 1236 bytes up to the ret at 0x17407, so the record keeps the 1236-byte extent and sets no function size"
+      "text": "the original at 0x16f34 holds 318 instructions and 1236 bytes over the full extent; the ret is at 0x17407, so the record keeps the 1236-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -26,12 +26,21 @@
     {
       "kind": "note",
       "text": "the state at +0x148 selects the full pitch projection or the flat yaw projection, and the flag at +0x108 selects the pitch path or the roll angle path"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_car_view_update",
   "name": "player_car_view_update",
   "notes": [],
   "object_offset": "0x6f34",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -43,17 +52,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 26,
-        "bytes_total": 898,
+        "bytes_equal": 51,
+        "bytes_total": 915,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 23,
-        "instructions_total": 247,
+        "instructions_equal": 21,
+        "instructions_total": 243,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x16f34",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:2ba7fbad1f982e950c1663757e4e8ff6aeee2faa5ff71a806d25d1ae5db34402",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:60d34ee6d962126e70b33d8f072ed79e0289184abca9f6089d534d5ed65e1a3b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:9d4b89b81bdc6f4ce84ba314dbdcc6fa1d63cb4cb138fbf619a66c4819524dde",
     "tool": "run.py"
   },

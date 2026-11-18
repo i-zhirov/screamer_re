@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "palette_shade_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

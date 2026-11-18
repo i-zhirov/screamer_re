@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_revolution_matrix.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_revolution_matrix.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "object_revolution_matrix_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

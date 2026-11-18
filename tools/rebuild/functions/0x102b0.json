@@ -70,6 +70,14 @@
     {
       "kind": "note",
       "text": "the options screen at 0x21338 calls this function at 0x214cd before a sprite blit and passes the same source and destination registers; the options_screen module names the helper sprite_blit; the two callers and the four sites support the general span blit name data_blit"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "data_blit",
   "notes": [],
   "object_offset": "0x2b0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

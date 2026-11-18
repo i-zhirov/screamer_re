@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 9 instructions and 19 bytes; the identity window holds 12 instructions and 27 bytes and stays open at 2 of 12 instructions, 0 of 27 bytes, and 0 of 4 relocation slots, because V2 pushes ebp first, saves edx after the frame setup, folds the frame slot and the spill and reload into one scaled store, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_effect_timer_clear",
   "notes": [],
   "object_offset": "0x14d7c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

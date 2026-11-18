@@ -59,12 +59,21 @@
     {
       "kind": "finding",
       "text": "The sound_voice_sample_set module at 0x1f764"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "sound_voice_sample_set",
   "name": "sound_voice_sample_set",
   "notes": [],
   "object_offset": "0xf764",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

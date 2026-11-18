@@ -66,6 +66,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/joystick_axis_read.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -73,6 +81,7 @@
   "name": "joystick_axis_read",
   "notes": [],
   "object_offset": "0x263",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

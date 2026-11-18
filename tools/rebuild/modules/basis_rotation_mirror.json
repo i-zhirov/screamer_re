@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "basis_rotation_mirror_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

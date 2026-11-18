@@ -67,6 +67,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1f6f8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "sound_bank_release",
   "notes": [],
   "object_offset": "0xf6f8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

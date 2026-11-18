@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "cd_system_shutdown_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

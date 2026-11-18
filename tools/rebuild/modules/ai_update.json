@@ -25,7 +25,8 @@
       "compiler": "wcc386",
       "file": "ai_update.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -34,7 +35,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "ai_update_main.c"
+      "file": "ai_update_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

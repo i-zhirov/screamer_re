@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 12 of 37 instructions equal, 0 of 98 bytes equal, and 0 of 4 relocation slots equal; the identity check stays open because V2 saves the frame and the registers first, keeps the record in esi, moves the model test before the load, uses imul for the object table stride, and calls the callees with stack arguments; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "traffic_record_init",
   "notes": [],
   "object_offset": "0x4970",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

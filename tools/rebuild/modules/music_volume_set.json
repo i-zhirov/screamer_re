@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "music_volume_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

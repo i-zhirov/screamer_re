@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "joystick_axis_read_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

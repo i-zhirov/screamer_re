@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "replay_buffer_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "video_bank_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

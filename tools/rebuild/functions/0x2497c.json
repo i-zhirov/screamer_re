@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt function holds 44 decoded instructions and 102 bytes; the identity check window holds 61 instructions and 159 bytes and stays open at 26 of 61 instructions and 7 of 159 bytes, because V2 saves ebp first, keeps the head, the selected entry, and the cursor in registers, copies the three head fields with a register swap, and decodes the following code after the rebuilt ret; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_queue_promote",
   "notes": [],
   "object_offset": "0x1497c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

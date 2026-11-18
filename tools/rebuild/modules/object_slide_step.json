@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_slide_step.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_slide_step.c"
     },
     {
       "compiler": "wasm",
@@ -30,5 +27,6 @@
       "compiler": "wcc386",
       "file": "object_slide_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

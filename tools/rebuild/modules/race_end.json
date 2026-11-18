@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "race_end_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

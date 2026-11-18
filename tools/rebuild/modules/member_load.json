@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "member_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

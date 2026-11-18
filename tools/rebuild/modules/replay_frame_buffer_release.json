@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "replay_frame_buffer_release_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

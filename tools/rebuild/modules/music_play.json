@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "music_play.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "music_play.c"
     },
     {
       "compiler": "wcc386",
       "file": "music_play_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

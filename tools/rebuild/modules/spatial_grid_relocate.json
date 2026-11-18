@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "spatial_grid_relocate_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

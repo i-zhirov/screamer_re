@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/camera_relative_angles.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm STARTH.EXE 0x4bee0 --count 30"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "camera_relative_angles",
   "notes": [],
   "object_offset": "0x3bee0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

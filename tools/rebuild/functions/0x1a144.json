@@ -59,6 +59,14 @@
     {
       "kind": "finding",
       "text": "The camera_pose_build module at 0x1a144"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "camera_pose_build",
   "notes": [],
   "object_offset": "0xa144",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

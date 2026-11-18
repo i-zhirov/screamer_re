@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "map_object_progress_sum_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

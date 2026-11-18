@@ -1,9 +1,60 @@
 {
   "address": "0xc5fca",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc5fca"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fopen",
+    "object_sha256": "sha256:155f71895f1306a19da482df8ff7bc50a4ce1c87ddb2f1a4c5fe8293b8cbc9c6",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "_fsopen_"
+  },
+  "name": "_fsopen",
   "notes": [],
   "object_offset": "0xb5fca",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 20,
+        "bytes_total": 27,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 13,
+        "instructions_total": 13,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc5fca",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:53282a6c1e340f63f0f306c04250da6e4da12efbc763ebe526e5bd2a0cb49b64",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:32f938c9ed6b00eff4a7000a15c1776cc65c5136559204878c36ec139ca51e30",
+    "tool": "run.py"
+  },
   "size": 27,
-  "status": "unknown"
+  "status": "verified"
 }

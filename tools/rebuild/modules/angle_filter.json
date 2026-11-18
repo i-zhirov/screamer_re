@@ -35,5 +35,6 @@
       "compiler": "wcc386",
       "file": "angle_filter_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

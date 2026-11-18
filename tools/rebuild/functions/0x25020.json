@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x25020 holds 292 instructions and 1044 bytes up to the ret 4 at 0x25431; the next record starts at 0x254a8, so the store record keeps the 1160-byte extent and sets no separate function size; the identity check uses 292 instructions"
+      "text": "the original body at 0x25020 holds 273 instructions and 993 bytes up to the ret 4 at 0x25431; the next record starts at 0x254a8, so the store record keeps the 1160-byte extent and sets no separate function size; the identity check uses 269 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function keeps the same behavior in C but holds fewer instructions than the 292 original instructions, because the original keeps the draw state in the BSS cells at 0x154xx and the C build keeps the same state in locals; the identity check stays open at 38 of 292 instructions and 25 of 918 bytes; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function keeps the same behavior in C but holds fewer instructions than the 292 original instructions, because the original keeps the draw state in the BSS cells at 0x154xx and the C build keeps the same state in locals; the identity check stays open at 44 of 269 instructions and 13 of 819 bytes; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "text_draw",
   "notes": [],
   "object_offset": "0x15020",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 918,
+        "bytes_equal": 21,
+        "bytes_total": 756,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 38,
-        "instructions_total": 292,
+        "instructions_equal": 46,
+        "instructions_total": 270,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25020",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:2bb298077c8cf5631b410ad6e0ceb942730e24afa0274adfd7d64df406487876",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:01dae3a973e98c6d320dea801dbef17b1e1a31193ddb784d40835303a6d281af",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:87cc6348c4fb6154349fefa302c6017058166545f8b31011db1484fdefceefa3",
     "tool": "run.py"
   },

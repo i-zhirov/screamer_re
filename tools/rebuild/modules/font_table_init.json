@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "font_table_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

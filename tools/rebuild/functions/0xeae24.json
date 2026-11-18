@@ -1,0 +1,19 @@
+{
+  "address": "0xeae24",
+  "checks": [],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    }
+  ],
+  "notes": [],
+  "object_offset": "0xdae24",
+  "provenance": "library",
+  "size": 99,
+  "status": "unknown"
+}

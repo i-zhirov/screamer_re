@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "sound_effect_trigger_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

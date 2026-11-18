@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The music_volume_set module at 0x2ff84"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "music_volume_set",
   "notes": [],
   "object_offset": "0x1ff84",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

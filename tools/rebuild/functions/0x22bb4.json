@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 3 of 21 instructions and 1 of 47 bytes equal, and 0 of 2 relocation slots; the identity check stays open because V2 saves ebp first, keeps the index in ecx, loads the table pointer as a fixed data offset, folds the index scale into the fmul operand, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "filter_update_int",
   "notes": [],
   "object_offset": "0x12bb4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

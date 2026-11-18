@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "point_rotate_y_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

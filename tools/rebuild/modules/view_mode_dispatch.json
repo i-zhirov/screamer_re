@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "view_mode_dispatch_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

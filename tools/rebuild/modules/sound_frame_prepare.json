@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "sound_frame_prepare_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

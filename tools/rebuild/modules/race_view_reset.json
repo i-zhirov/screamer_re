@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_view_reset.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_view_reset.c"
     },
     {
       "compiler": "wcc386",
       "file": "race_view_reset_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

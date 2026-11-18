@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "exit_with_message_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "player_cockpit_camera_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -1,99 +1,52 @@
 {
   "address": "0x4d9ba",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
-  "confidence": "inferred",
-  "count": 28,
   "evidence": [
     {
-      "kind": "note",
-      "text": "the original body at 0x4d9ba holds 28 instructions and 57 bytes up to the ret at 0x4d9f2; the next function starts at 0x4d9f4 after the one padding byte at 0x4d9f3, so the store record keeps the 58-byte extent and sets no separate function size; the identity check uses 28 instructions"
-    },
-    {
-      "kind": "note",
-      "text": "the seven direct call sites at 0x11123, 0x11470, 0x1550c, 0x1553b, 0x15553, 0x2f37e, and 0x4c1bf sit in object_lookup at 0x110d0, object_chunk_find at 0x11410, list_file_load at 0x15460, resource_free_name at 0x2f326, and member_open at 0x4c128; each site passes two string pointers in eax and edx and tests the result for zero"
-    },
-    {
-      "kind": "note",
-      "text": "the function loads one byte from each string, folds a byte in the range A to Z to lowercase, compares the two bytes, advances both pointers on an equal non-zero pair, and returns the difference of the final bytes; the case fold and the difference result identify the Watcom string compare stricmp; the original has no symbol, so the record keeps the name with the confidence inferred"
-    },
-    {
-      "kind": "note",
-      "text": "the original has no EBP frame and no local stack slot, so the module builds without -of+; the function holds no floating-point instruction and no direct call, so the module uses no FPU stub and no assembly implementation"
-    },
-    {
-      "kind": "note",
-      "text": "the harness holds two data buffers filled with explicit byte values, because the minimal image does not load a constant data segment; the nine paths cover the equal strings, the case-insensitive pair, both difference signs, the empty string on each side, the prefix, the non-letter pair, and the mixed-case pair; the output holds the markers 0 through 8 and D; the behavior check passes"
-    },
-    {
-      "kind": "note",
-      "text": "the rebuilt body holds 4 of 28 instructions equal and 3 of 56 bytes equal; the identity check stays open because V2 keeps the two bytes in ah and al and the first pointer in ecx, saves ecx instead of ebx, and zero-extends the final bytes with movzx; the build and behavior checks pass, so the store records rebuilt"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d9ba --count 28"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d9ba --count 28 --rebuilt work/rebuild/stricmp.exe --rebuilt-map work/rebuild/stricmp.map --rebuilt-symbol stricmp_"
-    },
-    {
-      "kind": "command",
-      "text": "python3 tools/rebuild/run.py run --function 0x4d9ba"
-    },
-    {
       "kind": "finding",
-      "text": "The stricmp module at 0x4d9ba"
+      "text": "## The Phase A library modules match byte for byte"
     },
     {
-      "kind": "file",
-      "text": "tools/rebuild/stricmp.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/stricmp_main.c"
-    },
-    {
-      "kind": "file",
-      "text": "tools/rebuild/modules/stricmp.json"
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0x4d9ba"
     }
   ],
-  "implementation": "c",
-  "module": "stricmp",
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "stricmp",
+    "object_sha256": "sha256:a51a87e7a60b4ea86576d43dc7e3640604e301ce6c5b01b8f901fbd0f9234322",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "stricmp_"
+  },
   "name": "stricmp",
   "notes": [],
   "object_offset": "0x3d9ba",
+  "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
-        "bytes_equal": 3,
-        "bytes_total": 56,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 4,
+        "bytes_equal": 57,
+        "bytes_total": 57,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 28,
         "instructions_total": 28,
-        "verdict": "fail"
+        "match": "exact-bytes",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4d9ba",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:5cf9e8336ed273d4ac12093f0f7112e076cb3ce89649ba40f2e4c2cfd2c07d18",
-    "source_digest": "sha256:cdc9920c09d1ff9f33a309883fc518bc08c683f0176e1b32a0e928b1a7df137d",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:5c6912eba0ba5705a703e900e48e8db70046525ff250d234632ded286574f769",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:ea8e4ae6c164a68101ac72b6b8206407d956c7ea7a34242685d4d27d91562032",
     "tool": "run.py"
   },
-  "role": "Compares two strings without case and returns the difference of the first different bytes.",
-  "section": "Resource loader",
   "size": 58,
-  "status": "rebuilt",
-  "symbol": "stricmp_"
+  "status": "verified"
 }

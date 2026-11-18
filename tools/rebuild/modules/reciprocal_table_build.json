@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "reciprocal_table_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

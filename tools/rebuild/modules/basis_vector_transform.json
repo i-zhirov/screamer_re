@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "basis_vector_transform_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

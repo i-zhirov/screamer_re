@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "gameport_pulse_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "bit_pattern_match_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

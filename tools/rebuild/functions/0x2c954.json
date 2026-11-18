@@ -63,6 +63,14 @@
     {
       "kind": "finding",
       "text": "The race_records_screen_init module at 0x2c954"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "race_records_screen_init",
   "notes": [],
   "object_offset": "0x1c954",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

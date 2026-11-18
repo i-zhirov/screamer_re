@@ -13,16 +13,25 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x1d6bc holds 82 instructions and 339 bytes up to the first ret at 0x1d80e: it truncates each scaled velocity sum with the helper at 0x4d9f4, multiplies the factor by the damping at DAT_0010cf08 + 0x13c, clears the factor below the 10.0 constant at object 3 offset 0xb24, accumulates the dwell timer +0x46c while both positions equal the target at +0x160 and +0x168, and snaps both positions by the scale at DAT_0010cf08 + 0x180 at the 3.0 constant at offset 0xb28; the rebuild keeps the 376-byte extent and uses a module-local FPU stub with a truncating __CHP"
+      "text": "the original at 0x1d6bc holds 88 instructions and 357 bytes over the full extent; the first ret is at 0x1d80e: it truncates each scaled velocity sum with the helper at 0x4d9f4, multiplies the factor by the damping at DAT_0010cf08 + 0x13c, clears the factor below the 10.0 constant at object 3 offset 0xb24, accumulates the dwell timer +0x46c while both positions equal the target at +0x160 and +0x168, and snaps both positions by the scale at DAT_0010cf08 + 0x180 at the 3.0 constant at offset 0xb28; the rebuild keeps the 376-byte extent and uses a module-local FPU stub with a truncating __CHP"
     },
     {
       "kind": "note",
       "text": "the harness covers the integration, the factor clamp, the dwell accumulation, the snap, both truncation directions, the threshold boundary, and the damping reduction; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "object_integrate",
   "name": "object_integrate",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -39,12 +48,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 9,
         "instructions_total": 62,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1d6bc",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:92c2719a7e82f3e4704c11c1c08c1f44785bcc998c2102eaf96d845cba8ebd56",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:97ce490cc3d1efa9c04b2b1dade6d982ed508312ff28af4898d57ca1afa5746c",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:44cc8314f59e6f9ecd52df37ae9092cb0970b52a4a081b9a1f7a1700368f73bf",
     "tool": "run.py"
   },

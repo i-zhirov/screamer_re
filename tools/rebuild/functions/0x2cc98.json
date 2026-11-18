@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2cc98 holds 124 instructions and 491 bytes up to the ret at 0x2ce82; the next function starts at 0x2ce84, so the store record keeps the 492-byte extent and sets no function size; the identity check uses 124 instructions"
+      "text": "the original body at 0x2cc98 holds 124 instructions and 491 bytes over the full extent; the ret is at 0x2ce82; the next function starts at 0x2ce84, so the store record keeps the 492-byte extent and sets no function size; the identity check uses 65 instructions"
     },
     {
       "kind": "note",
@@ -54,7 +54,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 412 bytes and 124 decoded instructions; the identity check stays open at 22 of 124 instructions and 38 of 412 bytes because V2 saves the frame pointer first, uses another prologue order, and uses a register loop counter; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 243 bytes and 65 decoded instructions; the identity check stays open at 15 of 65 instructions and 27 of 243 bytes because V2 saves the frame pointer first, uses another prologue order, and uses a register loop counter; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "track_select_update",
   "notes": [],
   "object_offset": "0x1cc98",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 38,
-        "bytes_total": 412,
+        "bytes_equal": 27,
+        "bytes_total": 243,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 22,
-        "instructions_total": 124,
+        "instructions_equal": 15,
+        "instructions_total": 65,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cc98",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:3abdef4d05a2b31cb9d51a36a60bd91d2834aef8307a136a2d53c1cb2d4009a1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:1aeffe4f0b2087b55ffe721f1b8e605d1534ba2d90edb3c36cd93531b1a35b1e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:da00d61a8886805664dded0477a3431a20fae0a540fc062b1542e2525db9ab19",
     "tool": "run.py"
   },

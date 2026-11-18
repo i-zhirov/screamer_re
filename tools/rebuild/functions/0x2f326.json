@@ -6,11 +6,20 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_0002f326` formats `%.11s`, compares each record name with `FUN_0004d9ba`, calls `FUN_0002f470`, and calls `FUN_000d2066`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "name": "resource_free_name",
   "notes": [],
   "object_offset": "0x1f326",
+  "provenance": "game",
   "role": "formats a name, frees each matching resource record, and shifts the list down",
   "section": "The resource layer",
   "size": 229,

@@ -1,9 +1,56 @@
 {
   "address": "0xea0d2",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xea0d2"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "math2err",
+    "object_sha256": "sha256:a79c997133eda3b5919b6f0247c5c1479736812215af7043d012b56d2bc9d823",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__math1err_"
+  },
+  "name": "__math1err",
   "notes": [],
   "object_offset": "0xda0d2",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 10,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 5,
+        "instructions_total": 5,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xea0d2",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:6ae88f22eeaf30edd018b36f971387604da0ecae431a816fa4342106e14736cb",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:394cc7bd5a8e4f4d9a972a99a614dc44dfdec9bc23b7b7f7d742173f0fa09510",
+    "tool": "run.py"
+  },
   "size": 10,
-  "status": "unknown"
+  "status": "verified"
 }

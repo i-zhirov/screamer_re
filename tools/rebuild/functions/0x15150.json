@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The screen_setup_cleanup module at 0x15150"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "screen_setup_cleanup",
   "notes": [],
   "object_offset": "0x5150",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

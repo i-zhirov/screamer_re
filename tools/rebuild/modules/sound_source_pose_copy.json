@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "sound_source_pose_copy_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

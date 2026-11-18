@@ -20,5 +20,6 @@
       "compiler": "wcc386",
       "file": "fprintf_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

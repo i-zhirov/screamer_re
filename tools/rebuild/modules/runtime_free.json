@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "runtime_free_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

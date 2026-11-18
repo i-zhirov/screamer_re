@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "func_2f985_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

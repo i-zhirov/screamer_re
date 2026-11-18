@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "view_move.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "view_move.c"
     },
     {
       "compiler": "wcc386",
       "file": "view_move_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

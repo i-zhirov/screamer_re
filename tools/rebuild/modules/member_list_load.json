@@ -18,16 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "member_list_load.c",
-      "flags": [
-        "-of+",
-        "-oi",
-        "-dMEMBER_LIST_LOAD_HARNESS"
-      ]
+      "file": "member_list_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "member_list_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

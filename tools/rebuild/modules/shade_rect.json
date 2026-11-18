@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "shade_rect_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/camera_basis_patch.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "camera_basis_patch",
   "notes": [],
   "object_offset": "0x7a9e8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

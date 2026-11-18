@@ -66,6 +66,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x25f14"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -73,6 +81,7 @@
   "name": "cd_system_shutdown",
   "notes": [],
   "object_offset": "0x15f14",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

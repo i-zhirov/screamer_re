@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "sound_effect_list_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

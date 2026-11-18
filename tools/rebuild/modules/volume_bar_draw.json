@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "volume_bar_draw_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

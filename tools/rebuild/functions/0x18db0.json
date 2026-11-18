@@ -34,12 +34,21 @@
     {
       "kind": "finding",
       "text": "The engine_rpm_update module at 0x18db0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "engine_rpm_update",
   "name": "engine_rpm_update",
   "notes": [],
   "object_offset": "0x8db0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -56,12 +65,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 44,
         "instructions_total": 339,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x18db0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:c26e86897e84b8be9ce87a87e8a8aba470ef9af5f05f41b2a28a038feebc63a7",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:0695664bb0941bcc503ba5fee614bca92bfacdab9f739b1ff5934759ed55f1c9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:fc5355d43b19bef410297289a3d44ddb851766213a7b66acf22cb8fd4aaa7415",
     "tool": "run.py"
   },

@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x82258 holds 127 instructions and 365 bytes up to the ret at 0x823c4; the next recorded function starts at 0x82c14, so the store record keeps the 2492-byte extent and sets no separate function size; the identity check uses 127 instructions"
+      "text": "the original body at 0x82258 holds 127 instructions and 365 bytes over the full extent; the ret is at 0x823c4, so the store record keeps the 2492-byte extent and sets no separate function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The matrix_compose module at 0x82258"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "matrix_compose",
   "notes": [],
   "object_offset": "0x72258",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -61,17 +70,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 8,
+        "bytes_equal": 17,
         "bytes_total": 365,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 34,
+        "instructions_equal": 39,
         "instructions_total": 127,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x82258",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:74bb4ba3dc25c31420a92da3042694c6dd19e8b5ce2229b23efd0a51dc492ca7",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7e3906c0d8b6c6b635a38527590dfb145eb61b65214d80a2b51d1f5456d28c21",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:bc9a9d15ae1132f513b91144d844127332fde55bc57aaa4127e123f30b97b667",
     "tool": "run.py"
   },

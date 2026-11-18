@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "cng_view_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

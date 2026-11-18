@@ -17,12 +17,16 @@
       "compiler": "wcc386",
       "file": "list_create.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "list_create_main.c"
+      "file": "list_create_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -1,9 +1,56 @@
 {
   "address": "0xeb72a",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeb72a"
+    }
+  ],
+  "library": {
+    "file": "MATH387R.LIB",
+    "module": "cvt",
+    "object_sha256": "sha256:74f8839c9e188869171de2bee8d33d5694c71532328a2cf8f80bc7a175b9693c",
+    "sha256": "sha256:97c532ab26c54a0d15f7ae8c74a9ca82d615562eb8a63edf685b2bf3990f672c",
+    "symbol": "__cvt_"
+  },
+  "name": "__cvt",
   "notes": [],
   "object_offset": "0xdb72a",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 466,
+        "bytes_total": 486,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 192,
+        "instructions_total": 192,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xeb72a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:0046c7297c76def3c26ccfb400194a79ce16cb3a60f5372fddb82fbc5a1e9942",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:efe41ffc51bcdaa6a5295b5753aed13958a2f89d261b6c79b02d1a80ffc1287d",
+    "tool": "run.py"
+  },
   "size": 491,
-  "status": "unknown"
+  "status": "verified"
 }

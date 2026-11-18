@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "returns the table entry for the index when the table flag is set, and `-1` otherwise"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "table_lookup",
   "name": "table_lookup",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -27,16 +36,22 @@
       },
       "identity": {
         "bytes_equal": 4,
-        "bytes_total": 54,
+        "bytes_total": 49,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 5,
-        "instructions_total": 21,
+        "instructions_equal": 4,
+        "instructions_total": 20,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1f718",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ad4fa21b005316eefc43c631e67cce8acdde9d8c4ef19034beb26719cf952387",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:41025fb827e455dc5c09566d8d251d35c3bacd1ca6a8f318ea3de7cfd40793dc",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:36b91eaefda11ef35579426558ef70f3e460e7bb2ecacab00023588aa99ba6d8",
     "tool": "run.py"
   },

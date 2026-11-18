@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000c8321` calls `FUN_000de7fd`, `FUN_000de855`, and `FUN_000de829` when `DAT_00105984` is set"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "music_timer_shutdown",
   "notes": [],
   "object_offset": "0xb8321",
+  "provenance": "library",
   "role": "masks the timer interrupt, restores the saved handler, and unmasks it when the driver flag at `DAT_00105984` is set",
   "section": "The HMI sound driver",
   "size": 58,

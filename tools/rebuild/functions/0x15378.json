@@ -63,6 +63,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 70 instructions and 218 bytes; the identity check stays open at 17 of 70 instructions, 15 of 218 bytes, and 0 of 21 relocation slots, because V2 puts the frame first, saves five registers, keeps the record in a register, multiplies with imul, and uses another branch layout; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "opponent_records_init",
   "notes": [],
   "object_offset": "0x5378",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

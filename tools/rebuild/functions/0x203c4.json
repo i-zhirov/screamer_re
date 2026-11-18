@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/sla_view_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "sla_view_update",
   "notes": [],
   "object_offset": "0x103c4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

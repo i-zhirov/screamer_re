@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "runs the five steps at `0x19ae8`, `0x19e78`, `0x19f00`, `0x1a144`, and `0x212d0` on the player structure `DAT_00110a20`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "player_update",
   "name": "player_update",
   "notes": [],
   "object_offset": "0x9ab0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -32,12 +41,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 12,
         "instructions_total": 14,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19ab0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:e3133afe73493ca8f438435285ccb72d3544ae17c00753bf0ba3a3e95ee4ec8a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:34917d5916a2e4a0da0068aae890c43131b4d34cb1d8eecaea3de36e24f697a5",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:c8d33740d81bd2ba91172135847d28ebad4d6d2b1326579d5601cf1603d1c285",
     "tool": "run.py"
   },

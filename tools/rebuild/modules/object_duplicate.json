@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "object_duplicate_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

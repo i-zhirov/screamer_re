@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "panel_show.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "panel_show.c"
     },
     {
       "compiler": "wcc386",
       "file": "panel_show_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

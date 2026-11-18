@@ -21,10 +21,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_drive_step.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_drive_step.c"
     },
     {
       "compiler": "wasm",
@@ -34,5 +31,6 @@
       "compiler": "wcc386",
       "file": "object_drive_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

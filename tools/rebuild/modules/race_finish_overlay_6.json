@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "race_finish_overlay_6_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

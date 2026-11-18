@@ -15,15 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "graphics_load.c",
-      "flags": [
-        "-of+",
-        "-oi"
-      ]
+      "file": "graphics_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "graphics_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

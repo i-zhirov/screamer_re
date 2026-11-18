@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x2b044 holds 222 instructions and 708 bytes up to the ret at 0x2b307; the next function starts at 0x2b308, so the record keeps the 708-byte extent and sets no function size; the identity check uses 222 instructions"
+      "text": "the original body at 0x2b044 holds 222 instructions and 708 bytes over the full extent; the ret is at 0x2b307; the next function starts at 0x2b308, so the record keeps the 708-byte extent and sets no function size; the identity check uses 153 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "finding",
       "text": "The map_object_place module at 0x2b044"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,6 +58,7 @@
   "name": "map_object_place",
   "notes": [],
   "object_offset": "0x1b044",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -61,17 +70,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 15,
-        "bytes_total": 671,
+        "bytes_equal": 13,
+        "bytes_total": 491,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 47,
-        "instructions_total": 222,
+        "instructions_equal": 39,
+        "instructions_total": 153,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2b044",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:f7d0b6c3b2815eb99d53310dc6adf7124d820338b00214aaf2e7f3b3530ac9cd",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d87be134b60ad44a359ecdf0fe507f14716e6f697cb5c870d125ed11aa96eee0",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:f2a6019f747a8a10596832f00b32d5adc6296d2ee43ff6940d35866a662c89d3",
     "tool": "run.py"
   },

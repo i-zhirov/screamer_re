@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/cd_audio_status_request.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "cd_audio_status_request",
   "notes": [],
   "object_offset": "0x160e0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

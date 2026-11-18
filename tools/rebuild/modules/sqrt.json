@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "sqrt_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

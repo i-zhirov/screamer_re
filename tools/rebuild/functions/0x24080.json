@@ -71,6 +71,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x24080"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "race_finish_time_ghost_update",
   "notes": [],
   "object_offset": "0x14080",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

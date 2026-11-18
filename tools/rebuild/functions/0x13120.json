@@ -70,6 +70,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/game_mode_20_start.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "game_mode_20_start",
   "notes": [],
   "object_offset": "0x3120",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "music_voice_stop_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

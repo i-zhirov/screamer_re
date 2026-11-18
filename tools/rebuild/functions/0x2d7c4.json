@@ -13,7 +13,7 @@
     },
     {
       "kind": "note",
-      "text": "the original at 0x2d7c4 holds 198 instructions and 690 bytes up to the first ret at 0x2da75; the case blocks continue to the ret at 0x2ddda, so the record keeps the 1560-byte extent and sets no size"
+      "text": "the original at 0x2d7c4 holds 450 instructions and 1559 bytes over the full extent; the first ret is at 0x2da75; the case blocks continue to the ret at 0x2ddda, so the record keeps the 1560-byte extent and sets no size"
     },
     {
       "kind": "note",
@@ -22,12 +22,21 @@
     {
       "kind": "note",
       "text": "the function reads the 0x38-byte player records at object-3 offset 0x2099c, draws the local player and the remote players through panel_draw_centered at 0x2e7cc, text_draw at 0x25020, and panel_show at 0x2dfac, processes the network events through 0xc739c, 0xc8208, 0xc712c, 0xc6fc8, 0xc7248, 0xc71dc, and 0xc76f0, calls net_player_add at 0x2dddc with 0x8844, and loads menu3h.pcx from gfx\\graf.dat with the palette; so the module names the function net_race_lobby"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "net_race_lobby",
   "name": "net_race_lobby",
   "notes": [],
   "object_offset": "0x1d7c4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -39,17 +48,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 61,
-        "bytes_total": 600,
+        "bytes_equal": 89,
+        "bytes_total": 1221,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 32,
-        "instructions_total": 154,
+        "instructions_equal": 51,
+        "instructions_total": 323,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2d7c4",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:fb5ca00fd3a2b54a29648ee710823c47e138b90ba3bca5f94ad7d5a31f20e104",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:43622065602976683dd9b4642bc4e1c50b10ab7e7ce7a5ff4abe78568b477b94",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:aac55ecaf4b136bfc6af86f62c41090b61bd8f33d81a5259471d08361188e160",
     "tool": "run.py"
   },

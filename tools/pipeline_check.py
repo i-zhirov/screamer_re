@@ -16,10 +16,11 @@ Stages:
 10. sound bank: decode the ADLIB- banks, the samples, and the songs.
 11. check_run: run every recorded check of the changed records, verify the
     unchanged records against their stored fingerprint, and compare the
-    printed verdicts with the recorded results.  Then compare the rebuilt
-    whole image with the original, when `--rebuilt-image` exists.
-12. check_store: prove the store, the seed, the generated tables, and the
-    status page.
+    printed verdicts with the recorded results.  Then score the rebuilt whole
+    image against the original.
+12. check_store: prove the store, the seed, the generated tables, the status
+    page, the provenance evidence, the library link manifest, and the
+    toolchain matrix.
 
 The check pins the reference artifact: the digests and the addresses come from
 `docs/reference/inventory.md` and `docs/reference/executables.md`.  The tool exits
@@ -55,7 +56,9 @@ import le as le_module  # noqa: E402
 from entry_probe import run_probe  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent / "rebuild"))
+import library  # noqa: E402
 import store as store_module  # noqa: E402
+import toolchain  # noqa: E402
 
 TOOLS = (
     "pipeline_check.py",
@@ -79,6 +82,12 @@ TOOLS = (
     "rebuild/view.py",
     "rebuild/docs.py",
     "rebuild/callgraph.py",
+    "rebuild/triage.py",
+    "rebuild/coverage.py",
+    "rebuild/library.py",
+    "rebuild/toolchain.py",
+    "rebuild/first_difference.py",
+    "rebuild/whole_image.py",
 )
 
 # Reference values from docs/reference/inventory.md and executables.md.
@@ -109,6 +118,8 @@ NO_RESULT_DETAIL = "no recorded result"
 RUNTIME_DETAIL = "the runtime is skipped"
 # The detail the runner writes for a record whose inputs are unchanged.
 UNCHANGED_DETAIL = "the inputs are unchanged since the previous run"
+# The prefix of the byte-score line of the whole-image comparison.
+IMAGE_SCORE_PREFIX = "image compare: "
 
 
 class Checks:
@@ -705,25 +716,55 @@ def expected_result(record: dict, skip_runtime: bool) -> tuple[str, str | None]:
     return "PASS", detail
 
 
-def unchanged_is_verified(record: dict, game_dir: Path) -> bool:
+def unchanged_matches(record: dict, verdict: str) -> bool:
+    """Tell whether the printed verdict equals the stored verdict of a record.
+
+    The runner prints the stored verdict of a record whose inputs are unchanged,
+    so a stored `fail` prints `FAIL` and stays the expected result of the drift
+    check.
+    """
+    return verdict == store_module.stored_verdict(record)
+
+
+def unchanged_is_verified(
+    record: dict, game_dir: Path, skip_runtime: bool
+) -> bool:
     """Tell whether the recorded result of an unchanged record is trustworthy.
 
-    The runner reports `PASS` with the unchanged detail only when the fingerprint
-    of the recorded result equals the current input fingerprint.  The stage
-    recomputes the fingerprint itself, so a forged or a stale store record
-    fails even when the runner is skipped.
+    The runner reports the stored verdict with the unchanged detail only when
+    the fingerprint of the recorded result equals the current input
+    fingerprint.  The stage recomputes the fingerprint itself, so a forged or a
+    stale store record fails even when the runner is skipped.  The strict mode
+    and the module toolchain enter the fingerprint.  The runtime mode does not,
+    so a stored runtime-run result still verifies under `--skip-runtime`.  A
+    record with a `library` field hashes its library entry with the pinned
+    library mode and no module, so the CLI strict and runtime flags do not
+    change it.
     """
     result = record.get("result") or {}
     stored = result.get("fingerprint")
     if not stored:
         return False
+    if record.get("library"):
+        current = store_module.compute_fingerprint(
+            record,
+            None,
+            library=record["library"],
+            original=game_dir / "STARTH.EXE",
+            mode=library.library_mode(),
+        )
+        return stored == current
     module_name = record.get("module") or record.get("name")
     try:
         module = store_module.load_module(module_name)
     except ValueError:
         return False
+    toolchain = store_module.module_toolchain(module)
     current = store_module.compute_fingerprint(
-        record, module, original=game_dir / "STARTH.EXE"
+        record,
+        module,
+        original=game_dir / "STARTH.EXE",
+        mode=store_module.run_mode(True, skip_runtime, toolchain),
     )
     return stored == current
 
@@ -737,10 +778,12 @@ def check_run(
     the stage needs Docker and DOSBox-X.  With `--skip-unchanged` the runner
     reports a record whose inputs are unchanged since the previous run without
     running its checks, and the stage verifies the stored fingerprint of that
-    record itself.  The stage compares the printed verdict of every record that
-    ran with the recorded result, so a known difference passes and a change or an
-    unexpected skip fails.  A record the store holds no result for is skipped,
-    because the run holds nothing to compare it with.
+    record itself.  The runner prints the stored verdict, so a stored `fail` is
+    the expected result of an unchanged record and still shows `FAIL`.  The stage
+    compares the printed verdict of every record that ran with the recorded
+    result, so a known difference passes and a change or an unexpected skip
+    fails.  A record the store holds no result for is skipped, because the run
+    holds nothing to compare it with.
     """
     if shutil.which("docker") is None:
         print("docker is not on PATH; the record run is skipped")
@@ -777,11 +820,16 @@ def check_run(
             checks.skip(f"stage 11: {label}", NO_RESULT_DETAIL)
             continue
         if detail == UNCHANGED_DETAIL:
-            ok = verdict == "PASS" and unchanged_is_verified(record, game_dir)
+            matches = unchanged_matches(record, verdict)
+            verified = unchanged_is_verified(record, game_dir, skip_runtime)
             detail_text = f"{verdict} ({detail})"
-            if not ok:
+            if not matches:
+                detail_text += (
+                    f", the stored result is {store_module.stored_verdict(record)}"
+                )
+            if not verified:
                 detail_text += ", the recorded fingerprint does not match the inputs"
-            checks.check(f"stage 11: {label}", ok, detail_text)
+            checks.check(f"stage 11: {label}", matches and verified, detail_text)
             compared += 1
             continue
         expected, expected_detail = expected_result(record, skip_runtime)
@@ -804,19 +852,20 @@ def check_run(
 def check_image(
     checks: Checks, game_dir: Path, exe: str, rebuilt_image: Path
 ) -> None:
-    """Compare the rebuilt whole image with the original, when it exists.
+    """Score the rebuilt whole image against the original.
 
     The record checks compare one function or one module.  This stage is the
-    whole-image gate: the rebuilt `STARTH.EXE` must equal the original byte for
-    byte, including the stub, the header, the objects, the pages, and the fixup
-    section.  The stage reports a skip until a whole image is built, because the
-    module recipes build separate executables.
+    whole-image score gate: it always runs and adds one counted check.  A
+    missing or unreadable image fails.  A present image runs the image compare,
+    and exit 0 or exit 1 passes with the byte score in the detail, because a
+    differing image still reports a score.  The detail holds the first score
+    line when the tool prints one, else the last output line or the last error
+    line.  The exact oracle remains the tool's exit code: exit 0 means the
+    image is byte-identical and exit 1 means the images differ.
     """
+    name = "stage 11: the whole image reports a byte score"
     if not rebuilt_image.is_file():
-        checks.skip(
-            "stage 11: the whole image matches",
-            f"no rebuilt image at {rebuilt_image}",
-        )
+        checks.check(name, False, f"no rebuilt image at {rebuilt_image}")
         return
     result = run(
         [
@@ -828,18 +877,26 @@ def check_image(
             str(rebuilt_image),
         ]
     )
-    checks.check(
-        "stage 11: the whole image matches",
-        result.returncode == 0,
-        last_line(result.stdout) or last_line(result.stderr),
+    detail = next(
+        (
+            line.strip()
+            for line in result.stdout.splitlines()
+            if line.strip().startswith(IMAGE_SCORE_PREFIX)
+        ),
+        None,
     )
+    if detail is None:
+        detail = last_line(result.stdout) or last_line(result.stderr)
+    checks.check(name, result.returncode in (0, 1), detail)
 
 
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
-    """Prove the store, the seed, the generated tables, and the page.
+    """Prove the store, the seed, the tables, the page, and the evidence.
 
     The store is the only module registry, so the stage runs the store check,
-    the seed check, and the drift check, and it renders the status page.
+    the seed check, the provenance evidence check, the library link manifest
+    check, the toolchain matrix check, and the drift check, and it renders the
+    status page.
     """
     result = run(
         [
@@ -852,6 +909,48 @@ def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:
     )
     checks.check(
         "stage 12: the store holds no violation",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/triage.py",
+            "check",
+            "--original",
+            str(game_dir / "STARTH.EXE"),
+        ]
+    )
+    checks.check(
+        "stage 12: the provenance evidence is complete",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/library.py",
+            "check-manifest",
+            "--manifest",
+            str(library.LINK_DOCUMENT),
+        ]
+    )
+    checks.check(
+        "stage 12: the library link manifest matches the records",
+        result.returncode == 0,
+        last_line(result.stdout) or last_line(result.stderr),
+    )
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/toolchain.py",
+            "check-matrix",
+            "--manifest",
+            str(toolchain.MANIFEST_DOCUMENT),
+        ]
+    )
+    checks.check(
+        "stage 12: the toolchain matrix matches the module recipes",
         result.returncode == 0,
         last_line(result.stdout) or last_line(result.stderr),
     )

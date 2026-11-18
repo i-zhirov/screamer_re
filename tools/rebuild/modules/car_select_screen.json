@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "car_select_screen_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

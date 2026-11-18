@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "camera_relative_angles_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

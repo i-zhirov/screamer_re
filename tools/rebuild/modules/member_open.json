@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "member_open_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

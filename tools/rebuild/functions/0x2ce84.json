@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x2ce84"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "name_entry_update",
   "notes": [],
   "object_offset": "0x1ce84",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

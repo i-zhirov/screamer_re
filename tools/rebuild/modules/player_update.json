@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "player_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

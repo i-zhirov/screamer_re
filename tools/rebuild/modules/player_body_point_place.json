@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "player_body_point_place_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

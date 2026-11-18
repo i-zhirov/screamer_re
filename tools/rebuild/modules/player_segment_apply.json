@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_segment_apply.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_segment_apply.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "player_segment_apply_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

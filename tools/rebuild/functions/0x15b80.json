@@ -66,6 +66,14 @@
     {
       "kind": "finding",
       "text": "The opponent_effect_update module at 0x15b80"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -73,6 +81,7 @@
   "name": "opponent_effect_update",
   "notes": [],
   "object_offset": "0x5b80",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

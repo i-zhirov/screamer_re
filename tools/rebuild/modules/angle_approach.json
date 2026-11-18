@@ -35,5 +35,6 @@
       "compiler": "wcc386",
       "file": "angle_approach_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

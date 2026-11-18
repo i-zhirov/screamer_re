@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "track_resource_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

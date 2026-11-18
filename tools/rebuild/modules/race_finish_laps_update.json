@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "race_finish_laps_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

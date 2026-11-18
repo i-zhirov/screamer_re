@@ -16,15 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "net_player_add.c",
-      "flags": [
-        "-of+",
-        "-oi"
-      ]
+      "file": "net_player_add.c"
     },
     {
       "compiler": "wcc386",
       "file": "net_player_add_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

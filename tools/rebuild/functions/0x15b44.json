@@ -62,6 +62,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/traffic_effect_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -69,6 +77,7 @@
   "name": "traffic_effect_update",
   "notes": [],
   "object_offset": "0x5b44",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

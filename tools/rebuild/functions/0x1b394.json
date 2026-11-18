@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1b394 holds 166 instructions and 502 bytes up to the ret at 0x1b589; the next function starts at 0x1b58c, so the record keeps the 504-byte extent and sets no function size; the identity check uses 166 instructions"
+      "text": "the original body at 0x1b394 holds 166 instructions and 502 bytes over the full extent; the ret is at 0x1b589; the next function starts at 0x1b58c, so the record keeps the 504-byte extent and sets no function size; the identity check uses 158 instructions"
     },
     {
       "kind": "note",
@@ -43,6 +43,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1b394"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -50,28 +58,35 @@
   "name": "member_list_load",
   "notes": [],
   "object_offset": "0xb394",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '3'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 24,
-        "bytes_total": 502,
+        "bytes_equal": 22,
+        "bytes_total": 313,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 26,
-        "instructions_total": 166,
+        "instructions_equal": 17,
+        "instructions_total": 92,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1b394",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:c080451d13ed358ddbad072663262306f2f985c6ccbb5d14466211469b60fdd2",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:b7bbf23dc29c45bda4d49ebedef3fdc0e66ddea11565fe3e682cc7de41aa5ae3",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:91de0bd916fd73dcfd6073730d60f97dc71607d07046ba8bc1631f969c15e03a",
     "tool": "run.py"
   },

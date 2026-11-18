@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "timer_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

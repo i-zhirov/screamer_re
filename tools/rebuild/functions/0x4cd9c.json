@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x4cd9c holds 81 instructions and 303 bytes up to the ret at 0x4ceca; the next function starts at 0x4cecc, so the store record keeps the 304-byte extent and sets no separate function size; the identity check uses 81 instructions"
+      "text": "the original body at 0x4cd9c holds 81 instructions and 303 bytes over the full extent; the ret is at 0x4ceca; the next function starts at 0x4cecc, so the store record keeps the 304-byte extent and sets no separate function size; the identity check uses 81 instructions"
     },
     {
       "kind": "note",
@@ -46,7 +46,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 81 decoded instructions and 232 bytes; the identity check stays open at 16 of 81 instructions, 16 of 232 bytes, and 0 of 16 relocation slots, because the harness build adds the five constant buffers and V2 saves the frame first with another local layout; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 134 decoded instructions and 429 bytes; the identity check stays open at 16 of 81 instructions, 22 of 303 bytes, and 0 of 16 relocation slots, because the harness build adds the five constant buffers and V2 saves the frame first with another local layout; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The material_load module at 0x4cd9c"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "material_load",
   "notes": [],
   "object_offset": "0x3cd9c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -85,17 +94,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 16,
-        "bytes_total": 232,
+        "bytes_equal": 13,
+        "bytes_total": 286,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 16,
+        "instructions_equal": 28,
         "instructions_total": 81,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4cd9c",
-    "date": "2026-11-08",
-    "fingerprint": "sha256:eb60dbd5a6576a830d1c922fcfbde5974c1af453c93f202e233cb7de208b1a8b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:bbbb9b5997948c4491547a34c795f7b55ef9835455c283b4043672ea6a577351",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:09bf069245fffaa7b5aed009d67cd43d945227c1991afd35edb0dafbd40694ba",
     "tool": "run.py"
   },

@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/memory_block_largest.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "memory_block_largest",
   "notes": [],
   "object_offset": "0x1f709",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

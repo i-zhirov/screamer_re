@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "sound_event_transform_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

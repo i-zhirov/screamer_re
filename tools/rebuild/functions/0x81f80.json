@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/basis_vector_transform.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "basis_vector_transform",
   "notes": [],
   "object_offset": "0x71f80",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

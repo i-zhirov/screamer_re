@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 40 instructions and 117 bytes up to the ret 4 at 0x10074; the identity window uses 49 instructions, so it decodes the square-root stub after the rebuilt ret; the identity check stays open at 3 of 49 instructions, 7 of 134 bytes, and 0 of 4 relocation slots, because V2 pushes edx after the frame and uses another frame offset, places the 2.0 scale in the local data, and routes the zero result through a second local; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "curve_speed",
   "notes": [],
   "object_offset": "0x122e0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

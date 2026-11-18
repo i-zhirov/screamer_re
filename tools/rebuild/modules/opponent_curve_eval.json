@@ -21,10 +21,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "opponent_curve_eval.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "opponent_curve_eval.c"
     },
     {
       "compiler": "wasm",
@@ -34,5 +31,6 @@
       "compiler": "wcc386",
       "file": "opponent_curve_eval_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

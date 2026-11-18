@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 45 decoded instructions and 153 bytes in the identity window; the identity check stays open at 8 of 45 instructions and 6 of 147 bytes, and 0 of 5 relocation slots, because V2 saves ecx and edx, keeps the record in ecx, forms the two point pointers with lea, and orders the prologue and the tail stores in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "traffic_body_point_place",
   "notes": [],
   "object_offset": "0xf108",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

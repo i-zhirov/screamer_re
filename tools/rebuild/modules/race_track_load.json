@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "race_track_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

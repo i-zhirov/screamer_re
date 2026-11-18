@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "acos_table_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -19,14 +19,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "championship_result_apply.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "championship_result_apply.c"
     },
     {
       "compiler": "wcc386",
       "file": "championship_result_apply_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

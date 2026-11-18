@@ -1,0 +1,56 @@
+{
+  "address": "0xeab22",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeab22"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "getenv",
+    "object_sha256": "sha256:1806cb0a0c5e5c2daac86c7a0842ff95fd04fc4e6dbfb2e79b76834b753eff9d",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "getenv_"
+  },
+  "name": "getenv",
+  "notes": [],
+  "object_offset": "0xdab22",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 84,
+        "bytes_total": 90,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 48,
+        "instructions_total": 48,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xeab22",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7a9832286efd62b41b2e311b47e528e6ff68d328d3cfe64b89b13d9d3336ceb9",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:5c7bdc4d6a3bf2ed8533a0f50bbf423142a08fef3a981cc9e6cda110306e4c73",
+    "tool": "run.py"
+  },
+  "size": 90,
+  "status": "verified"
+}

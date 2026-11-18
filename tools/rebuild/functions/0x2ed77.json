@@ -10,12 +10,21 @@
     {
       "kind": "note",
       "text": "releases the block when the pointer is set; counterpart of `list_create`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "assembly",
   "module": "list_destroy",
   "name": "list_destroy",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -32,12 +41,18 @@
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 25,
         "instructions_total": 25,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ed77",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:0d1069a5739e8f540f084866b5568eae257ef34aa750b78a2217b17c950ae740",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9df4c476aea2cdd6304cf7ab511416f6a91a14edf5d148df22a6e4bf04dbd32a",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:95a51f4c155070cde92bad8e9aeadbc0577a24bd33d2e7447b11a44335d2ce5e",
     "tool": "run.py"
   },

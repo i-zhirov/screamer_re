@@ -71,6 +71,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x111b4"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "object_handle_pair_release",
   "notes": [],
   "object_offset": "0x11b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

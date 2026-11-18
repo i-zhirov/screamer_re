@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "view_fade_out_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

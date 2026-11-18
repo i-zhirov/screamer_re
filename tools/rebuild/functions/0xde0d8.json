@@ -1,0 +1,56 @@
+{
+  "address": "0xde0d8",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xde0d8"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "_clse",
+    "object_sha256": "sha256:b20c59184cbb80416164b953ad2e5757c275e96329759beae79f84a79441c826",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__close_"
+  },
+  "name": "__close",
+  "notes": [],
+  "object_offset": "0xce0d8",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 44,
+        "bytes_total": 50,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 23,
+        "instructions_total": 23,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xde0d8",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9834aaa8b3dfc99e4745e6cc6f119a2a840792e931611df740f71de40bd1118e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:da613a12b7d45e3fb0b898198a90436926135d6a7575adbb2259777bd7a00916",
+    "tool": "run.py"
+  },
+  "size": 50,
+  "status": "verified"
+}

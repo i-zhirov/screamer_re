@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "replay_write_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

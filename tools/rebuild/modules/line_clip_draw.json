@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "line_clip_draw_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

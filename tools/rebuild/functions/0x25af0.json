@@ -71,6 +71,14 @@
     {
       "kind": "finding",
       "text": "The sprite_list_flush module at 0x25af0"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sprite_list_flush",
   "notes": [],
   "object_offset": "0x15af0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

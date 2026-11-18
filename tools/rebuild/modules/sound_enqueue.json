@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "sound_enqueue_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

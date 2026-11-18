@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "traffic_simulation_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

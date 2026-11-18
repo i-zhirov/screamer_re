@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x4c695 holds 106 instructions and 331 bytes up to the ret at 0x4c7df; the next function starts at 0x4c7e0, so the store record keeps the 331-byte extent and sets no function size; the identity check uses 106 instructions"
+      "text": "the original body at 0x4c695 holds 106 instructions and 331 bytes over the full extent; the ret is at 0x4c7df; the next function starts at 0x4c7e0, so the store record keeps the 331-byte extent and sets no function size; the identity check uses 72 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 106 decoded instructions and 277 bytes in the identity window; the identity check stays open at 27 of 106 instructions and 7 of 277 bytes, because V2 saves the frame first, keeps the three arguments in registers, forms the terminator branches with local flags, and builds the unbuffered tail in another shape; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 72 decoded instructions and 180 bytes in the identity window; the identity check stays open at 17 of 72 instructions and 6 of 180 bytes, because V2 saves the frame first, keeps the three arguments in registers, forms the terminator branches with local flags, and builds the unbuffered tail in another shape; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,18 @@
     {
       "kind": "finding",
       "text": "The stream_read_text module at 0x4c695"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "c",
@@ -62,6 +74,7 @@
   "name": "stream_read_text",
   "notes": [],
   "object_offset": "0x3c695",
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -74,16 +87,22 @@
       },
       "identity": {
         "bytes_equal": 7,
-        "bytes_total": 277,
+        "bytes_total": 172,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 27,
-        "instructions_total": 106,
+        "instructions_equal": 14,
+        "instructions_total": 71,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c695",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:8db438bba29a0363e5c5d4ac0ce4c2ef73b429c45c84efca99d27094aa00327c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9fc18d8269f8440564c841079d08991ffac109f116f39f7e174e3c3d2b5181c5",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:7e732fda8cef1f419ca756f17e8dcec6b8cd0892c965846d4184c6ef420f1c82",
     "tool": "run.py"
   },

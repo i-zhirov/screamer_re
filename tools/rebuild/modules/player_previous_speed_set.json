@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "player_previous_speed_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

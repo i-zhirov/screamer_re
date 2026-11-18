@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/object_handle_table_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "object_handle_table_release",
   "notes": [],
   "object_offset": "0x1a08",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

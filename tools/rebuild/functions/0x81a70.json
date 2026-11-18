@@ -15,11 +15,20 @@
     {
       "kind": "note",
       "text": "the original at 0x81a70 holds a 62-byte entry of 16 instructions up to the jump at 0x81aac: it stores the driver pointer 0x6350 in the global 0x7451c, saves all registers and the four segment registers, calls the reset helper at 0x82e0c, clears the active count 0x72488, loads the destination 0x40330 in edi, and jumps to the shared service body at 0x81ac6; the neighbour sound_effects_update at 0x81ab0 holds the shared body; the plan row counted 299 bytes because the body sweep follows the jump to the first ret at 0x81b9a"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "module": "sound_update",
   "name": "sound_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -32,16 +41,22 @@
       },
       "identity": {
         "bytes_equal": 4,
-        "bytes_total": 57,
+        "bytes_total": 27,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 3,
-        "instructions_total": 16,
+        "instructions_equal": 1,
+        "instructions_total": 6,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x81a70",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:1e0b292d6a49a512db55d973379a3369a587fc8ea746897a6dd9c2cb92dd44b1",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:b4ab2d53febb8429a2cda59b40f527440d4909b7b062b97865c0cd9f7b972253",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:cfb696cbdd7f17f98865a54c7108d0f6209ff17c965dbac5d285049dc64ec987",
     "tool": "run.py"
   },

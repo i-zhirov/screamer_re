@@ -23,5 +23,6 @@
       "compiler": "wcc386",
       "file": "sound_render_branch_greater_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

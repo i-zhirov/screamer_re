@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x18a14 holds 92 instructions and 329 bytes up to the ret at 0x18b5c; the next function starts at 0x18b60, so the store record keeps the 332-byte extent and sets no separate function size; the identity check uses 92 instructions"
+      "text": "the original body at 0x18a14 holds 92 instructions and 329 bytes over the full extent; the ret is at 0x18b5c; the next function starts at 0x18b60, so the store record keeps the 332-byte extent and sets no separate function size; the identity check uses 62 instructions"
     },
     {
       "kind": "note",
@@ -54,11 +54,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 92 decoded instructions and 351 bytes; the identity check stays open at 12 of 92 instructions, 23 of 329 bytes, and 0 of 36 relocation slots, because V2 saves the frame first, keeps the object in ecx, folds the clock loads, and emits a compact scan loop; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 62 decoded instructions and 245 bytes; the identity check stays open at 8 of 62 instructions, 15 of 245 bytes, and 0 of 36 relocation slots, because V2 saves the frame first, keeps the object in ecx, folds the clock loads, and emits a compact scan loop; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
       "text": "The race_clock_update module at 0x18a14"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "race_clock_update",
   "notes": [],
   "object_offset": "0x8a14",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -78,16 +87,22 @@
       },
       "identity": {
         "bytes_equal": 23,
-        "bytes_total": 329,
+        "bytes_total": 240,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 12,
-        "instructions_total": 92,
+        "instructions_equal": 7,
+        "instructions_total": 61,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x18a14",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:8cbc58d703c4f6265a09b021102dc85e9b3ba8dc793900af19081fe6a3de41ce",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:1dfe55b17b654a371428f7256978fef2eb752ba24728e0512139ed5da9bb406e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:560b8f2499b6462a0abdce955ce5c7f2a89195a248b62a92baf8af8c7e1d93dd",
     "tool": "run.py"
   },

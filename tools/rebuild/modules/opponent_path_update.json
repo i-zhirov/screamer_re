@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "opponent_path_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

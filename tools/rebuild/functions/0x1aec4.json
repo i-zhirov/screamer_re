@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 52 decoded instructions; the identity check stays open at 12 of 52 instructions and 15 of 159 bytes, because V2 sets the frame first, keeps the view pointer in ecx, folds the address computation, and calls the harness memcpy stub; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "car_camera_select",
   "notes": [],
   "object_offset": "0xaec4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

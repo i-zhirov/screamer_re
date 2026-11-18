@@ -63,6 +63,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 6 of 20 instructions and 7 of 54 bytes equal, and 0 of 3 relocation slots; the identity check stays open because V2 saves ecx, keeps the record in ecx, drops the two argument slots, uses direct operands, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "music_select",
   "notes": [],
   "object_offset": "0x1febc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

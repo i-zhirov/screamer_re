@@ -79,6 +79,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/cd_audio_play.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "cd_audio_play",
   "notes": [],
   "object_offset": "0x163cc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "track_progress_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

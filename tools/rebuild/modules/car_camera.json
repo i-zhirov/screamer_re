@@ -35,5 +35,6 @@
       "compiler": "wcc386",
       "file": "car_camera_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

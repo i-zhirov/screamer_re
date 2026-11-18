@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_disc_info_request_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

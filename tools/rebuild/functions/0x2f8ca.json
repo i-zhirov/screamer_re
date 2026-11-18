@@ -10,11 +10,25 @@
     {
       "kind": "note",
       "text": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "memory_available",
   "name": "memory_available",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-15",
+      "text": "The direct return is rejected: it removed the named local and the identity fell to the different match with 22 of 25 instructions and 30 of 52 bytes. The kept source holds the recorded first difference `instruction 8: byte 2: 0xfc against 0xf4` and the idiom `local slot order`. The measured first difference is `instruction 8: byte 2: 0xfc against 0xf4`, and further differences are at instructions 9 and 12. The original stack slot layout is `[ebp-4]` = the argument `pool`, `[ebp-8]` = the sum, and `[ebp-0xc]` = the return temporary. The rebuilt stack slot layout is `[ebp-4]` = the sum, `[ebp-8]` = the return temporary, and `[ebp-0xc]` = the argument `pool`. The cause is `the compiler allocator local slot order`, and that cause is an inference from the measured pair."
+    }
+  ],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -31,18 +45,24 @@
         "detail": "the instruction shapes match; the differing bytes are not relocations",
         "instructions_equal": 27,
         "instructions_total": 27,
-        "verdict": "pass"
+        "match": "same-shape",
+        "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:956887e4fd9e01c6a31da8114d99b523fffb8788c11798c7222af32bd12e934e",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:7256ba08e9c0f8171f748da7531e37319476c970b1b9531175f88e77497d225d",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:d5e72b9ada92ef440218f04138abfa8eec1d358b5c973a4e08f8e9015efb2e21",
     "tool": "run.py"
   },
   "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
   "section": "Program functions",
   "size": 58,
-  "status": "verified",
+  "status": "rebuilt",
   "symbol": "memory_available_"
 }

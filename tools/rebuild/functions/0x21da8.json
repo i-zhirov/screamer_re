@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The view_fade_out module at 0x21da8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "view_fade_out",
   "notes": [],
   "object_offset": "0x11da8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

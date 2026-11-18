@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "point_hit_probe_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "frame_step_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

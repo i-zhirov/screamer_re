@@ -1,9 +1,56 @@
 {
   "address": "0xde10a",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xde10a"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "write",
+    "object_sha256": "sha256:2eb156b781efd11b5f5206b15af6f5c0be63614b99201ab91c5d47906108a229",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "write_"
+  },
+  "name": "write",
   "notes": [],
   "object_offset": "0xce10a",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 441,
+        "bytes_total": 465,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 169,
+        "instructions_total": 169,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xde10a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:b3324d2bff153b7ee60e0ffba8dd14fc005900a00494bfa49e7465dc7015c821",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:d3d40a2fba371bfff46912e3b179ad2aa27d28211523af11696f69f6e73a4885",
+    "tool": "run.py"
+  },
   "size": 465,
-  "status": "unknown"
+  "status": "verified"
 }

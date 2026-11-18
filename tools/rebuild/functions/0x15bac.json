@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/player_car_effect_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "player_car_effect_update",
   "notes": [],
   "object_offset": "0x5bac",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

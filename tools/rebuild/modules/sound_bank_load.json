@@ -20,13 +20,16 @@
       "compiler": "wcc386",
       "file": "sound_bank_load.c",
       "flags": [
-        "-of+",
-        "-dSOUND_BANK_LOAD_HARNESS"
+        "-of+"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_bank_load_main.c"
+      "file": "sound_bank_load_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

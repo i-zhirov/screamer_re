@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "memory_alloc.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "memory_alloc.c"
     },
     {
       "compiler": "wcc386",
       "file": "memory_alloc_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

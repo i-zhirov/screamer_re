@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "sound_variant_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

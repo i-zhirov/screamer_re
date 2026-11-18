@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/race_finish_overlay_5.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "race_finish_overlay_5",
   "notes": [],
   "object_offset": "0x14264",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

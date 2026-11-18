@@ -1,9 +1,56 @@
 {
   "address": "0xe0994",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xe0994"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "enterdb",
+    "object_sha256": "sha256:ec8f41fc80e1b5d312bee16156fa6db10587386f6e50d4cecea5b82059ea8fd0",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__EnterWVIDEO_"
+  },
+  "name": "__EnterWVIDEO",
   "notes": [],
   "object_offset": "0xd0994",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 36,
+        "bytes_total": 38,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xe0994",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4599bc24205ddc2dd3ca0e2761c023db9c91c32d23a4a3b55befd6f4f228f109",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:1cfdf986ee7e32ae912e5283ca5afff2ae4d2118567593208c0e48c564179036",
+    "tool": "run.py"
+  },
   "size": 43,
-  "status": "unknown"
+  "status": "verified"
 }

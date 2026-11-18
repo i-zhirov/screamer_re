@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/palette_file_load.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "palette_file_load",
   "notes": [],
   "object_offset": "0x3cf3c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/func_113c8.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "func_113c8",
   "notes": [],
   "object_offset": "0x13c8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

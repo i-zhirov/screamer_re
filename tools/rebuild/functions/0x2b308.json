@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The map_object_line_select module at 0x2b308"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "map_object_line_select",
   "notes": [],
   "object_offset": "0x1b308",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

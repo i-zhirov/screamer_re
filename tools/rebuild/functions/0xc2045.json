@@ -1,9 +1,60 @@
 {
   "address": "0xc2045",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xc2045"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "atoi",
+    "object_sha256": "sha256:027111dcb71bcdb84d3b9636ff2c9adf6be9f1d2085d9f44315213ff52224776",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "atoi_"
+  },
+  "name": "atoi",
   "notes": [],
   "object_offset": "0xb2045",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 83,
+        "bytes_total": 87,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 37,
+        "instructions_total": 37,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xc2045",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:04d805a478f8b5681f2d1d6808234b0bddcf28f945918528d949adcf13703a14",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:fc87e9985c97cab94129475b9e7ad0e7b8d76089c053417048413c0ffdb61c57",
+    "tool": "run.py"
+  },
   "size": 87,
-  "status": "unknown"
+  "status": "verified"
 }

@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "data_blit_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

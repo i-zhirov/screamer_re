@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_prepare.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_prepare.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_prepare_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -19,14 +19,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "net_race_screen.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "net_race_screen.c"
     },
     {
       "compiler": "wcc386",
       "file": "net_race_screen_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

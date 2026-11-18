@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/array_sort.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## The object pipeline and the race frame"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "array_sort",
   "notes": [],
   "object_offset": "0x73500",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -109,7 +118,7 @@
   },
   "role": "Sorts a signed dword array in place in ascending order.",
   "section": "object_update_all callees",
-  "size": 192,
+  "size": 96,
   "status": "rebuilt",
   "symbol": "array_sort_"
 }

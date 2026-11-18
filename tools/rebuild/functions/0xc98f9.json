@@ -6,11 +6,24 @@
     {
       "kind": "note",
       "text": "the decompiled `FUN_000c98f9` tests `DAT_001275c8`, calls `FUN_000c9d0d` or `FUN_000deb82`, and clears the records at `DAT_001274f8` to `DAT_00127a78`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
     }
   ],
   "name": "music_channel_stop",
   "notes": [],
   "object_offset": "0xb98f9",
+  "provenance": "library",
   "role": "stops the voices of one music channel, releases the driver voice, and clears the channel records",
   "section": "The HMI sound driver",
   "size": 536,

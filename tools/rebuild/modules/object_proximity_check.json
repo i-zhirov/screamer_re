@@ -32,5 +32,6 @@
       "compiler": "wcc386",
       "file": "object_proximity_check_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

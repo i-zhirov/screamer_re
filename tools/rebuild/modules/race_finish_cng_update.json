@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "race_finish_cng_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

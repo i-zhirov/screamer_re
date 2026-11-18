@@ -1,9 +1,56 @@
 {
   "address": "0xde097",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xde097"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "lseek",
+    "object_sha256": "sha256:c4f35fb6e78401398d5c275dfc3983483da00d0ec484a7f6d6c10571890b7fba",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "lseek_"
+  },
+  "name": "lseek",
   "notes": [],
   "object_offset": "0xce097",
-  "size": 115,
-  "status": "unknown"
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 63,
+        "bytes_total": 65,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 26,
+        "instructions_total": 26,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xde097",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:98b30be3dd8a526148393b9e78682d32be1ac302cd0bf207535ba807bc97ea06",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:bd506e2fa9c77b84c89736e350d428c878e7c2573feb3d8fb11066778f5ace46",
+    "tool": "run.py"
+  },
+  "size": 65,
+  "status": "verified"
 }

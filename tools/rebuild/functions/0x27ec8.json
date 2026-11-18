@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "the original at `0x27ec8` holds 40 instructions and 122 bytes: the frame, the 0x310-byte local area, the loop over the 0x300 source bytes at `DAT_0010cf5c` from `0xcf5c` to `0xd25c`, the arithmetic `(byte - offset) * scale + offset` with the `0x4d9f4` rounding helper, the `palette_set` call at `0x81a05`, and the `ret 8` epilogue; the scale and the offset arrive on the stack"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "video_present",
   "name": "video_present",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 7,
-        "bytes_total": 89,
+        "bytes_equal": 8,
+        "bytes_total": 87,
         "detail": "the instruction sequences differ",
         "instructions_equal": 6,
         "instructions_total": 29,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27ec8",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:3b5a3863cf723a8e5174daf391d8f3b6a93a0bcad96db631725944f0fdb3a590",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:44e8317ea8222fcae0642c287b9bd2e37cf74df0be07f1f5f296d031baedfd9e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:f5eddab3eb7797a5a5ffb15fb98cb8ef6371154b06acfab61c47e7b81a31b71e",
     "tool": "run.py"
   },

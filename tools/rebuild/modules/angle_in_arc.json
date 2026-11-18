@@ -36,5 +36,6 @@
       "compiler": "wcc386",
       "file": "angle_in_arc_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

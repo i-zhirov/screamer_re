@@ -75,6 +75,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/object_lookup.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "object_lookup",
   "notes": [],
   "object_offset": "0x10d0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

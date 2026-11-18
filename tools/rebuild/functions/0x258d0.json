@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x258d0 holds 151 instructions and 475 bytes up to the ret at 0x25aaa; the next function starts at 0x25aac, so the store record keeps the 476-byte extent and sets no function size; the identity check uses 151 instructions"
+      "text": "the original body at 0x258d0 holds 151 instructions and 475 bytes over the full extent; the ret is at 0x25aaa; the next function starts at 0x25aac, so the store record keeps the 476-byte extent and sets no function size; the identity check uses 117 instructions"
     },
     {
       "kind": "note",
@@ -50,7 +50,15 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt function body holds 117 instructions and 360 bytes; the identity window uses the 151 original instructions, so the check stays open at 18 of 151 instructions and 19 of 462 bytes because V2 saves five registers, uses another prologue order, and uses registers for the two loops; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt function body holds 117 instructions and 360 bytes; the identity window uses the 151 original instructions, so the check stays open at 14 of 117 instructions and 15 of 360 bytes because V2 saves five registers, uses another prologue order, and uses registers for the two loops; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "palette_shade_build",
   "notes": [],
   "object_offset": "0x158d0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 19,
-        "bytes_total": 462,
+        "bytes_equal": 12,
+        "bytes_total": 352,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 18,
-        "instructions_total": 151,
+        "instructions_equal": 14,
+        "instructions_total": 119,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x258d0",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:7ff5ac6f57678bdfda953f08350990bb856cc7688791d95c4ff037ca0a9cbb6b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:ed9f9c68a2052bfc15b9b58974f3b5f5862fe8cf05d43aea04cdd849ffa2414e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:0ccbbc66821c4b599faccd1e3e3126e78eca1c94fde30e94265ea484969309c2",
     "tool": "run.py"
   },

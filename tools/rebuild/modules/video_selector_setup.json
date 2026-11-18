@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "video_selector_setup_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

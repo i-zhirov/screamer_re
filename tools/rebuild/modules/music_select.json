@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "music_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

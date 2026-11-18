@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "func_11230_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

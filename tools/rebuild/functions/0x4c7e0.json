@@ -11,12 +11,25 @@
     {
       "kind": "note",
       "text": "returns the word at `stream + 0x70`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_close module"
+    },
+    {
+      "kind": "finding",
+      "text": "## The stream_read module at 0x4c4e5"
+    },
+    {
+      "kind": "finding",
+      "text": "## The Phase A library modules match byte for byte"
     }
   ],
   "implementation": "assembly",
   "module": "stream_status",
   "name": "stream_status",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
       "behavior": {
@@ -33,12 +46,18 @@
         "detail": "the modules are byte-identical",
         "instructions_equal": 21,
         "instructions_total": 21,
+        "match": "exact-bytes",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c7e0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:9060cdede56f52bb5dcc35d5fab213cda8fc9eaf19809389a65efdbe35a99866",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d6bed1063fc0aa525e840294228f3e5f72689eb03bf071848ff4615b7491b324",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:6f59efd4f7445a93b225cb6be39c38cc3feb69ceab524b0c93b9b4ed0bb416af",
     "tool": "run.py"
   },

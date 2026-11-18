@@ -11,12 +11,21 @@
     {
       "kind": "note",
       "text": "calls the video copy at 0x8beb8 with 480, 400, and the video buffer pointer"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "assembly",
   "module": "video_fill",
   "name": "video_fill",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -33,12 +42,18 @@
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 12,
         "instructions_total": 12,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2aa98",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:6db07dbf83513fc82a008a65ed2f92f8bb9eee6d3cb62c684d2a36eafcdc0ccf",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:cf0eb8af6373f4b6e35780a1693f5197a7c4dbf8dd18b98390700ee35ab67514",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:68d60bc1a65647062d246cc33fc35d55cf09e885c5e0fee883a1651dc5fad95a",
     "tool": "run.py"
   },

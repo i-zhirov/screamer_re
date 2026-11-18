@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/replay_write_begin.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "replay_write_begin",
   "notes": [],
   "object_offset": "0x12d88",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

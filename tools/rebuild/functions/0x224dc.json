@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/point_rotation_flags.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "point_rotation_flags",
   "notes": [],
   "object_offset": "0x124dc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

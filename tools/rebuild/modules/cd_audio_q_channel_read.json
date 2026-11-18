@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_q_channel_read_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

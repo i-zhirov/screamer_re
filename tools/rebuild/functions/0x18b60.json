@@ -67,6 +67,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/opponent_score_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "opponent_score_update",
   "notes": [],
   "object_offset": "0x8b60",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

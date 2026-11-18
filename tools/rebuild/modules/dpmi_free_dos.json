@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "dpmi_free_dos_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "stream_seek_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

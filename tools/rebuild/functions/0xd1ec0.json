@@ -1,43 +1,63 @@
 {
   "address": "0xd1ec0",
   "checks": [
-    "build",
-    "identity",
-    "behavior"
+    "identity"
   ],
   "confidence": "observed",
   "evidence": [
     {
       "kind": "note",
       "text": "replicates the value byte over the dword and calls the run-time core at `0xe0860`"
+    },
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The OPL register write sequence in the HMI driver"
+    },
+    {
+      "kind": "finding",
+      "text": "## The malloc module at 0xd1f25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd1ec0"
     }
   ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "set386",
+    "object_sha256": "sha256:1375112f4506731219a65b00cc60b6528052ad6340b85c536d1bc4e55fb6f707",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "memset_"
+  },
   "module": "memset_runtime",
   "name": "memset",
   "notes": [],
+  "provenance": "library",
   "result": {
     "checks": {
-      "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
-      },
-      "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
-      },
       "identity": {
         "bytes_equal": 22,
         "bytes_total": 24,
         "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 12,
         "instructions_total": 12,
+        "match": "exact-relocations",
         "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd1ec0",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:a4cc64af4c333b6c21e430101c8ccbaf5c9c2bb349effb49c1a6891a499d8c70",
-    "source_digest": "sha256:710c8c8de6e0f25733b1888e2774cb2ac5960c182b63d4be2bc1fd6beccc8b56",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:f8edf99804f3beb7c63c4b72a345b1f5d6d5f9b952d358c4d84683147999b18f",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6241a71f7246fa880d23a10a26771656c05a971dd39786e757a843a21354496a",
     "tool": "run.py"
   },
   "role": "replicates the value byte over the dword and calls the run-time core at `0xe0860`",

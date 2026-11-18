@@ -19,12 +19,16 @@
       "compiler": "wcc386",
       "file": "menu_space_init.c",
       "flags": [
-        "-of+"
+        "-od"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "menu_space_init_main.c"
+      "file": "menu_space_init_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

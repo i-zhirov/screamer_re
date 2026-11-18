@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x219ec holds 122 instructions and 431 bytes up to the ret at 0x21b9a; the next function starts at 0x21b9c, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 122 instructions"
+      "text": "the original body at 0x219ec holds 122 instructions and 431 bytes over the full extent; the ret is at 0x21b9a; the next function starts at 0x21b9c, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 113 instructions"
     },
     {
       "kind": "note",
@@ -54,11 +54,19 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 436 bytes and 122 decoded instructions; the identity check stays open at 25 of 122 instructions and 48 of 431 bytes, and 0 of 35 relocation slots match, because V2 saves the frame pointer first, keeps the exit flag in esi and the up latch in edi, uses a 12-byte frame, folds the fill index into ecx, and reads the globals through near data operands; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 394 bytes and 113 decoded instructions; the identity check stays open at 23 of 113 instructions and 44 of 394 bytes, and 0 of 35 relocation slots match, because V2 saves the frame pointer first, keeps the exit flag in esi and the up latch in edi, uses a 12-byte frame, folds the fill index into ecx, and reads the globals through near data operands; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "finding",
       "text": "The quit_confirm_screen module at 0x219ec"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -66,6 +74,7 @@
   "name": "quit_confirm_screen",
   "notes": [],
   "object_offset": "0x119ec",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -77,17 +86,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 48,
-        "bytes_total": 431,
+        "bytes_equal": 37,
+        "bytes_total": 377,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 25,
-        "instructions_total": 122,
+        "instructions_equal": 30,
+        "instructions_total": 108,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x219ec",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:3db6c5e1179a7e6bc4b09ad6f9d2e636191ade94822b9362abfbf0aa698ff043",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:511f3c3e98b23726f3e15e108f7d4e7cd5b024ec7e99625d34c2e503f7e641f6",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:fe979e4ee75ba8412377894fa83de3ebc6c16466a22065a88f3417907d16606f",
     "tool": "run.py"
   },

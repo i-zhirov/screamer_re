@@ -9,7 +9,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original at 0x2cf68 holds 370 instructions and 1357 bytes up to the ret at 0x2d4b4, so the record keeps the 1360-byte extent and sets no function size"
+      "text": "the original at 0x2cf68 holds 370 instructions and 1357 bytes over the full extent; the ret is at 0x2d4b4, so the record keeps the 1360-byte extent and sets no function size"
     },
     {
       "kind": "note",
@@ -34,12 +34,21 @@
     {
       "kind": "command",
       "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2cf68 --count 370"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "championship_screen",
   "name": "championship_screen",
   "notes": [],
   "object_offset": "0x1cf68",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -56,12 +65,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 78,
         "instructions_total": 321,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2cf68",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:083b9436b8540a2242ac44c80d0208b21ee11ba404d2e65d6fd61e4c476f79b0",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9795a8aaf4551a52b787f03252f4c8ffdcfac1d7b51af370c8914078a3f0cb50",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:599117727b29db7cf032fce9280a97a3964bc0d8dfb8833bc23bd594ab483cb3",
     "tool": "run.py"
   },

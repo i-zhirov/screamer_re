@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "sound_event_render_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

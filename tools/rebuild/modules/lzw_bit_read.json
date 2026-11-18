@@ -19,14 +19,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "lzw_bit_read.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "lzw_bit_read.c"
     },
     {
       "compiler": "wcc386",
       "file": "lzw_bit_read_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

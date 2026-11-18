@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "camera_basis_patch_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

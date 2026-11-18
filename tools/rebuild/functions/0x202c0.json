@@ -79,6 +79,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/replay_view_update.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "replay_view_update",
   "notes": [],
   "object_offset": "0x102c0",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "opponent_score_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

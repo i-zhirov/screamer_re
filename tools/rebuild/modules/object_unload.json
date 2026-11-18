@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "object_unload_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

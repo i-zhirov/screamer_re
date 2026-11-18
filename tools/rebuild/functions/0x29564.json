@@ -10,11 +10,20 @@
     {
       "kind": "note",
       "text": "switches on `DAT_0011fac4`; case 1 advances `DAT_0002038c` by the frame timing and copies `DAT_0011facc` into `DAT_0011fac4` and `DAT_000203b8`"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "race_state_update",
   "name": "race_state_update",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -26,17 +35,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 0,
-        "bytes_total": 21,
+        "bytes_equal": 10,
+        "bytes_total": 139,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 2,
-        "instructions_total": 9,
+        "instructions_equal": 1,
+        "instructions_total": 31,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29564",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:cf602e95c4f70c10ccbf7f9b861972ca34cd59daaa8f61a75c6f0753c5c2f795",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9fcb7506e56fd62ae25b30206b4f5ec2fc2f884ca22c3e661968626baedc9d20",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "watcom10"
+    },
     "source_digest": "sha256:fc917e0a8f178158f6a7d416b662790f28cb42a25b8255a0dfc3714ecc430daa",
     "tool": "run.py"
   },

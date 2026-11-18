@@ -15,14 +15,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "stream_close.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "stream_close.c"
     },
     {
       "compiler": "wcc386",
       "file": "stream_close_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

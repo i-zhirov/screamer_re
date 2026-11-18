@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 4 of 25 instructions and 7 of 53 bytes equal, and 0 of 0 relocation slots; the identity check stays open because V2 puts the frame first and saves eax, ecx, and edx, while the original saves eax and edx before the frame; V2 keeps the zero value in ecx instead of edx and passes the double to the core with two dword pushes instead of fld and fstp; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sqrt",
   "notes": [],
   "object_offset": "0x12bec",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

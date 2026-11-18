@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "startup_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

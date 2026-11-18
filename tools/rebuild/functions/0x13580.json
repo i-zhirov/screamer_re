@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x13580 holds 91 instructions and 330 bytes up to the ret at 0x136c9; the next function starts at 0x136cc, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 91 instructions"
+      "text": "the original body at 0x13580 holds 91 instructions and 330 bytes over the full extent; the ret is at 0x136c9; the next function starts at 0x136cc, so the store record keeps the 332-byte extent and sets no function size; the identity check uses 85 instructions"
     },
     {
       "kind": "note",
@@ -38,7 +38,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 91 decoded instructions and 327 bytes in the identity window; the identity check stays open at 20 of 91 instructions and 23 of 327 bytes, because V2 saves the frame first, keeps the counter in a register inside each loop, and adds the symbol offset at the field store; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 85 decoded instructions and 302 bytes in the identity window; the identity check stays open at 20 of 85 instructions and 22 of 302 bytes, because V2 saves the frame first, keeps the counter in a register inside each loop, and adds the symbol offset at the field store; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "finding",
       "text": "The race_view_reset module at 0x13580"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "race_view_reset",
   "notes": [],
   "object_offset": "0x3580",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 23,
-        "bytes_total": 327,
+        "bytes_equal": 27,
+        "bytes_total": 296,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 20,
-        "instructions_total": 91,
+        "instructions_equal": 14,
+        "instructions_total": 82,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x13580",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:e759dea7451dbd2c2151aed20eeff974ec92229b228a42a013250d224fb387ef",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:37c20ce901af7a21516ea2f0ce30a3a6339109af818577f72d6ce65428294995",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:01ac7dbaae93aa35433401866851f9f1161bf79424cda5f9bd28e2a5eae93616",
     "tool": "run.py"
   },

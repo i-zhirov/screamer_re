@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "memory_block_largest_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

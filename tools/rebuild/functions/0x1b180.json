@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the identity check compares 9 instructions; the rebuilt body holds 9 instructions and 24 bytes, and the 9-instruction window holds 5 of 9 instructions, 6 of 22 bytes, and 0 of 2 relocation slots equal, because V2 saves ebp before edx, loads the archive context before the name pointer, and restores the stack with lea esp, [ebp - 4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "gamespline_release",
   "notes": [],
   "object_offset": "0xb180",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

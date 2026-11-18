@@ -51,6 +51,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 11 of 52 instructions equal, 13 of 141 bytes equal, and 0 of 7 relocation slots; the identity check stays open because V2 uses a shorter frame, fuses the two (1 - t) factors into one fmul st(0), keeps the output pointer in eax and the input pointer in edx without frame slots, and reads the basis constant through a near data operand; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "func_1e670",
   "notes": [],
   "object_offset": "0xe670",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

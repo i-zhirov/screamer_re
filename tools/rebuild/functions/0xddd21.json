@@ -1,9 +1,56 @@
 {
   "address": "0xddd21",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xddd21"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "allocfp",
+    "object_sha256": "sha256:35a39e05742a9225d5f52a27fd5259fbda2d848266020371e10899fbc9dcdd87",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "__freefp_"
+  },
+  "name": "__freefp",
   "notes": [],
   "object_offset": "0xcdd21",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 48,
+        "bytes_total": 57,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 25,
+        "instructions_total": 25,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xddd21",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:fab6512c1bafcc14dea6ac03fe7d8ce889549ed6a222bbdcfac031dcfdb0e319",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:9f59ee8042a46825711c79647f4548be64fdece66f8a2e18e3bfed036b6e46a6",
+    "tool": "run.py"
+  },
   "size": 87,
-  "status": "unknown"
+  "status": "verified"
 }

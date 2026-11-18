@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/sound_voice_finished.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "sound_voice_finished",
   "notes": [],
   "object_offset": "0xf834",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

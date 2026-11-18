@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "championship_screen_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "championship_screen_init.c"
     },
     {
       "compiler": "wasm",
@@ -31,5 +28,6 @@
       "compiler": "wcc386",
       "file": "championship_screen_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

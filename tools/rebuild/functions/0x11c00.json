@@ -51,6 +51,14 @@
     {
       "kind": "finding",
       "text": "The map_collision_check module at 0x11c00"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "map_collision_check",
   "notes": [],
   "object_offset": "0x1c00",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

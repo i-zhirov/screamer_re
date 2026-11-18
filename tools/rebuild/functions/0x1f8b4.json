@@ -71,6 +71,14 @@
     {
       "kind": "note",
       "text": "the identity check compares 14 instructions; the rebuilt body holds 11 of 14 instructions, 19 of 37 bytes, and 2 of 2 relocation slots equal; the rebuilt body holds 38 bytes because V2 puts push ebp before push edx, places the local at ebp-8, and uses lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "sound_fx_volume_set",
   "notes": [],
   "object_offset": "0xf8b4",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

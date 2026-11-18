@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x1517c holds 137 instructions and 499 bytes up to the ret at 0x1536e; the function continues through the ret at 0x15377, so the record keeps the 508-byte extent to the next function at 0x15378 and sets no function size; a branch at 0x152f8 jumps over the first ret to the common block at 0x151ba, so the identity check uses 137 instructions"
+      "text": "the original body at 0x1517c holds 144 instructions and 508 bytes over the full extent; the ret is at 0x1536e; the function continues through the ret at 0x15377, so the record keeps the 508-byte extent to the next function at 0x15378 and sets no function size; a branch at 0x152f8 jumps over the first ret to the common block at 0x151ba, so the identity check uses 100 instructions"
     },
     {
       "kind": "note",
@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1517c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -62,6 +70,7 @@
   "name": "opponent_route_setup",
   "notes": [],
   "object_offset": "0x517c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -73,17 +82,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 24,
-        "bytes_total": 421,
+        "bytes_equal": 23,
+        "bytes_total": 332,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 29,
-        "instructions_total": 137,
+        "instructions_equal": 23,
+        "instructions_total": 100,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1517c",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:fbc8ca3c6427c4d30c97f9f0354cae7067bbe2c4e6c140dc3f11fd80b1d67b1b",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9f72804047713617db23f867714a10bb9b0373210ea2ef1d2b96f15e87d3336e",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:2c9e517e9def404d8dcc1cd323ea1d8b6900b615288a69cab4cc90fc64011b4c",
     "tool": "run.py"
   },

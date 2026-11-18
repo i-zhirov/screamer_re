@@ -70,6 +70,14 @@
     {
       "kind": "finding",
       "text": "The material_data_release module at 0x4cecc"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "material_data_release",
   "notes": [],
   "object_offset": "0x3cecc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

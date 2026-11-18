@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "sound_queue_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

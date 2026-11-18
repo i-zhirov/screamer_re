@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the original body at 0x4c98c holds 96 instructions and 344 bytes up to the ret at 0x4cae3; the next function starts at 0x4cae4, so the store record keeps the 344-byte extent and sets no function size; the identity check uses 96 instructions"
+      "text": "the original body at 0x4c98c holds 96 instructions and 344 bytes over the full extent; the ret is at 0x4cae3; the next function starts at 0x4cae4, so the store record keeps the 344-byte extent and sets no function size; the identity check uses 96 instructions"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 16 of 96 instructions, 25 of 327 bytes, and 0 of 25 relocation slots equal; V2 saves ebp first and builds the harness text in local buffers, while the original uses the literal data object and the frame; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 16 of 96 instructions, 25 of 344 bytes, and 0 of 25 relocation slots equal; V2 saves ebp first and builds the harness text in local buffers, while the original uses the literal data object and the frame; the build and behavior checks pass, so the store records rebuilt"
     },
     {
       "kind": "command",
@@ -55,6 +55,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x4c98c"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -62,28 +70,35 @@
   "name": "unr_file_load",
   "notes": [],
   "object_offset": "0x3c98c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '2'",
+        "verdict": "fail"
       },
       "build": {
         "detail": "the module builds",
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 25,
-        "bytes_total": 327,
+        "bytes_equal": 30,
+        "bytes_total": 344,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 16,
-        "instructions_total": 96,
+        "instructions_equal": 32,
+        "instructions_total": 88,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c98c",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:fa24b359921f8b1ac85e8c8435ce5dfe1b1a956a1843def5013abf43e943c04f",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:4582ce484583498c51cbf777947b291294b83530b43999187b08d3838cdb711b",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:058ce902c01cec5338d4291564c7cc2109b2b2a41befa495759ecd2803a64aed",
     "tool": "run.py"
   },

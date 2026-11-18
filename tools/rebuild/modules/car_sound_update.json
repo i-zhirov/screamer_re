@@ -26,10 +26,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_sound_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_sound_update.c"
     },
     {
       "compiler": "wasm",
@@ -39,5 +36,6 @@
       "compiler": "wcc386",
       "file": "car_sound_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

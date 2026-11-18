@@ -71,6 +71,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/bios_tick_reset.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -78,6 +86,7 @@
   "name": "bios_tick_reset",
   "notes": [],
   "object_offset": "0xf990",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

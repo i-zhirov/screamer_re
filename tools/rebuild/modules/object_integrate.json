@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "object_integrate_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

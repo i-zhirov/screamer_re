@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "menu_line_value_next_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

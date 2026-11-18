@@ -79,6 +79,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/point_rotate_y.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "point_rotate_y",
   "notes": [],
   "object_offset": "0x1218c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

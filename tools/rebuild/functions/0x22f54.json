@@ -14,11 +14,20 @@
     {
       "kind": "note",
       "text": "the original at 0x22f54 holds 64 instructions and 228 bytes: the five register saves, the frame, the four-byte local area, the two float copies at +0x00 and +0x04, the six signed 16-bit copies at +0x08 through +0x12, the index advance at DAT_00118e64, the wrap test against DAT_00118e68, and the second-marker update at DAT_00118e70; the behavior check passes; the identity check stays open because the register saves and the record address differ"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "module": "replay_write",
   "name": "replay_write",
   "notes": [],
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -35,12 +44,18 @@
         "detail": "the instruction sequences differ",
         "instructions_equal": 24,
         "instructions_total": 58,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22f54",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:ea6a35dafa89671e804668d8a1cb85bc9fecfed8f424f7faf29eee335bdd570a",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:9a1357808ddb33e6906c64ac002a6a9103cf600370b677306348e9203f3cdf71",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:9262e232b6a3c5517f7c5856ff6de9cbdead3493c6eec3fc94ba0b85ffdeb9c3",
     "tool": "run.py"
   },

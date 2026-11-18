@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "screen_setup_cleanup_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

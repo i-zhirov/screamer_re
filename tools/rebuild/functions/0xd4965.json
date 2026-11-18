@@ -1,9 +1,56 @@
 {
   "address": "0xd4965",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xd4965"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "fgets",
+    "object_sha256": "sha256:7effe042f42b0bce6d7cfda3f1df1cbb620c6a3d50fbccd802f53e4e6dcdca55",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "fgets_"
+  },
+  "name": "fgets",
   "notes": [],
   "object_offset": "0xc4965",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 97,
+        "bytes_total": 99,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 45,
+        "instructions_total": 45,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd4965",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:d977ba242b1a233553bb8bcad40201c53a2706270a30080aa9a276062dba864a",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:6496b2ee8298294c3c913c1c35a0fe21bd7aa9f853b91ef939d50af233e5ad63",
+    "tool": "run.py"
+  },
   "size": 99,
-  "status": "unknown"
+  "status": "verified"
 }

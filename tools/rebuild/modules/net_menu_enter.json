@@ -25,5 +25,6 @@
       "compiler": "wcc386",
       "file": "net_menu_enter_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

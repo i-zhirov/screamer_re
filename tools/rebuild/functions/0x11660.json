@@ -67,6 +67,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 5 of 23 instructions equal and 0 of 59 bytes equal; the identity check stays open because V2 pushes the frame pointer first and then the saved register, keeps the list in ecx and an index in edi, uses imul for the 0x1c stride, and folds the loop into a direct compare; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "object_slot_acquire",
   "notes": [],
   "object_offset": "0x1660",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

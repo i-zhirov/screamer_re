@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "cache_resource_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "player_effect_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

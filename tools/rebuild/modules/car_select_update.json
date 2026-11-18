@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_select_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_select_update.c"
     },
     {
       "compiler": "wasm",
@@ -31,5 +28,6 @@
       "compiler": "wcc386",
       "file": "car_select_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

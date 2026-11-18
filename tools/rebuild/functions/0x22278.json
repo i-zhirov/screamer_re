@@ -75,6 +75,14 @@
     {
       "kind": "note",
       "text": "the rebuilt body holds 36 instructions in the identity window and 83 bytes up to the ret 4; the identity check stays open at 8 of 36 instructions, 8 of 83 bytes, and 0 of 0 relocation slots, because V2 keeps the input point in edx and the output point in ecx, saves ebx and esi, uses a smaller frame, and builds the two trig products in another order; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -82,6 +90,7 @@
   "name": "point_rotate_y_float",
   "notes": [],
   "object_offset": "0x12278",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "camera_reference_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

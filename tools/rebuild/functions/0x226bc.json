@@ -79,6 +79,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/direction_angle.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -86,6 +94,7 @@
   "name": "direction_angle",
   "notes": [],
   "object_offset": "0x126bc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

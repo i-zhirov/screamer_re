@@ -1,0 +1,56 @@
+{
+  "address": "0xeabba",
+  "checks": [
+    "identity"
+  ],
+  "evidence": [
+    {
+      "kind": "finding",
+      "text": "## The reachable unknown candidates"
+    },
+    {
+      "kind": "finding",
+      "text": "## The period Watcom 10.0a toolchain"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/library.py verify --address 0xeabba"
+    }
+  ],
+  "library": {
+    "file": "CLIB3R.LIB",
+    "module": "strncpy",
+    "object_sha256": "sha256:591e290c35107ce4ac72f7618362d7ef94d2744102fc9b80516b62d88d974d96",
+    "sha256": "sha256:ea6f73080f9ea18825258369989f6e1d0b7abc7c3df05e4bb8f17a31a5cbdee8",
+    "symbol": "strncpy_"
+  },
+  "name": "strncpy",
+  "notes": [],
+  "object_offset": "0xdabba",
+  "provenance": "library",
+  "result": {
+    "checks": {
+      "identity": {
+        "bytes_equal": 37,
+        "bytes_total": 37,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 23,
+        "instructions_total": 23,
+        "match": "exact-bytes",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xeabba",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:bf57689f6d14b7a42f730fb68f73830c21995d290b00905ed1697c81379e2291",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:83cd820a8e1903b69ef35f188bbfeb40342e1aafaaca638e3f5380b13163834c",
+    "tool": "run.py"
+  },
+  "size": 244,
+  "status": "verified"
+}

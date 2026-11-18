@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "cockpit_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

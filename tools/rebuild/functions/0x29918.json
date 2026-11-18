@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at `0x29918` holds 174 instructions and 657 bytes up to the `ret` at `0x29ba8`; the next function starts at `0x29bac`, so the store record keeps the 660-byte extent and sets no function size; the identity check uses 174 instructions"
+      "text": "the original body at `0x29918` holds 174 instructions and 657 bytes up to the `ret` at `0x29ba8`; the next function starts at `0x29bac`, so the store record keeps the 660-byte extent and sets no function size; the identity check uses 127 instructions"
     },
     {
       "kind": "note",
@@ -39,6 +39,14 @@
     {
       "kind": "finding",
       "text": "The menu_text_update module at 0x29918"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -46,6 +54,7 @@
   "name": "menu_text_update",
   "notes": [],
   "object_offset": "0x19918",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -57,17 +66,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 27,
-        "bytes_total": 605,
+        "bytes_equal": 24,
+        "bytes_total": 475,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 36,
-        "instructions_total": 174,
+        "instructions_equal": 27,
+        "instructions_total": 123,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x29918",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:8113fcf6a7ecd96779f25d2bf9981eefb0caf79f5eeb0c03ff907e46f9f3040c",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:18164326c137adbc8b1676a8095eedb9bc52373c33160877af32c173cc3cb2cc",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:de6c9f07637dd259432929ac0989bed7f2330b31aef7c8cc10f706210bad03c2",
     "tool": "run.py"
   },

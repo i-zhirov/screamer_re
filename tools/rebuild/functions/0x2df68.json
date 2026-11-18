@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/net_menu_enter.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "net_menu_enter",
   "notes": [],
   "object_offset": "0x1df68",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

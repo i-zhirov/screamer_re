@@ -38,5 +38,6 @@
       "compiler": "wcc386",
       "file": "sound_queue_promote_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

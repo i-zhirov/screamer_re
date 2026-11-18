@@ -70,6 +70,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x2666c"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -77,6 +85,7 @@
   "name": "dpmi_free_dos",
   "notes": [],
   "object_offset": "0x1666c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

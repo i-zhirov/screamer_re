@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_simulation_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_simulation_update.c"
     },
     {
       "compiler": "wcc386",
       "file": "race_simulation_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

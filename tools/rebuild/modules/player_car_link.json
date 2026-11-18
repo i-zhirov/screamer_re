@@ -21,10 +21,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_car_link.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_car_link.c"
     },
     {
       "compiler": "wasm",
@@ -34,5 +31,6 @@
       "compiler": "wcc386",
       "file": "player_car_link_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

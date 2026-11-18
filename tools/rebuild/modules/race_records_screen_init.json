@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "race_records_screen_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -16,14 +16,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "choice_load.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "choice_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "choice_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

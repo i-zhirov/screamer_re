@@ -24,5 +24,6 @@
       "compiler": "wcc386",
       "file": "sound_event_next_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

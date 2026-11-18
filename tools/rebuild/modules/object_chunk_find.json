@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "object_chunk_find_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

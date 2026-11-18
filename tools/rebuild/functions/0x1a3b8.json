@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at `0x1a3b8` holds 179 instructions and 631 bytes up to the `ret` at `0x1a62e`; the next function starts at `0x1a630`, so the store record keeps the 632-byte extent and sets no function size; the identity check uses 179 instructions"
+      "text": "the original body at `0x1a3b8` holds 179 instructions and 631 bytes up to the `ret` at `0x1a62e`; the next function starts at `0x1a630`, so the store record keeps the 632-byte extent and sets no function size; the identity check uses 162 instructions"
     },
     {
       "kind": "note",
@@ -51,6 +51,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x1a3b8"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -58,6 +66,7 @@
   "name": "player_view_orbit",
   "notes": [],
   "object_offset": "0xa3b8",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
@@ -69,17 +78,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 34,
-        "bytes_total": 566,
+        "bytes_equal": 35,
+        "bytes_total": 530,
         "detail": "the instruction sequences differ",
         "instructions_equal": 31,
-        "instructions_total": 179,
+        "instructions_total": 162,
+        "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1a3b8",
-    "date": "2026-11-06",
-    "fingerprint": "sha256:206c5fb99057cee9dcfcbb86fbfed12df397700219d9fa4ee407317f798baf39",
+    "date": "2026-11-15",
+    "fingerprint": "sha256:0821d4c4cb9f6dc99f7a8a4d58d294ad589000c5c129da7bbcbd51aaa8bdcfab",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
     "source_digest": "sha256:06265e3578e37c70aaf80f8826f650e94ff11fa0df8c804f74b1ed88e8e8ae1e",
     "tool": "run.py"
   },

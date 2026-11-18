@@ -26,5 +26,6 @@
       "compiler": "wcc386",
       "file": "object_handle_pair_release_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

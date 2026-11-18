@@ -66,6 +66,14 @@
     {
       "kind": "command",
       "text": "python3 tools/rebuild/run.py run --function 0x4cf2c"
+    },
+    {
+      "kind": "finding",
+      "text": "## The resource layer and the DPMI services"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
     }
   ],
   "implementation": "c",
@@ -73,6 +81,7 @@
   "name": "map_material_data_release",
   "notes": [],
   "object_offset": "0x3cf2c",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

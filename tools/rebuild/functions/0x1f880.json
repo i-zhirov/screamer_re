@@ -67,6 +67,14 @@
     {
       "kind": "finding",
       "text": "The sound_voice_stop module at 0x1f880"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -74,6 +82,7 @@
   "name": "sound_voice_stop",
   "notes": [],
   "object_offset": "0xf880",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {

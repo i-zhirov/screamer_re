@@ -63,6 +63,14 @@
     {
       "kind": "file",
       "text": "tools/rebuild/modules/bit_pattern_match.json"
+    },
+    {
+      "kind": "finding",
+      "text": "## Program map"
+    },
+    {
+      "kind": "finding",
+      "text": "## Function names"
     }
   ],
   "implementation": "c",
@@ -70,6 +78,7 @@
   "name": "bit_pattern_match",
   "notes": [],
   "object_offset": "0x14bfc",
+  "provenance": "game",
   "result": {
     "checks": {
       "behavior": {
