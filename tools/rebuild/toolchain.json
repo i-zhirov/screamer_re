@@ -12369,11 +12369,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "race_finish_overlay_4.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "race_finish_overlay_4.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

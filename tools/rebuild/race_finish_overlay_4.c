@@ -23,9 +23,11 @@
  * fourth case of the mode switch.  The original has no symbol, so the record
  * keeps the name with the confidence inferred.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
- * function holds no floating-point instruction and calls one helper, so the
- * module needs no FPU stub and no assembly implementation.
+ * The original has the EBP frame.  The C form with `-of+` adds a frame
+ * restore and reorders the argument setup, so the recipe uses the exact
+ * `race_finish_overlay_4.asm` body.  This C source stays as the readable
+ * behavioral reference.  The function holds no floating-point instruction and
+ * calls one helper, so the module needs no FPU stub.
  */
 extern char *DAT_00118ff0;
 

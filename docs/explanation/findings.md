@@ -34796,10 +34796,10 @@ temporary `-od` recipe.
   `test_relocate_keeps_the_original_target_for_an_unmapped_branch` and
   `test_relocate_keeps_the_original_target_for_an_ambiguous_symbol` cover the
   fallback.
-- Observation: 14 of the earlier 19 incomplete modules have no relocation
-  error.  Six hold a different prologue, epilogue, or instruction count:
-  `replay_playback_begin`, `race_finish_overlay_4`, `cd_audio_tick`,
-  `race_cleanup`, `video_buf_load`, and `map_data_release`.
+- Observation: 13 of the earlier 19 incomplete modules have no relocation
+  error.  Five hold a different prologue, epilogue, or instruction count:
+  `replay_playback_begin`, `cd_audio_tick`, `race_cleanup`, `video_buf_load`,
+  and `map_data_release`.
   Eight hold a different stack-slot layout: `cng_view_update`,
   `sla_view_update`, `list_create`, `dos_memory_alloc`, `memory_alloc_small`,
   `memory_free`, `memory_available`, and `pool_init`.  These are compiler-form
@@ -34847,10 +34847,22 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/replay_frame_buffer_release.map
   --rebuilt-symbol replay_frame_buffer_release_` reports
   `21 of 30 bytes equal` and `the instruction sequences match`.
+- Observation: `race_finish_overlay_4` now closes its body difference with
+  `tools/rebuild/race_finish_overlay_4.asm`.  The C form with `-of+` adds a
+  frame restore and reorders the argument setup.  The assembly body holds the
+  original 15 instructions and 33 bytes.  The byte diff is 28 of 33 bytes
+  equal, 15 of 15 instructions equal, two operands different, and one of one
+  relocation slot equal.  The identity match is `exact-relocations`, and the
+  whole-image relocation rewrites the text pointer and the call.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x240a0 --rebuilt work/rebuild/rfo4.exe
+  --rebuilt-map work/rebuild/race_finish_overlay_4.map
+  --rebuilt-symbol race_finish_overlay_4_` reports
+  `28 of 33 bytes equal` and `the instruction sequences match`.
 - Observation: `python3 tools/rebuild/whole_image.py --all` now reports
-  32 patched, 452 skipped, 97 relocation slots, and
+  33 patched, 451 skipped, 98 relocation slots, and
   `1,034,923 of 1,034,923 bytes equal`.  `relocation_incomplete` is empty,
-  `body_differences` holds 14 modules, and `runnable` is true.
+  `body_differences` holds 13 modules, and `runnable` is true.
   Evidence: `work/rebuild/whole-image.json` and
   `python3 tools/rebuild/image_compare.py --original STARTH.EXE --rebuilt
   work/rebuild/STARTH.EXE`.
@@ -34858,6 +34870,6 @@ temporary `-od` recipe.
   and every other module keeps the original bytes.  A body difference is not a
   relocation failure, and a byte score alone still does not prove a rebuilt
   body.
-- Limit: six modules keep a compiler-form difference and eight keep a
+- Limit: five modules keep a compiler-form difference and eight keep a
   stack-slot difference.  A future change must not patch them without a
   matching code form or a proven body transformation.
