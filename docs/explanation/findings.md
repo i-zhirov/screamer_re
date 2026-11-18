@@ -34796,21 +34796,49 @@ temporary `-od` recipe.
   `test_relocate_keeps_the_original_target_for_an_unmapped_branch` and
   `test_relocate_keeps_the_original_target_for_an_ambiguous_symbol` cover the
   fallback.
-- Observation: 17 of the earlier 19 incomplete modules have no relocation
-  error.  Nine hold a different prologue, epilogue, or instruction count:
-  `screen_setup_cleanup`, `replay_frame_buffer_release`,
-  `replay_playback_begin`, `race_finish_overlay_4`, `cd_audio_tick`,
-  `func_27f80`, `race_cleanup`, `video_buf_load`, and `map_data_release`.
+- Observation: 15 of the earlier 19 incomplete modules have no relocation
+  error.  Seven hold a different prologue, epilogue, or instruction count:
+  `replay_frame_buffer_release`, `replay_playback_begin`,
+  `race_finish_overlay_4`, `cd_audio_tick`, `race_cleanup`, `video_buf_load`,
+  and `map_data_release`.
   Eight hold a different stack-slot layout: `cng_view_update`,
   `sla_view_update`, `list_create`, `dos_memory_alloc`, `memory_alloc_small`,
   `memory_free`, `memory_available`, and `pool_init`.  These are compiler-form
   differences, not link-time operands, so the build keeps the original bytes.
   Evidence: the per-module instruction diff and the `body_differences` list in
   `work/rebuild/whole-image.json`.
+- Observation: `func_27f80` now closes its body difference with the assembly
+  source `tools/rebuild/func_27f80.asm`.  The C form with `-of+` adds
+  `mov esp, ebp`; the Watcom 10.0a and V2 matrix measured the existing flags,
+  `-of+`, `-od`, `-of+ -oi`, `-of+ -ot`, and the empty set, and no set reached
+  exact bytes.  The assembly body holds the original 7 instructions and 18
+  bytes.  The harness places its two data symbols at the original object
+  offsets `0x2dec` and `0x2e88`, so the identity check is `exact-bytes`.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x27f80 --rebuilt work/rebuild/f27f80.exe
+  --rebuilt-map work/rebuild/f27f80.map --rebuilt-symbol func_27f80_` reports
+  `18 of 18 bytes equal` and `the modules are byte-identical`.
+- Observation: the record extent of `func_27f80` holds two bytes after the
+  `ret`.  The whole-image fit now accepts a shorter `ret` body and keeps the
+  original record tail.  The build writes the 18 rebuilt bytes and leaves the
+  two tail bytes in place.  The report `rebuilt_size` is 18 and `size` is 20.
+  Evidence: `whole_image.py --module func_27f80` reports one patched module
+  and `1,034,923 of 1,034,923 bytes equal`.
+- Observation: `screen_setup_cleanup` now closes its body difference with
+  `tools/rebuild/screen_setup_cleanup.asm`.  The C form with `-of+` adds
+  `mov esp, ebp`; the assembly body holds the original 12 instructions and 42
+  bytes.  The byte diff is 22 of 42 bytes equal, 12 of 12 instructions equal,
+  and seven call operands different.  The identity match is `exact-relocations`,
+  and the whole-image relocation rewrites the seven calls.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x15150 --rebuilt work/rebuild/ssclean.exe
+  --rebuilt-map work/rebuild/screen_setup_cleanup.map
+  --rebuilt-symbol screen_setup_cleanup_` reports
+  `22 of 42 bytes equal` and `the instruction sequences match`.
 - Observation: `python3 tools/rebuild/whole_image.py --all` now reports
-  11 patched, 473 skipped, 22 relocation slots, and
+  31 patched, 453 skipped, 94 relocation slots, and
   `1,034,923 of 1,034,923 bytes equal`.  `relocation_incomplete` is empty,
-  `body_differences` holds 17 modules, and `runnable` is true.
+  `body_differences` holds 15 modules, and `runnable` is true.
   Evidence: `work/rebuild/whole-image.json` and
   `python3 tools/rebuild/image_compare.py --original STARTH.EXE --rebuilt
   work/rebuild/STARTH.EXE`.
@@ -34818,6 +34846,6 @@ temporary `-od` recipe.
   and every other module keeps the original bytes.  A body difference is not a
   relocation failure, and a byte score alone still does not prove a rebuilt
   body.
-- Limit: nine modules keep a compiler-form difference and eight keep a
+- Limit: seven modules keep a compiler-form difference and eight keep a
   stack-slot difference.  A future change must not patch them without a
   matching code form or a proven body transformation.

@@ -171,6 +171,24 @@ class FitTestCase(unittest.TestCase):
             reason, "the rebuilt body holds 4 bytes against the recorded 5"
         )
 
+    def test_has_original_tail_accepts_a_short_ret_body(self) -> None:
+        rebuilt = [insn(0x10000, "ret", "", b"\xc3")]
+
+        self.assertTrue(
+            whole_image.has_original_tail(
+                record("0x10000", "free", "free_", 3), rebuilt
+            )
+        )
+
+    def test_has_original_tail_rejects_a_short_non_ret_body(self) -> None:
+        rebuilt = [insn(0x10000, "nop", "", b"\x90")]
+
+        self.assertFalse(
+            whole_image.has_original_tail(
+                record("0x10000", "free", "free_", 3), rebuilt
+            )
+        )
+
     def test_fit_rejects_a_long_body(self) -> None:
         rebuilt = [
             insn(0x10000, "mov", "eax, 1", b"\xb8\x01\x00"),

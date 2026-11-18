@@ -22,7 +22,7 @@
     },
     {
       "kind": "note",
-      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and makes no math call, so the module needs no FPU stub, and the module uses no assembly implementation"
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp before the epilogue, so the recipe uses the exact screen_setup_cleanup.asm body; the function holds no floating-point instruction and makes no math call, so the module needs no FPU stub"
     },
     {
       "kind": "note",
@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 10 of 12 instructions and 20 of 42 bytes equal, and 0 of 0 relocation slots; V2 emits mov esp, ebp before pop ebp, while the original restores the frame with pop ebp alone at 0x15178; the seven call operands are the link-time addresses; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 12 of 12 instructions and 22 of 42 bytes equal, and 0 of 0 relocation slots; the assembly body drops the V2 mov esp, ebp and keeps the original pop ebp at 0x15178; the seven call operands are the link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
     },
     {
       "kind": "command",
@@ -69,6 +69,10 @@
       "text": "The screen_setup_cleanup module at 0x15150"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/screen_setup_cleanup.asm"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -77,7 +81,7 @@
       "text": "## Function names"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "screen_setup_cleanup",
   "name": "screen_setup_cleanup",
   "notes": [],
@@ -94,23 +98,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 20,
+        "bytes_equal": 22,
         "bytes_total": 42,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 10,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 12,
         "instructions_total": 12,
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x15150",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:e1dcd81db9215357a5f9c76582bbae2f2c91f37b790a828e6c5da36e41e6f321",
-    "source_digest": "sha256:9ceb3005474390e2ecd2d5a17eb3e155075db197ea5e9902102e89243242c7b5",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:784c8155292ed40fc0d45ee58823abe5746c82af60afba8f83ebb3150d554228",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:1f43a9dba4f77850cb944220187acb71b44eac10af2f9a128500c34b13c8e5fc",
     "tool": "run.py"
   },
   "role": "Runs the short subsystem teardown after a failed screen asset load.",
   "section": "Program functions",
   "size": 44,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "screen_setup_cleanup_"
 }

@@ -419,7 +419,8 @@ through the store.
 - The whole-image build `whole_image.py` places the rebuilt module bodies at
   their original addresses, writes `work/rebuild/STARTH.EXE` and
   `work/rebuild/whole-image.json`, and writes no store record.  A module is
-  patched only when its instruction byte sum equals the record `size`, its
+  patched only when its instruction byte sum equals the record `size` or the
+  body is a shorter `ret` body whose record tail stays original, its
   instruction count, sizes, and fixup slots align, and every absolute operand
   is relocated.  A skipped module keeps the original bytes and records the
   reason.  The report holds `runnable`, which is true only when the image is
@@ -532,8 +533,9 @@ through the store.
   uses the original `STARTH.EXE` as the container and keeps the stub, the
   header, the data objects, and the library bytes.  It places each rebuilt
   module body at its original address in the original address order of the
-  lowest identity record of each module.  The fit rule patches a module only
-  when the rebuilt instruction byte sum equals the record `size`.  The
+  lowest identity record of each module.  The fit rule patches a module when
+  the rebuilt instruction byte sum equals the record `size`, or when a shorter
+  body ends in `ret` and the record tail stays original.  The
   relocation rule rewrites an internal 4-byte slot with the original absolute
   target.  It rewrites a direct relative branch or call from the rebuilt symbol
   at the target to the unique original symbol of the same name.  A duplicate

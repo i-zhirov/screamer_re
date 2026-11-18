@@ -17,11 +17,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "func_27f80.c",
-      "flags": [
-        "-of+"
-      ]
+      "compiler": "wasm",
+      "file": "func_27f80.asm"
     },
     {
       "compiler": "wcc386",

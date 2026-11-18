@@ -23,8 +23,8 @@ void print(char *text);
 void quit(void);
 #pragma aux quit = "mov ax, 0x4C00" "int 0x21" parm [] modify exact [ax];
 
-void *DAT_00002dec;
-void *DAT_00002e88;
+extern void *DAT_00002dec;
+extern void *DAT_00002e88;
 
 static unsigned char context_a[0x40];
 static unsigned char context_b[0x40];

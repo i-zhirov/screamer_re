@@ -92,6 +92,16 @@ def fit(record: dict, rebuilt: list[le.Insn]) -> str | None:
     return f"the rebuilt body holds {total} bytes against the recorded {size}"
 
 
+def has_original_tail(record: dict, rebuilt: list[le.Insn]) -> bool:
+    """Return true when a short ret body can leave the record tail in place."""
+    total = sum(insn.size for insn in rebuilt)
+    return (
+        total < record["size"]
+        and bool(rebuilt)
+        and rebuilt[-1].mnemonic == "ret"
+    )
+
+
 def _slots(
     insn: le.Insn, relocations: list[le.Relocation]
 ) -> list[le.Relocation]:
@@ -389,12 +399,18 @@ def build(
             )
             row["rebuilt_size"] = rebuilt_size
             fit_reason = fit(record, rebuilt_instructions)
-            if fit_reason is not None:
+            tail = has_original_tail(record, rebuilt_instructions)
+            if fit_reason is not None and not tail:
                 row["fit_reason"] = fit_reason
                 row["reason"] = fit_reason
                 row["outcome"] = "skipped"
                 continue
-            row["fit"] = True
+            if fit_reason is None:
+                row["fit"] = True
+            if tail:
+                original_instructions = original_instructions[
+                    : len(rebuilt_instructions)
+                ]
             original_slots = [
                 slot
                 for slot in original_relocations
@@ -415,11 +431,16 @@ def build(
                 original_symbols,
             )
             if body is None:
-                row["reason"] = (
-                    "the rebuilt body differs beyond its absolute operands"
-                )
+                if fit_reason is not None:
+                    row["fit_reason"] = fit_reason
+                    row["reason"] = fit_reason
+                else:
+                    row["reason"] = (
+                        "the rebuilt body differs beyond its absolute operands"
+                    )
                 row["outcome"] = "skipped"
                 continue
+            row["fit"] = True
             file_offset = original.to_file_offset(address)
             if file_offset is None:
                 row["reason"] = "the original address is not in a file page"

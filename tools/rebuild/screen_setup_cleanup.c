@@ -21,9 +21,11 @@
  * flow.  The original has no symbol, so the record keeps the name with the
  * confidence inferred.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
+ * The original has the EBP frame.  The C form with `-of+` adds `mov esp,ebp`
+ * before the epilogue, so the recipe uses the exact `screen_setup_cleanup.asm`
+ * body.  This C source stays as the readable behavioral reference.  The
  * function holds no floating-point instruction and makes no math call, so the
- * module needs no FPU stub, and the module uses no assembly implementation.
+ * module needs no FPU stub.
  */
 extern void video_text_mode(void);
 extern void keyboard_hook(int enable);

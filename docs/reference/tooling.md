@@ -1076,10 +1076,11 @@ original address.
 The module order is the original address order of the lowest identity record of
 each module.  A module with no symbol record is excluded.
 
-The fit rule patches a module only when the sum of the rebuilt instruction sizes
-equals the record `size` and every absolute operand relocates.  An internal
-4-byte slot takes the original absolute target.  A direct relative branch or
-call takes the address of the unique original symbol that the rebuilt target
+The fit rule patches a module when the sum of the rebuilt instruction sizes
+equals the record `size`, or when a shorter body ends in `ret` and the record
+tail keeps its original bytes, and every absolute operand relocates.  An
+internal 4-byte slot takes the original absolute target.  A direct relative
+branch or call takes the address of the unique original symbol that the rebuilt target
 names.  An unmapped or ambiguous branch symbol keeps the original branch
 target.  A non-internal slot, a width other than 4, an instruction
 misalignment, or a difference outside a rewritten operand skips the module as a

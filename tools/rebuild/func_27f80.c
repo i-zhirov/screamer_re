@@ -16,9 +16,12 @@
  * the 6-byte record table at 0x106272.  The body has no confirmed name, so the
  * record uses the fallback name `func_27f80`.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
- * original has no floating-point instruction.  The module needs no assembly
- * source and no FPU stub.
+ * The original has the EBP frame.  The C form with `-of+` keeps the frame but
+ * adds `mov esp, ebp` before `pop ebp`.  V2 and Watcom 10.0a both add it, and
+ * the measured flag sets do not suppress it.  The module recipe uses the exact
+ * `func_27f80.asm` body instead.  This C source stays as the readable
+ * behavioral reference.  The original has no floating-point instruction, so
+ * the module needs no FPU stub.
  */
 extern void *DAT_00002dec;
 extern void *DAT_00002e88;

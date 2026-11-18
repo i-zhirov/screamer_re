@@ -9727,11 +9727,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "func_27f80.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "func_27f80.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -13141,11 +13139,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "screen_setup_cleanup.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "screen_setup_cleanup.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
