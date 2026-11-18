@@ -12865,11 +12865,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "replay_playback_begin.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "replay_playback_begin.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

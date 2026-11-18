@@ -22,9 +22,11 @@
  * The original has no symbol, so the record keeps the name with the confidence
  * inferred.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The function
- * holds no floating-point instruction and calls no helper, so it needs no FPU
- * stub and no assembly implementation.
+ * The original has the EBP frame.  The C form with `-of+` saves the frame
+ * first and reorders the stores, so the recipe uses the exact
+ * `replay_playback_begin.asm` body.  This C source stays as the readable
+ * behavioral reference.  The function holds no floating-point instruction and
+ * calls no helper, so it needs no FPU stub.
  */
 extern unsigned int DAT_00018e60;
 extern unsigned char DAT_00018e1c;
