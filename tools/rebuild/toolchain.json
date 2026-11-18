@@ -12839,11 +12839,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "replay_frame_buffer_release.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "replay_frame_buffer_release.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

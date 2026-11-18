@@ -21,7 +21,7 @@
     },
     {
       "kind": "note",
-      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls one resource helper, so the module needs no FPU stub and no assembly implementation"
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp, reorders the prologue, and keeps the zero in EAX, so the recipe uses the exact replay_frame_buffer_release.asm body; the function holds no floating-point instruction and calls one resource helper, so the module needs no FPU stub"
     },
     {
       "kind": "file",
@@ -65,7 +65,11 @@
     },
     {
       "kind": "note",
-      "text": "the identity check compares 11 instructions; the rebuilt body holds 7 of 11 instructions, 8 of 30 bytes, and 0 of 3 relocation slots equal; V2 puts push edx after mov ebp, esp, loads eax before edx, keeps the zero in eax, and restores the stack with lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 11 of 11 instructions, 21 of 30 bytes, and 3 of 3 relocation slots equal; the assembly body keeps the original push edx, push ebp prologue, the EDX name argument, the EAX context load, the xor edx,edx clear, and the pop ebp, pop edx epilogue; the four differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_frame_buffer_release.asm"
     },
     {
       "kind": "finding",
@@ -76,7 +80,7 @@
       "text": "## Function names"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "replay_frame_buffer_release",
   "name": "replay_frame_buffer_release",
   "notes": [],
@@ -93,23 +97,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 8,
+        "bytes_equal": 21,
         "bytes_total": 30,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 7,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 11,
         "instructions_total": 11,
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x22d44",
-    "date": "2026-11-13",
-    "fingerprint": "sha256:464638e350fd344d2e3bb33c6b32fc0caad3f607239075136fd64a6bb258981d",
-    "source_digest": "sha256:967c8b0d723ace2e7b3c7fc505f6b494d1ba5bdc89dcdc6173eaaf141731aca2",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:3346729e3093ee82041ad153f6afc4db414825b44feef85b9d72dfcb0b5e8188",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:4c89d735f229e0a7596d8eb6b2b11547f3f09d196730d2be3837dccf8810989e",
     "tool": "run.py"
   },
   "role": "Releases the REPLAY resource and clears the replay frame buffer pointer.",
   "section": "The replay records",
   "size": 32,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "replay_frame_buffer_release_"
 }

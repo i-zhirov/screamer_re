@@ -24,6 +24,7 @@ void quit(void);
 
 int DAT_000062ac;
 int DAT_0018e5c;
+char replay_name[] = "REPLAY";
 
 static char text[8];
 

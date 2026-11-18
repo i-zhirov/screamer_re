@@ -22,9 +22,11 @@
  * buffer loader support the name `replay_frame_buffer_release`.  The original
  * has no symbol, so the record keeps the name with the confidence inferred.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
- * function holds no floating-point instruction, so the module uses no FPU stub
- * and no assembly body.
+ * The original has the EBP frame.  The C form with `-of+` adds `mov esp,ebp`,
+ * reorders the prologue, and keeps the zero in EAX, so the recipe uses the exact
+ * `replay_frame_buffer_release.asm` body.  This C source stays as the readable
+ * behavioral reference.  The function holds no floating-point instruction, so
+ * the module needs no FPU stub.
  */
 extern int DAT_000062ac;
 extern int DAT_0018e5c;
