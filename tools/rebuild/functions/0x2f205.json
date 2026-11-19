@@ -12,6 +12,14 @@
       "text": "the original at `0x2f205` holds 33 instructions and 90 bytes: it builds the local register block with `0x0502` at offset 0 and the address words at offsets `0x10` and `0x14`, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, and returns the status at block offset `0x18`"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/memory_free.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 33 of 33 instructions, 84 of 90 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the original local numbering, the 81 ec 34 frame, the 0x0502 request, the c1 f8 arithmetic shift, the two DPMI calls, and the mov esp,ebp epilogue; the two differing operands are the call targets; the harness expects the sign-extended high word 0xffff9abc; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "memory_free",
   "name": "memory_free",
   "notes": [],
@@ -35,29 +44,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 75,
+        "bytes_equal": 84,
         "bytes_total": 90,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 32,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 33,
         "instructions_total": 33,
-        "match": "different",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f205",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:c9fd903ee581eda6fe45de05961c6e05db9a3d7f9c5a8123d71671daca5b3f72",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:226c46f407cb9f2840bdba3686f953e017d0672e43895bd2f96561ef0251ee24",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:5a7b8fce9b5e2377f90087a4e2202f5ffa3bd29db6068589637bee62e3f2ec68",
+    "source_digest": "sha256:310ee8cc5eac2c0f4643e486732d323122ad34079809d108aecca57b3b195dee",
     "tool": "run.py"
   },
   "role": "calls the DPMI free memory block function 0x0502 and returns its status",
   "section": "The resource layer",
   "size": 90,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "memory_free_"
 }

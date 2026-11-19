@@ -2542,11 +2542,9 @@
       "order": 2,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "memory_free.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "memory_free.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

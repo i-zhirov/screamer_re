@@ -5,7 +5,8 @@
  * the result block.  The harness checks the DPMI request:
  *
  *     0  the call ran with the interrupt 0x31, one block for the input and the
- *        result, the segment set, and the free request and address words
+ *        result, the segment set, and the free request and address words; the
+ *        original `sar` sign-extends the high word of 0x9abcdef0 to 0xffff9abc
  *     1  the module returned the status at block offset 0x18
  *     D  the exit marker
  *
@@ -65,7 +66,7 @@ int main(void)
     put(fill_calls == 1 && call_calls == 1
         && got_interrupt == 0x31 && got_regs == got_result
         && got_segments == filled_segments
-        && got_regs[0] == 0x502 && got_regs[4] == 0x9abc
+        && got_regs[0] == 0x502 && got_regs[4] == 0xffff9abc
         && got_regs[5] == 0xdef0 ? '0' : 'x');
     put(status == 0x12345678 ? '1' : 'x');
     put('D');
