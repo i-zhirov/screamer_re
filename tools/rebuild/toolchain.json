@@ -9140,11 +9140,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "cng_view_update.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "cng_view_update.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

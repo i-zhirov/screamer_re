@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the original has the EBP frame; the function uses no floating-point instruction and calls no function that needs an FPU stub; the module builds with -of+"
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp and reorders the calls, so the recipe uses the exact cng_view_update.asm body; the function uses no floating-point instruction and calls no function that needs an FPU stub"
     },
     {
       "kind": "note",
@@ -74,7 +74,11 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 21 of 23 instructions equal, 58 of 98 bytes equal, and 2 of 9 relocation slots equal; the identity check stays open because V2 appends the mov esp, ebp frame restore before pop ebp, so the last two instruction slots shift; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 23 of 23 instructions, 60 of 98 bytes, and 9 of 9 relocation slots equal; the assembly body keeps the original gate tests, the seven 0xf91c pointer loads, the eight call order, and the pop ebp, ret epilogue; the twelve differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cng_view_update.asm"
     },
     {
       "kind": "finding",
@@ -85,7 +89,7 @@
       "text": "## Function names"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "cng_view_update",
   "name": "cng_view_update",
   "notes": [],
@@ -102,23 +106,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 58,
+        "bytes_equal": 60,
         "bytes_total": 98,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 23,
         "instructions_total": 23,
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x20360",
-    "date": "2026-11-11",
-    "fingerprint": "sha256:2f2091495df91a02a35e881ca57f920c65f174e6e61107f125b4b3a7dea60549",
-    "source_digest": "sha256:09e7f2bdc088bb50ccab6b850364932eb3c413f1bba921d625763dc95283ed3a",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:c0f85a74d20f79280ced5c24942410428206b30462cffd438a70c0c78bddb218",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:ea1143ee59b8566ff7acfdac78371a53b674592673e8cd3c330c8d19496a93b1",
     "tool": "run.py"
   },
   "role": "runs the CNG view group for game mode 0x20: gates on the input flag and the mode bit, updates the opponent score on the player object, and runs the player groups",
   "section": "Program functions",
   "size": 100,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "cng_view_update_"
 }
