@@ -8,8 +8,9 @@
  * temporary at `[ebp-0xc]`, and the epilogue.
  *
  * The function uses `edx` to hold the first result across the second call, so the prologue
- * saves six registers here against five in `list_destroy`.  The register set follows the
- * registers the function uses.
+ * saves six registers here against five in `list_destroy`.  The C form uses the opposite
+ * local numbering, so the recipe uses the exact `memory_available.asm` body.  This C source
+ * stays as the readable behavioral reference.
  */
 extern unsigned probe_free(void *pool);
 extern unsigned probe_size(void *pool);
