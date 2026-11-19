@@ -10,6 +10,11 @@
  * releases the stream when the lookup fails.  The two lookup constants
  * `0x16c4` and `0x4b500` are the resource key and the name table address of
  * the original image.
+ *
+ * The C form with `-of+` adds `mov esp,ebp`, reorders the argument setup, and
+ * reloads the stream after the call.  The recipe uses the exact
+ * `video_buf_load.asm` body.  This C source stays as the readable behavioral
+ * reference.
  */
 extern void *resource_get(void *stream, unsigned key, void *name);
 extern void stream_release(void *stream);

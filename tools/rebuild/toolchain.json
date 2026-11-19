@@ -7678,11 +7678,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "video_buf_load.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "video_buf_load.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
