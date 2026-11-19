@@ -23,9 +23,11 @@
  * The module sits with the resource loaders, so it takes the section Resource
  * loader.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
- * function holds no floating-point instruction, so the module uses no FPU stub
- * and no assembly body.
+ * The original has the EBP frame.  The C form with `-of+` adds `mov esp,ebp`
+ * and reorders the argument setup, so the recipe uses the exact
+ * `map_data_release.asm` body.  This C source stays as the readable behavioral
+ * reference.  The function holds no floating-point instruction, so the module
+ * needs no FPU stub.
  */
 extern int DAT_0021574;
 extern int DAT_0021468;

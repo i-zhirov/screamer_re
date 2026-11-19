@@ -10204,11 +10204,9 @@
       "order": -1,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "map_data_release.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "map_data_release.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

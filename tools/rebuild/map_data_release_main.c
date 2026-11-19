@@ -37,6 +37,8 @@ enum {
 
 int DAT_0021574;
 int DAT_0021468;
+char map_obj_list[] = "OBJ_LST";
+char map_unr_file[] = "UNR_FILE";
 
 static char text[8];
 
