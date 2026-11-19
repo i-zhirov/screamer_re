@@ -22,7 +22,9 @@
  * name `sla_view_update`.  The original has no symbol, so the record keeps the
  * name with the confidence inferred.
  *
- * The original has the EBP frame, so the module builds with `-of+`.  The
+ * The original has the EBP frame.  The C form with `-of+` adds `mov esp,ebp`
+ * and reorders the calls, so the recipe uses the exact `sla_view_update.asm`
+ * body.  This C source stays as the readable behavioral reference.  The
  * function uses no floating-point instruction and links no FPU stub.
  */
 extern unsigned char DAT_00118e1d;
@@ -31,7 +33,7 @@ extern unsigned char DAT_0011d260;
 extern void sla_marker_check(void *player);
 extern void player_car_view_update(void *player);
 extern void player_physics_update(void *player);
-extern void player_effect_update(void *player);
+extern void player_car_effect_update(void *player);
 extern void player_step_update(void *player);
 extern void player_opponent_update(void *player);
 extern void player_update(void);
@@ -48,7 +50,7 @@ void sla_view_update(void)
     sla_marker_check((void *)0xf91c);
     player_car_view_update((void *)0xf91c);
     player_physics_update((void *)0xf91c);
-    player_effect_update((void *)0xf91c);
+    player_car_effect_update((void *)0xf91c);
     player_step_update((void *)0xf91c);
     player_opponent_update((void *)0xf91c);
     player_update();

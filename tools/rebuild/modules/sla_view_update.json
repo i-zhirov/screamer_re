@@ -17,11 +17,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "sla_view_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "compiler": "wasm",
+      "file": "sla_view_update.asm"
     },
     {
       "compiler": "wcc386",

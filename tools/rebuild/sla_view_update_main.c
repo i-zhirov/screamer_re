@@ -25,10 +25,10 @@ void quit(void);
 #pragma aux quit = "mov ax, 0x4C00" "int 0x21" parm [] modify exact [ax];
 
 #define SEQUENCE_MAX 32
-#define PLAYER_POINTER 0xf91c
 
 unsigned char DAT_00118e1d;
 unsigned char DAT_0011d260;
+extern char player_object;
 
 static char text[8];
 static char sequence[SEQUENCE_MAX];
@@ -57,7 +57,7 @@ static void append_actual(char letter)
 
 static void check_player(char letter, void *player)
 {
-    if (player != (void *)PLAYER_POINTER) {
+    if (player != (void *)&player_object) {
         bad_pointer = 1;
     }
     append_actual(letter);
@@ -66,7 +66,7 @@ static void check_player(char letter, void *player)
 void sla_marker_check(void *player) { check_player('M', player); }
 void player_car_view_update(void *player) { check_player('V', player); }
 void player_physics_update(void *player) { check_player('P', player); }
-void player_effect_update(void *player) { check_player('E', player); }
+void player_car_effect_update(void *player) { check_player('E', player); }
 void player_step_update(void *player) { check_player('S', player); }
 void player_opponent_update(void *player) { check_player('O', player); }
 void player_update(void) { append_actual('T'); }

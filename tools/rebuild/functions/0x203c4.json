@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the original has the EBP frame; the function uses no floating-point instruction and calls no function that needs an FPU stub; the module builds with -of+"
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp and reorders the calls, so the recipe uses the exact sla_view_update.asm body; the function uses no floating-point instruction and calls no function that needs an FPU stub"
     },
     {
       "kind": "note",
@@ -42,7 +42,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt body holds 21 of 23 instructions equal, 58 of 98 bytes equal, and 2 of 9 relocation slots equal; the identity check stays open because V2 appends the mov esp, ebp frame restore before pop ebp, so the last two instruction slots shift; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt body holds 23 of 23 instructions, 60 of 98 bytes, and 9 of 9 relocation slots equal; the assembly body keeps the original gate tests, the seven 0xf91c pointer loads, the SLA marker and player call order, and the pop ebp, ret epilogue; the twelve differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
     },
     {
       "kind": "command",
@@ -77,6 +77,10 @@
       "text": "tools/rebuild/modules/sla_view_update.json"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/sla_view_update.asm"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -85,7 +89,7 @@
       "text": "## Function names"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "sla_view_update",
   "name": "sla_view_update",
   "notes": [],
@@ -102,23 +106,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 58,
+        "bytes_equal": 60,
         "bytes_total": 98,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 21,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 23,
         "instructions_total": 23,
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x203c4",
-    "date": "2026-11-11",
-    "fingerprint": "sha256:f0fd9288356be8d3faf44a8cb4c61235f20bd3c2abb5979855e4f38020d8db32",
-    "source_digest": "sha256:ab477bc50301077290655856ecd91060e38418f5b1e0bc857953055619e867f8",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:53e9ccca6977b92b9df42c14cade0b3819b119388de6e4b606d440212101ff7f",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:8d9610d7c0fff66da99fb3d11d9596bd752fd4b4a4d07c55303de696eec482a4",
     "tool": "run.py"
   },
   "role": "runs the SLA view group for game mode 0x40: gates on the input flag and the mode bit, checks the SLA markers on the player object, and runs the player groups",
   "section": "Program functions",
   "size": 100,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "sla_view_update_"
 }
