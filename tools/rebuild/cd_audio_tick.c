@@ -29,9 +29,10 @@
  * `cd_audio_tick`.  The original has no symbol, so the record keeps the name
  * with the confidence inferred.
  *
- * The original has no EBP frame and saves the registers with `pushal`, so the
- * module builds without `-of+`.  The function holds no floating-point
- * instruction, so it needs no FPU stub and no assembly.
+ * The original has no EBP frame and saves the registers with `pushal`.  The C
+ * form reorders the branches, so the recipe uses the exact `cd_audio_tick.asm`
+ * body.  This C source stays as the readable behavioral reference.  The
+ * function holds no floating-point instruction, so it needs no FPU stub.
  */
 extern int DAT_0016000d;
 extern int DAT_00166688;

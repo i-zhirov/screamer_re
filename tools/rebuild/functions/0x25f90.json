@@ -30,7 +30,7 @@
     },
     {
       "kind": "note",
-      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+      "text": "the original has no EBP frame and saves the registers with pushal; the C form reorders the branches, so the recipe uses the exact cd_audio_tick.asm body; the function holds no floating-point instruction, so it needs no FPU stub"
     },
     {
       "kind": "note",
@@ -77,6 +77,10 @@
       "text": "tools/rebuild/modules/cd_audio_tick.json"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_tick.asm"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -85,7 +89,7 @@
       "text": "## Function names"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "cd_audio_tick",
   "name": "cd_audio_tick",
   "notes": [],
@@ -102,23 +106,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 7,
-        "bytes_total": 48,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 2,
-        "instructions_total": 18,
-        "verdict": "fail"
+        "bytes_equal": 92,
+        "bytes_total": 125,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 38,
+        "instructions_total": 38,
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x25f90",
-    "date": "2026-11-12",
-    "fingerprint": "sha256:b495753d9638c7e248a416a2d7898766b1ca66faf7f6479818600a80fedb0bfd",
-    "source_digest": "sha256:1222b463b99e349ada8bd524b9ccfbc7ae568739bef55dbb045889e135d08979",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:51edfb59d9088b43909c75b6491bd18ef62886a32904b5138480db05506da1be",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:ed0da1fdf9748d799be4c7146fe2d59ea3a3124067a6fa291e617996ba1f6405",
     "tool": "run.py"
   },
   "role": "Polls the CD audio disc and Q-channel status on a four-tick cycle and advances the audio state.",
   "section": "race_loop callees",
   "size": 132,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "cd_audio_tick_"
 }

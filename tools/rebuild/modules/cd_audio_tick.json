@@ -21,8 +21,8 @@
   },
   "sources": [
     {
-      "compiler": "wcc386",
-      "file": "cd_audio_tick.c"
+      "compiler": "wasm",
+      "file": "cd_audio_tick.asm"
     },
     {
       "compiler": "wcc386",

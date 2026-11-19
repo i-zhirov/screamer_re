@@ -34796,8 +34796,18 @@ temporary `-od` recipe.
   `test_relocate_keeps_the_original_target_for_an_unmapped_branch` and
   `test_relocate_keeps_the_original_target_for_an_ambiguous_symbol` cover the
   fallback.
-- Observation: one of the earlier 19 incomplete modules has no relocation
-  error: `cd_audio_tick` holds a different prologue and instruction count.
+- Observation: `cd_audio_tick` now closes the last body difference with
+  `tools/rebuild/cd_audio_tick.asm`.  The C form reorders the branches and uses
+  a different prologue.  The assembly body holds the original 38 instructions
+  and 125 bytes inside the 132-byte extent.  The byte diff is 92 of 125 bytes
+  equal, 38 of 38 instructions equal, 22 operands different, and eight of eight
+  relocation slots equal.  The identity match is `exact-relocations`, and the
+  whole-image relocation rewrites the counter, state, gate, and call addresses.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x25f90 --rebuilt work/rebuild/cdtick.exe
+  --rebuilt-map work/rebuild/cd_audio_tick.map
+  --rebuilt-symbol cd_audio_tick_` reports `92 of 125 bytes equal` and
+  `the instruction sequences match`.
   Eight hold a different stack-slot layout: `cng_view_update`,
   `sla_view_update`, `list_create`, `dos_memory_alloc`, `memory_alloc_small`,
   `memory_free`, `memory_available`, and `pool_init`.  These are compiler-form
@@ -35008,9 +35018,9 @@ temporary `-od` recipe.
   --rebuilt-symbol memory_alloc_small_` reports `141 of 147 bytes equal` and
   `the instruction sequences match`.
 - Observation: `python3 tools/rebuild/whole_image.py --all` now reports
-  45 patched, 439 skipped, 140 relocation slots, and
+  46 patched, 438 skipped, 148 relocation slots, and
   `1,034,923 of 1,034,923 bytes equal`.  `relocation_incomplete` is empty,
-  `body_differences` holds 1 module (`cd_audio_tick`), and `runnable` is true.
+  `body_differences` is empty, and `runnable` is true.
   Evidence: `work/rebuild/whole-image.json` and
   `python3 tools/rebuild/image_compare.py --original STARTH.EXE --rebuilt
   work/rebuild/STARTH.EXE`.
@@ -35018,6 +35028,5 @@ temporary `-od` recipe.
   and every other module keeps the original bytes.  A body difference is not a
   relocation failure, and a byte score alone still does not prove a rebuilt
   body.
-- Limit: `cd_audio_tick` keeps a compiler-form difference.  A future change
-  must not patch it without a matching code form or a proven body
-  transformation.
+- Limit: the whole image now patches every exact-relocation module and keeps
+  the remaining original bytes.  The byte score and every body row agree.
