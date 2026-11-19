@@ -1922,11 +1922,9 @@
       "order": 2,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "list_create.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "list_create.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
