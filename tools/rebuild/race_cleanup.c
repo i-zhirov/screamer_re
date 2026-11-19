@@ -7,7 +7,10 @@
  * and the last call takes the address `DAT_000062b0`.
  *
  * The call targets have no recovered names yet, so the module names them by
- * their order and records the addresses in the comments below.
+ * their order and records the addresses in the comments below.  The C form
+ * with `-of+` saves the frame first, adds `lea esp,[ebp-4]`, and reorders the
+ * argument setup, so the recipe uses the exact `race_cleanup.asm` body.  This
+ * C source stays as the readable behavioral reference.
  *
  *     01  0x264ec
  *     02  0x1be6c

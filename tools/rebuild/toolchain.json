@@ -5142,11 +5142,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "race_cleanup.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "race_cleanup.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
