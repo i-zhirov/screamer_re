@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "view_fade_out.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "view_fade_out.c"
     },
     {
       "compiler": "wasm",
@@ -32,5 +29,6 @@
       "compiler": "wcc386",
       "file": "view_fade_out_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

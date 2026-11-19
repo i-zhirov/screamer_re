@@ -20,10 +20,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "acos_table_build.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "acos_table_build.c"
     },
     {
       "compiler": "wasm",
@@ -33,5 +30,6 @@
       "compiler": "wcc386",
       "file": "acos_table_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "path_playback_apply_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

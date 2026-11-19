@@ -18,11 +18,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "basis_rotation_mirror.c"
+      "file": "basis_rotation_mirror.c",
+      "flags": [
+        "-od"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "basis_rotation_mirror_main.c"
+      "file": "basis_rotation_mirror_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

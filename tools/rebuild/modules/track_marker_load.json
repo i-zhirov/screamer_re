@@ -17,15 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "track_marker_load.c",
-      "flags": [
-        "-of+",
-        "-dTRACK_MARKER_LOAD_HARNESS"
-      ]
+      "file": "track_marker_load.c"
     },
     {
       "compiler": "wcc386",
       "file": "track_marker_load_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

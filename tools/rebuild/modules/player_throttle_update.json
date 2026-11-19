@@ -37,5 +37,6 @@
       "compiler": "wcc386",
       "file": "player_throttle_update_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

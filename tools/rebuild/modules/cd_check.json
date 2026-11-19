@@ -21,14 +21,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "cd_check.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "cd_check.c"
     },
     {
       "compiler": "wcc386",
       "file": "cd_check_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

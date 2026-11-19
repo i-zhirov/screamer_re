@@ -22,11 +22,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_source_update.c"
+      "file": "sound_source_update.c",
+      "flags": [
+        "-od"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_source_update_main.c"
+      "file": "sound_source_update_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

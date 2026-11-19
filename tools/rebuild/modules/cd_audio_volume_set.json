@@ -29,5 +29,6 @@
       "compiler": "wcc386",
       "file": "cd_audio_volume_set_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

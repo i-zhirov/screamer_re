@@ -33,13 +33,17 @@ def record(
     module: str | None,
     symbol: str | None,
     size: int,
+    match: str | None = None,
 ) -> dict:
-    return {
+    value = {
         "address": address,
         "module": module,
         "symbol": symbol,
         "size": size,
     }
+    if match is not None:
+        value["result"] = {"checks": {"identity": {"match": match}}}
+    return value
 
 
 def module(
@@ -144,7 +148,9 @@ class ReportRowTestCase(unittest.TestCase):
         self.assertFalse(row["fit"])
         self.assertIsNone(row["fit_reason"])
         self.assertEqual(row["rebuilt_size"], 0)
+        self.assertEqual(row["original_size"], 0)
         self.assertEqual(row["relocated"], 0)
+        self.assertIsNone(row["mode"])
         self.assertEqual(row["outcome"], "skipped")
 
 
@@ -184,9 +190,74 @@ class FitTestCase(unittest.TestCase):
         )
 
 
+class AlignmentTestCase(unittest.TestCase):
+    def test_aligned_accepts_equal_shapes(self) -> None:
+        original = [insn(0x300EC, "mov", "eax, 0", b"\x01" * 6)]
+        rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 6)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x300EE, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x10002, width=4, kind="internal")
+        ]
+
+        self.assertTrue(
+            whole_image.aligned(
+                original, rebuilt, original_relocations, rebuilt_relocations
+            )
+        )
+
+    def test_aligned_rejects_a_different_instruction_count(self) -> None:
+        original = [
+            insn(0x300EC, "mov", "eax, 0", b"\x00" * 4),
+            insn(0x300F0, "ret", "", b"\xc3\x90\x90\x90"),
+        ]
+        rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
+
+        self.assertFalse(whole_image.aligned(original, rebuilt, [], []))
+
+    def test_aligned_rejects_a_different_slot_offset(self) -> None:
+        original = [insn(0x300EC, "mov", "eax, 0", b"\x00" * 8)]
+        rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 8)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x300EE, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x10003, width=4, kind="internal")
+        ]
+
+        self.assertFalse(
+            whole_image.aligned(
+                original, rebuilt, original_relocations, rebuilt_relocations
+            )
+        )
+
+    def test_aligned_rejects_a_non_internal_slot(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 4)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x10000, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x20000, width=4, kind="import-ordinal", module=1, ordinal=1)
+        ]
+
+        self.assertFalse(
+            whole_image.aligned(
+                original, rebuilt, original_relocations, rebuilt_relocations
+            )
+        )
+
+
 class RelocateTestCase(unittest.TestCase):
-    def test_relocate_writes_the_original_target(self) -> None:
-        original = [insn(0x300EC, "mov", "eax, 0", b"\x01\x02\x03\x04\x05\x06")]
+    def test_relocate_copies_the_original_slot_bytes(self) -> None:
+        original = [insn(0x300EC, "mov", "eax, 0", b"\xaa\xbb\x20\x00\x00\x00")]
         rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00\x00\x00\x00\x00\x00")]
         original_relocations = [
             le.Relocation(
@@ -202,10 +273,9 @@ class RelocateTestCase(unittest.TestCase):
             rebuilt,
             original_relocations,
             rebuilt_relocations,
-            {1: 0x10000},
         )
 
-        self.assertEqual(body, b"\x00\x00\x20\x00\x01\x00")
+        self.assertEqual(body, b"\x00\x00\x20\x00\x00\x00")
         self.assertEqual(relocated, 1)
 
     def test_relocate_counts_each_slot(self) -> None:
@@ -229,7 +299,6 @@ class RelocateTestCase(unittest.TestCase):
             rebuilt,
             original_relocations,
             rebuilt_relocations,
-            {1: 0x10000},
         )
 
         self.assertEqual(relocated, 2)
@@ -242,7 +311,7 @@ class RelocateTestCase(unittest.TestCase):
         rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
 
         self.assertEqual(
-            whole_image.relocate(original, rebuilt, [], [], {}), (None, 0)
+            whole_image.relocate(original, rebuilt, [], []), (None, 0)
         )
 
     def test_relocate_returns_none_on_a_size_mismatch(self) -> None:
@@ -250,7 +319,7 @@ class RelocateTestCase(unittest.TestCase):
         rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
 
         self.assertEqual(
-            whole_image.relocate(original, rebuilt, [], [], {}), (None, 0)
+            whole_image.relocate(original, rebuilt, [], []), (None, 0)
         )
 
     def test_relocate_returns_none_on_a_slot_count_mismatch(self) -> None:
@@ -264,7 +333,7 @@ class RelocateTestCase(unittest.TestCase):
 
         self.assertEqual(
             whole_image.relocate(
-                original, rebuilt, original_relocations, [], {1: 0x10000}
+                original, rebuilt, original_relocations, []
             ),
             (None, 0),
         )
@@ -291,7 +360,6 @@ class RelocateTestCase(unittest.TestCase):
                 rebuilt,
                 [imported],
                 [rebuilt_internal],
-                {1: 0x10000},
             ),
             (None, 0),
         )
@@ -301,7 +369,6 @@ class RelocateTestCase(unittest.TestCase):
                 rebuilt,
                 [internal],
                 [rebuilt_imported],
-                {1: 0x10000},
             ),
             (None, 0),
         )
@@ -324,7 +391,6 @@ class RelocateTestCase(unittest.TestCase):
                 rebuilt,
                 [short_original],
                 [long_rebuilt],
-                {1: 0x10000},
             ),
             (None, 0),
         )
@@ -334,30 +400,6 @@ class RelocateTestCase(unittest.TestCase):
                 rebuilt,
                 [long_original],
                 [short_rebuilt],
-                {1: 0x10000},
-            ),
-            (None, 0),
-        )
-
-    def test_relocate_returns_none_for_an_unmapped_object(self) -> None:
-        original = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
-        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 4)]
-        original_relocations = [
-            le.Relocation(
-                offset=0x10000, width=4, kind="internal", object=2, target=0x20
-            )
-        ]
-        rebuilt_relocations = [
-            le.Relocation(offset=0x20000, width=4, kind="internal")
-        ]
-
-        self.assertEqual(
-            whole_image.relocate(
-                original,
-                rebuilt,
-                original_relocations,
-                rebuilt_relocations,
-                {1: 0x10000},
             ),
             (None, 0),
         )
@@ -380,7 +422,6 @@ class RelocateTestCase(unittest.TestCase):
                 rebuilt,
                 original_relocations,
                 rebuilt_relocations,
-                {1: 0x10000},
             ),
             (None, 0),
         )
@@ -396,7 +437,7 @@ class RelocateTestCase(unittest.TestCase):
 
         self.assertEqual(
             whole_image.relocate(
-                original, rebuilt, original_relocations, [], {1: 0x10000}
+                original, rebuilt, original_relocations, []
             ),
             (None, 0),
         )
@@ -405,10 +446,102 @@ class RelocateTestCase(unittest.TestCase):
         original = [insn(0x300EC, "jne", "0x300fe", b"\x75\x10")]
         rebuilt = [insn(0x10000, "jne", "0x10012", b"\x75\x10")]
 
-        body, relocated = whole_image.relocate(original, rebuilt, [], [], {})
+        body, relocated = whole_image.relocate(original, rebuilt, [], [])
 
         self.assertEqual(body, b"\x75\x10")
         self.assertEqual(relocated, 0)
+
+
+class PatchModeTestCase(unittest.TestCase):
+    def test_patch_mode_writes_an_aligned_span(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x01" * 4)]
+        rebuilt = [insn(0x10000, "mov", "eax, 0", b"\x00" * 4)]
+
+        mode = whole_image.patch_mode(
+            record("0x10000", "free", "free_", 4), original, rebuilt, [], []
+        )
+
+        self.assertEqual(mode, "write")
+
+    def test_patch_mode_reuses_a_strict_padded_body(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x01" * 9)]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 9)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x10000, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x20000, width=4, kind="internal")
+        ]
+
+        mode = whole_image.patch_mode(
+            record("0x10000", "free", "free_", 12, match="exact-relocations"),
+            original,
+            rebuilt,
+            original_relocations,
+            rebuilt_relocations,
+        )
+
+        self.assertEqual(mode, "reuse")
+
+    def test_patch_mode_rejects_a_non_strict_padded_body(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x01" * 9)]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 9)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x10000, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x20000, width=4, kind="internal")
+        ]
+
+        mode = whole_image.patch_mode(
+            record("0x10000", "free", "free_", 12, match="same-shape"),
+            original,
+            rebuilt,
+            original_relocations,
+            rebuilt_relocations,
+        )
+
+        self.assertIsNone(mode)
+
+    def test_patch_mode_rejects_a_padded_body_that_is_not_aligned(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x01" * 9)]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 9)]
+        original_relocations = [
+            le.Relocation(
+                offset=0x10000, width=4, kind="internal", object=1, target=0x20
+            )
+        ]
+        rebuilt_relocations = [
+            le.Relocation(offset=0x20001, width=4, kind="internal")
+        ]
+
+        mode = whole_image.patch_mode(
+            record("0x10000", "free", "free_", 12, match="exact-relocations"),
+            original,
+            rebuilt,
+            original_relocations,
+            rebuilt_relocations,
+        )
+
+        self.assertIsNone(mode)
+
+    def test_patch_mode_rejects_a_body_larger_than_the_span(self) -> None:
+        original = [insn(0x10000, "mov", "eax, 0", b"\x01" * 9)]
+        rebuilt = [insn(0x20000, "mov", "eax, 0", b"\x00" * 9)]
+
+        mode = whole_image.patch_mode(
+            record("0x10000", "free", "free_", 8, match="exact-bytes"),
+            original,
+            rebuilt,
+            [],
+            [],
+        )
+
+        self.assertIsNone(mode)
 
 
 class FakeObject:
@@ -511,7 +644,7 @@ class BuildTestCase(unittest.TestCase):
         records = [record("0x10000", "free", "free_", 4)]
         rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
 
-        self.invoke_build(
+        document = self.invoke_build(
             modules,
             records,
             [self.original, rebuilt_image, FakeImage(b"")],
@@ -523,13 +656,158 @@ class BuildTestCase(unittest.TestCase):
             ],
         )
 
+        row = document["modules"][0]
+        self.assertEqual(row["mode"], "write")
+        self.assertEqual(row["outcome"], "patched")
         self.assertEqual(
             self.out.read_bytes(), b"\xaa\xbb\xcc\xdd" + bytes(12)
         )
 
-    def test_build_patches_the_original_slot_target(self) -> None:
+    def test_build_reuses_a_padded_body(self) -> None:
         self.original = FakeImage(
-            bytes(16),
+            b"\x01\x02\x03\x04" + bytes(12),
+            objects=(FakeObject(1, 0x10000),),
+        )
+        rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
+        modules = [module("free", ["free.c"], "v2")]
+        records = [record("0x10000", "free", "free_", 8, match="exact-bytes")]
+
+        document = self.invoke_build(
+            modules,
+            records,
+            [self.original, rebuilt_image, FakeImage(b"")],
+            rebuilt_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\xaa\xbb\xcc\xdd")
+            ],
+            original_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04")
+            ],
+        )
+
+        row = document["modules"][0]
+        self.assertFalse(row["fit"])
+        self.assertIsNone(row["fit_reason"])
+        self.assertEqual(row["relocated"], 0)
+        self.assertEqual(row["mode"], "reuse")
+        self.assertEqual(row["outcome"], "reused")
+        self.assertNotIn("reason", row)
+        self.assertEqual(self.out.read_bytes()[:4], b"\x01\x02\x03\x04")
+
+    def test_build_keeps_the_padding_tail(self) -> None:
+        self.original = FakeImage(
+            b"\x01\x02\x03\x04\x09\x08\x07\x06" + bytes(8),
+            objects=(FakeObject(1, 0x10000),),
+        )
+        rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
+        modules = [module("free", ["free.c"], "v2")]
+        records = [record("0x10000", "free", "free_", 8, match="exact-bytes")]
+
+        self.invoke_build(
+            modules,
+            records,
+            [self.original, rebuilt_image, FakeImage(b"")],
+            rebuilt_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\xaa\xbb\xcc\xdd")
+            ],
+            original_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04")
+            ],
+        )
+
+        self.assertEqual(self.out.read_bytes()[4:8], b"\x09\x08\x07\x06")
+
+    def test_build_reuses_a_body_with_a_far_original_slot(self) -> None:
+        self.original = FakeImage(
+            b"\x01\x02\x03\x04" + bytes(12),
+            objects=(FakeObject(1, 0x10000),),
+            relocations=(
+                le.Relocation(
+                    offset=0x10050,
+                    width=4,
+                    kind="internal",
+                    object=1,
+                    target=0x20,
+                ),
+            ),
+        )
+        rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
+        modules = [module("free", ["free.c"], "v2")]
+        records = [record("0x10000", "free", "free_", 100, match="exact-bytes")]
+
+        document = self.invoke_build(
+            modules,
+            records,
+            [self.original, rebuilt_image, FakeImage(b"")],
+            rebuilt_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\xaa\xbb\xcc\xdd")
+            ],
+            original_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04")
+            ],
+        )
+
+        row = document["modules"][0]
+        self.assertEqual(row["mode"], "reuse")
+        self.assertEqual(row["outcome"], "reused")
+
+    def test_build_rejects_a_reuse_for_a_non_strict_record(self) -> None:
+        self.original = FakeImage(
+            b"\x01\x02\x03\x04" + bytes(12),
+            objects=(FakeObject(1, 0x10000),),
+        )
+        rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
+        modules = [module("free", ["free.c"], "v2")]
+        records = [record("0x10000", "free", "free_", 8, match="same-shape")]
+
+        document = self.invoke_build(
+            modules,
+            records,
+            [self.original, rebuilt_image, FakeImage(b"")],
+            rebuilt_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\xaa\xbb\xcc\xdd")
+            ],
+            original_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04")
+            ],
+        )
+
+        row = document["modules"][0]
+        self.assertEqual(row["outcome"], "skipped")
+        self.assertFalse(row["fit"])
+        self.assertEqual(
+            row["fit_reason"],
+            "the rebuilt body holds 4 bytes against the recorded 8",
+        )
+
+    def test_build_report_holds_the_reused_count(self) -> None:
+        self.original = FakeImage(
+            b"\x01\x02\x03\x04" + bytes(12),
+            objects=(FakeObject(1, 0x10000),),
+        )
+        rebuilt_image = FakeImage(b"", objects=(FakeObject(1, 0x10000),))
+        modules = [module("free", ["free.c"], "v2")]
+        records = [record("0x10000", "free", "free_", 8, match="exact-bytes")]
+
+        document = self.invoke_build(
+            modules,
+            records,
+            [self.original, rebuilt_image, FakeImage(b"")],
+            rebuilt_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\xaa\xbb\xcc\xdd")
+            ],
+            original_instructions=[
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04")
+            ],
+        )
+
+        self.assertEqual(document["patched"], 0)
+        self.assertEqual(document["reused"], 1)
+        self.assertEqual(document["skipped"], 0)
+        self.assertEqual(document["relocated"], 0)
+
+    def test_build_copies_the_original_slot_bytes(self) -> None:
+        self.original = FakeImage(
+            b"\x01\x02\x20\x00\x00\x00" + bytes(10),
             objects=(FakeObject(1, 0x10000),),
             relocations=(
                 le.Relocation(
@@ -559,13 +837,14 @@ class BuildTestCase(unittest.TestCase):
                 insn(0x10000, "mov", "eax, 0", b"\x00" * 6)
             ],
             original_instructions=[
-                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x03\x04\x05\x06")
+                insn(0x10000, "mov", "eax, 0", b"\x01\x02\x20\x00\x00\x00")
             ],
         )
 
         self.assertEqual(
-            self.out.read_bytes()[:6], b"\x00\x00\x20\x00\x01\x00"
+            self.out.read_bytes()[:6], b"\x00\x00\x20\x00\x00\x00"
         )
+        self.assertEqual(document["modules"][0]["mode"], "write")
         self.assertEqual(document["modules"][0]["relocated"], 1)
 
     def test_build_skips_a_failed_build(self) -> None:
@@ -871,7 +1150,9 @@ class BuildTestCase(unittest.TestCase):
             "fit",
             "fit_reason",
             "rebuilt_size",
+            "original_size",
             "relocated",
+            "mode",
             "outcome",
         }
         self.assertEqual(set(patched), base)
@@ -933,8 +1214,27 @@ class CommandBuildTestCase(unittest.TestCase):
             "fit": True,
             "fit_reason": None,
             "rebuilt_size": 4,
+            "original_size": 4,
             "relocated": 2,
+            "mode": "write",
             "outcome": "patched",
+        }
+
+    def reused_row(self) -> dict:
+        return {
+            "module": "error_report",
+            "address": "0x30000",
+            "size": 8,
+            "toolchain": "v2",
+            "sources": ["error_report.c"],
+            "build": "pass",
+            "fit": False,
+            "fit_reason": None,
+            "rebuilt_size": 4,
+            "original_size": 4,
+            "relocated": 0,
+            "mode": "reuse",
+            "outcome": "reused",
         }
 
     def skipped_row(self) -> dict:
@@ -948,7 +1248,9 @@ class CommandBuildTestCase(unittest.TestCase):
             "fit": False,
             "fit_reason": None,
             "rebuilt_size": 0,
+            "original_size": 0,
             "relocated": 0,
+            "mode": None,
             "outcome": "skipped",
             "reason": "boom",
         }
@@ -958,8 +1260,13 @@ class CommandBuildTestCase(unittest.TestCase):
             "date": date.today().isoformat(),
             "original": {"path": str(self.original), "sha256": "digest"},
             "image": {"path": str(self.out), "sha256": "image-digest"},
-            "modules": [self.patched_row(), self.skipped_row()],
+            "modules": [
+                self.patched_row(),
+                self.reused_row(),
+                self.skipped_row(),
+            ],
             "patched": 1,
+            "reused": 1,
             "skipped": 1,
             "relocated": 2,
             "score": {"equal": 10, "total": 16, "exact": False},
@@ -1001,9 +1308,12 @@ class CommandBuildTestCase(unittest.TestCase):
         _, output = self.invoke(arguments, self.document())
 
         self.assertIn("free: patched, 2 slots relocated", output)
+        self.assertIn(
+            "error_report: reused, the original body bytes stay", output
+        )
         self.assertIn("exit: skipped, boom", output)
         self.assertIn(
-            "1 patched, 1 skipped, 2 slots relocated, "
+            "1 patched, 1 reused, 1 skipped, 2 slots relocated, "
             "10 of 16 bytes equal",
             output,
         )

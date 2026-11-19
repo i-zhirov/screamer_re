@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "map_collision_check.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "map_collision_check.c"
     },
     {
       "compiler": "wcc386",
       "file": "map_collision_check_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

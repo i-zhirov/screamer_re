@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_variant_select.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "sound_variant_select.c"
     },
     {
       "compiler": "wcc386",
       "file": "sound_variant_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

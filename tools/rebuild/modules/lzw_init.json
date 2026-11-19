@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "lzw_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "lzw_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "lzw_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

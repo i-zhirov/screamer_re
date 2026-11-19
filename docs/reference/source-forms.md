@@ -32,8 +32,8 @@ non-strict module with the difference signatures on this page.
   tools/rebuild/harness_dos.py build --module list_destroy` with `-od` gives 25
   of 25 instructions equal.
 - **First-difference signature**: a `-of+` rebuild inverts the save order, so
-  the first difference is a `byte N:` difference on the save bytes.  That
-  difference classifies as `other`.
+  the first difference is a `byte 0:` difference on two `push` instructions of
+  a 32-bit register.  That difference classifies as `register save order`.
 
 ## The frame-only epilogue against the conservative mov esp,ebp
 
@@ -49,7 +49,9 @@ non-strict module with the difference signatures on this page.
 - **Evidence**: the findings section "The period Watcom 10.0a toolchain" and
   the command `python3 tools/rebuild/harness_dos.py build --module frame_step`.
 - **First-difference signature**: the rebuild holds one instruction the
-  original does not, so the instruction counts differ and the idiom is `other`.
+  original does not, so the instruction counts differ.  The first-difference
+  report shows the measured pair at the insertion point.  The `instruction
+  count` idiom is reserved for the equal-prefix count case.
 
 ## The local slot order
 
@@ -72,6 +74,27 @@ non-strict module with the difference signatures on this page.
   rebuilt operands both hold `[ebp - ...]` classifies as `local slot order`.
   One example is `byte 2: 0xf8 against 0xf4`.
 
+## The frame size
+
+- **Source form**: a C function whose local declaration set fixes the frame
+  size.  The declaration set is the local variables and the compiler-generated
+  locals.
+- **Compiler and flag condition**: the 10.0a compiler.  It allocates the frame
+  with one `sub esp, imm`, where the immediate is the rounded frame size.
+- **Effect on the object code**: a different declaration set gives a different
+  `sub esp, imm` immediate.  The instruction shape stays the same, so the
+  first difference is the immediate byte of the frame allocation.
+- **Original census**: the first-difference report measures three rows:
+  `race_lap_complete` at `0x19678`, `loading_screen` at `0x2a364`, and
+  `stream_read` at `0x4c4e5`.
+- **Evidence**: the first-difference report of the three rows, with the command
+  `python3 tools/rebuild/first_difference.py report --module race_lap_complete
+  --module loading_screen --module stream_read`, and the measured first
+  difference `byte 2:` on two `sub esp, imm` instructions.
+- **First-difference signature**: a `byte 2:` difference whose original and
+  rebuilt mnemonics are both `sub` and whose operands both start `esp, 0x`
+  classifies as `frame size`.
+
 ## The volatile parameter local
 
 - **Source form**: a C function whose parameter is `volatile int`.
@@ -89,9 +112,11 @@ non-strict module with the difference signatures on this page.
   parameter census of `STARTH.EXE` object 1 for the byte sequence `83 ec 04 89
   45 fc 8b 45 fc`.
 - **First-difference signature**: without the `volatile` form the rebuilt keeps
-  the argument in a register, so the instruction counts differ and the idiom is
-  `other`.  When both bodies store at different frame slots, the idiom is
-  `local slot order`.
+  the argument in a register, so the instruction counts differ.  The
+  first-difference report shows the measured pair at the removal point of the
+  frame store and the reload.  The `instruction count` idiom is reserved for the
+  equal-prefix count case.  When both bodies store at different frame slots, the
+  idiom is `local slot order`.
 
 ## The #pragma aux modify exact [regs] register contract
 
@@ -112,8 +137,10 @@ non-strict module with the difference signatures on this page.
   expansion, and the frame local" and the builds of `work/opt/V1.C`, `V8.C`,
   `V9.C`, `VEAX.C`, and `VEMPTY.C` with the 10.0a compiler.
 - **First-difference signature**: the extra register saves change the prologue,
-  so the instruction counts differ and the idiom is `other`.  A changed
-  instruction mnemonic gives `instruction selection`.
+  so the instruction counts differ.  The first-difference report shows the
+  measured pair at the insertion or removal point of the saves.  The
+  `instruction count` idiom is reserved for the equal-prefix count case.  A
+  changed instruction mnemonic gives `instruction selection`.
 
 ## The -ot body expansion
 
@@ -131,8 +158,10 @@ non-strict module with the difference signatures on this page.
 - **Evidence**: the findings section "The error_report register saves, the body
   expansion, and the frame local".
 - **First-difference signature**: without `-ot` the rebuilt folds the bodies
-  into a shared tail, so the instruction counts differ and the idiom is
-  `other`.  A `branch target:` difference that keeps the count gives the idiom
+  into a shared tail, so the instruction counts differ.  The first-difference
+  report shows the measured pair at the insertion or removal point.  The
+  `instruction count` idiom is reserved for the equal-prefix count case.  A
+  `branch target:` difference that keeps the count gives the idiom
   `basic-block order`.  A `mnemonic:` difference gives the idiom `instruction
   selection`.
 
@@ -152,7 +181,9 @@ non-strict module with the difference signatures on this page.
   missing case", `work/opt/T24.C`, and `work/opt/TM1.C`, built with the 10.0a
   `wcc386` and linked with `wlink system dos4g`.
 - **First-difference signature**: without the negative lower bound the rebuild
-  omits `inc eax`, so the instruction counts differ and the idiom is `other`.
+  omits `inc eax`, so the instruction counts differ.  The first-difference
+  report shows the measured pair at the removal point.  The `instruction count`
+  idiom is reserved for the equal-prefix count case.
 
 ## The short push imm8 against the long push imm32 with a relocation
 
@@ -225,13 +256,79 @@ non-strict module with the difference signatures on this page.
 | `mnemonic:` | `instruction selection` |
 | `branch target:` | `basic-block order` |
 | `relocations:`, `relocation offset:`, `relocation width:`, or `relocation target:` | `relocation target` |
+| `byte 0:` with a `push` of a 32-bit register on both operands | `register save order` |
+| `byte 2:` with `sub esp, 0x...` on both operands | `frame size` |
+| `instruction count:` | `instruction count` |
 | no difference after the optional `instruction N: ` prefix | `match` |
-| every other difference, including a different instruction count | `other` |
+| every other difference | `other` |
 
 A `mask:` difference is `constant operand`, and a relocation-slot difference
 also produces a `mask:` difference.  This overlap is a limitation of the
 classification.  A `byte 2:` difference gives `local slot order` only when both
-operands hold a stack frame displacement.
+operands hold a stack frame displacement and neither mnemonic is `sub`.  The
+frame-size rule runs before the local-slot rule.
+
+## The body census of the image rows
+
+The build `python3 tools/rebuild/whole_image.py --all` writes the image
+`work/rebuild/STARTH.EXE` and the report `work/rebuild/whole-image.json`.  The
+report holds 347 module items: 13 `write` rows, 12 `reuse` rows, and 322
+skipped rows.  The summary is `13 patched, 12 reused, 322 skipped, 16 slots
+relocated, 1034754 of 1034923 bytes equal`.  The score is a byte score, not a
+correctness measure.
+
+A `build` `pass` row whose `rebuilt_size` differs from the record `size` is a
+size mismatch.  It is `smaller` when `rebuilt_size` is below `original_size`,
+`larger` when it is above, and `padding` when it equals `original_size` and
+lies below `size`.  The 319 size-mismatch rows split into 273 `smaller`, 31
+`larger`, and 15 `padding`.  The 13 `write` rows, the 4 shape-misaligned rows
+(`race_data_release`, `bios_tick_reset`, `race_cleanup`, and `video_buf_load`),
+and the 11 library rows stay out of this census.  The 12 `reuse` rows are
+`padding`; the other 3 `padding` rows are non-strict and stay skipped.
+
+The first-difference report `python3 tools/rebuild/first_difference.py report
+--all --out work/rebuild/first-differences.json` selects the 221 non-strict
+records with an identity match.  It excludes the 30 strict module rows and the
+96 records whose identity check holds no match.  The report rows split into 193
+`smaller`, 20 `larger`, and 8 `aligned`.  The 96 records with no match add 80
+`smaller`, 11 `larger`, 3 `padding`, and the 2 shape-misaligned rows
+`race_data_release` and `bios_tick_reset`, so the image census is 273
+`smaller`, 31 `larger`, and 15 `padding`.  The 12 strict padding rows are
+absent from the report.
+
+The table holds one row per report family and idiom.  The count is the number
+of rows with the family and the idiom.  The first index, the instruction count,
+and the byte count are the values of the example row.  The instruction and byte
+counts are the oracle's equal and total values.  The `other` idiom splits by the
+differing byte index.  The 6 `aligned` `local slot order` rows are `write`
+rows; the 2 `aligned` `register save order` rows are shape-misaligned.
+
+| Family | Idiom | Count | First index | Instructions | Bytes | Example |
+| --- | --- | --- | --- | --- | --- | --- |
+| `smaller` | `register save order` | 132 | 0 | 0/56 | 38/194 | `game_main` 0x10020 |
+| `smaller` | `instruction selection` | 53 | 4 | 0/218 | 31/728 | `object_load` 0x10bfc |
+| `smaller` | `frame size` | 1 | 7 | 0/124 | 41/431 | `race_lap_complete` 0x19678 |
+| `smaller` | `local slot order` | 2 | 6 | 0/127 | 106/498 | `loading_screen` 0x2a364 |
+| `smaller` | `other` (`byte 1`) | 4 | 6 | 0/111 | 25/394 | `net_player_add` 0x2dddc |
+| `smaller` | `other` (`byte 0`) | 1 | 1 | 0/273 | 21/993 | `text_draw` 0x25020 |
+| `larger` | `instruction selection` | 10 | 0 | 0/153 | 17/513 | `radar_world_draw` 0x1057c |
+| `larger` | `register save order` | 8 | 0 | 0/71 | 86/271 | `engine_init` 0x127a0 |
+| `larger` | `frame size` | 1 | 4 | 0/50 | 113/161 | `fopen` 0x4c08d |
+| `larger` | `instruction encoding` | 1 | 21 | 0/104 | 78/379 | `dpmi_real_int` 0x25db0 |
+| `aligned` | `local slot order` | 6 | 8 | 20/27 | 43/58 | `memory_available` 0x2f8ca |
+| `aligned` | `register save order` | 2 | 0 | 0/25 | 34/100 | `race_cleanup` 0x2a1b0 |
+
+The 132 `smaller` `register save order` rows are the registers-before-frame
+prologue.  The 53 `smaller` `instruction selection` rows are the general
+mnemonic difference.  The one `smaller` `frame size` row is
+`race_lap_complete`.  The 2 `smaller` `local slot order` rows are
+`loading_screen` and `stream_read`; the frame-size source batch moved them from
+the frame-size idiom, and their final first differences are instruction 6.  The
+4 `byte 1` `smaller` `other` rows are `net_player_add`, `resource_read`,
+`resource_find`, and `lzw_bit_read`.  The one `byte 0` `smaller` `other` row is
+`text_draw`.  The 6 `aligned` `local slot order` rows are `dos_memory_alloc`,
+`list_create`, `memory_alloc_small`, `memory_available`, `memory_free`, and
+`pool_init`.
 
 ## The measured outcomes
 
@@ -255,3 +352,32 @@ The cause is the compiler allocator local slot order, as an inference from the
 measured original and rebuilt pair.  The before and after median byte match of
 the six are in `docs/explanation/findings.md`, section "The six near-miss
 source-form outcomes".
+
+### The frame-size source batch
+
+The batch changes the `loading_screen` and `stream_read` sources to the local
+declaration set that gives the original `sub esp, imm`, and it reverts the
+`race_lap_complete` source.  It keeps the C form, the bytes-first rank, and the
+module recipes.  The three rows stay non-strict, so the batch adds no strict
+form.  The store keeps 30 strict modules: 8 `exact-bytes` and 22
+`exact-relocations`.  The before and after counts are the identity record
+counts.  The first-difference column holds the first-difference report index
+and text.
+
+| Module | Record | Source change | Identity before | Identity after | First difference after (report) | Outcome |
+| --- | --- | --- | --- | --- | --- | --- |
+| `loading_screen` | 0x2a364 | `char name[0x308];` in place of `char name[0x320];` | 105/491 bytes, 55/124 instructions | 106/491 bytes, 55/124 instructions | instruction 6: `byte 2: 0xe4 against 0xf0` | Kept.  The frame is now `sub esp, 0x320`.  The remaining difference is the compiler allocator local slot order: the rebuilt argument slots sit at `[ebp - 0x10]`, `[ebp - 0x14]`, and `[ebp - 0x18]`, and the original slots sit at `[ebp - 0x1c]`, `[ebp - 0x18]`, and `[ebp - 0x20]`.  The higher byte count keeps the form. |
+| `stream_read` | 0x4c4e5 | the `int read;` local for the raw `fread` result, with `result = read;` | 159/218 bytes, 72/77 instructions | 159/224 bytes, 76/79 instructions | instruction 6: `byte 2: 0xf4 against 0xe4` | Kept.  The frame is now `sub esp, 0x1c`, and the instruction match rises from 72/77 to 76/79.  The remaining difference is the local slot order: the rebuilt argument slots sit at `[ebp - 0x1c]` to `[ebp - 0x14]`, and the original slots sit at `[ebp - 0xc]` to `[ebp - 4]`.  The instruction match keeps the form on the tie in bytes. |
+| `race_lap_complete` | 0x19678 | the `volatile int saved[3];` local and its three stores, then reverted | 41/314 bytes, 27/98 instructions | 41/314 bytes, 27/98 instructions | instruction 7: `byte 2: 0x1c against 0x10` | Reverted.  The stores wrote values that nothing reads, so the source is restored.  The frame stays `sub esp, 0x10`, and the first difference stays the `frame size` pair.  The behavior check fails on the markers 0 and 3, so the record stays `rebuilt`. |
+
+The image build reports 13 patched, 12 reused, 322 skipped, 16 slots
+relocated, and 1034754 of 1034923 bytes equal.  The batch does not change the
+score, because each changed body stays below its record span and the build keeps
+the original bytes.  The 4 `byte 1` `other` rows and the one `byte 0` `other`
+row stay unchanged.  Their measured follow-ups are `net_player_add` at 0x2dddc
+with instruction 6: `byte 1: 0xe5 against 0xc7`, `resource_read` at 0x2efc2
+with instruction 4: `byte 1: 0xe5 against 0xc6`, `resource_find` at 0x2f25f
+with instruction 5: `byte 1: 0xe5 against 0xc1`, `lzw_bit_read` at 0x4d844 with
+instruction 6: `byte 1: 0xe5 against 0xc6`, and `text_draw` at 0x25020 with
+instruction 1: `byte 0: 0x8b against 0x89`.  The batch does not convert them to
+assembly.

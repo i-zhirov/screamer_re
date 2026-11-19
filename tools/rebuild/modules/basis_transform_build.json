@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "basis_transform_build_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

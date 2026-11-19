@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "curve_speed_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

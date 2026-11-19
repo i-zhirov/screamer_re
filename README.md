@@ -34,9 +34,14 @@ Initial reconnaissance is complete.  The project has:
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
-Reconstructed module sources exist under `tools/rebuild/`.  One function,
-`memcpy`, matches the original byte for byte.  The other modules hold a recorded
-difference or a shape match.
+Reconstructed module sources exist under `tools/rebuild/`.  The tree holds 348
+module recipes.  The store records 30 strict modules: 8 exact-bytes and 22
+exact-relocations.  The other modules hold a recorded difference or a shape
+match.  The full
+whole-image build writes `work/rebuild/STARTH.EXE` and scores 1034754 of
+1034923 bytes equal.  The build has two row modes: `write` patches a fitted
+body with the exact original slot bytes, and `reuse` keeps the original body
+bytes of a strict padded body.
 
 ## Repository layout
 
@@ -155,9 +160,11 @@ nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
 ## Checks
 
 The full check runs every stage in the `cross-check` shell and reports
-433 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 429 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 418 checks.  Both flags report 414 checks.
+529 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 525 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 514 checks.  Both flags report 510 checks.
+The merged tree adds 96 function records, and stage 11 holds one check per
+record.
 The record run skips a record whose input fingerprint still matches its
 recorded result, so after one full run the record run takes only the hashing
 time for the unchanged modules.  Strict is the default identity gate: the

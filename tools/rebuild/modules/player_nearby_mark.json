@@ -23,14 +23,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_nearby_mark.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_nearby_mark.c"
     },
     {
       "compiler": "wcc386",
       "file": "player_nearby_mark_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

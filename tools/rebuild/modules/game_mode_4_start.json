@@ -31,5 +31,6 @@
       "compiler": "wcc386",
       "file": "game_mode_4_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

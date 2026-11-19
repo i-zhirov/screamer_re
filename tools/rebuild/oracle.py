@@ -295,6 +295,58 @@ def _instruction_difference(
     return None
 
 
+def first_difference(
+    original: list[le.Insn],
+    rebuilt: list[le.Insn],
+    *,
+    original_relocations: list[le.Relocation] | None = None,
+    rebuilt_relocations: list[le.Relocation] | None = None,
+    original_symbols: Callable[[le.Relocation], str | None] | None = None,
+    rebuilt_symbols: Callable[[le.Relocation], str | None] | None = None,
+) -> tuple[int, str] | None:
+    """Return the index and the difference text of the first true difference.
+
+    The masks, the bounds, and the address indexes are computed once.  The
+    function walks the instruction pairs in order and returns the first pair
+    whose comparison is not equal.  When the common prefix is equal and the
+    lengths differ, it returns the common length and the instruction count
+    difference.  When both bodies are equal, it returns None.  The text is bare
+    and holds no `instruction N: ` prefix.  The comparison rules match
+    `compare`.
+    """
+    original_slots = original_relocations or []
+    rebuilt_slots = rebuilt_relocations or []
+    original_masks = _mask_for(original, original_slots)
+    rebuilt_masks = _mask_for(rebuilt, rebuilt_slots)
+    original_bounds = _bounds(original)
+    rebuilt_bounds = _bounds(rebuilt)
+    original_index = _index_by_address(original)
+    rebuilt_index = _index_by_address(rebuilt)
+    for index, (left, right) in enumerate(zip(original, rebuilt)):
+        difference = _instruction_difference(
+            left,
+            right,
+            original_masks[index],
+            rebuilt_masks[index],
+            _slots_for(left, original_slots),
+            _slots_for(right, rebuilt_slots),
+            original_bounds,
+            rebuilt_bounds,
+            original_index,
+            rebuilt_index,
+            original_symbols,
+            rebuilt_symbols,
+        )
+        if difference is not None:
+            return index, difference
+    if len(original) != len(rebuilt):
+        return (
+            min(len(original), len(rebuilt)),
+            f"instruction count: {len(original)} against {len(rebuilt)}",
+        )
+    return None
+
+
 def compare(
     original: list[le.Insn],
     rebuilt: list[le.Insn],

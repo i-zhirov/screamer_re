@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "game_mode_1_start.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "game_mode_1_start.c"
     },
     {
       "compiler": "wcc386",
       "file": "game_mode_1_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

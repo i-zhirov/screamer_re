@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "member_open.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "member_open.c"
     },
     {
       "compiler": "wcc386",
       "file": "member_open_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

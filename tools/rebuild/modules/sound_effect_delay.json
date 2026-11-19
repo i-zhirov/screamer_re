@@ -34,5 +34,6 @@
       "compiler": "wcc386",
       "file": "sound_effect_delay_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

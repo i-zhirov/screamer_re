@@ -15,10 +15,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "net_race_lobby_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "net_race_lobby_init.c"
     },
     {
       "compiler": "wasm",
@@ -28,5 +25,6 @@
       "compiler": "wcc386",
       "file": "net_race_lobby_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

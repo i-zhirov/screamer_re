@@ -319,6 +319,101 @@ class OracleTestCase(unittest.TestCase):
         self.assertTrue(run.identity_accepted(oracle.SAME_MNEMONICS, False))
 
 
+class FirstDifferenceTestCase(unittest.TestCase):
+    def test_first_difference_reports_the_first_indexed_pair(self) -> None:
+        original = [insn(0x1000, "push", "ebx", b"\x53")]
+        rebuilt = [insn(0x2000, "push", "edx", b"\x52")]
+        self.assertEqual(
+            oracle.first_difference(original, rebuilt),
+            (0, "byte 0: 0x53 against 0x52"),
+        )
+
+    def test_first_difference_reports_a_later_pair(self) -> None:
+        original = [
+            insn(0x1000, "nop", "", b"\x90"),
+            insn(0x1001, "nop", "", b"\x90"),
+            insn(0x1002, "mov", "eax, ebx", b"\x89\xd8"),
+        ]
+        rebuilt = [
+            insn(0x2000, "nop", "", b"\x90"),
+            insn(0x2001, "nop", "", b"\x90"),
+            insn(0x2002, "lea", "eax, [ebx]", b"\x8d\x03"),
+        ]
+        self.assertEqual(
+            oracle.first_difference(original, rebuilt),
+            (2, "mnemonic: 'mov' against 'lea'"),
+        )
+
+    def test_first_difference_reports_a_count_mismatch_after_an_equal_prefix(
+        self,
+    ) -> None:
+        original = [
+            insn(0x1000, "nop", "", b"\x90"),
+            insn(0x1001, "nop", "", b"\x90"),
+            insn(0x1002, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "nop", "", b"\x90"),
+            insn(0x2001, "nop", "", b"\x90"),
+        ]
+        self.assertEqual(
+            oracle.first_difference(original, rebuilt),
+            (2, "instruction count: 3 against 2"),
+        )
+
+    def test_first_difference_is_none_for_equal_bodies(self) -> None:
+        body = [
+            insn(0x1000, "push", "ebx", b"\x53"),
+            insn(0x1001, "ret", "", b"\xc3"),
+        ]
+        self.assertIsNone(oracle.first_difference(body, list(body)))
+
+    def test_first_difference_masks_a_relocation(self) -> None:
+        original = [
+            insn(0x1000, "push", "0x2fd2", bytes.fromhex("68d22f0000"))
+        ]
+        rebuilt = [insn(0x2000, "push", "0x370", bytes.fromhex("6870030000"))]
+        self.assertIsNone(
+            oracle.first_difference(
+                original,
+                rebuilt,
+                original_relocations=[slot(0x1001, object=1, target=0x2FD2)],
+                rebuilt_relocations=[slot(0x2001, object=1, target=0x370)],
+            )
+        )
+
+    def test_first_difference_masks_an_intra_function_branch(self) -> None:
+        original = [
+            insn(0x1000, "jne", "0x1006", bytes.fromhex("0f8500000000")),
+            insn(0x1006, "nop", "", b"\x90"),
+            insn(0x1007, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "jne", "0x2007", bytes.fromhex("0f8501000000")),
+            insn(0x2006, "nop", "", b"\x90"),
+            insn(0x2007, "ret", "", b"\xc3"),
+        ]
+        sequence = oracle.first_difference(original, rebuilt)
+        self.assertIsNotNone(sequence)
+        index, text = sequence
+        self.assertEqual(index, 0)
+        self.assertTrue(text.startswith("branch target:"))
+
+    def test_compare_keeps_the_length_only_verdict(self) -> None:
+        original = [
+            insn(0x1000, "nop", "", b"\x90"),
+            insn(0x1001, "nop", "", b"\x90"),
+            insn(0x1002, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x2000, "nop", "", b"\x90"),
+            insn(0x2001, "nop", "", b"\x90"),
+        ]
+        result = oracle.compare(original, rebuilt)
+        self.assertEqual(result.match, oracle.DIFFERENT)
+        self.assertEqual(result.differences, [])
+
+
 class FixupRecordTestCase(unittest.TestCase):
     def test_internal_offset_record(self) -> None:
         data = bytes.fromhex("07000001013412")
