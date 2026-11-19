@@ -16,6 +16,10 @@
  *
  * The module name is `memory_alloc_small`, because the `memory_alloc` recipe
  * belongs to the different function at `0x30050`.
+ *
+ * The C form with `-od` numbers the locals in the opposite order, so the recipe
+ * uses the exact `memory_alloc_small.asm` body.  This C source stays as the
+ * readable behavioral reference.
  */
 struct dpmi_block {
     unsigned int block[7];

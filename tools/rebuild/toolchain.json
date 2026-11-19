@@ -2444,11 +2444,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "memory_alloc_small.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "memory_alloc_small.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

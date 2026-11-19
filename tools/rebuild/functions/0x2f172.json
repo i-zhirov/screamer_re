@@ -12,6 +12,14 @@
       "text": "the original at `0x2f172` holds 49 instructions and 147 bytes: it sets `0x0501` at block offset 0, splits the size into the words at offsets 4 and 8, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status at block offset `0x18`, and otherwise stores the address from block offsets `0x10` and `0x14` at the third argument and returns the size words"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/memory_alloc_small.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 49 of 49 instructions, 141 of 147 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the original local numbering, the 81 ec 3c frame, the 0x0501 request, the c1 f8 10 arithmetic shift, the two DPMI calls, the address and size reassembly, and the mov esp,ebp epilogue; the four differing operands are the call targets; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "memory_alloc_small",
   "name": "memory_alloc",
   "notes": [
@@ -40,29 +49,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 120,
+        "bytes_equal": 141,
         "bytes_total": 147,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 49,
         "instructions_total": 49,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f172",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:e9940c052695a3188418a8fa4a7c1463fbfe5ce40ddde5091f33bdba3397ef0a",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:235021a05e346c5e943b493f74d57808e1c36685c3db56dad925f45b444ff5ce",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:cf6c0834fab12b828d7836799793a7a93236220e14358a9d8d9149d33262c018",
+    "source_digest": "sha256:5a5ab660116184d8cb1957df9d84bad71b11aca6a4317062213f64cdddaeb182",
     "tool": "run.py"
   },
   "role": "calls the DPMI function 0x0501 with the size words and stores the returned block address at the third argument",
   "section": "The resource layer",
   "size": 147,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "memory_alloc_small_"
 }
