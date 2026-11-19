@@ -37,14 +37,18 @@ def record(
     module: str | None = "error_report",
     symbol: str | None = "error_report_",
     match: str | None = "same-shape",
+    size: int | None = 12,
 ) -> dict:
     identity = {} if match is None else {"match": match}
-    return {
+    item = {
         "address": address,
         "module": module,
         "symbol": symbol,
         "result": {"checks": {"identity": identity}},
     }
+    if size is not None:
+        item["size"] = size
+    return item
 
 
 def module(name: str) -> dict:
@@ -91,14 +95,19 @@ def row_for_module(
         "bytes_equal": 0,
         "bytes_total": 0,
         "first_difference": None,
+        "sequence_index": None,
         "idiom": "other",
         "original": None,
         "rebuilt": None,
+        "record_size": record.get("size"),
+        "original_size": 0,
+        "rebuilt_size": 0,
+        "family": "padding",
     }
 
 
 class IdiomTestCase(unittest.TestCase):
-    def test_idioms_hold_the_eight_names(self) -> None:
+    def test_idioms_hold_the_eleven_names(self) -> None:
         self.assertEqual(
             first_difference.IDIOMS,
             (
@@ -108,6 +117,9 @@ class IdiomTestCase(unittest.TestCase):
                 "instruction selection",
                 "basic-block order",
                 "relocation target",
+                "register save order",
+                "frame size",
+                "instruction count",
                 "match",
                 "other",
             ),
@@ -139,6 +151,62 @@ class IdiomTestCase(unittest.TestCase):
                 "byte 2: 0xf8 against 0xf4", original, rebuilt
             ),
             "other",
+        )
+
+    def test_idiom_of_classifies_a_register_save_order(self) -> None:
+        original = insn(0x1000, "push", "ebx", b"\x53")
+        rebuilt = insn(0x1000, "push", "edx", b"\x52")
+        self.assertEqual(
+            first_difference.idiom_of(
+                "byte 0: 0x53 against 0x52", original, rebuilt
+            ),
+            "register save order",
+        )
+
+    def test_idiom_of_requires_a_push_pair_for_a_register_save_order(
+        self,
+    ) -> None:
+        original = insn(0x1000, "mov", "al, 1", b"\xb0\x01")
+        rebuilt = insn(0x1000, "mov", "bl, 1", b"\xb3\x01")
+        self.assertEqual(
+            first_difference.idiom_of(
+                "byte 0: 0xb0 against 0xb3", original, rebuilt
+            ),
+            "other",
+        )
+
+    def test_idiom_of_classifies_a_frame_size(self) -> None:
+        original = insn(0x1000, "sub", "esp, 0xc", b"\x83\xec\x0c")
+        rebuilt = insn(0x1000, "sub", "esp, 0x8", b"\x83\xec\x08")
+        self.assertEqual(
+            first_difference.idiom_of(
+                "byte 2: 0x0c against 0x08", original, rebuilt
+            ),
+            "frame size",
+        )
+
+    def test_idiom_of_requires_a_sub_esp_pair_for_a_frame_size(self) -> None:
+        original = insn(
+            0x1000, "sub", "dword ptr [ebp - 4], 0x10", b"\x83\x6d\xfc\x10"
+        )
+        rebuilt = insn(
+            0x1000, "sub", "dword ptr [ebp - 4], 0x08", b"\x83\x6d\xfc\x08"
+        )
+        self.assertEqual(
+            first_difference.idiom_of(
+                "byte 2: 0xfc against 0xfc", original, rebuilt
+            ),
+            "other",
+        )
+
+    def test_idiom_of_classifies_an_instruction_count(self) -> None:
+        original = insn(0x1000, "nop", "", b"\x90")
+        rebuilt = insn(0x1000, "nop", "", b"\x90")
+        self.assertEqual(
+            first_difference.idiom_of(
+                "instruction count: 3 against 2", original, rebuilt
+            ),
+            "instruction count",
         )
 
     def test_idiom_of_classifies_a_mask(self) -> None:
@@ -366,19 +434,63 @@ class ReportRowTestCase(unittest.TestCase):
         self.assertIsNone(row["original"])
         self.assertIsNone(row["rebuilt"])
 
-    def test_report_row_classifies_a_different_count_result_as_other(
-        self,
-    ) -> None:
+    def test_report_row_holds_the_sequence_pair(self) -> None:
         original, rebuilt = self.pair()
         row = first_difference.report_row(
             record(),
             module("error_report"),
-            result([], instructions_total=3, instructions_equal=2),
+            result([]),
             original,
             rebuilt,
+            sequence=(0, "byte 2: 0xf8 against 0xf4"),
         )
-        self.assertIsNone(row["first_difference"])
-        self.assertEqual(row["idiom"], "other")
+        self.assertEqual(
+            row["first_difference"],
+            "instruction 0: byte 2: 0xf8 against 0xf4",
+        )
+        self.assertEqual(row["sequence_index"], 0)
+        self.assertEqual(row["idiom"], "local slot order")
+        self.assertEqual(
+            row["original"],
+            {
+                "address": "0x10000",
+                "bytes": "8945f8",
+                "text": "mov dword ptr [ebp - 8], eax",
+            },
+        )
+        self.assertEqual(
+            row["rebuilt"],
+            {
+                "address": "0x20000",
+                "bytes": "8945f4",
+                "text": "mov dword ptr [ebp - 0xc], eax",
+            },
+        )
+
+    def test_report_row_holds_the_sequence_count_difference(self) -> None:
+        original = [
+            insn(0x10000, "nop", "", b"\x90"),
+            insn(0x10001, "nop", "", b"\x90"),
+            insn(0x10002, "ret", "", b"\xc3"),
+        ]
+        rebuilt = [
+            insn(0x20000, "nop", "", b"\x90"),
+            insn(0x20001, "ret", "", b"\xc3"),
+        ]
+        row = first_difference.report_row(
+            record(),
+            module("error_report"),
+            result([]),
+            original,
+            rebuilt,
+            sequence=(2, "instruction count: 3 against 2"),
+        )
+        self.assertEqual(
+            row["first_difference"],
+            "instruction 2: instruction count: 3 against 2",
+        )
+        self.assertEqual(row["sequence_index"], 2)
+        self.assertEqual(row["idiom"], "instruction count")
         self.assertIsNone(row["original"])
         self.assertIsNone(row["rebuilt"])
 
@@ -397,6 +509,161 @@ class ReportRowTestCase(unittest.TestCase):
         self.assertEqual(row["idiom"], "match")
         self.assertIsNone(row["original"])
         self.assertIsNone(row["rebuilt"])
+
+
+class FamilyTestCase(unittest.TestCase):
+    def family(
+        self,
+        size: int | None,
+        original: list[le.Insn],
+        rebuilt: list[le.Insn],
+    ) -> str:
+        return first_difference.body_family(
+            record(size=size), original, rebuilt
+        )
+
+    def test_family_marks_a_smaller_body(self) -> None:
+        original = [
+            insn(0x1000, "push", "ebx", b"\x53"),
+            insn(0x1001, "mov", "eax, ebx", b"\x89\xd8"),
+        ]
+        rebuilt = [insn(0x2000, "push", "ebx", b"\x53")]
+        self.assertEqual(self.family(12, original, rebuilt), "smaller")
+
+    def test_family_marks_a_larger_body(self) -> None:
+        original = [insn(0x1000, "push", "ebx", b"\x53")]
+        rebuilt = [
+            insn(0x2000, "push", "ebx", b"\x53"),
+            insn(0x2001, "mov", "eax, ebx", b"\x89\xd8"),
+        ]
+        self.assertEqual(self.family(12, original, rebuilt), "larger")
+
+    def test_family_marks_a_padding_body(self) -> None:
+        original = [
+            insn(0x1000, "push", "ebx", b"\x53"),
+            insn(0x1001, "mov", "eax, ebx", b"\x89\xd8"),
+        ]
+        rebuilt = [
+            insn(0x2000, "push", "ebx", b"\x53"),
+            insn(0x2001, "mov", "eax, ebx", b"\x89\xd8"),
+        ]
+        self.assertEqual(self.family(12, original, rebuilt), "padding")
+
+    def test_family_marks_an_aligned_body(self) -> None:
+        original = [
+            insn(0x1000 + index, "nop", "", b"\x90") for index in range(12)
+        ]
+        rebuilt = [
+            insn(0x2000 + index, "nop", "", b"\x90") for index in range(12)
+        ]
+        self.assertEqual(self.family(12, original, rebuilt), "aligned")
+
+    def test_family_marks_a_body_at_the_span_as_aligned(self) -> None:
+        original = [insn(0x1000, "push", "ebx", b"\x53")]
+        rebuilt = [
+            insn(0x2000 + index, "nop", "", b"\x90") for index in range(12)
+        ]
+        self.assertEqual(self.family(12, original, rebuilt), "aligned")
+
+    def test_family_marks_a_missing_size_as_unmeasured(self) -> None:
+        body = [insn(0x1000, "push", "ebx", b"\x53")]
+        self.assertEqual(self.family(None, body, body), "unmeasured")
+
+
+class SummaryTestCase(unittest.TestCase):
+    def test_summary_counts_the_families_and_the_idioms(self) -> None:
+        rows = [
+            {
+                "family": "smaller",
+                "idiom": "register save order",
+                "sequence_index": 0,
+            },
+            {
+                "family": "smaller",
+                "idiom": "instruction selection",
+                "sequence_index": 1,
+            },
+            {
+                "family": "padding",
+                "idiom": "register save order",
+                "sequence_index": 2,
+            },
+        ]
+        summary = first_difference.summarize(rows)
+        self.assertEqual(summary["modules"], 3)
+        self.assertEqual(summary["families"], {"padding": 1, "smaller": 2})
+        self.assertEqual(
+            summary["idioms"],
+            {"instruction selection": 1, "register save order": 2},
+        )
+        self.assertEqual(
+            list(summary["families"]), sorted(summary["families"])
+        )
+        self.assertEqual(list(summary["idioms"]), sorted(summary["idioms"]))
+
+    def test_summary_counts_the_first_index_zero_rows(self) -> None:
+        rows = [
+            {
+                "family": "smaller",
+                "idiom": "register save order",
+                "sequence_index": 0,
+            },
+            {
+                "family": "larger",
+                "idiom": "instruction selection",
+                "sequence_index": 0,
+            },
+            {
+                "family": "padding",
+                "idiom": "other",
+                "sequence_index": 3,
+            },
+        ]
+        summary = first_difference.summarize(rows)
+        self.assertEqual(summary["first_index_zero"], 2)
+
+    def test_summary_counts_the_count_differences(self) -> None:
+        rows = [
+            {
+                "family": "smaller",
+                "idiom": "instruction count",
+                "sequence_index": 1,
+            }
+        ]
+        summary = first_difference.summarize(rows)
+        self.assertEqual(summary["count_differences"], 1)
+
+    def test_summary_counts_an_unmeasured_family(self) -> None:
+        rows = [
+            {
+                "build": "fail",
+                "family": "unmeasured",
+                "idiom": "other",
+                "sequence_index": None,
+            }
+        ]
+        summary = first_difference.summarize(rows)
+        self.assertEqual(summary["families"], {"unmeasured": 1})
+
+    def test_report_document_holds_the_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            original = root / "STARTH.EXE"
+            original.write_bytes(b"original")
+            records = [record("0x1", "alpha", "alpha_", "same-shape")]
+            modules = [module("alpha")]
+            with mock.patch.object(
+                first_difference,
+                "diff_record",
+                side_effect=row_for_module,
+            ):
+                document = first_difference.report(
+                    records, modules, original
+                )
+        self.assertEqual(
+            document["summary"],
+            first_difference.summarize(document["modules"]),
+        )
 
 
 class ReportTestCase(unittest.TestCase):
@@ -442,6 +709,15 @@ class ReportTestCase(unittest.TestCase):
 
     def test_report_skips_a_record_without_a_module(self) -> None:
         self.assert_no_rows([record(module=None)])
+
+    def test_report_skips_a_library_record(self) -> None:
+        item = record()
+        item["library"] = {
+            "file": "CLIB3R.LIB",
+            "symbol": "malloc_",
+            "module": "nmalloc",
+        }
+        self.assert_no_rows([item])
 
     def assert_no_rows(self, records: list[dict]) -> None:
         modules = [module("error_report")]
@@ -521,6 +797,69 @@ class ReportTestCase(unittest.TestCase):
 
 
 class DiffRecordTestCase(unittest.TestCase):
+    def test_diff_record_holds_the_sequence(self) -> None:
+        original_object = mock.Mock()
+        original_object.relocations.return_value = []
+        rebuilt_object = mock.Mock()
+        rebuilt_object.relocations.return_value = []
+        rebuilt_object.object_by_index.return_value = mock.Mock(
+            reloc_base=0x20000
+        )
+        original_body = [insn(0x10000, "push", "ebx", b"\x53")]
+        rebuilt_body = [insn(0x20000, "push", "edx", b"\x52")]
+        comparison = result([], match="different")
+        with mock.patch.object(
+            first_difference.run, "build_module", return_value=("pass", "")
+        ), mock.patch.object(
+            first_difference.le,
+            "load",
+            side_effect=[original_object, rebuilt_object],
+        ), mock.patch.object(
+            first_difference.diff_module, "map_address", return_value=(1, 0x100)
+        ), mock.patch.object(
+            first_difference.diff_module, "map_symbols", return_value=[]
+        ), mock.patch.object(
+            first_difference.diff_module, "next_symbol", return_value=None
+        ), mock.patch.object(
+            first_difference.diff_module,
+            "original_body",
+            return_value=original_body,
+        ), mock.patch.object(
+            first_difference.diff_module,
+            "rebuilt_body",
+            return_value=rebuilt_body,
+        ), mock.patch.object(
+            first_difference.diff_module,
+            "original_symbol_resolver",
+            return_value=None,
+        ), mock.patch.object(
+            first_difference.diff_module,
+            "rebuilt_symbol_resolver",
+            return_value=None,
+        ), mock.patch.object(
+            first_difference.oracle, "compare", return_value=comparison
+        ), mock.patch.object(
+            first_difference.oracle,
+            "first_difference",
+            return_value=(0, "byte 0: 0x53 against 0x52"),
+        ) as first_difference_mock:
+            row = first_difference.diff_record(
+                record(),
+                module("error_report"),
+                Path("STARTH.EXE"),
+                Path("work"),
+            )
+        first_difference_mock.assert_called_once()
+        called_original, called_rebuilt = first_difference_mock.call_args.args[:2]
+        self.assertIs(called_original, original_body)
+        self.assertIs(called_rebuilt, rebuilt_body)
+        self.assertEqual(
+            row["first_difference"],
+            "instruction 0: byte 0: 0x53 against 0x52",
+        )
+        self.assertEqual(row["sequence_index"], 0)
+        self.assertEqual(row["idiom"], "register save order")
+
     def test_diff_record_marks_a_failed_build(self) -> None:
         with mock.patch.object(
             first_difference.run, "build_module", return_value=("fail", "boom")
@@ -592,6 +931,13 @@ class CommandTestCase(unittest.TestCase):
         return {
             "date": date.today().isoformat(),
             "original": {"path": str(self.original), "sha256": "digest"},
+            "summary": {
+                "modules": 1,
+                "families": {row.get("family", "other"): 1},
+                "idioms": {row["idiom"]: 1},
+                "first_index_zero": 0,
+                "count_differences": 0,
+            },
             "modules": [row],
         }
 
@@ -753,6 +1099,7 @@ class CatalogueTestCase(unittest.TestCase):
             "## The registers-before-frame prologue with -od without -of+",
             "## The frame-only epilogue against the conservative mov esp,ebp",
             "## The local slot order",
+            "## The frame size",
             "## The volatile parameter local",
             "## The #pragma aux modify exact [regs] register contract",
             "## The -ot body expansion",

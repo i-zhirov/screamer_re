@@ -130,7 +130,7 @@ screamer_re/
 │   │   ├── toolchain.json      # the toolchain and flag manifest of the measured modules
 │   │   ├── contracts/          # the JSON Schema contracts of the records
 │   │   ├── functions/          # one record per function, 0x<address>.json
-│   │   ├── modules/            # the two hundred and fifty-two module recipes
+│   │   ├── modules/            # the three hundred and forty-eight module recipes
 │   │   └── tests/              # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -197,10 +197,11 @@ python3 tools/rebuild/first_difference.py report --module error_report --out wor
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It reports
-433 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 429 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 418 checks.  Both flags report 414 checks and
-take about 16 seconds.  The whole-image build stales the record fingerprints,
+529 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 525 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 514 checks.  Both flags report 510 checks and
+take about 16 seconds.  The merged tree adds 96 function records, and stage 11
+holds one check per record.  The whole-image build stales the record fingerprints,
 because the module maps hold a build timestamp, so the record stage re-runs
 every record.  The full and `--skip-cross` checks take about 65 minutes.
 Stage 11 always scores the rebuilt whole image, and the four counts include its
@@ -353,8 +354,13 @@ open ~/Documents/Screamer.app
   unmeasured and keeps its recipe.
 - Source Forms: `docs/reference/source-forms.md` names the source-form
   idioms, and `first_difference.py` classifies the first oracle difference
-  with the same names.  A new idiom name updates both the catalogue and the
-  classifier.
+  with the same names.  The shared names include `register save order`,
+  `frame size`, and `instruction count`.  The catalogue sync test checks that
+  the page holds every classifier name, so a new idiom name updates both the
+  catalogue and the classifier.
+- Whole-Image Build: the build keeps the original container and copies the
+  exact original internal slot bytes into each rebuilt slot.  A strict padded
+  body keeps the original body bytes in `reuse` mode.
 
 Layers:
 
@@ -412,17 +418,22 @@ through the store.
   `same-shape` form with the higher `instructions_equal`, then the higher
   `bytes_equal`, and records the trait, the measured first difference, and the
   reason.  A recorded non-strict outcome is a pass.
-- The full check reports 433 checks in the `cross-check` shell.  `--skip-cross`
-  gives 429 checks, `--skip-runtime` gives 418 checks, and both flags give 414
-  checks.  The whole-image stage adds one counted check.  `--skip-runtime` still
-  runs stage 8.  `--skip-cross` skips stage 8 and the tool preflight.
+- The full check reports 529 checks in the `cross-check` shell.  `--skip-cross`
+  gives 525 checks, `--skip-runtime` gives 514 checks, and both flags give 510
+  checks.  The whole-image stage adds one counted check, and stage 11 holds one
+  check per record.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips
+  stage 8 and the tool preflight.
 - The whole-image build `whole_image.py` places the rebuilt module bodies at
   their original addresses, writes `work/rebuild/STARTH.EXE` and
   `work/rebuild/whole-image.json`, and writes no store record.  A module is
-  patched only when its instruction byte sum equals the record `size` and its
-  instruction count, sizes, and fixup slots align.  A skipped module keeps the
-  original bytes and records the reason.  Stage 11 always scores the image and
-  fails when it is missing or unreadable.
+  written only when its instruction byte sum equals the record `size` and its
+  instruction count, sizes, and fixup slots align.  The build copies the exact
+  original internal slot bytes.  A strict padded body whose byte sum equals
+  the original body and lies below the record size keeps the original body
+  bytes in `reuse` mode, and the report counts it as `reused`.  The original
+  slot filter stops at the original body end, not the record span.  A skipped
+  module keeps the original bytes and records the reason.  Stage 11 always
+  scores the image and fails when it is missing or unreadable.
 - Stage 12 checks the store, the seed, the provenance evidence, the library
   link manifest, the toolchain manifest, the program-map tables, the call
   graph, and the status page.  The call graph check needs capstone and the
@@ -474,8 +485,10 @@ through the store.
 - The matrix measures the existing flag set and the five default flag sets
   for each selected toolchain.  It tries `v2` first and `watcom10` second.
   The rank is the match value, then fewer differing bytes, then fewer
-  differing instructions, then the earlier candidate.  A strict match is
-  preferred but not required.
+  differing instructions, then the earlier candidate.  The rank stays
+  bytes-first.  A strict match is preferred but not required.  The merged tree
+  added 96 migrated recipes, so the matrix now measures 348 recipes and the
+  committed manifest holds 347 rows.
 - `toolchain.py manifest` writes the committed manifest
   `tools/rebuild/toolchain.json`.  It holds one row per measured module and
   one `unmeasured` row for a module with an identity record and no measured
@@ -529,8 +542,11 @@ through the store.
   uses the original `STARTH.EXE` as the container and keeps the stub, the
   header, the data objects, and the library bytes.  It places each rebuilt
   module body at its original address in the original address order of the
-  lowest identity record of each module.  The fit rule patches a module only
-  when the rebuilt instruction byte sum equals the record `size`.  The
+  lowest identity record of each module.  The fit rule writes a module only
+  when the rebuilt instruction byte sum equals the record `size`.  The build
+  copies the exact original internal slot bytes into the rebuilt slot.  A
+  strict padded body whose byte sum equals the original body and lies below
+  the record size keeps the original body bytes in `reuse` mode.  The
   relocation rule rewrites only an internal 4-byte slot and skips a module on a
   non-internal slot, a width other than 4, or an instruction misalignment.  A
   direct branch target is relative and is not rewritten.  The original fixup

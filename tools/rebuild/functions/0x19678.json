@@ -10,7 +10,7 @@
   "evidence": [
     {
       "kind": "note",
-      "text": "the original body at 0x19678 holds 124 instructions and 431 bytes over the full extent; the ret is at 0x19826; the next function starts at 0x19828, so the store record keeps the 432-byte extent and sets no function size; the identity check uses 97 instructions"
+      "text": "the original body at 0x19678 holds 124 instructions and 431 bytes over the full extent; the ret is at 0x19826; the next function starts at 0x19828, so the store record keeps the 432-byte extent and sets no function size; the identity check compares the original 124 instructions with the rebuilt 98 instructions"
     },
     {
       "kind": "note",
@@ -34,7 +34,7 @@
     },
     {
       "kind": "note",
-      "text": "the harness holds the car state, the node count, the global best lap, the race position, the flag byte, the time buffer, the format string, and the 100.0 scale; the nine paths cover the new best lap, the higher lap, the car-only best, the global-only best, the hundredths 75 and 50, the minutes above 59, the count 1 loop, and the equal lap; the output holds the markers 0 through 8 and D; the behavior check passes"
+      "text": "the harness holds the car state, the node count, the global best lap, the race position, the flag byte, the time buffer, the format string, and the 100.0 scale; the nine paths cover the new best lap, the higher lap, the car-only best, the global-only best, the hundredths 75 and 50, the minutes above 59, the count 1 loop, and the equal lap; the output holds the markers 1, 2, and 4 through 8 and D; the behavior check fails because the output lacks the markers 0 and 3"
     },
     {
       "kind": "command",
@@ -50,7 +50,7 @@
     },
     {
       "kind": "note",
-      "text": "the rebuilt module holds 124 decoded instructions; the identity check stays open at 23 of 97 instructions, 23 of 312 bytes, and 0 of 17 relocation slots, because V2 saves the frame pointer first, inlines the __CHP truncation, and uses other registers for the index; the build and behavior checks pass, so the store records rebuilt"
+      "text": "the rebuilt module holds 98 decoded instructions and 314 bytes; the identity check stays open at 27 of 98 instructions, 41 of 314 bytes, and 0 of 0 relocation slots, because V2 saves the frame pointer first, inlines the __CHP truncation, and uses other registers for the index; the build check passes and the behavior check fails on the markers 0 and 3, so the store records rebuilt"
     },
     {
       "kind": "finding",
@@ -68,7 +68,12 @@
   "implementation": "c",
   "module": "race_lap_complete",
   "name": "race_lap_complete",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-18",
+      "text": "Kept the restored C source without the extra local. The measured first difference is instruction 7 `byte 2: 0x1c against 0x10` (`frame size`). The `volatile int saved[3]` stores wrote values that nothing reads, so the source is restored and the body stays non-strict; the build passes and the behavior check fails on the markers 0 and 3."
+    }
+  ],
   "object_offset": "0x9678",
   "provenance": "game",
   "result": {
@@ -92,8 +97,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x19678",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:7890a5bdebd74494a977dfe12a1dfd8b07ace645e8ee6a9bedc3591cf2648bca",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:e6c90dc6a8a23487aac37b6d2a39aeab52ed0b24782af9a104f00d64e3045971",
     "mode": {
       "runtime": "run",
       "strict": true,

@@ -18,7 +18,8 @@
       "compiler": "wcc386",
       "file": "race_records_screen_init.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -27,7 +28,12 @@
     },
     {
       "compiler": "wcc386",
-      "file": "race_records_screen_init_main.c"
+      "file": "race_records_screen_init_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

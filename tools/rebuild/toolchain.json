@@ -1,6 +1,39 @@
 {
-  "date": "2026-11-15",
+  "date": "2026-11-17",
   "modules": [
+    {
+      "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 121,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 40,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "acos_table_build",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "acos_table_build.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "acos_table_build_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "acos_table_build_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
     {
       "build": "pass",
       "bytes_equal": 28,
@@ -42,6 +75,104 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 5,
+      "bytes_total": 94,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 32,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "alfile_load",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "alfile_load.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "alfile_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 10,
+      "bytes_total": 167,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 14,
+      "instructions_total": 65,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "angle_approach",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "angle_approach.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "angle_approach_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 186,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 76,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "angle_step",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "angle_step.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "angle_step_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 10,
       "bytes_total": 269,
       "detail": "the instruction sequences differ",
@@ -66,6 +197,128 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 9,
+      "bytes_total": 162,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 57,
+      "label": "-of+",
+      "match": "different",
+      "measured": true,
+      "name": "basis_rotation_build",
+      "order": 6,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "basis_rotation_build.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "basis_rotation_build_main.c",
+          "flags": [
+            "-of+"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 163,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 23,
+      "instructions_total": 58,
+      "label": "-od",
+      "match": "different",
+      "measured": true,
+      "name": "basis_rotation_mirror",
+      "order": 2,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "basis_rotation_mirror.c",
+          "flags": [
+            "-od"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "basis_rotation_mirror_main.c",
+          "flags": [
+            "-od"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 9,
+      "bytes_total": 222,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 19,
+      "instructions_total": 65,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "basis_transform_build",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "basis_transform_build.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "basis_transform_build_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 28,
+      "bytes_total": 115,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 20,
+      "instructions_total": 34,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "bios_tick_reset",
+      "order": 6,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "bios_tick_reset.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "bios_tick_reset_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -122,6 +375,102 @@
         {
           "compiler": "wcc386",
           "file": "body_point_collision_detect_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 116,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 3,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "body_point_place",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "body_point_place.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "body_point_place_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 86,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 30,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "cache_resource",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cache_resource.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cache_resource_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 25,
+      "bytes_total": 305,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 11,
+      "instructions_total": 77,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "camera_pose_build",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "camera_pose_build.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "camera_pose_build_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "camera_pose_build_main.c",
           "flags": []
         }
       ],
@@ -227,6 +576,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 16,
+      "bytes_total": 133,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 37,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "car_camera_select",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "car_camera_select.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "car_camera_select_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 17,
       "bytes_total": 313,
       "detail": "the instruction sequences differ",
@@ -321,6 +698,34 @@
         {
           "compiler": "wcc386",
           "file": "car_collision_response_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 122,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 37,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "car_nearby_mark",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "car_nearby_mark.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "car_nearby_mark_main.c",
           "flags": []
         }
       ],
@@ -494,6 +899,62 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 139,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 12,
+      "instructions_total": 44,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "cd_audio_volume_set",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_volume_set.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_volume_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 13,
+      "bytes_total": 153,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 52,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "cd_check",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_check.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_check_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -682,6 +1143,62 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 22,
+      "bytes_total": 197,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 35,
+      "instructions_total": 53,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "choice_save",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "choice_save.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "choice_save_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 179,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 30,
+      "instructions_total": 57,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "cockpit_load",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cockpit_load.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cockpit_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 27,
       "bytes_total": 385,
       "detail": "the instruction sequences differ",
@@ -775,6 +1292,41 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 40,
+      "bytes_total": 163,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 11,
+      "instructions_total": 50,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "credits_fade_out",
+      "order": 6,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "credits_fade_out.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "credits_fade_out_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "credits_fade_out_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 20,
       "bytes_total": 362,
       "detail": "the instruction sequences differ",
@@ -799,6 +1351,41 @@
         {
           "compiler": "wcc386",
           "file": "credits_scroll_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 119,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 2,
+      "instructions_total": 40,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "curve_speed",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "curve_speed.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "curve_speed_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "curve_speed_main.c",
           "flags": []
         }
       ],
@@ -833,6 +1420,43 @@
       "strict": true,
       "toolchain": "v2",
       "verdict": "pass"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 1,
+      "bytes_total": 1,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 1,
+      "instructions_total": 1,
+      "label": "-od",
+      "match": "different",
+      "measured": true,
+      "name": "direction_angle",
+      "order": 2,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "direction_angle.c",
+          "flags": [
+            "-od"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "direction_angle_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "direction_angle_main.c",
+          "flags": [
+            "-od"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
     },
     {
       "build": "pass",
@@ -1533,6 +2157,165 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 2,
+      "bytes_total": 85,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 4,
+      "instructions_total": 41,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "func_11230",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_11230.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_11230_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 2,
+      "bytes_total": 47,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 2,
+      "instructions_total": 17,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "func_11714",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_11714.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_11714_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 4,
+      "bytes_total": 94,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "func_118e8",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_118e8.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "func_118e8_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_118e8_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 13,
+      "bytes_total": 105,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 39,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "func_1e670",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_1e670.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_1e670_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 13,
+      "bytes_total": 130,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 48,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "func_1e700",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_1e700.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_1e700_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 14,
       "bytes_total": 278,
       "detail": "the instruction sequences differ",
@@ -1655,6 +2438,159 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 23,
+      "bytes_total": 215,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 59,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "game_mode_10_start",
+      "order": 4,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_10_start.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "game_mode_10_start_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_10_start_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 17,
+      "bytes_total": 201,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 12,
+      "instructions_total": 57,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "game_mode_1_start",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_1_start.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_1_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 88,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 27,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "game_mode_20_start",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_20_start.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_20_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 86,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "game_mode_40_start",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_40_start.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_40_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 38,
+      "bytes_total": 248,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 19,
+      "instructions_total": 65,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "game_mode_4_start",
+      "order": 6,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_4_start.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "game_mode_4_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -2097,6 +3033,62 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 13,
+      "bytes_total": 125,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "lzw_expand",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "lzw_expand.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "lzw_expand_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 18,
+      "bytes_total": 105,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 14,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "lzw_init",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "lzw_init.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "lzw_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 53,
       "bytes_total": 79,
       "detail": "the instruction sequences match; the differing operands are the link-time addresses",
@@ -2153,6 +3145,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 155,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 56,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "map_collision_check",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_collision_check.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_collision_check_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 20,
       "bytes_total": 270,
       "detail": "the instruction sequences differ",
@@ -2177,6 +3197,34 @@
         {
           "compiler": "wcc386",
           "file": "map_object_finish_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 2,
+      "bytes_total": 58,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 2,
+      "instructions_total": 22,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "map_object_line_select",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_object_line_select.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_object_line_select_main.c",
           "flags": []
         }
       ],
@@ -2343,6 +3391,34 @@
         {
           "compiler": "wcc386",
           "file": "member_list_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 23,
+      "bytes_total": 410,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 41,
+      "instructions_total": 134,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "member_open",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "member_open.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "member_open_main.c",
           "flags": []
         }
       ],
@@ -2839,6 +3915,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 92,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 31,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "mouse_release_wait",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "mouse_release_wait.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "mouse_release_wait_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 35,
       "bytes_total": 563,
       "detail": "the instruction sequences differ",
@@ -3056,6 +4160,41 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 175,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 4,
+      "instructions_total": 53,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "name_entry_update",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "name_entry_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "name_entry_update_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "name_entry_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 25,
       "bytes_total": 170,
       "detail": "the instruction sequences differ",
@@ -3105,6 +4244,39 @@
         {
           "compiler": "wcc386",
           "file": "net_race_lobby_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 30,
+      "bytes_total": 212,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 50,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "net_race_lobby_init",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "net_race_lobby_init.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "net_race_lobby_init_main.c",
           "flags": []
         }
       ],
@@ -3166,6 +4338,34 @@
         {
           "compiler": "wcc386",
           "file": "object_car_link_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 0,
+      "bytes_total": 79,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 37,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "object_chunk_find",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_chunk_find.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_chunk_find_main.c",
           "flags": []
         }
       ],
@@ -3243,6 +4443,34 @@
       ],
       "strict": false,
       "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 12,
+      "bytes_total": 142,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 19,
+      "instructions_total": 59,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "object_duplicate",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_duplicate.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_duplicate_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
       "verdict": "fail"
     },
     {
@@ -3362,6 +4590,34 @@
         {
           "compiler": "wcc386",
           "file": "object_integrate_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 5,
+      "bytes_total": 84,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 40,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "object_list_link",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_list_link.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_list_link_main.c",
           "flags": []
         }
       ],
@@ -3509,6 +4765,34 @@
         {
           "compiler": "wcc386",
           "file": "object_proximity_check_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 3,
+      "bytes_total": 71,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "object_request",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_request.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_request_main.c",
           "flags": []
         }
       ],
@@ -3685,6 +4969,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 110,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 30,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "object_unload",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_unload.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_unload_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 26,
       "bytes_total": 281,
       "detail": "the instruction sequences differ",
@@ -3807,6 +5119,34 @@
         {
           "compiler": "wcc386",
           "file": "opponent_path_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 13,
+      "bytes_total": 141,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 15,
+      "instructions_total": 46,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "opponent_records_init",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "opponent_records_init.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "opponent_records_init_main.c",
           "flags": []
         }
       ],
@@ -4171,6 +5511,41 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 19,
+      "bytes_total": 184,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 12,
+      "instructions_total": 52,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "path_playback_apply",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "path_playback_apply.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "path_playback_apply_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "path_playback_apply_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 15,
       "bytes_total": 283,
       "detail": "the instruction sequences differ",
@@ -4196,6 +5571,38 @@
           "compiler": "wcc386",
           "file": "path_playback_update_main.c",
           "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 317,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 21,
+      "instructions_total": 98,
+      "label": "-of+",
+      "match": "different",
+      "measured": true,
+      "name": "pcx_decode",
+      "order": 1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "pcx_decode.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "pcx_decode_main.c",
+          "flags": [
+            "-of+"
+          ]
         }
       ],
       "strict": false,
@@ -4256,6 +5663,39 @@
       ],
       "strict": false,
       "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 116,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 3,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "player_body_point_place",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_body_point_place.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_body_point_place_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
       "verdict": "fail"
     },
     {
@@ -4535,6 +5975,40 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 18,
+      "bytes_total": 152,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 39,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "player_car_surface_effect_update",
+      "order": 10,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_car_surface_effect_update.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_car_surface_effect_update_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 30,
       "bytes_total": 609,
       "detail": "the instruction sequences differ",
@@ -4673,6 +6147,39 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 10,
+      "bytes_total": 160,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 41,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "player_cockpit_camera",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_cockpit_camera.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_cockpit_camera_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 32,
       "bytes_total": 270,
       "detail": "the instruction sequences differ",
@@ -4697,6 +6204,34 @@
         {
           "compiler": "wcc386",
           "file": "player_lap_progress_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 120,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 35,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "player_nearby_mark",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_nearby_mark.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_nearby_mark_main.c",
           "flags": []
         }
       ],
@@ -4732,6 +6267,39 @@
         {
           "compiler": "wcc386",
           "file": "player_route_camera_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 11,
+      "bytes_total": 191,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 48,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "player_screen_offset",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_screen_offset.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "player_screen_offset_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_screen_offset_main.c",
           "flags": []
         }
       ],
@@ -4875,6 +6443,41 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 18,
+      "bytes_total": 162,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 49,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "player_throttle_update",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_throttle_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_throttle_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 35,
       "bytes_total": 537,
       "detail": "the instruction sequences differ",
@@ -5005,6 +6608,136 @@
         {
           "compiler": "wcc386",
           "file": "player_view_setup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 17,
+      "bytes_total": 211,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 15,
+      "instructions_total": 60,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "point_height_probe",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_height_probe.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_height_probe_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 17,
+      "bytes_total": 137,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 38,
+      "label": "-of+",
+      "match": "different",
+      "measured": true,
+      "name": "point_hit_probe",
+      "order": 1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_hit_probe.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_hit_probe_main.c",
+          "flags": [
+            "-of+"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 9,
+      "bytes_total": 104,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 42,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "point_rotate_x",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_x.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "point_rotate_x_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_x_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 8,
+      "bytes_total": 97,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 38,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "point_rotate_y",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_y.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "point_rotate_y_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_y_main.c",
           "flags": []
         }
       ],
@@ -5221,6 +6954,40 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 51,
+      "bytes_total": 117,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 21,
+      "instructions_total": 29,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "race_data_release",
+      "order": 10,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_data_release.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_data_release_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 20,
       "bytes_total": 136,
       "detail": "the instruction sequences differ",
@@ -5242,6 +7009,163 @@
         {
           "compiler": "wcc386",
           "file": "race_end_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 60,
+      "bytes_total": 114,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 24,
+      "instructions_total": 32,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "race_finish_ghost_update",
+      "order": 10,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_ghost_update.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_ghost_update_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 17,
+      "bytes_total": 176,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 46,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "race_finish_laps_update",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_laps_update.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_laps_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 38,
+      "bytes_total": 135,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 25,
+      "instructions_total": 39,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "race_finish_overlay_1",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_1.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_1_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 38,
+      "bytes_total": 135,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 25,
+      "instructions_total": 39,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "race_finish_overlay_2",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_2.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_2_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 36,
+      "bytes_total": 172,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 14,
+      "instructions_total": 50,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "race_finish_time_update",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_time_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_time_update_main.c",
           "flags": []
         }
       ],
@@ -5315,6 +7239,34 @@
             "-of+",
             "-ot"
           ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 22,
+      "bytes_total": 196,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 17,
+      "instructions_total": 41,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "race_frame_update",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_frame_update.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_frame_update_main.c",
+          "flags": []
         }
       ],
       "strict": false,
@@ -5756,6 +7708,45 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 38,
+      "bytes_total": 234,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 18,
+      "instructions_total": 57,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "race_records_screen_init",
+      "order": 10,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_records_screen_init.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_records_screen_init_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 56,
       "bytes_total": 970,
       "detail": "the instruction sequences differ",
@@ -6061,6 +8052,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 17,
+      "bytes_total": 182,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 18,
+      "instructions_total": 57,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "replay_buffer_init",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_buffer_init.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_buffer_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 51,
       "bytes_total": 297,
       "detail": "the instruction sequences differ",
@@ -6125,6 +8144,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 12,
+      "bytes_total": 147,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 17,
+      "instructions_total": 46,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "replay_playback_start",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_playback_start.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_playback_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 18,
       "bytes_total": 176,
       "detail": "the instruction sequences differ",
@@ -6179,6 +8226,68 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 14,
+      "bytes_total": 162,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 17,
+      "instructions_total": 56,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "replay_save_atk",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_save_atk.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_save_atk_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 43,
+      "bytes_total": 160,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 37,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "replay_view_update",
+      "order": 10,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_view_update.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_view_update_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -6358,6 +8467,92 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 20,
+      "bytes_total": 219,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 19,
+      "instructions_total": 64,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "scene_setup",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "scene_setup.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "scene_setup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 4,
+      "bytes_total": 109,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 19,
+      "instructions_total": 42,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "screen_mode_set",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "screen_mode_set.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "screen_mode_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 2,
+      "bytes_total": 94,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 4,
+      "instructions_total": 33,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "screen_object_lists_init",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "screen_object_lists_init.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "screen_object_lists_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 15,
       "bytes_total": 105,
       "detail": "the instruction sequences differ",
@@ -6382,6 +8577,34 @@
       ],
       "strict": false,
       "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 9,
+      "bytes_total": 117,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 38,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "shade_rect",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "shade_rect.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "shade_rect_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
       "verdict": "fail"
     },
     {
@@ -6507,6 +8730,41 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 108,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 36,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "sound_effect_delay",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_delay.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_delay_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 28,
       "bytes_total": 201,
       "detail": "the instruction sequences differ",
@@ -6570,6 +8828,39 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 10,
+      "bytes_total": 74,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_enqueue",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_enqueue.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_enqueue_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 20,
       "bytes_total": 308,
       "detail": "the instruction sequences differ",
@@ -6595,6 +8886,38 @@
           "compiler": "wcc386",
           "file": "sound_event_render_main.c",
           "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 10,
+      "bytes_total": 218,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 53,
+      "label": "-od",
+      "match": "different",
+      "measured": true,
+      "name": "sound_event_transform",
+      "order": 7,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_transform.c",
+          "flags": [
+            "-od"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_transform_main.c",
+          "flags": [
+            "-od"
+          ]
         }
       ],
       "strict": false,
@@ -6632,6 +8955,72 @@
           "flags": [
             "-od"
           ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 101,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 18,
+      "instructions_total": 41,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_queue_promote",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_promote.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_promote_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 20,
+      "bytes_total": 139,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 4,
+      "instructions_total": 39,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_queue_update",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_update.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_update_main.c",
+          "flags": []
         }
       ],
       "strict": false,
@@ -6706,6 +9095,90 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 100,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 31,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_reset",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_reset.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_reset_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 105,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 13,
+      "instructions_total": 43,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "sound_source_collect",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_collect.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_collect_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 14,
+      "bytes_total": 223,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 20,
+      "instructions_total": 71,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "sound_source_frame_prepare",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_frame_prepare.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_frame_prepare_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 7,
       "bytes_total": 290,
       "detail": "the instruction sequences differ",
@@ -6745,6 +9218,38 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 5,
+      "bytes_total": 141,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 6,
+      "instructions_total": 57,
+      "label": "-od",
+      "match": "different",
+      "measured": true,
+      "name": "sound_source_update",
+      "order": 2,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_update.c",
+          "flags": [
+            "-od"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_update_main.c",
+          "flags": [
+            "-od"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 4,
       "bytes_total": 27,
       "detail": "the instruction sequences differ",
@@ -6764,6 +9269,62 @@
         {
           "compiler": "wcc386",
           "file": "sound_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 12,
+      "bytes_total": 105,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 11,
+      "instructions_total": 40,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_variant_next",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_next.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_next_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 11,
+      "bytes_total": 116,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 9,
+      "instructions_total": 39,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "sound_variant_select",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_select.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_select_main.c",
           "flags": []
         }
       ],
@@ -6803,6 +9364,36 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 134,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 17,
+      "instructions_total": 59,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "spatial_grid_relocate",
+      "order": 6,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "spatial_grid_relocate.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "spatial_grid_relocate_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -7100,6 +9691,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 4,
+      "bytes_total": 95,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 36,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "stream_seek",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "stream_seek.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "stream_seek_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 38,
       "bytes_total": 38,
       "detail": "the modules are byte-identical",
@@ -7284,6 +9903,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 10,
+      "bytes_total": 154,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 5,
+      "instructions_total": 42,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "track_marker_load",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "track_marker_load.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "track_marker_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 30,
       "bytes_total": 449,
       "detail": "the instruction sequences differ",
@@ -7420,6 +10067,39 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 98,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 3,
+      "instructions_total": 28,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "traffic_body_point_place",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_body_point_place.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_body_point_place_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 27,
       "bytes_total": 401,
       "detail": "the instruction sequences differ",
@@ -7449,6 +10129,64 @@
       ],
       "strict": false,
       "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 7,
+      "bytes_total": 108,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 36,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "traffic_event_read",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_event_read.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_event_read_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 6,
+      "bytes_total": 107,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 35,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "traffic_nearby_mark",
+      "order": 11,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_nearby_mark.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_nearby_mark_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "watcom10",
       "verdict": "fail"
     },
     {
@@ -7521,6 +10259,62 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 15,
+      "bytes_total": 112,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 6,
+      "instructions_total": 31,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "traffic_reset",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_reset.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_reset_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 27,
+      "bytes_total": 198,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 8,
+      "instructions_total": 43,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "traffic_simulation_update",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_simulation_update.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_simulation_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 17,
       "bytes_total": 261,
       "detail": "the instruction sequences differ",
@@ -7540,6 +10334,34 @@
         {
           "compiler": "wcc386",
           "file": "traffic_step_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 16,
+      "bytes_total": 422,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 22,
+      "instructions_total": 119,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "tri_point_test",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "tri_point_test.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "tri_point_test_main.c",
           "flags": []
         }
       ],
@@ -7787,6 +10609,101 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 5,
+      "bytes_total": 81,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 2,
+      "instructions_total": 20,
+      "label": "existing",
+      "match": "different",
+      "measured": true,
+      "name": "video_selector_setup",
+      "order": 0,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "video_selector_setup.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "video_selector_setup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 26,
+      "bytes_total": 195,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 7,
+      "instructions_total": 59,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "view_fade_out",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "view_fade_out.c",
+          "flags": []
+        },
+        {
+          "compiler": "wasm",
+          "file": "view_fade_out_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "view_fade_out_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
+      "bytes_equal": 1,
+      "bytes_total": 30,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 2,
+      "instructions_total": 13,
+      "label": "-of+ -ot",
+      "match": "different",
+      "measured": true,
+      "name": "view_mode_dispatch",
+      "order": 4,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "view_mode_dispatch.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "view_mode_dispatch_main.c",
+          "flags": [
+            "-of+",
+            "-ot"
+          ]
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 1,
       "bytes_total": 40,
       "detail": "the instruction sequences differ",
@@ -7878,6 +10795,34 @@
     },
     {
       "build": "pass",
+      "bytes_equal": 21,
+      "bytes_total": 131,
+      "detail": "the instruction sequences differ",
+      "instructions_equal": 10,
+      "instructions_total": 42,
+      "label": "empty",
+      "match": "different",
+      "measured": true,
+      "name": "volume_bar_draw",
+      "order": 5,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "volume_bar_draw.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "volume_bar_draw_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "fail"
+    },
+    {
+      "build": "pass",
       "bytes_equal": 22,
       "bytes_total": 354,
       "detail": "the instruction sequences differ",
@@ -7911,7 +10856,7 @@
     }
   ],
   "report": {
-    "path": "work/rebuild/toolchain-matrix.json",
-    "sha256": "c6e383a6d44811608d6359024a0ba63de218f852a82cd9a1bb88f34b8f5e5fce"
+    "path": "work/rebuild/toolchain-matrix-final.json",
+    "sha256": "3af184a0539fc128ea60b92e074bfd803b464954675d8d74df76dac3b5cafc03"
   }
 }

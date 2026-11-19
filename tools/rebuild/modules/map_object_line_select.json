@@ -17,14 +17,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "map_object_line_select.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "map_object_line_select.c"
     },
     {
       "compiler": "wcc386",
       "file": "map_object_line_select_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

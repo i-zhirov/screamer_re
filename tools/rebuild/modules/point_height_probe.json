@@ -27,5 +27,6 @@
       "compiler": "wcc386",
       "file": "point_height_probe_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

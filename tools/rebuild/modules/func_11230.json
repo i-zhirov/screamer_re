@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "func_11230.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "func_11230.c"
     },
     {
       "compiler": "wcc386",
       "file": "func_11230_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

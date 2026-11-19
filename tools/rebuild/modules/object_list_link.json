@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_list_link.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_list_link.c"
     },
     {
       "compiler": "wcc386",
       "file": "object_list_link_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

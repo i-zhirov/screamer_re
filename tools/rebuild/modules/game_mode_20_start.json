@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "game_mode_20_start.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "game_mode_20_start.c"
     },
     {
       "compiler": "wcc386",
       "file": "game_mode_20_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

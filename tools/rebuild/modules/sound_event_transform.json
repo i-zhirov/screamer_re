@@ -20,11 +20,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_event_transform.c"
+      "file": "sound_event_transform.c",
+      "flags": [
+        "-od"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "sound_event_transform_main.c"
+      "file": "sound_event_transform_main.c",
+      "flags": [
+        "-od"
+      ]
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

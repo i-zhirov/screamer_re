@@ -19,14 +19,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "replay_buffer_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "replay_buffer_init.c"
     },
     {
       "compiler": "wcc386",
       "file": "replay_buffer_init_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

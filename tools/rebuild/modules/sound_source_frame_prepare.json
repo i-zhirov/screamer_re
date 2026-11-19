@@ -22,5 +22,6 @@
       "compiler": "wcc386",
       "file": "sound_source_frame_prepare_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

@@ -26,12 +26,18 @@
       "compiler": "wcc386",
       "file": "view_mode_dispatch.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "view_mode_dispatch_main.c"
+      "file": "view_mode_dispatch_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

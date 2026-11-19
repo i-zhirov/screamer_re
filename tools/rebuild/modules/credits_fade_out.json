@@ -30,5 +30,6 @@
       "compiler": "wcc386",
       "file": "credits_fade_out_main.c"
     }
-  ]
+  ],
+  "toolchain": "watcom10"
 }

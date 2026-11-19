@@ -33,5 +33,6 @@
       "compiler": "wcc386",
       "file": "func_1e700_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

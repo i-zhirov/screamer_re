@@ -23,14 +23,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_nearby_mark.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_nearby_mark.c"
     },
     {
       "compiler": "wcc386",
       "file": "car_nearby_mark_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

@@ -1,14 +1,14 @@
 /* The rebuilt `loading_screen` module.
  *
  * The original sits at linear 0x2a364 in STARTH.EXE and holds 127 instructions
- * and 498 bytes: the four register saves, the frame with the 0x320-byte local
- * name buffer, the resource call at 0x2f326, the `load%d%c.pcx` build at
- * 0x4d32c, the `pcx_load` call at 0x1b5a4, the palette call at 0x81a05, the
- * message call at 0x258d0, the `memcpy` call at 0x8c150, the two swap calls at
- * 0x1075f and 0x107a1, the centered panel call at 0x2e7cc, the `map%d` build at
- * 0x4d32c, the `race_cleanup` call at 0x2a1b0, the run call at 0x1fd70, the
- * error path through 0x108e4, 0x10978, and 0x300be, and the epilogue at
- * 0x1be6c.
+ * and 498 bytes: the four register saves, the `sub esp, 0x320` frame with the
+ * `char name[0x308]` local name buffer, the resource call at 0x2f326, the
+ * `load%d%c.pcx` build at 0x4d32c, the `pcx_load` call at 0x1b5a4, the palette
+ * call at 0x81a05, the message call at 0x258d0, the `memcpy` call at 0x8c150,
+ * the two swap calls at 0x1075f and 0x107a1, the centered panel call at
+ * 0x2e7cc, the `map%d` build at 0x4d32c, the `race_cleanup` call at 0x2a1b0,
+ * the run call at 0x1fd70, the error path through 0x108e4, 0x10978, and
+ * 0x300be, and the epilogue at 0x1be6c.
  *
  * The second argument selects the loading screen.  A value above 6 drops by 6
  * and sets the bit 0x08 in `DAT_0001d274`, and the function restores the saved
@@ -77,7 +77,7 @@ extern void sub_1be6c(void);
 
 void loading_screen(int arg1, int arg2, int arg3)
 {
-    char name[0x320];
+    char name[0x308];
     unsigned int saved;
     int adjust;
     int result;

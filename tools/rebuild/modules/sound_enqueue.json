@@ -23,10 +23,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_enqueue.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "sound_enqueue.c"
     },
     {
       "compiler": "wasm",
@@ -36,5 +33,6 @@
       "compiler": "wcc386",
       "file": "sound_enqueue_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

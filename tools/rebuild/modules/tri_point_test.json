@@ -28,5 +28,6 @@
       "compiler": "wcc386",
       "file": "tri_point_test_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

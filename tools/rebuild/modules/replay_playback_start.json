@@ -20,14 +20,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "replay_playback_start.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "replay_playback_start.c"
     },
     {
       "compiler": "wcc386",
       "file": "replay_playback_start_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

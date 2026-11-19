@@ -20,13 +20,16 @@
       "compiler": "wcc386",
       "file": "pcx_decode.c",
       "flags": [
-        "-of+",
-        "-dPCX_DECODE_HARNESS"
+        "-of+"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "pcx_decode_main.c"
+      "file": "pcx_decode_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

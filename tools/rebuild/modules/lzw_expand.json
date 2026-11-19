@@ -22,14 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "lzw_expand.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "lzw_expand.c"
     },
     {
       "compiler": "wcc386",
       "file": "lzw_expand_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }

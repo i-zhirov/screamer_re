@@ -18,14 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "replay_save_atk.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "replay_save_atk.c"
     },
     {
       "compiler": "wcc386",
       "file": "replay_save_atk_main.c"
     }
-  ]
+  ],
+  "toolchain": "v2"
 }
