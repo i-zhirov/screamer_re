@@ -878,11 +878,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "dos_memory_alloc.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "dos_memory_alloc.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

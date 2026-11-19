@@ -34796,9 +34796,9 @@ temporary `-od` recipe.
   `test_relocate_keeps_the_original_target_for_an_unmapped_branch` and
   `test_relocate_keeps_the_original_target_for_an_ambiguous_symbol` cover the
   fallback.
-- Observation: 7 of the earlier 19 incomplete modules have no relocation
+- Observation: 6 of the earlier 19 incomplete modules have no relocation
   error.  One holds a different prologue, epilogue, or instruction count:
-  `cd_audio_tick`.  Six hold a different stack-slot layout.
+  `cd_audio_tick`.  Five hold a different stack-slot layout.
   Eight hold a different stack-slot layout: `cng_view_update`,
   `sla_view_update`, `list_create`, `dos_memory_alloc`, `memory_alloc_small`,
   `memory_free`, `memory_available`, and `pool_init`.  These are compiler-form
@@ -34933,10 +34933,22 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/memory_free.map
   --rebuilt-symbol memory_free_` reports `84 of 90 bytes equal` and
   `the instruction sequences match`.
+- Observation: `dos_memory_alloc` now closes its body difference with
+  `tools/rebuild/dos_memory_alloc.asm`.  The C form with `-od` numbers the
+  locals in the opposite order and emits `shr` instead of the original `sar`.
+  The assembly body holds the original 41 instructions and 118 bytes.  The byte
+  diff is 112 of 118 bytes equal, 41 of 41 instructions equal, four operands
+  different, and zero relocation slots.  The identity match is
+  `exact-relocations`, and the whole-image relocation rewrites the calls.
+  Evidence: `python3 tools/rebuild/diff_module.py --original STARTH.EXE
+  --original-address 0x2f0fc --rebuilt work/rebuild/dmamod.exe
+  --rebuilt-map work/rebuild/dos_memory_alloc.map
+  --rebuilt-symbol dos_memory_alloc_` reports `112 of 118 bytes equal` and
+  `the instruction sequences match`.
 - Observation: `python3 tools/rebuild/whole_image.py --all` now reports
-  39 patched, 445 skipped, 122 relocation slots, and
+  40 patched, 444 skipped, 122 relocation slots, and
   `1,034,923 of 1,034,923 bytes equal`.  `relocation_incomplete` is empty,
-  `body_differences` holds 7 modules, and `runnable` is true.
+  `body_differences` holds 6 modules, and `runnable` is true.
   Evidence: `work/rebuild/whole-image.json` and
   `python3 tools/rebuild/image_compare.py --original STARTH.EXE --rebuilt
   work/rebuild/STARTH.EXE`.
@@ -34944,6 +34956,6 @@ temporary `-od` recipe.
   and every other module keeps the original bytes.  A body difference is not a
   relocation failure, and a byte score alone still does not prove a rebuilt
   body.
-- Limit: one module keeps a compiler-form difference and six keep a
+- Limit: one module keeps a compiler-form difference and five keep a
   stack-slot difference.  A future change must not patch them without a
   matching code form or a proven body transformation.
