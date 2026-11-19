@@ -5020,11 +5020,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "pool_init.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "pool_init.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",

@@ -10,6 +10,10 @@
  * at `pool + 0x1c`.  A non-zero status returns 1.  Otherwise the field at
  * `+0x24` is multiplied by 4096, the field at `+0x3c` is multiplied by 4096 when
  * it is positive and set to 0 otherwise, and the function returns 0.
+ *
+ * The C form with `-od` numbers the locals in the opposite order, so the recipe
+ * uses the exact `pool_init.asm` body.  This C source stays as the readable
+ * behavioral reference.
  */
 extern void dpmi_fill_regs(void *segments);
 extern int dpmi_call(int vector, void *regs, void *result, void *segments);

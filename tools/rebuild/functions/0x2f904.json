@@ -12,6 +12,14 @@
       "text": "the original at `0x2f904` holds 44 instructions and 129 bytes: it sets `0x0500` at result word 0, sets the result buffer to `pool + 0x1c` at word 5, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 1 on a non-zero status, multiplies the field at `pool + 0x24` by 4096, multiplies the field at `pool + 0x3c` by 4096 when it is positive and sets it to 0 otherwise, and returns 0"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/pool_init.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 44 of 44 instructions, 123 of 129 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the original local numbering, the 81 ec 30 frame, the 0x0500 request, the pool+0x1c result buffer, the two DPMI calls, the 0x24 and 0x3c page shifts, and the mov esp,ebp epilogue; the six differing bytes are the call operands; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "pool_init",
   "name": "pool_init",
   "notes": [
@@ -40,29 +49,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 107,
+        "bytes_equal": 123,
         "bytes_total": 129,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 44,
         "instructions_total": 44,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f904",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:5b2b66a079a82090476106db8a1efdc595d7b352f1d95e30b3206f639165d315",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:38ecec6cdfaae1d5e3bef7b81b744156792a4950804ae68654b577fdf4b0e796",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:4b8e664b170495543fdc239f80b1406d8c8270b9b863b8e9f05b6d8534c02b1d",
+    "source_digest": "sha256:141cd406f5587ed3368e5e0cc7f586225d8a745896563f24ad34d2d69067b107",
     "tool": "run.py"
   },
   "role": "queries the free memory through DPMI function 0x0500 and converts the page counts to bytes",
   "section": "The resource layer",
   "size": 129,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "pool_init_"
 }
