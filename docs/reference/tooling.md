@@ -1303,9 +1303,10 @@ nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --record-timeout 7200
 ```
 
-The record run of stage 11 builds and runs every module record, so it needs
-more time as the module count grows.  Use `--record-timeout` to raise the
-budget of that one subprocess; the default is 3000 seconds:
+The record run of stage 11 builds and runs every module record.  It runs four
+records in parallel with `--jobs 4`; a build lock keeps the shared Docker work
+directory serial, and the behavior runs overlap.  Use `--record-timeout` to
+raise the budget of that one subprocess; the default is 3000 seconds:
 
 ```sh
 python3 tools/pipeline_check.py \
@@ -1315,11 +1316,11 @@ python3 tools/pipeline_check.py \
 
 A full run in the `cross-check` shell reports 666 checks.  `--skip-cross` skips
 stage 8 and the tool preflight, so the run reports 662 checks.  `--skip-runtime`
-skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 418
-checks.  Both flags report 647 checks and take about 16 seconds.  The
+skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 651
+checks.  Both flags report 647 checks and take about 18 minutes.  The
 whole-image build stales the record fingerprints, because the module maps hold
 a build timestamp, so the record stage re-runs every record.  The full and
-`--skip-cross` checks take about 65 minutes.  The whole-image stage adds one
+`--skip-cross` checks take about 42 minutes.  The whole-image stage adds one
 counted check.
 
 The checks and the status page run in these places:

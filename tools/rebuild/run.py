@@ -31,8 +31,8 @@ toolchain makes the stored result stale.
 Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
-        [--no-write] [--show] [--strict] [--allow-shape] [--skip-runtime]
-        [--skip-unchanged] [--original PATH] [--library-dir DIR]
+        [--no-write] [--jobs N] [--show] [--strict] [--allow-shape]
+        [--skip-runtime] [--skip-unchanged] [--original PATH] [--library-dir DIR]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -40,9 +40,11 @@ on a bad argument, a missing record, or a missing original image.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import re
 import subprocess
 import sys
+import threading
 from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
@@ -58,6 +60,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
 REBUILD_DIR = Path(__file__).resolve().parent
 WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 LOG_DIR = WORK_DIR / "logs"
+BUILD_LOCK = threading.Lock()
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
 HARNESS_DOS_TOOL = REBUILD_DIR / "harness_dos.py"
@@ -523,7 +526,8 @@ def _run_record(
     checks: dict[str, dict] = {}
     for check in target["checks"]:
         if check == "build":
-            verdict, output = run_build(module, arguments.show)
+            with BUILD_LOCK:
+                verdict, output = run_build(module, arguments.show)
             _log_output(log_lines, label, check, output)
             checks[check] = {
                 "verdict": verdict,
@@ -787,6 +791,10 @@ def command_run(arguments: argparse.Namespace) -> int:
     verdicts: list[str] = []
     buckets: list[str | None] = []
     failed = False
+    jobs = max(1, int(getattr(arguments, "jobs", 1)))
+    if not arguments.no_write:
+        jobs = 1
+    pending: list[tuple[int, dict | None, dict | None]] = []
     for index, (record, row) in enumerate(entries, 1):
         target = record if record is not None else row
         if arguments.skip_unchanged and _is_unchanged(
@@ -810,9 +818,26 @@ def command_run(arguments: argparse.Namespace) -> int:
             print(line)
             log_lines.append(line)
             continue
+        pending.append((index, record, row))
+
+    def run_one(
+        item: tuple[int, dict | None, dict | None]
+    ) -> tuple[int, dict | None, dict | None, dict[str, dict], str, str, bool, list[str]]:
+        index, record, row = item
+        local_log: list[str] = []
         checks, verdict, detail, write = _run_record(
-            record, row, modules, arguments, log_lines
+            record, row, modules, arguments, local_log
         )
+        return index, record, row, checks, verdict, detail, write, local_log
+
+    if jobs > 1 and len(pending) > 1:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
+            results = list(pool.map(run_one, pending))
+    else:
+        results = [run_one(item) for item in pending]
+
+    for index, record, row, checks, verdict, detail, write, local_log in results:
+        target = record if record is not None else row
         verdicts.append(verdict)
         buckets.append(
             store.result_bucket(checks, target.get("checks", []))
@@ -832,6 +857,7 @@ def command_run(arguments: argparse.Namespace) -> int:
             index, len(entries), _label(record, row), verdict, detail
         )
         print(line)
+        log_lines.extend(local_log)
         log_lines.append(line)
     summary = summarize(verdicts, buckets)
     print(summary)
@@ -895,6 +921,13 @@ def parse_arguments() -> argparse.Namespace:
     )
     run_parser.add_argument(
         "--no-write", action="store_true", help="write nothing"
+    )
+    run_parser.add_argument(
+        "--jobs",
+        type=int,
+        default=1,
+        metavar="N",
+        help="run N records in parallel when --no-write is set",
     )
     run_parser.add_argument(
         "--show", action="store_true", help="print the captured check output"

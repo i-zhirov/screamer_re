@@ -200,9 +200,11 @@ DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It reports
 666 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
 reports 662 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
 runs stage 8, so the run reports 651 checks.  Both flags report 647 checks and
-take about 16 seconds.  The whole-image build stales the record fingerprints,
+take about 18 minutes.  The whole-image build stales the record fingerprints,
 because the module maps hold a build timestamp, so the record stage re-runs
-every record.  The full and `--skip-cross` checks take about 65 minutes.
+every record.  Stage 11 runs four records in parallel with `--jobs 4`; a build
+lock keeps the shared Docker work directory serial, and the behavior runs
+overlap.  The full and `--skip-cross` checks take about 42 minutes.
 Stage 11 always scores the rebuilt whole image, and the four counts include its
 check.  A missing image is a failure, so
 `python3 tools/rebuild/whole_image.py --all` runs before the full check:
@@ -513,7 +515,9 @@ through the store.
 - A behavior run deletes the old output first.  A marker matches a complete
   output line, so an embedded marker does not pass.
 - `--skip-unchanged` prints the stored verdict of a record whose inputs are
-  unchanged since the previous run.  A stored `fail` prints `FAIL`.
+  unchanged since the previous run.  A stored `fail` prints `FAIL`.  The `run
+  --jobs N` option runs N records in parallel only with `--no-write`, and a
+  build lock keeps the shared Docker work directory serial.
 - `oracle.py` masks every byte that an LE fixup slot controls and every byte
   that encodes a direct branch target.  It compares the remaining bytes in
   instruction order.  An intra-function branch target compares by instruction

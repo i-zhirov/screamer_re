@@ -794,6 +794,8 @@ def check_run(
         "run",
         "--all",
         "--no-write",
+        "--jobs",
+        "4",
         "--skip-unchanged",
         "--original",
         str(game_dir / "STARTH.EXE"),
