@@ -1,7 +1,73 @@
 {
   "address": "0x2f4ee",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 40,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2f4ee holds 40 instructions and 102 bytes up to the ret at 0x2f553; the next function starts at 0x2f554, so the store record keeps the 102-byte extent and sets no separate function size; the identity check uses 40 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "no direct call, no data reference, and no LE relocation target reaches 0x2f4ee; Ghidra reports no reference and no function at the address; the sibling resource functions show the layout: the record array at +0x00, the count at +0x04, the limit at +0x08, and the status at +0x0c; each 0x1c-byte record holds the allocation result at +0x0c, the address cell at +0x10, the requested size at +0x14, and the free flag at +0x18"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the allocation result at record +0x0c through the run-time free at 0xd2008, zeroes count times 0x1c bytes through memset at 0xd1ec0, and sets the count at +0x04 to 0; the record array, the limit, and the status stay in place"
+    },
+    {
+      "kind": "note",
+      "text": "the record layout and the sibling resource_free family at 0x2f470 support the section The resource layer; the original has no caller and no data reference, so the record keeps the weak name func_2f4ee"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the resource record, four 0x1c-byte record slots, and the free and memset stubs; the four paths cover the count 3 with three allocation results, the count 0, the count 1, and the count 2 with a null and a set allocation result; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 9 of 40 instructions, 2 of 102 bytes, and 0 of 5 relocation slots equal; the rebuilt body alone holds 61 bytes against the 102-byte original body because V2 keeps the resource in ecx, folds the loop increment, and reaches the array through one base load; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2f4ee --count 40"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2f4ee --count 40 --rebuilt work/rebuild/func2f4.exe --rebuilt-map work/rebuild/func_2f4ee.map --rebuilt-symbol func_2f4ee_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module func_2f4ee"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2f4ee"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_2f4ee module at 0x2f4ee"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f4ee.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f4ee_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_2f4ee.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "func_2f4ee",
+  "name": "func_2f4ee",
   "notes": [],
   "object_offset": "0x1f4ee",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 102,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 40,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f4ee",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:50d90489f03fe5aff39419073000876585c6fceb7248778aa036b89275a0acb2",
+    "source_digest": "sha256:ffc819713e05e6d27750dfa5dcf84f9558d1c5438eeefd4669969ff5409bf3d7",
+    "tool": "run.py"
+  },
+  "role": "releases every record allocation, zeroes the record array, and clears the count of the resource",
+  "section": "The resource layer",
   "size": 102,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_2f4ee_"
 }

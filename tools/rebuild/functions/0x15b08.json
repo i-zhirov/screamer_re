@@ -1,7 +1,68 @@
 {
   "address": "0x15b08",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15b08 holds 18 instructions and 57 bytes up to the ret at 0x15b40; the next function starts at 0x15b44, so the store record keeps the 60-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the player update at 0x2003c runs this group at 0x20154 on the player object at object-3 offset 0xf91c; the player nearby mark at 0x12378 and the car proximity pass at 0x17408 record this group as their only caller; the sibling traffic group at 0x15b44 has the same shape with the traffic nearby marker and the traffic collision pass, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the object pointer arrives in eax; the function first calls player_body_point_place at 0x17c6c, returns at once when the state field +0x148 is not zero, and otherwise calls player_nearby_mark at 0x12378, car_proximity_pass at 0x17408, and opponent_start at 0x124c0, all with the same player object"
+    },
+    {
+      "kind": "note",
+      "text": "the player update caller, the player steps, and the state gate support the name player_effect_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores the argument to the frame and reloads it before each call; the volatile local reproduces the store and the reload, as error_report.c records for the same frame-local pattern; the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two player object buffers and one stub for each of the four callees; the four paths cover the clear state, the state 1, the state -1, and the second object; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body matches the original instruction sequence at 18 of 18 instructions and 45 of 57 bytes; the five differing operands are link-time addresses, so the identity check passes and the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15b08 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15b08 --count 18 --rebuilt work/rebuild/peff.exe --rebuilt-map work/rebuild/player_effect_update.map --rebuilt-symbol player_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15b08"
+    },
+    {
+      "kind": "finding",
+      "text": "The player_effect_update module at 0x15b08"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_effect_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/player_effect_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/player_effect_update.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +72,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "player_effect_update",
+  "name": "player_effect_update",
   "notes": [],
   "object_offset": "0x5b08",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 45,
+        "bytes_total": 57,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15b08",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:096f810dd005a005cb2f65e78fd50a41d44f274b687c3fa67be0f1b47b10af84",
+    "source_digest": "sha256:3b68e98f3de5e77c8f47616b4727421eb0b92415185be210766a233bc6f7f43b",
+    "tool": "run.py"
+  },
+  "role": "Runs the player body point place step, then marks the nearby car records, runs the car proximity pass, and starts the nearby opponents when the player state field is clear.",
+  "section": "The vehicle state chain",
   "size": 60,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "player_effect_update_"
 }

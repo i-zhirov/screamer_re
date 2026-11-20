@@ -1,0 +1,30 @@
+{
+  "exe": "fntrel.exe",
+  "map": "font_data_release.map",
+  "name": "font_data_release",
+  "run": {
+    "command": "fntrel.exe > fntrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "fntrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "font_data_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "font_data_release_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,30 @@
+{
+  "exe": "cdtq.exe",
+  "map": "cdtq.map",
+  "name": "cd_audio_track_query",
+  "run": {
+    "command": "cdtq.exe > cdtq.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "cdtq.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_track_query.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_track_query_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,7 +1,69 @@
 {
   "address": "0x24bfc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24bfc holds 32 instructions and 78 bytes up to the ret at 0x24c49; the next entry sound_effect_delay starts at 0x24c4c, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 32 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function has no direct caller, no indirect call, and no relocation slot that points to it; it sits between sound_variant_next at 0x24b48 and sound_effect_delay at 0x24c4c, but the body reads only DAT_000007fd, so the record takes the section Program functions; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the argument arrives in eax; the loop doubles the mask and sets the low bit for each bit of the argument, so the mask becomes all ones up to the highest set bit of the argument; the function returns 1 when the low bits of DAT_000007fd equal the argument and 0 otherwise; a zero argument returns 1 with an empty mask"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds DAT_000007fd; the eight paths cover the six-bit match, the four-bit match, the five-bit difference, the zero argument, the zero global, the eight-bit match, the ninth-bit difference, and the high-bit match; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 20 instructions and 42 bytes; the identity check stays open at 5 of 32 instructions, 1 of 78 bytes, and 0 of 4 relocation slots, because V2 pushes the frame first, keeps the remaining value in eax, builds the mask with lea, uses movzx for the return, places DAT_000007fd at another address, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The bit_pattern_match module at 0x24bfc"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24bfc --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24bfc --count 32 --rebuilt work/rebuild/bpmatch.exe --rebuilt-map work/rebuild/bit_pattern_match.map --rebuilt-symbol bit_pattern_match_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module bit_pattern_match"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24bfc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/bit_pattern_match.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/bit_pattern_match_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/bit_pattern_match.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "bit_pattern_match",
+  "name": "bit_pattern_match",
   "notes": [],
   "object_offset": "0x14bfc",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 78,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24bfc",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:4535eecc8605194ec09b5a3f57937ff755155cc47a43b189a515741c2fc72d9f",
+    "source_digest": "sha256:16ca205735ea8991bbaba3c889ad7728fce0e4c939221bf969a8b1b4d5c23c13",
+    "tool": "run.py"
+  },
+  "role": "Tests whether the low bits of DAT_000007fd equal the argument.",
+  "section": "Program functions",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "bit_pattern_match_"
 }

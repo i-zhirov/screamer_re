@@ -1,0 +1,37 @@
+{
+  "exe": "racegau.exe",
+  "map": "race_gauges.map",
+  "name": "race_gauges",
+  "run": {
+    "command": "racegau.exe > racegau.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "racegau.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_gauges.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "race_gauges_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_gauges_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,29 @@
+{
+  "exe": "sseq.exe",
+  "map": "sound_sequence_prepare.map",
+  "name": "sound_sequence_prepare",
+  "run": {
+    "command": "sseq.exe > sseq.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "sseq.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_sequence_prepare.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_sequence_prepare_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

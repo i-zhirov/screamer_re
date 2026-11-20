@@ -1,0 +1,38 @@
+{
+  "exe": "f11974.exe",
+  "map": "func_11974.map",
+  "name": "func_11974",
+  "run": {
+    "command": "f11974.exe > f11974.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "f11974.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_11974.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "func_11974_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_11974_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

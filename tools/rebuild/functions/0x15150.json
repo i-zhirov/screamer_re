@@ -1,7 +1,77 @@
 {
   "address": "0x15150",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 12,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15150 holds 12 instructions and 42 bytes up to the ret at 0x15179; the next function starts at 0x1517c, so the store record keeps the 44-byte extent and sets no separate function size; the identity check uses 12 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers sit in the screen setup functions: cd_check_screen at 0x15874 calls it at 0x158ef after a failed menu1h.pcx load, menu_space_init at 0x29d08 calls it at 0x29dbd and 0x29de4 after the sprite load and the font load, menu_frame at 0x29f80 calls it at 0x29fac after a failed pcx load, loading_screen at 0x2a364 calls it at 0x2a431, and the state init screens at 0x2a558, 0x2bedc, 0x2c188, 0x2c430, 0x2c7a8, 0x2c954, 0x2ca40, and 0x2d7c4 call it on a failed PCX or list load; the callers span several sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs the teardown in order: the text mode at 0x4c928, the keyboard hook with the value 0 at 0x14e20, the material release at 0x4cecc, the FONTS release at 0x25640, the SPRITES release at 0x258b8, the sound system shutdown at 0x1f28c, and the DOS clock set at 0x1fa2c; the short teardown follows a failed screen asset load, and the loader call, the callee set, and the call order support the name screen_setup_cleanup; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp before the epilogue, so the recipe uses the exact screen_setup_cleanup.asm body; the function holds no floating-point instruction and makes no math call, so the module needs no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one stub for each of the seven callees; each stub appends a letter to the trace and counts its calls, and the keyboard stub records the enable value; the three paths cover the first, second, and third call with the order ABCDEFG, the counts 1, 2, and 3, and the value 0; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 12 of 12 instructions and 22 of 42 bytes equal, and 0 of 0 relocation slots; the assembly body drops the V2 mov esp, ebp and keeps the original pop ebp at 0x15178; the seven call operands are the link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15150 --count 12"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15150 --count 12 --rebuilt work/rebuild/ssclean.exe --rebuilt-map work/rebuild/screen_setup_cleanup.map --rebuilt-symbol screen_setup_cleanup_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module screen_setup_cleanup"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module screen_setup_cleanup"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15150"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/screen_setup_cleanup.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/screen_setup_cleanup_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/screen_setup_cleanup.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The screen_setup_cleanup module at 0x15150"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/screen_setup_cleanup.asm"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,46 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
+  "module": "screen_setup_cleanup",
+  "name": "screen_setup_cleanup",
   "notes": [],
   "object_offset": "0x5150",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 42,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 12,
+        "instructions_total": 12,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15150",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:784c8155292ed40fc0d45ee58823abe5746c82af60afba8f83ebb3150d554228",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:1f43a9dba4f77850cb944220187acb71b44eac10af2f9a128500c34b13c8e5fc",
+    "tool": "run.py"
+  },
+  "role": "Runs the short subsystem teardown after a failed screen asset load.",
+  "section": "Program functions",
   "size": 44,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "screen_setup_cleanup_"
 }

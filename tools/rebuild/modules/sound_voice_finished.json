@@ -1,0 +1,35 @@
+{
+  "exe": "svfin.exe",
+  "map": "sound_voice_finished.map",
+  "name": "sound_voice_finished",
+  "run": {
+    "command": "svfin.exe > svf.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "svf.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_finished.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_voice_finished_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

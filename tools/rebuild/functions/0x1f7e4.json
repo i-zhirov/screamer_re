@@ -1,7 +1,73 @@
 {
   "address": "0x1f7e4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 25,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f7e4 holds 25 instructions and 79 bytes up to the ret at 0x1f832; the next function starts at 0x1f834, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 25 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct callers are object_collision at 0x1e00c, engine_rpm_update at 0x18db0, and sound_emitter_update at 0x21b9c; each caller passes the voice index in eax and the pitch value in edx; the callers sit in three sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the setup word DAT_00008058 gates the store; a zero pitch becomes 1; the function passes DAT_00018d94, the voice index, and the pitch to the driver value store at 0xc6af6, which writes voice field 0x44; a pitch above 0x40000 prints the message PITCH from object-3 offset 0xbfa through 0x3009b"
+    },
+    {
+      "kind": "note",
+      "text": "the caller data, the driver field at voice offset 0x44, and the message support the name sound_voice_pitch_set; the module records the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the setup word, the driver handle, the driver stub, and the print stub; the six paths cover the zero setup word, the zero pitch default, a plain pitch, the 0x40000 boundary, the 0x40001 message, and a negative pitch; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 16 of 25 instructions equal, 3 of 70 bytes equal, and 2 of 4 relocation slots equal; V2 sets the frame first, keeps the voice index and the pitch in registers, saves ecx and esi, and reaches the driver with register arguments instead of the stack copies of the original; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f7e4 --count 25"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f7e4 --count 25 --rebuilt work/rebuild/svpset.exe --rebuilt-map work/rebuild/sound_voice_pitch_set.map --rebuilt-symbol sound_voice_pitch_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_voice_pitch_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f7e4"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_voice_pitch_set module at 0x1f7e4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_pitch_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_pitch_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_voice_pitch_set.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_voice_pitch_set",
+  "name": "sound_voice_pitch_set",
   "notes": [],
   "object_offset": "0xf7e4",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 70,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 16,
+        "instructions_total": 25,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f7e4",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:6cdec8780d87a4da7007d81e204ece75565c59afde437fc8e3b68a52dd9665dc",
+    "source_digest": "sha256:fdf2e5bc42fc24e529b48b377ca373a43472e70b5b5c432c1ca3a68a752ed5da",
+    "tool": "run.py"
+  },
+  "role": "Sets the pitch of an HMI voice, defaults a zero pitch to 1, and prints PITCH above 0x40000.",
+  "section": "Program functions",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_voice_pitch_set_"
 }

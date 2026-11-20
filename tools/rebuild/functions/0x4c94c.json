@@ -1,7 +1,77 @@
 {
   "address": "0x4c94c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 27,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4c94c holds 27 instructions and 61 bytes up to the ret at 0x4c988; the next function starts at 0x4c98c, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses the plan count 27"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_data_load at 0x131a8 with the call site at 0x13347; it passes the level name DAT_0011d294 in eax, which race_start builds as MAP%d, and it runs material_load at 0x4cd9c with the same level name first, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function copies the level name to the global name buffer DAT_002154c through the inline two-byte copy loop, then calls unr_file_load at 0x4c98c and mmp_file_load at 0x4cae4; those two functions build the %s.UNR and %s.MMP member names from that buffer"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the two callees, and the shared name buffer support the name map_file_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the -oi flag expands the strcpy call into the same two-byte copy loop as the original; the function holds no floating-point instruction, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "DOS/4G 2.01a under DOSBox-X leaves the initialized data pages zero, so the harness builds the four name texts in local buffers; the four paths cover MAP1, the empty name, MENU, and the two calls TRACK01 then AB; every path checks the buffer, both stub names, the call counts, and the call order; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 27 instructions and 61 bytes; the identity check stays open at 7 of 27 instructions, 4 of 61 bytes, and 0 of 3 relocation slots; V2 saves ebp before esi and edi, keeps the source in esi without the frame slot, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_file_load module at 0x4c94c"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4c94c --count 27"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4c94c --count 27 --rebuilt work/rebuild/mapfile.exe --rebuilt-map work/rebuild/map_file_load.map --rebuilt-symbol map_file_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module map_file_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_file_load"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4c94c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_file_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_file_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/map_file_load.json"
+    },
     {
       "kind": "finding",
       "text": "## The resource layer and the DPMI services"
@@ -11,9 +81,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "map_file_load",
+  "name": "map_file_load",
   "notes": [],
   "object_offset": "0x3c94c",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 61,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4c94c",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f80846a2faf04181c3e406fed56325eb061372b32a15715ba5a4fd398c3bdffd",
+    "source_digest": "sha256:165db1952f3b3e22f8c5267d20ba32e3289e8b26ea3d975e0348be05f1cda034",
+    "tool": "run.py"
+  },
+  "role": "Copies the level name to the shared name buffer and loads the matching .UNR and .MMP map members.",
+  "section": "Resource loader",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_file_load_"
 }

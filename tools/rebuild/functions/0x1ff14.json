@@ -1,7 +1,77 @@
 {
   "address": "0x1ff14",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 27,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1ff14 holds 27 instructions and 90 bytes up to the ret at 0x1ff6d; two padding bytes at 0x1ff6e and 0x1ff6f precede the next function at 0x1ff70, so the store record keeps the 92-byte extent and sets no separate function size; the identity check uses 27 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_session_run at 0x1fd70, which calls this function at 0x1fdb5 and 0x1fe7a; the driver runs the loop once per race session and treats a negative result as the replay mode; the neighbouring record race_frame_update at 0x1ff70 calls this function the frame loop"
+    },
+    {
+      "kind": "note",
+      "text": "the loop runs motion_update at 0x21e6c, default_data_copy at 0x10193, joystick_update at 0x24da0, the optional input_poll at 0x26448, music_play at 0x2ff14 with the request record 0x62b0, frame_timer at 0x1fc38, input_map at 0x211e0, race_frame_update at 0x1ff70, and video_fill at 0x2aa98; it then reads the exit state DAT_0018e18 and repeats while the state stays zero; it returns the exit state"
+    },
+    {
+      "kind": "note",
+      "text": "the input poll runs only when DAT_001d2c0 and DAT_001d2cc are not zero, the same gate as quit_confirm_screen at 0x219ec"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the per-frame callees, and the exit state support the section race_frame callees and the name race_frame_loop; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two input gates, the exit state, and one stub for each of the nine callees; the five paths cover one full frame with the exit state 1, three full frames with the exit state -1, the two input gates that skip the poll, and two full frames with the exit state 5; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body alone holds 22 instructions and 84 bytes up to its ret; the identity check uses the count 27, so it decodes the following code and reports 6 of 27 instructions, 0 of 90 bytes, and 0 of 9 relocation slots equal; V2 saves only ebp, keeps the exit state in eax, reads the two gates and the exit state through direct memory operands, and restores the frame with mov esp, ebp and pop ebp, while the original saves ecx, edx, and ebp and keeps the exit state in ecx; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1ff14 --count 27"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1ff14 --count 27 --rebuilt work/rebuild/rfl.exe --rebuilt-map work/rebuild/race_frame_loop.map --rebuilt-symbol race_frame_loop_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_frame_loop"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1ff14"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_frame_loop module at 0x1ff14"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_frame_loop.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_frame_loop_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_frame_loop.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "race_frame_loop",
+  "name": "race_frame_loop",
   "notes": [],
   "object_offset": "0xff14",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 90,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 27,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1ff14",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:81f2ebf05dc5e6713a7063e0dd89e76821c465beb40a9962d51e7acfdd97f91b",
+    "source_digest": "sha256:5d77f0ab27ca567c1994c0708fdb697fa491081c05fa762e3e44b728869bd887",
+    "tool": "run.py"
+  },
+  "role": "Runs one game frame and repeats it until the exit state is non-zero, then returns the exit state.",
+  "section": "race_frame callees",
   "size": 92,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_frame_loop_"
 }

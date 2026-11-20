@@ -1,0 +1,39 @@
+{
+  "exe": "fint.exe",
+  "map": "filter_update_int.map",
+  "name": "filter_update_int",
+  "run": {
+    "command": "fint.exe > fint_out.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "fint_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "filter_update_int.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "filter_update_int_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "filter_update_int_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

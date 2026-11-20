@@ -1,0 +1,30 @@
+{
+  "exe": "ohtl.exe",
+  "map": "object_handle_table_load.map",
+  "name": "object_handle_table_load",
+  "run": {
+    "command": "ohtl.exe > ohtl.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ohtl.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_table_load.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_table_load_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

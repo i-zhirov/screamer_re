@@ -1,7 +1,76 @@
 {
   "address": "0x4cecc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cecc holds 12 instructions and 38 bytes up to the ret at 0x4cef1; the two padding bytes at 0x4cef2 and 0x4cef3 precede the next function at 0x4cef4, so the store record keeps the 40-byte extent and sets no separate function size; the identity check uses 12 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the wrapper at 0x4cf2c calls this function at 0x4cf2f and then the sibling at 0x4cef4; screen_setup_cleanup at 0x15150 calls this function at 0x1515f during a teardown, and race_cleanup at 0x2a1b0 calls it at 0x2a1eb; the callers span several sections, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the MATERIALS resource of the archive head DAT_0021574 through resource_free_name at 0x2f326 with the name at object-3 offset 0x1711, then frees the material record whose allocation pointer is DAT_00214e8 through resource_find at 0x2f25f; material_load at 0x4cd9c loads the resource and sets the record, so the two functions form the material load and release pair"
+    },
+    {
+      "kind": "note",
+      "text": "the MATERIALS resource, the material record, the two callers, and the sibling map data release support the name material_data_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cecc --count 12"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cecc --count 12 --rebuilt work/rebuild/mdrel.exe --rebuilt-map work/rebuild/material_data_release.map --rebuilt-symbol material_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module material_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module material_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cecc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/material_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/material_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/material_data_release.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive head and the material record; the three paths cover the full sequence, a second context and key, and a sentinel context and key; every path checks the call order, the resource name, and the key; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 8 of 12 instructions and 10 of 38 bytes equal, and 2 of 4 relocation slots; V2 saves ebp before edx and loads eax before edx, and the rebuilt data offsets differ, so the identity check stays open; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The material_data_release module at 0x4cecc"
+    },
     {
       "kind": "finding",
       "text": "## The resource layer and the DPMI services"
@@ -11,9 +80,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "material_data_release",
+  "name": "material_data_release",
   "notes": [],
   "object_offset": "0x3cecc",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 38,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 12,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cecc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:b3e4647ea298c6203cb36f0e71638ecf724b51dc05e6824b3485ae838cf17146",
+    "source_digest": "sha256:8f9032ac2b390edce35429a488b71d8b4cc30a86439306bac1960f077722eddb",
+    "tool": "run.py"
+  },
+  "role": "Frees the MATERIALS resource and the material record whose allocation pointer is DAT_00214e8.",
+  "section": "Resource loader",
   "size": 40,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "material_data_release_"
 }

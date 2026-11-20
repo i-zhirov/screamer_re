@@ -1,7 +1,73 @@
 {
   "address": "0x2ff84",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 15,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2ff84 holds 15 instructions and 40 bytes up to the ret at 0x2ffab; the next recorded function starts at 0x2ffc4, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses 15 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is view_move at 0x1f94c, which calls this function at 0x1f96e with the music bank record 0x62b0 in eax and the third argument shifted right by 8 in edx; view_move sits in the section motion_update callees, so the record takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the record gate at +0x14 is the music bank active flag that music_bank_load at 0x2f9e0 sets on success; a clear gate calls nothing; a set gate passes the low seven bits of the value to the MIDI master volume helper at 0xd3d14, which stores the master volume and re-sends controller 7 on the active MIDI channels; the record, the gate, and the helper support the name music_volume_set; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the music bank record and the master volume stub; the stub records the forwarded volume and the call count; the six paths cover the clear gate, the volumes 0x7f, 0x80, 0x123, 0x40, and 0x55, and the gates 1, 2, and -1; every path checks the call count and the forwarded volume; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 15 instructions; the rebuilt body holds 3 of 15 instructions, 6 of 40 bytes, and 0 of 3 relocation slots equal; the identity check stays open because V2 keeps the two arguments in the registers, drops the two local slots, uses eax for the mask, and calls the nearby harness stub in place of the link-time target; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2ff84 --count 15"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2ff84 --count 15 --rebuilt work/rebuild/mvol.exe --rebuilt-map work/rebuild/music_volume_set.map --rebuilt-symbol music_volume_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module music_volume_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module music_volume_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2ff84"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_volume_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_volume_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/music_volume_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The music_volume_set module at 0x2ff84"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "music_volume_set",
+  "name": "music_volume_set",
   "notes": [],
   "object_offset": "0x1ff84",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 40,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 15,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2ff84",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f3776909155c079ec8b27dc16879b581a399a982bca3d914da692d5d686ecc28",
+    "source_digest": "sha256:ced92ea0ba742b8f9bd1e98d567c335eaa9f98574d539e4ebfabfd0d3f289cc0",
+    "tool": "run.py"
+  },
+  "role": "Sets the MIDI master volume when the music bank is active.",
+  "section": "motion_update callees",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "music_volume_set_"
 }

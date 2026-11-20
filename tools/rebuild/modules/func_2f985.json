@@ -1,0 +1,32 @@
+{
+  "exe": "f985.exe",
+  "map": "func_2f985.map",
+  "name": "func_2f985",
+  "run": {
+    "command": "f985.exe > f985.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "f985.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_2f985.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_2f985_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

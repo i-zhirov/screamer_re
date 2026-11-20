@@ -1,7 +1,69 @@
 {
   "address": "0x2febc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2febc holds 20 instructions and 54 bytes up to the ret at 0x2fef1; the two padding bytes at 0x2fef2 and 0x2fef3 precede the next function at 0x2fef4, so the store record keeps the 56-byte extent and sets no separate function size; the identity check uses 20 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "three rebuilt callers name the target music_select: music_play at 0x2ff14 calls it at 0x2ff50 with the music record and the value 1 when the word at +0x0c is 1; menu_space_init at 0x29d08 calls it at 0x29f6f with the record 0x62b0 and the value 1 after music_load; race_session_start at 0x128e0 calls it at 0x12b83 with the record 0x62b0 and the value 1"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when the success flag at +0x04 is negative; otherwise it frees the driver voice of the channel index at +0x00 through sound_channel_free at 0xd38e6, starts the voice again through 0xd3857, and writes the argument to +0x0c; the same record gate and the same free call sit in music_bank_stop at 0x2fe68"
+    },
+    {
+      "kind": "note",
+      "text": "the three rebuilt callers supply the name music_select; the original has no symbol, so the record keeps the name with the confidence inferred; the sibling music_load at 0x2fcec and music_bank_stop at 0x2fe68 sit in the section The sound loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2febc --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2febc --count 20 --rebuilt work/rebuild/msel.exe --rebuilt-map work/rebuild/music_select.map --rebuilt-symbol music_select_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module music_select"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2febc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_select.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/music_select_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/music_select.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the music record, the two channel stubs, and the call order; the five paths cover the set flag, the zero flag, the two negative flags, and the channel index 0; each path checks the call order, the two arguments, the value write, and the unchanged word on the skip path; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 20 instructions and 7 of 54 bytes equal, and 0 of 3 relocation slots; the identity check stays open because V2 saves ecx, keeps the record in ecx, drops the two argument slots, uses direct operands, and restores the stack through lea; the build and behavior checks pass, so the store records rebuilt"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "music_select",
+  "name": "music_select",
   "notes": [],
   "object_offset": "0x1febc",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 54,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2febc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:1093ff2a3500f4a4adbd4214f64f9351091a64b8b3cb094e1b0afba8158542ab",
+    "source_digest": "sha256:347dd14e60398d163b14fd4d235395a282da03ed89f3be4a37b6e68ae9f893ff",
+    "tool": "run.py"
+  },
+  "role": "restarts the driver voice of the music record and writes the select value to the record",
+  "section": "The sound loaders",
   "size": 56,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "music_select_"
 }

@@ -1,0 +1,28 @@
+{
+  "exe": "srbless.exe",
+  "map": "sound_render_branch_less.map",
+  "name": "sound_render_branch_less",
+  "run": {
+    "command": "srbless.exe > srbless.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "srbless.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_render_branch_less.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_render_branch_less_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

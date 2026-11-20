@@ -1,7 +1,65 @@
 {
   "address": "0x8bd54",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 16,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8bd54 holds 16 instructions and 64 bytes up to the ret at 0x8bd93; a later function starts at 0x8bd94, and the next recorded function starts at 0x8bdec, so the store record keeps the 152-byte extent and sets no separate function size; the identity check uses 16 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the argument in the eight data cells at 0x73bf7, 0x73c05, 0x73c13, 0x73c21, 0x73c68, 0x73c76, 0x73c84, and 0xc7cf0, negates the value into 0xc7cf4, and stores the value minus 0x80 at 0x72bf0; the object data holds the default state for the argument 0xffff54e0, and the far depth limit at 0xc7cf0 is read by sound_mix_prepare at 0x8aa60 and the renderer"
+    },
+    {
+      "kind": "note",
+      "text": "the four direct callers are race_start at 0x27770, loading_screen at 0x2a364, menu_space_init at 0x29d08, and race_results_screen at 0x2a558; the callers pass a table value or the default 0xffff54e0, and the caller data flow supports the name state_cells_set with the confidence inferred and the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame, so the module builds without -of+; the function uses no floating-point instruction and calls no helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the ten data cells and covers the default value 0xffff54e0, the value 0x12345678, and the value 0; every path checks the eight cells, the negated cell, and the biased cell; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The state_cells_set module at 0x8bd54"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8bd54 --count 16"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8bd54 --count 16 --rebuilt work/rebuild/scs.exe --rebuilt-map work/rebuild/scs.map --rebuilt-symbol state_cells_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module state_cells_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8bd54"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/state_cells_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/state_cells_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/state_cells_set.json"
+    },
     {
       "kind": "finding",
       "text": "## The object pipeline and the race frame"
@@ -11,9 +69,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "state_cells_set",
+  "name": "state_cells_set",
   "notes": [],
   "object_offset": "0x7bd54",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 22,
+        "bytes_total": 63,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 14,
+        "instructions_total": 16,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8bd54",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:cd0564b378076bd54c325a00e4af6f0c32c873efe393f6d144e6646ce3043ca1",
+    "source_digest": "sha256:92bff820777b15e7fe7931c243da89f97f5978166f51af0878e26fbdd200de12",
+    "tool": "run.py"
+  },
+  "role": "stores the current state value in the state cells and sets the negated depth limit and the biased value",
+  "section": "Program functions",
   "size": 152,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "state_cells_set_"
 }

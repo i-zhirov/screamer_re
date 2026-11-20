@@ -1,0 +1,32 @@
+{
+  "exe": "memload.exe",
+  "map": "member_load.map",
+  "name": "member_load",
+  "run": {
+    "command": "memload.exe > memload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "memload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "member_load.c",
+      "flags": [
+        "-of+",
+        "-dMEMBER_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "member_load_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,33 @@
+{
+  "exe": "phdelta.exe",
+  "map": "phase_delta.map",
+  "name": "phase_delta",
+  "run": {
+    "command": "phdelta.exe > phd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "phd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "phase_delta.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "phase_delta_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

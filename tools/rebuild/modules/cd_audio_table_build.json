@@ -1,0 +1,32 @@
+{
+  "exe": "cdtab.exe",
+  "map": "cd_audio_table_build.map",
+  "name": "cd_audio_table_build",
+  "run": {
+    "command": "cdtab.exe > cdtab.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "cdtab.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_table_build.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_table_build_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,29 @@
+{
+  "exe": "slaview.exe",
+  "map": "sla_view_update.map",
+  "name": "sla_view_update",
+  "run": {
+    "command": "slaview.exe > slaview.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "slaview.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "sla_view_update.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sla_view_update_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

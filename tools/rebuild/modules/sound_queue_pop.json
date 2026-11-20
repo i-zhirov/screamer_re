@@ -1,0 +1,35 @@
+{
+  "exe": "sqpop.exe",
+  "map": "sound_queue_pop.map",
+  "name": "sound_queue_pop",
+  "run": {
+    "command": "sqpop.exe > sqpop.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "sqpop.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_queue_pop.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_queue_pop_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,7 +1,77 @@
 {
   "address": "0x1f8b4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 14,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f8b4 holds 14 instructions and 37 bytes up to the ret at 0x1f8d8; the next recorded function starts at 0x1f8dc, so the store record keeps the 40-byte extent and sets no separate function size; the identity check uses 14 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are race_end at 0x279a4 with the call site at 0x279ae and the value 0, race_data_release at 0x156a8, credits_fade_out at 0x27e08 with the call site at 0x27eae and the scaled DAT_0011d2bc value, and view_move at 0x1f94c with the call site at 0x1f95e and its second value; the callers sit in several sections, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the setup word DAT_00008058 gates the call; a zero word returns at once; a set word passes the driver handle DAT_00018d94 in eax and the saved value in edx to the driver word store at 0xc6c73, which indexes the far pointer table at 0x27a54 by the handle and writes the word at +4; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the options screen maps the label FX to DAT_0011d2bc, CD to DAT_0011d2c0, and MU to DAT_0011d2c4; view_move passes the CD slot to cd_audio_volume_set and the MU slot to music_volume_set, so the third slot and the parallel volume setters support the name sound_fx_volume_set; the earlier notes call the same slot the mouse helper, and the audio slot table gives the stronger evidence"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and one local, so the module builds with -of+; the function holds no floating-point instruction and calls one driver helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_fx_volume_set.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_fx_volume_set_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_fx_volume_set.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_fx_volume_set module at 0x1f8b4"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f8b4 --count 14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f8b4 --count 14 --rebuilt work/rebuild/fxvol.exe --rebuilt-map work/rebuild/sound_fx_volume_set.map --rebuilt-symbol sound_fx_volume_set_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_fx_volume_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_fx_volume_set"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f8b4"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the setup word, the driver handle, and the driver word store stub; the stub records the handle, the value, and the call count; the seven paths cover the zero setup word, the values 0, 0x7f, 0x80, 0x123, and 0x7fff, and two calls in a row; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 14 instructions; the rebuilt body holds 11 of 14 instructions, 19 of 37 bytes, and 2 of 2 relocation slots equal; the rebuilt body holds 38 bytes because V2 puts push ebp before push edx, places the local at ebp-8, and uses lea esp, [ebp-4]; the build and behavior checks pass, so the store records rebuilt"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_fx_volume_set",
+  "name": "sound_fx_volume_set",
   "notes": [],
   "object_offset": "0xf8b4",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 19,
+        "bytes_total": 37,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 11,
+        "instructions_total": 14,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f8b4",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:8bf424a8e63293b7840cdcc94029a80e611b9c6a60091e3f50c958a79b19f630",
+    "source_digest": "sha256:7bcd8424f0ed5906976ffe58c84d2bc91be7e3784b156699ad5937ab0d76eebb",
+    "tool": "run.py"
+  },
+  "role": "Sets the sound effects volume through the driver word store when the setup word is set.",
+  "section": "Program functions",
   "size": 40,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_fx_volume_set_"
 }

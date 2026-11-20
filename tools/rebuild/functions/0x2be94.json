@@ -1,7 +1,61 @@
 {
   "address": "0x2be94",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 9,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original entry path at 0x2be94 holds 9 instructions and 28 bytes up to the ret at 0x2beaf; the other case blocks follow the ret and end at the next record at 0x2bedc, so the store record keeps the 72-byte extent and sets no separate function size; the identity check uses 9 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x295c9 is case 1 of race_state_update at 0x29564; race_state_update is a race_frame callee at 0x2807c, so the module takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the state word DAT_0011fac4, rejects a value above 8, and jumps through the table at linear 0x2be70; the table maps the state 0 to menu_frame at 0x29f80, the state 2 to car_select_screen at 0x2bedc, the state 3 to track_select_screen at 0x2c188, the state 4 to name_entry_screen at 0x2c430, the state 5 to championship_screen_init at 0x2c7a8, the state 6 to race_records_screen_init at 0x2c954, and the state 8 to net_race_lobby_init at 0x2ca40; the states 1 and 7 and the default path call nothing"
+    },
+    {
+      "kind": "note",
+      "text": "the state word, the jump table, and the seven screen initializers support the name state_init_dispatch; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and uses no floating-point instruction, so the module builds with -of+ and links no FPU stub and no assembly source"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the state word and one stub for each of the seven initializers; the eleven paths cover the states 0 through 9 and the exit; every path checks that only the expected initializer runs; the output holds the markers 0 through 9 and D, and the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 5 of 9 instructions, 9 of 28 bytes, and 1 of 2 relocation slots equal; the identity check stays open because V2 uses the if/else dispatch, emits a near conditional jump, and reads the state word through the harness address; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2be94 --count 9"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2be94 --count 9 --rebuilt work/rebuild/sidisp.exe --rebuilt-map work/rebuild/state_init_dispatch.map --rebuilt-symbol state_init_dispatch_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module state_init_dispatch"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2be94"
+    },
+    {
+      "kind": "finding",
+      "text": "The state_init_dispatch module at 0x2be94"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +65,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "state_init_dispatch",
+  "name": "state_init_dispatch",
   "notes": [],
   "object_offset": "0x1be94",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 28,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 9,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2be94",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0e0d329bc8e14bc624bd2ac49cfefd3ed3961b17f08bd49c0c8e6073202ad687",
+    "source_digest": "sha256:4c19491c6b2482b0f9c48f94703f7c78c25bf043196b7d276940b860b0ebbe53",
+    "tool": "run.py"
+  },
+  "role": "dispatches the state word to the screen initializer of the state",
+  "section": "race_frame callees",
   "size": 72,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "state_init_dispatch_"
 }

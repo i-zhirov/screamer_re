@@ -1,0 +1,27 @@
+{
+  "exe": "ssclean.exe",
+  "map": "screen_setup_cleanup.map",
+  "name": "screen_setup_cleanup",
+  "run": {
+    "command": "ssclean.exe > ssclean.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ssclean.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "screen_setup_cleanup.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "screen_setup_cleanup_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

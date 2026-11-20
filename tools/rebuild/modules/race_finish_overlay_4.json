@@ -1,0 +1,29 @@
+{
+  "exe": "rfo4.exe",
+  "map": "race_finish_overlay_4.map",
+  "name": "race_finish_overlay_4",
+  "run": {
+    "command": "rfo4.exe > rfo4.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rfo4.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "race_finish_overlay_4.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_overlay_4_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

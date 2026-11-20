@@ -1,0 +1,29 @@
+{
+  "exe": "cdvolr.exe",
+  "map": "cdvolr.map",
+  "name": "cd_volume_descriptor_read",
+  "run": {
+    "command": "cdvolr.exe > cdvolr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cdvolr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_volume_descriptor_read.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_volume_descriptor_read_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

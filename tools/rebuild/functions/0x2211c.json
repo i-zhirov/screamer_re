@@ -1,7 +1,85 @@
 {
   "address": "0x2211c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 41,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2211c holds 41 instructions and 110 bytes up to the ret 8 at 0x22187; the next function starts at 0x2218c, so the store record keeps the 112-byte extent and sets no separate function size; the identity check uses 41 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the first argument arrives in eax; the float target makes the Watcom compiler pass the remaining arguments on the stack, so the callee cleans them with ret 8; the push edx in the prologue saves the second register"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is player_car_skid_update at 0x17d14, which calls the function at 0x18085 with the shake value and the step 0x5a to filter the value into +0x128; the call sweep of 688 candidate function starts finds no other call site"
+    },
+    {
+      "kind": "note",
+      "text": "the function moves the value at *value toward the target with the coefficient DAT_0010cf08[step]; when the absolute difference is below pi/2, it takes the sine of the offset; otherwise it takes the offset directly"
+    },
+    {
+      "kind": "note",
+      "text": "the function sits between angle_approach at 0x22018 and point_rotate_y at 0x2218c and shares the coefficient table and the pi/2 constant at object-3 offset 0xd70 with the angle filters, so the module takes the section The timing and filter layer"
+    },
+    {
+      "kind": "note",
+      "text": "the moved value with the sine correction supports the name angle_filter; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the coefficient table pointer DAT_0010cf08 and the pi/2 constant DAT_0010d70 arrive through globals, because the harness image does not load the constant segment; the local angle_filter_fpu.asm supplies the sine and the absolute value from the hardware and the FPU run-time symbols"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the coefficient table and the pi/2 constant; the nine paths cover the small positive and negative offsets, the two large offsets, the offset near pi/2, the coefficient above one, the equal value, the large offset with the coefficient above one, and the negative result; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 5 of 41 instructions and 2 of 106 bytes equal and 0 of 6 relocation slots equal; the identity check stays open because the V2 compiler saves ebp, ecx, and edx, keeps the pointer in a register, uses another local slot order, and orders the two branches in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2211c --count 41"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2211c --count 41 --rebuilt work/rebuild/anflt.exe --rebuilt-map work/rebuild/angle_filter.map --rebuilt-symbol angle_filter_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module angle_filter"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2211c"
+    },
+    {
+      "kind": "finding",
+      "text": "The angle_filter module at 0x2211c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/angle_filter.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/angle_filter_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/angle_filter_fpu.asm"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/angle_filter.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +89,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "angle_filter",
+  "name": "angle_filter",
   "notes": [],
   "object_offset": "0x1211c",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 106,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 41,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2211c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:5f98ea551084dbc09b05c435faa75fbc7c999283b835f5ab470095567b2a54cb",
+    "source_digest": "sha256:04ce9bea8e65a9693ce4500bd75ca772118eccdea144e12053c6c18ee9dece60",
+    "tool": "run.py"
+  },
+  "role": "moves a value toward a target with the coefficient table, using the sine of a small offset and the offset directly otherwise",
+  "section": "The timing and filter layer",
   "size": 112,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "angle_filter_"
 }

@@ -1,0 +1,41 @@
+{
+  "exe": "arc.exe",
+  "map": "angle_in_arc.map",
+  "name": "angle_in_arc",
+  "run": {
+    "command": "arc.exe > arc.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "arc.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "angle_in_arc.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "angle_in_arc_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

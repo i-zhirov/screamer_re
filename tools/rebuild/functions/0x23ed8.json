@@ -1,7 +1,77 @@
 {
   "address": "0x23ed8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x23ed8 holds 18 instructions and 60 bytes up to the ret at 0x23f13; the next function starts at 0x23f14, so the store record keeps the 60-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_laps_update at 0x20ec8 with the call site at 0x20f22; it selects this finish handler from the mode byte DAT_0011d260 on mode 1; the handler sits in the section Program functions; the mode 2 handler at 0x23f14 holds the identical body"
+    },
+    {
+      "kind": "note",
+      "text": "the handler compares the finish position DAT_000ffa4 with 1; position 1 sets bit 3 of the control byte DAT_0018e1d and enqueues the effect 0xb; any other position keeps the control byte and enqueues the effect 0xc; both calls use the variant mode 3 and the delay 0 through sound_enqueue at 0x247fc"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the mode 1 selection, the position test, and the two effects support the name race_finish_mode_1_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original function holds no floating-point instruction, but the sound_enqueue call passes a float argument, so the recipe adds the shared fpu_stub.asm for the FPU run-time symbols; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte and the finish position; the five paths cover position 1 with a clear and a set control byte, position 0, position 2, and position -1; every path checks the effect, the mode 3, and the delay 0; the output holds the markers 0 through 4 and D, and the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 18 instructions and 57 bytes in the identity window; the identity check stays open at 10 of 18 instructions, 17 of 57 bytes, and 1 of 3 relocation slots, because V2 pushes the frame first, folds the bit set into or byte ptr, and the two absolute data operands and long call differ; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_mode_1_update module at 0x23ed8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23ed8 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23ed8 --count 18 --rebuilt work/rebuild/rfm1.exe --rebuilt-map work/rebuild/race_finish_mode_1_update.map --rebuilt-symbol race_finish_mode_1_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module race_finish_mode_1_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_mode_1_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23ed8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_mode_1_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_mode_1_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_mode_1_update.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "race_finish_mode_1_update",
+  "name": "race_finish_mode_1_update",
   "notes": [],
   "object_offset": "0x13ed8",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 17,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23ed8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:9d7dfb3e4f03fba71f4f07e923cc6c11221b1e986c0766064acf5fc3240c37c8",
+    "source_digest": "sha256:24576cc04ae462f5824df0a65ed85e2a68e84895dee7af47dfc703fb0f59aca5",
+    "tool": "run.py"
+  },
+  "role": "Sets the finish control bit and enqueues the win or lose effect for the mode 1 finish handler.",
+  "section": "Program functions",
   "size": 60,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_mode_1_update_"
 }

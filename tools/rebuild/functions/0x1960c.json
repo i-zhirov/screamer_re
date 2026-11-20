@@ -1,7 +1,77 @@
 {
   "address": "0x1960c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 32,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1960c holds 32 instructions and 105 bytes up to the ret at 0x19674; three pad bytes follow the ret, and the next record starts at 0x19678, so the store record keeps the 108-byte extent and sets no separate function size; the identity check uses 32 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct callers are player_lap_progress_update at 0x194a0 with the call sites at 0x1955c and 0x19592; that function runs in the vehicle state chain after player_track_node_update at 0x1821c and names the callee track_timer_update, so the record takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the function returns at once when the race position at 0x11d2b0 plus one equals the lap index at +0x684; otherwise it divides the timer at +0x790 by the divisor 5.0 at object-3 offset 0x8b4, adds the integer step, and clears the effect timer index 0x16 through 0x24d7c"
+    },
+    {
+      "kind": "note",
+      "text": "the mode byte DAT_0011d260 selects the step: the bits 0x60 read the global at object-3 offset 0xcf50 and the clear bits read the global at object-3 offset 0xcf4c; the minimal harness image does not load the constant segment, so the module reads the divisor and the two steps from the globals track_timer_divisor, track_timer_step_mode, and track_timer_step_default"
+    },
+    {
+      "kind": "note",
+      "text": "player_lap_progress_update already names the callee track_timer_update; the timer field, the two step globals, and the effect timer clear support the name; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses the x87 stack for the divide and the integer-to-float add, so the module links the shared fpu_stub.asm for __8087, __init_387_emulator, and _fltused_; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the object, the race position, the mode byte, the divisor, the two steps, and the effect timer stub; the nine paths cover the early return, the default step, the mode 0x60, the mode bits 0x20 and 0x40, the mode bit 0x10 alone, the negative step, the mode 0x50, and the repeated calls with an early return; the output holds the markers 0 through 8 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 4 of 32 instructions, 8 of 105 bytes, and 0 of 11 relocation slots equal; the identity check stays open because V2 saves ebp first, keeps the object in eax and the step in a local, selects the step with two memory loads, and divides with the divisor in the FPU stack; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1960c --count 32"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1960c --count 32 --rebuilt work/rebuild/ttu.exe --rebuilt-map work/rebuild/track_timer_update.map --rebuilt-symbol track_timer_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module track_timer_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1960c"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_timer_update module at 0x1960c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/track_timer_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/track_timer_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/track_timer_update.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "track_timer_update",
+  "name": "track_timer_update",
   "notes": [],
   "object_offset": "0x960c",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 8,
+        "bytes_total": 105,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 32,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1960c",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:d469c2b6d36988f39b31a820cbddeb6b3959ba9b1a017bb9addc4dbc38cb8864",
+    "source_digest": "sha256:b1bf733ab7607418e00c4824ca7bbc801261ee45ff06a7609cc768d3fc79ed4f",
+    "tool": "run.py"
+  },
+  "role": "updates the lap timer of the player object and clears one effect timer",
+  "section": "The vehicle state chain",
   "size": 108,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_timer_update_"
 }

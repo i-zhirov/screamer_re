@@ -1,0 +1,32 @@
+{
+  "exe": "arrsrt.exe",
+  "map": "array_sort.map",
+  "name": "array_sort",
+  "run": {
+    "command": "arrsrt.exe > arrsrt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "arrsrt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "array_sort.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "array_sort_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,35 @@
+{
+  "exe": "rmenuh.exe",
+  "map": "race_menu_handler.map",
+  "name": "race_menu_handler",
+  "run": {
+    "command": "rmenuh.exe > rmenuh.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "rmenuh.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_menu_handler.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_menu_handler_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

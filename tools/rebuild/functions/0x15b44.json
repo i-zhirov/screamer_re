@@ -1,7 +1,68 @@
 {
   "address": "0x15b44",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x15b44 holds 18 instructions and 57 bytes up to the ret at 0x15b7c; the next function starts at 0x15b80, so the store record keeps the 60-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the traffic view group at 0x201d0, call site 0x20268, on the player object at object-3 offset 0xf91c; the car path has the same shape at 0x15b08 with the player nearby marker and the car proximity pass, so the module takes the section The vehicle state chain"
+    },
+    {
+      "kind": "note",
+      "text": "the object pointer arrives in eax; the function first calls player_body_point_place at 0x17c6c, returns at once when the state field +0x148 is not zero, and otherwise calls traffic_nearby_mark at 0x12424, traffic_collision_pass at 0x175dc, and opponent_start at 0x124c0, all with the same player object"
+    },
+    {
+      "kind": "note",
+      "text": "the caller chain, the traffic steps, and the state gate support the name traffic_effect_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original stores the argument to the frame and reloads it before each call; the volatile local reproduces the store and the reload, as error_report.c records for the same frame-local pattern; the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no math call, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two player object buffers and one stub for each of the four callees; the four paths cover the clear state, the state 1, the state -1, and the second object; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body matches the original instruction sequence at 18 of 18 instructions and 45 of 57 bytes; the five differing operands are link-time addresses, so the identity check passes and the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x15b44 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x15b44 --count 18 --rebuilt work/rebuild/teff.exe --rebuilt-map work/rebuild/traffic_effect_update.map --rebuilt-symbol traffic_effect_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x15b44"
+    },
+    {
+      "kind": "finding",
+      "text": "The traffic_effect_update module at 0x15b44"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_effect_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/traffic_effect_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/traffic_effect_update.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +72,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "traffic_effect_update",
+  "name": "traffic_effect_update",
   "notes": [],
   "object_offset": "0x5b44",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 45,
+        "bytes_total": 57,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 18,
+        "instructions_total": 18,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x15b44",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:1c6e2c94925b7be5c11156b613c86430e9897c3b5ea240e203f9461259d6543d",
+    "source_digest": "sha256:fe720aa50d1c93f3521ebf7d9614b76eb8bc34c74fc9f9aecbe91c6dbbd6879c",
+    "tool": "run.py"
+  },
+  "role": "Runs the player body point place step, then marks the nearby traffic records, runs the traffic collision pass, and starts the nearby opponents when the player state field is clear.",
+  "section": "The vehicle state chain",
   "size": 60,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "traffic_effect_update_"
 }

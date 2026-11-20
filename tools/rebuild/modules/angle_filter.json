@@ -1,0 +1,40 @@
+{
+  "exe": "anflt.exe",
+  "map": "angle_filter.map",
+  "name": "angle_filter",
+  "run": {
+    "command": "anflt.exe > anflt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "anflt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "angle_filter.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "angle_filter_fpu.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "angle_filter_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

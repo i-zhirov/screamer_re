@@ -1,0 +1,30 @@
+{
+  "exe": "ftinit.exe",
+  "map": "font_table_init.map",
+  "name": "font_table_init",
+  "run": {
+    "command": "ftinit.exe > ftinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "ftinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "font_table_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "font_table_init_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

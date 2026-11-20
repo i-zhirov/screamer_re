@@ -1,7 +1,81 @@
 {
   "address": "0x83500",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 39,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x83500 holds 39 instructions and 93 bytes up to the ret at 0x8355c; the next store record starts at 0x835c0, so the record keeps the 192-byte extent and sets no separate function size; the identity check uses 39 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct call sites are 0x81af0 in sound_effects_update at 0x81ab0, and 0x8af64 and 0x8af9a in sound_frame_prepare at 0x8af08; every caller puts the array base in EDI, the element count in EAX, and the element size 4 in EDX before the call; the array at 0x45790 and the array at 0x7a6e4 belong to the sound code, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the function sorts an array of signed dwords in place in ascending order; it takes the element at the middle of the range as the pivot and swaps it to the start, moves every element below the pivot to the front part of the range, keeps the pivot at the start, processes the start part first, and keeps the end part on the machine stack for later; the signed comparison and the 4-byte stride support the form"
+    },
+    {
+      "kind": "note",
+      "text": "the original writes the entry ESP into the immediate of a cmp esp, imm32 at 0x8354d, so the test at the end of a range compares ESP with the entry value; an equal value means the machine stack holds no pending end part, and the function returns; the relocation at 0x83502 targets object 1 offset 0x7354f, the immediate itself, so the store is deliberate"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol, so the data flow supports the name array_sort; the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original saves no register, has no EBP frame, calls no function, and uses no floating-point instruction; the module uses no assembly implementation and needs no fpu stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one work buffer with a guard dword after each input and runs eight paths: ascending, descending, negative values, duplicate values, a single element, a pair, an empty array, and a larger mixed array; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt C function recurses on the two parts of each range, so it keeps the same order and the same sorted result; the identity check stays open at 9 of 39 instructions equal, 0 of 91 bytes equal, and 0 of 1 relocation slot equal, because V2 emits a frame prologue, saves registers, and forms the recursion in place of the explicit machine-stack loop; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x83500 --count 39"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x83500 --count 39 --rebuilt work/rebuild/arrsrt.exe --rebuilt-map work/rebuild/array_sort.map --rebuilt-symbol array_sort_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module array_sort"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module array_sort"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x83500"
+    },
+    {
+      "kind": "finding",
+      "text": "The array_sort module at 0x83500"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/array_sort.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/array_sort_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/array_sort.json"
+    },
     {
       "kind": "finding",
       "text": "## The object pipeline and the race frame"
@@ -11,9 +85,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "array_sort",
+  "name": "array_sort",
   "notes": [],
   "object_offset": "0x73500",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 91,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 39,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x83500",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:f399c9e7a594f11c48386b32a7a429e87b25fe21fb09fb64a83337481e9dca6f",
+    "source_digest": "sha256:89210c7f913710b78ba838e41cc57602a5d2ef87ba167f7c7004887afef44863",
+    "tool": "run.py"
+  },
+  "role": "Sorts a signed dword array in place in ascending order.",
+  "section": "object_update_all callees",
   "size": 96,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "array_sort_"
 }

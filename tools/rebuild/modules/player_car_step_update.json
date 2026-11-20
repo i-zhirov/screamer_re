@@ -1,0 +1,30 @@
+{
+  "exe": "pcstep.exe",
+  "map": "player_car_step_update.map",
+  "name": "player_car_step_update",
+  "run": {
+    "command": "pcstep.exe > pcstep.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "pcstep.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_car_step_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_car_step_update_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

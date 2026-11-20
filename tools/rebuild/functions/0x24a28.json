@@ -1,7 +1,69 @@
 {
   "address": "0x24a28",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 23,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24a28 holds 23 instructions and 67 bytes up to the ret at 0x24a6a; the -1 return path is out of line at 0x24a6b through the ret at 0x24a71; two pad bytes follow, and the jump table of sound_variant_select starts at 0x24a74; the next function starts at 0x24a84, so the store record keeps the 92-byte extent and sets no separate function size; the identity check uses 23 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_queue_update at 0x24880, with the call site at 0x248d7; the caller passes the head queue record at DAT_0019080 and stores the result as the playing sound status at DAT_00119070; the callee sound_variant_select at 0x24a84 selects the sample id, and the callee table_lookup at 0x1f718 resolves the table id; the caller chain supports the name sound_queue_start and the section Program functions; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the argument in EAX points at a sound-queue record; the field +0x00 holds the effect index and the field +0x04 holds the variant mode; when the selected sample id is -1 the function returns -1 and touches no global; otherwise it stores the frame counter DAT_000007fd at DAT_0019078, adds the sample base DAT_001906c to the selected sample id, stores the table id at DAT_0019074, and returns the table entry from table_lookup; the sample base comes from sound_effect_list_init at 0x24600"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no conversion to an integer, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame counter, the sample base, the table id, the start frame, and the two callee stubs; the seven paths cover the -1 return with untouched globals, the base add, the zero sample id and zero base, the negative sample id, the large base, the unchanged queue record pointer, and the -1 table entry after the two stores; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 23 instructions and 76 bytes; the identity check window holds 23 instructions and 67 bytes and stays open at 5 of 23 instructions, 5 of 67 bytes, and 0 of 10 relocation slots, because V2 saves the frame pointer before edx, keeps the selected sample id in eax instead of a frame slot, forms the base add with a load and an add, and reaches the globals through the small harness offsets; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_queue_start module at 0x24a28"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24a28 --count 23"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24a28 --count 23 --rebuilt work/rebuild/sqstart.exe --rebuilt-map work/rebuild/sound_queue_start.map --rebuilt-symbol sound_queue_start_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_queue_start"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24a28"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_start.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_queue_start_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_queue_start.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_queue_start",
+  "name": "sound_queue_start",
   "notes": [],
   "object_offset": "0x14a28",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 67,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 23,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24a28",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:f51fc37c109afe097cfb99a62308d6bb6f7456758e14b8643f04080fd780d374",
+    "source_digest": "sha256:52ce40b1b2e553db0433fa003a1ba5972e7a85e585d573b62c518e4760fae32b",
+    "tool": "run.py"
+  },
+  "role": "starts the head queue entry and returns the resolved sound table entry",
+  "section": "Program functions",
   "size": 92,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_queue_start_"
 }

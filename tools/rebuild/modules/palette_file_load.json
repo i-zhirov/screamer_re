@@ -1,0 +1,31 @@
+{
+  "exe": "pfload.exe",
+  "map": "palette_file_load.map",
+  "name": "palette_file_load",
+  "run": {
+    "command": "pfload.exe > pfload.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "pfload.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "palette_file_load.c",
+      "flags": [
+        "-of+",
+        "-dPALETTE_FILE_LOAD_HARNESS"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "palette_file_load_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

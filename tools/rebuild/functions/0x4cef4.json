@@ -1,7 +1,72 @@
 {
   "address": "0x4cef4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cef4 holds 15 instructions and 53 bytes up to the ret at 0x4cf28; the three padding bytes at 0x4cf29, 0x4cf2a, and 0x4cf2b precede the next function at 0x4cf2c, so the store record keeps the 56-byte extent and sets no separate function size; the identity check uses 15 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the wrapper at 0x4cf2c; it calls the sibling at 0x4cecc and then this function, and race_data_release at 0x156a8 calls the wrapper during a shutdown"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the OBJ_LST and UNR_FILE resources of the archive head DAT_0021574 through resource_free_name at 0x2f326 with the names at object-3 offsets 0x171b and 0x1723; it then frees the ALFILE map grid record whose allocation pointer is DAT_0021468 through resource_find at 0x2f25f; the record field at +0xc holds the allocation result"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling at 0x4cecc frees the MATERIALS resource and the material record at DAT_00214e8; the two functions form the material and map data release pair; the two resource names, the map grid record, the wrapper caller, and the sibling support the name map_data_release; the original has no symbol, so the record keeps the name with the confidence inferred; the module sits with the resource loaders, so it takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp and reorders the argument setup, so the recipe uses the exact map_data_release.asm body; the function holds no floating-point instruction, so the module needs no FPU stub"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cef4 --count 15"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cef4 --count 15 --rebuilt work/rebuild/mdrl.exe --rebuilt-map work/rebuild/map_data_release.map --rebuilt-symbol map_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cef4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/map_data_release.json"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive head and the map grid key; the three paths cover the full sequence, a second context and key, and a sentinel context and key; every path checks the call order, the two resource names, and the key; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 15 of 15 instructions, 25 of 53 bytes, and 6 of 6 relocation slots equal; the assembly body keeps the original push edx, push ebp prologue, the two name pointers, the archive head load, the three calls, the map grid key, and the pop ebp, pop edx epilogue; the nine differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_data_release.asm"
+    },
     {
       "kind": "finding",
       "text": "## The resource layer and the DPMI services"
@@ -11,9 +76,46 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "assembly",
+  "module": "map_data_release",
+  "name": "map_data_release",
   "notes": [],
   "object_offset": "0x3cef4",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 25,
+        "bytes_total": 53,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 15,
+        "instructions_total": 15,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cef4",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:ab50425205a69515e7b4bbfb321329559e8f414d150e8eac44d5b5e31e698319",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:89f66ac61b45b00d97d10e08adadc27c5eb35935986418584935d2c4dffe5d39",
+    "tool": "run.py"
+  },
+  "role": "frees the OBJ_LST and UNR_FILE resources and the map grid record whose allocation pointer is DAT_0021468",
+  "section": "Resource loader",
   "size": 56,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "map_data_release_"
 }

@@ -1,0 +1,29 @@
+{
+  "exe": "dpfree.exe",
+  "map": "dpmi_free_dos.map",
+  "name": "dpmi_free_dos",
+  "run": {
+    "command": "dpfree.exe > dpfree.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "dpfree.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_free_dos.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "dpmi_free_dos_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

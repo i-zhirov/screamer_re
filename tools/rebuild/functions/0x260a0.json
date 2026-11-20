@@ -1,7 +1,73 @@
 {
   "address": "0x260a0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x260a0 holds 62 bytes and 22 instructions to the ret at 0x260dd; two padding bytes at 0x260de precede the next function at 0x260e0, so the store record keeps the 64-byte extent and sets no separate function size; the identity check uses the plan count 22"
+    },
+    {
+      "kind": "note",
+      "text": "the direct call sites are 0x25e82 and 0x25eb3 in the CD audio setup at 0x25dd5, 0x25fa8 in the CD audio tick at 0x25f90, 0x26169 in the playback block at 0x26148, and 0x2630c in cd_audio_table_build at 0x262fc; the CD audio request path sits in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the MSCDEX request header at DAT_001666a4: the length 0x1a, the subunit DAT_00166680, the command 3 (IOCTL input), the transfer count 2, and the payload subfunction 9 (get audio disc info); it clears the dword at +0x41 and the dword at +0x45, runs the request through 0x25f24, and returns the dword at the response pointer DAT_001666a8"
+    },
+    {
+      "kind": "note",
+      "text": "the setup at 0x25dd5 sets the response pointer DAT_001666a8 to the request plus 0x41, so the return is the first dword of the disc info payload; the CD audio tick tests the low byte for 0xff, so the return marks a missing disc"
+    },
+    {
+      "kind": "note",
+      "text": "the MSCDEX subfunction 9, the transfer count 2, and the callers support the name cd_audio_disc_info_request; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the device byte, the request buffer, the response pointer, the response dword, and the submit stub; the stub counts the driver calls, checks the two cleared dwords at +0x41 and +0x45, and writes the response dword; the five paths cover the response 0, the low byte 0xff, the device byte 0x77 with the response 0x12345678, two calls, and the response 0xffffffff; the sentinel byte 0xa5 checks every field outside the written set; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_disc_info_request module at 0x260a0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x260a0 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x260a0 --count 22 --rebuilt work/rebuild/cddisc.exe --rebuilt-map work/rebuild/cd_audio_disc_info_request.map --rebuilt-symbol cd_audio_disc_info_request_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_audio_disc_info_request"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x260a0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_disc_info_request.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_disc_info_request_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_disc_info_request.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "cd_audio_disc_info_request",
+  "name": "cd_audio_disc_info_request",
   "notes": [],
   "object_offset": "0x160a0",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 62,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x260a0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:dd76c7c3bd2d4d5f628cccea0900e0346ace07c8b3995f2700ff0cc6ae6436a6",
+    "source_digest": "sha256:484751391ada1a125fb7e92a035f8d5cf6edb23a4f277706b5b42e2615874470",
+    "tool": "run.py"
+  },
+  "role": "builds the MSCDEX audio disc info request and returns the first response dword",
+  "section": "race_loop callees",
   "size": 64,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_disc_info_request_"
 }

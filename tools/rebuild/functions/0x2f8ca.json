@@ -12,6 +12,14 @@
       "text": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/memory_available.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 27 of 27 instructions, 50 of 58 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the six register saves, the 81 ec 0c local area, the local numbering at -4, -8, and -0xc, the 89 c2 and 01 c2 encodings, and the mov esp,ebp epilogue; the two differing operands are the probe call targets; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "memory_available",
   "name": "memory_available",
   "notes": [
@@ -40,29 +49,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 43,
+        "bytes_equal": 50,
         "bytes_total": 58,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 27,
         "instructions_total": 27,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f8ca",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:7256ba08e9c0f8171f748da7531e37319476c970b1b9531175f88e77497d225d",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:d0bc07f70ad5cfe3756458eda14a55624b52fb1a20ade26cadb7cd3232233580",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:d5e72b9ada92ef440218f04138abfa8eec1d358b5c973a4e08f8e9015efb2e21",
+    "source_digest": "sha256:a793875c63102d1dbeff2b0956d3523ab2779149b2517baf2d5240377767209e",
     "tool": "run.py"
   },
   "role": "probes the heap, frees the probe blocks, and returns the total; `main` compares it with `6400000`",
   "section": "Program functions",
   "size": 58,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "memory_available_"
 }

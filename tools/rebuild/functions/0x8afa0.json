@@ -1,7 +1,80 @@
 {
   "address": "0x8afa0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x8afa0 holds 5 instructions and 18 bytes up to the ret at 0x8afb1; the next recorded function starts at 0x8afb2, so the store record keeps the 18-byte extent and sets no separate function size; the identity check uses 5 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the body loads 0x7d in al and stores al to the bytes at linear 0x83853, 0x83907, and 0x83bc7; each byte is the opcode of a conditional jump in a tail block of sound_event_render at 0x836ac; 0x7d is the jge opcode and 0x7c is the jl opcode; the sibling at 0x8afb2 writes 0x7c to the same three bytes"
+    },
+    {
+      "kind": "note",
+      "text": "the on-disk operand of each store is the object-relative value 0x73853, 0x73907, and 0x73bc7, which le.py prints; the internal fixup adds the object 1 base 0x10000, so the run-time byte sits at 0x83853, 0x83907, and 0x83bc7; the Ghidra reference list names the cells uRam00083853, uRam00083907, and uRam00083bc7"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_source_frame_prepare at 0x8affc with the call site at 0x8b062; the caller runs the sibling at 0x8afb2 on every path, and it calls this function when the sample offset at 0x74528 is not negative; the caller sits in object_update_all callees, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the three patched jge opcodes, the jl sibling, and the caller toggle support the name sound_render_branch_greater; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and holds no floating-point instruction; the rebuild models the three code bytes as three globals, because the rebuilt sound_event_render uses C conditions; the module uses no assembly source and no FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the three branch bytes; the four paths cover the zero bytes, the 0xff bytes, the sibling value 0x7c, and the mixed values; every path checks all three bytes; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 5 instructions; the rebuilt body holds 5 of 5 instructions, 9 of 18 bytes, and 3 of 3 relocation slots equal; the differing operands are the link-time addresses, so the identity verdict is the link-time-address match, and the store records verified"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_render_branch_greater.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_render_branch_greater_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_render_branch_greater.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_render_branch_greater module at 0x8afa0"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x8afa0 --count 5"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x8afa0 --count 5 --rebuilt work/rebuild/srbgreat.exe --rebuilt-map work/rebuild/sound_render_branch_greater.map --rebuilt-symbol sound_render_branch_greater_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_render_branch_greater"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_render_branch_greater"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x8afa0"
+    },
     {
       "kind": "finding",
       "text": "## The object pipeline and the race frame"
@@ -11,9 +84,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "sound_render_branch_greater",
+  "name": "sound_render_branch_greater",
   "notes": [],
   "object_offset": "0x7afa0",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 18,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 5,
+        "instructions_total": 5,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x8afa0",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:2baf0c0b90e8b6faad27cd55f6bd14368ecd122e00c468e2f8d9832adec42e15",
+    "source_digest": "sha256:5d37fbdf5636e09d66e8d5354ede647c9e8ddf618fd8aece6860c3bf2009488a",
+    "tool": "run.py"
+  },
+  "role": "Sets the three sound_event_render conditional jump opcodes at 0x83853, 0x83907, and 0x83bc7 to the signed-greater-or-equal comparison 0x7d.",
+  "section": "object_update_all callees",
   "size": 18,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "sound_render_branch_greater_"
 }

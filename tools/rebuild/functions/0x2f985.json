@@ -1,7 +1,73 @@
 {
   "address": "0x2f985",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 21,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x2f985 holds 21 instructions and 38 bytes up to the ret at 0x2f9aa; the next function starts at 0x2f9b0 after the five padding bytes, so the store record keeps the 43-byte extent and sets no separate function size; the identity check uses 21 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "no direct call, no data reference, and no LE relocation target reaches 0x2f985; the function is a leaf getter that stores its argument, reloads the pointer, reads the dword at +0x3c, stores the value in the second local, reloads it, and returns it; the sibling pool_init at 0x2f904 writes the same field as a 4 KB page count and converts it to bytes, so the field holds a pool size"
+    },
+    {
+      "kind": "note",
+      "text": "the resource functions at 0x2f470 through 0x2f554 show the same pool layout and support the section The resource layer; the original has no caller and no data reference, so the record keeps the weak name func_2f985"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction and calls no helper, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one 0x40-byte pool record; the five paths cover the fields 0, 1, 0x1000, 0x12345678, and 0xffffffff; every path clears the record, sets the field, and checks the returned value; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 6 of 21 instructions, 1 of 38 bytes, and 0 of 4 relocation slots equal; the identity check stays open because V2 saves only the frame pointer, while the original saves ebx, ecx, edx, esi, edi, and ebp; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2f985 --count 21"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2f985 --count 21 --rebuilt work/rebuild/f985.exe --rebuilt-map work/rebuild/func_2f985.map --rebuilt-symbol func_2f985_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module func_2f985"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module func_2f985"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2f985"
+    },
+    {
+      "kind": "finding",
+      "text": "The func_2f985 module at 0x2f985"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f985.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/func_2f985_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/func_2f985.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "func_2f985",
+  "name": "func_2f985",
   "notes": [],
   "object_offset": "0x1f985",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 38,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2f985",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:62efc3875cde178f856fe086df01f927c3efe630e6d552af43030eb525a980b7",
+    "source_digest": "sha256:d279c47181779e00c2d50adc4b0abf4b5841f96254d56f1bc160e583d5332398",
+    "tool": "run.py"
+  },
+  "role": "Returns the size field at offset 0x3c of the pool record.",
+  "section": "The resource layer",
   "size": 43,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "func_2f985_"
 }

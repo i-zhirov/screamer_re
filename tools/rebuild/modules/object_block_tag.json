@@ -1,0 +1,33 @@
+{
+  "exe": "obt.exe",
+  "map": "object_block_tag.map",
+  "name": "object_block_tag",
+  "run": {
+    "command": "obt.exe > obt.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "obt.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_block_tag.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_block_tag_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

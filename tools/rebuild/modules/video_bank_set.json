@@ -1,0 +1,32 @@
+{
+  "exe": "vbs.exe",
+  "map": "video_bank_set.map",
+  "name": "video_bank_set",
+  "run": {
+    "command": "vbs.exe > vbs.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "vbs.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "video_bank_set.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "video_bank_set_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,39 @@
+{
+  "exe": "oscore.exe",
+  "map": "opponent_score_update.map",
+  "name": "opponent_score_update",
+  "run": {
+    "command": "oscore.exe > oscore.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "oscore.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_score_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_score_update_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,7 +1,65 @@
 {
   "address": "0x25aac",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25aac holds 22 instructions and 65 bytes up to the ret at 0x25aec; the next code starts at 0x25af0, so the store record keeps the 68-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function receives the container path in eax and the member name in edx; it loads the engine buffer pointer from the cell PTR_DAT_000bdd20 and calls member_load at 0x4c485 with the local stream record, the path, the name, and that pointer; a non-zero result runs file_error_report at 0x4bf88 with the stream record"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_data_load at 0x131a8 with the call site at 0x1336d; the caller builds the %s\\gfx\\%s%c.dat path and the %s.smg member name first, so the function opens the level member .smg from the track archive; the caller and the data flow support the name track_stream_open with the confidence inferred, and the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the third value 0x104 from the caller is not used by the original body, so the module keeps the caller signature and ignores the value; the original has the EBP frame, so the module builds with -of+, and the function uses no floating-point instruction, so the module needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the engine buffer and its pointer cell PTR_DAT_000bdd20, and the member_load and file_error_report stubs; the three paths cover the successful load, the failed load with the report, and the empty path and member with the third value 0xabcd and the second buffer in the pointer cell; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The track_stream_open module at 0x25aac"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25aac --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25aac --count 22 --rebuilt work/rebuild/tsopen.exe --rebuilt-map work/rebuild/track_stream_open.map --rebuilt-symbol track_stream_open_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module track_stream_open"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25aac"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/track_stream_open.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/track_stream_open_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/track_stream_open.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +69,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "track_stream_open",
+  "name": "track_stream_open",
   "notes": [],
   "object_offset": "0x15aac",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 65,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25aac",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:88ec7d9804d9b5f8a0bb8543e233f8c10e251e708a5b3c84556dc3477d3e939b",
+    "source_digest": "sha256:fe048ec5f1bc211d82aafea3600a51beefa37ef14bed7044591878da14ae3232",
+    "tool": "run.py"
+  },
+  "role": "opens the level .smg member into the engine buffer pointer and reports a file error on failure",
+  "section": "Resource loader",
   "size": 68,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "track_stream_open_"
 }

@@ -12,6 +12,14 @@
       "text": "the original at `0x2f0fc` holds 41 instructions and 118 bytes: it sets `0x0100` at result word 0, sets the paragraph count `(size >> 4) + 1` at word 1, fills the segment set through `dpmi_fill_regs` at `0x4bf23`, runs the interrupt 0x31 call through `dpmi_call` at `0x4bf4b`, returns 0 on a non-zero status, and otherwise returns the segment word times 16 and stores the selector word at the third argument"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/dos_memory_alloc.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 41 of 41 instructions, 112 of 118 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the original local numbering, the 81 ec 3c frame, the 0x0100 request, the c1 f8 04 arithmetic shift, the two DPMI calls, the status branch, the shl eax,4 segment shift, the selector store, and the mov esp,ebp epilogue; the differing operands are the call targets; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "dos_memory_alloc",
   "name": "dos_memory_alloc",
   "notes": [],
@@ -35,29 +44,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 91,
+        "bytes_equal": 112,
         "bytes_total": 118,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 40,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 41,
         "instructions_total": 41,
-        "match": "different",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f0fc",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:33638ff587a228de8da138a7ca05a2058f2fe8add4c75a703ec9ce0419d57e48",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:5a00f42287a129933f63ba9724119ce7ad387dded97abd626b4e3911153cf2e2",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:cc39f4cb316dc11f32734ce7f7cdd1bafa23d1c014a20e69213c2959741a16fc",
+    "source_digest": "sha256:56ddca54288fd2e25920add4c198342f352963769acd0e22d9249c0f0d85f8a4",
     "tool": "run.py"
   },
   "role": "allocates a DOS memory block through DPMI function 0x0100 and returns the linear address",
   "section": "The resource layer",
   "size": 118,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "dos_memory_alloc_"
 }

@@ -1,0 +1,39 @@
+{
+  "exe": "mlvn.exe",
+  "map": "menu_line_value_next.map",
+  "name": "menu_line_value_next",
+  "run": {
+    "command": "mlvn.exe > mlvn.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "mlvn.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "menu_line_value_next.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "menu_line_value_next_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

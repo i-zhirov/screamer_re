@@ -1,0 +1,30 @@
+{
+  "exe": "tmr.exe",
+  "map": "timer_set.map",
+  "name": "timer_set",
+  "run": {
+    "command": "tmr.exe > tmr.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "tmr.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "timer_set.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "timer_set_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

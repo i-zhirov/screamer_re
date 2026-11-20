@@ -1,0 +1,30 @@
+{
+  "exe": "gpp.exe",
+  "map": "gameport_pulse.map",
+  "name": "gameport_pulse",
+  "run": {
+    "command": "gpp.exe > gpp.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "gpp.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "gameport_pulse.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "gameport_pulse_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

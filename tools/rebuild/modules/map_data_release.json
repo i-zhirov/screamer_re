@@ -1,0 +1,27 @@
+{
+  "exe": "mdrl.exe",
+  "map": "map_data_release.map",
+  "name": "map_data_release",
+  "run": {
+    "command": "mdrl.exe > mdrl.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mdrl.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "map_data_release.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_data_release_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

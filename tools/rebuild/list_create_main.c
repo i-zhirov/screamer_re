@@ -50,14 +50,14 @@ void pool_init(void *target)
     pool_calls = pool_calls + 1;
 }
 
-void *malloc(unsigned int size)
+void *malloc_rt(unsigned int size)
 {
     malloc_size = size;
     malloc_calls = malloc_calls + 1;
     return malloc_result;
 }
 
-void *memset(void *target, int value, unsigned int size)
+void *memset_runtime(void *target, int value, unsigned int size)
 {
     memset_block = target;
     memset_value = value;

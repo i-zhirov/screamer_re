@@ -1,0 +1,31 @@
+{
+  "exe": "func2f5.exe",
+  "map": "func_2f554.map",
+  "name": "func_2f554",
+  "run": {
+    "command": "func2f5.exe > func2f5.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "func2f5.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_2f554.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_2f554_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

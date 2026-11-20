@@ -1,0 +1,33 @@
+{
+  "exe": "cdplay.exe",
+  "map": "cd_audio_play.map",
+  "name": "cd_audio_play",
+  "run": {
+    "command": "cdplay.exe > cdplay.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "D"
+    ],
+    "output": "cdplay.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_play.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_play_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

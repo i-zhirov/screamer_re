@@ -1,7 +1,81 @@
 {
   "address": "0x83354",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x83354 holds 20 instructions and 80 bytes up to the ret at 0x833a3; the next function sound_source_collect starts at 0x833a4, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 20 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is sound_effects_update at 0x81ab0 with the call site at 0x81ac1; the caller source already names this function sound_sequence_prepare; no named function sits between the caller and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes the row count in eax and the row pointer in esi from sound_range_update at 0x830c8; C cannot return a pointer in esi, so the callee stores the row pointer in the global grid_row; the function stores the row count at 0x734f0, clears 0x734fc, and sets the output cursor to 0x40330"
+    },
+    {
+      "kind": "note",
+      "text": "the loop reads one row entry with lodsd and skips an entry equal to -1; for every other entry it writes the literal 0xaaaabbbb to 0x734f4, adds the same literal to the entry, and calls sound_source_collect at 0x833a4 with the entry in ebp and the output cursor in edi; the literal is the linker fill value and no fixup covers either slot"
+    },
+    {
+      "kind": "note",
+      "text": "the loop decrements 0x734f0 after the body and continues while the result is not negative, so it runs count + 1 times; the function then divides the output length by the 8-byte record with an arithmetic shift by three, stores the count at 0x72488, and returns it in eax"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the row walk, the source collect call, and the active count support the name sound_sequence_prepare; the caller source already uses the name, so the record keeps it with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses no floating-point instruction, so the module builds without -of+ and links no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the row array, the row count, the output cursor, the four scratch globals, and the two callee stubs; the sound_source_collect stub records the region pointer and the row limit and advances the output cursor by a chosen number of 8-byte records; the five paths cover the single entry, the skipped -1 entry, the -1-only loop, two records per call, and the count -1; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x83354 --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x83354 --count 20 --rebuilt work/rebuild/sseq.exe --rebuilt-map work/rebuild/sound_sequence_prepare.map --rebuilt-symbol sound_sequence_prepare_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_sequence_prepare"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x83354"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_sequence_prepare module at 0x83354"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_sequence_prepare.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_sequence_prepare_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_sequence_prepare.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 1 of 20 instructions equal, 1 of 74 bytes equal, and 0 of 11 relocation slots equal; the identity check stays open because V2 pushes the saved registers, keeps the row cursor and the output cursor in registers, forms the fill add with sub, and reloads the count from its stack slot; the build and behavior checks pass, so the store records rebuilt"
+    },
     {
       "kind": "finding",
       "text": "## The object pipeline and the race frame"
@@ -11,9 +85,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "sound_sequence_prepare",
+  "name": "sound_sequence_prepare",
   "notes": [],
   "object_offset": "0x73354",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 74,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 1,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x83354",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:b9455098dd0d961f799b8d7f95884a32c71bc24b52654dba5d1d712930363e9e",
+    "source_digest": "sha256:9c1f28ec2da2fdc945a1d6d4f5dcfd63adbaebcd1cc4c0436e2ed28e058a44cb",
+    "tool": "run.py"
+  },
+  "role": "Builds the active sound source list from the spatial grid rows and stores the active source count.",
+  "section": "Program functions",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_sequence_prepare_"
 }

@@ -1,0 +1,29 @@
+{
+  "exe": "cdtrkinf.exe",
+  "map": "cdtrkinf.map",
+  "name": "cd_audio_track_info_request",
+  "run": {
+    "command": "cdtrkinf.exe > cdtrkinf.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "cdtrkinf.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_track_info_request.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_track_info_request_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

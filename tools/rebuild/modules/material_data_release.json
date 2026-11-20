@@ -1,0 +1,30 @@
+{
+  "exe": "mdrel.exe",
+  "map": "material_data_release.map",
+  "name": "material_data_release",
+  "run": {
+    "command": "mdrel.exe > mdrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "mdrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "material_data_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "material_data_release_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

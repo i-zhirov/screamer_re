@@ -1,0 +1,30 @@
+{
+  "exe": "txtrel.exe",
+  "map": "text_data_release.map",
+  "name": "text_data_release",
+  "run": {
+    "command": "txtrel.exe > txtrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "txtrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "text_data_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "text_data_release_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

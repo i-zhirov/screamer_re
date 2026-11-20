@@ -1,7 +1,77 @@
 {
   "address": "0x247ac",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x247ac holds 22 instructions and 71 bytes up to the ret at 0x247f2; the early return block at 0x247f3 through 0x247fb holds mov eax,-1, mov esp,ebp, pop ebp, and ret; the next function starts at 0x247fc, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_intro_update at 0x20d20 with the call site at 0x20db7; the caller passes the half-second bucket DAT_00118e20 in eax and the mode 0 in edx; no named function sits between the caller and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the state DAT_0001d2c8 and the table flag DAT_00008058 gate the lookup; a zero state returns -1 and a zero flag returns -1; the table function table_lookup at 0x1f718 reads the same flag"
+    },
+    {
+      "kind": "note",
+      "text": "with both gates set, the function writes the effect to the field +0x00 and the mode to the field +0x04 of a two-field stack record and passes the record to sound_variant_select at 0x24a84; it adds the sample base DAT_0001906c to the selected sample id, resolves the sum through table_lookup at 0x1f718, and returns the table entry; the sample base comes from sound_effect_list_init at 0x24600"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the two sound gates, the variant select, and the table lookup support the name sound_variant_lookup; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the state, the table flag, the sample base, the sound_variant_select stub, and the table_lookup stub; the eight paths cover the zero state, the zero flag, the base add, the mode 3 at the base 0, the selected -1 with the base 5, a large base with a negative effect, the effect 0 and mode 0, and a non-zero state and flag; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 7 of 22 instructions equal, 9 of 68 bytes equal, and 0 of 7 relocation slots equal; the identity check stays open because V2 tests the two gates before it saves the arguments, merges the two early returns into one block at the top, uses the 8-byte frame, writes the stack record at -8 and -4, and omits the separate parameter locals; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x247ac --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x247ac --count 22 --rebuilt work/rebuild/svlk.exe --rebuilt-map work/rebuild/sound_variant_lookup.map --rebuilt-symbol sound_variant_lookup_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_variant_lookup"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x247ac"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_variant_lookup module at 0x247ac"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_variant_lookup.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_variant_lookup_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_variant_lookup.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_variant_lookup",
+  "name": "sound_variant_lookup",
   "notes": [],
   "object_offset": "0x147ac",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 68,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x247ac",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:2ae355a36e56ab6c3903fbecd9064ac620a229b31ff9fbed286b48bb4f7773d5",
+    "source_digest": "sha256:53a5b7b644bb3d0e3d1ad9c07148cb14bcf774db39bcafe6786d199fd78d28a4",
+    "tool": "run.py"
+  },
+  "role": "Resolves a sound effect and a variant mode to its sample table entry, or returns -1 when a sound gate is clear.",
+  "section": "Program functions",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_variant_lookup_"
 }

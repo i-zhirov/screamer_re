@@ -1,7 +1,76 @@
 {
   "address": "0x22d44",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22d44 holds 11 instructions and 30 bytes up to the ret at 0x22d61; the next recorded function attack_data_release starts at 0x22d64, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_data_release at 0x156a8 with the call site at 0x156fe; it calls this function after the FONTS release at 0x25640 and before the ATTACK release at 0x22d64; the function frees the REPLAY resource at object-3 offset 0xdba from the archive DAT_000062ac through resource_free_name at 0x2f326, then clears DAT_0018e5c; the string at linear 0x100dba holds REPLAY"
+    },
+    {
+      "kind": "note",
+      "text": "replay_frame_buffer_init at 0x22c30 loads the same REPLAY resource at object-3 offset 0xdac and stores the pointer at DAT_0018e5c; the load and release pair and the replay records support the name replay_frame_buffer_release; the original has no symbol, so the record keeps the name with the confidence inferred; the module sits with the replay records, so the record takes the section The replay records"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp, reorders the prologue, and keeps the zero in EAX, so the recipe uses the exact replay_frame_buffer_release.asm body; the function holds no floating-point instruction and calls one resource helper, so the module needs no FPU stub"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_frame_buffer_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_frame_buffer_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/replay_frame_buffer_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_frame_buffer_release module at 0x22d44"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22d44 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22d44 --count 11 --rebuilt work/rebuild/rplrel.exe --rebuilt-map work/rebuild/replay_frame_buffer_release.map --rebuilt-symbol replay_frame_buffer_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module replay_frame_buffer_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_frame_buffer_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22d44"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive context, the replay frame buffer pointer, and the resource free stub; the stub records the call count, the context, and the name pointer; the three paths cover the first values, other values, and the sentinel context and buffer; every path checks the call count, the context, the REPLAY name, and the cleared buffer; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 11 of 11 instructions, 21 of 30 bytes, and 3 of 3 relocation slots equal; the assembly body keeps the original push edx, push ebp prologue, the EDX name argument, the EAX context load, the xor edx,edx clear, and the pop ebp, pop edx epilogue; the four differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_frame_buffer_release.asm"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +80,46 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
+  "module": "replay_frame_buffer_release",
+  "name": "replay_frame_buffer_release",
   "notes": [],
   "object_offset": "0x12d44",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 21,
+        "bytes_total": 30,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 11,
+        "instructions_total": 11,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22d44",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:3346729e3093ee82041ad153f6afc4db414825b44feef85b9d72dfcb0b5e8188",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:4c89d735f229e0a7596d8eb6b2b11547f3f09d196730d2be3837dccf8810989e",
+    "tool": "run.py"
+  },
+  "role": "Releases the REPLAY resource and clears the replay frame buffer pointer.",
+  "section": "The replay records",
   "size": 32,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "replay_frame_buffer_release_"
 }

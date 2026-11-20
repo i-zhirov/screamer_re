@@ -1,7 +1,72 @@
 {
   "address": "0x25f14",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25f14 holds 6 instructions and 15 bytes up to the ret at 0x25f22; one padding byte at 0x25f23 precedes the next function at 0x25f24, so the store record keeps the 16-byte extent and sets no separate function size; the identity check uses 6 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is engine_shutdown at 0x128ac with the call site at 0x128d9; engine_shutdown is the counterpart of engine_init and tears the subsystems down, so the function runs at the end of the program shutdown"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls sound_driver_set at 0x262a8 with 0 and then dpmi_free_dos at 0x2666c; the first helper clears the HMI driver state; the second helper frees the DOS memory block at DAT_001666a2; the MSCDEX setup in dpmi_real_int at 0x25db0 allocates that block through the DPMI function 0x0100 at 0x26640 and builds the CD request block on it, so the function releases the CD subsystem; the caller, the two helpers, and the CD setup support the name cd_system_shutdown; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the original holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two callee stubs; the stubs record the order and the argument; the three paths cover one, two, and three runs, and every path checks the sound call with 0 then the DPMI call; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 6 instructions; the rebuilt body holds 0 of 6 instructions and 2 of 15 bytes equal, because C emits xor eax, eax and a tail jump to dpmi_free_dos in place of the pushal and popal frame and the second call; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_system_shutdown.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_system_shutdown_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_system_shutdown.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_system_shutdown module at 0x25f14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25f14 --count 6"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25f14 --count 6 --rebuilt work/rebuild/cdshut.exe --rebuilt-map work/rebuild/cd_system_shutdown.map --rebuilt-symbol cd_system_shutdown_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_system_shutdown"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_system_shutdown"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25f14"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +76,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "cd_system_shutdown",
+  "name": "cd_system_shutdown",
   "notes": [],
   "object_offset": "0x15f14",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 2,
+        "bytes_total": 15,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 0,
+        "instructions_total": 6,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25f14",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:c9079fbc4feb982b41166d301c202a0c0c5a31e43b20baed82b0428672ba48b9",
+    "source_digest": "sha256:7a9868bed5dbaaa1a982f0115747aa51fd106684fd812470c12c9de965cd5da1",
+    "tool": "run.py"
+  },
+  "role": "Stops the sound driver and frees the CD subsystem DOS memory block.",
+  "section": "Subsystem shutdown",
   "size": 16,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_system_shutdown_"
 }

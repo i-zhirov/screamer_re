@@ -1,0 +1,38 @@
+{
+  "exe": "setrg.exe",
+  "map": "sound_effect_trigger.map",
+  "name": "sound_effect_trigger",
+  "run": {
+    "command": "setrg.exe > setrg.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "setrg.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_effect_trigger.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_effect_trigger_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

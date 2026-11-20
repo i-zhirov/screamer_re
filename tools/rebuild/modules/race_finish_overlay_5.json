@@ -1,0 +1,32 @@
+{
+  "exe": "rfo5.exe",
+  "map": "race_finish_overlay_5.map",
+  "name": "race_finish_overlay_5",
+  "run": {
+    "command": "rfo5.exe > rfo5.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rfo5.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_overlay_5.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_overlay_5_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

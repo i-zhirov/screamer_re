@@ -1,0 +1,31 @@
+{
+  "exe": "cdres.exe",
+  "map": "cd_audio_resume.map",
+  "name": "cd_audio_resume",
+  "run": {
+    "command": "cdres.exe > cdres.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "cdres.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_resume.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_resume_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

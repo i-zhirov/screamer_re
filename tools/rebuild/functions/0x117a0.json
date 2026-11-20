@@ -1,7 +1,64 @@
 {
   "address": "0x117a0",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x117a0 holds 18 instructions and 51 bytes up to the first ret at 0x117d2; the bind path continues at 0x117d3 to the second ret at 0x117fb, and the next function starts at 0x117fc, so the store record keeps the 92-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the entry index from the address in ebx; the index selects one 0x1c-byte record of the object table; a record with the slot word at +0x18 equal to -1 returns 0xe and changes nothing; otherwise the function inverts the top bit of the list value at list[slot] and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "the helper at 0x117fc writes the plain block pointer, and the helper at 0x11850 writes the block pointer with the two top bits inverted; no caller names the function, so the data flow supports the name object_list_tag_toggle with the confidence inferred; the record takes the section Resource loader; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no direct call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds eight 0x1c-byte records, one block object per record, an eight-entry list, and one entry index; the seven paths cover the first list slot, the middle slot, the last slot, the free slot, the record selection by index, record 3 at slot 6, and two calls; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 7 of 18 instructions equal and 4 of 41 bytes equal; the identity check stays open because V2 keeps the index in ebx, uses imul for the 0x1c stride, keeps the slot in ecx, and folds the top-bit inversion into xor byte [edx + eax*4 + 3], 0x80; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x117a0 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x117a0 --count 18 --rebuilt work/rebuild/olt.exe --rebuilt-map work/rebuild/object_list_tag_toggle.map --rebuilt-symbol object_list_tag_toggle_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x117a0"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_list_tag_toggle module at 0x117a0"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_tag_toggle.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_list_tag_toggle_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_list_tag_toggle.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +68,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "object_list_tag_toggle",
+  "name": "object_list_tag_toggle",
   "notes": [],
   "object_offset": "0x17a0",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 41,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x117a0",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:a71641335a93b116e6bc077a9bf6a74bfa67370bf0c61cbd8b6053c27a40a0eb",
+    "source_digest": "sha256:3831a78001fd5257910bd1e5f82b36afa6c96dc915047181e9b1c30623c31b60",
+    "tool": "run.py"
+  },
+  "role": "Inverts the top tag bit of the object list slot of an active object table record and reports 0xe for a free slot.",
+  "section": "Resource loader",
   "size": 92,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_list_tag_toggle_"
 }

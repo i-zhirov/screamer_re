@@ -1,7 +1,69 @@
 {
   "address": "0x26120",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x26120 holds 13 instructions and 38 bytes up to the jmp at 0x26144; the jump enters the shared tail at 0x26104, which writes the payload subfunction, clears two dwords, runs the DPMI request through 0x25f24, and returns the status word; the plan row counts 22 instructions and 68 bytes through the first ret at 0x26163; the next recorded function starts at 0x261a8, so the store record keeps the 136-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are the two request pairs in cd_audio_table_build at 0x262fc, at the call site 0x26311 and in the second block at 0x2636a; the caller sits in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function builds the MSCDEX request header at DAT_001666a4: the length 0x1a, the subunit DAT_00166680, the command 3 (IOCTL input), the transfer count 7, and the payload subfunction 0x0a (audio track info); it clears the dword at +0x41 and the dword at +0x45; the request runs through 0x25f24, and the function returns the raw status word at +3, so the error bit does not select a value"
+    },
+    {
+      "kind": "note",
+      "text": "the MSCDEX subfunction 0x0a and the 7-byte transfer count give the audio track info record; the caller, the request, and the returned status support the name cd_audio_track_info_request; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves the registers with pushal, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the device byte, the request buffer, the response status, and the submit stub; the stub counts the driver calls and writes the response status word; the five paths cover the status 0x0100, the status 0x8002, the status 0x81ff with the device byte 0x77, two calls, and the status 0xffff; the sentinel byte 0xa5 checks every field outside the written set; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 10 of 22 instructions and 4 of 68 bytes equal, and the relocation compare holds 0 of 8 slots equal; the identity check stays open because V2 builds the whole header with immediate stores, keeps the request pointer in eax, calls the submit stub, and the 22-instruction window crosses the next function at 0x26146; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_audio_track_info_request module at 0x26120"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x26120 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x26120 --count 22 --rebuilt work/rebuild/cdtrkinf.exe --rebuilt-map work/rebuild/cdtrkinf.map --rebuilt-symbol cd_audio_track_info_request_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x26120"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_track_info_request.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_audio_track_info_request_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_audio_track_info_request.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "cd_audio_track_info_request",
+  "name": "cd_audio_track_info_request",
   "notes": [],
   "object_offset": "0x16120",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 4,
+        "bytes_total": 68,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x26120",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:612d1eb23497d490cd4b328071ed55d7359b700bc9ab8e6519a132cca4e49214",
+    "source_digest": "sha256:a211693e57eb6f09fb3b92ac8be88503c09053be9db83323756cbb343a232832",
+    "tool": "run.py"
+  },
+  "role": "Submits the CD audio track info request and returns the request status.",
+  "section": "race_loop callees",
   "size": 136,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_audio_track_info_request_"
 }

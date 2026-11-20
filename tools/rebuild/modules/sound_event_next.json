@@ -1,0 +1,29 @@
+{
+  "exe": "sevnext.exe",
+  "map": "sound_event_next.map",
+  "name": "sound_event_next",
+  "run": {
+    "command": "sevnext.exe > sevnext.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "sevnext.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_event_next.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_event_next_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

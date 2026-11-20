@@ -1,0 +1,29 @@
+{
+  "exe": "f27f80.exe",
+  "map": "f27f80.map",
+  "name": "func_27f80",
+  "run": {
+    "command": "f27f80.exe > f27f80.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "f27f80.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wasm",
+      "file": "func_27f80.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_27f80_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

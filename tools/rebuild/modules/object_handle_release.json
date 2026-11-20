@@ -1,0 +1,31 @@
+{
+  "exe": "objhrel.exe",
+  "map": "object_handle_release.map",
+  "name": "object_handle_release",
+  "run": {
+    "command": "objhrel.exe > objhrel.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "objhrel.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_release.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "object_handle_release_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

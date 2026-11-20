@@ -1,0 +1,32 @@
+{
+  "exe": "rplfb.exe",
+  "map": "replay_frame_buffer_init.map",
+  "name": "replay_frame_buffer_init",
+  "run": {
+    "command": "rplfb.exe > rplfb.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rplfb.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "replay_frame_buffer_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "replay_frame_buffer_init_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

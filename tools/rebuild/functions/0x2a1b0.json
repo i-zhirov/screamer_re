@@ -12,6 +12,14 @@
       "text": "the original at `0x2a1b0` holds 24 instructions and 97 bytes: the frame, the twelve cleanup calls at `0x264ec`, `0x1be6c`, `0x25640`, `0x258b8`, `0x115f8`, `0x11304`, `0x11a08`, `0x4cecc`, `0x1b58c`, `0x2f326`, `0x1f6f8`, and `0x2fe68`, and the epilogue; the two argument call pairs receive the imported data addresses and the last two calls receive the pointer at `DAT_000062ac` and the address `DAT_000062b0`"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/race_cleanup.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 24 of 24 instructions, 43 of 97 bytes, and 6 of 6 relocation slots equal; the assembly body keeps the original push edx, push ebp prologue, the twelve cleanup calls, the argument setup, and the pop ebp, pop edx epilogue; the eighteen differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "race_cleanup",
   "name": "race_cleanup",
   "notes": [],
@@ -35,29 +44,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 34,
+        "bytes_equal": 43,
         "bytes_total": 97,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 20,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 24,
         "instructions_total": 24,
-        "match": "different",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2a1b0",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:1cff7ea48af038785af3d5a553dd8f1d4b4190eee93c4c77425c2692341d882e",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:5a22386e7893f2888516cc2692586a61ceb6807131b21d6d74b4e725b6c6a3ca",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "v2"
     },
-    "source_digest": "sha256:9c56495871b8678dfc224fd0ea26787441da8d5e77695b61139a5cd42acb8a70",
+    "source_digest": "sha256:f61f4cd87a732a02568e76b8e9e2bed55c14343841039d6d7ed493f267ba7d58",
     "tool": "run.py"
   },
   "role": "runs the twelve race cleanup calls and passes the imported data addresses",
   "section": "frame_update callees",
   "size": 100,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "race_cleanup_"
 }

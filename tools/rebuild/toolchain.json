@@ -1502,11 +1502,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "dos_memory_alloc.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "dos_memory_alloc.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -2860,11 +2858,9 @@
       "order": 2,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "list_create.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "list_create.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -3524,11 +3520,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "memory_alloc_small.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "memory_alloc_small.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -3556,11 +3550,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "memory_available.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "memory_available.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -3620,11 +3612,9 @@
       "order": 2,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "memory_free.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "memory_free.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -6759,11 +6749,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "pool_init.c",
-          "flags": [
-            "-od"
-          ]
+          "compiler": "wasm",
+          "file": "pool_init.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -6875,11 +6863,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "race_cleanup.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "race_cleanup.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -10500,11 +10486,9 @@
       "order": 0,
       "sources": [
         {
-          "compiler": "wcc386",
-          "file": "video_buf_load.c",
-          "flags": [
-            "-of+"
-          ]
+          "compiler": "wasm",
+          "file": "video_buf_load.asm",
+          "flags": []
         },
         {
           "compiler": "wcc386",
@@ -10853,6 +10837,4144 @@
       "strict": false,
       "toolchain": "v2",
       "verdict": "fail"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "angle_filter",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "angle_filter.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "angle_filter_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "angle_filter_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "angle_in_arc",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "angle_in_arc.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "angle_in_arc_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "angle_within",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "angle_within.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "angle_within_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "array_sort",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "array_sort.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "array_sort_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "attack_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "attack_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "attack_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "basis_vector_transform",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "basis_vector_transform.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "basis_vector_transform_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "bit_pattern_match",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "bit_pattern_match.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "bit_pattern_match_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "camera_basis_patch",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "camera_basis_patch.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "camera_basis_patch_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "camera_reference_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "camera_reference_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "camera_reference_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "camera_relative_angles",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "camera_relative_angles.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "camera_relative_angles_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "car_collision_step",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "car_collision_step.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "car_collision_step_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_disc_info_request",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_disc_info_request.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_disc_info_request_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_play",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_play.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_play_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_q_channel_read",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_q_channel_read.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_q_channel_read_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_resume",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_resume.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_resume_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_status_request",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_status_request.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_status_request_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_stop",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_stop.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_stop_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_table_build",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_table_build.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_table_build_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_tick",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "cd_audio_tick.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_tick_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_track_info_request",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_track_info_request.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_track_info_request_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_audio_track_query",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_track_query.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_audio_track_query_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_request_send",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_request_send.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_request_send_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_request_submit",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_request_submit.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_request_submit_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_system_shutdown",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_system_shutdown.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_system_shutdown_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cd_volume_descriptor_read",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "cd_volume_descriptor_read.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cd_volume_descriptor_read_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "cng_view_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "cng_view_update.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "cng_view_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "data_blit",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "data_blit.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "data_blit_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "dpmi_alloc_dos",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "dpmi_alloc_dos.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "dpmi_alloc_dos_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "dpmi_free_dos",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "dpmi_free_dos.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "dpmi_free_dos_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "filter_update_int",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "filter_update_int.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "filter_update_int_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "filter_update_int_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "font_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "font_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "font_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "font_table_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "font_table_init.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "font_table_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_113c8",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_113c8.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_113c8_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_11974",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_11974.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "func_11974_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_11974_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_27f80",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "func_27f80.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_27f80_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_2f4ee",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_2f4ee.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_2f4ee_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_2f554",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_2f554.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_2f554_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "func_2f985",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "func_2f985.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "func_2f985_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "gameport_pulse",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "gameport_pulse.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "gameport_pulse_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "gamespline_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "gamespline_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "gamespline_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "joystick_axis_read",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "joystick_axis_read.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "joystick_axis_read_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "line_clip_draw",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "line_clip_draw.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "line_clip_draw_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "map_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "map_data_release.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "map_file_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_file_load.c",
+          "flags": [
+            "-of+",
+            "-oi"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_file_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "map_material_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_material_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_material_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "map_object_progress_sum",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_object_progress_sum.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_object_progress_sum_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "map_object_record_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "map_object_record_init.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "map_object_record_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "material_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "material_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "material_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "memory_block_largest",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "memory_block_largest.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "memory_block_largest_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "menu_line_value_next",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "menu_line_value_next.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "menu_line_value_next_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "mmp_file_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "mmp_file_load.c",
+          "flags": [
+            "-of+",
+            "-dMMP_FILE_LOAD_HARNESS"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "mmp_file_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "music_select",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "music_select.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "music_select_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "music_voice_stop",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "music_voice_stop.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "music_voice_stop_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "music_volume_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "music_volume_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "music_volume_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "net_menu_enter",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "net_menu_enter.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "net_menu_enter_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_block_tag",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_block_tag.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_block_tag_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_handle_pair_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_pair_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_pair_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_handle_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_handle_table_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_table_load.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_table_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_handle_table_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_table_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_handle_table_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_list_bind",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_list_bind.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_list_bind_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_list_refresh",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_list_refresh.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_list_refresh_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_list_release_all",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_list_release_all.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_list_release_all_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_list_tag_toggle",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_list_tag_toggle.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_list_tag_toggle_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_load_by_name",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_load_by_name.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_load_by_name_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_lookup",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_lookup.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_lookup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "object_slot_acquire",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "object_slot_acquire.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "object_slot_acquire_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "opponent_effect_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "opponent_effect_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "opponent_effect_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "opponent_score_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "opponent_score_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "opponent_score_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "palette_file_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "palette_file_load.c",
+          "flags": [
+            "-of+",
+            "-dPALETTE_FILE_LOAD_HARNESS"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "palette_file_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "phase_delta",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "phase_delta.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "phase_delta_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_car_effect_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_car_effect_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_car_effect_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_car_step_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_car_step_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_car_step_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_effect_state_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_effect_state_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_effect_state_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_effect_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_effect_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_effect_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_physics_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_physics_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_physics_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "player_previous_speed_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "player_previous_speed_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "player_previous_speed_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "point_rotate_y_float",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_y_float.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "point_rotate_y_float_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_rotate_y_float_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "point_rotation_flags",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "point_rotation_flags.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "point_rotation_flags_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_cng_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_cng_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_cng_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_mode_1_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_mode_1_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_mode_1_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_mode_2_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_mode_2_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_mode_2_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_overlay_3",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_3.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_3_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_overlay_4",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "race_finish_overlay_4.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_4_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_overlay_5",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_5.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_5_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_overlay_6",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_6.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_overlay_6_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_sla_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_sla_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_sla_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_finish_time_ghost_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_time_ghost_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_finish_time_ghost_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_frame_loop",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_frame_loop.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_frame_loop_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_gauges",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_gauges.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "race_gauges_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_gauges_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_menu_handler",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_menu_handler.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_menu_handler_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "race_track_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "race_track_load.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "race_track_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "reciprocal_table_build",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "reciprocal_table_build.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "reciprocal_table_build_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "reciprocal_table_build_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "replay_frame_buffer_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_frame_buffer_init.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_frame_buffer_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "replay_frame_buffer_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "replay_frame_buffer_release.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_frame_buffer_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "replay_playback_begin",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "replay_playback_begin.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_playback_begin_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "replay_write_begin",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "replay_write_begin.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "replay_write_begin_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "row_offset_table_build",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "row_offset_table_build.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "row_offset_table_build_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "screen_setup_cleanup",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "screen_setup_cleanup.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "screen_setup_cleanup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sla_view_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wasm",
+          "file": "sla_view_update.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sla_view_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_bank_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_bank_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_bank_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_effect_list_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_list_init.c",
+          "flags": [
+            "-of+",
+            "-dSOUND_EFFECT_LIST_INIT_HARNESS"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_list_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_effect_repeat",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_repeat.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_repeat_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_effect_timer_clear",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_timer_clear.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_timer_clear_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_effect_trigger",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_trigger.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_effect_trigger_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_event_frame_select",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_frame_select.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_frame_select_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_event_next",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_next.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_event_next_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_frame_prepare",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_frame_prepare.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_frame_prepare_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_fx_volume_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_fx_volume_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_fx_volume_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_queue_pop",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_pop.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_pop_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_queue_start",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_start.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_queue_start_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_render_branch_greater",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_render_branch_greater.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_render_branch_greater_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_render_branch_less",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_render_branch_less.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_render_branch_less_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_sequence_prepare",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_sequence_prepare.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_sequence_prepare_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_source_pose_copy",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_pose_copy.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_source_pose_copy_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_variant_lookup",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_lookup.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_variant_lookup_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_voice_acquire",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_acquire.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_acquire_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_voice_finished",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_finished.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_finished_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_voice_pitch_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_pitch_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_pitch_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_voice_sample_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_sample_set.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_sample_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sound_voice_stop",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_stop.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sound_voice_stop_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sprite_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sprite_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sprite_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sprite_entry_draw",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sprite_entry_draw.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sprite_entry_draw_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sprite_list_flush",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sprite_list_flush.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sprite_list_flush_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sprite_list_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sprite_list_init.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sprite_list_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "sqrt",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "sqrt.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "sqrt_fpu.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "sqrt_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "state_cells_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "state_cells_set.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "state_cells_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "state_init_dispatch",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "state_init_dispatch.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "state_init_dispatch_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "text_data_release",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "text_data_release.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "text_data_release_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "timer_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "timer_set.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "timer_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "track_resource_load",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "track_resource_load.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "track_resource_load_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "track_stream_open",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "track_stream_open.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "track_stream_open_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "track_timer_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "track_timer_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wasm",
+          "file": "fpu_stub.asm",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "track_timer_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "traffic_effect_update",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_effect_update.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_effect_update_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "traffic_event_flush",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_event_flush.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_event_flush_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "traffic_record_init",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "traffic_record_init.c",
+          "flags": [
+            "-of+"
+          ]
+        },
+        {
+          "compiler": "wcc386",
+          "file": "traffic_record_init_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
+    },
+    {
+      "build": "skip",
+      "bytes_equal": null,
+      "bytes_total": null,
+      "detail": "no measured result",
+      "instructions_equal": null,
+      "instructions_total": null,
+      "label": "",
+      "match": null,
+      "measured": false,
+      "name": "video_bank_set",
+      "order": -1,
+      "sources": [
+        {
+          "compiler": "wcc386",
+          "file": "video_bank_set.c",
+          "flags": []
+        },
+        {
+          "compiler": "wcc386",
+          "file": "video_bank_set_main.c",
+          "flags": []
+        }
+      ],
+      "strict": false,
+      "toolchain": "v2",
+      "verdict": "skip"
     }
   ],
   "report": {

@@ -1,7 +1,73 @@
 {
   "address": "0x25b10",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the plan row records a 70-byte body of 22 instructions up to the first ret at 0x25b55; the function continues through five early exits and ends at the ret at 0x25ccb, so the whole body holds 126 instructions and 444 bytes; the next record starts at 0x25d28, so the store record keeps the 536-byte extent and sets no separate function size; the identity check uses 22 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the sprite-list flush at 0x25af0, which walks the 0x28-byte entries of the list at DAT_0015cd0 and calls this function for every entry with bit 0 of the first dword set; an entry holds the active flag at +0x00, the x at +0x04, the y at +0x08, the sprite record index at +0x0c, and the reserved cell at +0x10"
+    },
+    {
+      "kind": "note",
+      "text": "the sprite record at DAT_0015ccc + index * 0x14 holds the x offset, the y offset, the width, the height, and the data offset, as the sprite record dump confirms; the one-byte pixel data starts at DAT_0015ce0 and the framebuffer pointer sits at DAT_0021528"
+    },
+    {
+      "kind": "note",
+      "text": "the function clips the sprite rectangle against DAT_0015ce4 through DAT_0015cf0 and returns at once when the sprite leaves the clip rectangle; it copies a nonzero pixel and leaves the destination byte on a zero source byte; it stores the absolute destination pointer at +0x14, the framebuffer offset at +0x18, the visible width at +0x1c, the visible height at +0x20, and the negated visible width at +0x24 of the entry"
+    },
+    {
+      "kind": "note",
+      "text": "the scratch cells 0x15cf4 through 0x15d18 hold the clip skips, the edges, the rectangle, and the row stride; only this function reads and writes them, so the rebuilt function keeps them in locals; the original uses pushal and popal and has no EBP frame, so the module builds without -of+ and needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no symbol and no named caller, and the sprite-record fields and the framebuffer stores support the name sprite_entry_draw; the record keeps the name with the confidence inferred; the section Program functions follows the adjacent shade_rect primitive at 0x25d28"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the sprite record table, the pixel data, the framebuffer, the clip rectangle, an eight-row framebuffer, and a pixel buffer; the eight paths cover no clip, the left clip, the right clip, the top clip, the bottom clip, the whole-sprite clip, the combined left and top clip, and the combined right and bottom clip; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 3 of 22 instructions and 1 of 51 bytes equal, and the compare has 0 of 7 relocation slots equal; the identity check stays open because V2 saves the registers with push instructions instead of pushal and places the arguments in other registers; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25b10 --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25b10 --count 22 --rebuilt work/rebuild/sprdraw.exe --rebuilt-map work/rebuild/sprdraw.map --rebuilt-symbol sprite_entry_draw_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25b10"
+    },
+    {
+      "kind": "finding",
+      "text": "The sprite_entry_draw module at 0x25b10"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_entry_draw.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sprite_entry_draw_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sprite_entry_draw.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sprite_entry_draw",
+  "name": "sprite_entry_draw",
   "notes": [],
   "object_offset": "0x15b10",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 1,
+        "bytes_total": 51,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 3,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25b10",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:95e17bf103f4870864cec75d2ebd0068b064c1c4d1f166e3ab1b7d718826cb21",
+    "source_digest": "sha256:db641470d3a09b8df56080ab2b1ff4a68a74cb4174f2ba6d62422f00cdd9bd1d",
+    "tool": "run.py"
+  },
+  "role": "Draws one active sprite entry into the framebuffer with the clip rectangle and the zero-byte transparency rule, and stores the visible rectangle on the entry.",
+  "section": "Program functions",
   "size": 536,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sprite_entry_draw_"
 }

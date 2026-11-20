@@ -1,0 +1,35 @@
+{
+  "exe": "tefl.exe",
+  "map": "traffic_event_flush.map",
+  "name": "traffic_event_flush",
+  "run": {
+    "command": "tefl.exe > tefl.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "tefl.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "traffic_event_flush.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "traffic_event_flush_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

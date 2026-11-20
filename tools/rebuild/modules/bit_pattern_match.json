@@ -1,0 +1,35 @@
+{
+  "exe": "bpmatch.exe",
+  "map": "bit_pattern_match.map",
+  "name": "bit_pattern_match",
+  "run": {
+    "command": "bpmatch.exe > bpmatch.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "bpmatch.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "bit_pattern_match.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "bit_pattern_match_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

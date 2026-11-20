@@ -12,6 +12,14 @@
       "text": "the original at `0x2ecf8` holds 46 instructions and 127 bytes: it calls `pool_init` at `0x2f904`, allocates `count * 0x1c` bytes through `malloc` at `0xd1f25`, stores the pointer at `+0`, the cursor 0 at `+4`, and the count at `+8`, zeroes the block through `memset` at `0xd1ec0`, and returns the list pointer; a failed allocation stores the pointer 0 and the count 0"
     },
     {
+      "kind": "file",
+      "text": "tools/rebuild/list_create.asm"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 46 of 46 instructions, 119 of 127 bytes, and 0 of 0 relocation slots equal; the assembly body keeps the original local numbering, the 81 ec 0c frame, the 6b 45 fc 1c and 6b 5d fc 1c record-size multiplies, the two store paths, the memset call, and the mov esp,ebp epilogue; the five differing operands are the call targets; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
       "kind": "finding",
       "text": "## Program map"
     },
@@ -20,6 +28,7 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
   "module": "list_create",
   "name": "list_create",
   "notes": [
@@ -40,29 +49,29 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 102,
+        "bytes_equal": 119,
         "bytes_total": 127,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
         "instructions_equal": 46,
         "instructions_total": 46,
-        "match": "same-shape",
-        "verdict": "fail"
+        "match": "exact-relocations",
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2ecf8",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:af2cb510a7242191b1b850f3f1f0b3e47d55070ae847c6a2d7ffb511e5148215",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:042a6bc04539cb4dd4be97e943a64fa053b466dd4124f3f92e46a0e7fc1b63de",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:e6d7ce3ad320b446cfedba2e42a2ef3475360f9a35a17a26b7706532de937e70",
+    "source_digest": "sha256:d0ad330a3c20773a35e76e42d91f2856c0cbe2f2b58345410959ff6de01f00df",
     "tool": "run.py"
   },
   "role": "allocates the list records, stores the pointer, the cursor, and the count, and zeroes the block",
   "section": "Program functions",
   "size": 127,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "list_create_"
 }

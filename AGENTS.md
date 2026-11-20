@@ -130,7 +130,7 @@ screamer_re/
 │   │   ├── toolchain.json      # the toolchain and flag manifest of the measured modules
 │   │   ├── contracts/          # the JSON Schema contracts of the records
 │   │   ├── functions/          # one record per function, 0x<address>.json
-│   │   ├── modules/            # the three hundred and forty-eight module recipes
+│   │   ├── modules/            # the four hundred and ninety-two module recipes
 │   │   └── tests/              # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -197,13 +197,14 @@ python3 tools/rebuild/first_difference.py report --module error_report --out wor
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It reports
-529 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
-reports 525 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
-runs stage 8, so the run reports 514 checks.  Both flags report 510 checks and
-take about 16 seconds.  The merged tree adds 96 function records, and stage 11
-holds one check per record.  The whole-image build stales the record fingerprints,
+666 checks.  `--skip-cross` skips stage 8 and the tool preflight, so the run
+reports 662 checks.  `--skip-runtime` skips stages 5, 6, 7, and 9 and still
+runs stage 8, so the run reports 651 checks.  Both flags report 647 checks and
+take about 18 minutes.  The whole-image build stales the record fingerprints,
 because the module maps hold a build timestamp, so the record stage re-runs
-every record.  The full and `--skip-cross` checks take about 65 minutes.
+every record.  Stage 11 runs four records in parallel with `--jobs 4`; a build
+lock keeps the shared Docker work directory serial, and the behavior runs
+overlap.  The full and `--skip-cross` checks take about 57 minutes.
 Stage 11 always scores the rebuilt whole image, and the four counts include its
 check.  A missing image is a failure, so
 `python3 tools/rebuild/whole_image.py --all` runs before the full check:
@@ -418,22 +419,23 @@ through the store.
   `same-shape` form with the higher `instructions_equal`, then the higher
   `bytes_equal`, and records the trait, the measured first difference, and the
   reason.  A recorded non-strict outcome is a pass.
-- The full check reports 529 checks in the `cross-check` shell.  `--skip-cross`
-  gives 525 checks, `--skip-runtime` gives 514 checks, and both flags give 510
-  checks.  The whole-image stage adds one counted check, and stage 11 holds one
-  check per record.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips
-  stage 8 and the tool preflight.
+- The full check reports 666 checks in the `cross-check` shell.  `--skip-cross`
+  gives 662 checks, `--skip-runtime` gives 651 checks, and both flags give 647
+  checks.  The whole-image stage adds one counted check.  `--skip-runtime` still
+  runs stage 8.  `--skip-cross` skips stage 8 and the tool preflight.
 - The whole-image build `whole_image.py` places the rebuilt module bodies at
   their original addresses, writes `work/rebuild/STARTH.EXE` and
   `work/rebuild/whole-image.json`, and writes no store record.  A module is
-  written only when its instruction byte sum equals the record `size` and its
-  instruction count, sizes, and fixup slots align.  The build copies the exact
-  original internal slot bytes.  A strict padded body whose byte sum equals
-  the original body and lies below the record size keeps the original body
-  bytes in `reuse` mode, and the report counts it as `reused`.  The original
-  slot filter stops at the original body end, not the record span.  A skipped
-  module keeps the original bytes and records the reason.  Stage 11 always
-  scores the image and fails when it is missing or unreadable.
+  patched when its instruction byte sum equals the record `size`, or when a
+  shorter `ret` body keeps the record tail, its instruction count, sizes, and
+  fixup slots align, and every absolute operand is relocated.  A strict padded
+  body whose byte sum equals the original body and lies below the record size
+  keeps the original body bytes in `reuse` mode, and the report counts it as
+  `reused`.  A skipped module keeps the original bytes and records the reason.
+  The report holds `runnable`, which is true only when the image is
+  byte-identical, and the `relocation_incomplete` and `body_differences`
+  module lists.  Stage 11 always scores the image and fails when it is missing
+  or unreadable.
 - Stage 12 checks the store, the seed, the provenance evidence, the library
   link manifest, the toolchain manifest, the program-map tables, the call
   graph, and the status page.  The call graph check needs capstone and the
@@ -487,8 +489,8 @@ through the store.
   The rank is the match value, then fewer differing bytes, then fewer
   differing instructions, then the earlier candidate.  The rank stays
   bytes-first.  A strict match is preferred but not required.  The merged tree
-  added 96 migrated recipes, so the matrix now measures 348 recipes and the
-  committed manifest holds 347 rows.
+  added 96 migrated recipes, so the matrix now measures 484 recipes and the
+  committed manifest holds 484 rows.
 - `toolchain.py manifest` writes the committed manifest
   `tools/rebuild/toolchain.json`.  It holds one row per measured module and
   one `unmeasured` row for a module with an identity record and no measured
@@ -522,7 +524,9 @@ through the store.
 - A behavior run deletes the old output first.  A marker matches a complete
   output line, so an embedded marker does not pass.
 - `--skip-unchanged` prints the stored verdict of a record whose inputs are
-  unchanged since the previous run.  A stored `fail` prints `FAIL`.
+  unchanged since the previous run.  A stored `fail` prints `FAIL`.  The `run
+  --jobs N` option runs N records in parallel only with `--no-write`, and a
+  build lock keeps the shared Docker work directory serial.
 - `oracle.py` masks every byte that an LE fixup slot controls and every byte
   that encodes a direct branch target.  It compares the remaining bytes in
   instruction order.  An intra-function branch target compares by instruction
@@ -542,15 +546,18 @@ through the store.
   uses the original `STARTH.EXE` as the container and keeps the stub, the
   header, the data objects, and the library bytes.  It places each rebuilt
   module body at its original address in the original address order of the
-  lowest identity record of each module.  The fit rule writes a module only
-  when the rebuilt instruction byte sum equals the record `size`.  The build
-  copies the exact original internal slot bytes into the rebuilt slot.  A
-  strict padded body whose byte sum equals the original body and lies below
-  the record size keeps the original body bytes in `reuse` mode.  The
-  relocation rule rewrites only an internal 4-byte slot and skips a module on a
-  non-internal slot, a width other than 4, or an instruction misalignment.  A
-  direct branch target is relative and is not rewritten.  The original fixup
-  section stays valid, so the build does not rewrite it.  A record that carries
+  lowest identity record of each module.  The fit rule patches a module when
+  the rebuilt instruction byte sum equals the record `size`, or when a shorter
+  body ends in `ret` and the record tail stays original.  The
+  relocation rule copies the original internal slot bytes.  It rewrites a
+  direct relative branch or call from the rebuilt symbol at the target to the
+  unique original symbol of the same name.  A duplicate original symbol, a
+  missing symbol, a non-internal slot, a width other than 4, an instruction
+  misalignment, or a difference outside a rewritten operand skips the module.
+  A strict padded body whose byte sum equals the original body and lies below
+  the record size keeps the original body bytes in `reuse` mode.  The original
+  fixup section stays valid, so the build does not rewrite it.  A record that
+  carries
   a `library` field is skipped, so the original library bytes stay in the
   image.  The library manifest `tools/rebuild/library.json` proves the verified
   records.  The whole-image oracle `image_compare.py` compares the

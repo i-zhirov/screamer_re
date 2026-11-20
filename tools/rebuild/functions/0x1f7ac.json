@@ -1,7 +1,77 @@
 {
   "address": "0x1f7ac",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 17,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the identity window at 0x1f7ac holds 17 instructions and 48 bytes up to the ret at 0x1f7db; a branch at 0x1f7ce enters the second exit block at 0x1f7dc, and that block ends with the ret at 0x1f7e2; the next function starts at 0x1f7e4, so the store record keeps the 56-byte extent and sets no separate function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x16f1b is player_car_cornering_update at 0x16ca0; it passes the constant 4 in eax and the object cell at +0x7d4 in edx and stores the result back in the cell; the caller sits in The vehicle state chain, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "when the cached voice is -1 or the driver word at offset 0x34 of that voice differs from the sample, the function returns table_lookup at 0x1f718 for the sample; otherwise it returns the cached voice; the driver word comes from 0xc6bde with the driver handle DAT_00018d94"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling sound_voice_sample_set at 0x1f764, sound_voice_finished at 0x1f834, and table_lookup at 0x1f718 read the same driver fields and the sample table at 0x16034, and the caller stores the entry in the type-4 voice cell +0x7d4; these facts support the name sound_voice_acquire; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction, so it needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the driver handle, the driver field stub, and the table lookup stub; the eight paths cover the cached voice -1, a kept sample, another sample, the voice 0 with sample 0, a large sample, a different word with sample 0, the voice 0x1f, and the sample 0; every path checks the result, the call counts, and the recorded arguments; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 10 of 17 instructions, 3 of 42 bytes, and 1 of 1 relocation slots equal; the identity check stays open because V2 keeps the two arguments in ebx and ecx in place of the frame spills and places the lookup call before the return block; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f7ac --count 17"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f7ac --count 17 --rebuilt work/rebuild/svaq.exe --rebuilt-map work/rebuild/svaq.map --rebuilt-symbol sound_voice_acquire_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_voice_acquire"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_voice_acquire"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f7ac"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_voice_acquire module at 0x1f7ac"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_acquire.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_acquire_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_voice_acquire.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_voice_acquire",
+  "name": "sound_voice_acquire",
   "notes": [],
   "object_offset": "0xf7ac",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 42,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 10,
+        "instructions_total": 17,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f7ac",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:162c1c21c2dab93c7d570bb9e44c271a7517cf9a235b2756f33bf4261e2d5291",
+    "source_digest": "sha256:07dd3cdf8f044491497bb8aecba5f2df93890bf16348a1d7fb5fb70ee962e4a0",
+    "tool": "run.py"
+  },
+  "role": "Returns the cached sound voice when it still holds the sample, and a free voice from the sample table otherwise.",
+  "section": "The vehicle state chain",
   "size": 56,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_voice_acquire_"
 }

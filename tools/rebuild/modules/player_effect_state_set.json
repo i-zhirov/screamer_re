@@ -1,0 +1,34 @@
+{
+  "exe": "pess.exe",
+  "map": "player_effect_state_set.map",
+  "name": "player_effect_state_set",
+  "run": {
+    "command": "pess.exe > pess.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "pess.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "player_effect_state_set.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "player_effect_state_set_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

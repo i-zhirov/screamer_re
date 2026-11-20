@@ -1,7 +1,77 @@
 {
   "address": "0x2a214",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 31,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the dispatch head at 0x2a214 holds 31 instructions and 103 bytes up to the default ret at 0x2a27a; the next record starts at 0x2a364, so the store record keeps the 336-byte extent and sets no separate function size; the identity check uses 31 instructions; the case blocks after the head hold 75 more instructions and 13 calls, so the full body holds 106 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function reads the context dword at 0x2dec and its field +0x18; a value 3 moves to 4; the switch on the mode word DAT_001d260 selects the paths: mode 1 runs the loading screen at the table DAT_000021e4 with the context field +0x28, the menu space, the menu frame, and the record save at DAT_00203bc; mode 4 runs sprintf, the member check at 0xd1d44, the loading screen with the screen 0, the menu space, and the menu frame; mode 0x10 runs the race results screen at 0x2a558; mode 0x20 and mode 0x40 run the loading screen with the screen 0, the menu space, and the menu frame; every other mode runs no path"
+    },
+    {
+      "kind": "note",
+      "text": "the member check clears DAT_001d264 when it returns -1 and the flag is set; a clear flag or a successful check keeps the flag"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are net_race_screen at 0x2908b and net_race_lobby at 0x2dcf9; both functions belong to the race-frame group, so the record takes the section race_frame callees"
+    },
+    {
+      "kind": "note",
+      "text": "the mode switch, the menu calls, the results screen, and the record save support the name race_menu_handler; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses no floating-point operation, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the context record, the mode word, the counter, the track index, the member flag, and the menu table; the eight paths cover an unlisted mode, the mode 1 path, the value 3 move to 4, the mode 4 path with a failing member check, the mode 4 path with a successful member check, the mode 0x10 path, the mode 0x20 path, and the mode 0x40 path; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the diff reports 4 of 31 instructions, 9 of 103 bytes, and 0 of 8 relocation slots equal; the identity check stays open because V2 saves ebp first, keeps the context value in ebx, orders the 0x20 case before the 0x40 case, uses short branches and another branch layout, and reserves a 0x144-byte frame; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x2a214 --count 31"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x2a214 --count 31 --rebuilt work/rebuild/rmenuh.exe --rebuilt-map work/rebuild/race_menu_handler.map --rebuilt-symbol race_menu_handler_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_menu_handler"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x2a214"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_menu_handler module at 0x2a214"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_menu_handler.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_menu_handler_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_menu_handler.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "race_menu_handler",
+  "name": "race_menu_handler",
   "notes": [],
   "object_offset": "0x1a214",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 9,
+        "bytes_total": 103,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 31,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x2a214",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:08ebd60cc05eef1a444a78d2eb66c3515e5722b5efc6a6d3f9d49e5f9fbb1208",
+    "source_digest": "sha256:f6e26b156021a6c9320f402348db6bda1d9ca1c486cb46c14d98e10d726be858",
+    "tool": "run.py"
+  },
+  "role": "Dispatches the race-menu action from the mode word and runs the loading, menu, results, or record-save path.",
+  "section": "race_frame callees",
   "size": 336,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_menu_handler_"
 }

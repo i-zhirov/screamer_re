@@ -1,0 +1,27 @@
+{
+  "exe": "scs.exe",
+  "map": "scs.map",
+  "name": "state_cells_set",
+  "run": {
+    "command": "scs.exe > scs.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "scs.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "state_cells_set.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "state_cells_set_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -190,6 +190,26 @@ class FitTestCase(unittest.TestCase):
         )
 
 
+class TailFitTestCase(unittest.TestCase):
+    def test_has_original_tail_accepts_a_short_ret_body(self) -> None:
+        rebuilt = [insn(0x10000, "ret", "", b"\xc3")]
+
+        self.assertTrue(
+            whole_image.has_original_tail(
+                record("0x10000", "free", "free_", 3), rebuilt
+            )
+        )
+
+    def test_has_original_tail_rejects_a_short_non_ret_body(self) -> None:
+        rebuilt = [insn(0x10000, "nop", "", b"\x90")]
+
+        self.assertFalse(
+            whole_image.has_original_tail(
+                record("0x10000", "free", "free_", 3), rebuilt
+            )
+        )
+
+
 class AlignmentTestCase(unittest.TestCase):
     def test_aligned_accepts_equal_shapes(self) -> None:
         original = [insn(0x300EC, "mov", "eax, 0", b"\x01" * 6)]
@@ -542,6 +562,52 @@ class PatchModeTestCase(unittest.TestCase):
         )
 
         self.assertIsNone(mode)
+
+
+class BranchRelocateTestCase(unittest.TestCase):
+    def test_relocate_maps_a_rebuilt_branch_symbol(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original,
+            rebuilt,
+            [],
+            [],
+            [(0x10020, "target_")],
+            [(0x300EC, "target_")],
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
+    def test_relocate_keeps_the_original_target_for_an_unmapped_branch(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original, rebuilt, [], [], [], []
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
+    def test_relocate_keeps_the_original_target_for_an_ambiguous_symbol(self) -> None:
+        original = [insn(0x300EC, "call", "0x300ec", b"\xe8\x00\x00\x00\x00")]
+        rebuilt = [insn(0x10000, "call", "0x10020", b"\xe8\x1b\x00\x00\x00")]
+
+        body, relocated = whole_image.relocate(
+            original,
+            rebuilt,
+            [],
+            [],
+            [(0x10020, "target_")],
+            [(0x300EC, "target_"), (0x30100, "target_")],
+        )
+
+        self.assertEqual(body, b"\xe8\xfb\xff\xff\xff")
+        self.assertEqual(relocated, 0)
+
 
 
 class FakeObject:

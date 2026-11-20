@@ -1,0 +1,31 @@
+{
+  "exe": "oppeff.exe",
+  "map": "opponent_effect_update.map",
+  "name": "opponent_effect_update",
+  "run": {
+    "command": "oppeff.exe > oppeff.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "oppeff.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "opponent_effect_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "opponent_effect_update_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

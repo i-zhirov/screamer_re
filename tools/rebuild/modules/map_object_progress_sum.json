@@ -1,0 +1,37 @@
+{
+  "exe": "mops.exe",
+  "map": "map_object_progress_sum.map",
+  "name": "map_object_progress_sum",
+  "run": {
+    "command": "mops.exe > mops.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "D"
+    ],
+    "output": "mops.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "map_object_progress_sum.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "map_object_progress_sum_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,7 +1,72 @@
 {
   "address": "0x4cf2c",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4cf2c holds 6 instructions and 15 bytes up to the ret at 0x4cf3a; the padding byte at 0x4cf3b precedes the next function at 0x4cf3c, so the store record keeps the 16-byte extent and sets no separate function size; the identity check uses 6 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two direct callers are race_data_release at 0x156a8 with the call site at 0x156e5 and race_end at 0x279a4 with the call site at 0x279fe; both callers run during a shutdown, so the function releases the map and material data at the end of a race; the callers span several sections, so the module takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls material_data_release at 0x4cecc and then map_data_release at 0x4cef4 with no arguments; the first helper frees the MATERIALS resource and the material record, and the second helper frees the OBJ_LST and UNR_FILE resources and the map grid record; the two callers, the two helpers, and the sibling names support the name map_material_data_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two callee stubs; the three paths cover one, two, and three runs, and every path checks the order material then map; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 6 instructions; the rebuilt body holds 4 of 6 instructions and 5 of 15 bytes equal, and 0 of 0 relocation slots, because V2 adds mov esp, ebp before pop ebp and the call operands are the rebuilt link-time addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_material_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/map_material_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/map_material_data_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The map_material_data_release module at 0x4cf2c"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4cf2c --count 6"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4cf2c --count 6 --rebuilt work/rebuild/mmdrl.exe --rebuilt-map work/rebuild/map_material_data_release.map --rebuilt-symbol map_material_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module map_material_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module map_material_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4cf2c"
+    },
     {
       "kind": "finding",
       "text": "## The resource layer and the DPMI services"
@@ -11,9 +76,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "map_material_data_release",
+  "name": "map_material_data_release",
   "notes": [],
   "object_offset": "0x3cf2c",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 15,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 4,
+        "instructions_total": 6,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4cf2c",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:7e87372dc866d0eb4d7b80240fb2ae0041afb310b0b5ad1b6df7544c946c803e",
+    "source_digest": "sha256:e1d513fa7be552ea5d73fbf0c4cc42d8431653c9ee38273d043b961c73c733d2",
+    "tool": "run.py"
+  },
+  "role": "Releases the material and map data of a level through the two release helpers in order.",
+  "section": "Resource loader",
   "size": 16,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "map_material_data_release_"
 }

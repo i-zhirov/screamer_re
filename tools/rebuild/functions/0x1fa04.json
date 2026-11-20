@@ -1,7 +1,77 @@
 {
   "address": "0x1fa04",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 15,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1fa04 holds 15 instructions and 34 bytes up to the ret at 0x1fa25; the return path for a current value below the saved value continues at 0x1fa26, and the next function starts at 0x1fa2c, so the store record keeps the 40-byte extent and sets no separate function size; the identity check uses 15 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the four direct callers are traffic_step at 0x1eae0 at the call site 0x1eb53, mouse_release_wait at 0x1f8dc at 0x1f937, view_fade_out at 0x21da8 at 0x21e2f, and race_timeout at 0x27f44 at 0x27f53; the callers pass the saved value in eax and the current value in edx, or the reverse in race_timeout; three callers sit in Program functions and one sits in object_update_all callees, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the function forms the difference current - saved; when the current value is at least the saved value it returns the difference, and otherwise it returns the bitwise complement, which is saved - current - 1; the phase wait and the fade read the delta between the saved phase DAT_000007f9 and the current phase, and the traffic step and the timeout read the frame counter DAT_000007fd"
+    },
+    {
+      "kind": "note",
+      "text": "the callers, the phase counter, and the frame counter support the name phase_delta; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction and calls no helper, so the module needs no FPU stub and no assembly implementation; the two volatile locals reproduce the two argument stores and the reloads"
+    },
+    {
+      "kind": "note",
+      "text": "the harness calls the module with six pairs of saved and current values; the six paths cover the forward delta, the complement form, the equal values, the full-range delta, the complement across the sign bit, and the wrap from the top value to zero; every path checks the returned delta; the output holds the markers 0 through 5 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 15 instructions; the rebuilt body holds 15 of 15 instructions and 34 of 34 bytes equal, and 0 of 0 relocation slots; the build, identity, and behavior checks pass, so the store records verified"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1fa04 --count 15"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1fa04 --count 15 --rebuilt work/rebuild/phdelta.exe --rebuilt-map work/rebuild/phase_delta.map --rebuilt-symbol phase_delta_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module phase_delta"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module phase_delta"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1fa04"
+    },
+    {
+      "kind": "finding",
+      "text": "The phase_delta module at 0x1fa04"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/phase_delta.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/phase_delta_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/phase_delta.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "phase_delta",
+  "name": "phase_delta",
   "notes": [],
   "object_offset": "0xfa04",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 34,
+        "bytes_total": 34,
+        "detail": "the modules are byte-identical",
+        "instructions_equal": 15,
+        "instructions_total": 15,
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1fa04",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:742fa356f0e182cb7d37cfc759b6179e1029842f12c09b988782b8b2d408a16c",
+    "source_digest": "sha256:56baff049cefd407193f273d47f7c7e236958835545b675e32103d6e92528589",
+    "tool": "run.py"
+  },
+  "role": "Returns the counter delta between a saved value and a current value, with the complement form when the current value is below the saved value.",
+  "section": "Program functions",
   "size": 40,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "phase_delta_"
 }

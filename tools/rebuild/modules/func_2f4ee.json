@@ -1,0 +1,31 @@
+{
+  "exe": "func2f4.exe",
+  "map": "func_2f4ee.map",
+  "name": "func_2f4ee",
+  "run": {
+    "command": "func2f4.exe > func2f4.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "func2f4.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "func_2f4ee.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "func_2f4ee_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

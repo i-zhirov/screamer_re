@@ -1,7 +1,77 @@
 {
   "address": "0x4d2dc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 22,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x4d2dc holds 22 instructions and 61 bytes up to the ret at 0x4d318; the next record starts at 0x4d32c, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses the plan count 22"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is stream_layer_init at 0x4c810, with the call site at 0x4c82a; that function calls this row offset table first, then the reciprocal table at 0x4d214, the inverse-cosine table at 0x4d260, the perspective table at 0x4cf94, and the visibility table at 0x4d030; the caller sits in the section The TABS table loaders, so the record takes that section"
+    },
+    {
+      "kind": "note",
+      "text": "the function takes no argument; it walks the index from 0 to 0x1e0 and stores the row byte offset at the slot of the table at 0x20bbc; each entry is the index times 640 bytes through the lea, add, and shift sequence; the table holds 481 entries from index 0 to 0x1e0"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the fixed 640-byte row step, and the table at 0x20bbc support the name row_offset_table_build; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no call, so the module needs no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 481-entry table and two guard cells; the four paths cover the full scan with the guard cells, the entries at index 1 and 2, the entry at index 0x1e0, and two calls; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 22 instructions and 60 bytes; the identity check stays open at 6 of 22 instructions, 5 of 60 bytes, and 0 of 4 relocation slots; V2 saves ebp only, keeps the index in eax and the scaled value in ecx, increments at the loop bottom, and folds the lea and add into one lea; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The row_offset_table_build module at 0x4d2dc"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d2dc --count 22"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x4d2dc --count 22 --rebuilt work/rebuild/rowtab.exe --rebuilt-map work/rebuild/row_offset_table_build.map --rebuilt-symbol row_offset_table_build_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module row_offset_table_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module row_offset_table_build"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x4d2dc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/row_offset_table_build.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/row_offset_table_build_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/row_offset_table_build.json"
+    },
     {
       "kind": "finding",
       "text": "## The resource layer and the DPMI services"
@@ -11,9 +81,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "row_offset_table_build",
+  "name": "row_offset_table_build",
   "notes": [],
   "object_offset": "0x3d2dc",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 60,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 22,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x4d2dc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:eaa79fa451cab65d50071dc3ad9b3cbe2c03f3a05612e18169b1989b8d303ad0",
+    "source_digest": "sha256:10db1312611c5e2041450da6804166e3eeb49d16833547748b942ce946ced642",
+    "tool": "run.py"
+  },
+  "role": "Builds the 481-entry row offset table; each entry is the row index times 640 bytes.",
+  "section": "The TABS table loaders",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "row_offset_table_build_"
 }

@@ -1,7 +1,81 @@
 {
   "address": "0x25640",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 9,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25640 holds 9 instructions and 22 bytes up to the ret at 0x25655; the next record font_load starts at 0x25658 after the two padding bytes at 0x25656 and 0x25657, so the store record keeps the 24-byte extent and sets no separate function size; the identity check uses 9 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function frees the FONTS resource at object-3 offset 0xea4 from the archive DAT_000062ac through resource_free_name at 0x2f326; the string at linear 0x100ea4 holds FONTS; the function loads the name pointer in edx and the archive context in eax before the call"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are screen_setup_cleanup at 0x15150 with the call site at 0x15164, race_data_release at 0x156a8 with the call site at 0x156f9, race_end at 0x279a4 with the call site at 0x27a0d, and race_cleanup at 0x2a1b0 with the call site at 0x2a1be; every caller runs the function in a teardown"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling font_load at 0x25658 gets the same FONTS resource at object-3 offset 0xead, so the two functions form the font data load and release pair; the module sits with the graphics decoders, so it takes the section The graphics decoders"
+    },
+    {
+      "kind": "note",
+      "text": "the FONTS resource, the caller group, and the sibling loader support the name font_data_release; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module uses no FPU stub and no assembly body"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the archive context DAT_000062ac and the resource free stub; the stub records the call count, the context, and the name pointer; the three paths cover the first context, a second context, and a sentinel context; every path checks the call count, the context, and the FONTS name; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the identity check compares 9 instructions; the rebuilt body holds 9 instructions and 24 bytes, and the 9-instruction window holds 5 of 9 instructions, 7 of 22 bytes, and 0 of 2 relocation slots equal, because V2 saves ebp before edx, loads the archive context before the name pointer, and restores the stack with lea esp, [ebp - 4]; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25640 --count 9"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25640 --count 9 --rebuilt work/rebuild/fntrel.exe --rebuilt-map work/rebuild/font_data_release.map --rebuilt-symbol font_data_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module font_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module font_data_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25640"
+    },
+    {
+      "kind": "finding",
+      "text": "The font_data_release module at 0x25640"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/font_data_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/font_data_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/font_data_release.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +85,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "font_data_release",
+  "name": "font_data_release",
   "notes": [],
   "object_offset": "0x15640",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 7,
+        "bytes_total": 22,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 9,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25640",
+    "date": "2026-11-13",
+    "fingerprint": "sha256:0987f22c032599c12ccb3526bb0dc83c35d0332cec6233467075fe7ce6866b63",
+    "source_digest": "sha256:a99da6403164c259812da44780e7bba2c248697a50e1ac3392666bc8e5c2deb3",
+    "tool": "run.py"
+  },
+  "role": "frees the FONTS resource from the archive DAT_000062ac during a teardown",
+  "section": "The graphics decoders",
   "size": 24,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "font_data_release_"
 }

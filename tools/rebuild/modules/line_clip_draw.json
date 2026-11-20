@@ -1,0 +1,32 @@
+{
+  "exe": "lcd.exe",
+  "map": "lcd.map",
+  "name": "line_clip_draw",
+  "run": {
+    "command": "lcd.exe > lcd.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "lcd.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "line_clip_draw.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "line_clip_draw_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,7 +1,81 @@
 {
   "address": "0x25f44",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x25f44 holds 20 instructions and 74 bytes up to the ret at 0x25f8d; the next function starts at 0x25f90, so the store record keeps the 76-byte extent and sets no separate function size; the identity check uses 20 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the direct call sites are 0x25f3d in the request helper at 0x25f24, 0x2643f in the playback block at 0x263cc, 0x264e4 in the request helper at 0x264b8, and 0x2651f and 0x2657a in the request helper at 0x264f8; the CD audio request path sits in the section race_loop callees, so the module takes the same section"
+    },
+    {
+      "kind": "note",
+      "text": "the function receives the request header address in edi; it writes the low nibble to DAT_001176d0, the shifted high part to DAT_001176e2, the value 0x1510 to DAT_001176dc, and the CD drive unit from DAT_0016668c to DAT_001176d8; these fields are the real-mode far pointer ES:BX of the request header, the INT 2Fh function 0x1510 (send device driver request), and the drive unit of the ECX register"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs INT 31h with ax 0x0300 (simulate real-mode interrupt), bl 0x2f, and es:edi at the RMCS 0x176c0; it then returns the status word at offset 3 of the request header at DAT_001666a4"
+    },
+    {
+      "kind": "note",
+      "text": "the request header, the drive unit, and the status return support the name cd_request_send; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and saves no register, so the module builds without -of+; the function holds no floating-point instruction, so it needs no FPU stub; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the request header pointer, the CD drive unit, the four RMCS cells, the request buffer, the response status, and the DPMI stub; the stub checks the RMCS setup and writes the response status word; the eight paths cover the status values 0x0000, 0x8100, 0x8002, and 0x81ff, a request pointer at +4, the drive units 5 and 0x0102, and the request pointer 0x000256d7 with the response from the request header; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 20 instructions and 74 bytes in the identity window; the identity check stays open at 8 of 20 instructions, 6 of 74 bytes, and 0 of 11 relocation slots, because V2 keeps the argument in eax, uses near data operands for the RMCS cells, and calls the DPMI stub in place of the INT 31h instruction; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The cd_request_send module at 0x25f44"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x25f44 --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x25f44 --count 20 --rebuilt work/rebuild/cdsend.exe --rebuilt-map work/rebuild/cd_request_send.map --rebuilt-symbol cd_request_send_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module cd_request_send"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module cd_request_send"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x25f44"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_request_send.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/cd_request_send_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/cd_request_send.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +85,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "cd_request_send",
+  "name": "cd_request_send",
   "notes": [],
   "object_offset": "0x15f44",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 74,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x25f44",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:2a5d4fbd88ccfaa4daaf3424407dcf2955098fc1578c666bf2298feb57fb7bb5",
+    "source_digest": "sha256:d1c00c96bd6013568a11be58250bc8b85e8002f2d91380460fd645df8291b2a0",
+    "tool": "run.py"
+  },
+  "role": "Sends the MSCDEX request header through the DPMI real-mode INT 2Fh path and returns the driver status word.",
+  "section": "race_loop callees",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "cd_request_send_"
 }

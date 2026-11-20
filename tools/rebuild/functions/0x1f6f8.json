@@ -1,7 +1,73 @@
 {
   "address": "0x1f6f8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 11,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x1f6f8 holds 11 instructions and 31 bytes up to the ret at 0x1f716; the next function starts at 0x1f718 after one padding byte at 0x1f717, so the store record keeps the 32-byte extent and sets no separate function size; the identity check uses 11 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the function tests the setup word DAT_00008058; a zero word returns at once; a set word frees the SOUND_FX resource from the archive DAT_000062ac through resource_free_name at 0x2f326; the string at linear 0x100bf1 holds SOUND_FX"
+    },
+    {
+      "kind": "note",
+      "text": "sound_bank_load at 0x1f2e0 gets the SOUND_FX resource from the same archive through resource_get at 0x2eed0 and returns at once when the setup word is zero; the two functions form the sound bank load and release pair, so the name sound_bank_release fits the pair; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the direct callers are race_data_release at 0x156a8 with the call site at 0x156ea, race_end at 0x279a4 with the call site at 0x27a03, and race_cleanup at 0x2a1b0 with the call site at 0x2a1ff; all three callers run at race teardown; the two functions sit with the sound loaders, so the record takes the section The sound loaders"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, so the module needs no FPU stub; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the setup word, the archive context, and the resource free stub; the stub records the call count, the context, and the name pointer; the three paths cover the zero setup word, the set setup word with the first context, and another non-zero setup word with a sentinel context; every path checks the call count, the context, and the SOUND_FX name; the output holds the markers 0, 1, 2, and D; the behavior check passes"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_bank_release.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_bank_release_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_bank_release.json"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_bank_release module at 0x1f6f8"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f6f8 --count 11"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f6f8 --count 11 --rebuilt work/rebuild/sbrmod.exe --rebuilt-map work/rebuild/sound_bank_release.map --rebuilt-symbol sound_bank_release_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module sound_bank_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_bank_release"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f6f8"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_bank_release",
+  "name": "sound_bank_release",
   "notes": [],
   "object_offset": "0xf6f8",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 31,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 7,
+        "instructions_total": 11,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f6f8",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:85b72ea04705c27b4d4d665501c9e678a78e9daab7042f0e34e068cd62842f7d",
+    "source_digest": "sha256:1f01b39e2f4c294888a2b081e9b87da3bca712638a4069f36565729f71eb3786",
+    "tool": "run.py"
+  },
+  "role": "Frees the SOUND_FX resource from the archive at race teardown when the setup word is set.",
+  "section": "The sound loaders",
   "size": 32,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_bank_release_"
 }

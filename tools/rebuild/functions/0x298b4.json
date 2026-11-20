@@ -1,7 +1,73 @@
 {
   "address": "0x298b4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 30,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x298b4 holds 30 instructions and 100 bytes up to the ret at 0x29917; the next function starts at 0x29918, so the store record keeps the 100-byte extent and sets no separate function size; the identity check uses 30 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x28ec6 is case 0x4d2 of net_race_screen at 0x28ba4; the case calls this function and then table_lookup at 0x1f718 with 2"
+    },
+    {
+      "kind": "note",
+      "text": "the function calls map_object_progress_sum at 0x2b3e4 and returns at once when the sum is not zero; otherwise it reads the menu index DAT_0011fb60, the selected line DAT_001fb08[index], and the line table DAT_00102de8[index]; a line record holds the first string offset at +0x00, the item id at +0x04, the value index at +0x08, and the value count at +0x0c; the function increments the value index and resets it to zero when it exceeds the value count, then sets the overlay word DAT_0011fac0 to 1"
+    },
+    {
+      "kind": "note",
+      "text": "menu_text_update at 0x29918 reads the value index as the second string offset and the value count as the highest value, so the increment selects the next value of the selected line; the progress sum measures the remaining menu animation, so the function waits for the animation; the name menu_line_value_next is inferred and the section is race_frame callees; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function uses the x87 stack only for the zero compare, so the module links the shared fpu_stub.asm; the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the menu index, the selected-line table, the two line tables, and the overlay word; the map_object_progress_sum stub returns the configured float; the eight paths cover a non-zero sum, the increment, the wrap above the count, the equal count, the second menu, the negative sum, the zero count, and the negative zero; the output holds the markers 0 through 7 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 15 of 30 instructions, 18 of 85 bytes, and 1 of 9 relocation slots equal; the identity check stays open because V2 pushes the registers in another order, keeps the line pointer in eax, folds the increment into a load, an inc, and a store, and reaches the line table through near addresses; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x298b4 --count 30"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x298b4 --count 30 --rebuilt work/rebuild/mlvn.exe --rebuilt-map work/rebuild/menu_line_value_next.map --rebuilt-symbol menu_line_value_next_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module menu_line_value_next"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x298b4"
+    },
+    {
+      "kind": "finding",
+      "text": "The menu_line_value_next module at 0x298b4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/menu_line_value_next.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/menu_line_value_next_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/menu_line_value_next.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +77,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "menu_line_value_next",
+  "name": "menu_line_value_next",
   "notes": [],
   "object_offset": "0x198b4",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 18,
+        "bytes_total": 85,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 15,
+        "instructions_total": 30,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x298b4",
+    "date": "2026-11-10",
+    "fingerprint": "sha256:9c442c10ace1d1d4773b0ba9406e147dbbbb272fe81f6d231cbe46fcb3b893a4",
+    "source_digest": "sha256:6bedbb2bc852d2ca6f828e70631703afd37739b3fa50232b4eeb1a6ef5ac283d",
+    "tool": "run.py"
+  },
+  "role": "Advances the value index of the selected menu line when the menu animation has finished, wraps the index at the value count, and raises the overlay word.",
+  "section": "race_frame callees",
   "size": 100,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "menu_line_value_next_"
 }

@@ -1,0 +1,31 @@
+{
+  "exe": "cdstop.exe",
+  "map": "cd_audio_stop.map",
+  "name": "cd_audio_stop",
+  "run": {
+    "command": "cdstop.exe > cdstop.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "D"
+    ],
+    "output": "cdstop.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_stop.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "cd_audio_stop_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -1,0 +1,30 @@
+{
+  "exe": "slstinit.exe",
+  "map": "sprite_list_init.map",
+  "name": "sprite_list_init",
+  "run": {
+    "command": "slstinit.exe > slstinit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "slstinit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sprite_list_init.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sprite_list_init_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

@@ -14,7 +14,7 @@
     },
     {
       "kind": "note",
-      "text": "the direct callers pass the object table at 0x6530 in ebx, the name in eax, and a position block in edx; the callers are the wrapper at 0x113c8, player_car_init at 0x136cc, car_setup at 0x142ec, and the unnamed function at 0x14970; the position block holds the object table slot at +0x00 and takes the chunk index at +0x04"
+      "text": "the direct callers pass the object table at 0x6530 in ebx, the name in eax, and a position block in edx; the callers are the wrapper at 0x113c8, player_car_init at 0x136cc, car_setup at 0x142ec, and traffic_record_init at 0x14970; the position block holds the object table slot at +0x00 and takes the chunk index at +0x04"
     },
     {
       "kind": "note",

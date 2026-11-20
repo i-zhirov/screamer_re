@@ -1,0 +1,29 @@
+{
+  "exe": "slflush.exe",
+  "map": "sprite_list_flush.map",
+  "name": "sprite_list_flush",
+  "run": {
+    "command": "slflush.exe > slflush.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "slflush.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sprite_list_flush.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sprite_list_flush_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

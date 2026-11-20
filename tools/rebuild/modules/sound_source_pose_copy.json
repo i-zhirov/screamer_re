@@ -1,0 +1,28 @@
+{
+  "exe": "sspose.exe",
+  "map": "sound_source_pose_copy.map",
+  "name": "sound_source_pose_copy",
+  "run": {
+    "command": "sspose.exe > sspose.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "sspose.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_source_pose_copy.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "sound_source_pose_copy_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

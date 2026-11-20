@@ -1,0 +1,36 @@
+{
+  "exe": "rfm2.exe",
+  "map": "race_finish_mode_2_update.map",
+  "name": "race_finish_mode_2_update",
+  "run": {
+    "command": "rfm2.exe > rfm2.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "rfm2.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_mode_2_update.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "race_finish_mode_2_update_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

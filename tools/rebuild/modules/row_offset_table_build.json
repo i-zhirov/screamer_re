@@ -1,0 +1,31 @@
+{
+  "exe": "rowtab.exe",
+  "map": "row_offset_table_build.map",
+  "name": "row_offset_table_build",
+  "run": {
+    "command": "rowtab.exe > rowtab.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "D"
+    ],
+    "output": "rowtab.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "row_offset_table_build.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wcc386",
+      "file": "row_offset_table_build_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

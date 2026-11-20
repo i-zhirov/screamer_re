@@ -1,7 +1,77 @@
 {
   "address": "0x24d30",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 18,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x24d30 holds 18 instructions and 67 bytes up to the ret at 0x24d72; the return 0 path is out of line at 0x24d73 through the ret at 0x24d78, and the next record starts at 0x24d7c, so the store record keeps the 76-byte extent and sets no separate function size; the identity check uses 18 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the two integer arguments arrive in the Watcom register order: eax holds the effect index and edx holds the variant mode; the function pushes the float delay 0.7 and calls sound_enqueue at 0x247fc with the effect, the mode, and the delay"
+    },
+    {
+      "kind": "note",
+      "text": "the array at DAT_001922c holds one timer per effect and the value 0xbf800000 is the float -1.0; sound_effect_delay at 0x24c4c latches its timer at -1 after one firing and sound_reset at 0x2471c clears the array to 0; a latched cell returns 0, and any other cell enqueues the effect, latches the cell at -1, and returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is car_sound_update at 0x242bc with the call sites at 0x24363, 0x24420, and 0x245ec; it passes the variant mode 3 to the effects 0x16, 0x1a, and 0x13; the sound functions sit in the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the array index, the latch, and the enqueue support the name sound_effect_trigger; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction, but the sound_enqueue call passes a float delay, so the recipe adds the shared fpu_stub.asm for the FPU run-time symbols; the module uses no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the 27-entry timer array and the sound_enqueue stub; the seven paths cover the armed cell, the latched cell, the positive cell with the mode -2, the latched effect 0, the last cell 26, the cell 0xbf800001 next to the latch, and the cell 0xbf7fffff below the latch; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_effect_trigger module at 0x24d30"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x24d30 --count 18"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x24d30 --count 18 --rebuilt work/rebuild/setrg.exe --rebuilt-map work/rebuild/sound_effect_trigger.map --rebuilt-symbol sound_effect_trigger_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sound_effect_trigger"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x24d30"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_trigger.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_effect_trigger_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_effect_trigger.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 17 instructions and 56 bytes; the identity window holds 18 instructions and 57 bytes and stays open at 5 of 18 instructions, 3 of 57 bytes, and 0 of 4 relocation slots, because V2 keeps the effect index in ecx and the variant mode in edx across the call, saves ecx instead of the two argument slots, and places the return 0 block inline; the build and behavior checks pass, so the store records rebuilt"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_effect_trigger",
+  "name": "sound_effect_trigger",
   "notes": [],
   "object_offset": "0x14d30",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 3,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 5,
+        "instructions_total": 18,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x24d30",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:ada3aae54b9df5849f04e47766ec55371150c96123e2b87323c94f44554619d5",
+    "source_digest": "sha256:545f491fc9eb4d8c24bec88954de12ba9383e4b4a15e9d84404ca6cb5974a81c",
+    "tool": "run.py"
+  },
+  "role": "Plays the effect when its timer cell differs from the float -1.0, latches the cell, and returns 1.",
+  "section": "Program functions",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_effect_trigger_"
 }

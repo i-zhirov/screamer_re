@@ -1,7 +1,77 @@
 {
   "address": "0x22d88",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 14,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x22d88 holds 14 instructions and 45 bytes up to the ret at 0x22db4; the next function starts at 0x22db8, so the store record keeps the 48-byte extent and sets no separate function size; the identity check uses 14 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is game_mode_1_start at 0x12c0c, at the call site 0x12cf9; the caller runs this function on the no-replay path after it prepares the frame buffer through 0x22c30 when the mode argument is not zero"
+    },
+    {
+      "kind": "note",
+      "text": "the function runs only when the frame buffer gate DAT_00018e60 is not zero; it clears the replay index DAT_00018e64, selects the replay write mode by the dword DAT_00018e6c = 0, and sets the playback bit 0x40 of the byte DAT_00018e1c"
+    },
+    {
+      "kind": "note",
+      "text": "the sibling replay_playback_begin at 0x22db8 selects the replay read mode with the same gate; timing_update at 0x22df8 reads the mode: a non-zero value reads a record through 0x22e94, and a zero value writes a record through 0x22f54; the caller, the write mode, and the cleared index support the name replay_write_begin; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and calls no helper, so it needs no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the frame buffer gate, the control byte, the replay write mode, and the replay index; every cell starts at a distinct sentinel value; the five paths cover the zero gate and the flags 0x00, 0xa5, 0x7f, and 0xff; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 14 instructions, 5 of 44 bytes, and 1 of 7 relocation slots equal; V2 saves the frame first and then edx, keeps the zero in edx and the flags in al, uses another prologue and epilogue with the lea esp restore, and does not form the ah scratch byte; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "finding",
+      "text": "The replay_write_begin module at 0x22d88"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x22d88 --count 14"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x22d88 --count 14 --rebuilt work/rebuild/rplwbgn.exe --rebuilt-map work/rebuild/replay_write_begin.map --rebuilt-symbol replay_write_begin_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py build --module replay_write_begin"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module replay_write_begin"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x22d88"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_write_begin.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/replay_write_begin_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/replay_write_begin.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "replay_write_begin",
+  "name": "replay_write_begin",
   "notes": [],
   "object_offset": "0x12d88",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 44,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 14,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x22d88",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:6731ed8b3c4af0bea72047e8c03636f1ab8e198c62be5b0f5faad8a404ed3f84",
+    "source_digest": "sha256:d86a8cc17b0edf0b12b8adbe16ca4f02c9f719dda30d0bb1a8b2b86d5eaa930f",
+    "tool": "run.py"
+  },
+  "role": "Selects the replay write mode, clears the replay index, and sets the playback bit when the frame buffer is ready.",
+  "section": "The replay records",
   "size": 48,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "replay_write_begin_"
 }

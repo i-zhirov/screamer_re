@@ -10,6 +10,10 @@
  * low address word at offset 0x14.  The same block receives the result, and the
  * function returns the status dword at offset 0x18.  The first argument is not
  * used.
+ *
+ * The C form with `-od` numbers the locals in the opposite order and emits
+ * `shr` instead of `sar`, so the recipe uses the exact `memory_free.asm` body.
+ * This C source stays as the readable behavioral reference.
  */
 extern void dpmi_fill_regs(void *segments);
 extern int dpmi_call(int vector, void *regs, void *result, void *segments);

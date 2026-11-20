@@ -1,0 +1,29 @@
+{
+  "exe": "jaxis.exe",
+  "map": "joystick_axis_read.map",
+  "name": "joystick_axis_read",
+  "run": {
+    "command": "jaxis.exe > jaxis.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "jaxis.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "joystick_axis_read.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "joystick_axis_read_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

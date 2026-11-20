@@ -1,7 +1,73 @@
 {
   "address": "0x81f80",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 28,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x81f80 holds 28 instructions and 78 bytes up to the ret at 0x81fcd; the next function starts at 0x81fd0, so the store record keeps the 80-byte extent and sets no separate function size; the identity check uses 28 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the three direct call sites are 0x8b607 in the second basis builder at 0x8b51c, 0x8b6e8 in basis_transform_build at 0x8b610, and 0x8b7c8 in the next builder at 0x8b6ee; each caller passes the matrix pointer in esi and the three vector values in eax, ebx, and ecx; the callers sit in the object update chain, so the record takes the section object_update_all callees"
+    },
+    {
+      "kind": "note",
+      "text": "the record holds the nine Q14 dwords of the 3x3 matrix at +0x00 through +0x20; the function forms three products, sums them, shifts the sum right by 14 with the arithmetic shift, and stores the results at +0x24, +0x28, and +0x2c; basis_transform_build calls the function with the negated position, so the result is the inverse translation"
+    },
+    {
+      "kind": "note",
+      "text": "the three callers and the existing basis_vector_transform reference in the basis_transform_build module support the name basis_vector_transform; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has no EBP frame and uses ebp and edi as scratch registers, so the module builds without -of+; the function holds no floating-point instruction, so the module needs no FPU stub, and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds one 12-dword record; the four paths cover the identity matrix, the scale and cross terms, the negative values with the arithmetic shift, and the mixed signs; the output holds the markers 0 through 3 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 6 of 28 instructions equal, 0 of 76 bytes equal, and 0 of 0 relocation slots equal; the rebuilt C uses the standard Watcom calling convention, takes the pointer from the stack, and keeps the products in edi and esi instead of ebp and edi; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x81f80 --count 28"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x81f80 --count 28 --rebuilt work/rebuild/bvt.exe --rebuilt-map work/rebuild/basis_vector_transform.map --rebuilt-symbol basis_vector_transform_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module basis_vector_transform"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x81f80"
+    },
+    {
+      "kind": "finding",
+      "text": "The basis_vector_transform module at 0x81f80"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_vector_transform.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/basis_vector_transform_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/basis_vector_transform.json"
+    },
     {
       "kind": "finding",
       "text": "## The object pipeline and the race frame"
@@ -11,9 +77,40 @@
       "text": "## Program map"
     }
   ],
+  "implementation": "c",
+  "module": "basis_vector_transform",
+  "name": "basis_vector_transform",
   "notes": [],
   "object_offset": "0x71f80",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 0,
+        "bytes_total": 76,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 28,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x81f80",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:eef7b404dec1fa5c07942c40dd3ae61422599496950f6b0b02bef2a26bc4cd3d",
+    "source_digest": "sha256:0a648ebe8469a3238f259cdd4f8d8acf1bfe917178e97262513097727fdf3ebd",
+    "tool": "run.py"
+  },
+  "role": "Multiplies a Q14 3x3 basis matrix by a vector and stores the inverse translation.",
+  "section": "object_update_all callees",
   "size": 80,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "basis_vector_transform_"
 }

@@ -1,0 +1,39 @@
+{
+  "exe": "ptrflg.exe",
+  "map": "point_rotation_flags.map",
+  "name": "point_rotation_flags",
+  "run": {
+    "command": "ptrflg.exe > ptrflg.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "D"
+    ],
+    "output": "ptrflg.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "point_rotation_flags.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "point_rotation_flags_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

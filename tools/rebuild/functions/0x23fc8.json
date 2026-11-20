@@ -1,7 +1,77 @@
 {
   "address": "0x23fc8",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 24,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x23fc8 holds 24 instructions and 83 bytes up to the ret at 0x2401a; the one padding byte at 0x2401b and the next function at 0x2401c give the 84-byte extent, so the store record keeps that extent and sets no separate function size; the identity check uses 24 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is race_finish_laps_update at 0x20ec8 with the call site at 0x20f3e; it selects one finish handler from the mode byte DAT_0011d260, and this handler runs on mode 0x40; the game mode 0x40 is the SLA mode; no named function sits between the caller and the target, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the handler sets bit 3 of the control byte DAT_00118e1d, writes the finish position 1 to DAT_0000ffa4, and enqueues the effect 0xb with the variant mode 3 and the delay 0 through sound_enqueue at 0x247fc"
+    },
+    {
+      "kind": "note",
+      "text": "when the SLA marker count DAT_00007ed4 equals the hit count DAT_001100dc and the state cell DAT_001100d4 is zero, the handler sets bit 7 (0x80) of DAT_00118e1d; the mode 0x40 overlay at 0x2420c reads bit 7 and adds the extra text, so the bit marks the all-marker result"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the SLA marker count, the hit count, and the extra-text bit support the name race_finish_sla_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the original function holds no floating-point instruction, but the sound_enqueue call passes a float argument, so the recipe adds the shared fpu_stub.asm for the FPU run-time symbols and the module uses no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the control byte, the marker count, the hit count, the state cell, the finish position, and the sound_enqueue stub; the seven paths cover the partial hit, the all-marker hit, the set state cell, the zero count, the negative count, the preserved control bits 0x11, and the preserved control bit 0x10; the output holds the markers 0 through 6 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x23fc8 --count 24"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x23fc8 --count 24 --rebuilt work/rebuild/rfsla.exe --rebuilt-map work/rebuild/race_finish_sla_update.map --rebuilt-symbol race_finish_sla_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module race_finish_sla_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x23fc8"
+    },
+    {
+      "kind": "finding",
+      "text": "The race_finish_sla_update module at 0x23fc8"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_sla_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/race_finish_sla_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/race_finish_sla_update.json"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 8 of 24 instructions and 10 of 82 bytes equal, and 0 of 10 relocation slots equal; the identity check stays open because V2 pushes ebp first and saves edx after the frame, keeps the control byte in al instead of ah, keeps the marker count in edx, drops the ebx save, and restores the stack with lea; the build and behavior checks pass, so the store records rebuilt"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +81,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "race_finish_sla_update",
+  "name": "race_finish_sla_update",
   "notes": [],
   "object_offset": "0x13fc8",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 10,
+        "bytes_total": 82,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 8,
+        "instructions_total": 24,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x23fc8",
+    "date": "2026-11-11",
+    "fingerprint": "sha256:43bc445a1b3840739789ee29651162383ef6e60d1c2e75ab5c8364bcd61f7081",
+    "source_digest": "sha256:6b8c615599dd42ad8f7a26fb6c2d9999df7ec298c4d0255aa9d6e7681dbad094",
+    "tool": "run.py"
+  },
+  "role": "Sets the finish control bits and the 0xb effect for the SLA mode, and sets bit 0x80 when every SLA marker is hit and the state cell is zero.",
+  "section": "Program functions",
   "size": 84,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "race_finish_sla_update_"
 }

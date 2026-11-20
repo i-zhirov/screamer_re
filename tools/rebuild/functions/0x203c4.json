@@ -1,7 +1,85 @@
 {
   "address": "0x203c4",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 23,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x203c4 holds 23 instructions and 98 bytes up to the ret at 0x20425; two padding bytes at 0x20426 precede the next function at 0x20428, so the store record keeps the 100-byte extent and sets no separate function size; the identity check uses 23 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is the race frame update at 0x1ff70, at the call site 0x1ffcd; the frame update selects this view group when the mode byte DAT_0011d260 holds bit 0x40, and the loader fills the SLA marker table only for that mode; the frame update calls the function directly, so the record takes the section Program functions"
+    },
+    {
+      "kind": "note",
+      "text": "the two gates require input flag DAT_00118e1d bit 0 and mode byte DAT_0011d260 bit 0x40; the function returns before any call when either gate is clear"
+    },
+    {
+      "kind": "note",
+      "text": "the group calls sla_marker_check at 0x18ba8 with the player object 0xf91c, then player_car_view_update at 0x16f34, the physics group at 0x15a80, the effect group at 0x15bac, the step group at 0x15ab8, the opponent group at 0x15b80, player_update at 0x19ab0, and player_car_link at 0x15c1c, all on the same player object 0xf91c"
+    },
+    {
+      "kind": "note",
+      "text": "the SLA marker check, the mode 0x40 gate, and the player object support the name sla_view_update; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame; the C form with -of+ adds mov esp, ebp and reorders the calls, so the recipe uses the exact sla_view_update.asm body; the function uses no floating-point instruction and calls no function that needs an FPU stub"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the two gate bytes and the eight callee stubs; every player stub checks the fixed player pointer 0xf91c; the five paths cover the clear input gate, the clear mode gate, the mode 0x40 path, the extra mode bit, and the extra input bits; the output holds the markers 0 through 4 and D; the behavior check passes"
+    },
+    {
+      "kind": "note",
+      "text": "the harness builds the expected sequence with an if-chain, because the V2 compiler places a switch jump table outside the code object and the run reaches offset 1; the finding The error_report jump table at run time records the same fault"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 23 of 23 instructions, 60 of 98 bytes, and 9 of 9 relocation slots equal; the assembly body keeps the original gate tests, the seven 0xf91c pointer loads, the SLA marker and player call order, and the pop ebp, ret epilogue; the twelve differing operands are link-time addresses; the build and behavior checks pass, so the store records verified with the exact-relocations match"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x203c4 --count 23"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x203c4 --count 23 --rebuilt work/rebuild/slaview.exe --rebuilt-map work/rebuild/sla_view_update.map --rebuilt-symbol sla_view_update_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/harness.py run --module sla_view_update"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x203c4"
+    },
+    {
+      "kind": "finding",
+      "text": "The sla_view_update module at 0x203c4"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sla_view_update.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sla_view_update_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sla_view_update.json"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sla_view_update.asm"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +89,46 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "assembly",
+  "module": "sla_view_update",
+  "name": "sla_view_update",
   "notes": [],
   "object_offset": "0x103c4",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 60,
+        "bytes_total": 98,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 23,
+        "instructions_total": 23,
+        "match": "exact-relocations",
+        "verdict": "pass"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x203c4",
+    "date": "2026-11-19",
+    "fingerprint": "sha256:53e9ccca6977b92b9df42c14cade0b3819b119388de6e4b606d440212101ff7f",
+    "mode": {
+      "runtime": "run",
+      "strict": true,
+      "toolchain": "v2"
+    },
+    "source_digest": "sha256:8d9610d7c0fff66da99fb3d11d9596bd752fd4b4a4d07c55303de696eec482a4",
+    "tool": "run.py"
+  },
+  "role": "runs the SLA view group for game mode 0x40: gates on the input flag and the mode bit, checks the SLA markers on the player object, and runs the player groups",
+  "section": "Program functions",
   "size": 100,
-  "status": "unknown"
+  "status": "verified",
+  "symbol": "sla_view_update_"
 }

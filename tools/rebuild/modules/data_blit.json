@@ -1,0 +1,29 @@
+{
+  "exe": "dblit.exe",
+  "map": "data_blit.map",
+  "name": "data_blit",
+  "run": {
+    "command": "dblit.exe > dblit.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "D"
+    ],
+    "output": "dblit.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "data_blit.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "data_blit_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

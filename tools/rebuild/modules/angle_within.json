@@ -1,0 +1,41 @@
+{
+  "exe": "angwin.exe",
+  "map": "angle_within.map",
+  "name": "angle_within",
+  "run": {
+    "command": "angwin.exe > angwin.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "D"
+    ],
+    "output": "angwin.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "angle_within.c",
+      "flags": [
+        "-of+"
+      ]
+    },
+    {
+      "compiler": "wasm",
+      "file": "fpu_stub.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "angle_within_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

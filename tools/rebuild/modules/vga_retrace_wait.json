@@ -1,0 +1,27 @@
+{
+  "exe": "vret.exe",
+  "map": "vga_retrace_wait.map",
+  "name": "vga_retrace_wait",
+  "run": {
+    "command": "vret.exe > vret.txt",
+    "expect": [
+      "0",
+      "1",
+      "2",
+      "D"
+    ],
+    "output": "vret.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "vga_retrace_wait.c"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "vga_retrace_wait_main.c"
+    }
+  ],
+  "toolchain": "v2"
+}

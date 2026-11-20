@@ -634,7 +634,7 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the three hundred and forty-eight module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the four hundred and ninety-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the provenance field and its status rule, the library field, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -1008,10 +1008,10 @@ it is the best measured row.  A failed or skipped build ranks after every
 measured identity result.  The matrix writes the winner through
 `store.save_module`.  The merged tree added 96 recipes with no `toolchain`
 field; `migrate` writes the default `v2` value into them, so the matrix now
-measures 348 recipes.
+measures 484 recipes.
 
 The full report stays under `work/rebuild/toolchain-matrix.json`.  The committed
-manifest is `tools/rebuild/toolchain.json`.  It holds 347 rows after the
+manifest is `tools/rebuild/toolchain.json`.  It holds 484 rows after the
 follow-up: one row per measured module and one `unmeasured` row for a module
 with an identity record and no measured result.  A module with no identity
 record has no row.  Stage 12 runs `toolchain.py check-matrix`, so it needs no
@@ -1101,13 +1101,16 @@ original address.
 The module order is the original address order of the lowest identity record of
 each module.  A module with no symbol record is excluded.
 
-The fit rule writes a module only when the sum of the rebuilt instruction sizes
-equals the record `size`.  The relocation rule copies the exact original
-internal slot bytes into the rebuilt slot.  It rewrites only an internal 4-byte
-slot.  A non-internal slot, a width other than 4, or an instruction misalignment
-skips the module.  The original slot filter stops at the original body end, not
-the record span.  A direct branch target is relative and is not rewritten.  The
-original fixup section stays valid, so the build does not rewrite it.
+The fit rule patches a module when the sum of the rebuilt instruction sizes
+equals the record `size`, or when a shorter body ends in `ret` and the record
+tail keeps its original bytes, and every absolute operand relocates.  The
+relocation rule copies the original internal 4-byte slot bytes.  It rewrites a
+direct relative branch or call from the rebuilt symbol at the target to the
+unique original symbol of the same name.  An unmapped or ambiguous branch
+symbol keeps the original branch target.  A non-internal slot, a width other
+than 4, an instruction misalignment, or a difference outside a rewritten
+operand skips the module as a body difference.  The original fixup section
+stays valid, so the build does not rewrite it.
 
 A strict padded body whose byte sum equals the original body byte sum and lies
 below the record size keeps the original body bytes.  The build starts that row
@@ -1126,11 +1129,13 @@ A patched row holds no `reason`.
 
 The build writes `work/rebuild/STARTH.EXE` and `work/rebuild/whole-image.json`.
 The report holds the date, the original path and digest, the image path and
-digest, one row per module, the `patched`, `reused`, `skipped`, and `relocated`
-counts, and the byte `score`.  A row holds the module, the address, the size,
-the toolchain, the sources, the build verdict, the fit, the fit reason, the
-rebuilt size, the original size, the relocated count, the mode, the outcome,
-and the reason of a skipped row.  The build writes no store record.
+digest, one row per module, the `patched`, `reused`, `skipped`, and
+`relocated` counts, the byte `score`, the `relocation_incomplete` and
+`body_differences` module lists, and `runnable`.  The `runnable` value is true
+only when the image is byte-identical.  A row holds the module, the address,
+the size, the toolchain, the sources, the build verdict, the fit, the fit
+reason, the rebuilt size, the original size, the relocated count, the mode, the
+outcome, and the reason of a skipped row.  The build writes no store record.
 
 Stage 11 is a score gate.  It always scores the rebuilt image and fails when the
 image is missing or unreadable.  It passes on a byte score, including when the
@@ -1329,9 +1334,10 @@ nix develop .#cross-check --command python3 tools/pipeline_check.py \
   --record-timeout 7200
 ```
 
-The record run of stage 11 builds and runs every module record, so it needs
-more time as the module count grows.  Use `--record-timeout` to raise the
-budget of that one subprocess; the default is 3000 seconds:
+The record run of stage 11 builds and runs every module record.  It runs four
+records in parallel with `--jobs 4`; a build lock keeps the shared Docker work
+directory serial, and the behavior runs overlap.  Use `--record-timeout` to
+raise the budget of that one subprocess; the default is 3000 seconds:
 
 ```sh
 python3 tools/pipeline_check.py \
@@ -1339,14 +1345,13 @@ python3 tools/pipeline_check.py \
   --record-timeout 7200
 ```
 
-A full run in the `cross-check` shell reports 529 checks.  `--skip-cross` skips
-stage 8 and the tool preflight, so the run reports 525 checks.  `--skip-runtime`
-skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 514
-checks.  Both flags report 510 checks and take about 16 seconds.  The merged
-tree adds 96 function records, and stage 11 holds one check per record.  The
+A full run in the `cross-check` shell reports 666 checks.  `--skip-cross` skips
+stage 8 and the tool preflight, so the run reports 662 checks.  `--skip-runtime`
+skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 651
+checks.  Both flags report 647 checks and take about 18 minutes.  The
 whole-image build stales the record fingerprints, because the module maps hold
 a build timestamp, so the record stage re-runs every record.  The full and
-`--skip-cross` checks take about 65 minutes.  The whole-image stage adds one
+`--skip-cross` checks take about 57 minutes.  The whole-image stage adds one
 counted check.
 
 The checks and the status page run in these places:

@@ -1,7 +1,69 @@
 {
   "address": "0x119cc",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 21,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the original body at 0x119cc holds 21 instructions and 58 bytes up to the ret at 0x11a05; the next function starts at 0x11a08, so the store record keeps the 60-byte extent and sets no separate function size; the identity check uses 21 instructions"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller is menu_objects_init at 0x2aab8, call site 0x2aadc; it loads the menu object list before it looks the object names up, so the record takes the section Resource loader"
+    },
+    {
+      "kind": "note",
+      "text": "the function requests the OBJ_LIST name at object-3 offset 0x3f0 with the size 0x17e80 through resource_get at 0x2eed0; it passes the resource list at object-3 offset 0x801c in eax, the name in edx, and the size in ebx"
+    },
+    {
+      "kind": "note",
+      "text": "the function stores the result in the handle table pointer at object-3 offset 0x21540; a zero result returns 0x12; otherwise it writes the free marker -1 to the first handle and returns 0"
+    },
+    {
+      "kind": "note",
+      "text": "object_load at 0x10bfc walks the same handle table from the first handle and stops at the -1 marker, so the loaded resource is the object file handle table; the caller, the resource name, and the free marker support the name object_handle_table_load; the original has no symbol, so the record keeps the name with the confidence inferred"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame, so the module builds with -of+; the function holds no floating-point instruction and no other helper, so the module uses no FPU stub and no assembly implementation"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the resource list pointer, the handle table pointer, the handle table, and the resource_get stub; the three paths cover the non-zero result, the zero result, and a second non-zero result with another resource list; the output holds the markers 0 through 2 and D; the behavior check passes"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x119cc --count 21"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x119cc --count 21 --rebuilt work/rebuild/ohtl.exe --rebuilt-map work/rebuild/object_handle_table_load.map --rebuilt-symbol object_handle_table_load_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x119cc"
+    },
+    {
+      "kind": "finding",
+      "text": "The object_handle_table_load module at 0x119cc"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_table_load.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/object_handle_table_load_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/object_handle_table_load.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "object_handle_table_load",
+  "name": "object_handle_table_load",
   "notes": [],
   "object_offset": "0x19cc",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 6,
+        "bytes_total": 57,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 6,
+        "instructions_total": 21,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x119cc",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:cdc149f7db364bd63aa6913b56f0ad2d53e8306b3491df53ac1fa7cb3d765c5b",
+    "source_digest": "sha256:6b025d85c186bef0c2e1018cab021f4dfec6bab770803375167a9c7682da2834",
+    "tool": "run.py"
+  },
+  "role": "Loads the OBJ_LIST resource into the object file handle table and sets the first handle marker.",
+  "section": "Resource loader",
   "size": 60,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "object_handle_table_load_"
 }

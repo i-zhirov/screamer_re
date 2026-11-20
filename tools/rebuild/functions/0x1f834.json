@@ -1,7 +1,69 @@
 {
   "address": "0x1f834",
-  "checks": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "inferred",
+  "count": 20,
   "evidence": [
+    {
+      "kind": "note",
+      "text": "the identity window at 0x1f834 holds 20 instructions and 59 bytes up to the success-path ret at 0x1f86e; two return-1 tails follow out of line at 0x1f86f and 0x1f878, and the next function starts at 0x1f880, so the store record keeps the 76-byte extent and sets no separate function size"
+    },
+    {
+      "kind": "note",
+      "text": "the only direct caller at 0x248fb is sound_queue_update at 0x24880; the caller passes the sound table id DAT_00119074 in eax and the playing sound status DAT_00119070 in edx; a zero result keeps the queue, and a non-zero result pops the queue through 0x24918 and clears the timer"
+    },
+    {
+      "kind": "note",
+      "text": "the setup word DAT_00008058 gates the check; a zero word returns 0; otherwise the function reads the voice word at driver offset 0x34 through 0xc6bde with the driver handle DAT_00018d94 and the status; when that word equals the table id plus one the function returns the free check at 0xca815, which reads bit 0x8000 of the voice word at offset 0x30 and returns 1 when the bit is clear; a different word returns 1"
+    },
+    {
+      "kind": "note",
+      "text": "the caller, the table id, the two voice fields, and the sibling sound voice functions support the name sound_voice_finished with the confidence inferred; the original has no symbol"
+    },
+    {
+      "kind": "note",
+      "text": "the original has the EBP frame and two locals, so the module builds with -of+; the function holds no floating-point instruction and no direct call to a math symbol, so the module uses no FPU stub and no assembly"
+    },
+    {
+      "kind": "note",
+      "text": "the harness holds the setup word, the driver handle, and the two driver stubs; the field stub records the handle, the voice index, and the call count and returns a scripted word, and the idle stub records the same and returns a scripted result; the eight paths cover the zero word, the matching word with an idle voice, the matching word with a busy voice, the different word, the table id 0, the table id -1, the field equal to the table id, and the table id 0x1234 with the status 0x1f; the output holds the markers 0 through 7 and D"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt body holds 9 of 20 instructions equal and 0 of 6 relocation slots equal; the identity check stays open because V2 saves ebx and ecx and keeps the table id and the status in registers, reaches the globals through the small harness offsets, and lays out the two returns in another shape; the build and behavior checks pass, so the store records rebuilt"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x1f834 --count 20"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x1f834 --count 20 --rebuilt work/rebuild/svfin.exe --rebuilt-map work/rebuild/sound_voice_finished.map --rebuilt-symbol sound_voice_finished_"
+    },
+    {
+      "kind": "command",
+      "text": "python3 tools/rebuild/run.py run --function 0x1f834"
+    },
+    {
+      "kind": "finding",
+      "text": "The sound_voice_finished module at 0x1f834"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_finished.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/sound_voice_finished_main.c"
+    },
+    {
+      "kind": "file",
+      "text": "tools/rebuild/modules/sound_voice_finished.json"
+    },
     {
       "kind": "finding",
       "text": "## Program map"
@@ -11,9 +73,40 @@
       "text": "## Function names"
     }
   ],
+  "implementation": "c",
+  "module": "sound_voice_finished",
+  "name": "sound_voice_finished",
   "notes": [],
   "object_offset": "0xf834",
   "provenance": "game",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 5,
+        "bytes_total": 55,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 9,
+        "instructions_total": 20,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0x1f834",
+    "date": "2026-11-12",
+    "fingerprint": "sha256:10211f4d87db64832cb782c819aa59fde3a3d0d5aa32e18c31ca19897f30c234",
+    "source_digest": "sha256:754eb114ac6eaacc42fa549373a40d7d7e5ebe3592f3d2246d78f668cc9cd192",
+    "tool": "run.py"
+  },
+  "role": "Reports whether the playing sound voice has finished.",
+  "section": "Program functions",
   "size": 76,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "sound_voice_finished_"
 }

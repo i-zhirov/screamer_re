@@ -25,6 +25,7 @@ void quit(void);
 void *DAT_00021574;
 void *DAT_00021504;
 void *DAT_00121528;
+char video_key;
 
 static char text[8];
 static void *lookup_result;
@@ -68,7 +69,8 @@ int main(void)
     DAT_00121528 = 0;
     release_calls = 0;
     video_buf_load();
-    put(got_stream == stream_obj && got_key == 0x16c4 && got_name == (void *)0x4b500
+    put(got_stream == stream_obj && got_key == (unsigned int)&video_key
+        && got_name == (void *)0x4b500
         && DAT_00021504 == buffer && DAT_00121528 == buffer && release_calls == 0
         ? '0' : 'x');
     lookup_result = 0;

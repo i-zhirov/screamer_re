@@ -550,11 +550,215 @@ reproduce the original bytes.
 | `0x1f8dc` | `mouse_release_wait` (done) | 112 | 37 | 4 | 0 |
 | `0x2218c` | `point_rotate_y` (done) | 111 | 38 | 4 | 18 |
 
-This table starts Phase V.
+This table completes Phase V.
+
+### Phase W: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x262fc` | `cd_audio_table_build` (done) | 110 | 34 | 3 | 0 |
+| `0x224dc` | `point_rotation_flags` (done) | 110 | 41 | 1 | 2 |
+| `0x2211c` | `angle_filter` (done) | 110 | 41 | 1 | 17 |
+| `0x110d0` | `object_lookup` (done) | 110 | 40 | 1 | 0 |
+| `0x2b3e4` | `map_object_progress_sum` (done) | 108 | 40 | 0 | 4 |
+| `0x1960c` | `track_timer_update` (done) | 105 | 32 | 1 | 6 |
+| `0x24cc8` | `sound_effect_repeat` (done) | 104 | 33 | 1 | 5 |
+| `0x2a214` | `race_menu_handler` (done) | 103 | 31 | 0 | 0 |
+| `0x8a9e8` | `camera_basis_patch` (done) | 102 | 25 | 0 | 0 |
+| `0x4cae4` | `mmp_file_load` (done) | 102 | 32 | 4 | 0 |
+| `0x2f4ee` | `func_2f4ee` (done) | 102 | 40 | 2 | 0 |
+| `0x24600` | `sound_effect_list_init` (done) | 101 | 35 | 2 | 0 |
+| `0x22278` | `point_rotate_y_float` (done) | 101 | 36 | 2 | 18 |
+| `0x115f8` | `object_list_release_all` (done) | 101 | 40 | 1 | 0 |
+| `0x298b4` | `menu_line_value_next` (done) | 100 | 30 | 1 | 3 |
+| `0x8af08` | `sound_frame_prepare` (done) | 98 | 22 | 3 | 0 |
+| `0x24918` | `sound_queue_pop` (done) | 98 | 36 | 0 | 2 |
+| `0x203c4` | `sla_view_update` (done) | 98 | 23 | 8 | 0 |
+| `0x20360` | `cng_view_update` (done) | 98 | 23 | 8 | 0 |
+| `0x14970` | `traffic_record_init` (done) | 98 | 37 | 1 | 0 |
+| `0x4c485` | `member_load` (done) | 96 | 32 | 3 | 0 |
+| `0x2369c` | `race_gauges` (done) | 96 | 32 | 1 | 0 |
+| `0x2254c` | `angle_in_arc` (done) | 95 | 34 | 0 | 18 |
+| `0x83500` | `array_sort` (done) | 93 | 39 | 0 | 0 |
+
+This table completes Phase W.
+
+### Phase X: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x150f4` | `track_resource_load` (done) | 92 | 29 | 3 | 0 |
+| `0x2f554` | `func_2f554` (done) | 90 | 37 | 0 | 0 |
+| `0x1ff14` | `race_frame_loop` (done) | 90 | 27 | 9 | 0 |
+| `0x8a848` | `sound_event_frame_select` (done) | 89 | 40 | 0 | 0 |
+| `0x4cf3c` | `palette_file_load` (done) | 88 | 30 | 4 | 0 |
+| `0x22c30` | `replay_frame_buffer_init` (done) | 87 | 30 | 2 | 0 |
+| `0x24264` | `race_finish_overlay_5` (done) | 86 | 27 | 2 | 0 |
+| `0x2420c` | `race_finish_overlay_6` (done) | 86 | 27 | 2 | 0 |
+| `0x22664` | `angle_within` (done) | 85 | 32 | 0 | 16 |
+| `0x11974` | `func_11974` (done) | 85 | 28 | 1 | 3 |
+| `0x23fc8` | `race_finish_sla_update` (done) | 83 | 24 | 1 | 0 |
+| `0x83354` | `sound_sequence_prepare` (done) | 80 | 20 | 2 | 0 |
+| `0x2f709` | `memory_block_largest` (done) | 79 | 34 | 2 | 0 |
+| `0x1f7e4` | `sound_voice_pitch_set` (done) | 79 | 25 | 2 | 0 |
+| `0x81f80` | `basis_vector_transform` (done) | 78 | 28 | 0 | 0 |
+| `0x24bfc` | `bit_pattern_match` (done) | 78 | 32 | 0 | 0 |
+| `0x15bac` | `player_car_effect_update` (done) | 78 | 23 | 7 | 0 |
+| `0x15ab8` | `player_car_step_update` (done) | 77 | 23 | 8 | 0 |
+| `0x4d214` | `reciprocal_table_build` (done) | 76 | 28 | 1 | 5 |
+| `0x261e4` | `cd_audio_q_channel_read` (done) | 74 | 25 | 1 | 0 |
+| `0x25f44` | `cd_request_send` (done) | 74 | 20 | 0 | 0 |
+| `0x2401c` | `race_finish_cng_update` (done) | 74 | 22 | 1 | 0 |
+| `0x247ac` | `sound_variant_lookup` (done) | 71 | 22 | 2 | 0 |
+| `0x1f764` | `sound_voice_sample_set` (done) | 71 | 26 | 1 | 0 |
+
+This table completes Phase X.
+
+### Phase Y: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x113c8` | `func_113c8` (done) | 71 | 27 | 1 | 0 |
+| `0x25b10` | `sprite_entry_draw` (done) | 70 | 22 | 0 | 0 |
+| `0x18b60` | `opponent_score_update` (done) | 70 | 22 | 0 | 3 |
+| `0x30389` | `exit_with_message` (done) | 68 | 28 | 1 | 0 |
+| `0x26120` | `cd_audio_track_info_request` (done) | 68 | 22 | 0 | 0 |
+| `0x4bee0` | `camera_relative_angles` (done) | 67 | 26 | 0 | 0 |
+| `0x24d30` | `sound_effect_trigger` (done) | 67 | 18 | 1 | 0 |
+| `0x24a28` | `sound_queue_start` (done) | 67 | 23 | 2 | 0 |
+| `0x2df68` | `net_menu_enter` (done) | 65 | 22 | 5 | 0 |
+| `0x2b450` | `map_object_record_init` (done) | 65 | 22 | 1 | 0 |
+| `0x25aac` | `track_stream_open` (done) | 65 | 22 | 2 | 0 |
+| `0x8bd54` | `state_cells_set` (done) | 64 | 16 | 0 | 0 |
+| `0x260e0` | `cd_audio_status_request` (done) | 64 | 22 | 1 | 0 |
+| `0x22db8` | `replay_playback_begin` (done) | 64 | 19 | 0 | 0 |
+| `0x212d0` | `camera_reference_update` (done) | 63 | 20 | 0 | 2 |
+| `0x260a0` | `cd_audio_disc_info_request` (done) | 62 | 22 | 1 | 0 |
+| `0x4d2dc` | `row_offset_table_build` (done) | 61 | 22 | 0 | 0 |
+| `0x4c94c` | `map_file_load` (done) | 61 | 27 | 2 | 0 |
+| `0x1c7d0` | `car_collision_step` (done) | 61 | 19 | 3 | 0 |
+| `0x25f90` | `cd_audio_tick` (done) | 60 | 18 | 2 | 0 |
+| `0x23f14` | `race_finish_mode_2_update` (done) | 60 | 18 | 1 | 0 |
+| `0x23ed8` | `race_finish_mode_1_update` (done) | 60 | 18 | 1 | 0 |
+| `0x118a4` | `object_block_tag` (done) | 60 | 21 | 0 | 0 |
+| `0x11660` | `object_slot_acquire` (done) | 60 | 23 | 0 | 0 |
+
+This table completes Phase Y.
+
+### Phase Z: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x1f834` | `sound_voice_finished` (done) | 59 | 20 | 2 | 0 |
+| `0x11060` | `object_load_by_name` (done) | 59 | 22 | 2 | 0 |
+| `0x119cc` | `object_handle_table_load` (done) | 58 | 21 | 1 | 0 |
+| `0x4d9ba` | `stricmp` (done) | 57 | 28 | 0 | 0 |
+| `0x261a8` | `cd_audio_track_query` (done) | 57 | 21 | 1 | 0 |
+| `0x15b44` | `traffic_effect_update` (done) | 57 | 18 | 4 | 0 |
+| `0x15b08` | `player_effect_update` (done) | 57 | 18 | 4 | 0 |
+| `0x8afc4` | `sound_source_pose_copy` (done) | 56 | 25 | 0 | 0 |
+| `0x22bec` | `sqrt` (done) | 56 | 25 | 1 | 7 |
+| `0x241d4` | `race_finish_overlay_3` (done) | 55 | 20 | 1 | 0 |
+| `0x2febc` | `music_select` (done) | 54 | 20 | 2 | 0 |
+| `0x22bb4` | `filter_update_int` (done) | 54 | 21 | 1 | 5 |
+| `0x4cef4` | `map_data_release` (done) | 53 | 15 | 3 | 0 |
+| `0x15a80` | `player_physics_update` (done) | 53 | 17 | 5 | 0 |
+| `0x102b0` | `data_blit` (done) | 52 | 26 | 0 | 0 |
+| `0x264b8` | `cd_audio_stop` (done) | 51 | 15 | 1 | 0 |
+| `0x11850` | `object_list_bind` (done) | 51 | 18 | 0 | 0 |
+| `0x117fc` | `object_list_refresh` (done) | 51 | 18 | 0 | 0 |
+| `0x117a0` | `object_list_tag_toggle` (done) | 51 | 18 | 0 | 0 |
+| `0x1ec48` | `traffic_event_flush` (done) | 50 | 24 | 3 | 0 |
+| `0x263cc` | `cd_audio_play` (done) | 49 | 13 | 0 | 0 |
+| `0x1f7ac` | `sound_voice_acquire` (done) | 48 | 17 | 2 | 0 |
+| `0x102e4` | `line_clip_draw` (done) | 47 | 16 | 0 | 0 |
+| `0x264f8` | `cd_audio_resume` (done) | 46 | 14 | 1 | 0 |
+
+This table completes Phase Z.
+
+### Phase AA: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x8a8d8` | `sound_event_next` (done) | 45 | 12 | 0 | 0 |
+| `0x22d88` | `replay_write_begin` (done) | 45 | 14 | 0 | 0 |
+| `0x4da3a` | `trig_range_reduce` (done) | 44 | 22 | 0 | 6 |
+| `0x1f880` | `sound_voice_stop` (done) | 42 | 15 | 1 | 0 |
+| `0x15150` | `screen_setup_cleanup` (done) | 42 | 12 | 7 | 0 |
+| `0x15b80` | `opponent_effect_update` (done) | 41 | 14 | 2 | 0 |
+| `0x10263` | `joystick_axis_read` (done) | 41 | 16 | 1 | 0 |
+| `0x2ff84` | `music_volume_set` (done) | 40 | 15 | 1 | 0 |
+| `0x19478` | `player_effect_state_set` (done) | 40 | 14 | 0 | 0 |
+| `0x4cecc` | `material_data_release` (done) | 38 | 12 | 2 | 0 |
+| `0x2f985` | `func_2f985` (done) | 38 | 21 | 0 | 0 |
+| `0x1f8b4` | `sound_fx_volume_set` (done) | 37 | 14 | 1 | 0 |
+| `0x22d64` | `attack_data_release` (done) | 36 | 12 | 1 | 0 |
+| `0x11a08` | `object_handle_table_release` (done) | 36 | 13 | 2 | 0 |
+| `0x1028c` | `gameport_pulse` (done) | 36 | 18 | 0 | 0 |
+| `0x1fa04` | `phase_delta` (done) | 34 | 15 | 0 | 0 |
+| `0x240a0` | `race_finish_overlay_4` (done) | 33 | 15 | 1 | 0 |
+| `0x13540` | `race_track_load` (done) | 33 | 13 | 1 | 0 |
+| `0x2fef4` | `music_voice_stop` (done) | 32 | 13 | 1 | 0 |
+| `0x25af0` | `sprite_list_flush` (done) | 32 | 11 | 1 | 0 |
+| `0x25f24` | `cd_request_submit` (done) | 31 | 11 | 1 | 0 |
+| `0x25620` | `font_table_init` (done) | 31 | 12 | 0 | 0 |
+| `0x1f6f8` | `sound_bank_release` (done) | 31 | 11 | 1 | 0 |
+| `0x15bfc` | `player_previous_speed_set` (done) | 31 | 11 | 0 | 2 |
+
+This table completes Phase AA.
+
+### Phase AB: next unnamed functions
+
+These functions use the C build.  Assembly is not added unless C cannot
+reproduce the original bytes.
+
+| Address | Name | Size | Instructions | Calls | FPU |
+| --- | --- | --- | --- | --- | --- |
+| `0x81a05` | `palette_set` (done) | 30 | 17 | 2 | 0 |
+| `0x22d44` | `replay_frame_buffer_release` (done) | 30 | 11 | 1 | 0 |
+| `0x111b4` | `object_handle_pair_release` (done) | 29 | 13 | 0 | 0 |
+| `0x11148` | `object_handle_release` (done) | 29 | 13 | 0 | 0 |
+| `0x8be93` | `dpmi_alloc_dos` (done) | 28 | 11 | 0 | 0 |
+| `0x2be94` | `state_init_dispatch` (done) | 28 | 9 | 1 | 0 |
+| `0x24d7c` | `sound_effect_timer_clear` (done) | 27 | 12 | 0 | 0 |
+| `0x8c0fc` | `video_bank_set` (done) | 24 | 10 | 0 | 0 |
+| `0x101f6` | `timer_set` (done) | 23 | 13 | 0 | 0 |
+| `0x258b8` | `sprite_data_release` (done) | 22 | 9 | 1 | 0 |
+| `0x25640` | `font_data_release` (done) | 22 | 9 | 1 | 0 |
+| `0x1b58c` | `text_data_release` (done) | 22 | 9 | 1 | 0 |
+| `0x1b180` | `gamespline_release` (done) | 22 | 9 | 1 | 0 |
+| `0x81a24` | `vga_dac_write` (done) | 21 | 9 | 0 | 0 |
+| `0x819f0` | `vga_retrace_wait` (done) | 21 | 11 | 0 | 0 |
+| `0x2666c` | `dpmi_free_dos` (done) | 20 | 6 | 0 | 0 |
+| `0x8afb2` | `sound_render_branch_less` (done) | 18 | 5 | 0 | 0 |
+| `0x8afa0` | `sound_render_branch_greater` (done) | 18 | 5 | 0 | 0 |
+| `0x27f80` | `func_27f80` (done) | 18 | 7 | 0 | 0 |
+| `0x26014` | `cd_volume_descriptor_read` (done) | 16 | 7 | 0 | 0 |
+| `0x4cf2c` | `map_material_data_release` (done) | 15 | 6 | 2 | 0 |
+| `0x25f14` | `cd_system_shutdown` (done) | 15 | 6 | 2 | 0 |
+| `0x257a0` | `sprite_list_init` (done) | 15 | 5 | 0 | 0 |
+| `0x24080` | `race_finish_time_ghost_update` (done) | 15 | 5 | 0 | 0 |
+
+This table starts Phase AB.
 
 ## Position
 
-Three hundred and forty-seven modules carry a recipe and a result: the twelve Phase A modules,
+Four hundred and ninety-one modules carry a recipe and a result: the twelve Phase A modules,
 the eleven modules of the earlier batches, the twenty-four Phase B modules,
 including `sound_update` at `0x81a70`, and the first thirty-two Phase C modules
 `graphics_load` at `0x10ba4`,
@@ -752,5 +956,145 @@ Phase T module `point_height_probe` at `0x1bfd4`, and the Phase T module
 `video_selector_setup` at `0x8bc7c`, and the Phase V module
 `bios_tick_reset` at `0x1f990`, and the Phase V module
 `mouse_release_wait` at `0x1f8dc`, and the Phase V module
-`point_rotate_y` at `0x2218c`.
-The next unnamed function is `0x262fc`.
+`point_rotate_y` at `0x2218c`, and the Phase W module
+`cd_audio_table_build` at `0x262fc`, and the Phase W module
+`point_rotation_flags` at `0x224dc`, and the Phase W module
+`angle_filter` at `0x2211c`, and the Phase W module
+`object_lookup` at `0x110d0`, and the Phase W module
+`map_object_progress_sum` at `0x2b3e4`, and the Phase W module
+`track_timer_update` at `0x1960c`, and the Phase W module
+`sound_effect_repeat` at `0x24cc8`, and the Phase W module
+`race_menu_handler` at `0x2a214`, and the Phase W module
+`camera_basis_patch` at `0x8a9e8`, and the Phase W module
+`mmp_file_load` at `0x4cae4`, and the Phase W module
+`func_2f4ee` at `0x2f4ee`, and the Phase W module
+`sound_effect_list_init` at `0x24600`, and the Phase W module
+`point_rotate_y_float` at `0x22278`, and the Phase W module
+`object_list_release_all` at `0x115f8`, and the Phase W module
+`menu_line_value_next` at `0x298b4`, and the Phase W module
+`sound_frame_prepare` at `0x8af08`, and the Phase W module
+`sound_queue_pop` at `0x24918`, and the Phase W module
+`sla_view_update` at `0x203c4`, and the Phase W module
+`cng_view_update` at `0x20360`, and the Phase W module
+`traffic_record_init` at `0x14970`, and the Phase W module
+`member_load` at `0x4c485`, and the Phase W module
+`race_gauges` at `0x2369c`, and the Phase W module
+`angle_in_arc` at `0x2254c`, and the Phase W module
+`array_sort` at `0x83500`, and the Phase X modules
+`track_resource_load` at `0x150f4`, `func_2f554` at `0x2f554`,
+`race_frame_loop` at `0x1ff14`, `sound_event_frame_select` at `0x8a848`,
+`palette_file_load` at `0x4cf3c`, `replay_frame_buffer_init` at `0x22c30`,
+`race_finish_overlay_5` at `0x24264`, and `race_finish_overlay_6` at
+`0x2420c`, the Phase X module `angle_within` at `0x22664`, the Phase X
+module `func_11974` at `0x11974`, and the Phase X module
+`race_finish_sla_update` at `0x23fc8`, the Phase X module
+`sound_sequence_prepare` at `0x83354`, and the Phase X module
+`memory_block_largest` at `0x2f709`, and the Phase X module
+`sound_voice_pitch_set` at `0x1f7e4`, and the Phase X module
+`basis_vector_transform` at `0x81f80`, and the Phase X module
+`bit_pattern_match` at `0x24bfc`, and the Phase X module
+`player_car_effect_update` at `0x15bac`, and the Phase X module
+`player_car_step_update` at `0x15ab8`, and the Phase X module
+`reciprocal_table_build` at `0x4d214`, and the Phase X module
+`cd_audio_q_channel_read` at `0x261e4`, and the Phase X module
+`cd_request_send` at `0x25f44`, and the Phase X module
+`race_finish_cng_update` at `0x2401c`, and the Phase X module
+`sound_variant_lookup` at `0x247ac`, and the Phase X module
+`sound_voice_sample_set` at `0x1f764`, and the Phase Y module
+`func_113c8` at `0x113c8`, and the Phase Y module
+`sprite_entry_draw` at `0x25b10`, and the Phase Y module
+`opponent_score_update` at `0x18b60`, and the Phase Y module
+`exit_with_message` at `0x30389`, and the Phase Y module
+`cd_audio_track_info_request` at `0x26120`, and the Phase Y module
+`camera_relative_angles` at `0x4bee0`, the Phase Y module
+`sound_effect_trigger` at `0x24d30`, and the Phase Y module
+`sound_queue_start` at `0x24a28`, and the Phase Y module
+`net_menu_enter` at `0x2df68`, and the Phase Y module
+`map_object_record_init` at `0x2b450`, and the Phase Y module
+`track_stream_open` at `0x25aac`, and the Phase Y module
+`state_cells_set` at `0x8bd54`, and the Phase Y module
+`cd_audio_status_request` at `0x260e0`, and the Phase Y module
+`replay_playback_begin` at `0x22db8`, and the Phase Y module
+`camera_reference_update` at `0x212d0`, and the Phase Y module
+`cd_audio_disc_info_request` at `0x260a0`, and the Phase Y module
+`row_offset_table_build` at `0x4d2dc`, and the Phase Y module
+`map_file_load` at `0x4c94c`, and the Phase Y module
+`car_collision_step` at `0x1c7d0`, and the Phase Y module
+`cd_audio_tick` at `0x25f90`, and the Phase Y module
+`race_finish_mode_2_update` at `0x23f14`, and the Phase Y module
+`race_finish_mode_1_update` at `0x23ed8`, and the Phase Y module
+`object_block_tag` at `0x118a4`, and the Phase Y module
+`object_slot_acquire` at `0x11660`, and the Phase Z module
+`sound_voice_finished` at `0x1f834`, and the Phase Z module
+`object_load_by_name` at `0x11060`, and the Phase Z module
+`object_handle_table_load` at `0x119cc`, and the Phase Z module
+`stricmp` at `0x4d9ba`, and the Phase Z module
+`cd_audio_track_query` at `0x261a8`, and the Phase Z module
+`traffic_effect_update` at `0x15b44`, and the Phase Z module
+`player_effect_update` at `0x15b08`, and the Phase Z module
+`sound_source_pose_copy` at `0x8afc4`, and the Phase Z module
+`sqrt` at `0x22bec`, and the Phase Z module
+`race_finish_overlay_3` at `0x241d4`, and the Phase Z module
+`music_select` at `0x2febc`, and the Phase Z module
+`filter_update_int` at `0x22bb4`, and the Phase Z module
+`map_data_release` at `0x4cef4`, and the Phase Z module
+`player_physics_update` at `0x15a80`, and the Phase Z module
+`data_blit` at `0x102b0`, and the Phase Z module
+`cd_audio_stop` at `0x264b8`, and the Phase Z module
+`object_list_bind` at `0x11850`, and the Phase Z module
+`object_list_refresh` at `0x117fc`, and the Phase Z module
+`object_list_tag_toggle` at `0x117a0`, and the Phase Z module
+`traffic_event_flush` at `0x1ec48`, and the Phase Z module
+`cd_audio_play` at `0x263cc`, and the Phase Z module
+`sound_voice_acquire` at `0x1f7ac`, and the Phase Z module
+`line_clip_draw` at `0x102e4`, and the Phase Z module
+`cd_audio_resume` at `0x264f8`, and the Phase AA module
+`sound_event_next` at `0x8a8d8`, and the Phase AA module
+`replay_write_begin` at `0x22d88`, and the Phase AA module
+`trig_range_reduce` at `0x4da3a`, and the Phase AA module
+`sound_voice_stop` at `0x1f880`, and the Phase AA module
+`screen_setup_cleanup` at `0x15150`, and the Phase AA module
+`opponent_effect_update` at `0x15b80`, and the Phase AA module
+`joystick_axis_read` at `0x10263`, and the Phase AA module
+`music_volume_set` at `0x2ff84`, and the Phase AA module
+`player_effect_state_set` at `0x19478`, and the Phase AA module
+`material_data_release` at `0x4cecc`, and the Phase AA module
+`func_2f985` at `0x2f985`, and the Phase AA module
+`sound_fx_volume_set` at `0x1f8b4`, and the Phase AA module
+`attack_data_release` at `0x22d64`, and the Phase AA module
+`object_handle_table_release` at `0x11a08`, and the Phase AA module
+`gameport_pulse` at `0x1028c`, and the Phase AA module
+`phase_delta` at `0x1fa04`, and the Phase AA module
+`race_finish_overlay_4` at `0x240a0`, and the Phase AA module
+`race_track_load` at `0x13540`, and the Phase AA module
+`music_voice_stop` at `0x2fef4`, and the Phase AA module
+`sprite_list_flush` at `0x25af0`, and the Phase AA module
+`cd_request_submit` at `0x25f24`, and the Phase AA module
+`font_table_init` at `0x25620`, and the Phase AA module
+`sound_bank_release` at `0x1f6f8`, and the Phase AA module
+`player_previous_speed_set` at `0x15bfc`, and the Phase AB module
+`palette_set` at `0x81a05`, and the Phase AB module
+`replay_frame_buffer_release` at `0x22d44`, and the Phase AB module
+`object_handle_pair_release` at `0x111b4`, and the Phase AB module
+`object_handle_release` at `0x11148`, and the Phase AB module
+`dpmi_alloc_dos` at `0x8be93`, and the Phase AB module
+`state_init_dispatch` at `0x2be94`, and the Phase AB module
+`sound_effect_timer_clear` at `0x24d7c`, and the Phase AB module
+`video_bank_set` at `0x8c0fc`, and the Phase AB module
+`timer_set` at `0x101f6`, and the Phase AB module
+`sprite_data_release` at `0x258b8`, and the Phase AB module
+`font_data_release` at `0x25640`, and the Phase AB module
+`text_data_release` at `0x1b58c`, and the Phase AB module
+`gamespline_release` at `0x1b180`, and the Phase AB module
+`vga_dac_write` at `0x81a24`, and the Phase AB module
+`vga_retrace_wait` at `0x819f0`, and the Phase AB module
+`dpmi_free_dos` at `0x2666c`, and the Phase AB module
+`sound_render_branch_less` at `0x8afb2`, and the Phase AB module
+`sound_render_branch_greater` at `0x8afa0`, and the Phase AB module
+`func_27f80` at `0x27f80`, the Phase AB module
+`cd_volume_descriptor_read` at `0x26014`, and the Phase AB module
+`map_material_data_release` at `0x4cf2c`, and the Phase AB module
+`cd_system_shutdown` at `0x25f14`, and the Phase AB module
+`sprite_list_init` at `0x257a0`, and the Phase AB module
+`race_finish_time_ghost_update` at `0x24080`.
+The next unnamed function is `0x10010`.
