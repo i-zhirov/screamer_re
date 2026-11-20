@@ -31,5 +31,5 @@
       "file": "credits_fade_out_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

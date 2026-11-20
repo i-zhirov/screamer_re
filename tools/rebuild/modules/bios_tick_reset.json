@@ -26,5 +26,5 @@
       "file": "bios_tick_reset_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

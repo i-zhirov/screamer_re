@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "shade_rect.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "shade_rect.c"
     },
     {
       "compiler": "wcc386",

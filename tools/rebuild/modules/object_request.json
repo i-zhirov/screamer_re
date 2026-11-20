@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_request.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_request.c"
     },
     {
       "compiler": "wcc386",

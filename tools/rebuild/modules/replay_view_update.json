@@ -20,13 +20,18 @@
       "compiler": "wcc386",
       "file": "replay_view_update.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "replay_view_update_main.c"
+      "file": "replay_view_update_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

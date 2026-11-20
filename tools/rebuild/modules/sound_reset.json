@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_reset.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "sound_reset.c"
     },
     {
       "compiler": "wcc386",

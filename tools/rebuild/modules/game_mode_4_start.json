@@ -32,5 +32,5 @@
       "file": "game_mode_4_start_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

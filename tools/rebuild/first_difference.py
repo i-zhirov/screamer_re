@@ -44,18 +44,42 @@ IDIOMS = (
     "instruction selection",
     "basic-block order",
     "relocation target",
+    "register save order",
+    "frame size",
+    "instruction count",
     "match",
     "other",
 )
 STACK_SLOT = re.compile(r"\[ebp\s*-")
+REGISTER32 = re.compile(r"^(?:eax|ebx|ecx|edx|esi|edi|ebp|esp)$")
 INSTRUCTION_PREFIX = re.compile(r"^instruction (\d+): ")
 REPORT_DOCUMENT = store.WORK_DIR / "first-differences.json"
 BLOCK_SIZE = 65536
 
 
-def _stack_slot(insn: le.Insn) -> bool:
+def _stack_slot(insn: le.Insn | None) -> bool:
     """Tell whether the operands hold a stack frame displacement."""
+    if insn is None:
+        return False
     return STACK_SLOT.search(insn.operands) is not None
+
+
+def _frame_size(insn: le.Insn | None) -> bool:
+    """Tell whether an instruction allocates the frame with sub esp, imm."""
+    return (
+        insn is not None
+        and insn.mnemonic.lower() == "sub"
+        and insn.operands.startswith("esp, 0x")
+    )
+
+
+def _register_save(insn: le.Insn | None) -> bool:
+    """Tell whether an instruction pushes a 32-bit register."""
+    return (
+        insn is not None
+        and insn.mnemonic.lower() == "push"
+        and REGISTER32.match(insn.operands.strip()) is not None
+    )
 
 
 def _difference_text(difference: str) -> str:
@@ -63,12 +87,15 @@ def _difference_text(difference: str) -> str:
     return INSTRUCTION_PREFIX.sub("", difference, count=1)
 
 
-def idiom_of(difference: str, original: le.Insn, rebuilt: le.Insn) -> str:
+def idiom_of(
+    difference: str, original: le.Insn | None, rebuilt: le.Insn | None
+) -> str:
     """Classify one oracle difference with a source-form idiom.
 
-    The rules run in order.  A `mask:` difference is a constant operand, and a
-    relocation-slot difference also produces a `mask:` difference.  That
-    overlap is a documented limitation of the classification.
+    The rules run in order.  The frame-size rule runs before the local-slot
+    rule.  A `mask:` difference is a constant operand, and a relocation-slot
+    difference also produces a `mask:` difference.  That overlap is a
+    documented limitation of the classification.
     """
     text = _difference_text(difference)
     if not text:
@@ -79,16 +106,32 @@ def idiom_of(difference: str, original: le.Insn, rebuilt: le.Insn) -> str:
         return "instruction encoding"
     if text.startswith("mask:"):
         return "constant operand"
+    if text.startswith("byte 2:") and _frame_size(original) and _frame_size(
+        rebuilt
+    ):
+        return "frame size"
     if (
         text.startswith("byte 2:")
         and _stack_slot(original)
         and _stack_slot(rebuilt)
+        and original is not None
+        and rebuilt is not None
+        and original.mnemonic.lower() != "sub"
+        and rebuilt.mnemonic.lower() != "sub"
     ):
         return "local slot order"
+    if (
+        text.startswith("byte 0:")
+        and _register_save(original)
+        and _register_save(rebuilt)
+    ):
+        return "register save order"
     if text.startswith("branch target:"):
         return "basic-block order"
     if text.startswith("relocation"):
         return "relocation target"
+    if text.startswith("instruction count:"):
+        return "instruction count"
     return "other"
 
 
@@ -123,27 +166,98 @@ def _instruction_field(insn: le.Insn | None) -> dict | None:
     }
 
 
+def body_family(
+    record: dict,
+    original: list[le.Insn],
+    rebuilt: list[le.Insn],
+) -> str:
+    """Classify the rebuilt body size against the record span and the original.
+
+    Returns `unmeasured` when the record has no `size`, `aligned` when the
+    rebuilt byte sum equals the record span, `smaller` and `larger` against the
+    original byte sum, and `padding` when the rebuilt body equals the original
+    body below the record span.
+    """
+    size = record.get("size")
+    if size is None:
+        return "unmeasured"
+    original_size = sum(insn.size for insn in original)
+    rebuilt_size = sum(insn.size for insn in rebuilt)
+    if rebuilt_size == size:
+        return "aligned"
+    if rebuilt_size < original_size:
+        return "smaller"
+    if rebuilt_size > original_size:
+        return "larger"
+    return "padding"
+
+
+def summarize(rows: list[dict]) -> dict:
+    """Count the families, the idioms, and the first-index and count rows."""
+    families: dict[str, int] = {}
+    idioms: dict[str, int] = {}
+    first_index_zero = 0
+    count_differences = 0
+    for row in rows:
+        family = row.get("family", "unmeasured")
+        families[family] = families.get(family, 0) + 1
+        idiom = row.get("idiom", "other")
+        idioms[idiom] = idioms.get(idiom, 0) + 1
+        if row.get("sequence_index") == 0:
+            first_index_zero += 1
+        if idiom == "instruction count":
+            count_differences += 1
+    return {
+        "modules": len(rows),
+        "families": dict(sorted(families.items())),
+        "idioms": dict(sorted(idioms.items())),
+        "first_index_zero": first_index_zero,
+        "count_differences": count_differences,
+    }
+
+
 def report_row(
     record: dict,
     module: dict,
     result: oracle.OracleResult,
     original: list[le.Insn],
     rebuilt: list[le.Insn],
+    sequence: tuple[int, str] | None = None,
 ) -> dict:
-    """Build one report row from one measured module result."""
-    pair = first_pair(original, rebuilt, result)
-    if pair is None:
-        left = None
-        right = None
-        if result.differences:
-            idiom = "other"
-        elif result.match in run.STRICT_MATCHES:
-            idiom = "match"
-        else:
-            idiom = "other"
+    """Build one report row from one measured module result.
+
+    When `sequence` is given, the row uses its index and text.  The row formats
+    the text as `instruction <index>: <text>`.  A pair is present only when
+    both indexes are below the body lengths.  When `sequence` is None, the row
+    keeps the `first_pair` and `result.differences` path.
+    """
+    index: int | None
+    if sequence is not None:
+        index, text = sequence
+        first_difference = f"instruction {index}: {text}"
+        present = index < len(original) and index < len(rebuilt)
+        left = original[index] if present else None
+        right = rebuilt[index] if present else None
+        idiom = idiom_of(text, left, right)
     else:
-        _, left, right = pair
-        idiom = idiom_of(result.differences[0], left, right)
+        pair = first_pair(original, rebuilt, result)
+        if pair is None:
+            left = None
+            right = None
+            index = None
+            if result.differences:
+                idiom = "other"
+            elif result.match in run.STRICT_MATCHES:
+                idiom = "match"
+            else:
+                idiom = "other"
+            first_difference = (
+                result.differences[0] if result.differences else None
+            )
+        else:
+            index, left, right = pair
+            idiom = idiom_of(result.differences[0], left, right)
+            first_difference = result.differences[0]
     return {
         "module": module["name"],
         "address": record["address"],
@@ -156,12 +270,15 @@ def report_row(
         "instructions_total": result.instructions_total,
         "bytes_equal": result.bytes_equal,
         "bytes_total": result.bytes_total,
-        "first_difference": (
-            result.differences[0] if result.differences else None
-        ),
+        "first_difference": first_difference,
+        "sequence_index": index,
         "idiom": idiom,
         "original": _instruction_field(left),
         "rebuilt": _instruction_field(right),
+        "record_size": record.get("size"),
+        "original_size": sum(insn.size for insn in original),
+        "rebuilt_size": sum(insn.size for insn in rebuilt),
+        "family": body_family(record, original, rebuilt),
     }
 
 
@@ -180,9 +297,14 @@ def _failure_row(record: dict, module: dict, build: str) -> dict:
         "bytes_equal": None,
         "bytes_total": None,
         "first_difference": None,
+        "sequence_index": None,
         "idiom": "other",
         "original": None,
         "rebuilt": None,
+        "record_size": record.get("size"),
+        "original_size": 0,
+        "rebuilt_size": 0,
+        "family": "unmeasured",
     }
 
 
@@ -216,18 +338,33 @@ def diff_record(
     rebuilt_instructions = diff_module.rebuilt_body(
         rebuilt, rebuilt_address, end, count, extent=extent
     )
+    original_symbols = diff_module.original_symbol_resolver(
+        original, diff_module.load_records()
+    )
+    rebuilt_symbols = diff_module.rebuilt_symbol_resolver(rebuilt, symbols)
     result = oracle.compare(
         original_instructions,
         rebuilt_instructions,
         original_relocations=original.relocations(),
         rebuilt_relocations=rebuilt.relocations(),
-        original_symbols=diff_module.original_symbol_resolver(
-            original, diff_module.load_records()
-        ),
-        rebuilt_symbols=diff_module.rebuilt_symbol_resolver(rebuilt, symbols),
+        original_symbols=original_symbols,
+        rebuilt_symbols=rebuilt_symbols,
+    )
+    sequence = oracle.first_difference(
+        original_instructions,
+        rebuilt_instructions,
+        original_relocations=original.relocations(),
+        rebuilt_relocations=rebuilt.relocations(),
+        original_symbols=original_symbols,
+        rebuilt_symbols=rebuilt_symbols,
     )
     return report_row(
-        record, module, result, original_instructions, rebuilt_instructions
+        record,
+        module,
+        result,
+        original_instructions,
+        rebuilt_instructions,
+        sequence,
     )
 
 
@@ -241,6 +378,8 @@ def report(
     module_by_name = {module["name"]: module for module in modules}
     rows: list[dict] = []
     for record in records:
+        if record.get("library"):
+            continue
         name = record.get("module")
         if not name or name not in module_by_name:
             continue
@@ -269,6 +408,7 @@ def report(
             "path": str(original_path),
             "sha256": _sha256(original_path),
         },
+        "summary": summarize(rows),
         "modules": rows,
     }
 
@@ -336,6 +476,11 @@ def command_report(arguments: argparse.Namespace) -> int:
             f"{row['module']}: {row['build']} {row['match']} "
             f"{row['idiom']}: {difference}"
         )
+    summary = document.get("summary") or summarize(document["modules"])
+    for family, count in summary["families"].items():
+        print(f"family {family}: {count}")
+    for idiom, count in summary["idioms"].items():
+        print(f"idiom {idiom}: {count}")
     not_measured = sum(
         1 for row in document["modules"] if row["build"] != "pass"
     )

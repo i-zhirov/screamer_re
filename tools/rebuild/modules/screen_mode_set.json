@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "screen_mode_set.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "screen_mode_set.c"
     },
     {
       "compiler": "wcc386",

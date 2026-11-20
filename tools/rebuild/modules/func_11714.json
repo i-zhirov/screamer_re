@@ -20,10 +20,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "func_11714.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "func_11714.c"
     },
     {
       "compiler": "wcc386",

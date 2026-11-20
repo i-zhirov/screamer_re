@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_variant_next.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "sound_variant_next.c"
     },
     {
       "compiler": "wcc386",

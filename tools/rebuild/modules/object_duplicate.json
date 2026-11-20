@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_duplicate.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_duplicate.c"
     },
     {
       "compiler": "wcc386",

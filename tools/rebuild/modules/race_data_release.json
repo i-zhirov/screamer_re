@@ -18,13 +18,18 @@
       "compiler": "wcc386",
       "file": "race_data_release.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
       "compiler": "wcc386",
-      "file": "race_data_release_main.c"
+      "file": "race_data_release_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

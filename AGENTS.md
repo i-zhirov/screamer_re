@@ -204,7 +204,7 @@ take about 18 minutes.  The whole-image build stales the record fingerprints,
 because the module maps hold a build timestamp, so the record stage re-runs
 every record.  Stage 11 runs four records in parallel with `--jobs 4`; a build
 lock keeps the shared Docker work directory serial, and the behavior runs
-overlap.  The full and `--skip-cross` checks take about 42 minutes.
+overlap.  The full and `--skip-cross` checks take about 57 minutes.
 Stage 11 always scores the rebuilt whole image, and the four counts include its
 check.  A missing image is a failure, so
 `python3 tools/rebuild/whole_image.py --all` runs before the full check:
@@ -355,8 +355,13 @@ open ~/Documents/Screamer.app
   unmeasured and keeps its recipe.
 - Source Forms: `docs/reference/source-forms.md` names the source-form
   idioms, and `first_difference.py` classifies the first oracle difference
-  with the same names.  A new idiom name updates both the catalogue and the
-  classifier.
+  with the same names.  The shared names include `register save order`,
+  `frame size`, and `instruction count`.  The catalogue sync test checks that
+  the page holds every classifier name, so a new idiom name updates both the
+  catalogue and the classifier.
+- Whole-Image Build: the build keeps the original container and copies the
+  exact original internal slot bytes into each rebuilt slot.  A strict padded
+  body keeps the original body bytes in `reuse` mode.
 
 Layers:
 
@@ -421,11 +426,13 @@ through the store.
 - The whole-image build `whole_image.py` places the rebuilt module bodies at
   their original addresses, writes `work/rebuild/STARTH.EXE` and
   `work/rebuild/whole-image.json`, and writes no store record.  A module is
-  patched only when its instruction byte sum equals the record `size` or the
-  body is a shorter `ret` body whose record tail stays original, its
-  instruction count, sizes, and fixup slots align, and every absolute operand
-  is relocated.  A skipped module keeps the original bytes and records the
-  reason.  The report holds `runnable`, which is true only when the image is
+  patched when its instruction byte sum equals the record `size`, or when a
+  shorter `ret` body keeps the record tail, its instruction count, sizes, and
+  fixup slots align, and every absolute operand is relocated.  A strict padded
+  body whose byte sum equals the original body and lies below the record size
+  keeps the original body bytes in `reuse` mode, and the report counts it as
+  `reused`.  A skipped module keeps the original bytes and records the reason.
+  The report holds `runnable`, which is true only when the image is
   byte-identical, and the `relocation_incomplete` and `body_differences`
   module lists.  Stage 11 always scores the image and fails when it is missing
   or unreadable.
@@ -480,8 +487,10 @@ through the store.
 - The matrix measures the existing flag set and the five default flag sets
   for each selected toolchain.  It tries `v2` first and `watcom10` second.
   The rank is the match value, then fewer differing bytes, then fewer
-  differing instructions, then the earlier candidate.  A strict match is
-  preferred but not required.
+  differing instructions, then the earlier candidate.  The rank stays
+  bytes-first.  A strict match is preferred but not required.  The merged tree
+  added 96 migrated recipes, so the matrix now measures 484 recipes and the
+  committed manifest holds 484 rows.
 - `toolchain.py manifest` writes the committed manifest
   `tools/rebuild/toolchain.json`.  It holds one row per measured module and
   one `unmeasured` row for a module with an identity record and no measured
@@ -540,13 +549,15 @@ through the store.
   lowest identity record of each module.  The fit rule patches a module when
   the rebuilt instruction byte sum equals the record `size`, or when a shorter
   body ends in `ret` and the record tail stays original.  The
-  relocation rule rewrites an internal 4-byte slot with the original absolute
-  target.  It rewrites a direct relative branch or call from the rebuilt symbol
-  at the target to the unique original symbol of the same name.  A duplicate
-  original symbol, a missing symbol, a non-internal slot, a width other than 4,
-  an instruction misalignment, or a difference outside a rewritten operand
-  skips the module.  The original fixup section stays valid, so the build does
-  not rewrite it.  A record that carries
+  relocation rule copies the original internal slot bytes.  It rewrites a
+  direct relative branch or call from the rebuilt symbol at the target to the
+  unique original symbol of the same name.  A duplicate original symbol, a
+  missing symbol, a non-internal slot, a width other than 4, an instruction
+  misalignment, or a difference outside a rewritten operand skips the module.
+  A strict padded body whose byte sum equals the original body and lies below
+  the record size keeps the original body bytes in `reuse` mode.  The original
+  fixup section stays valid, so the build does not rewrite it.  A record that
+  carries
   a `library` field is skipped, so the original library bytes stay in the
   image.  The library manifest `tools/rebuild/library.json` proves the verified
   records.  The whole-image oracle `image_compare.py` compares the

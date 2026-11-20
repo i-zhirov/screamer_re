@@ -22,10 +22,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "game_mode_40_start.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "game_mode_40_start.c"
     },
     {
       "compiler": "wcc386",

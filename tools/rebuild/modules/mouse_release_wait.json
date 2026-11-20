@@ -18,15 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "mouse_release_wait.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "mouse_release_wait.c"
     },
     {
       "compiler": "wcc386",
       "file": "mouse_release_wait_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

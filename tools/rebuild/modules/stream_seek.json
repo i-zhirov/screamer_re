@@ -21,15 +21,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "stream_seek.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "stream_seek.c"
     },
     {
       "compiler": "wcc386",
       "file": "stream_seek_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

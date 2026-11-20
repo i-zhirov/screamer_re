@@ -23,10 +23,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "race_frame_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "race_frame_update.c"
     },
     {
       "compiler": "wcc386",

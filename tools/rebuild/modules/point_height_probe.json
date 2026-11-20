@@ -28,5 +28,5 @@
       "file": "point_height_probe_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

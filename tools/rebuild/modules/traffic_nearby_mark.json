@@ -22,15 +22,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_nearby_mark.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_nearby_mark.c"
     },
     {
       "compiler": "wcc386",
       "file": "traffic_nearby_mark_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

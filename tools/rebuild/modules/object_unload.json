@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_unload.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_unload.c"
     },
     {
       "compiler": "wcc386",

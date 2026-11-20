@@ -21,11 +21,17 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "point_hit_probe.c"
+      "file": "point_hit_probe.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "point_hit_probe_main.c"
+      "file": "point_hit_probe_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
   ],
   "toolchain": "v2"

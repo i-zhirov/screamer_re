@@ -19,7 +19,8 @@
       "compiler": "wcc386",
       "file": "game_mode_10_start.c",
       "flags": [
-        "-of+"
+        "-of+",
+        "-ot"
       ]
     },
     {
@@ -28,7 +29,11 @@
     },
     {
       "compiler": "wcc386",
-      "file": "game_mode_10_start_main.c"
+      "file": "game_mode_10_start_main.c",
+      "flags": [
+        "-of+",
+        "-ot"
+      ]
     }
   ],
   "toolchain": "v2"

@@ -1002,17 +1002,20 @@ of the existing per-source flag list.  It tries `v2` first and `watcom10`
 second, and it stops a toolchain at the first byte-identical match.
 
 The rank is the match value, then fewer differing bytes, then fewer differing
-instructions, then the earlier candidate.  A strict match is preferred but not
-required, so a shape or different row can win when it is the best measured row.
-A failed or skipped build ranks after every measured identity result.  The
-matrix writes the winner through `store.save_module`.
+instructions, then the earlier candidate.  The rank stays bytes-first.  A strict
+match is preferred but not required, so a shape or different row can win when
+it is the best measured row.  A failed or skipped build ranks after every
+measured identity result.  The matrix writes the winner through
+`store.save_module`.  The merged tree added 96 recipes with no `toolchain`
+field; `migrate` writes the default `v2` value into them, so the matrix now
+measures 484 recipes.
 
 The full report stays under `work/rebuild/toolchain-matrix.json`.  The committed
-manifest is `tools/rebuild/toolchain.json`.  It holds one row per measured
-module and one `unmeasured` row for a module with an identity record and no
-measured result.  A module with no identity record has no row.  Stage 12 runs
-`toolchain.py check-matrix`, so it needs no Docker, no DOSBox-X, and no period
-toolchain.
+manifest is `tools/rebuild/toolchain.json`.  It holds 484 rows after the
+follow-up: one row per measured module and one `unmeasured` row for a module
+with an identity record and no measured result.  A module with no identity
+record has no row.  Stage 12 runs `toolchain.py check-matrix`, so it needs no
+Docker, no DOSBox-X, and no period toolchain.
 
 The matrix needs Docker, DOSBox-X, and the period toolchain.  Use `--only-missing`
 with `--resume MANIFEST` to continue an interrupted pass.  `--dry-run` writes the
@@ -1041,17 +1044,39 @@ object-code effect, the census, the evidence, and the first-difference
 signature.
 
 The report document holds the date, the original path and its SHA-256 digest,
-and one row per selected module.  A row holds the module, the record address,
-the symbol, the toolchain, the sources, the build verdict, the match, the four
-counts, the first difference, the idiom, and the original and rebuilt
-instruction pair.  The row holds a null pair when the first difference has no
-instruction index.
+one row per selected module, and a `summary`.  A row holds the module, the
+record address, the symbol, the toolchain, the sources, the build verdict, the
+match, the four counts, the first difference, the sequence index, the idiom,
+the original and rebuilt instruction pair, `record_size`, `original_size`,
+`rebuilt_size`, and the `family`.  The first difference is the true sequence
+difference: the tool walks the two instruction lists in order and reports the
+first index where the text differs.  An insertion or a removal therefore shows
+the measured pair at that point, not an empty difference list.  The row holds a
+null pair when the first difference has no instruction index.
 
-The eight idiom names are `local slot order`, `constant operand`,
+The `family` value classifies the body size: `unmeasured` when the record has
+no `size`, `aligned` when the rebuilt byte sum equals the record span, `smaller`
+and `larger` against the original byte sum, and `padding` when the rebuilt body
+equals the original body below the record span.  A failed or skipped build
+holds the `unmeasured` family and the `other` idiom.
+
+The `summary` holds the module count, the family counts, the idiom counts, the
+first-index-zero count, and the instruction-count difference count.
+
+The eleven idiom names are `local slot order`, `constant operand`,
 `instruction encoding`, `instruction selection`, `basic-block order`,
-`relocation target`, `match`, and `other`.  A `mask:` difference is a
-`constant operand`, and a relocation-slot difference also produces a `mask:`
-difference.  That overlap is a limitation of the classification.
+`relocation target`, `register save order`, `frame size`, `instruction count`,
+`match`, and `other`.  A `mask:` difference is a `constant operand`, and a
+relocation-slot difference also produces a `mask:` difference.  That overlap
+is a limitation of the classification.  The three newer names are `register
+save order` for a `byte 0:` difference on two 32-bit `push` instructions,
+`frame size` for a `byte 2:` difference on two `sub esp, imm` instructions,
+and `instruction count` for an `instruction count:` difference.
+
+The report skips a record that carries a `library` field, a record with no
+identity result, a strict record, and a record with no module or symbol.  The
+library exclusion keeps the verified library objects out of the source-form
+census.
 
 The tool writes `work/rebuild/first-differences.json` by default.  It writes no
 store record.  It is not a stage, so it adds no stage check.  The tool enters
@@ -1078,14 +1103,20 @@ each module.  A module with no symbol record is excluded.
 
 The fit rule patches a module when the sum of the rebuilt instruction sizes
 equals the record `size`, or when a shorter body ends in `ret` and the record
-tail keeps its original bytes, and every absolute operand relocates.  An
-internal 4-byte slot takes the original absolute target.  A direct relative
-branch or call takes the address of the unique original symbol that the rebuilt target
-names.  An unmapped or ambiguous branch symbol keeps the original branch
-target.  A non-internal slot, a width other than 4, an instruction
-misalignment, or a difference outside a rewritten operand skips the module as a
-body difference.  The original fixup section stays valid, so the build does not
-rewrite it.
+tail keeps its original bytes, and every absolute operand relocates.  The
+relocation rule copies the original internal 4-byte slot bytes.  It rewrites a
+direct relative branch or call from the rebuilt symbol at the target to the
+unique original symbol of the same name.  An unmapped or ambiguous branch
+symbol keeps the original branch target.  A non-internal slot, a width other
+than 4, an instruction misalignment, or a difference outside a rewritten
+operand skips the module as a body difference.  The original fixup section
+stays valid, so the build does not rewrite it.
+
+A strict padded body whose byte sum equals the original body byte sum and lies
+below the record size keeps the original body bytes.  The build starts that row
+in `reuse` mode, holds `fit` false, and counts it as `reused`.  The `mode` and
+`outcome` fields carry the acceptance: `write` with `patched`, or `reuse` with
+`reused`.
 
 A record that carries a `library` field keeps the original library bytes.  The
 build skips it with the reason `the original library bytes stay` and does not
@@ -1098,13 +1129,13 @@ A patched row holds no `reason`.
 
 The build writes `work/rebuild/STARTH.EXE` and `work/rebuild/whole-image.json`.
 The report holds the date, the original path and digest, the image path and
-digest, one row per module, the `patched`, `skipped`, and `relocated` counts,
-the byte `score`, the `relocation_incomplete` and `body_differences` module
-lists, and `runnable`.  The `runnable` value is true only when the image is
-byte-identical.  A row holds the module, the address, the size,
-the toolchain, the sources, the build verdict, the fit, the fit reason, the
-rebuilt size, the relocated count, the outcome, and the reason of a skipped
-row.  The build writes no store record.
+digest, one row per module, the `patched`, `reused`, `skipped`, and
+`relocated` counts, the byte `score`, the `relocation_incomplete` and
+`body_differences` module lists, and `runnable`.  The `runnable` value is true
+only when the image is byte-identical.  A row holds the module, the address,
+the size, the toolchain, the sources, the build verdict, the fit, the fit
+reason, the rebuilt size, the original size, the relocated count, the mode, the
+outcome, and the reason of a skipped row.  The build writes no store record.
 
 Stage 11 is a score gate.  It always scores the rebuilt image and fails when the
 image is missing or unreadable.  It passes on a byte score, including when the
@@ -1320,7 +1351,7 @@ skips stages 5, 6, 7, and 9 and still runs stage 8, so the run reports 651
 checks.  Both flags report 647 checks and take about 18 minutes.  The
 whole-image build stales the record fingerprints, because the module maps hold
 a build timestamp, so the record stage re-runs every record.  The full and
-`--skip-cross` checks take about 42 minutes.  The whole-image stage adds one
+`--skip-cross` checks take about 57 minutes.  The whole-image stage adds one
 counted check.
 
 The checks and the status page run in these places:

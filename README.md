@@ -34,10 +34,14 @@ Initial reconnaissance is complete.  The project has:
 - decoders for the graphics assets and the sound formats,
 - an investigation log with evidence and open questions.
 
-Reconstructed module sources exist under `tools/rebuild/`.  One hundred and
-sixty-eight records match the original byte for byte: one hundred and forty-two
-verified library objects, three compiler helpers, and twenty-three game
-functions.  The rebuilt modules hold a recorded difference or a shape match.
+Reconstructed module sources exist under `tools/rebuild/`.  The tree holds 492
+module recipes.  One hundred and seventy-four records match the original byte for
+byte: one hundred and forty-two verified library objects, three compiler
+helpers, and twenty-nine game functions.  The rebuilt modules hold a recorded
+difference or a shape match.  The full whole-image build writes
+`work/rebuild/STARTH.EXE` and scores 1034923 of 1034923 bytes equal.  The build
+has two row modes: `write` patches a fitted body with the exact original slot
+bytes, and `reuse` keeps the original body bytes of a strict padded body.
 
 ## Repository layout
 

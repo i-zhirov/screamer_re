@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "cache_resource.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "cache_resource.c"
     },
     {
       "compiler": "wcc386",

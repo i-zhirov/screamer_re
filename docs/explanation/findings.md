@@ -1917,6 +1917,36 @@ outcomes are in the section "The six near-miss source-form outcomes".
   adds the toolchain manifest check.
   Evidence: the four `tools/pipeline_check.py` commands in the testing section.
 
+## The 96-recipe matrix repair
+
+- Observation: the merged tree holds 348 module recipes.  The committed
+  manifest held 251 rows, and 96 of the merged recipes had no `toolchain`
+  field.  `migrate` wrote the default `v2` value into the 96 recipes, and
+  `migrate --check` then reported `migrated 0 modules`.
+  Evidence: `python3 tools/rebuild/toolchain.py migrate` and
+  `python3 tools/rebuild/toolchain.py migrate --check`.
+- Observation: the `--only-missing` pass used the committed manifest as the
+  base and as the resume base.  The summary holds `348 modules: 347 measured,
+  1 unmeasured, 22 strict`.  The unmeasured module is `driver`, which has no
+  identity record.  The report holds 348 items, and the manifest holds the 347
+  rows of the modules with an identity record.
+  Evidence: `python3 tools/rebuild/toolchain.py matrix --all --only-missing
+  --manifest tools/rebuild/toolchain.json --resume tools/rebuild/toolchain.json
+  --out work/rebuild/toolchain-matrix-repair.json` and
+  `python3 tools/rebuild/toolchain.py manifest --report
+  work/rebuild/toolchain-matrix-final.json --out tools/rebuild/toolchain.json`.
+- Observation: `check-matrix` passes against the 347-row manifest.
+  Evidence: `python3 tools/rebuild/toolchain.py check-matrix --manifest
+  tools/rebuild/toolchain.json` prints `the toolchain matrix matches the
+  recipes`.
+- Observation: the report reads the store records, so the repair does not
+  change its counts.  It holds 348 modules: 30 strict (8 `exact-bytes` and 22
+  `exact-relocations`), 4 shape, 217 `different`, and 97 `no-result`.  The
+  `no-result` count stays at 97 until the identity results of the 96 records
+  are re-run.
+  Evidence: `python3 tools/rebuild/toolchain.py report` before and after the
+  matrix repair.
+
 ## The six near-miss source-form outcomes
 
 The table records the source-form outcome of each selected near-miss module.  The
@@ -2206,6 +2236,193 @@ library-pass snapshot.  The earlier bullet that holds 155 `verified` and 223
 - Limit: the current build follows the in-place rule and the agreed fit rule.
   The image is a byte-score artifact, not a proven runnable image.
 - The image and the report stay under `work/rebuild/`.  Do not commit them.
+
+## The 193 shorter bodies
+
+- Observation: the full build writes 347 module items: 13 `write` rows, 12
+  `reuse` rows, and 322 skipped rows.  The summary is `13 patched, 12 reused,
+  322 skipped, 16 slots relocated, 1034754 of 1034923 bytes equal`.  The 336
+  build-pass rows hold 319 size-mismatch rows: 273 `smaller`, 31 `larger`, and
+  15 `padding`.  The 12 `reuse` rows are strict padding rows.
+  Evidence: `python3 tools/rebuild/whole_image.py --all`,
+  `work/rebuild/whole-image.json`, and the strict identity match in
+  `tools/rebuild/functions/*.json`.
+- Observation: the first-difference report selects the 221 non-strict records
+  with an identity match.  It holds 8 `aligned`, 20 `larger`, and 193
+  `smaller` rows.  The 193 `smaller` rows split into 132 `register save
+  order`, 53 `instruction selection`, 5 `other` (4 `byte 1` and 1 `byte 0`),
+  1 `frame size`, and 2 `local slot order`.  The frame-size source batch moved
+  the 2 `local slot order` rows from the `frame size` idiom.  The 12 strict
+  padding rows are absent from the report.
+  Evidence: `python3 tools/rebuild/first_difference.py report --all --out
+  work/rebuild/first-differences.json` and `work/rebuild/first-differences.json`.
+- Observation: the earlier 251-row image held 193 `smaller`, 20 `larger`, and
+  12 `padding` rows.  The 96 merged recipes whose identity check holds no
+  match add 80 `smaller` rows, 11 `larger` rows, 3 `padding` rows, and the 2
+  shape-misaligned rows `race_data_release` and `bios_tick_reset`.  The 319
+  size-mismatch rows are 273 `smaller`, 31 `larger`, and 15 `padding`; the 13
+  `write` rows, 4 shape rows, and 11 library rows stay out.  The score does
+  not change, because each added row stays skipped.
+  Evidence: the historical §The whole-image build and the score,
+  `work/rebuild/whole-image-restored.log` for the 251-row image and the
+  193/20/12 split, and a read-only query over
+  `tools/rebuild/functions/*.json` for the 96 modules whose identity result
+  holds no `match` value.
+- Observation: the 12 `reuse` rows are `video_block_swap_b`, `error_report`,
+  `sound_driver_set`, `hud_update`, `video_fill`, `music_bank_reset`, `free`,
+  `stream_status`, `fp_helper`, `memcpy`, `memset`, and `main_invoker`.  They
+  keep the original body bytes.  The focused build of the 12 rows reports 12
+  `reuse`, 0 `skip`, and the exact score `1034923 of 1034923 bytes equal`.
+  Evidence: `python3 tools/rebuild/whole_image.py --module
+  video_block_swap_b --module error_report --module sound_driver_set
+  --module hud_update --module video_fill --module music_bank_reset --module
+  free --module stream_status --module fp_helper --module memcpy --module
+  memset --module main_invoker --out work/rebuild/STARTH-padding.EXE
+  --report work/rebuild/whole-image-padding.json` and
+  `work/rebuild/whole-image-padding.json`.
+- Observation: the other 3 `padding` rows are `race_finish_overlay_1`,
+  `race_finish_overlay_2`, and `shade_rect`.  Their identity check holds a
+  fail verdict and no match, so the reuse rule rejects them and they stay
+  skipped.  Evidence: `work/rebuild/whole-image.json` and
+  `tools/rebuild/functions/0x240c4.json`.
+- Observation: the exact relocation copies 16 original slot bytes, one byte
+  per slot.  The slots are 12 on `vesa_set_mode`, 2 on `default_data_copy`, 1
+  on `video_block_swap_a`, and 1 on `shutdown`.  The image score rises from
+  `1034738` to `1034754`, a gain of 16 bytes.  The 13 write rows change
+  `1034923 - 1034738 = 185` bytes with the earlier rewrite and
+  `1034923 - 1034754 = 169` bytes with the exact copy.
+  Evidence: `work/rebuild/whole-image-restored.log` holds the `1034738`
+  score, `work/rebuild/whole-image.json` holds the `1034754` score, and
+  `python3 tools/rebuild/image_compare.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  work/rebuild/STARTH.EXE` reports `1034754 of 1034923 bytes equal`.
+- Observation: the earlier control log `work/rebuild/whole-image-prefix.log`
+  records a build that patched the 13 write rows and the 12 padding rows and
+  scored `1034576`, so the padding rows changed
+  `1034738 - 1034576 = 162` bytes.  The current build keeps the original
+  padding bytes and scores `1034754`.  The evidence is the earlier log, not a
+  fresh run.
+  Evidence: `work/rebuild/whole-image-prefix.log` holds the `25 patched, 226
+  skipped, 83 slots relocated, 1034576 of 1034923 bytes equal` summary.
+- Observation: the 20 `larger` report rows are `cd_check_screen`,
+  `dpmi_real_int`, `engine_init`, `fopen`, `matrix_compose`,
+  `menu_space_init`, `object_slide_step`, `panel_draw_centered`,
+  `player_update`, `race_data_load`, `race_panel_0`, `race_timeout`,
+  `radar_world_draw`, `sound_mix_prepare`, `sound_range_reset`,
+  `sound_range_update`, `sound_source_frame_select`, `startup`,
+  `unr_file_load`, and `video_copy`.  The 11 other `larger` image rows are
+  `point_height_probe`, `replay_view_update`, `view_fade_out`,
+  `direction_angle`, `cd_audio_volume_set`, `acos_table_build`,
+  `basis_rotation_build`, `basis_rotation_mirror`, `sound_event_transform`,
+  `sound_source_update`, and `basis_transform_build`.  All 31 stay skipped.
+  Evidence: `work/rebuild/whole-image.json` and
+  `work/rebuild/first-differences.json`.
+- Observation: the 4 shape-misaligned rows are `race_data_release`,
+  `bios_tick_reset`, `race_cleanup`, and `video_buf_load`.  Each holds a
+  rebuilt body sum equal to the record span, but the instructions do not
+  align, so the build keeps the original bytes.  The first-difference report
+  holds the 2 rows `race_cleanup` and `video_buf_load`; the other 2 rows are
+  merged recipes with no match.
+  Evidence: `work/rebuild/whole-image.json`.
+- Follow-up: the 20 report `larger` rows, the 11 merged `larger` rows, and the
+  4 shape-misaligned rows are measured follow-ups.  Their bodies stay
+  unchanged.
+- The image and the report stay under `work/rebuild/`.  Do not commit them.
+
+### The frame-size source batch
+
+- Observation: the batch changes the `loading_screen` and `stream_read` sources
+  to the local declaration set that gives the original `sub esp, imm`, and it
+  reverts the `race_lap_complete` source.  It keeps the C form, the bytes-first
+  rank, and the module recipes.  The three records stay non-strict, so the
+  batch adds no strict form.  The store keeps 30 strict modules: 8
+  `exact-bytes` and 22 `exact-relocations`.  Evidence:
+  `work/rebuild/first-batch-before.json`,
+  `work/rebuild/first-batch-after.json`, and
+  `python3 tools/rebuild/toolchain.py report`.
+- Observation: `loading_screen` at 0x2a364 changes `char name[0x320];` to
+  `char name[0x308];`.  The identity moves from 105/491 bytes and 55/124
+  instructions to 106/491 bytes and 55/124 instructions.  The frame moves from
+  `sub esp, 0x338` to `sub esp, 0x320`, and the first difference moves from
+  instruction 5 `byte 2: 0x20 against 0x38` (`frame size`) to instruction 6
+  `byte 2: 0xe4 against 0xf0` (`local slot order`).  The behavior check holds
+  every marker.  Evidence: `work/rebuild/first-batch-before.json`,
+  `work/rebuild/first-batch-after.json`, and `python3 tools/rebuild/run.py run
+  --recheck-record 0x2a364`.
+- Observation: `stream_read` at 0x4c4e5 adds the `int read;` local for the raw
+  `fread` result and keeps `result = read;`.  The identity moves from 159/218
+  bytes and 72/77 instructions to 159/224 bytes and 76/79 instructions.  The
+  frame moves from `sub esp, 0x18` to `sub esp, 0x1c`, and the first difference
+  moves from instruction 5 `byte 2: 0x1c against 0x18` (`frame size`) to
+  instruction 6 `byte 2: 0xf4 against 0xe4` (`local slot order`).  The behavior
+  check holds every marker.  The equal `bytes_equal` count and the higher
+  instruction match keep the form.  Evidence:
+  `work/rebuild/first-batch-before.json`,
+  `work/rebuild/first-batch-after.json`, and `python3 tools/rebuild/run.py run
+  --recheck-record 0x4c4e5`.
+- Observation: `race_lap_complete` at 0x19678 reverts the `volatile int
+  saved[3];` local and its three stores.  The stores wrote values that nothing
+  reads, and the array is not a natural declaration set.  The identity stays at
+  41/314 bytes and 27/98 instructions.  The frame stays `sub esp, 0x10`, and the
+  first difference stays instruction 7 `byte 2: 0x1c against 0x10` (`frame
+  size`).  The behavior
+  check fails on the markers 0 and 3, so the record stays `rebuilt`.  Evidence:
+  `work/rebuild/first-batch-before.json`,
+  `work/rebuild/first-batch-after.json`, and `python3 tools/rebuild/run.py run
+  --recheck-record 0x19678`.
+- Observation: the image build reports 13 patched, 12 reused, 322 skipped, 16
+  slots relocated, and 1034754 of 1034923 bytes equal.  The batch does not
+  change the score, because each changed body stays below its record span and
+  the build keeps the original bytes.  Evidence:
+  `python3 tools/rebuild/whole_image.py --all`,
+  `work/rebuild/whole-image.json`, and `python3 tools/rebuild/image_compare.py
+  --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --rebuilt work/rebuild/STARTH.EXE`.
+- Observation: the 4 `byte 1` `other` rows and the one `byte 0` `other` row
+  stay unchanged.  Their measured follow-ups are `net_player_add` at 0x2dddc
+  with instruction 6: `byte 1: 0xe5 against 0xc7`, `resource_read` at 0x2efc2
+  with instruction 4: `byte 1: 0xe5 against 0xc6`, `resource_find` at 0x2f25f
+  with instruction 5: `byte 1: 0xe5 against 0xc1`, `lzw_bit_read` at 0x4d844
+  with instruction 6: `byte 1: 0xe5 against 0xc6`, and `text_draw` at 0x25020
+  with instruction 1: `byte 0: 0x8b against 0x89`.  The batch does not convert
+  them to assembly.  Evidence: `work/rebuild/first-batch-before.json` and
+  `work/rebuild/first-batch-after.json`.
+- Follow-up: the remaining differences of the one `frame size` row, the 2
+  `local slot order` rows, the 4 `byte 1` rows, and the one `byte 0` row are
+  measured follow-ups.  Their bodies stay unchanged.
+- Observation: the final whole-image build holds 13 `write` rows, 12 `reuse`
+  rows, 322 skipped rows, 16 relocated slots, and the score `1034754 of
+  1034923 bytes equal`.  The frame-size source batch does not change the score,
+  because the build skips or reuses every changed body.  The bytes-first rank
+  stays; the batch adds no strict form.  Evidence:
+  `python3 tools/rebuild/whole_image.py --all`,
+  `work/rebuild/whole-image.json`, and
+  `python3 tools/rebuild/image_compare.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  work/rebuild/STARTH.EXE`.
+- Observation: the final stage-12 result holds the 96 repaired recipes with
+  rows and the 347-row manifest, and `check-matrix` passes.  The four full-check
+  modes pass with 0 failures: 529, 525, 514, and 510 checks.  Each count is 96
+  above the pre-merge count, because the merged tree adds 96 function records
+  and stage 11 holds one check per record.  Evidence: the four
+  `tools/pipeline_check.py` commands, `python3 tools/rebuild/toolchain.py
+  check-matrix --manifest tools/rebuild/toolchain.json`, and the 347-row
+  manifest assertion.
+- Observation: the first-difference report shows `other` for a length-only
+  oracle verdict, not `match`.  The code shows `other`, and the report `match`
+  field is `same-mnemonics` or `different`.  The report now holds the true
+  sequence difference and the `instruction count` idiom.  Evidence:
+  `tools/rebuild/first_difference.py` and
+  `tools/rebuild/tests/test_first_difference.py`.
+- Observation: the committed matrix held 252 rows, but the merged tree holds
+  348 recipes and the report counts 97 no-result rows before the identity
+  re-run.  The repair measured the 96 migrated recipes, and the committed
+  manifest holds 347 rows.  Evidence:
+  `python3 tools/rebuild/toolchain.py report`,
+  `python3 tools/rebuild/toolchain.py matrix --all --only-missing --manifest
+  tools/rebuild/toolchain.json --resume tools/rebuild/toolchain.json`, and
+  `python3 tools/rebuild/toolchain.py check-matrix --manifest
+  tools/rebuild/toolchain.json`.
 
 ## Open questions
 

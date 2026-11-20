@@ -24,10 +24,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "volume_bar_draw.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "volume_bar_draw.c"
     },
     {
       "compiler": "wcc386",

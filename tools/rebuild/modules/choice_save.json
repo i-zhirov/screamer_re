@@ -16,10 +16,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "choice_save.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "choice_save.c"
     },
     {
       "compiler": "wcc386",

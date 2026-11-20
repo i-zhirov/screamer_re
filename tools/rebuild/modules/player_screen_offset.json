@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "player_screen_offset.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "player_screen_offset.c"
     },
     {
       "compiler": "wasm",

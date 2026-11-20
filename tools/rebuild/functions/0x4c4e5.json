@@ -30,7 +30,12 @@
   ],
   "module": "stream_read",
   "name": "stream_read",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-18",
+      "text": "Kept the `int read;` local for the `fread` result with `result = read;`. The measured first difference is instruction 6 `byte 2: 0xf4 against 0xe4` (`local slot order`). The frame is `sub esp, 0x1c`, the instruction match rises to 76/79, the byte match stays 159/224, and the behavior check passes, so the higher instruction match keeps the form."
+    }
+  ],
   "provenance": "library",
   "result": {
     "checks": {
@@ -44,23 +49,23 @@
       },
       "identity": {
         "bytes_equal": 159,
-        "bytes_total": 218,
+        "bytes_total": 224,
         "detail": "the instruction sequences differ",
-        "instructions_equal": 72,
-        "instructions_total": 77,
+        "instructions_equal": 76,
+        "instructions_total": 79,
         "match": "different",
         "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4c4e5",
-    "date": "2026-11-15",
-    "fingerprint": "sha256:7f342b340423659faec7981c09cb56c6babe1c37a6877532c58fdbf3dc987dc8",
+    "date": "2026-11-18",
+    "fingerprint": "sha256:fa3aea89d66c1e99968dde8c8a7d3959291b16325833a09ba13d4410e9a927b0",
     "mode": {
       "runtime": "run",
       "strict": true,
       "toolchain": "watcom10"
     },
-    "source_digest": "sha256:03dc129260b1cd36cda461ac27fcf7581ea0cb6d5f16c229a3d288747233eb5a",
+    "source_digest": "sha256:501c0dd507098e93a0aa4daf9cb4411ec338353e41937cf8d0064902d3aba0df",
     "tool": "run.py"
   },
   "role": "reads the requested bytes from the stream, advances the position, clamps it to the size, and returns the byte count",

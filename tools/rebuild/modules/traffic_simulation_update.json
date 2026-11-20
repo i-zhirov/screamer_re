@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_simulation_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_simulation_update.c"
     },
     {
       "compiler": "wcc386",

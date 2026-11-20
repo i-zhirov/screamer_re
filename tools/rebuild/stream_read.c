@@ -20,6 +20,7 @@ extern int lzw_expand(void *input, void *output, int input_size, int count,
 int stream_read(char *stream, char *buffer, int count)
 {
     int position;
+    int read;
     int result;
 
     if (*(int *)(stream + 0x10) != 0) {
@@ -32,13 +33,14 @@ int stream_read(char *stream, char *buffer, int count)
         result = lzw_expand(*(void **)(stream + 0xb0), buffer,
                             *(int *)(stream + 0x6c), count, *(int *)stream);
     } else {
-        result = fread(buffer, 1, count, *(int *)stream);
+        read = fread(buffer, 1, count, *(int *)stream);
         position = *(int *)(stream + 0xc);
-        *(int *)(stream + 0xc) += result;
+        *(int *)(stream + 0xc) += read;
         if (*(int *)(stream + 0xc) > *(int *)(stream + 0x8)) {
-            result = *(int *)(stream + 0x8) - position;
+            read = *(int *)(stream + 0x8) - position;
             *(int *)(stream + 0xc) = *(int *)(stream + 0x8);
         }
+        result = read;
     }
     return result;
 }

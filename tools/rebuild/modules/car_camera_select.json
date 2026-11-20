@@ -18,15 +18,12 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "car_camera_select.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "car_camera_select.c"
     },
     {
       "compiler": "wcc386",
       "file": "car_camera_select_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

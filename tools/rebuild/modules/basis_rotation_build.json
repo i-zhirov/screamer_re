@@ -18,12 +18,18 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "basis_rotation_build.c"
+      "file": "basis_rotation_build.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
-      "file": "basis_rotation_build_main.c"
+      "file": "basis_rotation_build_main.c",
+      "flags": [
+        "-of+"
+      ]
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

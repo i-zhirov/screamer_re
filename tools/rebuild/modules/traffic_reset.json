@@ -18,10 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_reset.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_reset.c"
     },
     {
       "compiler": "wcc386",

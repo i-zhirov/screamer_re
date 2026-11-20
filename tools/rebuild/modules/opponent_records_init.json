@@ -17,10 +17,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "opponent_records_init.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "opponent_records_init.c"
     },
     {
       "compiler": "wcc386",

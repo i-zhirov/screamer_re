@@ -17,7 +17,10 @@ pipeline can pass a record whose stored result is `fail`.
 - At the design date, the store holds 652 `unknown`, 31 `named`, 221 `rebuilt`,
   1 `matching`, and 30 `verified` records. At the plan date, the store holds
   971 function records, 688 `unknown`, 31 `named`, 230 `rebuilt`, 0 `matching`,
-  22 `verified`, and 252 module records.
+  22 `verified`, and 252 module recipes. The observed store holds 981 function
+  records and 348 module recipes. The merged tree added 96 recipes, and the
+  toolchain manifest holds 347 rows after the follow-up. The 252-row matrix is
+  the plan-time value before the follow-up.
 - At the design date, the 23 strict records are 20 hand-written assembly
   modules and 3 Watcom library C functions (`exit`, `exit_flush`, and `free`).
 - No game function written in C is a strict match.
@@ -39,8 +42,8 @@ pipeline can pass a record whose stored result is `fail`.
   matches split into four library records and three records outside the
   library scope: 0xd4324 (`compiler_helper`), 0x2f8ca (`game`), and
   0xd4410 (`compiler_helper`).
-- The observed store holds 981 function records. The status holds 224
-  `rebuilt`, 569 `unknown`, 154 `verified`, 31 `named`, and 3
+- The observed store holds 981 function records and 348 module recipes. The
+  status holds 317 `rebuilt`, 473 `unknown`, 157 `verified`, 31 `named`, and 3
   `not_a_function`. The provenance holds 490 `game`, 480 `library`, 8
   `compiler_helper`, and 3 `not_a_function`.
 - `run.py --skip-unchanged` prints `PASS` for a record with a stored `fail`.
@@ -116,7 +119,12 @@ pipeline can pass a record whose stored result is `fail`.
 - C-7: The 10.0a toolchain runs alongside OpenWatcom V2. Do not replace V2.
 - C-8: The status ladder stays `unknown`, `not_a_function`, `named`, `rebuilt`, `matching`, `verified`.
 - C-9: The identity verdict strings stay unchanged.
-- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. The observed counts after the toolchain pass are 432, 428, 417, and 413. The whole-image stage adds one counted check, so the expected counts are 433, 429, 418, and 414. Update these counts when a change adds or removes a check.
+- C-10: At the design date, the full check reports 303 checks. `--skip-cross` reports 299, `--skip-runtime` reports 288, and both flags report 284. The plan-date counts are 304, 300, 289, and 285. The observed counts after the library pass are 431, 427, 416, and 412. The observed counts after the toolchain pass are 432, 428, 417, and 413. The whole-image stage adds one counted check, so the expected counts are 433,
+  429, 418, and 414. The final observed counts on the merged tree are 529, 525,
+  514, and 510. The merged tree adds 96 function
+  records, and stage 11 holds one check per record, so each mode is 96 above
+  the plan-time count. Update these counts when a change adds or removes a
+  check.
 - C-11: Do not commit. The user commits.
 
 ## Non-Goals
@@ -175,17 +183,21 @@ pipeline can pass a record whose stored result is `fail`.
   `STARTH.EXE` as the container, keeps the stub, the header, the data objects,
   and the library bytes, and writes each rebuilt module body at its original
   address. The module order is the original address order of the lowest
-  identity record of each module. A module is patched only when its rebuilt
+  identity record of each module. A module is written only when its rebuilt
   body size equals the record `size` and its instruction shapes align. The
-  build writes the original internal fixup target into each rebuilt slot. A
-  direct branch target is relative, so it stays valid when the body moves as a
-  unit. The original fixup section stays valid, so the build does not rewrite
-  it. A module that fails the build, the size fit, or the shape alignment is
-  skipped and recorded with the reason. The build writes the image and a
-  report under `work/rebuild/`. The library manifest proves that every verified
-  library record resolves to its named object, and the original library bytes
-  stay in place. The data pipeline is not needed, because the original data
-  objects stay in the image.
+  build copies the original internal fixup slot bytes into each rebuilt slot,
+  so the slot bytes stay exact. A direct branch target is relative, so it
+  stays valid when the body moves as a unit. The original fixup section stays
+  valid, so the build does not rewrite it. A strict padded body whose rebuilt
+  byte sum equals the original body byte sum and lies below the record size
+  keeps the original body bytes; the build starts that row in `reuse` mode and
+  the report counts it as `reused`. A module that fails the build, the size
+  fit, or the shape alignment is skipped and recorded with the reason. The
+  build writes the image and a report under `work/rebuild/`. A report row
+  holds `original_size` and `mode`. The library manifest proves that every
+  verified library record resolves to its named object, and the original
+  library bytes stay in place. The data pipeline is not needed, because the
+  original data objects stay in the image.
 - The whole-image stage is a score gate. It always runs and is counted in the
   four modes. It fails when the rebuilt image is missing or unreadable. It
   passes when `image_compare.py` prints a byte score, including when the

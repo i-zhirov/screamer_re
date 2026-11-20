@@ -21,10 +21,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "sound_queue_update.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "sound_queue_update.c"
     },
     {
       "compiler": "wasm",

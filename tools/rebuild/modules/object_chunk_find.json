@@ -20,10 +20,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "object_chunk_find.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "object_chunk_find.c"
     },
     {
       "compiler": "wcc386",

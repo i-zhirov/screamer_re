@@ -19,10 +19,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "traffic_body_point_place.c",
-      "flags": [
-        "-of+"
-      ]
+      "file": "traffic_body_point_place.c"
     },
     {
       "compiler": "wasm",

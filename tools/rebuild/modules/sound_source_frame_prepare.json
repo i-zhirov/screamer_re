@@ -23,5 +23,5 @@
       "file": "sound_source_frame_prepare_main.c"
     }
   ],
-  "toolchain": "v2"
+  "toolchain": "watcom10"
 }

@@ -18,11 +18,7 @@
   "sources": [
     {
       "compiler": "wcc386",
-      "file": "cockpit_load.c",
-      "flags": [
-        "-of+",
-        "-dCOCKPIT_LOAD_HARNESS"
-      ]
+      "file": "cockpit_load.c"
     },
     {
       "compiler": "wcc386",
