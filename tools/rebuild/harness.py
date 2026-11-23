@@ -341,13 +341,11 @@ def run_dosker(
     result = None
     try:
         client.start(RUN_IMAGE, container)
-        client.exec(container, "MD C:\\RUN", timeout=10)
-        client.copy_in(container, exe, f"C:\\RUN\\{module['exe'].upper()}")
-        client.copy_in(container, EXTENDER_201, "C:\\RUN\\DOS4GW.EXE")
+        client.copy_in(container, exe, f"C:\\{module['exe'].upper()}")
         result = client.exec(
             container,
             module["exe"],
-            workdir="C:\\RUN",
+            workdir="C:\\",
             timeout=recipe.get("timeout", 180),
         )
     finally:

@@ -293,7 +293,7 @@ if log:
     with open(log, "a", encoding="utf-8") as stream:
         stream.write(json.dumps({"args": args}) + "\\n")
 if args == ["--version"]:
-    print("dosker 0.1.2")
+    print("dosker 0.1.3")
     sys.exit(0)
 if args and args[0] == "exec" and args[-1].lower() == "free.exe":
     print("NULL\\nDONE\\nFREE\\nAFTR")
@@ -361,11 +361,12 @@ class DoskerRunTestCase(unittest.TestCase):
             self.assertIn(marker, out)
         copied = [call["args"] for call in self.calls() if call["args"][0] == "cp"]
         guest = [args[2].split(":", 1)[1] for args in copied]
-        self.assertIn("C:\\RUN\\FREE.EXE", guest)
-        self.assertIn("C:\\RUN\\DOS4GW.EXE", guest)
+        self.assertIn("C:\\FREE.EXE", guest)
+        self.assertNotIn("C:\\RUN\\FREE.EXE", guest)
+        self.assertNotIn("C:\\DOS4GW.EXE", guest)
         execs = [call["args"] for call in self.calls() if call["args"][0] == "exec"]
         self.assertEqual(execs[-1][-1], "free.exe")
-        self.assertIn("C:\\RUN", execs[-1])
+        self.assertIn("C:\\", execs[-1])
         runs = [call["args"] for call in self.calls() if call["args"][0] == "run"]
         self.assertIn("screamer-run:1", runs[-1])
 

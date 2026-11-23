@@ -325,7 +325,7 @@ the V2 1.97 reject it with DOS/4GW error 1012.  The default Docker backend
 keeps the DOSBox-X behavior run and copies the shipped `DOS4GW.EXE` beside the
 module EXE.
 
-Dosker 0.1.2 rules: the image name is flat
+Dosker 0.1.3 rules: the image name is flat
 (`[a-z0-9][a-z0-9_.-]{0,62}`).  The `COPY` source is a context path with `/`.
 A line that ends with `\` is a line continuation.  A `COPY` that must reach
 the image disk needs a following `RUN`.
@@ -917,7 +917,7 @@ with the code 1.  The guard is silent when the segments agree.
 | `python3` | 3.14.7 | project tools |
 | `capstone` | 5.0.9 | x86 disassembly library |
 | `dosbox-x` | 2026.10.01 | DOS emulator with a debugger |
-| `dosker` | 0.1.2 | DOS container runtime |
+| `dosker` | 0.1.3 | DOS container runtime |
 | `qemu-system-i386` | 11.1.3 | the Dosker QEMU engine |
 | `mcopy`, `mdir` | mtools | the V2 toolchain volume |
 | `objdump` | LLVM 21.1.8 | object inspection |

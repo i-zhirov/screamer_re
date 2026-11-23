@@ -19414,3 +19414,16 @@ temporary `-od` recipe.
   image and the extender.  `python3 tools/rebuild/run.py run --function
   0x300ec --backend dosker --no-write` reports `ran free: 4 markers found,
   exit 0` and `0x300ec free: PASS`.
+
+## The image extender serves the whole-image run
+
+- Observation: Dosker 0.1.3 contains the `d3081eb` projection fix. A container
+  from `screamer-run:1` now sees the image's `C:\DOS4GW.EXE` (353,668 bytes).
+- Observation: the DOS/4G stub finds the extender in the module's current
+  directory only, not through `PATH`. With the module EXE in `C:\`, beside the
+  image's `C:\DOS4GW.EXE`, the free test finds all 4 markers. The `C:\RUN`
+  copy is no longer needed.
+- Decision: `run_dosker` copies the module EXE to `C:\` and runs it there.
+- Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --backend
+  dosker --no-write` reports `ran free: 4 markers found, exit 0` and
+  `0x300ec free: PASS`.

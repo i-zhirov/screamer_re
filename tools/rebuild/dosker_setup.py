@@ -17,7 +17,7 @@ Usage:
 The tool takes every path from the command line.  It uses `mcopy` and `mdir`
 from mtools for the FAT volume.  It enumerates every copied name with the DOS
 8.3 rule before the copy and fails with the offending path.  The image and
-volume names are flat, because Dosker 0.1.2 rejects a name that holds a slash.
+volume names are flat, because Dosker 0.1.3 rejects a name that holds a slash.
 The DOS/4G 2.01a extender is embedded in DOSBox-X 2026.10.01; its offset and
 digest are pinned to that build.
 """
@@ -189,7 +189,7 @@ def ensure_run_image(client: dosker.DoskerClient, extender: Path) -> None:
     shutil.copy2(extender, context / "extender" / "DOS4GW.EXE")
     (context / "Doskerfile").write_text(
         f"FROM {dosker.DEBUG_IMAGE}\n"
-        "COPY extender/DOS4GW.EXE C:\\DOS4GW.EXE\n"
+        "COPY extender/ C:/\n"
         "RUN DIR C:\\DOS4GW.EXE\n"
     )
     client.build_image(RUN_IMAGE, context)

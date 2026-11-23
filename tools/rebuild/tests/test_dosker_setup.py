@@ -25,7 +25,7 @@ import sys
 
 args = sys.argv[1:]
 if args == ["--version"]:
-    print("dosker 0.1.2")
+    print("dosker 0.1.3")
     sys.exit(0)
 if args and args[0] == "images":
     print("REFERENCE DIGEST SIZE CREATED")
@@ -201,7 +201,7 @@ class CheckTestCase(unittest.TestCase):
             dosker_setup.ensure_run_image(client, extender)
         self.assertEqual((context / "extender/DOS4GW.EXE").read_bytes(), b"MZ")
         self.assertIn(
-            "COPY extender/DOS4GW.EXE", (context / "Doskerfile").read_text()
+            "COPY extender/ C:/", (context / "Doskerfile").read_text()
         )
 
     def test_reports_a_missing_10_0a_volume(self) -> None:

@@ -25,7 +25,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-PINNED_VERSION = "0.1.2"
+PINNED_VERSION = "0.1.3"
 DEBUG_IMAGE = "freedos:1.3"
 RUN_IMAGE = "screamer-run:1"
 TOOLCHAIN_VOLUME = "screamer-watcom-v2-tools"
@@ -98,7 +98,7 @@ class DoskerClient:
         return completed
 
     def version(self) -> str:
-        """The reported Dosker version, for example `0.1.2`."""
+        """The reported Dosker version, for example `0.1.3`."""
         completed = self._run(["--version"])
         parts = completed.stdout.strip().split()
         return parts[-1] if parts else ""
