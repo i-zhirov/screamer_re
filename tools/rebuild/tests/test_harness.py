@@ -177,7 +177,7 @@ class HarnessTestCase(unittest.TestCase):
             "option nodefaultlibs",
             "option start=_cstart_",
         ])
-        self.assertIn("option map=C:\\WORK\\free.map", lines)
+        self.assertIn("option map=C:\\WORK\\FREE.MAP", lines)
         self.assertIn("name C:\\WORK\\free.exe", lines)
         self.assertIn(
             "file C:\\WORK\\O0.OBJ,C:\\WORK\\O1.OBJ,"
