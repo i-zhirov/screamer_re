@@ -90,8 +90,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x12f50",
-    "date": "2026-11-07",
-    "fingerprint": "sha256:5b73d6e4d10eaab9be856e6ec7023ddff5c9f30fc56a2523e2530dc00ce62a15",
+    "date": "2026-11-23",
+    "fingerprint": "sha256:df39ef6d5b14239d832ed400b7d37942cc138149e730358b42d2cb07bf64654e",
     "source_digest": "sha256:72e3c2f32c1ab205f7ecc26cd90206545f029421301741185a349d9e666c70e8",
     "tool": "run.py"
   },
