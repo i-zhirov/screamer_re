@@ -145,10 +145,21 @@ def missing_lines(expect: list[str], text: str) -> list[str]:
     ]
 
 
+def dosker_stage_name(name: str) -> str:
+    """The 8.3 staging directory name of one module."""
+    return name.upper()[:8]
+
+
 def dosker_source_name(index: int, source: dict) -> str:
     """The 8.3 copy name of one module source."""
     suffix = ".ASM" if source["compiler"] == "wasm" else ".C"
     return f"S{index}{suffix}"
+
+
+def dosker_map_name(name: str) -> str:
+    """The 8.3 map name of one module."""
+    path = Path(name)
+    return path.stem.upper()[:8] + path.suffix.upper()
 
 
 def dosker_object_name(index: int) -> str:
@@ -193,7 +204,7 @@ def dosker_link_rsp(module: dict) -> str:
         "option start=_cstart_",
     ]
     if "map" in module:
-        lines.append(f"option map=C:\\WORK\\{module['map']}")
+        lines.append(f"option map=C:\\WORK\\{dosker_map_name(module['map'])}")
     lines.append(f"name C:\\WORK\\{module['exe']}")
     files = [f"C:\\WORK\\{dosker_object_name(i)}" for i in range(len(module["sources"]))]
     files += ["C:\\WORK\\CHK.OBJ", "C:\\WORK\\CSTART.OBJ", "C:\\WORK\\STACK.OBJ"]
@@ -213,7 +224,7 @@ def build_dosker(module: dict, arguments: argparse.Namespace) -> int:
             f"the toolchain volume {arguments.toolchain_volume} is missing; "
             "run tools/rebuild/dosker_setup.py"
         )
-    staging = DOSKER_STAGE / name
+    staging = DOSKER_STAGE / dosker_stage_name(name)
     shutil.rmtree(staging, ignore_errors=True)
     staging.mkdir(parents=True)
     for source in SHARED_SOURCES:
@@ -252,16 +263,16 @@ def build_dosker(module: dict, arguments: argparse.Namespace) -> int:
             sys.stdout.write(result.output)
             print(f"error: the build of {name} failed", file=sys.stderr)
             return 1
-        artifacts = [module["exe"]]
+        artifacts = [(module["exe"], module["exe"])]
         if "map" in module:
-            artifacts.append(module["map"])
-        for artifact in artifacts:
+            artifacts.append((dosker_map_name(module["map"]), module["map"]))
+        for guest, host in artifacts:
             client.copy_out(
-                container, f"C:\\WORK\\{artifact.upper()}", WORK_DIR / artifact
+                container, f"C:\\WORK\\{guest}", WORK_DIR / host
             )
     finally:
         client.remove(container)
-    print(f"built {name}: " + ", ".join(str(WORK_DIR / a) for a in artifacts))
+    print(f"built {name}: " + ", ".join(str(WORK_DIR / h) for _, h in artifacts))
     return 0
 
 
@@ -313,7 +324,7 @@ def command_build(name: str, arguments: argparse.Namespace) -> int:
     artifacts = [module["exe"]]
     if "map" in module:
         artifacts.append(module["map"])
-    print(f"built {name}: " + ", ".join(str(WORK_DIR / a) for a in artifacts))
+    print(f"built {name}: " + ", ".join(str(WORK_DIR / h) for _, h in artifacts))
     return 0
 
 
