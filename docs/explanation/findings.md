@@ -19427,3 +19427,10 @@ temporary `-od` recipe.
 - Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --backend
   dosker --no-write` reports `ran free: 4 markers found, exit 0` and
   `0x300ec free: PASS`.
+
+## The Dosker backend is the default
+
+- Observation: `run.py` and `harness.py` default to `dosker`. The `legacy`
+  value still selects the Docker/DOSBox-X path for one milestone.
+- Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --no-write`
+  (no `--backend`) reports `0x300ec free: PASS`.

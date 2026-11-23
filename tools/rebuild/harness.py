@@ -6,8 +6,8 @@ the DOSBox-X debugger through `tools/dosboxx_control.py`.  It writes only under
 `work/rebuild/` and never modifies the shipped artifacts.
 
 Usage:
-    python3 tools/rebuild/harness.py build --module NAME [--backend dosker]
-    python3 tools/rebuild/harness.py run --module NAME [--backend dosker] [--show]
+    python3 tools/rebuild/harness.py build --module NAME [--backend dosker|legacy]
+    python3 tools/rebuild/harness.py run --module NAME [--backend dosker|legacy] [--show]
     python3 tools/rebuild/harness.py digest --module NAME
 
 The `dosker` backend builds on the Dosker FreeDOS base with the V2 toolchain
@@ -450,7 +450,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     for command_parser in (build_parser, run_parser):
         command_parser.add_argument(
-            "--backend", choices=("legacy", "dosker"), default="legacy"
+            "--backend", choices=("legacy", "dosker"), default="dosker"
         )
         command_parser.add_argument("--dosker", default="dosker")
         command_parser.add_argument(

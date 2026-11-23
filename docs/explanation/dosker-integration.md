@@ -190,8 +190,8 @@ A contributor prepares the environments.
   `work/rebuild/STARTH.EXE` exists. The check count MUST NOT change.
 - **FR-017**: The two harnesses and `run.py` MUST accept
   `--backend dosker|legacy`. `run.py` MUST pass the backend and the client
-  options to each harness call. The default MUST be `legacy` until the
-  migration gate passes.
+  options to each harness call. The default is `dosker`. The `legacy` value stays
+  for one milestone.
 - **FR-018**: The fingerprint MUST include `tools/rebuild/dosker.py`, the four
   Doskerfile digests, the image digests, and the pinned Dosker version.
 - **FR-019**: The design MUST document the future uses and the Dosker feature
@@ -530,7 +530,7 @@ class Session:
 
 | Tool | New option | Default | Purpose |
 | --- | --- | --- | --- |
-| `harness.py` | `--backend dosker\|legacy` | `legacy` | Select the environment. |
+| `harness.py` | `--backend dosker\|legacy` | `dosker` | Select the environment. |
 | `harness.py` | `--dosker PATH` | `dosker` from `PATH` | The binary. |
 | `harness.py` | `--data-root PATH` | `work/dosker/root` | The Dosker store. |
 | `harness.py` | `--qemu PATH` | `qemu-system-i386` from `PATH` | The engine program. |

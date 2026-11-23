@@ -680,7 +680,7 @@ def parse_arguments() -> argparse.Namespace:
         help="the original LE executable",
     )
     run_parser.add_argument(
-        "--backend", choices=("legacy", "dosker"), default="legacy"
+        "--backend", choices=("legacy", "dosker"), default="dosker"
     )
     run_parser.add_argument("--dosker", default="dosker")
     run_parser.add_argument(
