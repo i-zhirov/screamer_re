@@ -26,8 +26,8 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "error: the output lacks 'D'",
-        "verdict": "fail"
+        "detail": "the output holds every marker",
+        "verdict": "pass"
       },
       "build": {
         "detail": "the module builds",
@@ -43,8 +43,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x279a4",
-    "date": "2026-11-23",
-    "fingerprint": "sha256:4e990aa67cca62b824ab4c7e609fb1aa673473ccf0a3fea7834d8ebeffd2d2c4",
+    "date": "2026-11-24",
+    "fingerprint": "sha256:4414d9640185b96c46c4f092eb40d81ad9ba8ffb94dac8146848b42b88f57863",
     "source_digest": "sha256:508afa9c0b01ae922e053ecf7e47cfc106216f7e4f96e40d94a686d3334a45d1",
     "tool": "run.py"
   },

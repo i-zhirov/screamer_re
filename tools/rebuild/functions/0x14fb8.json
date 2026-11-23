@@ -69,8 +69,8 @@
         "verdict": "pass"
       },
       "build": {
-        "detail": "error: the dosker command 'cp' failed: dosker: agent error BAD_PATH: path is invalid or not 8.3",
-        "verdict": "fail"
+        "detail": "the module builds",
+        "verdict": "pass"
       },
       "identity": {
         "bytes_equal": 19,
@@ -82,8 +82,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x14fb8",
-    "date": "2026-11-23",
-    "fingerprint": "sha256:1cc2889234191e3c740d85f34a3dc718070d54c8507805c57d28b88f88aad2c7",
+    "date": "2026-11-24",
+    "fingerprint": "sha256:d5ba0edeeb7038f432506158e98fe3266751479e233dd583cc2b4c9725f6b778",
     "source_digest": "sha256:04ae07b5b9d1e5debee09e9d21de77b13b953f98c5d954c21dc698ea82c2c9f2",
     "tool": "run.py"
   },
