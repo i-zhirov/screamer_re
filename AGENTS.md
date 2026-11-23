@@ -75,6 +75,7 @@ screamer_re/
 │   └── pipeline.yml           # CI: the syntax gate, the status page, the Pages deploy, and the full check
 ├── docs/
 │   ├── explanation/
+│   │   ├── dosker-integration.md  # DOSker build and run substrate design
 │   │   ├── findings.md        # evidence-backed observations and open questions
 │   │   └── roadmap.md         # milestones and next steps
 │   └── reference/

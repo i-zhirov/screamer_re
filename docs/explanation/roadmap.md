@@ -385,3 +385,12 @@ The plan follows the size order, starting with the smallest functions.
     `tools/rebuild/oracle.py` masks the fixup slots and the direct branch
     targets, `free` and `exit` pass `--strict`, and a reordered or shape-only
     sequence fails).
+15. Move the build and run substrate to DOSker (designed, not started: the
+    design is in `docs/explanation/dosker-integration.md`. It declares the V2,
+    10.0a, run, and image environments in Doskerfiles and keeps the harness
+    interface. It also adds the whole-image link plan and the coverage report.
+    The migration identity run passed: 251 modules built, 252 identity checks,
+    no verdict or gate difference, and 37 byte-count-only diagnostics. The
+    behavior run passed too: 250 baselines, no verdict difference. The
+    substrate implementation remains).
+

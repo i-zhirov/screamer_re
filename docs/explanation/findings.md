@@ -19126,3 +19126,171 @@ temporary `-od` recipe.
   `python3 tools/rebuild/run.py run --function 0x257b0`.
 - Limit: the original has no symbol name for this function.  The module name
   and the field names in the harness stay inferred.
+
+## The module run depends on an unrecorded extender copy
+
+- Observation: a module EXE from `harness.py` is a small MZ DOS/4GW stub.
+  The stub searches `PATH` for `DOS4GW.EXE`.  The string in the file is
+  `PATHDOS4GW.EXE`.
+  Evidence: `strings -a work/rebuild/free.exe | grep DOS4GW` prints
+  `PATHDOS4GW.EXE`, and `xxd -l 64 work/rebuild/free.exe` starts with `MZ`.
+- Observation: the run needs `DOS4GW.EXE` beside the EXE.  The file
+  `work/rebuild/DOS4GW.EXE` is the shipped extender.  Its SHA-256 digest
+  `0c54f552e7367f1568d6c72062d2755dfcc34cb6591b988f56d2aa19e371ccf3` equals
+  the inventory entry for the shipped `DOS4GW.EXE`.
+  Evidence: `ls -l work/rebuild/DOS4GW.EXE` reports 254532 bytes, and
+  `shasum -a 256 work/rebuild/DOS4GW.EXE` gives the digest above.
+- Observation: no project tool copies the extender into `work/rebuild`.  A
+  person adds it by hand.  `harness.py run` mounts only `work/rebuild` as
+  `D:` and then starts the module EXE, so a clean `work/` holds no extender
+  for the run.
+  Evidence: `rg -n "DOS4GW" tools` finds no copy step, and
+  `conf_text` in `tools/rebuild/harness.py` mounts only `D:`.
+- Inference: the run result must record the extender digest.  The Dosker run
+  session copies the shipped extender beside the module EXE.
+  Evidence: `docs/explanation/dosker-integration.md`, FR-010.
+
+## The DOS-hosted V2 build matches the Linux container for the function bodies
+
+- Observation: the pinned Docker image carries OpenWatcom V2 beta, build
+  `Oct 24 2026 05:12:46` (64-bit).  The cached DOS package carries build
+  `Nov 1 2026 06:46:11` (32-bit).  The two builds differ.
+  Evidence: `/opt/watcom/binl64/wcc386` in the container and
+  `WCC386 -?` under DOSBox-X with the cached package.
+- Observation: the two builds link byte-identical test EXEs for `free` and
+  `memcpy`.  The hash of `free.exe` is
+  `32e3bc520de0f88db03a6d48133fe82da1b86b80e651b58a36e783092acf6983` for
+  both builds.
+  Evidence: `python3 tools/rebuild/harness.py build --module free` and the
+  DOS build in `work/dosker-dryrun/compare_v2.py`.
+- Observation: for `list_create` the module body is byte-identical.  The full
+  test EXE differs outside the module body, because the two compiler builds
+  place static data in a different order.
+  Evidence: `diff_module.py --original …/docker.exe --original-address
+  0x10000 --rebuilt …/dos.exe --rebuilt-address 0x10000` reports `26 of 26
+  instructions equal, 0 opcodes different, 0 operands different` and `the
+  modules are byte-identical`.
+- Observation: for `ai_update` the two builds give `181 of 181 instructions
+  equal, 0 opcodes different, 14 operands different`, and the oracle verdict
+  is `the instruction sequences match; the differing operands are the
+  link-time addresses`.  The 14 operands are the module's FPU constant
+  addresses.
+  Evidence: the same `diff_module.py` command on `ai_update`.
+- Observation: the identity verdict against the shipped image is the same for
+  both builds on every tested module.  For `list_create` at `0x2ecf8`, both
+  builds report `9 of 26 instructions equal, 17 opcodes different, 9 operands
+  different`, because V2 differs from the 10.0a original in the same way on
+  both hosts.
+  Evidence: `diff_module.py --original STARTH.EXE --original-address 0x2ecf8
+  --rebuilt …/docker.exe --rebuilt-address 0x10000` and the same command with
+  `…/dos.exe`.
+- Inference: the host does not change the compiled function.  It can change
+  the static data order, and the linker then changes the addresses.  The
+  oracle masks those addresses.
+- Decision: adopt the DOS-hosted V2 package.  Gate the migration on the
+  identity verdict and the behavior markers, not on the test EXE bytes.  Pin
+  the package SHA-256 and record the compiler build.
+  Evidence: `docs/explanation/dosker-integration.md`, RD-001.
+
+## The toolchain trees pass the DOS 8.3 name rule
+
+- Observation: the cached DOS-hosted V2 tree holds 1646 entries and no
+  violation of the Dosker `normalize_name` rule.  The longest component is 12
+  characters.
+  Evidence: `work/dosker-dryrun/iso83.py` and the same rule applied to
+  `~/.cache/dosker-openwatcom-dos/openwatcom/toolchain`.
+- Observation: the 10.0a CD ISO `WATCOM` tree holds 5115 files in 324
+  directories and no violation.  The image has no Joliet supplementary
+  volume and no Rock Ridge extension, so `bsdtar` extracts the primary ISO 8.3
+  names.
+  Evidence: `python3 work/dosker-dryrun/iso83.py` reads the directory records
+  from `WATCOM_C10A.ISO` by HTTP range request and prints
+  `joliet supplementary volumes: none`, `rock ridge present: False`, and
+  `dirs 324 files 5115 violations 0`.
+- Observation: the rule comes from Dosker `DosName::normalize`: a stem of 1 to
+  8 characters, an extension of 1 to 3 characters, at most one dot, and the
+  allowed character set.  The uppercase form is accepted.
+  Evidence: `crates/dosker-image/src/path.rs` in the Dosker source.
+- Decision: use `COPY` for both trees and add no name map.  The setup tool
+  enumerates every name before it builds an image and fails on the first
+  violation.
+  Evidence: `docs/explanation/dosker-integration.md`, RD-002.
+
+## The full V2 migration keeps every identity verdict
+
+- Observation: the full migration built 251 buildable modules with the cached
+  DOS-hosted OpenWatcom V2 package.  No module failed to build.  The `driver`
+  module is behavior-only and has no map.
+- Observation: 252 identity checks ran.  The `exit` module carries two
+  function records, `exit` at `0x300be` and `exit_flush` at `0x300d6`, and
+  both records checked against the same `EXITMOD.EXE` and map.
+  Evidence: `tools/rebuild/functions/0x300be.json` and `0x300d6.json`.
+- Observation: the DOS verdicts match the Docker baseline for every record.
+  0 verdict differences and 0 gate differences.  The distribution is 221
+  `the instruction sequences differ`, 16 `the instruction sequences match;
+  the differing operands are the link-time addresses`, 8 `the instruction
+  shapes match; the differing bytes are not relocations`, and 7 `the modules
+  are byte-identical`.  The gate passes 31 records and fails 221, the same as
+  the baseline.
+  Evidence: `work/dosmig/identity.log` and `work/dosmig/migration.json`.
+- Observation: 37 records differ only in the `bytes_equal` count, by 1 or 2
+  bytes, with the same instruction counts.  All 37 are in the fail group.
+  The names include `race_simulation_update`, `game_mode_100_start`,
+  `object_slide_step`, `replay_save`, `player_car_spin_update`,
+  `menu_space_init`, `frame_update`, `race_radar`, `input_map`, `music_load`,
+  `race_cleanup`, `car_setup`, `camera_project`.  The data-placement
+  difference moves a data-address byte in or out of the equal set.  The
+  verdict does not change.
+  Evidence: `work/dosmig/migration.json`, rows where `match` is false and
+  `detail` equals the baseline detail.
+- Observation: the batch session mode stalled once at `input_poll` in a
+  50-module session.  The link succeeded when it ran alone.  The per-module
+  session mode built all 251 modules.  This supports the design's open
+  question about a long-lived session.
+  Evidence: `work/dosmig/MIGR01.LOG` (empty after the stall) and
+  `work/dosmig/build_rest.log`.
+- Inference: the host changes the static data order, not the identity
+  verdict.  The RD-001 gate holds for the full set.
+- Evidence: `python3 work/dosmig/migrate.py --per-module` builds the staged
+  modules and `python3 work/dosmig/migrate.py --skip-build` writes the
+  report.  The driver is in `work/dosmig/migrate.py`.
+- Decision: keep RD-001.  The behavior checks remain in the migration gate.
+  Evidence: `docs/explanation/dosker-integration.md`, RD-001.
+
+## The full behavior run matches the baseline
+
+- Observation: 252 module runs with the DOS-hosted V2 builds.  The `driver`
+  module was rebuilt with the same toolchain in `work/dosmig/MDRV`.
+- Observation: 250 records carry a behavior baseline: 249 pass and 1 fail.
+  0 verdict differences.  The DOS run gives 251 pass and 1 fail.  The 2
+  records without a behavior check, `exit_flush` at `0x300d6` and
+  `dpmi_int31_entry` at `0xd4410`, pass.  The `driver` module passes.
+  Evidence: `work/dosmig/behavior_final.log` and `work/dosmig/behavior.json`.
+- Observation: the one fail baseline is `error_report` at `0x10978`.  Both
+  runs fail, so the gate verdict matches.  The outputs differ: the Docker
+  baseline lacks only `D`, and the DOS run stops with
+  `DOS/4G error (2001): exception 0Dh (general protection fault)` and holds
+  no marker.  The module is `matching`, not verified.
+  Evidence: `work/dosmig/M*/ERR_OUT.TXT` and the `error_report` row of
+  `work/dosmig/behavior.json`.
+- Observation: the behavior run needs DOSBox-X long file names.  With
+  `lfn = false`, 26 file tests fail their markers, for example `replay_save`
+  prints `0 x 2 D` instead of `0 1 2 D`.  With `lfn = true`, they pass.
+  Evidence: `work/dosmig/behavior.log` and `work/dosmig/behavior_retry.log`.
+- Observation: a long session accumulates DOS state.  A 25-module session
+  produced 24 false failures in the file tests.  A fresh session per module
+  produced 0 differences.
+  Evidence: `work/dosmig/behavior_all.log` and `work/dosmig/behavior_final.log`.
+- Observation: the shipped `DOS4GW.EXE` must sit beside the module EXE.  With
+  the extender on `PATH` in `D:\SHARED`, `free.exe` fails with
+  `DOS/4GW fatal error (1012): ... is not a WATCOM program`.  With the
+  extender beside the EXE, the same file runs, for both the shipped extender
+  and the V2 `BINW` extender.
+  Evidence: `work/dosmig/BEH.CONF` and `work/dosmig/BEH1.CONF`.
+- Inference: the behavior code matches the baseline at the gate level.  The
+  `error_report` detail differs on a module that is not verified.  The run
+  environment, not the module code, causes the other differences.
+- Decision: one fresh session per module, long file names on, and the
+  extender beside the EXE.  See RD-003.
+- Evidence: `python3 work/dosmig/behavior.py --chunk-size 1` writes
+  `work/dosmig/behavior.json`.
