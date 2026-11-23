@@ -156,6 +156,11 @@ def dosker_source_name(index: int, source: dict) -> str:
     return f"S{index}{suffix}"
 
 
+def dosker_exe_name(name: str) -> str:
+    """The 8.3 guest name of one module EXE."""
+    return name.upper()
+
+
 def dosker_map_name(name: str) -> str:
     """The 8.3 map name of one module."""
     path = Path(name)
@@ -263,7 +268,7 @@ def build_dosker(module: dict, arguments: argparse.Namespace) -> int:
             sys.stdout.write(result.output)
             print(f"error: the build of {name} failed", file=sys.stderr)
             return 1
-        artifacts = [(module["exe"], module["exe"])]
+        artifacts = [(dosker_exe_name(module["exe"]), module["exe"])]
         if "map" in module:
             artifacts.append((dosker_map_name(module["map"]), module["map"]))
         for guest, host in artifacts:
