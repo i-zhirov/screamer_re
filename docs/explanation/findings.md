@@ -19368,3 +19368,49 @@ temporary `-od` recipe.
   the extender digest.  `python3 tools/rebuild/run.py run --function 0x300ec
   --backend dosker --no-write --show` prints `ran free: 4 markers found,
   exit 0` and `[1/1] 0x300ec free: PASS (instructions 3/3, bytes 6/9)`.
+
+## The 10.0a toolchain volume is built
+
+- Observation: the `watcom10_setup.py` fetches the Watcom 10.0a ISO
+  `WATCOM_C10A.ISO` (SHA-256
+  `f51ed9358e7eaf6a0d292268bbbc15832530489dd8239a98f6938c244f1736fc`) and
+  extracts the `WATCOM` tree to `work/watcom10/WATCOM`.  The tree is 177 MiB
+  and holds 5438 entries.
+- Observation: the V2 tree holds lowercase names (`binw`, `dos4gw.exe`).  The
+  DOS 8.3 check is case-insensitive; the mcopy writes the uppercase names.
+  The V2 tree holds 1646 entries and 0 violations.  The 10.0a tree holds 5438
+  entries and 0 violations.
+- Observation: the setup creates the 256 MiB `screamer-watcom10-tools` volume
+  with `mcopy`.  The 10.0a compiler is `BINB/WCC386.EXE`.  The V2 volume digest
+  is `2f85c2d51c07b108a9253348093d98bf27fb66422b590efa09f4247a28f6ab2d` and
+  the 10.0a volume digest is
+  `19f5df74034871776bc7d3440f3d54691334e1dbc17215b11055a91ad2de2e3a`.
+- Observation: `--check` prints the two volume lines, the two toolchain lines,
+  and the extender line, and exits 0 when all are present.
+- Decision: the setup creates both volumes, enforces the 8.3 rule before the
+  copy, and records `volume_digest` and `volume10_digest`.
+- Evidence: `python3 tools/rebuild/dosker_setup.py --toolchain PATH
+  --toolchain10 work/watcom10/WATCOM` prints the two volume digests.
+  `python3 tools/rebuild/dosker_setup.py --check` prints
+  `check: volume screamer-watcom10-tools: present` and
+  `check: toolchain 10.0a: present` and exits 0.
+
+## The screamer-run:1 run image is built
+
+- Observation: the setup builds `screamer-run:1` from the FreeDOS base and the
+  DOS/4G 2.01a extender.  The image digest is
+  `b1af4d1b7b30437d301f5680a029cfec06686f9b303de24561d292134dfcaaae`.  The
+  `--check` prints `check: run image screamer-run:1: present`.
+- Observation: the guest does not resolve the image's `C:\DOS4GW.EXE` through
+  the `PATH` in this harness.  The behavior run therefore copies the host
+  extender into `C:\RUN\DOS4GW.EXE`, as before.  The image still holds the
+  extender for a later whole-image run.
+- Observation: an old cached image held the shipped 1.95 extender.  The
+  `ensure_run_image` skip kept it.  The `dosker rmi` command removed it, and
+  the rebuild used the 2.01a.
+- Decision: the setup builds the run image; the run uses the host extender
+  until the guest `PATH` resolves the image file.
+- Evidence: `python3 tools/rebuild/dosker_setup.py --check` reports the run
+  image and the extender.  `python3 tools/rebuild/run.py run --function
+  0x300ec --backend dosker --no-write` reports `ran free: 4 markers found,
+  exit 0` and `0x300ec free: PASS`.

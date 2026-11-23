@@ -47,6 +47,7 @@ DOSBOX = "dosbox-x"
 DOCKER = "docker"
 DOSBOX_CONTROL = REPOSITORY_ROOT / "tools/dosboxx_control.py"
 DOSKER_IMAGE = "freedos:1.3"
+RUN_IMAGE = "screamer-run:1"
 DOSKER_TOOLCHAIN_DRIVE = "D:"
 DOSKER_TOOLCHAIN_ROOT = "D:\\WATCOM"
 DOSKER_STAGE = REPOSITORY_ROOT / "work/dosker/stage"
@@ -339,7 +340,7 @@ def run_dosker(
     container = f"screamer-run-{name[:20].replace('_', '-')}"
     result = None
     try:
-        client.start(DOSKER_IMAGE, container)
+        client.start(RUN_IMAGE, container)
         client.exec(container, "MD C:\\RUN", timeout=10)
         client.copy_in(container, exe, f"C:\\RUN\\{module['exe'].upper()}")
         client.copy_in(container, EXTENDER_201, "C:\\RUN\\DOS4GW.EXE")

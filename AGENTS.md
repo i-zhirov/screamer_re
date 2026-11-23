@@ -105,7 +105,7 @@ screamer_re/
 │   │   ├── store.py           # the function and module record store
 │   │   ├── harness.py         # the pinned container and DOSBox-X harness
 │   │   ├── dosker.py          # the Dosker CLI client
-│   │   ├── dosker_setup.py    # the V2 toolchain volume and DOS/4G 2.01a setup
+│   │   ├── dosker_setup.py    # the V2 and 10.0a volumes, the screamer-run:1 image, and the extender
 │   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
 │   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
 │   │   ├── run.py             # run the declared checks and print progress
@@ -131,6 +131,7 @@ screamer_re/
   module rebuild uses the OpenWatcom V2 container harness and needs Docker:
 
 ```sh
+python3 tools/rebuild/dosker_setup.py --toolchain PATH --toolchain10 PATH
 python3 tools/rebuild/dosker_setup.py --check
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py build --module free --backend dosker

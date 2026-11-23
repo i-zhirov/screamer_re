@@ -57,6 +57,7 @@ class HarnessTestCase(unittest.TestCase):
         self.assertEqual(
             harness.EXTENDER_201, harness.REPOSITORY_ROOT / "work/dosker/DOS4GW.EXE"
         )
+        self.assertEqual(harness.RUN_IMAGE, "screamer-run:1")
 
     def test_build_script_free(self) -> None:
         script = harness.build_script(self.module())
@@ -360,11 +361,13 @@ class DoskerRunTestCase(unittest.TestCase):
             self.assertIn(marker, out)
         copied = [call["args"] for call in self.calls() if call["args"][0] == "cp"]
         guest = [args[2].split(":", 1)[1] for args in copied]
-        self.assertIn("C:\\RUN\\DOS4GW.EXE", guest)
         self.assertIn("C:\\RUN\\FREE.EXE", guest)
+        self.assertIn("C:\\RUN\\DOS4GW.EXE", guest)
         execs = [call["args"] for call in self.calls() if call["args"][0] == "exec"]
         self.assertEqual(execs[-1][-1], "free.exe")
         self.assertIn("C:\\RUN", execs[-1])
+        runs = [call["args"] for call in self.calls() if call["args"][0] == "run"]
+        self.assertIn("screamer-run:1", runs[-1])
 
 
 if __name__ == "__main__":

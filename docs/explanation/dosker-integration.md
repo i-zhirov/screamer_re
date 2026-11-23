@@ -156,7 +156,9 @@ A contributor prepares the environments.
   The run image is `screamer-run:1`. The image names MUST be flat, because
   Dosker 0.1.2 rejects a name that holds a slash.
 - **FR-005**: The setup tool MUST create an absent volume, copy the toolchain
-  into it, reuse a present volume, and record the digests.
+  into it, reuse a present volume, enforce the 8.3 name rule, and record the
+  digests.  The 8.3 check is case-insensitive, because the V2 tree uses
+  lowercase names.
 - **FR-006**: The build adapter MUST stage the sources with 8.3 names, write a
   `BUILD.BAT` batch file and a `LINK.RSP` response file, copy them into
   `C:\WORK`, run the batch with `dosker exec`, and copy the EXE and the MAP
@@ -408,9 +410,9 @@ _Future Extensions_ list their own requests.
 | Component | Responsibility | Depends On |
 | --- | --- | --- |
 | `tools/rebuild/dosker.py` | Hold every call to the `dosker` binary. Parse the result. Map the exit codes. | Python standard library |
-| `tools/rebuild/dosker_setup.py` | Check the pin. Ensure the base. Create the V2 toolchain volume. Extract the DOS/4G 2.01a. Record the digests. | `dosker.py`, mtools |
+| `tools/rebuild/dosker_setup.py` | Check the pin. Ensure the base. Create the V2 and 10.0a toolchain volumes. Extract the DOS/4G 2.01a. Record the digests. | `dosker.py`, mtools |
 | `screamer-watcom-v2-tools` | The 256 MiB volume with the V2 tree at `D:\WATCOM`. | Dosker |
-| `screamer-run:1` | The FreeDOS base plus the DOS/4G 2.01a extender. | Dosker |
+| `screamer-run:1` | The FreeDOS base plus the DOS/4G 2.01a extender. The setup builds it. | Dosker |
 | `screamer-image:1` | The whole-image build environment. A later step. | Dosker |
 | `tools/rebuild/harness.py` | Module build and run with the current interface. | `dosker.py`, `store.py` |
 | `tools/rebuild/harness_dos.py` | Period build with the current interface. | `dosker.py`, `store.py` |
@@ -552,14 +554,16 @@ toolchain into the base fails at the `RUN` step with
 `screamer-watcom-v2-tools` volume:
 
 ```sh
-python3 tools/rebuild/dosker_setup.py --toolchain PATH
+python3 tools/rebuild/dosker_setup.py --toolchain PATH --toolchain10 PATH
 ```
 
-The setup creates the 256 MiB volume, copies the V2 tree into `::WATCOM` with
-`mcopy`, and records the digests in `work/dosker/setup.json`. The FreeDOS base
-exposes the first added volume as `D:`, so the build batch sets
-`WATCOM=D:\WATCOM`. `dosker run -v NAME:E:` records `E:`, but the guest sees
-`D:` (RD-004).
+The setup creates the two 256 MiB volumes, copies the V2 tree and the Watcom
+10.0a tree into `::WATCOM` with `mcopy`, and records the digests in
+`work/dosker/setup.json`.  The 10.0a compiler is `BINB/WCC386.EXE`.  The 8.3
+check is case-insensitive; the V2 tree uses lowercase names and the mcopy
+writes the uppercase names.  The FreeDOS base exposes the first added volume
+as `D:`, so the build batch sets `WATCOM=D:\WATCOM`. `dosker run -v NAME:E:`
+records `E:`, but the guest sees `D:` (RD-004).
 
 The build container is the `freedos:1.3` base with the volume on `D:`. The
 build copies the sources and the batch into `C:\WORK` and runs `BUILD.BAT`.
@@ -578,7 +582,9 @@ RUN DIR C:\DOS4GW.EXE
 
 The `RUN` projects the `COPY` tree onto the image disk. A `COPY` without a
 following `RUN` leaves the file in the tree only, and a run container does
-not hold it.
+not hold it.  The setup builds this image and records its digest.  The run
+copies the extender from the host into `C:\RUN`, because the guest does not
+resolve the image's `C:\DOS4GW.EXE` through the `PATH` in this harness.
 
 Rules:
 
@@ -629,16 +635,20 @@ Rules:
 
 ### `tools/rebuild/dosker_setup.py`
 
-- **Purpose**: Prepare the four images once and record their identity.
+- **Purpose**: Prepare the base, the two toolchain volumes, and the DOS/4G
+  2.01a extender once and record their identity.
 - **Interface**:
-  - `dosker_setup.py [--dosker PATH] [--data-root PATH] [--check]`
-  - `--check` verifies the pin and the inputs and builds nothing.
-  - Without `--check`, the tool fetches a missing input, builds a missing
-    image, and leaves a present image alone.
-- **Output**: `work/dosker/images.json` with one record per tag, and a line
-  per image with the tag and the digest.
+  - `dosker_setup.py [--dosker PATH] [--data-root PATH] [--toolchain PATH]
+    [--toolchain10 PATH] [--check]`
+  - `--check` verifies the pin, the volumes, the extender, and the 8.3 names,
+    and builds nothing.
+  - Without `--check`, the tool creates a missing volume, copies a missing
+    toolchain, and leaves a present volume alone.
+- **Output**: `work/dosker/setup.json` with the base, the V2 volume, the
+  10.0a volume, the `screamer-run:1` image, and the extender digests, and one
+  line per environment.
 - **Failure Modes**: A missing input prints the pinned URL and the expected
-  SHA-256 and exits 1. A missing Dosker prints the release URL and exits 3.
+  SHA-256 and exits 2. A missing Dosker prints the release URL and exits 3.
 
 ### `tools/rebuild/image_plan.py`
 
@@ -827,10 +837,12 @@ The former blocking questions are resolved in RD-001 to RD-005.
   configuration.
 - **SC-008**: `docs/reference/tooling.md`, `AGENTS.md`, and
   `docs/explanation/findings.md` describe the new path.
-- **SC-009**: The setup name check passes the V2 DOS tree and the 10.0a CD
-  tree with zero violations.
+- **SC-009**: The setup name check passes the V2 DOS tree (1646 entries) and
+  the 10.0a CD tree (5438 entries) with zero violations.
 - **SC-010**: `run.py run --function 0x300ec --backend dosker --no-write`
   passes the build, identity, and behavior checks in the Dosker FreeDOS base.
+- **SC-011**: `screamer-run:1` builds from the DOS/4G 2.01a extender, and the
+  `--check` reports it present.
 
 ## Future Extensions
 
