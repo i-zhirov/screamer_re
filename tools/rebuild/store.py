@@ -49,6 +49,8 @@ SHARED_SOURCES = ("chk.asm", "stack.asm", "cstart.c")
 TOOL_FILES = (
     "rebuild/run.py",
     "rebuild/harness.py",
+    "rebuild/dosker.py",
+    "rebuild/dosker_setup.py",
     "rebuild/diff_module.py",
     "rebuild/oracle.py",
     "rebuild/store.py",

@@ -16,7 +16,8 @@ Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
         [--no-write] [--show] [--strict] [--skip-runtime] [--skip-unchanged]
-        [--original PATH]
+        [--original PATH] [--backend legacy|dosker] [--dosker PATH]
+        [--data-root PATH] [--toolchain-volume NAME]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
 on a bad argument, a missing record, or a missing original image.
@@ -33,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import dosker  # noqa: E402
 import store  # noqa: E402
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -41,6 +43,7 @@ WORK_DIR = REPOSITORY_ROOT / "work/rebuild"
 LOG_DIR = WORK_DIR / "logs"
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
+HARNESS_ARGS: list[str] = []
 PASS_VERDICTS = (
     "the modules are byte-identical",
     "the instruction sequences match; the differing operands are the link-time addresses",
@@ -261,6 +264,7 @@ def _harness(command: str, module: dict, show: bool) -> tuple[str, str]:
             command,
             "--module",
             module["name"],
+            *HARNESS_ARGS,
         ],
         capture_output=True,
         text=True,
@@ -675,11 +679,33 @@ def parse_arguments() -> argparse.Namespace:
         default=store.DEFAULT_ORIGINAL,
         help="the original LE executable",
     )
+    run_parser.add_argument(
+        "--backend", choices=("legacy", "dosker"), default="legacy"
+    )
+    run_parser.add_argument("--dosker", default="dosker")
+    run_parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=REPOSITORY_ROOT / "work/dosker/root",
+    )
+    run_parser.add_argument(
+        "--toolchain-volume", default=dosker.TOOLCHAIN_VOLUME
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     arguments = parse_arguments()
+    HARNESS_ARGS[:] = [
+        "--backend",
+        arguments.backend,
+        "--dosker",
+        arguments.dosker,
+        "--data-root",
+        str(arguments.data_root),
+        "--toolchain-volume",
+        arguments.toolchain_volume,
+    ]
     try:
         if arguments.command == "run":
             return command_run(arguments)

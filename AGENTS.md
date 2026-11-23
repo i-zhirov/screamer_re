@@ -104,6 +104,8 @@ screamer_re/
 │   ├── rebuild/               # the rebuild framework and the two toolchain harnesses
 │   │   ├── store.py           # the function and module record store
 │   │   ├── harness.py         # the pinned container and DOSBox-X harness
+│   │   ├── dosker.py          # the Dosker CLI client
+│   │   ├── dosker_setup.py    # the V2 toolchain volume and DOS/4G 2.01a setup
 │   │   ├── harness_dos.py     # the period Watcom 10.0a build under DOSBox-X
 │   │   ├── watcom10_setup.py  # fetch and extract the period Watcom 10.0a toolchain
 │   │   ├── run.py             # run the declared checks and print progress
@@ -129,8 +131,12 @@ screamer_re/
   module rebuild uses the OpenWatcom V2 container harness and needs Docker:
 
 ```sh
+python3 tools/rebuild/dosker_setup.py --check
 python3 tools/rebuild/harness.py build --module free
+python3 tools/rebuild/harness.py build --module free --backend dosker
 python3 tools/rebuild/harness.py run --module free
+python3 tools/rebuild/harness.py run --module free --backend dosker
+python3 tools/rebuild/run.py run --function 0x300ec --backend dosker --no-write
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
 python3 tools/rebuild/run.py run --all --strict
@@ -154,7 +160,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/dosker.py tools/rebuild/dosker_setup.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -220,6 +226,7 @@ open ~/Documents/Screamer.app
       tools/rebuild/oracle.py
       tools/rebuild/store.py tools/rebuild/schema.py
       tools/rebuild/image_compare.py tools/rebuild/harness.py
+      tools/rebuild/dosker.py tools/rebuild/dosker_setup.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
       tools/rebuild/callgraph.py tools/pipeline_check.py` to check the syntax

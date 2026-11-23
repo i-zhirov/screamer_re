@@ -5,9 +5,13 @@ Usage:
 """
 from __future__ import annotations
 
+import json
+import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -47,6 +51,12 @@ class HarnessTestCase(unittest.TestCase):
         )
         self.assertEqual(harness.DOSBOX, "dosbox-x")
         self.assertEqual(harness.WORK_DIR, harness.REPOSITORY_ROOT / "work/rebuild")
+        self.assertEqual(harness.DOSKER_IMAGE, "freedos:1.3")
+        self.assertEqual(harness.DOSKER_TOOLCHAIN_DRIVE, "D:")
+        self.assertEqual(harness.DOSKER_TOOLCHAIN_ROOT, "D:\\WATCOM")
+        self.assertEqual(
+            harness.EXTENDER_201, harness.REPOSITORY_ROOT / "work/dosker/DOS4GW.EXE"
+        )
 
     def test_build_script_free(self) -> None:
         script = harness.build_script(self.module())
@@ -133,6 +143,74 @@ class HarnessTestCase(unittest.TestCase):
             " memcpy.obj,list_destroy.obj,chk.obj,cstart.obj,stack.obj",
         )
 
+    def test_dosker_build_batch_free(self) -> None:
+        lines = harness.dosker_build_batch(self.module()).splitlines()
+        self.assertEqual(lines[0], "@ECHO OFF")
+        self.assertIn("SET WATCOM=D:\\WATCOM", lines)
+        self.assertIn("IF NOT EXIST C:\\TMP\\NUL MD C:\\TMP >NUL", lines)
+        self.assertIn(
+            "WCC386 -bt=dos -s -zq -fo=C:\\WORK\\CSTART.OBJ "
+            "C:\\WORK\\CSTART.C",
+            lines,
+        )
+        self.assertIn(
+            "WASM -bt=dos -zq -zcm=watcom -fo=C:\\WORK\\CHK.OBJ "
+            "C:\\WORK\\CHK.ASM",
+            lines,
+        )
+        self.assertIn(
+            "wcc386 -bt=dos -s -zq -fo=C:\\WORK\\O0.OBJ C:\\WORK\\S0.C",
+            lines,
+        )
+        self.assertIn(
+            "wcc386 -bt=dos -s -zq -fo=C:\\WORK\\O1.OBJ C:\\WORK\\S1.C",
+            lines,
+        )
+        self.assertEqual(lines[-1], "WLINK @C:\\WORK\\LINK.RSP")
+
+    def test_dosker_link_rsp_free(self) -> None:
+        lines = harness.dosker_link_rsp(self.module()).splitlines()
+        self.assertEqual(lines[:4], [
+            "system dos4g",
+            "option quiet",
+            "option nodefaultlibs",
+            "option start=_cstart_",
+        ])
+        self.assertIn("option map=C:\\WORK\\free.map", lines)
+        self.assertIn("name C:\\WORK\\free.exe", lines)
+        self.assertIn(
+            "file C:\\WORK\\O0.OBJ,C:\\WORK\\O1.OBJ,"
+            "C:\\WORK\\CHK.OBJ,C:\\WORK\\CSTART.OBJ,"
+            "C:\\WORK\\STACK.OBJ",
+            lines,
+        )
+
+    def test_dosker_link_rsp_driver_holds_no_map(self) -> None:
+        module = self.module(
+            name="driver",
+            exe="driver.exe",
+            sources=[{"file": "driver.c", "compiler": "wcc386"}],
+        )
+        module.pop("map")
+        lines = harness.dosker_link_rsp(module).splitlines()
+        self.assertFalse(any(line.startswith("option map=") for line in lines))
+        self.assertIn(
+            "file C:\\WORK\\O0.OBJ,C:\\WORK\\CHK.OBJ,"
+            "C:\\WORK\\CSTART.OBJ,C:\\WORK\\STACK.OBJ",
+            lines,
+        )
+
+    def test_dosker_source_names_are_8_3(self) -> None:
+        self.assertEqual(
+            harness.dosker_source_name(0, {"file": "free.c", "compiler": "wcc386"}),
+            "S0.C",
+        )
+        self.assertEqual(
+            harness.dosker_source_name(1, {"file": "chk.asm", "compiler": "wasm"}),
+            "S1.ASM",
+        )
+        self.assertEqual(harness.dosker_object_name(2), "O2.OBJ")
+
     def test_free_port(self) -> None:
         port = harness.free_port()
         self.assertIsInstance(port, int)
@@ -199,6 +277,94 @@ class HarnessTestCase(unittest.TestCase):
             "Crash address (unrelocated) = 3:00000001\n"
         )
         self.assertEqual(harness.missing_lines(expect, text), ["R", "R", "R", "D"])
+
+
+
+
+DOSKER_RUN_FAKE = """#!/usr/bin/env python3
+import json
+import os
+import sys
+
+args = sys.argv[1:]
+log = os.environ.get("FAKE_DOSKER_LOG")
+if log:
+    with open(log, "a", encoding="utf-8") as stream:
+        stream.write(json.dumps({"args": args}) + "\\n")
+if args == ["--version"]:
+    print("dosker 0.1.2")
+    sys.exit(0)
+if args and args[0] == "exec" and args[-1].lower() == "free.exe":
+    print("NULL\\nDONE\\nFREE\\nAFTR")
+sys.exit(0)
+"""
+
+
+class DoskerRunTestCase(unittest.TestCase):
+    """The Dosker behavior run with a fake client and a fake extender."""
+
+    def module(self) -> dict:
+        return {
+            "name": "free",
+            "exe": "free.exe",
+            "run": {
+                "output": "free_out.txt",
+                "expect": ["NULL", "DONE", "FREE", "AFTR"],
+                "timeout": 10,
+            },
+        }
+
+    def setUp(self) -> None:
+        self.directory = tempfile.TemporaryDirectory()
+        self.root = Path(self.directory.name)
+        self.binary = self.root / "dosker"
+        self.binary.write_text(DOSKER_RUN_FAKE)
+        self.binary.chmod(0o755)
+        self.log = self.root / "calls.jsonl"
+        os.environ["FAKE_DOSKER_LOG"] = str(self.log)
+        self.previous_extender = harness.EXTENDER_201
+        self.previous_work = harness.WORK_DIR
+        harness.EXTENDER_201 = self.root / "DOS4GW.EXE"
+        harness.EXTENDER_201.write_bytes(b"MZ")
+        harness.WORK_DIR = self.root / "rebuild"
+        harness.WORK_DIR.mkdir()
+        (harness.WORK_DIR / "free.exe").write_bytes(b"MZ")
+        self.arguments = SimpleNamespace(
+            dosker=str(self.binary),
+            data_root=self.root / "root",
+            toolchain_volume="screamer-watcom-v2-tools",
+            backend="dosker",
+        )
+
+    def tearDown(self) -> None:
+        harness.EXTENDER_201 = self.previous_extender
+        harness.WORK_DIR = self.previous_work
+        os.environ.pop("FAKE_DOSKER_LOG", None)
+        self.directory.cleanup()
+
+    def calls(self) -> list[dict]:
+        return [
+            json.loads(line)
+            for line in self.log.read_text().splitlines()
+            if line.strip()
+        ]
+
+    def test_run_writes_the_guest_output(self) -> None:
+        module = self.module()
+        code = harness.run_dosker(
+            "free", module, module["run"], False, self.arguments
+        )
+        self.assertEqual(code, 0)
+        out = (self.root / "rebuild/free_out.txt").read_text()
+        for marker in ("NULL", "DONE", "FREE", "AFTR"):
+            self.assertIn(marker, out)
+        copied = [call["args"] for call in self.calls() if call["args"][0] == "cp"]
+        guest = [args[2].split(":", 1)[1] for args in copied]
+        self.assertIn("C:\\RUN\\DOS4GW.EXE", guest)
+        self.assertIn("C:\\RUN\\FREE.EXE", guest)
+        execs = [call["args"] for call in self.calls() if call["args"][0] == "exec"]
+        self.assertEqual(execs[-1][-1], "free.exe")
+        self.assertIn("C:\\RUN", execs[-1])
 
 
 if __name__ == "__main__":

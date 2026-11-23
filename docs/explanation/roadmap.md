@@ -392,5 +392,7 @@ The plan follows the size order, starting with the smallest functions.
     The migration identity run passed: 251 modules built, 252 identity checks,
     no verdict or gate difference, and 37 byte-count-only diagnostics. The
     behavior run passed too: 250 baselines, no verdict difference. The
-    substrate implementation remains).
+    substrate implementation is in progress: the Dosker build backend and the
+    DOS/4G 2.01a FreeDOS behavior run are in place. The full migration and the
+    whole-image pipeline remain).
 

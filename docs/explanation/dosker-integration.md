@@ -1,7 +1,7 @@
 # DOSker Integration for the Reconstruction — Design
 
 - **Date**: 2026-11-23
-- **Status**: Draft
+- **Status**: Approved
 - **Input**: Brainstorm how the Dosker container system can serve the reproduction instrumentation of the Screamer reconstruction.
 
 ## Index
@@ -151,13 +151,16 @@ A contributor prepares the environments.
   No other tool MUST call the binary.
 - **FR-003**: The client MUST check the Dosker version against a pinned
   constant. A mismatch MUST fail with a clear message.
-- **FR-004**: The project MUST define four images: `screamer/watcom-v2:1`,
-  `screamer/watcom10:1`, `screamer/run:1`, and `screamer/image:1`.
-- **FR-005**: The setup tool MUST build an absent image, reuse a present
-  image, and record each digest.
+- **FR-004**: The toolchain MUST live in the named volumes
+  `screamer-watcom-v2-tools` and `screamer-watcom10-tools` (256 MiB each).
+  The run image is `screamer-run:1`. The image names MUST be flat, because
+  Dosker 0.1.2 rejects a name that holds a slash.
+- **FR-005**: The setup tool MUST create an absent volume, copy the toolchain
+  into it, reuse a present volume, and record the digests.
 - **FR-006**: The build adapter MUST stage the sources with 8.3 names, write a
-  `BUILD.BAT` batch file, run it with `dosker exec`, and copy the EXE and the
-  MAP back.
+  `BUILD.BAT` batch file and a `LINK.RSP` response file, copy them into
+  `C:\WORK`, run the batch with `dosker exec`, and copy the EXE and the MAP
+  back. The batch sets `WATCOM=D:\WATCOM` on the toolchain volume.
 - **FR-007**: The build adapter MUST write no file into a live bind of the
   host tree. It MUST use the sync bind fallback or a container copy.
 - **FR-008**: `run.py` MUST own the sessions and stop each one in a `finally`
@@ -329,6 +332,43 @@ _Future Extensions_ list their own requests.
 - **Finding**: `docs/explanation/findings.md`, "The full behavior run matches
   the baseline".
 
+#### RD-004: The toolchain volume
+
+- **Question**: can the V2 toolchain live in the image?
+- **Evidence**: the FreeDOS base is 32 MiB and the V2 toolchain is 121 MiB.
+  The build of `COPY toolchain/ C:\WATCOM` plus `RUN CHECK.BAT` fails at the
+  `RUN` with `cannot write C:\WATCOM\BINW\VI.HLP: No space left on device`.
+- **Evidence**: the `screamer-watcom-v2-tools` volume (256 MiB) holds the
+  tree at `WATCOM`. The FreeDOS base exposes the first added volume as `D:`,
+  although `dosker run -v NAME:E:` records `E:`.
+- **Decision**: the toolchain is a named volume. The build image is the
+  FreeDOS base. The setup copies the tree with `mcopy`.
+- **Decision**: image and container names are flat. The image name pattern is
+  `[a-z0-9][a-z0-9_.-]{0,62}`. A slash is invalid.
+
+#### RD-005: The FreeDOS DOS/4GW boundary
+
+- **Question**: does the behavior run work in the Dosker FreeDOS base?
+- **Evidence**: the shipped `STARTH.EXE` with the shipped `DOS4GW.EXE` runs in
+  the base and prints `Files damaged. Re-install Screamer.`  The game starts.
+  A V2-built test EXE (`free.exe`, byte-identical to the Docker build) fails
+  with `DOS/4GW fatal error (1012): ... is not a WATCOM program`, with the
+  shipped 1.95 extender and the V2 1.97 extender.  The same files run in the
+  host DOSBox-X.
+- **Evidence**: the DOSBox-X 2026.10.01 binary embeds a DOS/4G 2.01a
+  extender at file offset `0x7cfc67`, 353,668 bytes, SHA-256
+  `87cb2fb20a83adde247e08b2dd98c3001392e7f5cca1faa17277ccd75186b919`.  The
+  extracted extender runs the test EXE in the FreeDOS base and prints the 4
+  markers.  The DOSBox-X internal DOS uses the same 2.01a; that is why the
+  host run passed.
+- **Decision**: the setup extracts the 2.01a from the pinned DOSBox-X.  The
+  Dosker behavior run copies the 2.01a beside the test EXE.  The default
+  Docker backend keeps the DOSBox-X behavior run.
+- **First module**: `run.py run --function 0x300ec --backend dosker
+  --no-write` passes. The build is the Dosker V2 volume. The identity is 3 of
+  3 instructions and 6 of 9 bytes, the stored verdict. The behavior finds the
+  4 markers in the Dosker FreeDOS base with the 2.01a.
+
 ## Approaches Considered
 
 ### Dosker Is The Engine, Screamer Keeps The Contract — Recommended
@@ -368,11 +408,10 @@ _Future Extensions_ list their own requests.
 | Component | Responsibility | Depends On |
 | --- | --- | --- |
 | `tools/rebuild/dosker.py` | Hold every call to the `dosker` binary. Parse the result. Map the exit codes. | Python standard library |
-| `tools/rebuild/dosker_setup.py` | Check the pin. Fetch the inputs. Build the four images. Record the digests. | `dosker.py` |
-| `tools/dosker/watcom-v2/Doskerfile` | Define the V2 build image. | Dosker |
-| `tools/dosker/watcom10/Doskerfile` | Define the period build image. | Dosker |
-| `tools/dosker/run/Doskerfile` | Define the module run image. | Dosker |
-| `tools/dosker/image/Doskerfile` | Define the whole-image build environment. | Dosker |
+| `tools/rebuild/dosker_setup.py` | Check the pin. Ensure the base. Create the V2 toolchain volume. Extract the DOS/4G 2.01a. Record the digests. | `dosker.py`, mtools |
+| `screamer-watcom-v2-tools` | The 256 MiB volume with the V2 tree at `D:\WATCOM`. | Dosker |
+| `screamer-run:1` | The FreeDOS base plus the DOS/4G 2.01a extender. | Dosker |
+| `screamer-image:1` | The whole-image build environment. A later step. | Dosker |
 | `tools/rebuild/harness.py` | Module build and run with the current interface. | `dosker.py`, `store.py` |
 | `tools/rebuild/harness_dos.py` | Period build with the current interface. | `dosker.py`, `store.py` |
 | `tools/rebuild/image_plan.py` | Link plan. Whole-image build. Coverage report. | `dosker.py`, `le.py`, `store.py` |
@@ -413,13 +452,13 @@ flowchart LR
 
 1. `run.py` selects a record and calls `harness.py build`.
 2. The harness reads the module recipe and stages the sources under
-   `work/dosker/stage/M<index>/`. The index is deterministic, because a
-   module name is often longer than 8.3.
-3. The harness writes `BUILD.BAT` and asks the client to `exec` it in the
-   work directory `D:\M<index>`.
-4. The client sends the batch name to the session container. The agent runs
-   the batch through `COMMAND.COM` and returns the exit code and the output.
-5. The client copies `D:\M<index>\<exe>` and the map into `work/rebuild/`.
+   `work/dosker/stage/<module>/` with 8.3 names.
+3. The harness writes `BUILD.BAT` and `LINK.RSP`. The client starts the
+   `freedos:1.3` base with the V2 volume on `D:`, then copies the files into
+   `C:\WORK`.
+4. The client runs `C:\WORK\BUILD.BAT`. The agent runs the batch through
+   `COMMAND.COM` and returns the exit code and the output.
+5. The client copies `C:\WORK\<EXE>` and the map into `work/rebuild/`.
 6. `diff_module.py` and `oracle.py` compare the rebuilt body with the shipped
    body. The result goes through `store.py`.
 7. For the behavior run, `run.py` starts one session per module. The harness
@@ -507,60 +546,48 @@ The exit code map stays:
 
 ### Doskerfiles
 
-`tools/dosker/watcom-v2/Doskerfile`:
+The V2 toolchain is 121 MiB. The FreeDOS base is 32 MiB. A `COPY` of the
+toolchain into the base fails at the `RUN` step with
+`No space left on device` (RD-004). The toolchain stays in the
+`screamer-watcom-v2-tools` volume:
+
+```sh
+python3 tools/rebuild/dosker_setup.py --toolchain PATH
+```
+
+The setup creates the 256 MiB volume, copies the V2 tree into `::WATCOM` with
+`mcopy`, and records the digests in `work/dosker/setup.json`. The FreeDOS base
+exposes the first added volume as `D:`, so the build batch sets
+`WATCOM=D:\WATCOM`. `dosker run -v NAME:E:` records `E:`, but the guest sees
+`D:` (RD-004).
+
+The build container is the `freedos:1.3` base with the volume on `D:`. The
+build copies the sources and the batch into `C:\WORK` and runs `BUILD.BAT`.
+The behavior run uses the DOS/4G 2.01a extender that the setup extracts from
+the pinned DOSBox-X.  The 2.01a accepts the V2 test stub in the FreeDOS base;
+the shipped 1.95 and the V2 1.97 reject it with DOS/4GW error 1012 (RD-005).
+The default Docker backend keeps the DOSBox-X behavior run.
+
+The run image is `screamer-run:1`:
 
 ```doskerfile
 FROM freedos:1.3
-COPY toolchain\ C:\WATCOM\
-COPY check\ C:\CHECK\
-RUN C:\CHECK\CHECK.BAT
+COPY extender/DOS4GW.EXE C:\DOS4GW.EXE
+RUN DIR C:\DOS4GW.EXE
 ```
 
-`tools/dosker/watcom10/Doskerfile`:
+The `RUN` projects the `COPY` tree onto the image disk. A `COPY` without a
+following `RUN` leaves the file in the tree only, and a run container does
+not hold it.
 
-```doskerfile
-FROM freedos:1.3
-MACHINE memory=32M
-COPY WATCOM\ C:\WATCOM\
-COPY check\ C:\CHECK\
-RUN C:\CHECK\CHECK.BAT
-```
+Rules:
 
-`tools/dosker/run/Doskerfile`:
-
-```doskerfile
-FROM freedos:1.3
-MACHINE memory=32M
-COPY extender\ C:\
-```
-
-The image holds the shipped `DOS4GW.EXE` on `C:`. The run session copies it
-beside the module EXE, because the stub searches the current directory and
-`PATH`. The image holds no game file. A whole-game image is a later option.
-
-`tools/dosker/image/Doskerfile`:
-
-```doskerfile
-FROM freedos:1.3
-MACHINE memory=32M
-COPY WATCOM\ C:\WATCOM\
-COPY link\ C:\LINK\
-COPY check\ C:\CHECK\
-RUN C:\CHECK\CHECK.BAT
-```
-
-The toolchain batch files set `WATCOM`, `PATH`, `INCLUDE`, `LIB`, and
-`DOS4GPATH`, as the Dosker `openwatcom-dos` example does. The `RUN` check and
-the generated `BUILD.BAT` each set them. The images need no `ENV`
-instruction.
-
-The generator fills each `toolchain\`, `WATCOM\`, `files\`, `link\`, and
-`check\` directory from a pinned input. `CHECK.BAT` compiles and links a
-small C file and ends with `ECHO OK`. A non-zero exit stops the image build.
-
-The Dosker `COPY` instruction accepts a directory source and copies it
-recursively. This fact makes the toolchain images possible without a new
-Dosker feature. The 8.3 rule still applies to every copied name.
+- The `COPY` source is a context path with `/`. The destination is a DOS path.
+- Do not end a Doskerfile line with `\`. The parser treats it as a line
+  continuation. Use a file destination, or a destination without the trailing
+  separator.
+- A `COPY` of a tree needs a following `RUN` to reach the image disk.
+- The 8.3 rule applies to every copied name (RD-002).
 
 The setup tool records the input digests. It also confirms that
 `freedos:1.3`, `DOSKER.EXE`, and the FreeDOS source are present. A missing
@@ -573,7 +600,7 @@ input stops the setup with the pinned URL and the expected SHA-256.
 ```json
 {
   "version": 1,
-  "toolchain": "screamer/watcom10:1",
+  "toolchain": "screamer-watcom10:1",
   "engine": "qemu",
   "link_options": [
     "system", "dos4g",
@@ -701,7 +728,7 @@ A build result adds these fields to the existing `checks` object:
   recorded Docker baseline. Measure the baseline before the default switch.
 - **NFR-002**: A build MAY reuse one container for a batch of at most 25
   modules. A behavior run MUST start a fresh session per module, because a
-  long session accumulates DOS state. The behavior run MUST enable DOSBox-X
+  long session accumulates DOS state. The DOSBox-X behavior run MUST enable
   long file names, because the test harnesses use them.
 - **NFR-003**: The output MUST print the image tag, the image digest, the
   engine command, and the guest exit code. A log file MUST hold the same
@@ -734,8 +761,9 @@ A build result adds these fields to the existing `checks` object:
   compare the check count.
 - **Pipeline**: The stage 11 whole-image check MUST print the coverage line
   when the image exists. The count stays at 303.
-- **Behavior run**: Use one fresh session per module, long file names on, and
-  the extender beside the EXE. Do not batch the behavior runs.
+- **Behavior run**: Use one fresh session per module, the DOS/4G 2.01a
+  extender beside the EXE, and long file names where the DOS supports them.
+  Do not batch the behavior runs.
 
 ## Rollout And Compatibility
 
@@ -763,6 +791,8 @@ The compatibility rules are:
 | --- | --- | --- |
 | A future V2 package moves the static data. | The test-EXE bytes differ. | Gate on the identity verdict. The oracle masks the link-time addresses. See RD-001. |
 | A future toolchain input has a long name. | The image build fails. | The setup enumerates the names and fails early. The current inputs pass. See RD-002. |
+| The toolchain exceeds the base image. | The `RUN` fails with no space. | Use the toolchain volume. See RD-004. |
+| The FreeDOS base rejects the V2 DOS/4GW stub. | The behavior run fails. | The setup extracts the DOS/4G 2.01a from the pinned DOSBox-X; the 2.01a accepts the stub. See RD-005. |
 | QEMU TCG boot time slows the record run. | Long CI runs. | Batch the builds. The behavior run boots once per module, as the Docker baseline does. Measure. Use a snapshot later. |
 | A live bind corrupts the host tree. | Lost work. | Force the sync fallback. Reject a live bind in the client. |
 | Dosker 0.1.2 is young. | A bug blocks the build. | Pin the release. Keep the change small. File the fix in Dosker. |
@@ -772,7 +802,7 @@ The compatibility rules are:
 
 ## Open Questions
 
-The former blocking questions are resolved in RD-001, RD-002, and RD-003.
+The former blocking questions are resolved in RD-001 to RD-005.
 
 | Question | Owner | Resolution Path |
 | --- | --- | --- |
@@ -799,6 +829,8 @@ The former blocking questions are resolved in RD-001, RD-002, and RD-003.
   `docs/explanation/findings.md` describe the new path.
 - **SC-009**: The setup name check passes the V2 DOS tree and the 10.0a CD
   tree with zero violations.
+- **SC-010**: `run.py run --function 0x300ec --backend dosker --no-write`
+  passes the build, identity, and behavior checks in the Dosker FreeDOS base.
 
 ## Future Extensions
 

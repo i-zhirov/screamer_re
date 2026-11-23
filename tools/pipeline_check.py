@@ -74,6 +74,8 @@ TOOLS = (
     "rebuild/store.py",
     "rebuild/schema.py",
     "rebuild/harness.py",
+    "rebuild/dosker.py",
+    "rebuild/dosker_setup.py",
     "rebuild/run.py",
     "rebuild/image_compare.py",
     "rebuild/view.py",

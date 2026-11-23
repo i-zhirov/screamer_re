@@ -304,6 +304,35 @@ rebuilt modules.  The build runs in a container, because the OpenWatcom V2
 release has no macOS asset.  The container holds the extracted toolchain, so
 no installer run is needed.
 
+### The Dosker build backend
+
+`tools/rebuild/dosker.py` is the only caller of the `dosker` CLI.
+`harness.py build --backend dosker` uses the `freedos:1.3` base and the
+`screamer-watcom-v2-tools` volume.  `tools/rebuild/dosker_setup.py` creates the
+volume and copies the DOS-hosted V2 tree with `mcopy` from mtools.  The V2 tree
+is 121 MiB, so it cannot live in the 32 MiB base image.
+
+The `--backend dosker` behavior run uses the DOS/4G 2.01a extender, which
+`dosker_setup.py` extracts from the pinned DOSBox-X at `0x7cfc67` (353,668
+bytes, SHA-256 `87cb2fb20a83adde247e08b2dd98c3001392e7f5cca1faa17277ccd75186b919`).
+The 2.01a accepts the V2 test stub in the FreeDOS base; the shipped 1.95 and
+the V2 1.97 reject it with DOS/4GW error 1012.  The default Docker backend
+keeps the DOSBox-X behavior run and copies the shipped `DOS4GW.EXE` beside the
+module EXE.
+
+Dosker 0.1.2 rules: the image name is flat
+(`[a-z0-9][a-z0-9_.-]{0,62}`).  The `COPY` source is a context path with `/`.
+A line that ends with `\` is a line continuation.  A `COPY` that must reach
+the image disk needs a following `RUN`.
+
+```sh
+python3 tools/rebuild/dosker_setup.py --toolchain PATH
+python3 tools/rebuild/dosker_setup.py --check
+python3 tools/rebuild/harness.py build --module free --backend dosker
+python3 tools/rebuild/run.py run --function 0x300ec --backend dosker --no-write
+python3 tools/rebuild/harness.py run --module free --backend dosker
+```
+
 C is the default module implementation.  An assembly implementation is used
 only when C cannot reproduce the original bytes; the finding records why.  Do
 not add an assembly oracle only to raise the verified count.  The FPU and math
@@ -883,6 +912,9 @@ with the code 1.  The guard is silent when the segments agree.
 | `python3` | 3.14.7 | project tools |
 | `capstone` | 5.0.9 | x86 disassembly library |
 | `dosbox-x` | 2026.10.01 | DOS emulator with a debugger |
+| `dosker` | 0.1.2 | DOS container runtime |
+| `qemu-system-i386` | 11.1.3 | the Dosker QEMU engine |
+| `mcopy`, `mdir` | mtools | the V2 toolchain volume |
 | `objdump` | LLVM 21.1.8 | object inspection |
 | `otool`, `nm`, `strings`, `xxd` | macOS | binary inspection |
 | `hdiutil` | macOS 15.5 | ISO mount |

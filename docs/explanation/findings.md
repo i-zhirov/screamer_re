@@ -19294,3 +19294,77 @@ temporary `-od` recipe.
   extender beside the EXE.  See RD-003.
 - Evidence: `python3 work/dosmig/behavior.py --chunk-size 1` writes
   `work/dosmig/behavior.json`.
+
+## The Dosker build substrate builds the first module
+
+- Observation: the first Dosker image reference `screamer/watcom-v2:1` is
+  invalid.  The image name pattern is `[a-z0-9][a-z0-9_.-]{0,62}`, so a slash
+  is not allowed.  The flat name `screamer-watcom-v2:1` is accepted.
+  Evidence: `dosker build -t screamer/watcom-v2:1` prints
+  `invalid image reference`.
+- Observation: a `COPY` source is a build-context path with `/`.  A source
+  with a backslash is not found.  A destination that ends with `\` at the end
+  of the line is read as a line continuation.
+  Evidence: `COPY toolchain\ C:\WATCOM\` prints
+  `source not found: toolchain\`, and a line that ends with `C:\WATCOM\`
+  prints `unterminated line continuation`.
+- Observation: the FreeDOS base image is 32 MiB.  The DOS-hosted V2 toolchain
+  is 121 MiB.  The build fails at the `RUN` step with
+  `cannot write C:\WATCOM\BINW\VI.HLP: No space left on device`.
+  Evidence: `dosker build --update -t screamer-watcom-v2:1 work/dosker/v2-context`
+  with the `COPY toolchain/` step.
+- Observation: the 256 MiB volume `screamer-watcom-v2-tools` holds the V2 tree
+  with `mcopy` (mtools).  The FreeDOS base exposes the first added volume as
+  `D:`, although `dosker run -v NAME:E:` records `E:`.
+  Evidence: `mcopy -s -m -i volume.img@@1048576 <toolchain>/* ::WATCOM`, then
+  `dosker exec <c> DIR E:\` prints `Invalid drive E:.` and `DIR D:\` lists the
+  `WATCOM` directory.
+- Observation: a `COPY` that must reach the image disk needs a following
+  `RUN`.  A `COPY`-only image has the file in the tree, and a run container
+  does not hold it.
+  Evidence: the `screamer-run:1` image with `COPY extender/DOS4GW.EXE` and no
+  `RUN`; the container `DIR C:\` lacks the file.  With `RUN DIR C:\DOS4GW.EXE`
+  the file is present.
+- Observation: the FreeDOS base rejects the V2 DOS/4GW test EXE with
+  `DOS/4GW fatal error (1012): ... is not a WATCOM program`.  The shipped
+  `STARTH.EXE` with the shipped extender runs and prints
+  `Files damaged. Re-install Screamer.`  The same test EXE and extender run in
+  the host DOSBox-X.  The guest `FREE.EXE` hash equals the host hash.
+  Evidence: `dosker exec test-free 'free.exe'` and
+  `dosker exec test-free 'STARTH.EXE'`.
+- Observation: the Dosker build of `free` produces the same `free.exe` hash
+  `32e3bc520de0f88db03a6d48133fe82da1b86b80e651b58a36e783092acf6983` as the
+  Docker build.  The record passes: the identity is 3 of 3 instructions and 6
+  of 9 bytes, and the behavior finds the 4 markers in DOSBox-X.
+  Evidence: `python3 tools/rebuild/harness.py build --module free
+  --backend dosker` and `python3 tools/rebuild/run.py run --function 0x300ec
+  --backend dosker --no-write --show` report
+  `[1/1] 0x300ec free: PASS`.
+- Inference: the build substrate is sound.  The behavior gate stays in
+  DOSBox-X until the FreeDOS DOS/4GW condition is resolved or the test EXEs
+  are bound to the extender.
+- Decision: keep the build on Dosker.  See RD-004 and RD-005.
+
+## The DOS/4G 2.01a extender fixes the FreeDOS behavior
+
+- Observation: the DOSBox-X 2026.10.01 binary (SHA-256
+  `6934abe66fe55d71487ded37e097416de65981250c902a9cca2bfd1284e98c96`) embeds a
+  DOS/4G 2.01a extender at file offset `0x7cfc67`, 353,668 bytes, SHA-256
+  `87cb2fb20a83adde247e08b2dd98c3001392e7f5cca1faa17277ccd75186b919`.  The
+  `_bfb_DOS4GW_EXE` descriptor at `0xcb93e8` names the blob.
+- Observation: the extracted extender runs the V2 `free.exe` in the Dosker
+  FreeDOS base and prints `NULL`, `DONE`, `FREE`, `AFTR`.  The shipped 1.95
+  and the V2 1.97 fail with DOS/4GW error 1012.  The host DOSBox-X uses the
+  same 2.01a, which is why the host behavior run passed.
+- Observation: `dosker exec` does not honor the guest `>` redirection.  The
+  guest output comes back on stdout.  The behavior runner writes the stdout
+  to `work/rebuild/<module>_out.txt`.
+- Observation: the guest exit code is recorded, not gated.  The markers
+  decide the check, as FR-008 states.
+- Decision: the setup extracts the 2.01a and pins the DOSBox-X and extender
+  digests.  The `--backend dosker` behavior run uses the FreeDOS base with the
+  2.01a.  The default Docker backend keeps the DOSBox-X run.
+- Evidence: `python3 tools/rebuild/dosker_setup.py --toolchain PATH` prints
+  the extender digest.  `python3 tools/rebuild/run.py run --function 0x300ec
+  --backend dosker --no-write --show` prints `ran free: 4 markers found,
+  exit 0` and `[1/1] 0x300ec free: PASS (instructions 3/3, bytes 6/9)`.
