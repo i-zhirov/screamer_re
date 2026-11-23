@@ -19434,3 +19434,14 @@ temporary `-od` recipe.
   value still selects the Docker/DOSBox-X path for one milestone.
 - Evidence: `python3 tools/rebuild/run.py run --function 0x300ec --no-write`
   (no `--backend`) reports `0x300ec free: PASS`.
+
+## The Dosker cp rejects a lowercase guest name
+
+- Observation: Dosker 0.1.3 rejects a guest path that is not an uppercase 8.3
+  name. The build copied the module EXE out as `free.exe`; the copy failed and
+  left a stale map. The identity then read the stale map and failed.
+- Decision: the build names the staging directory, the EXE, and the map with
+  uppercase 8.3 forms (`dosker_stage_name`, `dosker_exe_name`,
+  `dosker_map_name`). The run copies the EXE in as `C:\<EXE>`.
+- Evidence: `run.py run --function 0x300ec` and `run.py run --all` both report
+  `0x300ec free: PASS`.
