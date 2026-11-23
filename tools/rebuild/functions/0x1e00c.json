@@ -30,12 +30,12 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the output lacks '8'",
+        "verdict": "fail"
       },
       "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
+        "detail": "error: the dosker command 'cp' failed: dosker: agent error BAD_PATH: path is invalid or not 8.3",
+        "verdict": "fail"
       },
       "identity": {
         "bytes_equal": 45,
@@ -48,7 +48,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1e00c",
     "date": "2026-11-23",
-    "fingerprint": "sha256:2f5854dc15e2c3c2f826669b73383e20f04c559d15093e8849f1e98505b5b690",
+    "fingerprint": "sha256:9716a3c5ade52b0833d201f67c581ac6d46f59ab85d56fccc95a04efdecb2842",
     "source_digest": "sha256:6e61af52a22e4a420c496e74f7e994b4a709d63285991ed38ff1f22ec359deec",
     "tool": "run.py"
   },

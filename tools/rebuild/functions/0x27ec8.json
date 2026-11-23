@@ -22,8 +22,8 @@
         "verdict": "pass"
       },
       "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
+        "detail": "error: the dosker command 'run' failed: dosker: container name already in use: screamer-build-video-present",
+        "verdict": "fail"
       },
       "identity": {
         "bytes_equal": 7,
@@ -36,7 +36,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27ec8",
     "date": "2026-11-23",
-    "fingerprint": "sha256:b32ad46e39532e02c7760ee87bcc078b9795a3b9ae96c0c0bcbfb1e552bac2f7",
+    "fingerprint": "sha256:5717f5698dec13f6f5b1fba3b88a832f2ae690685a116884db116b5c339dced6",
     "source_digest": "sha256:f5eddab3eb7797a5a5ffb15fb98cb8ef6371154b06acfab61c47e7b81a31b71e",
     "tool": "run.py"
   },

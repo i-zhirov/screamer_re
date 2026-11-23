@@ -61,12 +61,12 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "the output holds every marker",
-        "verdict": "pass"
+        "detail": "error: the dosker command 'run' failed: dosker: engine setup failed: qemu --version timed out",
+        "verdict": "fail"
       },
       "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
+        "detail": "error: the dosker command 'run' failed: dosker: engine setup failed: qemu --version timed out",
+        "verdict": "fail"
       },
       "identity": {
         "bytes_equal": 22,
@@ -79,7 +79,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x27c34",
     "date": "2026-11-23",
-    "fingerprint": "sha256:5df7579f9149fdd15c0ed0ee432ccbbee6df7c9a1c84e5a1433005923e6cac83",
+    "fingerprint": "sha256:7d336584fdfa12a6b86b0a2a4bb552117d2564a065206e9ee1a1a1fec0c51a52",
     "source_digest": "sha256:59d894c773ffc7b45c0f3cb320fe784075ce6011bf254a8887013e51c062241a",
     "tool": "run.py"
   },
