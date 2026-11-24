@@ -1,0 +1,15 @@
+{
+  "exe": "memrt.exe",
+  "map": "memory_runtime.map",
+  "name": "memory_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "memory_runtime.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "memory_runtime.asm"
+    }
+  ]
+}

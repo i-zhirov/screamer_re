@@ -1,0 +1,11 @@
+{
+  "exe": "soundrt.exe",
+  "map": "sound_runtime.map",
+  "name": "sound_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "sound_runtime.c"
+    }
+  ]
+}

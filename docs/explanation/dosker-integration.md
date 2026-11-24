@@ -907,7 +907,7 @@ repeatable test.
 ### Whole-Image Completion
 
 The current store holds 935 function records: 30 `verified`, 1 `matching`,
-221 `rebuilt`, 31 `named`, and 652 `unknown`. It holds 252 module recipes.
+221 `rebuilt`, 31 `named`, and 652 `unknown`. It holds 258 module recipes.
 The records cover code functions only. A byte-identical image needs:
 
 - the data objects and the string table;

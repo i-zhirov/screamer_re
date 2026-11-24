@@ -148,5 +148,92 @@ class CompareLoadedTestCase(unittest.TestCase):
         self.assertEqual(exe.fixup_section(), b"ABCD")
 
 
+def coverage_objects() -> tuple[list[le.Object], list[le.Page]]:
+    objects = [
+        le.Object(1, 0x20, 0x10000, le.O_EXECUTABLE, 1, 1, 0),
+        le.Object(2, 0x10, 0x20000, le.O_WRITABLE, 2, 1, 0),
+    ]
+    pages = [
+        le.Page(1, 0, 1, 0, 0x40, 0x10, 0x10000, 0x20),
+        le.Page(2, 0, 2, 0, 0x80, 0x10, 0x20000, 0x10),
+    ]
+    return objects, pages
+
+
+class CoverageTestCase(unittest.TestCase):
+    def test_identical_images_are_identical(self) -> None:
+        objects, pages = coverage_objects()
+        left = image(bytes(0x100), objects=objects, pages=pages)
+        right = image(bytes(0x100), objects=objects, pages=pages)
+        report = image_compare.coverage_loaded(left, right)
+        self.assertEqual(report.verdict, "identical")
+        self.assertEqual(report.code_gap, 0)
+        self.assertEqual(report.data_gap, 0)
+        self.assertEqual(report.code_linked, 0x20)
+
+    def test_an_unmodeled_range_marks_a_region(self) -> None:
+        objects, pages = coverage_objects()
+        left = image(bytes(0x100), objects=objects, pages=pages)
+        right = image(bytes(0x100), objects=objects, pages=pages)
+        report = image_compare.coverage_loaded(
+            left, right, [image_compare.LinearRange(0x10008, 0x1000C, "code")]
+        )
+        statuses = {region.name: region.status for region in report.regions}
+        self.assertEqual(statuses["obj.1.10008"], "unmodeled")
+        self.assertEqual(report.verdict, "unmodeled")
+        self.assertEqual(report.unmodeled_bytes, 4)
+
+    def test_a_short_rebuilt_region_is_absent(self) -> None:
+        objects, pages = coverage_objects()
+        left = image(bytes(0x100), objects=objects, pages=pages)
+        right = image(bytes(0x50), objects=objects, pages=pages)
+        report = image_compare.coverage_loaded(left, right)
+        statuses = {region.name: region.status for region in report.regions}
+        self.assertEqual(statuses["obj.1.10000"], "absent")
+        self.assertEqual(report.verdict, "absent")
+
+    def test_a_different_byte_is_different(self) -> None:
+        objects, pages = coverage_objects()
+        left = image(bytes(0x100), objects=objects, pages=pages)
+        changed = bytearray(0x100)
+        changed[0x40] = 0xFF
+        right = image(bytes(changed), objects=objects, pages=pages)
+        report = image_compare.coverage_loaded(left, right)
+        statuses = {region.name: region.status for region in report.regions}
+        self.assertEqual(statuses["obj.1.10000"], "different")
+        self.assertEqual(report.verdict, "different")
+
+
+class PlanUnmodeledTestCase(unittest.TestCase):
+    def test_ranges_are_parsed(self) -> None:
+        ranges = image_compare.plan_unmodeled(
+            {
+                "unmodeled": [
+                    {"start": "0x10000", "end": "0x10010", "kind": "code"},
+                    {"start": 0x20000, "end": 0x20010, "kind": "data"},
+                ]
+            }
+        )
+        self.assertEqual(
+            ranges,
+            [
+                image_compare.LinearRange(0x10000, 0x10010, "code"),
+                image_compare.LinearRange(0x20000, 0x20010, "data"),
+            ],
+        )
+
+    def test_a_bad_kind_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            image_compare.plan_unmodeled(
+                {"unmodeled": [{"start": "0x10000", "end": "0x10010", "kind": "x"}]}
+            )
+
+    def test_an_empty_range_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            image_compare.plan_unmodeled(
+                {"unmodeled": [{"start": "0x10010", "end": "0x10010", "kind": "code"}]}
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

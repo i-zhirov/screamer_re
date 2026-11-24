@@ -337,8 +337,9 @@ class ImageGateTestCase(unittest.TestCase):
                 )
         self.assertEqual(len(checks.results), 1)
         self.assertTrue(checks.results[0][1])
+        commands = [call.args[0] for call in run_mock.call_args_list]
         self.assertTrue(
-            any("image_compare.py" in part for part in run_mock.call_args.args[0])
+            any("image_compare.py" in part for command in commands for part in command)
         )
 
     def test_a_differing_image_fails(self) -> None:

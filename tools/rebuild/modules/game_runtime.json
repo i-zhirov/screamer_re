@@ -1,0 +1,11 @@
+{
+  "exe": "gamert.exe",
+  "map": "game_runtime.map",
+  "name": "game_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "game_runtime.c"
+    }
+  ]
+}

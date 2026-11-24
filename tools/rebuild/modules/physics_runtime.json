@@ -1,0 +1,11 @@
+{
+  "exe": "physrt.exe",
+  "map": "physics_runtime.map",
+  "name": "physics_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "physics_runtime.c"
+    }
+  ]
+}

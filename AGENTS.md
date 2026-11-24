@@ -112,6 +112,8 @@ screamer_re/
 │   │   ├── oracle.py          # compare function bodies with relocations normalized
 │   │   ├── diff_module.py     # diff one rebuilt module against the original
 │   │   ├── image_compare.py   # compare a rebuilt whole image with the original
+│   │   ├── image_plan.py      # the whole-image link plan, build, and coverage
+│   │   ├── link.json          # the module link order and the unmodeled ranges
 │   │   ├── schema.py          # validate a record against the contract subset
 │   │   ├── view.py            # render the five status-page views
 │   │   ├── docs.py            # render the program-map tables
@@ -119,7 +121,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the two hundred and fifty-two module recipes
+│   │   ├── modules/           # the two hundred and fifty-eight module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -144,6 +146,10 @@ python3 tools/rebuild/run.py run --all --strict
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
+python3 tools/rebuild/image_plan.py seed
+python3 tools/rebuild/image_plan.py seed --check
+python3 tools/rebuild/image_plan.py build --check
+python3 tools/rebuild/image_plan.py coverage --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
@@ -161,7 +167,7 @@ python3 tools/rebuild/harness_dos.py build --module free
 - **Test**: run the syntax gate and the tool checks:
 
 ```sh
-python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/harness.py tools/rebuild/dosker.py tools/rebuild/dosker_setup.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
+python3 -m py_compile tools/le.py tools/inventory.py tools/extract_cd_image.py tools/dosboxx_control.py tools/entry_probe.py tools/gfx_container.py tools/export_assets.py tools/sound_bank.py tools/member_probe.py tools/cross_check.py tools/rebuild/diff_module.py tools/rebuild/oracle.py tools/rebuild/store.py tools/rebuild/schema.py tools/rebuild/image_compare.py tools/rebuild/image_plan.py tools/rebuild/harness.py tools/rebuild/dosker.py tools/rebuild/dosker_setup.py tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py tools/rebuild/callgraph.py tools/pipeline_check.py
 python3 tools/le.py info ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
 python3 tools/inventory.py ~/Documents/Screamer.app/Contents/Resources/game
 python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --original-address 0x300ec --rebuilt work/rebuild/free.exe --rebuilt-map work/rebuild/free.map --rebuilt-symbol free_
@@ -178,8 +184,10 @@ skips stage 8 and the tool preflight, so the run reports 299 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
 run reports 288 checks.  Both flags report 284 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
-`--rebuilt-image` exists.  The image check is a skip until a whole image is
-built, so it does not change these counts:
+`--rebuilt-image` exists and prints the coverage report when
+`tools/rebuild/link.json` is present.  The image check is a skip until a whole
+image is built, and the coverage report adds no check, so the counts stay the
+same:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
@@ -226,7 +234,7 @@ open ~/Documents/Screamer.app
       tools/rebuild/diff_module.py
       tools/rebuild/oracle.py
       tools/rebuild/store.py tools/rebuild/schema.py
-      tools/rebuild/image_compare.py tools/rebuild/harness.py
+      tools/rebuild/image_compare.py tools/rebuild/image_plan.py tools/rebuild/harness.py
       tools/rebuild/dosker.py tools/rebuild/dosker_setup.py
       tools/rebuild/harness_dos.py tools/rebuild/watcom10_setup.py
       tools/rebuild/run.py tools/rebuild/view.py tools/rebuild/docs.py
@@ -371,6 +379,37 @@ through the store.
   stub, the header, the resident tables, the fixup section, every object, the
   non-resident name table, and the whole file.  Stage 11 runs it when
   `--rebuilt-image` exists and reports a skip when no whole image is built.
+- `image_plan.py` owns the link plan (`link.json`), the best-effort whole-image
+  build, and the coverage report.  `seed` derives the module order from the
+  lowest record address of each module and the unmodeled ranges from the gaps
+  between the module record extents and the data objects.  `build` compiles the
+  non-harness sources of the plan on the Dosker V2 volume; a module recipe's
+  `<module>_main` source is its stand-alone test harness, so the build excludes
+  it.  The batch appends every compile and the link to `BUILD.LOG`, because
+  `dosker exec` does not interpret `>` on the command line and the agent returns
+  the batch output as one control line; the tool copies the log back on a
+  failure.  `coverage` writes `work/rebuild/image_coverage.json` and prints a
+  region table with the status `identical`, `different`, `absent`, or
+  `unmodeled`.  A gap is a plan gap, so the tool reports it and does not claim a
+  pass.
+- The run-time clusters have no function record and no behavior check, so they
+  do not enter the verified count.  `memory_runtime` holds the heap and memory
+  helpers; its allocator is a compatibility layer until the Watcom nheap is
+  recovered.  `startup_runtime` holds the C startup, DPMI, port I/O, process
+  terminator, and cleanup and teardown helpers; most are inert compatibility
+  stubs.  `input_runtime` holds the keyboard, joystick, and mouse entry points
+  and the input state globals; it is inert too.  `sound_runtime` holds the
+  sound and music entry points and the sound state globals; it is inert as
+  well.  `game_runtime` holds the race flow, menu, network, overlay, track, and
+  timer entry points; it is inert as well.  `physics_runtime` holds the object
+  list, map collision, player and opponent steps, traffic links, rotation
+  helpers, and the vehicle state; it is inert as well.  Do not call these
+  modules byte-faithful.  A new run-time module enters the plan only when it is
+  listed in `image_plan.RUNTIME_MODULES`, which appends it to the seeded order.
+- Stage 11 prints the coverage report when `--rebuilt-image` exists and
+  `tools/rebuild/link.json` is present.  The report is a diagnostic: the
+  whole-image check owns the pass or fail, so the coverage output adds no check
+  and the documented counts stay at 303, 299, 288, and 284.
 - `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.

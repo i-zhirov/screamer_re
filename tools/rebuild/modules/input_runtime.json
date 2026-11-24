@@ -1,0 +1,11 @@
+{
+  "exe": "inputrt.exe",
+  "map": "input_runtime.map",
+  "name": "input_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "input_runtime.c"
+    }
+  ]
+}

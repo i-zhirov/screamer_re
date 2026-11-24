@@ -19614,3 +19614,199 @@ temporary `-od` recipe.
 - Byte-perfect identity is the long-term gate. For now the behavior check is the
   interim guarantee; the `game_main` behavior currently stops at
   `Can't run DOS/4G(W)`, which is the test runtime, not the C code.
+
+## The whole-image plan seeds from the record extents and reports coverage
+
+- Observation: `image_plan.py seed` writes `tools/rebuild/link.json` with 251
+  modules in link order and 105 unmodeled ranges.  The order is the lowest
+  record address of each module, starting at `game_main` (`0x10020`).  The
+  unmodeled ranges are the code gaps between the module record extents
+  (103 ranges) and the two data objects (`0xf0000` and `0x100000`).
+- Observation: `image_plan.py build --check` resolves the 251 modules to 325
+  unique implementation sources.  A module recipe's `<module>_main` source is
+  its stand-alone test harness and is excluded from the link.  The staged names
+  pass the 8.3 rule and the guest command fits 127 characters.
+- Observation: `image_plan.py coverage` on the shipped image against itself
+  reports `code linked 336439, code gap 0, data gap 0, unmodeled 588551` and the
+  verdict `unmodeled`.  The modeled code regions are `identical`; the 105 plan
+  gaps are `unmodeled`.  The gap is a plan gap, not a build failure.
+- Observation: the whole-image build is best-effort.  The module recipes are
+  stand-alone test units, so the link excludes their `<module>_main` harness
+  sources, and a link can still fail on a symbol that only the shipped
+  run-time defines.  The tool reports the failure and does not claim a pass.
+- Evidence: `python3 tools/rebuild/image_plan.py seed`,
+  `python3 tools/rebuild/image_plan.py seed --check`,
+  `python3 tools/rebuild/image_plan.py build --check`, and
+  `python3 tools/rebuild/image_plan.py coverage --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE`.
+- Stage 11 prints the coverage report when the rebuilt image and the link plan
+  exist.  The report adds no check, so the pipeline counts stay at 303, 299,
+  288, and 284.
+
+## The whole-image link fails on the missing data model and unmodeled functions
+
+- Observation: `image_plan.py build` compiled all 325 implementation sources
+  with the Dosker V2 toolchain and no compiler error, then the linker reported
+  2,107 undefined references over 1,426 unique symbols.  Every one of the 251
+  module symbols resolves, so the link does not expose a module mismatch.
+- Observation: the 1,426 unique symbols are 338 functions with no module, 383
+  game data globals, 697 compiler data labels (`_DAT_*`/`_PTR_DAT_*`), and 8
+  run-time or library symbols (`main_`, `__int7`, `__int7_pl3`, `__LpDllName`,
+  `_EFG_Format_`, `__cnvs2d_`, `__doformat_`, `__vsprintf_`).  The 338 include
+  Watcom run-time internals (`heap_*`, `stack_grow_*`, `stream_*`, `nfree_`,
+  `inportb_`, `outportb_`, `startup_*`, `drm_*`) and decompiler-named game
+  functions (`sub_*`, `case_*`, `f1_`..`f8_`).
+- Observation: `dosker exec` does not interpret `>` on the command line, and
+  the agent returns the batch output as one control line.  The build batch
+  therefore appends every compile and the link to `BUILD.LOG`, and the tool
+  copies the log back when the batch fails.
+- Evidence: `python3 tools/rebuild/image_plan.py build`; the complete unique
+  list is `work/rebuild/undefined_symbols.txt`, the per-object map is
+  `work/rebuild/undefined_by_object.txt`, and the linker output is
+  `work/rebuild/BUILD.LOG`.
+
+## The heap and memory cluster resolves in the whole-image link
+
+- Observation: the 338 missing functions group into nine subsystems: heap and
+  memory (11), startup and run-time (61), input (14), sound and music (34),
+  files and streams (17), objects and physics (47), render and video (25), race
+  and game flow (65), and unnamed or general (64).  The grouping comes from the
+  symbol prefix and the call site; the complete list is
+  `work/rebuild/function_subsystems.txt`.
+- Observation: the heap and memory cluster is `heap_alloc_`, `heap_free_`,
+  `heap_grow_`, `heap_expand_`, `probe_free_`, `probe_size_`,
+  `dos_memory_free_`, `nfree_`, `memset_core_`, `stack_grow_0_`, and
+  `stack_grow_1_`, with the globals `_heap_cursor`, `_heap_flag`,
+  `_heap_free_list`, `_heap_largest_free`, `_free_list`, `_free_list_end`,
+  `_largest_free`, and `_out_of_memory_1`/`_2`.  The module `memory_runtime`
+  defines them.
+- Observation: after the rebuild, the linker reports 2,085 undefined references
+  over 1,406 unique symbols.  Exactly 20 symbols are new-resolved (the 11
+  functions and 9 globals) and 0 symbols are new-undefined.  The rest of the
+  338 are still open.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery of the Watcom nheap.  The allocator is a bump arena with one
+  free-list node per request, a release is a no-op, and an expand reports
+  failure.  The module has no function record and no behavior check, so it does
+  not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The startup and run-time cluster resolves in the whole-image link
+
+- Observation: the `startup_runtime` module defines the 64 functions of the
+  startup and run-time subsystem with the callers' register convention:
+  `atof`, `cleanup` and `cleanup_01`..`cleanup_12`, `teardown_01`..`teardown_13`,
+  `f1`..`f8`, `exit_proc`, `exit_terminate`, the seven `drm_*` DPMI helpers,
+  `inportb`, `outportb`, and the eighteen `startup_*` helpers.
+- Observation: the module also defines the four startup data labels
+  `_DAT_00004298`, `_DAT_0000429c`, `_DAT_00027e24`, and `_DAT_00027e28`.
+- Observation: after the rebuild, the linker reports 1,338 unique undefined
+  symbols, down from 1,406.  Exactly 68 symbols are new-resolved: the 64
+  functions and the four data labels.  Zero symbols are new-undefined.
+- Observation: the remaining open set is 263 functions, 374 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The startup helpers return inert values, the cleanup and teardown
+  routines do nothing, `drm_26120` reports the ready state, and the port I/O and
+  terminator are assembly.  The module has no function record and no behavior
+  check, so it does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The input cluster resolves in the whole-image link
+
+- Observation: the `input_runtime` module defines the 14 functions of the input
+  subsystem with the callers' register convention: `input_apply`,
+  `input_apply_release`, `input_clear`, `input_overlay_update`, `input_read`,
+  `input_refresh`, `input_reset`, `joystick_axis_read`, `joystick_button_read`,
+  `mouse_system_init`, `mouse_system_shutdown`, `mouse_handler_install`,
+  `mouse_handler_remove`, and `wait_for_input`.
+- Observation: the module also defines the nine input state globals
+  `_input_flags_low`, `_input_flags_high`, `_input_selector`, `_joystick_axis0`,
+  `_joystick_axis1`, `_joystick_axis4`, `_joystick_axis5`,
+  `_joystick_center4`, and `_joystick_center5`.
+- Observation: after the rebuild, the linker reports 1,315 unique undefined
+  symbols, down from 1,338.  Exactly 23 symbols are new-resolved: the 14
+  functions and the nine globals.  Zero symbols are new-undefined.
+- Observation: the remaining open set is 249 functions, 365 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The input entry points are inert and return 0, and the state
+  globals start at 0.  The module has no function record and no behavior check,
+  so it does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The sound and music cluster resolves in the whole-image link
+
+- Observation: the `sound_runtime` module defines the 35 functions of the sound
+  and music subsystem with the callers' register convention: `cd_audio_poll`,
+  `cd_audio_reset`, `cd_audio_stop`, `engine_sound_update`, `engine_teardown`,
+  `midi_song_load`, `music_bank_stop`, `music_ready`, `music_select`,
+  `music_step`, the `sound_bank`/`sound_basis`/`sound_driver` entry points,
+  `sound_enqueue`, the `sound_event_*` and `sound_frame_prepare` helpers,
+  `sound_marker`, `sound_reset`, `sound_sequence_prepare`, `sound_service_body`,
+  `sound_set_pan`, `sound_set_pitch`, `sound_set_volume`, `sound_slot_init`,
+  `sound_slots_update`, `sound_source_update`, `sound_stop`,
+  `sound_system_cleanup`, `sound_system_init`, `sound_timer_set`,
+  `sound_timer_update`, and `sound_voice_mix`.
+- Observation: the module also defines the 41 sound state globals, including
+  `sound_state`, `sound_handles`, the voice context and records, the mix source,
+  voice, and entry pointers, and the engine and music data words.
+- Observation: after the rebuild, the linker reports 1,239 unique undefined
+  symbols, down from 1,315.  Exactly 76 symbols are new-resolved: the 35
+  functions and the 41 globals.  Zero symbols are new-undefined.
+- Observation: the remaining open set is 214 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The driver, mixer, and CD audio entry points are inert and return
+  0, and the state starts at 0.  The module has no function record and no
+  behavior check, so it does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The race and game-flow cluster resolves in the whole-image link
+
+- Observation: the `game_runtime` module defines the 65 functions of the
+  race/game-flow subsystem with the callers' register convention: the effect
+  queue, the filter and frame helpers, the five game-mode starts, the menu and
+  overlay dispatch, the network lobby, the race flow and draw helpers, the
+  timer layer, and the track helpers.
+- Observation: after the rebuild, the linker reports 1,174 unique undefined
+  symbols, down from 1,239.  Exactly 65 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 149 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The race, menu, network, overlay, and timer entry points are inert
+  and return 0.  The module has no function record and no behavior check, so it
+  does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The objects and physics cluster resolves in the whole-image link
+
+- Observation: the `physics_runtime` module defines the 56 functions of the
+  objects/physics subsystem with the callers' register convention: the object
+  list and load helpers, the map collision layer, the player and opponent
+  steps, the traffic links, the rotation helpers, the angle and approach
+  helpers, and the vehicle state.
+- Observation: after the rebuild, the linker reports 1,118 unique undefined
+  symbols, down from 1,174.  Exactly 56 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 93 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The object and physics entry points are inert and return 0.  The
+  module has no function record and no behavior check, so it does not enter the
+  verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.

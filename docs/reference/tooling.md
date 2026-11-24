@@ -657,13 +657,15 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the two hundred and fifty-two module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and fifty-eight module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
 | `run.py` | select the records, run the declared checks, print the progress, and write the results |
 | `oracle.py` | compare two function bodies with the fixup slots and the direct branch targets normalized |
-| `image_compare.py` | compare a rebuilt whole image with the original by region and by byte |
+| `image_compare.py` | compare a rebuilt whole image with the original by region and by byte, and report the coverage |
+| `image_plan.py` | derive the whole-image link plan, build the image on the Dosker V2 volume, and write the coverage report |
+| `link.json` | the module link order and the unmodeled address ranges of the whole-image plan |
 | `view.py` | render the self-contained status page of the store: the board, the table, the address-space map, the treemap, and the call graph |
 | `docs.py` | render the `program-map.md` tables and check the drift |
 | `callgraph.py` | build the named call graph from the store and the original executable, and check the drift |
@@ -678,6 +680,10 @@ python3 tools/rebuild/run.py run --all --strict
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
 python3 tools/rebuild/image_compare.py --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
+python3 tools/rebuild/image_plan.py seed
+python3 tools/rebuild/image_plan.py seed --check
+python3 tools/rebuild/image_plan.py build --check
+python3 tools/rebuild/image_plan.py coverage --original ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt work/rebuild/STARTH.EXE
 python3 tools/rebuild/docs.py render
 python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
@@ -714,6 +720,61 @@ assembly` marks the source language of one record.  The value is `c` or
 one score per region (stub, header, loader tables, fixup section, object pages,
 and non-resident names), the differing header and table fields, and the whole
 file verdict.  The whole file is exact only when every byte is equal.
+`--coverage` prints the coverage table instead: the linked code bytes, the code
+gap, the data gap, and the unmodeled ranges.  A row is `identical`, `different`,
+`absent`, or `unmodeled`.  With `--plan` it reads the unmodeled ranges from the
+link plan.
+
+`image_plan.py` owns the whole-image link plan, the build, and the coverage
+report.  `seed` writes `tools/rebuild/link.json`: the module order is the
+lowest record address of each module, and the unmodeled ranges are the code
+gaps between the module record extents plus the data objects.  `build` compiles
+the non-harness sources of the plan on the Dosker V2 toolchain volume and links
+`work/rebuild/STARTH.EXE` and `work/rebuild/STARTH.MAP`; a module recipe's
+`<module>_main` source is its stand-alone test harness, so the build excludes
+it.  The batch writes every compile and the link to `BUILD.LOG`, because
+`dosker exec` does not interpret `>` on the command line and the agent returns
+the batch output as one control line; the tool copies the log back on a
+failure.  `coverage` writes
+`work/rebuild/image_coverage.json` and prints the region table.  The whole image
+has no data model yet and the module recipes are stand-alone test units, so the
+build is best-effort: a whole-image link can still fail on a symbol that only
+the shipped run-time defines.  The report names the remaining gaps and the tool
+does not claim a pass.  Stage 11 prints the same report when the rebuilt image
+and the link plan exist; the report adds no check, so the pipeline count does not
+change.
+
+`memory_runtime.c` and `memory_runtime.asm` hold the first run-time cluster: the
+heap and memory helpers that the rebuilt modules call (`heap_alloc`, `heap_free`,
+`heap_grow`, `heap_expand`, `probe_free`, `probe_size`, `dos_memory_free`,
+`nfree`, `memset_core`, and the two stack-grow helpers).  The module has no
+function record and no behavior check, so it does not enter the verified count.
+The allocator is a compatibility layer until the Watcom nheap is recovered; do
+not call it byte-faithful.  A new run-time module enters the link plan only when
+it is listed in `image_plan.RUNTIME_MODULES`.
+
+`startup_runtime.c` and `startup_runtime.asm` hold the second run-time cluster:
+the C startup helpers, the DPMI polling helpers, the port I/O, the process
+terminator, and the cleanup and teardown call sites.  The module is a
+compatibility layer too, so it does not enter the verified count.
+
+`input_runtime.c` holds the third run-time cluster: the input apply, read, and
+refresh entry points, the joystick and mouse helpers, `wait_for_input`, and the
+nine input state globals.  The entry points are inert, so the module does not
+enter the verified count either.
+
+`sound_runtime.c` holds the fourth run-time cluster: the ADLIB driver, music
+player, sample mixer, and CD audio entry points and the 41 sound state globals.
+The entry points are inert, so the module does not enter the verified count.
+
+`game_runtime.c` holds the fifth run-time cluster: the race flow, menu and
+overlay dispatch, network lobby, frame and track helpers, and the timer layer.
+The entry points are inert, so the module does not enter the verified count.
+
+`physics_runtime.c` holds the sixth run-time cluster: the object list, the map
+collision layer, the player and opponent steps, the traffic links, the rotation
+helpers, and the vehicle state.  The entry points are inert, so the module does
+not enter the verified count.
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,

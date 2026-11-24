@@ -1,0 +1,15 @@
+{
+  "exe": "startrt.exe",
+  "map": "startup_runtime.map",
+  "name": "startup_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "startup_runtime.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "startup_runtime.asm"
+    }
+  ]
+}

@@ -78,6 +78,7 @@ TOOLS = (
     "rebuild/dosker_setup.py",
     "rebuild/run.py",
     "rebuild/image_compare.py",
+    "rebuild/image_plan.py",
     "rebuild/view.py",
     "rebuild/docs.py",
     "rebuild/callgraph.py",
@@ -835,6 +836,41 @@ def check_image(
         result.returncode == 0,
         last_line(result.stdout) or last_line(result.stderr),
     )
+    print_coverage(game_dir, exe, rebuilt_image)
+
+
+def print_coverage(game_dir: Path, exe: str, rebuilt_image: Path) -> None:
+    """Print the whole-image coverage report when the image and plan exist.
+
+    The report is a diagnostic, not a check: the whole-image gate above owns
+    the pass or fail of stage 11.  The coverage rows name each region as
+    identical, different, absent, or unmodeled, and the summary counts the
+    linked code bytes, the code gap, the data gap, and the unmodeled bytes.
+    """
+    plan = Path("tools/rebuild/link.json")
+    if not plan.is_file():
+        print(f"stage 11: the coverage report is skipped; {plan} is missing")
+        return
+    result = run(
+        [
+            sys.executable,
+            "tools/rebuild/image_plan.py",
+            "coverage",
+            "--original",
+            str(game_dir / exe),
+            "--rebuilt",
+            str(rebuilt_image),
+            "--plan",
+            str(plan),
+        ]
+    )
+    if result.stdout.strip():
+        print(result.stdout.rstrip())
+    if result.returncode not in (0, 1):
+        print(
+            "stage 11: the coverage report failed: "
+            + (last_line(result.stderr) or f"exit {result.returncode}")
+        )
 
 
 def check_store(checks: Checks, game_dir: Path, work_dir: Path) -> None:

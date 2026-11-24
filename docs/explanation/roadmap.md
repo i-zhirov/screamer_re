@@ -385,15 +385,23 @@ The plan follows the size order, starting with the smallest functions.
     `tools/rebuild/oracle.py` masks the fixup slots and the direct branch
     targets, `free` and `exit` pass `--strict`, and a reordered or shape-only
     sequence fails).
-15. Move the build and run substrate to DOSker (designed, not started: the
-    design is in `docs/explanation/dosker-integration.md`. It declares the V2,
-    10.0a, run, and image environments in Doskerfiles and keeps the harness
-    interface. It also adds the whole-image link plan and the coverage report.
-    The migration identity run passed: 251 modules built, 252 identity checks,
-    no verdict or gate difference, and 37 byte-count-only diagnostics. The
+15. Move the build and run substrate to DOSker (designed; the design is in
+    `docs/explanation/dosker-integration.md`. It declares the V2, 10.0a, run,
+    and image environments in Doskerfiles and keeps the harness interface. The
+    migration identity run passed: 251 modules built, 252 identity checks, no
+    verdict or gate difference, and 37 byte-count-only diagnostics. The
     behavior run passed too: 250 baselines, no verdict difference. The
     substrate implementation is in progress: the Dosker build backend, the V2
     and 10.0a toolchain volumes, the screamer-run:1 image, and the DOS/4G 2.01a
-    FreeDOS behavior run are in place. The full migration and the whole-image
-    pipeline remain).
+    FreeDOS behavior run are in place. The whole-image link plan
+    (`tools/rebuild/link.json`), the build check, and the coverage report are
+    in place; the report names the remaining unmodeled gaps and does not claim a
+    pass. The heap and memory cluster resolves through the `memory_runtime`
+    compatibility module, the startup and run-time cluster resolves through
+    `startup_runtime`, the input cluster resolves through `input_runtime`, the
+    sound and music cluster resolves through `sound_runtime`, the race and
+    game-flow cluster resolves through `game_runtime`, and the objects and
+    physics cluster resolves through `physics_runtime`; the other 93 missing
+    functions and the data model remain. The 10.0a Dosker backend and a
+    byte-identical image remain).
 

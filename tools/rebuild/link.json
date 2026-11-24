@@ -1,0 +1,802 @@
+{
+  "version": 1,
+  "toolchain": "screamer-watcom-v2-tools",
+  "engine": "qemu",
+  "exe": "STARTH.EXE",
+  "map": "STARTH.MAP",
+  "link_options": [
+    "system dos4g",
+    "option quiet",
+    "option nodefaultlibs",
+    "option start=_cstart_"
+  ],
+  "runtime_libs": [
+    "D:\\WATCOM\\LIB386\\DOS\\CLIB3R.LIB"
+  ],
+  "order": [
+    "game_main",
+    "default_data_copy",
+    "radar_world_draw",
+    "video_block_swap_a",
+    "video_block_swap_b",
+    "engine_interface_init",
+    "bios_video",
+    "error_report",
+    "graphics_load",
+    "object_load",
+    "wheel_contact_update",
+    "collision_cell_test",
+    "body_point_collision_detect",
+    "player_segment_update",
+    "track_nearest_node",
+    "opponent_start",
+    "engine_init",
+    "shutdown",
+    "race_session_start",
+    "game_mode_100_start",
+    "race_data_load",
+    "race_view_reset",
+    "player_car_init",
+    "car_setup",
+    "keyboard_hook",
+    "spline_table_load",
+    "opponent_route_setup",
+    "list_file_load",
+    "palette_build",
+    "cd_check_screen",
+    "player_car_link",
+    "player_brake_update",
+    "player_steering_update",
+    "player_car_contact_update",
+    "player_car_suspension_update",
+    "player_segment_apply",
+    "player_car_cornering_update",
+    "player_car_view_update",
+    "car_proximity_pass",
+    "traffic_collision_pass",
+    "car_collision_response",
+    "traffic_push_response",
+    "player_car_skid_update",
+    "player_track_node_update",
+    "player_car_reset_update",
+    "player_car_spin_update",
+    "race_clock_update",
+    "sla_marker_check",
+    "engine_rpm_update",
+    "player_lap_progress_update",
+    "race_lap_complete",
+    "player_car_wheel_effect_start",
+    "player_car_wheel_effect_update",
+    "player_update",
+    "player_view_setup",
+    "view_transition_update",
+    "player_view_orbit",
+    "player_route_camera",
+    "car_camera",
+    "spline_load",
+    "controls_load",
+    "member_list_load",
+    "pcx_load",
+    "replay_save",
+    "replay_load",
+    "replay_load_atk",
+    "setup_load",
+    "choice_load",
+    "config_load",
+    "quad_point_test",
+    "object_player_input",
+    "object_prepare",
+    "object_physics",
+    "object_car_link",
+    "terrain_contact_update",
+    "object_state_save",
+    "object_transform",
+    "object_drive_step",
+    "car_collision_pass",
+    "car_collision_push",
+    "object_revolution_step",
+    "object_revolution_matrix",
+    "object_integrate",
+    "object_gear_step",
+    "object_gear_state",
+    "track_progress_update",
+    "object_slide_step",
+    "object_collision",
+    "object_proximity_check",
+    "opponent_avoid_player",
+    "func_1e7b4",
+    "func_1e914",
+    "traffic_step",
+    "player_state_snapshot",
+    "traffic_object_link",
+    "mouse_init",
+    "sound_bank_load",
+    "table_lookup",
+    "view_move",
+    "dos_datetime_set",
+    "frame_timer",
+    "race_session_run",
+    "race_simulation_update",
+    "race_position_update",
+    "ai_update",
+    "opponent_update",
+    "opponent_path_update",
+    "race_intro_update",
+    "race_finish_update",
+    "input_map",
+    "options_screen",
+    "quit_confirm_screen",
+    "sound_emitter_update",
+    "motion_update",
+    "opponent_curve_eval",
+    "spline_interpolate",
+    "filter_update",
+    "timing_update",
+    "replay_read",
+    "replay_write",
+    "path_playback_update",
+    "path_keyframe_append",
+    "race_hud_draw",
+    "gauge_marker_draw",
+    "race_radar",
+    "car_sound_update",
+    "joystick_update",
+    "text_draw",
+    "text_measure",
+    "font_load",
+    "sprite_load",
+    "palette_shade_build",
+    "dpmi_real_int",
+    "sound_driver_set",
+    "input_poll",
+    "race_loop",
+    "race_start",
+    "object_update_all",
+    "race_end",
+    "hud_update",
+    "hud_panel_show",
+    "credits_scroll",
+    "video_present",
+    "race_timeout",
+    "frame_update",
+    "race_frame",
+    "overlay_dispatch",
+    "overlay_queue_update",
+    "menu_enter",
+    "net_race_screen",
+    "championship_record_select",
+    "race_state_begin",
+    "race_state_update",
+    "race_heading_update",
+    "fade_update",
+    "menu_text_update",
+    "championship_result_apply",
+    "menu_space_init",
+    "menu_frame",
+    "race_cleanup",
+    "loading_screen",
+    "race_results_screen",
+    "frame_step",
+    "video_fill",
+    "menu_objects_init",
+    "map_object_place",
+    "map_object_finish",
+    "name_entry_letter_update",
+    "map_object_update",
+    "car_select_screen",
+    "track_select_screen",
+    "name_entry_screen",
+    "championship_screen_init",
+    "car_select_update",
+    "track_select_update",
+    "championship_screen",
+    "race_records_screen",
+    "net_race_lobby",
+    "net_player_add",
+    "panel_show",
+    "race_panel_0",
+    "race_panel_2",
+    "race_panel_3",
+    "race_panel_4",
+    "panel_draw_centered",
+    "race_record_save",
+    "list_create",
+    "list_destroy",
+    "memory_error_report",
+    "resource_get",
+    "resource_read",
+    "dos_memory_alloc",
+    "memory_alloc_small",
+    "memory_free",
+    "resource_find",
+    "resource_free",
+    "memory_available",
+    "pool_init",
+    "music_bank_reset",
+    "music_bank_load",
+    "music_load",
+    "music_play",
+    "music_start",
+    "memory_alloc",
+    "printf",
+    "exit",
+    "free",
+    "startup",
+    "dpmi_fill_regs",
+    "dpmi_call",
+    "fprintf",
+    "file_error_report",
+    "fopen",
+    "stream_close",
+    "stream_read",
+    "stream_read_text",
+    "stream_status",
+    "stream_layer_init",
+    "video_buf_load",
+    "unr_file_load",
+    "object_init_from_file",
+    "material_load",
+    "persptab_load",
+    "vis_tab_load",
+    "sprintf",
+    "lzw_block",
+    "lzw_bit_read",
+    "fp_helper",
+    "sound_update",
+    "sound_effects_update",
+    "matrix_compose",
+    "camera_project",
+    "sound_range_reset",
+    "sound_range_update",
+    "sound_event_render",
+    "background_scale",
+    "sound_mix_prepare",
+    "camera_update",
+    "sound_voice_setup",
+    "sound_source_frame_select",
+    "vesa_set_mode",
+    "video_copy",
+    "memcpy",
+    "memset",
+    "memset_runtime",
+    "malloc_rt",
+    "runtime_free",
+    "memmove",
+    "fprtf",
+    "main_invoker",
+    "dpmi_int31_entry",
+    "memory_runtime",
+    "startup_runtime",
+    "input_runtime",
+    "sound_runtime",
+    "game_runtime",
+    "physics_runtime"
+  ],
+  "unmodeled": [
+    {
+      "start": "0x10000",
+      "end": "0x10020",
+      "kind": "code"
+    },
+    {
+      "start": "0x101b4",
+      "end": "0x1057c",
+      "kind": "code"
+    },
+    {
+      "start": "0x108c8",
+      "end": "0x108e4",
+      "kind": "code"
+    },
+    {
+      "start": "0x10ed4",
+      "end": "0x11a30",
+      "kind": "code"
+    },
+    {
+      "start": "0x11c00",
+      "end": "0x11ccc",
+      "kind": "code"
+    },
+    {
+      "start": "0x12378",
+      "end": "0x124c0",
+      "kind": "code"
+    },
+    {
+      "start": "0x126e4",
+      "end": "0x127a0",
+      "kind": "code"
+    },
+    {
+      "start": "0x12c0c",
+      "end": "0x12f50",
+      "kind": "code"
+    },
+    {
+      "start": "0x130a0",
+      "end": "0x131a8",
+      "kind": "code"
+    },
+    {
+      "start": "0x13540",
+      "end": "0x13580",
+      "kind": "code"
+    },
+    {
+      "start": "0x14970",
+      "end": "0x14e20",
+      "kind": "code"
+    },
+    {
+      "start": "0x150f4",
+      "end": "0x1517c",
+      "kind": "code"
+    },
+    {
+      "start": "0x15378",
+      "end": "0x15460",
+      "kind": "code"
+    },
+    {
+      "start": "0x156a8",
+      "end": "0x15720",
+      "kind": "code"
+    },
+    {
+      "start": "0x157b8",
+      "end": "0x15874",
+      "kind": "code"
+    },
+    {
+      "start": "0x15984",
+      "end": "0x15c1c",
+      "kind": "code"
+    },
+    {
+      "start": "0x160a4",
+      "end": "0x16150",
+      "kind": "code"
+    },
+    {
+      "start": "0x17c6c",
+      "end": "0x17d14",
+      "kind": "code"
+    },
+    {
+      "start": "0x1814c",
+      "end": "0x1821c",
+      "kind": "code"
+    },
+    {
+      "start": "0x18b60",
+      "end": "0x18ba8",
+      "kind": "code"
+    },
+    {
+      "start": "0x18ccc",
+      "end": "0x18db0",
+      "kind": "code"
+    },
+    {
+      "start": "0x19478",
+      "end": "0x194a0",
+      "kind": "code"
+    },
+    {
+      "start": "0x1960c",
+      "end": "0x19678",
+      "kind": "code"
+    },
+    {
+      "start": "0x19e78",
+      "end": "0x19f00",
+      "kind": "code"
+    },
+    {
+      "start": "0x1a144",
+      "end": "0x1a3b8",
+      "kind": "code"
+    },
+    {
+      "start": "0x1aec4",
+      "end": "0x1af70",
+      "kind": "code"
+    },
+    {
+      "start": "0x1b180",
+      "end": "0x1b304",
+      "kind": "code"
+    },
+    {
+      "start": "0x1b58c",
+      "end": "0x1b5a4",
+      "kind": "code"
+    },
+    {
+      "start": "0x1b974",
+      "end": "0x1ba4c",
+      "kind": "code"
+    },
+    {
+      "start": "0x1be6c",
+      "end": "0x1bf38",
+      "kind": "code"
+    },
+    {
+      "start": "0x1bfd4",
+      "end": "0x1c13c",
+      "kind": "code"
+    },
+    {
+      "start": "0x1c38a",
+      "end": "0x1c760",
+      "kind": "code"
+    },
+    {
+      "start": "0x1c7d0",
+      "end": "0x1c810",
+      "kind": "code"
+    },
+    {
+      "start": "0x1ce38",
+      "end": "0x1cee0",
+      "kind": "code"
+    },
+    {
+      "start": "0x1e670",
+      "end": "0x1e7b4",
+      "kind": "code"
+    },
+    {
+      "start": "0x1ec48",
+      "end": "0x1ed04",
+      "kind": "code"
+    },
+    {
+      "start": "0x1eed8",
+      "end": "0x1ef68",
+      "kind": "code"
+    },
+    {
+      "start": "0x1f108",
+      "end": "0x1f1a0",
+      "kind": "code"
+    },
+    {
+      "start": "0x1f28c",
+      "end": "0x1f2e0",
+      "kind": "code"
+    },
+    {
+      "start": "0x1f6f8",
+      "end": "0x1f718",
+      "kind": "code"
+    },
+    {
+      "start": "0x1f764",
+      "end": "0x1f94c",
+      "kind": "code"
+    },
+    {
+      "start": "0x1f990",
+      "end": "0x1fa2c",
+      "kind": "code"
+    },
+    {
+      "start": "0x1ff14",
+      "end": "0x2003c",
+      "kind": "code"
+    },
+    {
+      "start": "0x201d0",
+      "end": "0x20428",
+      "kind": "code"
+    },
+    {
+      "start": "0x20ec8",
+      "end": "0x21058",
+      "kind": "code"
+    },
+    {
+      "start": "0x212d0",
+      "end": "0x21338",
+      "kind": "code"
+    },
+    {
+      "start": "0x21da8",
+      "end": "0x21e6c",
+      "kind": "code"
+    },
+    {
+      "start": "0x21f40",
+      "end": "0x22378",
+      "kind": "code"
+    },
+    {
+      "start": "0x224dc",
+      "end": "0x22744",
+      "kind": "code"
+    },
+    {
+      "start": "0x22bb4",
+      "end": "0x22df8",
+      "kind": "code"
+    },
+    {
+      "start": "0x23328",
+      "end": "0x23420",
+      "kind": "code"
+    },
+    {
+      "start": "0x2369c",
+      "end": "0x2392c",
+      "kind": "code"
+    },
+    {
+      "start": "0x23dfc",
+      "end": "0x242bc",
+      "kind": "code"
+    },
+    {
+      "start": "0x24600",
+      "end": "0x24da0",
+      "kind": "code"
+    },
+    {
+      "start": "0x25620",
+      "end": "0x25658",
+      "kind": "code"
+    },
+    {
+      "start": "0x257a0",
+      "end": "0x257b0",
+      "kind": "code"
+    },
+    {
+      "start": "0x258b8",
+      "end": "0x258d0",
+      "kind": "code"
+    },
+    {
+      "start": "0x25aac",
+      "end": "0x25db0",
+      "kind": "code"
+    },
+    {
+      "start": "0x25f14",
+      "end": "0x262a8",
+      "kind": "code"
+    },
+    {
+      "start": "0x262fc",
+      "end": "0x26448",
+      "kind": "code"
+    },
+    {
+      "start": "0x264b8",
+      "end": "0x27700",
+      "kind": "code"
+    },
+    {
+      "start": "0x27e08",
+      "end": "0x27ec8",
+      "kind": "code"
+    },
+    {
+      "start": "0x27f80",
+      "end": "0x27f94",
+      "kind": "code"
+    },
+    {
+      "start": "0x298b4",
+      "end": "0x29918",
+      "kind": "code"
+    },
+    {
+      "start": "0x2a214",
+      "end": "0x2a364",
+      "kind": "code"
+    },
+    {
+      "start": "0x2b308",
+      "end": "0x2b494",
+      "kind": "code"
+    },
+    {
+      "start": "0x2be94",
+      "end": "0x2bedc",
+      "kind": "code"
+    },
+    {
+      "start": "0x2c954",
+      "end": "0x2cb20",
+      "kind": "code"
+    },
+    {
+      "start": "0x2ce84",
+      "end": "0x2cf68",
+      "kind": "code"
+    },
+    {
+      "start": "0x2df68",
+      "end": "0x2dfac",
+      "kind": "code"
+    },
+    {
+      "start": "0x2dff4",
+      "end": "0x2e0b4",
+      "kind": "code"
+    },
+    {
+      "start": "0x2f062",
+      "end": "0x2f0fc",
+      "kind": "code"
+    },
+    {
+      "start": "0x2f326",
+      "end": "0x2f470",
+      "kind": "code"
+    },
+    {
+      "start": "0x2f4ee",
+      "end": "0x2f8ca",
+      "kind": "code"
+    },
+    {
+      "start": "0x2f985",
+      "end": "0x2f9b0",
+      "kind": "code"
+    },
+    {
+      "start": "0x2fc90",
+      "end": "0x2fcec",
+      "kind": "code"
+    },
+    {
+      "start": "0x2fe68",
+      "end": "0x2ff14",
+      "kind": "code"
+    },
+    {
+      "start": "0x2ff84",
+      "end": "0x2ffc4",
+      "kind": "code"
+    },
+    {
+      "start": "0x300f8",
+      "end": "0x30170",
+      "kind": "code"
+    },
+    {
+      "start": "0x30389",
+      "end": "0x4bf23",
+      "kind": "code"
+    },
+    {
+      "start": "0x4c128",
+      "end": "0x4c38d",
+      "kind": "code"
+    },
+    {
+      "start": "0x4c3e6",
+      "end": "0x4c4e5",
+      "kind": "code"
+    },
+    {
+      "start": "0x4c5c7",
+      "end": "0x4c695",
+      "kind": "code"
+    },
+    {
+      "start": "0x4c850",
+      "end": "0x4c8f0",
+      "kind": "code"
+    },
+    {
+      "start": "0x4c928",
+      "end": "0x4c98c",
+      "kind": "code"
+    },
+    {
+      "start": "0x4cae4",
+      "end": "0x4cc10",
+      "kind": "code"
+    },
+    {
+      "start": "0x4cecc",
+      "end": "0x4cf94",
+      "kind": "code"
+    },
+    {
+      "start": "0x4d098",
+      "end": "0x4d32c",
+      "kind": "code"
+    },
+    {
+      "start": "0x4d360",
+      "end": "0x4d4c4",
+      "kind": "code"
+    },
+    {
+      "start": "0x4d9ba",
+      "end": "0x4d9f4",
+      "kind": "code"
+    },
+    {
+      "start": "0x4da26",
+      "end": "0x81a70",
+      "kind": "code"
+    },
+    {
+      "start": "0x81f80",
+      "end": "0x82258",
+      "kind": "code"
+    },
+    {
+      "start": "0x83354",
+      "end": "0x836ac",
+      "kind": "code"
+    },
+    {
+      "start": "0x843a8",
+      "end": "0x8aa60",
+      "kind": "code"
+    },
+    {
+      "start": "0x8af08",
+      "end": "0x8b1d4",
+      "kind": "code"
+    },
+    {
+      "start": "0x8b610",
+      "end": "0x8bdec",
+      "kind": "code"
+    },
+    {
+      "start": "0x8be93",
+      "end": "0x8beb8",
+      "kind": "code"
+    },
+    {
+      "start": "0x8c0fc",
+      "end": "0x8c150",
+      "kind": "code"
+    },
+    {
+      "start": "0xc1ffd",
+      "end": "0xd1ec0",
+      "kind": "code"
+    },
+    {
+      "start": "0xd1ed8",
+      "end": "0xd1f25",
+      "kind": "code"
+    },
+    {
+      "start": "0xd208c",
+      "end": "0xd429f",
+      "kind": "code"
+    },
+    {
+      "start": "0xd4374",
+      "end": "0xd4410",
+      "kind": "code"
+    },
+    {
+      "start": "0xd4448",
+      "end": "0xeba93",
+      "kind": "code"
+    },
+    {
+      "start": "0xf0000",
+      "end": "0xf0082",
+      "kind": "data"
+    },
+    {
+      "start": "0x100000",
+      "end": "0x1472c0",
+      "kind": "data"
+    }
+  ]
+}
