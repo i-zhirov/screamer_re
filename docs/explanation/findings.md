@@ -19527,3 +19527,19 @@ temporary `-od` recipe.
   layout and the DOS V2 `binw` layout.
 - Evidence: `python3 tools/rebuild/harness_dos.py build --module game_main
   --toolchain ~/.cache/dosker-openwatcom-dos/openwatcom/toolchain`.
+
+## The original is Watcom C/C++32 with DOS/4G
+
+- Observation: the `STARTH.EXE` strings hold `WATCOM C/C++32 Run-Time system`
+  (1988-1994) and `RATIONAL DOS/4G`. The 32-bit Watcom toolchain and the
+  Rational extender produced the binary, so DJGPP, Borland, Zortech, and Pascal
+  are excluded.
+- The `-r` register-convention flags select the Windows `W32RUN` compiler, not
+  DOS. The `__watcall` form with `int (argc, argv, envp)` does not change the
+  10.0a code generation: the rebuild stays at 189 bytes, 55 instructions, 21 of
+  55.
+- The 10.0a tree places `WCC386.EXE` in `BINB` and the W32 `WLINK.EXE`/`BIN`.
+  The working build uses `PATH=C:\WATCOM\BIN;C:\WATCOM\BINB` and
+  `C:\WATCOM\BIN\WLINK`.
+- Evidence: `python3 tools/rebuild/harness_dos.py build --module game_main`
+  reports 191 bytes, 57 instructions, 25 of 56.
