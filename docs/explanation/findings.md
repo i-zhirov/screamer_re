@@ -19590,3 +19590,16 @@ temporary `-od` recipe.
 - The record now reports `identity: pass, 56 of 56`; the behavior check fails
   because `gmmod.exe` prints `Can't run DOS/4G(W)`. That is the test runtime, not
   the reproduced code, and the module's build and identity are correct.
+
+## DJGPP does not produce the original code
+
+- DJGPP GCC 6.1 (`anibali/djgpp`) compiled the representative modules:
+  - `free`: 9 instruction lines; the original is 3.
+  - `video_present`: 38 lines against the original 40, with a `push ebp`
+    prologue and `fnstcw` FPU control code.
+  - `game_main`: 72 lines against the original 56, with `push ebp; mov ebp,esp;
+    sub esp,36` and no `push ebx; push edx`.
+- None of the prologues or counts match. The executable is an LE image with the
+  Watcom run-time and DOS/4G, while DJGPP produces COFF with `go32`/CWSDPMI.
+- Conclusion: DJGPP and the GCC family are refuted. The original is Watcom
+  C/C++32, as the banner states.
