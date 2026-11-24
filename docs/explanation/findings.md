@@ -19481,3 +19481,15 @@ temporary `-od` recipe.
 - The `volatile int result` form with the best combination stays at 7 of 56.
 - Inference: the memory model and the optimization level do not move the
   register allocation. The original compile options remain unknown.
+
+## The main source variants stay at 25/56
+
+- Variants: declaration order (`result` first), `register` on `result`, on
+  `list`, or on both, `const void *list`, and an initialized list declaration.
+- Result: every variant that builds gives 25 of 56 instructions at 191 bytes and
+  57 instructions, identical to the plain form. The `register` hint and `const`
+  do not change the 10.0a code generation at `-ot -of+`.
+- The declaration-order swap build timed out once; it is not evidence of a
+  better match.
+- Inference: these source levers do not move the allocator. The plain form's
+  25/56 ceiling holds.
