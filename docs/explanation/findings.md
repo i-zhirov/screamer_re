@@ -19463,6 +19463,10 @@ temporary `-od` recipe.
   versus 194 and 56; 25 of 56 instructions match (V2: 21 of 55). The prologue is
   `push ebp; mov ebp, esp; push ebx; push edx`, so it saves `ebx`, but it still
   holds the result in `edx` and allocates no `[ebp-4]`.
-- Inference: the period compiler is closer but does not reproduce the original
-  local and `ebx` use. That difference comes from the source form of `result`,
-  not from the compiler alone.
+- Experiment (address-taken): `int *result_slot = &result` puts the pointer in
+  `ebx` and the value at `[ebp-0x10]`; 9 of 56 instructions match.
+- Experiment (`volatile`): `volatile int result` puts the slot at `[ebp-0xc]`
+  and compares memory directly; 7 of 56 match.
+- Inference: forcing a stack slot does not reproduce the original `[ebp-4]`
+  value in `ebx`. The plain `int result` with 10.0a stays the closest at 25 of
+  56, so the difference is the allocator, not the source form alone.
