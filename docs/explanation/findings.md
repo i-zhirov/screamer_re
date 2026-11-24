@@ -19470,3 +19470,14 @@ temporary `-od` recipe.
 - Inference: forcing a stack slot does not reproduce the original `[ebp-4]`
   value in `ebx`. The plain `int result` with 10.0a stays the closest at 25 of
   56, so the difference is the allocator, not the source form alone.
+
+## The 10.0a option sweep keeps the plain main at 25/56
+
+- Sweep: the optimization levels `-od`, `-ot`, `-os`, `-ox` against the memory
+  models `-mf`, `-ms`, `-mc`, `-mm`, `-ml`, each with `-of+`.
+- Result: the best is 25 of 56 instructions with `-ot` or `-ox` and `-mf` or
+  `-ms`. `-os` gives 18 of 54; `-od` gives 11 or 12 of 56; `-mc`, `-mm`, and
+  `-ml` give 4 to 9. No combination improves on the current 25/56.
+- The `volatile int result` form with the best combination stays at 7 of 56.
+- Inference: the memory model and the optimization level do not move the
+  register allocation. The original compile options remain unknown.
