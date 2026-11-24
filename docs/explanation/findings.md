@@ -19554,3 +19554,13 @@ temporary `-od` recipe.
   55. Neither reproduces the `push ebx; push edx; push ebp` prologue.
 - Inference: the C compiler cannot reproduce the original prologue and the
   `ebx` result. The minimal-assembly path is justified for `game_main`.
+
+## The game_main assembly reproduces the instruction form
+
+- The `game_main.asm` module writes the original `game_main_` in assembly because
+  the 10.0a C compiler cannot emit the `push ebx; push edx; push ebp` prologue or
+  the `[ebp-4]` value with an `ebx` test.
+- The rebuilt form matches all 56 instructions; 53 of 188 bytes are equal and
+  the remaining 27 operands are relocation-controlled call and data addresses.
+- The oracle verdict stays `fail` on the byte comparison; the instruction form
+  is exact. The record marks `implementation: assembly`.

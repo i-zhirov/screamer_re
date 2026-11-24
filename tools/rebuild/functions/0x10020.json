@@ -49,5 +49,6 @@
   "section": "Program functions",
   "size": 371,
   "status": "rebuilt",
-  "symbol": "game_main_"
+  "symbol": "game_main_",
+  "implementation": "assembly"
 }
