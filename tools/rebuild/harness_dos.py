@@ -60,7 +60,7 @@ class ToolchainLayout:
 def toolchain_layout(root: Path) -> ToolchainLayout:
     """Detects the 10.0a layout or the DOS-hosted V2 layout."""
     if (root / "WATCOM/BINB/WCC386.EXE").is_file():
-        return ToolchainLayout(root, "WATCOM/BINB", "WATCOM/H", "WATCOM")
+        return ToolchainLayout(root, "WATCOM\\BINB", "WATCOM\\H", "WATCOM")
     if (root / "binw/wcc386.exe").is_file():
         return ToolchainLayout(root, "binw", "h", "")
     raise ValueError(f"the toolchain {root} has no known layout")

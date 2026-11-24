@@ -30,15 +30,20 @@ class HarnessDosTestCase(unittest.TestCase):
         base.update(overrides)
         return base
 
+    def layout(self) -> harness_dos.ToolchainLayout:
+        return harness_dos.ToolchainLayout(
+            harness_dos.TOOLCHAIN_DIR, "WATCOM\\BINB", "WATCOM\\H", "WATCOM"
+        )
+
     def test_compile_line_wcc386(self) -> None:
-        line = harness_dos.compile_line({"file": "free.c", "compiler": "wcc386"}, 0)
+        line = harness_dos.compile_line({"file": "free.c", "compiler": "wcc386"}, 0, self.layout())
         self.assertEqual(
             line,
             "wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -fo=D:\\O0.OBJ S0.C",
         )
 
     def test_compile_line_wasm_holds_no_stack_flag(self) -> None:
-        line = harness_dos.compile_line({"file": "memcpy.asm", "compiler": "wasm"}, 1)
+        line = harness_dos.compile_line({"file": "memcpy.asm", "compiler": "wasm"}, 1, self.layout())
         self.assertEqual(line, "wasm -bt=dos -zq -fo=D:\\O1.OBJ S1.ASM")
 
     def test_compile_line_source_flags(self) -> None:
@@ -49,6 +54,7 @@ class HarnessDosTestCase(unittest.TestCase):
                 "flags": ["-of+", "-od"],
             },
             0,
+            self.layout(),
         )
         self.assertEqual(
             line,
@@ -64,6 +70,7 @@ class HarnessDosTestCase(unittest.TestCase):
                 "period_flags": ["-od"],
             },
             0,
+            self.layout(),
         )
         self.assertEqual(
             line,
@@ -94,15 +101,15 @@ class HarnessDosTestCase(unittest.TestCase):
         self.assertIn("file O0.OBJ", lines)
 
     def test_conf_text(self) -> None:
-        text = harness_dos.conf_text(self.module(), 2)
+        text = harness_dos.conf_text(self.module(), 2, self.layout())
         self.assertIn("[dos]\nlfn = true", text)
-        self.assertIn(f"mount C {harness_dos.TOOLCHAIN_DIR}", text)
+        self.assertIn(f"mount C {self.layout().root}", text)
         self.assertIn(f"mount D {harness_dos.WORK_DIR}", text)
-        self.assertIn("PATH=C:\\WATCOM\\BIN;C:\\WATCOM\\BINB", text)
+        self.assertIn("set PATH=C:\\WATCOM\\BINB", text)
         self.assertIn("set WATCOM=C:\\WATCOM", text)
         self.assertIn("wcc386 -bt=dos -s -zq -i=C:\\WATCOM\\H -fo=D:\\O0.OBJ"
                       " S0.C >> D:\\dos_build.log", text)
-        self.assertIn("C:\\WATCOM\\BIN\\WLINK @D:\\dos_link.rsp"
+        self.assertIn("C:\\WATCOM\\BINB\\WLINK @D:\\dos_link.rsp"
                       " >> D:\\dos_build.log", text)
         self.assertTrue(text.endswith("exit\n"))
 
