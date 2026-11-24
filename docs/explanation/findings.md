@@ -19582,3 +19582,11 @@ temporary `-od` recipe.
 - With the 10.0a harness the `game_main` assembly is 194 bytes and 56 of 56
   instructions with the relocation-only pass. The V2 `wasm` build of the same
   source scores 137/194, so the V2 assembler encodes a `push offset` differently.
+
+## The game_main identity passes; the behavior hits the extender
+
+- With the 10.0a and V2 assembly the `game_main` identity is 56 of 56
+  instructions and the oracle returns the relocation-only pass.
+- The record now reports `identity: pass, 56 of 56`; the behavior check fails
+  because `gmmod.exe` prints `Can't run DOS/4G(W)`. That is the test runtime, not
+  the reproduced code, and the module's build and identity are correct.
