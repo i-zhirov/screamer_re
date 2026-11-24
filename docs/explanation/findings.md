@@ -19543,3 +19543,14 @@ temporary `-od` recipe.
   `C:\WATCOM\BIN\WLINK`.
 - Evidence: `python3 tools/rebuild/harness_dos.py build --module game_main`
   reports 191 bytes, 57 instructions, 25 of 56.
+
+## The invoker calls game_main with the register convention
+
+- Observation: `main_invoker.asm` loads `eax`/`edx` and calls `game_main_`. The
+  original `main` at 0x10020 is a `game_main(argc, argv)` function called with
+  the register convention, not the C `main`.
+- The 10.0a rejects `__watcall` (E1009). Naming the function `main` gives 186
+  bytes and 19 of 53. `#pragma aux parm [eax] [edx]` gives 189 bytes and 21 of
+  55. Neither reproduces the `push ebx; push edx; push ebp` prologue.
+- Inference: the C compiler cannot reproduce the original prologue and the
+  `ebx` result. The minimal-assembly path is justified for `game_main`.
