@@ -19517,3 +19517,13 @@ temporary `-od` recipe.
 - The DOS V2 free build gives the same 3 of 3 instructions as the V2.
 - The DOS V2 `game_main` build did not finish in the command window. Its config
   needs the DOS V2 mount layout (`C:\BINW`, `C:\H`), not the 10.0a `C:\WATCOM`.
+
+## The DOS V2 matches the Linux V2, not the 10.0a
+
+- The DOS-hosted OpenWatcom V2 2.0 beta 2026-11-01 gives the same `game_main`
+  result as the Linux V2: 189 bytes and 55 instructions with 21 of 55 equal.
+  The 10.0a stays at 25 of 56.
+- `harness_dos.py` takes `--toolchain` and detects the 10.0a `WATCOM/BINB`
+  layout and the DOS V2 `binw` layout.
+- Evidence: `python3 tools/rebuild/harness_dos.py build --module game_main
+  --toolchain ~/.cache/dosker-openwatcom-dos/openwatcom/toolchain`.

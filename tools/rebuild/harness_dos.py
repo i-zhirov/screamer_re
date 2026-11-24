@@ -43,8 +43,27 @@ CONF_NAME = "dos_build.conf"
 RSP_NAME = "dos_link.rsp"
 LOG_NAME = "dos_build.log"
 MAP_NAME = "M.MAP"
-WCC_FLAGS = ("-bt=dos", "-s", "-zq", "-i=C:\\WATCOM\\H")
+WCC_FLAGS = ("-bt=dos", "-s", "-zq")
 WASM_FLAGS = ("-bt=dos", "-zq")
+
+
+class ToolchainLayout:
+    """The mount layout of a Watcom toolchain tree."""
+
+    def __init__(self, root: Path, bin: str, include: str, watcom: str) -> None:
+        self.root = root
+        self.bin = bin
+        self.include = include
+        self.watcom = watcom
+
+
+def toolchain_layout(root: Path) -> ToolchainLayout:
+    """Detects the 10.0a layout or the DOS-hosted V2 layout."""
+    if (root / "WATCOM/BINB/WCC386.EXE").is_file():
+        return ToolchainLayout(root, "WATCOM/BINB", "WATCOM/H", "WATCOM")
+    if (root / "binw/wcc386.exe").is_file():
+        return ToolchainLayout(root, "binw", "h", "")
+    raise ValueError(f"the toolchain {root} has no known layout")
 
 
 def object_name(index: int) -> str:
@@ -63,9 +82,11 @@ def source_name(index: int, source: dict) -> str:
     return f"S{index}{suffix}"
 
 
-def compile_line(source: dict, index: int) -> str:
+def compile_line(source: dict, index: int, layout: ToolchainLayout) -> str:
     compiler = source["compiler"]
     flags = list(WCC_FLAGS if compiler == "wcc386" else WASM_FLAGS)
+    if compiler == "wcc386":
+        flags.append(f"-i=C:\\{layout.include}")
     flags += list(source.get("period_flags", source.get("flags", [])))
     return " ".join([compiler, *flags, f"-fo=D:\\{object_name(index)}", source_name(index, source)])
 
@@ -85,7 +106,7 @@ def link_rsp(module: dict, count: int) -> str:
     return "\n".join(lines) + "\n"
 
 
-def conf_text(module: dict, count: int) -> str:
+def conf_text(module: dict, count: int, layout: ToolchainLayout) -> str:
     lines = [
         "[dosbox]",
         "machine=svga_s3",
@@ -95,16 +116,18 @@ def conf_text(module: dict, count: int) -> str:
         "lfn = true",
         "",
         "[autoexec]",
-        f"mount C {TOOLCHAIN_DIR}",
+        f"mount C {layout.root}",
         f"mount D {WORK_DIR}",
         "C:",
-        "PATH=C:\\WATCOM\\BIN;C:\\WATCOM\\BINB",
-        "set WATCOM=C:\\WATCOM",
+        f"set PATH=C:\\{layout.bin.upper()}",
+        f"set WATCOM=C:\\{layout.watcom}" if layout.watcom else "set WATCOM=C:\\",
+        f"set INCLUDE=C:\\{layout.include.upper()}",
+        f"set DOS4GPATH=C:\\{layout.bin.upper()}",
         "D:",
     ]
     for index, source in enumerate(module["sources"]):
-        lines.append(f"{compile_line(source, index)} >> D:\\{LOG_NAME}")
-    lines.append(f"C:\\WATCOM\\BIN\\WLINK @D:\\{RSP_NAME} >> D:\\{LOG_NAME}")
+        lines.append(f"{compile_line(source, index, layout)} >> D:\\{LOG_NAME}")
+    lines.append(f"C:\\{layout.bin.upper()}\\WLINK @D:\\{RSP_NAME} >> D:\\{LOG_NAME}")
     lines.append("exit")
     return "\n".join(lines) + "\n"
 
@@ -120,12 +143,15 @@ def wait_for_artifacts(module: dict, timeout: int) -> bool:
     return False
 
 
-def command_build(name: str, timeout: int) -> int:
+def command_build(name: str, timeout: int, toolchain: Path | None = None) -> int:
     module = store.load_module(name)
     if shutil.which(DOSBOX) is None:
         print(f"skip: the {DOSBOX} command is missing; install DOSBox-X to build {name}")
         return 3
-    if not (TOOLCHAIN_DIR / "WATCOM/BINB/WCC386.EXE").is_file():
+    root = toolchain if toolchain is not None else TOOLCHAIN_DIR
+    try:
+        layout = toolchain_layout(root)
+    except ValueError:
         print(
             "skip: the period toolchain is missing; run"
             " tools/rebuild/watcom10_setup.py to install it",
@@ -140,7 +166,7 @@ def command_build(name: str, timeout: int) -> int:
             REBUILD_DIR / source["file"], WORK_DIR / source_name(index, source)
         )
     (WORK_DIR / RSP_NAME).write_text(link_rsp(module, len(module["sources"])))
-    (WORK_DIR / CONF_NAME).write_text(conf_text(module, len(module["sources"])))
+    (WORK_DIR / CONF_NAME).write_text(conf_text(module, len(module["sources"]), layout))
     log_path = WORK_DIR / LOG_NAME
     if log_path.is_file():
         log_path.unlink()
@@ -194,6 +220,12 @@ def parse_arguments() -> argparse.Namespace:
         default=600,
         help="the build timeout in seconds (default: 600)",
     )
+    build_parser.add_argument(
+        "--toolchain",
+        type=Path,
+        default=None,
+        help="the toolchain tree (default: work/watcom10)",
+    )
     digest_parser = subparsers.add_parser(
         "digest", help="print the source digest of one module"
     )
@@ -205,7 +237,9 @@ def main() -> int:
     arguments = parse_arguments()
     try:
         if arguments.command == "build":
-            return command_build(arguments.module, arguments.timeout)
+            return command_build(
+                arguments.module, arguments.timeout, arguments.toolchain
+            )
         return command_digest(arguments.module)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)

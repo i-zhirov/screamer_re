@@ -747,7 +747,7 @@ python3 tools/rebuild/watcom10_setup.py
 Build one module with the period toolchain (needs DOSBox-X):
 
 ```sh
-python3 tools/rebuild/harness_dos.py build --module free
+python3 tools/rebuild/harness_dos.py build --module free [--toolchain PATH]
 ```
 
 The period link uses the standard run-time library (the default libs), because
