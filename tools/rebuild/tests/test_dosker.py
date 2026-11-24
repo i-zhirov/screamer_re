@@ -33,7 +33,7 @@ if log:
             + "\\n"
         )
 if args == ["--version"]:
-    print("dosker " + os.environ.get("FAKE_DOSKER_VERSION", "0.1.3"))
+    print("dosker " + os.environ.get("FAKE_DOSKER_VERSION", "0.1.5"))
     sys.exit(0)
 if args and args[0] == "exec":
     print("guest output")
@@ -80,15 +80,15 @@ class DoskerClientTestCase(unittest.TestCase):
         ]
 
     def test_version(self) -> None:
-        self.assertEqual(self.client.version(), "0.1.3")
-        self.assertEqual(self.client.check_version(), "0.1.3")
+        self.assertEqual(self.client.version(), "0.1.5")
+        self.assertEqual(self.client.check_version(), "0.1.5")
 
     def test_version_mismatch(self) -> None:
         os.environ["FAKE_DOSKER_VERSION"] = "0.1.2"
         with self.assertRaises(dosker.DoskerError) as context:
             self.client.check_version()
         self.assertIn("0.1.2", str(context.exception))
-        self.assertIn("0.1.3", str(context.exception))
+        self.assertIn("0.1.5", str(context.exception))
 
     def test_missing_binary(self) -> None:
         client = dosker.DoskerClient(

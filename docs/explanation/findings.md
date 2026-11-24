@@ -19573,3 +19573,12 @@ temporary `-od` recipe.
 - The rebuilt `game_main` is 194 bytes and 56 instructions; all 56 instructions
   match, and the oracle returns the relocation-only pass: "the instruction
   sequences match; the differing operands are the link-time addresses."
+
+## The Dosker pin moves to 0.1.5
+
+- The installed `dosker` is 0.1.5; the tools pinned 0.1.3, so `run.py` refused to
+  build and the identity gate ran on a stale artifact.
+- The pin, the setup tool, the test fakes, and the docs now use 0.1.5.
+- With the 10.0a harness the `game_main` assembly is 194 bytes and 56 of 56
+  instructions with the relocation-only pass. The V2 `wasm` build of the same
+  source scores 137/194, so the V2 assembler encodes a `push offset` differently.

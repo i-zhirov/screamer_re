@@ -293,7 +293,7 @@ if log:
     with open(log, "a", encoding="utf-8") as stream:
         stream.write(json.dumps({"args": args}) + "\\n")
 if args == ["--version"]:
-    print("dosker 0.1.3")
+    print("dosker 0.1.5")
     sys.exit(0)
 if args and args[0] == "exec" and args[-1].lower() == "free.exe":
     print("NULL\\nDONE\\nFREE\\nAFTR")

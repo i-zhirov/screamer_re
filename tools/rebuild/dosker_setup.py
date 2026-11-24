@@ -17,7 +17,7 @@ Usage:
 The tool takes every path from the command line.  It uses `mcopy` and `mdir`
 from mtools for the FAT volume.  It enumerates every copied name with the DOS
 8.3 rule before the copy and fails with the offending path.  The image and
-volume names are flat, because Dosker 0.1.3 rejects a name that holds a slash.
+volume names are flat, because Dosker 0.1.5 rejects a name that holds a slash.
 The DOS/4G 2.01a extender is embedded in DOSBox-X 2026.10.01; its offset and
 digest are pinned to that build.
 """

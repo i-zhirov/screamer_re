@@ -25,7 +25,7 @@ import sys
 
 args = sys.argv[1:]
 if args == ["--version"]:
-    print("dosker 0.1.3")
+    print("dosker 0.1.5")
     sys.exit(0)
 if args and args[0] == "images":
     print("REFERENCE DIGEST SIZE CREATED")

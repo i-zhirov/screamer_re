@@ -39,7 +39,7 @@ It stores images in an OCI layout and caches the builds. A `Doskerfile`
 declares the environment. `dosker exec` runs a guest command through a serial
 agent and returns the guest exit code and the captured output. `dosker cp`
 moves files. A named volume and a bind mount attach data. A serial log and an
-engine log record the run. Dosker 0.1.3 is in use. The owner of this
+engine log record the run. Dosker 0.1.5 is in use. The owner of this
 reconstruction also owns Dosker, so the design can request small features.
 
 ## Goals And Non-Goals
@@ -154,7 +154,7 @@ A contributor prepares the environments.
 - **FR-004**: The toolchain MUST live in the named volumes
   `screamer-watcom-v2-tools` and `screamer-watcom10-tools` (256 MiB each).
   The run image is `screamer-run:1`. The image names MUST be flat, because
-  Dosker 0.1.3 rejects a name that holds a slash.
+  Dosker 0.1.5 rejects a name that holds a slash.
 - **FR-005**: The setup tool MUST create an absent volume, copy the toolchain
   into it, reuse a present volume, enforce the 8.3 name rule, and record the
   digests.  The 8.3 check is case-insensitive, because the V2 tree uses
@@ -204,7 +204,7 @@ A contributor prepares the environments.
 
 ### Assumptions
 
-- Dosker is an external release, pinned at 0.1.3. The Screamer tools do not
+- Dosker is an external release, pinned at 0.1.5. The Screamer tools do not
   change the Dosker source.
 - The owner of the reconstruction can add features to Dosker. This design
   requests one addition (machine-readable output) and one release asset (the
@@ -218,7 +218,7 @@ A contributor prepares the environments.
 - The shipped game files that the run needs use 8.3 names. A staging list
   selects them.
 
-### Constraints From Dosker 0.1.3
+### Constraints From Dosker 0.1.5
 
 | Limit | Value | Effect on the design |
 | --- | --- | --- |
@@ -479,7 +479,7 @@ flowchart LR
 - **Interface**:
 
 ```python
-PINNED_VERSION = "0.1.3"
+PINNED_VERSION = "0.1.5"
 
 class ExecResult:
     exit_code: int
@@ -580,7 +580,7 @@ COPY extender/ C:/
 RUN DIR C:\DOS4GW.EXE
 ```
 
-The `RUN` projects the `COPY` tree onto the image disk.  Dosker 0.1.3
+The `RUN` projects the `COPY` tree onto the image disk.  Dosker 0.1.5
 projects the image tree onto the container disk, so a run container sees the
 image's `C:\DOS4GW.EXE`.  The setup builds this image and records its digest.
 The run copies the module EXE to `C:\` and runs it there, beside the image's
@@ -805,7 +805,7 @@ The compatibility rules are:
 | The FreeDOS base rejects the V2 DOS/4GW stub. | The behavior run fails. | The setup extracts the DOS/4G 2.01a from the pinned DOSBox-X; the 2.01a accepts the stub. See RD-005. |
 | QEMU TCG boot time slows the record run. | Long CI runs. | Batch the builds. The behavior run boots once per module, as the Docker baseline does. Measure. Use a snapshot later. |
 | A live bind corrupts the host tree. | Lost work. | Force the sync fallback. Reject a live bind in the client. |
-| Dosker 0.1.3 is young. | A bug blocks the build. | Pin the release. Keep the change small. File the fix in Dosker. |
+| Dosker 0.1.5 is young. | A bug blocks the build. | Pin the release. Keep the change small. File the fix in Dosker. |
 | The whole image has no data model. | The gate cannot pass. | Report coverage. Do not claim a pass. |
 | CI cannot build the FreeDOS base. | No images in CI. | Cache the image store. Pin the agent binary and the FreeDOS ZIP. |
 | The run needs the CD data. | The whole game does not run. | Defer to the CD audio work in M4. The module runs do not need it. |

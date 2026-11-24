@@ -25,7 +25,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-PINNED_VERSION = "0.1.3"
+PINNED_VERSION = "0.1.5"
 DEBUG_IMAGE = "freedos:1.3"
 RUN_IMAGE = "screamer-run:1"
 TOOLCHAIN_VOLUME = "screamer-watcom-v2-tools"
