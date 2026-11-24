@@ -1,0 +1,11 @@
+{
+  "exe": "miscrt.exe",
+  "map": "misc_runtime.map",
+  "name": "misc_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "misc_runtime.c"
+    }
+  ]
+}

@@ -61,6 +61,7 @@ RUNTIME_MODULES = (
     "sound_runtime",
     "game_runtime",
     "physics_runtime",
+    "misc_runtime",
 )
 SHARED_OBJECTS = ("CHK.OBJ", "CSTART.OBJ", "STACK.OBJ")
 SHARED_FILES = ("CHK.ASM", "CSTART.C", "STACK.ASM")

@@ -400,8 +400,9 @@ The plan follows the size order, starting with the smallest functions.
     compatibility module, the startup and run-time cluster resolves through
     `startup_runtime`, the input cluster resolves through `input_runtime`, the
     sound and music cluster resolves through `sound_runtime`, the race and
-    game-flow cluster resolves through `game_runtime`, and the objects and
-    physics cluster resolves through `physics_runtime`; the other 93 missing
-    functions and the data model remain. The 10.0a Dosker backend and a
-    byte-identical image remain).
+    game-flow cluster resolves through `game_runtime`, the objects and physics
+    cluster resolves through `physics_runtime`, and the misc and unnamed
+    cluster resolves through `misc_runtime`; the other 55 missing functions and
+    the data model remain. The 10.0a Dosker backend and a byte-identical image
+    remain).
 

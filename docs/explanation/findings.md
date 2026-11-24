@@ -19810,3 +19810,22 @@ temporary `-od` recipe.
 - Evidence: `python3 tools/rebuild/image_plan.py build`;
   `work/rebuild/BUILD.LOG`; the comparison of
   `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The misc and unnamed cluster resolves in the whole-image link
+
+- Observation: the `misc_runtime` module defines the 38 functions of the
+  misc/unnamed subsystem with the callers' register convention: the sixteen
+  network race-screen cases, `cd_check`, `func_20428`, `sd_setup`,
+  `state_cells_set`, the eight `state_step_*` helpers, the nine `sub_*`
+  helpers, and `volume_bar_draw`.
+- Observation: after the rebuild, the linker reports 1,080 unique undefined
+  symbols, down from 1,118.  Exactly 38 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 55 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The helpers are inert and return 0.  The module has no function
+  record and no behavior check, so it does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
