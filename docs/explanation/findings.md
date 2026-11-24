@@ -19457,8 +19457,12 @@ temporary `-od` recipe.
 
 ## main differs in register allocation
 
-- Observation: the original saves `ebx`, keeps the race result in `[ebp-4]`,
-  and tests `ebx`. The rebuild keeps the result in `edx` and holds no local.
-  The source is otherwise the same, so the difference is the allocator.
-- Open question: whether the period Watcom 10.0a emits the original form. The
-  V2 harness does not.
+- Observation (V2): the original saves `ebx`, keeps the race result in `[ebp-4]`,
+  and tests `ebx`. The V2 rebuild keeps the result in `edx` and holds no local.
+- Observation (period Watcom 10.0a): the build is 191 bytes and 57 instructions
+  versus 194 and 56; 25 of 56 instructions match (V2: 21 of 55). The prologue is
+  `push ebp; mov ebp, esp; push ebx; push edx`, so it saves `ebx`, but it still
+  holds the result in `edx` and allocates no `[ebp-4]`.
+- Inference: the period compiler is closer but does not reproduce the original
+  local and `ebx` use. That difference comes from the source form of `result`,
+  not from the compiler alone.
