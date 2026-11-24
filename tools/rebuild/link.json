@@ -272,7 +272,8 @@
     "game_runtime",
     "physics_runtime",
     "misc_runtime",
-    "render_runtime"
+    "render_runtime",
+    "files_runtime"
   ],
   "unmodeled": [
     {

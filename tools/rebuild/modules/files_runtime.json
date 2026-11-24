@@ -1,0 +1,11 @@
+{
+  "exe": "filesrt.exe",
+  "map": "files_runtime.map",
+  "name": "files_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "files_runtime.c"
+    }
+  ]
+}

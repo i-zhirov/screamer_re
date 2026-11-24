@@ -402,7 +402,9 @@ The plan follows the size order, starting with the smallest functions.
     sound and music cluster resolves through `sound_runtime`, the race and
     game-flow cluster resolves through `game_runtime`, the objects and physics
     cluster resolves through `physics_runtime`, the misc and unnamed cluster
-    resolves through `misc_runtime`, and the render and video cluster resolves
-    through `render_runtime`; the other 22 missing functions and the data model
-    remain. The 10.0a Dosker backend and a byte-identical image remain).
+    resolves through `misc_runtime`, the render and video cluster resolves
+    through `render_runtime`, and the files and streams cluster resolves through
+    `files_runtime`; the function set now resolves, and the 324 globals, the
+    data model, and the 8 run-time symbols remain.  The 10.0a Dosker backend
+    and a byte-identical image remain).
 

@@ -12,6 +12,7 @@
  *   probe_free(pool), probe_size(pool) -> the memory probe of `memory_available`
  *   dos_memory_free(handle, address)   -> the DOS memory release
  *   nfree(block)                       -> the run-time free entry
+ *   release(block)                     -> the memory release entry
  *
  * The functions are a compatibility layer, not yet a byte-faithful recovery of
  * the Watcom allocator.  The allocator is a bump arena with one free-list node
@@ -115,6 +116,12 @@ int dos_memory_free(int handle, unsigned int address)
 }
 
 void nfree(void *block)
+{
+    (void)block;
+}
+
+/* Part of the heap/memory compatibility layer. */
+void release(void *block)
 {
     (void)block;
 }

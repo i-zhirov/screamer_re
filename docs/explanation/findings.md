@@ -19847,3 +19847,43 @@ temporary `-od` recipe.
 - Evidence: `python3 tools/rebuild/image_plan.py build`;
   `work/rebuild/BUILD.LOG`; the comparison of
   `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The files and streams cluster resolves in the whole-image link
+
+- Observation: the `files_runtime` module defines the 21 functions of the
+  files/streams subsystem with the callers' register convention: the file open
+  and close, the member open, the rename and delete, the resource cache and
+  release, the stream alloc, release, restore, and seek, the stream setup
+  cases, the replay helpers, and the table entry and read helpers.
+- Observation: after the rebuild, the linker reports 1,026 unique undefined
+  symbols, down from 1,047.  Exactly 21 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 1 function (`release_`), 324 globals,
+  693 `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The void entry points do nothing, and the int and pointer entry
+  points return 0.  The module has no function record and no behavior check, so
+  it does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The last missing function resolves in the whole-image link
+
+- Observation: the `memory_runtime` heap and memory module now defines
+  `release` as `void release(void *block)`.  This is the void release that
+  `game_main` calls through `extern void release(void *block)`.
+- Observation: after the rebuild, the linker reports 1,025 unique undefined
+  symbols, down from 1,026.  Exactly 1 symbol is new-resolved (`release_`), and
+  zero symbols are new-undefined.
+- Observation: the remaining open set is 0 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: `release` is an inert compatibility stub in the heap/memory
+  compatibility layer.  It is not a byte-faithful recovery of the game memory
+  release.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the change;
+  `python3 tools/rebuild/image_plan.py seed` still reports 260 modules;
+  `python3 tools/rebuild/image_plan.py build --check` still reports 336 unique
+  sources.
