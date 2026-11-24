@@ -19445,3 +19445,20 @@ temporary `-od` recipe.
   `dosker_map_name`). The run copies the EXE in as `C:\<EXE>`.
 - Evidence: `run.py run --function 0x300ec` and `run.py run --all` both report
   `0x300ec free: PASS`.
+
+## The video_present palette loop is a pointer walk
+
+- Observation: the original walks the 0x300 palette bytes with a source
+  pointer, an end pointer, and a destination pointer. The rebuild used an index
+  loop, which folded the walk into a counter and lost instructions.
+- Change: `video_present.c` uses the pointer form.
+- Evidence: the rebuilt `video_present` grows from 29 to 37 instructions; the
+  original has 40. The identity check stays `fail` (6/37).
+
+## main differs in register allocation
+
+- Observation: the original saves `ebx`, keeps the race result in `[ebp-4]`,
+  and tests `ebx`. The rebuild keeps the result in `edx` and holds no local.
+  The source is otherwise the same, so the difference is the allocator.
+- Open question: whether the period Watcom 10.0a emits the original form. The
+  V2 harness does not.

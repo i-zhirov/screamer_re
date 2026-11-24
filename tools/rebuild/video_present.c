@@ -1,15 +1,10 @@
 /* The rebuilt `video_present` module.
  *
- * The original sits at linear 0x27ec8 in STARTH.EXE and holds 29 instructions
- * and 124 bytes: the three register saves, the frame, the 0x310-byte local
- * area, the 0x300-byte palette loop, the scale and offset arithmetic, the
- * rounding helper at `0x4d9f4`, the palette call at `0x81a05`, and the
- * `ret 8` epilogue.
- *
- * The function maps the 0x300 source bytes at `DAT_0010cf5c` with the formula
- * `(byte - offset) * scale + offset`, stores the result in the local palette,
- * and passes it to `palette_set`.  The two arguments arrive on the stack in the
- * original; the rebuild uses the compiler convention and the same arithmetic.
+ * The original sits at linear 0x27ec8 in STARTH.EXE.  It walks the 0x300 source
+ * bytes at `DAT_0010cf5c` with a source pointer and an end pointer, writes the
+ * mapped byte through a destination pointer into the local palette, and passes
+ * the palette to `palette_set`.  The pointer form is what the original compiler
+ * emitted; an index loop folds the walk into a counter and changes the code.
  */
 extern unsigned char DAT_0010cf5c[];
 extern void palette_set(char *palette);
@@ -17,12 +12,19 @@ extern void palette_set(char *palette);
 void video_present(float scale, int offset)
 {
     char palette[0x300];
-    int index;
+    unsigned char *source;
+    unsigned char *end;
+    char *destination;
     int value;
 
-    for (index = 0; index < 0x300; ++index) {
-        value = (int)DAT_0010cf5c[index] - offset;
-        palette[index] = (char)((int)((float)value * scale + offset));
+    source = DAT_0010cf5c;
+    end = DAT_0010cf5c + 0x300;
+    destination = palette;
+    while (source < end) {
+        value = (int)*source - offset;
+        *destination = (char)((int)((float)value * scale + offset));
+        ++source;
+        ++destination;
     }
     palette_set(palette);
 }
