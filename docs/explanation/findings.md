@@ -19493,3 +19493,15 @@ temporary `-od` recipe.
   better match.
 - Inference: these source levers do not move the allocator. The plain form's
   25/56 ceiling holds.
+
+## The broad 10.0a flag sweep does not break 25/56
+
+- Sweep: the CPU levels `-3` to `-6`; the optimization sub-flags `-ob`, `-oe`,
+  `-oh`, `-oi`, `-ol`, `-om`, `-or`, `-ou`, `-ov`, `-ow`, `-oy`, `-oz`, `-j`,
+  `-k`; the code-generation flags `-zp1`, `-zp2`, `-zp8`, `-zW`, `-zu`, `-zl`,
+  `-zc`, `-bd`, `-zri`, `-zro`, `-zrs`, all with `-ot -mf -of+`.
+- Result: no combination exceeds 25 of 56. Many tie it. `-3` gives 18 of 54 and
+  `-ol` gives 18 of 56. `-bd` fails the link on `__DLLstart_`; `-zri`, `-zro`,
+  and `-zrs` fail the compile on `O0.OBJ`; several flags give no usable diff.
+- Inference: the flags do not move the register allocation. The 25/56 ceiling
+  holds for the 10.0a compiler.
