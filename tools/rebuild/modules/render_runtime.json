@@ -1,0 +1,11 @@
+{
+  "exe": "rendrt.exe",
+  "map": "render_runtime.map",
+  "name": "render_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "render_runtime.c"
+    }
+  ]
+}

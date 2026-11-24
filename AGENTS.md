@@ -121,7 +121,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the two hundred and fifty-nine module recipes
+│   │   ├── modules/           # the two hundred and sixty module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -406,9 +406,11 @@ through the store.
   helpers, and the vehicle state; it is inert as well.  `misc_runtime` holds
   the network race-screen cases, the CD check, the menu and loading helpers,
   the race state steps, the collision cell tests, the sound driver setup, and
-  the volume bar; it is inert as well.  Do not call these modules
-  byte-faithful.  A new run-time module enters the plan only when it is listed
-  in `image_plan.RUNTIME_MODULES`, which appends it to the seeded order.
+  the volume bar; it is inert as well.  `render_runtime` holds the drawing,
+  palette, sprite, PCX, HUD, camera, panel, and view entry points; it is inert
+  as well.  Do not call these modules byte-faithful.  A new run-time module
+  enters the plan only when it is listed in `image_plan.RUNTIME_MODULES`, which
+  appends it to the seeded order.
 - Stage 11 prints the coverage report when `--rebuilt-image` exists and
   `tools/rebuild/link.json` is present.  The report is a diagnostic: the
   whole-image check owns the pass or fail, so the coverage output adds no check

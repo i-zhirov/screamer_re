@@ -62,6 +62,7 @@ RUNTIME_MODULES = (
     "game_runtime",
     "physics_runtime",
     "misc_runtime",
+    "render_runtime",
 )
 SHARED_OBJECTS = ("CHK.OBJ", "CSTART.OBJ", "STACK.OBJ")
 SHARED_FILES = ("CHK.ASM", "CSTART.C", "STACK.ASM")

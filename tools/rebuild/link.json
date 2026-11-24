@@ -271,7 +271,8 @@
     "sound_runtime",
     "game_runtime",
     "physics_runtime",
-    "misc_runtime"
+    "misc_runtime",
+    "render_runtime"
   ],
   "unmodeled": [
     {

@@ -19829,3 +19829,21 @@ temporary `-od` recipe.
 - Evidence: `python3 tools/rebuild/image_plan.py build`;
   `work/rebuild/BUILD.LOG`; the comparison of
   `work/rebuild/undefined_symbols.txt` before and after the module.
+
+## The render and video cluster resolves in the whole-image link
+
+- Observation: the `render_runtime` module defines the 33 functions of the
+  render/video subsystem with the callers' register convention: the drawing,
+  palette, sprite, PCX, HUD, camera, panel, and view entry points.
+- Observation: after the rebuild, the linker reports 1,047 unique undefined
+  symbols, down from 1,080.  Exactly 33 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 22 functions, 324 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  The draw, sprite, palette, and view entry points are inert and
+  return 0.  The module has no function record and no behavior check, so it
+  does not enter the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module.
