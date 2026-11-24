@@ -19505,3 +19505,15 @@ temporary `-od` recipe.
   and `-zrs` fail the compile on `O0.OBJ`; several flags give no usable diff.
 - Inference: the flags do not move the register allocation. The 25/56 ceiling
   holds for the 10.0a compiler.
+
+## The archive search finds no original recipe and one extra V2 build
+
+- The archives hold the Watcom 10.0a ISO (`work/archive`) and the game data
+  track. The Git history and the installed game hold no build recipe.
+- The Docker image `arlaneenalra/watcom-docker` is OpenWatcom V2 2.0 beta
+  Nov 21 2026 (64-bit). The DOS toolchain in
+  `~/.cache/dosker-openwatcom-dos/openwatcom/toolchain` is OpenWatcom V2 2.0
+  beta Nov 1 2026 (32-bit).
+- The DOS V2 free build gives the same 3 of 3 instructions as the V2.
+- The DOS V2 `game_main` build did not finish in the command window. Its config
+  needs the DOS V2 mount layout (`C:\BINW`, `C:\H`), not the 10.0a `C:\WATCOM`.
