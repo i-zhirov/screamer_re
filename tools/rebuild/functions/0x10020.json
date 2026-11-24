@@ -16,7 +16,7 @@
       "text": "the original at `0x10020` holds 56 instructions and 194 bytes: the frame, the allocation of `0x4c` bytes, the list of `0x96` records at `DAT_000062ac`, the memory check against `0x61a800`, the two low-memory messages at object 3 offsets 4 and 0x29, `engine_init`, the `race_loop` and `frame_update` loop on `DAT_00007ed8`, the error path through `bios_video(3)`, `error_report`, and `exit`, `engine_shutdown`, and the cleanup"
     }
   ],
-  "implementation": "assembly",
+  "implementation": "c",
   "module": "game_main",
   "name": "main",
   "notes": [],
@@ -32,23 +32,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 137,
-        "bytes_total": 194,
-        "detail": "the instruction shapes match; the differing bytes are not relocations",
-        "instructions_equal": 56,
-        "instructions_total": 56,
-        "verdict": "pass"
+        "bytes_equal": 20,
+        "bytes_total": 189,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 21,
+        "instructions_total": 55,
+        "verdict": "fail"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10020",
     "date": "2026-11-24",
-    "fingerprint": "sha256:1df8a97eed14fdaf480aa791316c16f122a9fa0e30c5cc887f99ce5e3e91483d",
-    "source_digest": "sha256:a340f6ef0f6247521d5407beccf218413a3712471ef12a5d3fb87e09393f2e88",
+    "fingerprint": "sha256:c12c6d490d93ac68e259085d4796361774ddc1d1625309205d2cb34836eaad1c",
+    "source_digest": "sha256:fc4fc31170526e3457fdf63d42abd2507fb33ba0a1fdc8881c73aab3ca9c7cd0",
     "tool": "run.py"
   },
   "role": "allocates the list, checks the available memory, runs the engine and the race loop, and frees the list",
   "section": "Program functions",
   "size": 371,
-  "status": "matching",
+  "status": "rebuilt",
   "symbol": "game_main_"
 }

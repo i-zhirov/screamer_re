@@ -19603,3 +19603,14 @@ temporary `-od` recipe.
   Watcom run-time and DOS/4G, while DJGPP produces COFF with `go32`/CWSDPMI.
 - Conclusion: DJGPP and the GCC family are refuted. The original is Watcom
   C/C++32, as the banner states.
+
+## game_main returns to C; behavior is the interim gate
+
+- The full `game_main.asm` is removed. `game_main` is C again, built with the
+  10.0a: 191 bytes, 57 instructions, 25 of 56 equal.
+- The project direction is C-first with inline assembly only for specific
+  optimizations, because the code must eventually port to other CPU
+  architectures. A standalone assembly function is not the target.
+- Byte-perfect identity is the long-term gate. For now the behavior check is the
+  interim guarantee; the `game_main` behavior currently stops at
+  `Can't run DOS/4G(W)`, which is the test runtime, not the C code.

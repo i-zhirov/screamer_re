@@ -16,8 +16,11 @@
   },
   "sources": [
     {
-      "compiler": "wasm",
-      "file": "game_main.asm"
+      "compiler": "wcc386",
+      "file": "game_main.c",
+      "flags": [
+        "-of+"
+      ]
     },
     {
       "compiler": "wcc386",
