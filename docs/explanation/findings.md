@@ -19564,3 +19564,12 @@ temporary `-od` recipe.
   the remaining 27 operands are relocation-controlled call and data addresses.
 - The oracle verdict stays `fail` on the byte comparison; the instruction form
   is exact. The record marks `implementation: assembly`.
+
+## The game_main assembly matches the original form
+
+- The format-string pushes use `push offset _msg_low`/`_msg_need`, which forces
+  the 5-byte `68 imm32` form and a relocation. The earlier `push 4` optimized to
+  the 2-byte `6A imm8` and failed the shape check.
+- The rebuilt `game_main` is 194 bytes and 56 instructions; all 56 instructions
+  match, and the oracle returns the relocation-only pass: "the instruction
+  sequences match; the differing operands are the link-time addresses."

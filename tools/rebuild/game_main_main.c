@@ -35,8 +35,8 @@ unsigned int DAT_00007ed8;
 
 static char text[8];
 static char block[0x200];
-static char msg_low[] = "\nNot enough memory to play SCREAMER\n";
-static char msg_need[] = "You need another %d bytes\n";
+char msg_low[] = "\nNot enough memory to play SCREAMER\n";
+char msg_need[] = "You need another %d bytes\n";
 
 static unsigned int alloc_size;
 static void *alloc_result;

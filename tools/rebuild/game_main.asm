@@ -23,6 +23,8 @@ extrn list_destroy_:near
 extrn release_:near
 extrn _DAT_000062ac:dword
 extrn _DAT_00007ed8:dword
+extrn _msg_low:byte
+extrn _msg_need:byte
 .code
 game_main_ proc near
         push ebx
@@ -41,7 +43,7 @@ alloc_done:
         call memory_available_
         cmp eax, 0x61a800
         jge normal
-        push 4
+        push offset _msg_low
         call printf_
         add esp, 4
         mov eax, dword ptr [_DAT_000062ac]
@@ -49,7 +51,7 @@ alloc_done:
         call memory_available_
         sub edx, eax
         push edx
-        push 0x29
+        push offset _msg_need
         call printf_
         mov eax, dword ptr [_DAT_000062ac]
         add esp, 8
