@@ -33,10 +33,6 @@
       "text": "the harness holds the two font tables, the font count, and the measured text; the eight paths cover the out-of-range font, the two visible glyphs, the control byte 1 monospace mode, the control byte 2 restore, the control byte 3 widen clear, the control byte 4 widen set, the character below the first and past the range, and the two higher glyphs; the output holds the markers 0 through 7 and D; the behavior check passes"
     },
     {
-      "kind": "note",
-      "text": "the rebuilt module holds the same behavior in C; the identity check stays open at 16 of 104 instructions and 12 of 284 bytes because the original saves all registers with pushal and keeps the argument copies and the two mode flags in the BSS globals, while the C build keeps them in locals; the build and behavior checks pass, so the store records rebuilt"
-    },
-    {
       "kind": "command",
       "text": "python3 tools/le.py disasm ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x254a8 --count 104"
     },
@@ -50,13 +46,22 @@
     },
     {
       "kind": "finding",
-      "text": "The text_measure module at 0x254a8"
+      "text": "The text_measure routine at 0x254a8 is a strict identity match"
+    },
+    {
+      "kind": "note",
+      "text": "the original is a self-contained Watcom 10.0a routine: pushad, four argument copies into BSS cells, the widest-glyph scan, the text walk, and cld/popad/ret; the C build keeps the same state in locals, so V2 cannot reproduce the sequence"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "text_measure",
   "name": "text_measure",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-25",
+      "text": "the transliteration in text_measure.asm matches 104 of 104 instructions and 258 of 360 bytes; the differing bytes are the link-time data addresses, so the strict identity gate passes"
+    }
+  ],
   "object_offset": "0x154a8",
   "result": {
     "checks": {
@@ -69,23 +74,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 12,
-        "bytes_total": 284,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 16,
+        "bytes_equal": 258,
+        "bytes_total": 360,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 104,
         "instructions_total": 104,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x254a8",
-    "date": "2026-11-24",
-    "fingerprint": "sha256:6d2da4ab55b233f2848c1218061367d3c75cdf95730dad5f380b7cb687ee6618",
-    "source_digest": "sha256:9e682624e153598d7f561bd6fd6eed7e9ccb8d20ba0cf7bcd550a35341ad4f2e",
+    "date": "2026-11-25",
+    "fingerprint": "sha256:cccf1891417195bdf1ceaffe572f57ae7bbd2e56adb7834342eafe288a772016",
+    "source_digest": "sha256:7f086133051c553b92785eee820c635e2e8874f035ebb828ef6c41626a163514",
     "tool": "run.py"
   },
   "role": "Measures the width and height of a text string from the font glyph tables.",
   "section": "Program functions",
   "size": 376,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "text_measure_"
 }

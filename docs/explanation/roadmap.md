@@ -374,8 +374,8 @@ The plan follows the size order, starting with the smallest functions.
     `traffic_push_response` at `0x17b54`, and
     `camera_project` at `0x82c14`
     are done;
-    the result is thirty verified modules, one matching module, and two
-    hundred and fifteen open rebuilds).
+    the result is thirty-two verified modules, one matching module, and two
+    hundred and twenty open rebuilds).
 13. Enforce the byte gate (in progress: `run.py --strict` accepts only the
     exact-bytes verdict and the relocation-only verdict, `store.py check`
     validates every record against the JSON Schema contracts, and stage 11

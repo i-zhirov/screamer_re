@@ -20142,3 +20142,33 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/formatter.map --rebuilt-symbol formatter_`;
   `work/rebuild/fmt_out.txt`; `tools/rebuild/formatter.asm`,
   `formatter.c`, `formatter_main.c`, and `compiler_runtime.c`.
+
+## The text_measure routine at 0x254a8 is a strict identity match
+
+- Observation: the original at `0x254a8` holds 104 instructions and 360 bytes
+  up to the `ret` at `0x2560f`.  It saves all registers with `pushad`, copies
+  the four arguments into BSS cells, scans the glyph row for the widest
+  advance, walks the text, and ends with `cld`, `popad`, and `ret`.  The four
+  arguments arrive as the width pointer in `eax`, the height pointer in `edx`,
+  the text pointer in `ebx`, and the font index in `ecx`.
+- Observation: the C build keeps the argument copies and the two mode flags in
+  locals.  The V2 compiler therefore cannot reproduce the original register
+  and BSS sequence, and the identity check stops at 16 of 104 instructions.
+- Observation: the transliteration in `text_measure.asm` keeps the original
+  BSS cells and the original instruction order.  It also carries the
+  `cs`-prefixed `mov eax, eax` padding bytes and the two `nop` cells.
+- Observation: the first transliteration build reports 104 of 104 instructions
+  and 258 of 360 bytes with the verdict `exact-relocations`.  The differing
+  bytes are the link-time data addresses, which the oracle masks.  Both the
+  default gate and the strict gate accept the result, so the record at
+  `0x254a8` is `verified` with the implementation `assembly`.
+- Observation: the 9-case behavior harness still reports every marker and
+  exit 0.  The C source stays on disk as the reference, and the recipe builds
+  the assembly source.
+- Evidence: `python3 tools/rebuild/run.py run --recheck-record 0x254a8
+  --strict --backend dosker`; `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0x254a8 --rebuilt work/rebuild/txm.exe
+  --rebuilt-map work/rebuild/text_measure.map --rebuilt-symbol text_measure_`;
+  `work/rebuild/txm.txt`; `tools/rebuild/text_measure.asm`,
+  `text_measure.c`, and `text_measure_main.c`.

@@ -417,6 +417,8 @@ The files:
 | `stream_status.asm` | the hand-written `stream_status` module: the word at `stream + 0x70`; the source pins the original `mov ebp,esp`, `mov esp,ebp`, and `sub esp,8` encodings |
 | `stream_status.c` | the C reference version of the `stream_status` module, kept alongside the assembly; the V2 `-of+ -od` build changes the prologue order, the local offsets, and the epilogue |
 | `stream_status_main.c` | the `stream_status` test harness: the stream record and the status check |
+| `text_measure.asm` | the transliterated `text_measure` module at `0x254a8`: the `pushad` frame, the four BSS argument copies, the widest-glyph scan, and the text walk |
+| `text_measure.c` | the C reference version of the `text_measure` module, kept alongside the assembly; the V2 build keeps the state in locals |
 | `race_state_update.c` | the rebuilt `race_state_update` module: the state dispatch through an if-else chain |
 | `race_state_update_main.c` | the `race_state_update` test harness: the state words and the step stubs |
 | `fpu_stub.asm` | the FPU run-time stubs of the `race_state_update` harness |
