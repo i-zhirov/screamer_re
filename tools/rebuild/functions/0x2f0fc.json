@@ -36,7 +36,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x2f0fc",
     "date": "2026-11-25",
-    "fingerprint": "sha256:b29f28e27ca79222fc7ac6a63db34b0d88f921806dd42708f03ef87f2729732f",
+    "fingerprint": "sha256:40e1d902240c57af23b262225dc87bea48fb9c52ea8bc751aa9c58011740190e",
     "source_digest": "sha256:cc39f4cb316dc11f32734ce7f7cdd1bafa23d1c014a20e69213c2959741a16fc",
     "tool": "run.py"
   },

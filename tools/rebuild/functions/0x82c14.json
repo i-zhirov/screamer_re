@@ -83,7 +83,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x82c14",
     "date": "2026-11-25",
-    "fingerprint": "sha256:882643fe99aa71a5d0620ed6d45a036e1927f1129a92fb10033a54a09516ec30",
+    "fingerprint": "sha256:64c4bc3dd0c017f6cf63f525dadd2fac7c95d9820bda85d421d2c052b3d36a6e",
     "source_digest": "sha256:75521f6f2b413bb86b96ebe1f12d386c5a1e40a0674ca70e2b73c8fede9a8215",
     "tool": "run.py"
   },
