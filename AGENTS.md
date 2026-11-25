@@ -121,7 +121,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the two hundred and sixty-three module recipes
+│   │   ├── modules/           # the two hundred and sixty-four module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -186,8 +186,11 @@ run reports 288 checks.  Both flags report 284 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists and prints the coverage report when
 `tools/rebuild/link.json` is present.  The image check is a skip until a whole
-image is built, and the coverage report adds no check, so the counts stay the
-same:
+image is built, and the coverage report adds no check, so the counts above
+assume no rebuilt image at the default path.  After
+`python3 tools/rebuild/image_plan.py build` writes `work/rebuild/STARTH.EXE`,
+stage 11 adds the image check, and the compatibility image fails it.  The full
+check commands:
 
 ```sh
 nix develop .#cross-check --command sh tools/ghidra/install_loader.sh
@@ -357,8 +360,10 @@ through the store.
   directory.
 - The full check reports 303 checks in the `cross-check` shell.  `--skip-cross`
   gives 299 checks, `--skip-runtime` gives 288 checks, and both flags give 284
-  checks.  `--skip-runtime` still runs stage 8.  `--skip-cross` skips stage 8
-  and the tool preflight.
+  checks when no rebuilt image is at the default path.  `--skip-runtime` still
+  runs stage 8.  `--skip-cross` skips stage 8 and the tool preflight.  After
+  the whole-image build writes `work/rebuild/STARTH.EXE`, stage 11 adds the
+  image check, and the compatibility image fails it.
 - Stage 12 checks the program-map tables and the call graph for drift.  The
   call graph check needs capstone and the original executable.
 - The identity gate has two modes.  The default gate accepts the three
@@ -412,8 +417,10 @@ through the store.
   and stream entry points and the resource and table helpers; it is inert as
   well.  `data_runtime` holds the global data definitions and
   `data_labels_runtime` holds the compiler data labels that the module sources
-  address by name; both are compatibility layers as well.  Do not call these
-  modules byte-faithful.  A new run-time module enters the plan only when it is
+  address by name, and `compiler_runtime` holds the compiler and run-time
+  labels: the C main entry, the two format entry points, the EFG table, the
+  profiler pointer, the interrupt-7 handlers, and the DLL startup entry; all
+  are compatibility layers as well.  Do not call these modules byte-faithful.  A new run-time module enters the plan only when it is
   listed in `image_plan.RUNTIME_MODULES`, which appends it to the seeded order.
 - Stage 11 prints the coverage report when `--rebuilt-image` exists and
   `tools/rebuild/link.json` is present.  The report is a diagnostic: the

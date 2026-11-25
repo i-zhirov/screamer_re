@@ -405,8 +405,8 @@ The plan follows the size order, starting with the smallest functions.
     resolves through `misc_runtime`, the render and video cluster resolves
     through `render_runtime`, the files and streams cluster resolves through
     `files_runtime`, the global data cluster resolves through `data_runtime`,
-    and the compiler data-label cluster resolves through `data_labels_runtime`;
-    the function set, the globals, and the 693 data labels now resolve, and the
-    8 run-time symbols remain.  The 10.0a Dosker backend and a byte-identical
-    image remain).
+    the compiler data-label cluster resolves through `data_labels_runtime`, and
+    the compiler and run-time labels resolve through `compiler_runtime`; the
+    whole image now links.  The 10.0a Dosker backend, the unmodeled code and
+    data regions, and a byte-identical image remain).
 

@@ -657,7 +657,7 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the two hundred and sixty-three module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and sixty-four module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -735,14 +735,17 @@ the non-harness sources of the plan on the Dosker V2 toolchain volume and links
 it.  The batch writes every compile and the link to `BUILD.LOG`, because
 `dosker exec` does not interpret `>` on the command line and the agent returns
 the batch output as one control line; the tool copies the log back on a
-failure.  `coverage` writes
-`work/rebuild/image_coverage.json` and prints the region table.  The whole image
-has no data model yet and the module recipes are stand-alone test units, so the
-build is best-effort: a whole-image link can still fail on a symbol that only
-the shipped run-time defines.  The report names the remaining gaps and the tool
-does not claim a pass.  Stage 11 prints the same report when the rebuilt image
-and the link plan exist; the report adds no check, so the pipeline count does not
-change.
+failure.  The batch sets `DOS4G=QUIET`, because the DOS/4GW banner of every
+compile would otherwise exceed the control-line limit.  `coverage` writes
+`work/rebuild/image_coverage.json` and prints the region table.  The link now
+resolves every symbol, including the compiler and run-time labels, and writes
+`work/rebuild/STARTH.EXE`.  The whole image has no data model yet and the module
+recipes are stand-alone test units, so the image is a compatibility build: the
+coverage verdict is `unmodeled`, the report names the code and data gaps, and
+the tool does not claim a pass.  Stage 11 prints the same report when the
+rebuilt image and the link plan exist; the report adds no check, so the
+pipeline count does not change.  The image check itself runs when the rebuilt
+image exists and fails for the compatibility image.
 
 `memory_runtime.c` and `memory_runtime.asm` hold the first run-time cluster: the
 heap and memory helpers that the rebuilt modules call (`heap_alloc`, `heap_free`,
@@ -806,6 +809,17 @@ definition needs, and its element width is the widest access, so a scalar view
 and an array view share one object and a `double` access starts at an
 eight-byte boundary.  Every object starts at zero, so the module is a
 compatibility layer and does not enter the verified count.
+
+`compiler_runtime.c` and `compiler_runtime.asm` hold the compiler and run-time
+labels that the module sources and CLIB3R reference: the C main entry `main_`,
+the two format entry points `__vsprintf_` and `__doformat_`, the conversion
+helper `__cnvs2d_`, the EFG table `_EFG_Format_`, the profiler pointer
+`__LpDllName`, the interrupt-7 handlers `__int7` and `__int7_pl3`, and the DLL
+startup entry `__DLLstart_` that the V2 startup chain exposes.  The C main
+entry calls the rebuilt main invoker; the format and conversion entries return
+zero; the table and the pointer start at zero; the interrupt handlers end in
+`iret`; the DLL entry reports success.  The module is a compatibility layer, so
+it does not enter the verified count.
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,
@@ -1146,7 +1160,9 @@ import and reports 303 checks.  `--skip-cross` skips stage 8 and the tool
 preflight, so the run reports 299 checks.  `--skip-runtime` skips stages 5, 6,
 7, and 9 and still runs stage 8, so the run reports 288 checks.  Both flags
 report 284 checks and take about 16 seconds.  The whole-image check is a skip
-until `--rebuilt-image` exists, so it does not change these counts.
+until `--rebuilt-image` exists, so it does not change these counts; after
+`image_plan.py build` writes the default `work/rebuild/STARTH.EXE`, the check
+runs and fails for the compatibility image.
 
 The checks and the status page run in these places:
 

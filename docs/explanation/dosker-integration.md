@@ -907,8 +907,11 @@ repeatable test.
 ### Whole-Image Completion
 
 The current store holds 935 function records: 30 `verified`, 1 `matching`,
-221 `rebuilt`, 31 `named`, and 652 `unknown`. It holds 263 module recipes.
-The records cover code functions only. A byte-identical image needs:
+221 `rebuilt`, 31 `named`, and 652 `unknown`. It holds 264 module recipes.
+The records cover code functions only. The whole-image link now resolves
+every symbol and writes `work/rebuild/STARTH.EXE`; the coverage verdict is
+`unmodeled`, because the compatibility modules and the unmodeled code and data
+regions differ from the shipped image. A byte-identical image needs:
 
 - the data objects, the compiler data-label values, and the string table; the
   labels link through zero-filled placeholders, so the shipped bytes are still

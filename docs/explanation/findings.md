@@ -19949,3 +19949,59 @@ temporary `-od` recipe.
   `python3 tools/rebuild/image_plan.py seed` reports 262 modules;
   `python3 tools/rebuild/image_plan.py build --check` reports 338 unique
   sources.
+
+## The compiler and run-time labels resolve and the whole image links
+
+- Observation: the `compiler_runtime` module defines the eight symbols that
+  the link still reports as undefined, plus the DLL startup entry that the V2
+  startup chain then exposes.  The C part defines the format entry points
+  `__vsprintf` and `__doformat`, the conversion helper `__cnvs2d`, the EFG
+  table `EFG_Format_`, the profiler pointer `_LpDllName`, and the C main entry
+  `main`.  The assembly part defines the interrupt-7 handlers `__int7` and
+  `__int7_pl3` and the DLL startup entry `__DLLstart_`.  The exact signature of
+  `__cnvs2d` and the byte size of the EFG table are unknown; the helper returns
+  zero and the table holds 256 zero bytes.
+- Observation: the Watcom names follow three rules.  A default C function gets
+  a trailing underscore (`main` gives `main_`, `__vsprintf` gives
+  `__vsprintf_`).  A data object gets a leading underscore (`EFG_Format_` gives
+  `_EFG_Format_`, and `_LpDllName` gives `__LpDllName`).  A raw assembly label
+  keeps its spelling (`__int7`).  The maps show the rules: `input_map.map`
+  holds `_DAT_00118e1c` for a data object, and `game_main.map` holds `main_`
+  for the harness `main`.
+- Observation: the rebuilt game main is `game_main_` at `0x10020`, and the
+  original startup calls the main invoker at `0xd4324`, not the game main.
+  The startup at `0x30382` calls `0xd4324`; the invoker loads `argc` and
+  `argv` and calls `0x10020` at `0xd4364`.  The new `main_` therefore calls
+  `main_invoker_`, so the chain is `_cstart_` -> `main_` -> `main_invoker_` ->
+  `game_main_`.
+- Observation: the V2 C startup chain exposes one more label, `__DLLstart_`.
+  The member `dllmncwd.c` defines `DllMain_` and references `__DLLstart_`; the
+  library member is pulled in after `main_` resolves.  The game is an EXE, so
+  the DLL entry is not called, and the stub returns 1 in EAX.
+- Observation: the whole-image link now reports 0 undefined symbols and writes
+  `work/rebuild/STARTH.EXE` (334,572 bytes, SHA-256
+  `eb7f3fabc69f528c5a180c1d87d89c2e9488e3719c09f0b145d5cdb293107d85`) and
+  `work/rebuild/STARTH.MAP`.  The `BUILD.LOG` holds only the `BUILD` line and
+  no link error.  The link resolves the 693 data labels, the 324 globals, and
+  the eight compiler and run-time labels, plus `__DLLstart_`.
+- Observation: the coverage verdict is `unmodeled`: 102,951 code bytes linked,
+  233,488 code gap bytes, 25,259 data gap bytes, and 588,551 unmodeled bytes.
+  The image is a compatibility build, not a byte-identical recovery.  The
+  image check fails, because the data objects, the unmodeled code, and the
+  link layout differ.
+- Observation: the build batch sets `DOS4G=QUIET`.  The DOS/4GW banner of every
+  compile (93 bytes for each of the 340 sources, plus the compiler warnings)
+  exceeded the Dosker control-line limit, so the tool saw
+  `control line exceeds the size limit` instead of the link result.  The
+  quiet setting removes the banners, and the tool now reads the batch exit
+  code and copies out the image.  The compiler warnings still reach the
+  console.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; `work/rebuild/STARTH.EXE`;
+  `work/rebuild/STARTH.MAP`;
+  `python3 tools/rebuild/image_plan.py coverage --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE --rebuilt
+  work/rebuild/STARTH.EXE`; `python3 tools/rebuild/image_plan.py seed`
+  reports 263 modules; `python3 tools/rebuild/image_plan.py build --check`
+  reports 340 unique sources; `python3 tools/rebuild/store.py check` reports
+  1199 records and 0 violations.

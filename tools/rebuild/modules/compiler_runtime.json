@@ -1,0 +1,15 @@
+{
+  "exe": "crt.exe",
+  "map": "compiler_runtime.map",
+  "name": "compiler_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "compiler_runtime.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "compiler_runtime.asm"
+    }
+  ]
+}

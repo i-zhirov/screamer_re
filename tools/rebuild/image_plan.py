@@ -66,6 +66,7 @@ RUNTIME_MODULES = (
     "files_runtime",
     "data_runtime",
     "data_labels_runtime",
+    "compiler_runtime",
 )
 SHARED_OBJECTS = ("CHK.OBJ", "CSTART.OBJ", "STACK.OBJ")
 SHARED_FILES = ("CHK.ASM", "CSTART.C", "STACK.ASM")
@@ -308,12 +309,15 @@ def build_batch(plan: dict, sources: list[dict]) -> str:
 
     Every command appends to `BUILD.LOG`.  The agent returns the whole batch
     output as one control line and does not interpret `>` on the exec command
-    line, so the batch itself must keep the output short.  The tool copies the
-    log back when the batch fails.
+    line, so the batch itself must keep the output short.  `DOS4G=QUIET`
+    suppresses the DOS/4GW banner of every compile, because the banners
+    otherwise exceed the control-line limit; the compiler warnings still reach
+    the console.  The tool copies the log back when the batch fails.
     """
     log = f" >> C:\\WORK\\{BUILD_LOG}"
     lines = [
         "@ECHO OFF",
+        "SET DOS4G=QUIET",
         f"SET WATCOM={harness.DOSKER_TOOLCHAIN_ROOT}",
         "SET DOS4GPATH=%WATCOM%\\BINW",
         "SET INCLUDE=%WATCOM%\\H;%WATCOM%\\H\\SYS",

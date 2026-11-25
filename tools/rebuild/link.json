@@ -275,7 +275,8 @@
     "render_runtime",
     "files_runtime",
     "data_runtime",
-    "data_labels_runtime"
+    "data_labels_runtime",
+    "compiler_runtime"
   ],
   "unmodeled": [
     {

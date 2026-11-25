@@ -170,6 +170,7 @@ class BuildTextTestCase(unittest.TestCase):
 
     def test_batch_compiles_every_source_and_links(self) -> None:
         text = image_plan.build_batch(plan(["free"]), self.sources())
+        self.assertIn("SET DOS4G=QUIET", text)
         self.assertIn("SET WATCOM=D:\\WATCOM", text)
         self.assertIn(
             "wcc386 -bt=dos -s -zq -of+ -fo=C:\\WORK\\S000.OBJ C:\\WORK\\S000.C"
