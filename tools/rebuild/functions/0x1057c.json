@@ -69,8 +69,8 @@
         "verdict": "pass"
       },
       "build": {
-        "detail": "error: the dosker command 'volume' failed: dosker: invalid volume metadata at /Users/iliazhirov/.local/share/opencode/worktree/f03cf976adf6247edf97ad21fd94f61d192d52fc/dosker-integration/work/dosker/root/volumes/screamer-watcom-v2-tools-2/holder.json: invalid volume holder: the holder file is empty",
-        "verdict": "fail"
+        "detail": "the module builds",
+        "verdict": "pass"
       },
       "identity": {
         "bytes_equal": 24,
@@ -83,7 +83,7 @@
     },
     "command": "python3 tools/rebuild/run.py run --function 0x1057c",
     "date": "2026-11-25",
-    "fingerprint": "sha256:8dd55a55cb7c6fff20eed2ad5f59744ce640634f3766318f58e9e6fa31123618",
+    "fingerprint": "sha256:ecb8afd611255ba0ab1dbb469f1ea10f10bf9cc69f99892b83048885ed85074e",
     "source_digest": "sha256:0cf8cc9769a6b2b6fdb91fecf20a864b6ceb7197afbf3dedb499ee461e08cfbd",
     "tool": "run.py"
   },

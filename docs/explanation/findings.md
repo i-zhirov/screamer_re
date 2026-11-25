@@ -20207,3 +20207,44 @@ temporary `-od` recipe.
   --jobs 4 --toolchain-volumes "screamer-watcom-v2-tools,screamer-watcom-v2-tools-1,screamer-watcom-v2-tools-2,screamer-watcom-v2-tools-3"`;
   `work/rebuild/logs/run-20261125-191643.log`; `tools/rebuild/dosker.py`,
   `harness.py`, `run.py`, and `dosker_setup.py`.
+
+## The parallel run does not change the identity failures
+
+- Observation: the final 4-worker run reports 221 FAIL entries.  220 hold an
+  identity failure (two of them also hold a behavior failure) and one holds
+  only a behavior failure: `error_report` at `0x10978`, the `matching` record.
+- Observation: all 221 identity results match the pre-parallel records at
+  `536030c` except `video_present` at `0x27ec8`.  Its totals changed from 6
+  of 29 instructions and 7 of 89 bytes to 6 of 37 and 1 of 97.  A serial
+  `--recheck-record 0x27ec8` run reproduces the new totals, so the change is a
+  rebuild, not a parallel write.
+- Observation: two records, `main` at `0x10020` and `radar_world_draw` at
+  `0x1057c`, held a transient build failure in the parallel run:
+  `invalid volume metadata ... holder.json: invalid volume holder: the holder
+  file is empty`.  A serial recheck of each passes the build and behavior
+  checks, and the identity still fails with the same counts (21 of 55 and 27
+  of 154).  The identity failure is pre-existing; the build failure came from
+  the parallel volume reuse.
+- Observation: no FAIL entry in the run holds `0/0` or a check error.  The
+  per-module lock serializes the records of one module, and each worker holds
+  its own toolchain volume.
+- Observation: the literal 8-worker pass (no `--skip-unchanged`) reports 30
+  pass, 224 fail, and 694 skip with no volume conflict.  The 224 are the 221
+  pre-existing failures plus three transient build failures on verified
+  records (`default_data_copy`, `video_block_swap_a`, and
+  `video_block_swap_b`).  The empty volume holder also hit `engine_interface_init`,
+  `bios_video`, `race_data_load`, and `main`.  Serial rechecks repaired every
+  build failure.  After the repair the failing set is 221 and every identity
+  count matches the 4-worker run, so the 8-worker pass adds no identity
+  failure.
+- Observation: the linker map carries a creation time, so the full 8-worker
+  run rewrote the fingerprint of every rebuilt record; the check results are
+  unchanged.
+- Evidence: `work/rebuild/logs/run-20261125-194017.log`;
+  `work/rebuild/logs/run-20261125-201107.log`;
+  `python3 tools/rebuild/run.py run --all --backend dosker --jobs 8
+  --toolchain-volumes ...`;
+  `python3 tools/rebuild/run.py run --recheck-record 0x27ec8 --backend
+  dosker`; `... --recheck-record 0x10020 ...`; `... --recheck-record 0x1057c
+  ...`; the comparison of the current records with
+  `git show 536030c:tools/rebuild/functions/<address>.json`.
