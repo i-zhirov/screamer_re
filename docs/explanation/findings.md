@@ -20108,3 +20108,37 @@ temporary `-od` recipe.
   ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d32c
   0xd429f 0xd68c0`; `tools/rebuild/formatter.c`, `formatter.asm`, and
   `formatter_main.c`.
+
+## The format driver at 0xd68c0 is a strict identity match
+
+- Observation: the driver at `0xd68c0` is now a transliteration in
+  `formatter.asm`.  The parser at `0xd6b41` and the conversion dispatcher at
+  `0xd6e59` stay the C core in `formatter.c`.  The driver keeps the original
+  register contract: `eax` is the destination handle, `edx` the format, `ebx`
+  the argument cell, and `ecx` the sink.  The sink receives `eax` = the field
+  record and `edx` = the character, so the string sink, the stream sink, and
+  the `%n` count read the record at the original offsets.
+- Observation: the first transliteration reports 223 of 223 instructions and
+  594 of 641 bytes, with the verdict `same-shape`.  The 25 remaining byte
+  differences are register-to-register encodings where the original compiler
+  uses the `89h` `mov`, `31h` and `30h` `xor`, `01h` `add`, and `88h` `mov`
+  forms and the assembler chooses the alternate direction.
+- Observation: the four groups are closed in order: the eight `89h` `mov`
+  forms, the eight `31h` `xor` forms, the six `01h` `add` forms, and the two
+  `88h` `mov` and one `30h` `xor` forms.  `db` directives force the original
+  bytes, as `memmove.asm` already does for the same reason.
+- Observation: after the groups the identity check reports 223 of 223
+  instructions and 635 of 641 bytes, with the verdict `exact-relocations`.
+  The six remaining bytes are the link-time `call` targets.  The default gate
+  and the strict gate both accept the result, so the record at `0xd68c0` is
+  `verified`.
+- Observation: the 26-case behavior harness still reports 26 markers and exit
+  0.  The `__vsprintf` and `__doformat` wrappers pass the destination buffer
+  and the `FILE` record directly, and the sinks read the field record.
+- Evidence: `python3 tools/rebuild/run.py run --recheck-record 0xd68c0
+  --strict --backend dosker`; `python3 tools/rebuild/diff_module.py --original
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE
+  --original-address 0xd68c0 --rebuilt work/rebuild/fmtmod.exe
+  --rebuilt-map work/rebuild/formatter.map --rebuilt-symbol formatter_`;
+  `work/rebuild/fmt_out.txt`; `tools/rebuild/formatter.asm`,
+  `formatter.c`, `formatter_main.c`, and `compiler_runtime.c`.

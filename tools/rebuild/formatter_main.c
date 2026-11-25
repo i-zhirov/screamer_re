@@ -55,11 +55,10 @@ static int same(const char *actual, const char *expected, int count)
 static int format_into(char *out, const char *fmt, ...)
 {
     va_list args;
-    char *cursor = out;
     int count;
 
     va_start(args, fmt);
-    count = formatter(&cursor, fmt, &args, formatter_string_sink);
+    count = formatter(out, fmt, &args, formatter_string_sink);
     va_end(args);
     return count;
 }

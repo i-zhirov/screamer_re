@@ -406,8 +406,8 @@ The files:
 | `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
 | `fprtf.c` | the rebuilt `__fprtf` run-time stream formatter: the file flags, the buffer allocation, the format call, and the restore |
 | `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
-| `formatter.c` | the rebuilt `formatter` at `0xd68c0`: the format loop, the field parser, the conversions, the padding, and the string sink |
-| `formatter.asm` | the stream sink of the `formatter` module: the DOS handle write |
+| `formatter.c` | the parser and conversion core of the rebuilt `formatter` at `0xd68c0`: the field parser, the conversions, the padding record, and the string sink |
+| `formatter.asm` | the transliterated `formatter` driver and its sinks: the 223-instruction driver, the `format_convert` register shuffle, and the DOS handle write |
 | `formatter_main.c` | the `formatter` test harness: the string sink and the 26 marker cases |
 | `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
 | `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
@@ -814,13 +814,16 @@ and an array view share one object and a `double` access starts at an
 eight-byte boundary.  Every object starts at zero, so the module is a
 compatibility layer and does not enter the verified count.
 
-`formatter.c` and `formatter.asm` rebuild the Watcom format engine at
-`0xd68c0`: the format loop, the field parser, the `s`, `c`, `d`, `i`, `u`, `x`,
-`X`, `o`, and `p` conversions, the flags, the width, the precision, and the
-padding order.  The string sink writes through a `char **` cursor, and the
-stream sink writes each byte through the `FILE` handle.  The `__vsprintf` and
-`__doformat` labels in `compiler_runtime.c` call this function with the two
-sinks.  The C rebuild is not byte-faithful, so the record stays `rebuilt`.
+`formatter.asm` transliterates the Watcom format driver at `0xd68c0`: the
+format loop, the field parser call, the conversion call, the padding order,
+and the sink loop.  `formatter.c` holds the parser and conversion core behind
+the driver: the field parser, the `s`, `c`, `d`, `i`, `u`, `x`, `X`, `o`, and
+`p` conversions, the flags, the width, and the precision.  The string sink
+writes through the record cursor, and the stream sink writes each byte through
+the `FILE` handle.  The `__vsprintf` and `__doformat` labels in
+`compiler_runtime.c` call the driver with the two sinks.  The driver matches
+223 of 223 instructions and 635 of 641 bytes; the remaining bytes are the
+link-time call targets, so the record is `verified` under the strict gate.
 
 `compiler_runtime.c` and `compiler_runtime.asm` hold the compiler and run-time
 labels that the module sources and CLIB3R reference: the C main entry `main_`,

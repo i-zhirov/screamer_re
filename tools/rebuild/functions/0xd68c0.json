@@ -14,12 +14,21 @@
     {
       "kind": "note",
       "text": "the rebuilt wrappers __vsprintf and __doformat call this function with the string sink and the stream sink"
+    },
+    {
+      "kind": "note",
+      "text": "the driver at 0xd68c0 is transliterated in formatter.asm; the parser at 0xd6b41 and the dispatcher at 0xd6e59 stay the C core in formatter.c"
     }
   ],
-  "implementation": "c",
+  "implementation": "assembly",
   "module": "formatter",
   "name": "formatter",
-  "notes": [],
+  "notes": [
+    {
+      "date": "2026-11-25",
+      "text": "the driver matches 223 of 223 instructions and 635 of 641 bytes; the six remaining bytes are the link-time call addresses, so the strict identity gate passes"
+    }
+  ],
   "object_offset": "0xc68c0",
   "result": {
     "checks": {
@@ -32,23 +41,23 @@
         "verdict": "pass"
       },
       "identity": {
-        "bytes_equal": 14,
+        "bytes_equal": 635,
         "bytes_total": 641,
-        "detail": "the instruction sequences differ",
-        "instructions_equal": 33,
+        "detail": "the instruction sequences match; the differing operands are the link-time addresses",
+        "instructions_equal": 223,
         "instructions_total": 223,
-        "verdict": "fail"
+        "verdict": "pass"
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0xd68c0",
     "date": "2026-11-25",
-    "fingerprint": "sha256:0663f220446bf56bf00dd722a495588b08ad436e1eb852c77f626ab8546dca18",
-    "source_digest": "sha256:b1081573d5ebe824b62ec76cf5dd1df9af7c0df2434bebfe36852587cf6bdb7e",
+    "fingerprint": "sha256:a0748a8404e52f344166e979e0c997791abc05e97a84ac3a4f0cdd22b2b0d918",
+    "source_digest": "sha256:7e7958336f6c999d3ffc628308fdbe47ab6b0d63053fb227cb0e555a05ec9645",
     "tool": "run.py"
   },
   "role": "formats text through a caller-supplied output sink",
   "section": "Resource loader",
   "size": 641,
-  "status": "rebuilt",
+  "status": "verified",
   "symbol": "formatter_"
 }

@@ -50,10 +50,8 @@ unsigned char EFG_Format_[EFG_TABLE_SIZE];
 
 int __vsprintf(char *buffer, const char *format, void *args, void *file)
 {
-    char *cursor = buffer;
-
     (void)file;
-    return formatter(&cursor, format, args, formatter_string_sink);
+    return formatter(buffer, format, args, formatter_string_sink);
 }
 
 int __doformat(void *file, char *format, void *args, void *table)
