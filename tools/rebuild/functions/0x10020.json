@@ -24,12 +24,12 @@
   "result": {
     "checks": {
       "behavior": {
-        "detail": "error: the output lacks 'D'",
-        "verdict": "fail"
+        "detail": "the output holds every marker",
+        "verdict": "pass"
       },
       "build": {
-        "detail": "the module builds",
-        "verdict": "pass"
+        "detail": "error: the dosker command 'volume' failed: dosker: invalid volume metadata at /Users/iliazhirov/.local/share/opencode/worktree/f03cf976adf6247edf97ad21fd94f61d192d52fc/dosker-integration/work/dosker/root/volumes/screamer-watcom-v2-tools-2/holder.json: invalid volume holder: the holder file is empty",
+        "verdict": "fail"
       },
       "identity": {
         "bytes_equal": 20,
@@ -41,8 +41,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x10020",
-    "date": "2026-11-24",
-    "fingerprint": "sha256:c12c6d490d93ac68e259085d4796361774ddc1d1625309205d2cb34836eaad1c",
+    "date": "2026-11-25",
+    "fingerprint": "sha256:f97ff821315cf0d2b1f12d07d0efed298daf83f0ffbb1637ac853026005459b5",
     "source_digest": "sha256:fc4fc31170526e3457fdf63d42abd2507fb33ba0a1fdc8881c73aab3ca9c7cd0",
     "tool": "run.py"
   },

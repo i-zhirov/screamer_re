@@ -130,6 +130,14 @@ class DoskerClientTestCase(unittest.TestCase):
         self.assertEqual(call[-1], "freedos:1.3")
         self.assertIn("--boot-timeout", call)
 
+    def test_start_read_only_volume(self) -> None:
+        self.client.start(
+            "freedos:1.3",
+            "c",
+            volumes=[dosker.Volume("tools", "D:", read_only=True)],
+        )
+        self.assertIn("tools:D::ro", self.calls()[-1]["args"])
+
     def test_copy_arguments(self) -> None:
         host = self.root / "free.c"
         self.client.copy_in("c", host, "C:\\WORK\\S0.C")

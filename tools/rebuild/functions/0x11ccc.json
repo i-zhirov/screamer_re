@@ -90,8 +90,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x11ccc",
-    "date": "2026-11-24",
-    "fingerprint": "sha256:8d0f90ecbac6f2b1d078b5db4dfdc6031d2ab7ad7ad014be13386a0d072482b7",
+    "date": "2026-11-25",
+    "fingerprint": "sha256:0e37141dc0cfcbb0ee936ce952a92afd8874c1a5a7af7ca71bb6117abb3301a7",
     "source_digest": "sha256:9fea6993169fb9281bad2e49378520357c53f72d77e309896a2a5643a122c382",
     "tool": "run.py"
   },

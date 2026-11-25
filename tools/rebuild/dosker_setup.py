@@ -195,7 +195,19 @@ def ensure_run_image(client: dosker.DoskerClient, extender: Path) -> None:
     client.build_image(RUN_IMAGE, context)
 
 
+def pool_names(workers: int) -> list[str]:
+    """The V2 toolchain volumes of a pool of `workers` build jobs.
+
+    Dosker attaches a named volume to one container, so each parallel worker
+    needs its own volume.  Worker zero keeps the original name; the other
+    workers take a numeric suffix.
+    """
+    return [VOLUME_NAME] + [f"{VOLUME_NAME}-{index}" for index in range(1, workers)]
+
+
 def prepare(arguments: argparse.Namespace) -> int:
+    if arguments.workers < 1:
+        raise ValueError("--workers must be at least 1")
     if not mtools_available():
         raise ValueError("mcopy and mdir from mtools are required")
     client = dosker.DoskerClient(
@@ -218,6 +230,20 @@ def prepare(arguments: argparse.Namespace) -> int:
         install_toolchain(image, arguments.toolchain)
     if not volume_has_toolchain(image):
         raise ValueError("the V2 toolchain is not on the volume after the copy")
+    pool_images: list[tuple[str, Path]] = []
+    for name in pool_names(arguments.workers)[1:]:
+        client.volume_create(name)
+        pool_image = client.volume_image(name)
+        if not pool_image.is_file():
+            raise ValueError(f"the volume image {pool_image} is missing")
+        if not volume_has_toolchain(pool_image):
+            print(f"setup: copying the V2 toolchain into {name}")
+            install_toolchain(pool_image, arguments.toolchain)
+        if not volume_has_toolchain(pool_image):
+            raise ValueError(
+                f"the V2 toolchain is not on the volume {name} after the copy"
+            )
+        pool_images.append((name, pool_image))
     client.volume_create(TOOLCHAIN10_VOLUME)
     image10 = client.volume_image(TOOLCHAIN10_VOLUME)
     if not image10.is_file():
@@ -252,6 +278,17 @@ def prepare(arguments: argparse.Namespace) -> int:
         "volume": VOLUME_NAME,
         "volume_image": str(image),
         "volume_digest": file_digest(image),
+        "pool": [
+            {
+                "name": VOLUME_NAME,
+                "image": str(image),
+                "digest": file_digest(image),
+            }
+        ]
+        + [
+            {"name": name, "image": str(pool_image), "digest": file_digest(pool_image)}
+            for name, pool_image in pool_images
+        ],
         "toolchain": str(arguments.toolchain),
         "volume10": TOOLCHAIN10_VOLUME,
         "volume10_image": str(image10),
@@ -267,10 +304,11 @@ def prepare(arguments: argparse.Namespace) -> int:
     SETUP_RECORD.write_text(json.dumps(record, indent=1) + "\n")
     print(f"setup: dosker {record['dosker']}")
     print(f"setup: base {record['base']} {record['base_digest']}")
-    print(
-        f"setup: volume {VOLUME_NAME} with the V2 toolchain "
-        f"{record['volume_digest']}"
-    )
+    for entry in record["pool"]:
+        print(
+            f"setup: volume {entry['name']} with the V2 toolchain "
+            f"{entry['digest']}"
+        )
     print(
         f"setup: volume {TOOLCHAIN10_VOLUME} with the Watcom 10.0a toolchain "
         f"{record['volume10_digest']}"
@@ -282,6 +320,8 @@ def prepare(arguments: argparse.Namespace) -> int:
 
 
 def check(arguments: argparse.Namespace) -> int:
+    if arguments.workers < 1:
+        raise ValueError("--workers must be at least 1")
     client = dosker.DoskerClient(
         arguments.dosker, arguments.data_root, REPOSITORY_ROOT / "work/rebuild"
     )
@@ -309,7 +349,32 @@ def check(arguments: argparse.Namespace) -> int:
     print(f"check: toolchain 10.0a: {'present' if toolchain10 else 'missing'}")
     print(f"check: run image {RUN_IMAGE}: {'present' if run_image else 'missing'}")
     print(f"check: DOS/4G 2.01a extender: {'present' if extender_present else 'missing'}")
-    return 0 if base and toolchain and toolchain10 and run_image and extender_present else 1
+    pool_ok = True
+    for name in pool_names(arguments.workers)[1:]:
+        pool_volume = client.volume_exists(name)
+        pool_image = client.volume_image(name)
+        pool_toolchain = (
+            pool_volume
+            and pool_image.is_file()
+            and mtools_available()
+            and volume_has_toolchain(pool_image)
+        )
+        print(f"check: volume {name}: {'present' if pool_volume else 'missing'}")
+        print(
+            f"check: toolchain V2 {name}: "
+            f"{'present' if pool_toolchain else 'missing'}"
+        )
+        pool_ok = pool_ok and pool_toolchain
+    return (
+        0
+        if base
+        and toolchain
+        and toolchain10
+        and run_image
+        and extender_present
+        and pool_ok
+        else 1
+    )
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -345,6 +410,12 @@ def parse_arguments() -> argparse.Namespace:
         type=Path,
         default=EXTENDER_PATH,
         help="the output path of the DOS/4G 2.01a extender",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="the number of V2 toolchain volumes in the parallel pool",
     )
     parser.add_argument(
         "--check", action="store_true", help="verify the setup and build nothing"

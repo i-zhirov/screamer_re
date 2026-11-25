@@ -51,10 +51,16 @@ class ExecResult:
 
 @dataclass(frozen=True)
 class Volume:
-    """One named volume and its drive letter."""
+    """One named volume and its drive letter.
+
+    A read-only volume is safe to attach to many containers at the same time.
+    The build mounts the shared toolchain volume read-only, so a parallel run
+    cannot write the FAT image from two guests.
+    """
 
     name: str
     drive: str
+    read_only: bool = False
 
 
 class DoskerClient:
@@ -178,7 +184,8 @@ class DoskerClient:
         if engine is not None:
             arguments += ["--engine", engine]
         for volume in volumes:
-            arguments += ["-v", f"{volume.name}:{volume.drive}"]
+            suffix = ":ro" if volume.read_only else ""
+            arguments += ["-v", f"{volume.name}:{volume.drive}{suffix}"]
         arguments.append(reference)
         self._run(arguments, timeout=boot_timeout + 120)
 

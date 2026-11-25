@@ -682,6 +682,7 @@ The files:
 python3 tools/rebuild/harness.py build --module free
 python3 tools/rebuild/harness.py run --module free
 python3 tools/rebuild/run.py run --all
+python3 tools/rebuild/run.py run --all --skip-unchanged --backend dosker --jobs 4 --toolchain-volumes "screamer-watcom-v2-tools,screamer-watcom-v2-tools-1,screamer-watcom-v2-tools-2,screamer-watcom-v2-tools-3"
 python3 tools/rebuild/run.py run --all --strict
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
@@ -695,6 +696,13 @@ python3 tools/rebuild/callgraph.py build
 python3 tools/rebuild/callgraph.py check
 python3 tools/rebuild/view.py html
 ```
+
+`run.py --jobs N` runs N records in parallel.  Each worker uses its own
+container and its own V2 toolchain volume, because Dosker attaches a named
+volume to one container.  `--toolchain-volumes` names one volume per worker,
+and `dosker_setup.py --workers N` creates the pool.  The parent owns the result
+writes and the log, a worker holds a per-module lock, and `--show` needs
+`--jobs 1`.
 
 `view.py html` writes five views. The board groups the records by the
 program-map section. The table lists one row per record. The map places each

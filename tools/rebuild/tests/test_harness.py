@@ -212,6 +212,21 @@ class HarnessTestCase(unittest.TestCase):
         )
         self.assertEqual(harness.dosker_object_name(2), "O2.OBJ")
 
+    def test_container_name_is_unique(self) -> None:
+        first = harness.container_name(
+            "screamer-build", "player_car_cornering_update", 24
+        )
+        second = harness.container_name(
+            "screamer-build", "player_car_suspension_update", 24
+        )
+        self.assertNotEqual(first, second)
+        self.assertTrue(first.startswith("screamer-build-"))
+
+    def test_stage_name_is_unique(self) -> None:
+        first = harness.dosker_stage_name("player_car_cornering_update")
+        second = harness.dosker_stage_name("player_car_suspension_update")
+        self.assertNotEqual(first, second)
+
     def test_free_port(self) -> None:
         port = harness.free_port()
         self.assertIsInstance(port, int)

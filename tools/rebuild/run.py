@@ -16,7 +16,7 @@ Usage:
     python3 tools/rebuild/run.py run (--function ADDR | --name NAME | --module NAME
         | --status STATUS | --stale | --next N | --recheck-record ADDR | --all)
         [--no-write] [--show] [--strict] [--skip-runtime] [--skip-unchanged]
-        [--original PATH] [--backend legacy|dosker] [--dosker PATH]
+        [--jobs N] [--original PATH] [--backend legacy|dosker] [--dosker PATH]
         [--data-root PATH] [--toolchain-volume NAME]
 
 Exit code 0 on success or an empty selection, 1 when a declared check fails, and 2
@@ -25,10 +25,13 @@ on a bad argument, a missing record, or a missing original image.
 from __future__ import annotations
 
 import argparse
+import queue
 import re
 import subprocess
 import sys
+import threading
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime
 from pathlib import Path
 
@@ -44,6 +47,10 @@ LOG_DIR = WORK_DIR / "logs"
 DIFF_TOOL = REBUILD_DIR / "diff_module.py"
 HARNESS_TOOL = REBUILD_DIR / "harness.py"
 HARNESS_ARGS: list[str] = []
+WORKER = threading.local()
+VOLUME_POOL: queue.Queue[str] = queue.Queue()
+MODULE_LOCKS: dict[str, threading.Lock] = {}
+MODULE_LOCKS_GUARD = threading.Lock()
 PASS_VERDICTS = (
     "the modules are byte-identical",
     "the instruction sequences match; the differing operands are the link-time addresses",
@@ -257,15 +264,20 @@ def run_behavior(module: dict, show: bool = False) -> tuple[str, str]:
 
 
 def _harness(command: str, module: dict, show: bool) -> tuple[str, str]:
+    arguments = [
+        sys.executable,
+        str(HARNESS_TOOL),
+        command,
+        "--module",
+        module["name"],
+        *HARNESS_ARGS,
+    ]
+    if command == "build":
+        volume = getattr(WORKER, "toolchain_volume", None)
+        if volume:
+            arguments += ["--toolchain-volume", volume]
     completed = subprocess.run(
-        [
-            sys.executable,
-            str(HARNESS_TOOL),
-            command,
-            "--module",
-            module["name"],
-            *HARNESS_ARGS,
-        ],
+        arguments,
         capture_output=True,
         text=True,
     )
@@ -400,6 +412,69 @@ def _run_record(
     return checks, verdict, detail, verdict != "SKIP" and not skipped
 
 
+def _module_lock(module_name: str) -> threading.Lock:
+    """The lock that serializes the records of one module.
+
+    Two records of the same module share the module EXE, the map, and the
+    behavior output file, so they must not build or run at the same time.  A
+    worker holds the module lock for the whole entry.
+    """
+    with MODULE_LOCKS_GUARD:
+        lock = MODULE_LOCKS.get(module_name)
+        if lock is None:
+            lock = threading.Lock()
+            MODULE_LOCKS[module_name] = lock
+        return lock
+
+
+def _run_entry(
+    index: int,
+    record: dict | None,
+    row: dict | None,
+    modules: dict[str, dict],
+    arguments: argparse.Namespace,
+) -> tuple[int, dict[str, dict], str, str, bool, list[str]]:
+    """Run one entry in a worker and return its result and its log lines.
+
+    A worker never writes a record and never prints.  The parent owns the record
+    write, the progress line, and the log, so parallel workers cannot interleave
+    the output or race on one record file.  An unexpected error becomes a failed
+    entry, so one bad module does not stop the pool.
+    """
+    module_name = (
+        record.get("module") if record is not None else (row or {}).get("name")
+    )
+    module_lock = _module_lock(module_name) if module_name else None
+    if module_lock is not None:
+        module_lock.acquire()
+    try:
+        try:
+            volume = VOLUME_POOL.get_nowait()
+        except queue.Empty:
+            volume = None
+        WORKER.toolchain_volume = volume
+        log_lines: list[str] = []
+        try:
+            try:
+                checks, verdict, detail, write = _run_record(
+                    record, row, modules, arguments, log_lines
+                )
+            except Exception as error:  # noqa: BLE001 - one bad entry must not stop the run
+                checks = {}
+                verdict = "FAIL"
+                detail = f"the runner failed: {error}"
+                write = False
+                log_lines.append(f"--- {_label(record, row)}: error ---")
+                log_lines.append(detail)
+            return index, checks, verdict, detail, write, log_lines
+        finally:
+            if volume is not None:
+                VOLUME_POOL.put(volume)
+    finally:
+        if module_lock is not None:
+            module_lock.release()
+
+
 def _result(
     checks: dict[str, dict], module: dict, command: str, fingerprint: str
 ) -> dict:
@@ -518,6 +593,30 @@ def command_run(arguments: argparse.Namespace) -> int:
         arguments.function = arguments.recheck_record
         arguments.show = True
         arguments.skip_unchanged = False
+        arguments.jobs = 1
+    if arguments.jobs < 1:
+        raise ValueError("--jobs must be at least 1")
+    if arguments.jobs > 1 and arguments.show:
+        raise ValueError("--show needs --jobs 1")
+    if arguments.jobs > 1 and arguments.backend != "dosker":
+        raise ValueError("--jobs above 1 needs --backend dosker")
+    WORKER.toolchain_volume = None
+    while not VOLUME_POOL.empty():
+        VOLUME_POOL.get_nowait()
+    with MODULE_LOCKS_GUARD:
+        MODULE_LOCKS.clear()
+    if arguments.jobs > 1:
+        volumes = [
+            name.strip()
+            for name in (arguments.toolchain_volumes or "").split(",")
+            if name.strip()
+        ]
+        if len(volumes) < arguments.jobs:
+            raise ValueError(
+                "--jobs above 1 needs --toolchain-volumes with one volume per job"
+            )
+        for volume in volumes[: arguments.jobs]:
+            VOLUME_POOL.put(volume)
     records = [
         store.load_record(address) for address in store.candidate_addresses()
     ]
@@ -561,36 +660,90 @@ def command_run(arguments: argparse.Namespace) -> int:
     log_lines: list[str] = []
     verdicts: list[str] = []
     failed = False
-    for index, (record, row) in enumerate(entries, 1):
-        if arguments.skip_unchanged and _is_unchanged(
-            record, row, modules, arguments.original
-        ):
-            verdicts.append("PASS")
+    if arguments.jobs == 1:
+        for index, (record, row) in enumerate(entries, 1):
+            if arguments.skip_unchanged and _is_unchanged(
+                record, row, modules, arguments.original
+            ):
+                verdicts.append("PASS")
+                line = progress_line(
+                    index,
+                    len(entries),
+                    _label(record, row),
+                    "PASS",
+                    store.UNCHANGED_DETAIL,
+                )
+                print(line)
+                log_lines.append(line)
+                continue
+            checks, verdict, detail, write = _run_record(
+                record, row, modules, arguments, log_lines
+            )
+            verdicts.append(verdict)
+            if verdict == "FAIL":
+                failed = True
+            if write and not arguments.no_write:
+                _write_result(
+                    record,
+                    row,
+                    checks,
+                    _command_text(record, row),
+                    arguments.original,
+                )
             line = progress_line(
-                index,
-                len(entries),
-                _label(record, row),
-                "PASS",
-                store.UNCHANGED_DETAIL,
+                index, len(entries), _label(record, row), verdict, detail
             )
             print(line)
             log_lines.append(line)
-            continue
-        checks, verdict, detail, write = _run_record(
-            record, row, modules, arguments, log_lines
-        )
-        verdicts.append(verdict)
-        if verdict == "FAIL":
-            failed = True
-        if write and not arguments.no_write:
-            _write_result(
-                record, row, checks, _command_text(record, row), arguments.original
-            )
-        line = progress_line(
-            index, len(entries), _label(record, row), verdict, detail
-        )
-        print(line)
-        log_lines.append(line)
+    else:
+        pending: list[tuple[int, dict | None, dict | None]] = []
+        for index, (record, row) in enumerate(entries, 1):
+            if arguments.skip_unchanged and _is_unchanged(
+                record, row, modules, arguments.original
+            ):
+                verdicts.append("PASS")
+                line = progress_line(
+                    index,
+                    len(entries),
+                    _label(record, row),
+                    "PASS",
+                    store.UNCHANGED_DETAIL,
+                )
+                print(line)
+                log_lines.append(line)
+                continue
+            pending.append((index, record, row))
+        if pending:
+            workers = min(arguments.jobs, len(pending))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                futures = {
+                    executor.submit(
+                        _run_entry, index, record, row, modules, arguments
+                    ): (index, record, row)
+                    for index, record, row in pending
+                }
+                for future in as_completed(futures):
+                    _, record, row = futures[future]
+                    index, checks, verdict, detail, write, worker_log = (
+                        future.result()
+                    )
+                    log_lines.extend(worker_log)
+                    verdicts.append(verdict)
+                    if verdict == "FAIL":
+                        failed = True
+                    if write and not arguments.no_write:
+                        _write_result(
+                            record,
+                            row,
+                            checks,
+                            _command_text(record, row),
+                            arguments.original,
+                        )
+                    line = progress_line(
+                        index, len(entries), _label(record, row), verdict, detail
+                    )
+                    print(line)
+                    log_lines.append(line)
     summary = summarize(verdicts)
     print(summary)
     log_lines.append(summary)
@@ -667,6 +820,19 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="report a record whose inputs are unchanged since the previous "
         "run, and run no check for it",
+    )
+    run_parser.add_argument(
+        "--jobs",
+        type=int,
+        default=1,
+        help="run this many records in parallel (default: 1); each record "
+        "uses its own container and its own toolchain volume",
+    )
+    run_parser.add_argument(
+        "--toolchain-volumes",
+        default="",
+        help="the comma-separated V2 toolchain volumes for --jobs; one per "
+        "worker, because Dosker attaches a volume to one container",
     )
     run_parser.add_argument(
         "--strict",

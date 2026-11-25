@@ -40,8 +40,8 @@
       }
     },
     "command": "python3 tools/rebuild/run.py run --function 0x4bf88",
-    "date": "2026-11-24",
-    "fingerprint": "sha256:cf4f43e2f78b460ab36aba39ff1b2975f25b4d6053c7a34226e95e795bd9de12",
+    "date": "2026-11-25",
+    "fingerprint": "sha256:27ee8a36bcc698f3db7f77dfd17388c7e43e9a71caddf0d330fafc32b8175a4f",
     "source_digest": "sha256:9baba7bf41b880b41eef0846d40656b93204bed385ba7ade52bfa9058aa199e0",
     "tool": "run.py"
   },

@@ -142,6 +142,7 @@ python3 tools/rebuild/harness.py run --module free --backend dosker
 python3 tools/rebuild/run.py run --function 0x300ec --backend dosker --no-write
 python3 tools/rebuild/run.py run --all
 python3 tools/rebuild/run.py run --all --skip-unchanged
+python3 tools/rebuild/run.py run --all --skip-unchanged --backend dosker --jobs 4 --toolchain-volumes "screamer-watcom-v2-tools,screamer-watcom-v2-tools-1,screamer-watcom-v2-tools-2,screamer-watcom-v2-tools-3"
 python3 tools/rebuild/run.py run --all --strict
 python3 tools/rebuild/run.py run --recheck-record 0x300ec
 python3 tools/rebuild/store.py check
@@ -467,6 +468,14 @@ through the store.
   `save_record` marks a new address and `remove_record` marks a deletion, and
   the seed, the command dispatch, and the `atexit` hook call `sync_extents()`,
   so a later migration cannot leave a stale extent.
+- A parallel verification run uses one V2 toolchain volume per worker, because
+  Dosker attaches a named volume to one container.  `dosker_setup.py
+  --workers N` creates the pool, `run.py --jobs N --toolchain-volumes ...`
+  assigns one volume per worker, and the build mounts its volume read-only.
+  The parent owns the record writes and the log, the worker does not print,
+  and the container and host staging names carry a short name digest.  A
+  worker holds a per-module lock, because two records of one module share the
+  module EXE, the map, and the behavior output.
 - The pipeline checks the debugger control port and the inputs before any
   stage.  When another process holds the port (`--port`, default 9876), when
   the game directory or the reference executable is missing, when the reference

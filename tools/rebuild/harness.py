@@ -24,6 +24,7 @@ Docker, DOSBox-X, Dosker, or the toolchain volume is missing.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 import socket
 import subprocess
@@ -146,8 +147,14 @@ def missing_lines(expect: list[str], text: str) -> list[str]:
 
 
 def dosker_stage_name(name: str) -> str:
-    """The 8.3 staging directory name of one module."""
-    return name.upper()[:8]
+    """The unique host staging directory name of one module.
+
+    The stage is a host directory that the build copies into the container, so
+    it is not bound by the guest 8.3 rule.  A short stable digest keeps two
+    modules with the same eight-character prefix from sharing the stage.
+    """
+    digest = hashlib.sha1(name.encode("utf-8")).hexdigest()[:6]
+    return f"{name[:24]}-{digest}"
 
 
 def dosker_source_name(index: int, source: dict) -> str:
@@ -217,6 +224,18 @@ def dosker_link_rsp(module: dict) -> str:
     return "\r\n".join(lines) + "\r\n"
 
 
+def container_name(prefix: str, name: str, limit: int) -> str:
+    """A flat, unique container name for one module.
+
+    The module name is truncated to the limit and a short stable digest of the
+    full name is appended, so two long names that share a prefix cannot collide
+    when a parallel run starts both containers.
+    """
+    digest = hashlib.sha1(name.encode("utf-8")).hexdigest()[:6]
+    base = name[:limit].replace("_", "-")
+    return f"{prefix}-{base}-{digest}"
+
+
 def build_dosker(module: dict, arguments: argparse.Namespace) -> int:
     """Build one module in a Dosker container with the V2 toolchain volume."""
     name = module["name"]
@@ -243,13 +262,19 @@ def build_dosker(module: dict, arguments: argparse.Namespace) -> int:
         dosker_build_batch(module).encode()
     )
     (staging / "LINK.RSP").write_bytes(dosker_link_rsp(module).encode())
-    container = f"screamer-build-{name[:24].replace('_', '-')}"
+    container = container_name("screamer-build", name, 24)
     WORK_DIR.mkdir(parents=True, exist_ok=True)
     try:
         client.start(
             DOSKER_IMAGE,
             container,
-            volumes=[dosker.Volume(arguments.toolchain_volume, DOSKER_TOOLCHAIN_DRIVE)],
+            volumes=[
+                dosker.Volume(
+                    arguments.toolchain_volume,
+                    DOSKER_TOOLCHAIN_DRIVE,
+                    read_only=True,
+                )
+            ],
         )
         client.exec(container, "MD C:\\WORK", timeout=10)
         files = [staging / source.upper() for source in SHARED_SOURCES]
@@ -353,7 +378,7 @@ def run_dosker(
             return built
     client = dosker.DoskerClient(arguments.dosker, arguments.data_root, WORK_DIR)
     client.check_version()
-    container = f"screamer-run-{name[:20].replace('_', '-')}"
+    container = container_name("screamer-run", name, 20)
     result = None
     try:
         client.start(RUN_IMAGE, container)

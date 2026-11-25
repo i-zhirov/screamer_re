@@ -150,6 +150,7 @@ class CheckTestCase(unittest.TestCase):
             dosker=str(self.binary),
             data_root=self.root / "root",
             extender=dosker_setup.EXTENDER_PATH,
+            workers=1,
         )
         self.images = {
             "screamer-watcom-v2-tools": self.root

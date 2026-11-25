@@ -11,6 +11,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from collections.abc import Callable
 from pathlib import Path
@@ -60,6 +61,8 @@ class RunTestCase(unittest.TestCase):
         store.REBUILD_DIR = self.saved_rebuild
         store.WORK_DIR = self.saved_work
         store.TOOLS_DIR = self.saved_tools
+        with run.MODULE_LOCKS_GUARD:
+            run.MODULE_LOCKS.clear()
         self.temporary.cleanup()
 
     def write_record(self, address: int, record: dict) -> Path:
@@ -535,6 +538,154 @@ class RunTestCase(unittest.TestCase):
                     code = run.main()
         self.assertEqual(code, 0)
         self.assertIn("PASS (instructions 3/3, bytes 6/9)", output.getvalue())
+
+    def test_jobs_must_be_positive(self) -> None:
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--jobs",
+            "0",
+        ]
+        output = io.StringIO()
+        with mock.patch.object(sys, "argv", arguments):
+            with contextlib.redirect_stderr(output):
+                code = run.main()
+        self.assertEqual(code, 2)
+        self.assertIn("--jobs must be at least 1", output.getvalue())
+
+    def test_jobs_with_show_is_rejected(self) -> None:
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--jobs",
+            "2",
+            "--show",
+        ]
+        output = io.StringIO()
+        with mock.patch.object(sys, "argv", arguments):
+            with contextlib.redirect_stderr(output):
+                code = run.main()
+        self.assertEqual(code, 2)
+        self.assertIn("--show needs --jobs 1", output.getvalue())
+
+    def test_jobs_needs_the_dosker_backend(self) -> None:
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--jobs",
+            "2",
+            "--backend",
+            "legacy",
+        ]
+        output = io.StringIO()
+        with mock.patch.object(sys, "argv", arguments):
+            with contextlib.redirect_stderr(output):
+                code = run.main()
+        self.assertEqual(code, 2)
+        self.assertIn("--jobs above 1 needs --backend dosker", output.getvalue())
+
+    def test_module_lock_is_shared(self) -> None:
+        first = run._module_lock("exit")
+        second = run._module_lock("exit")
+        third = run._module_lock("free")
+        self.assertIs(first, second)
+        self.assertIsNot(first, third)
+
+    def test_jobs_needs_toolchain_volumes(self) -> None:
+        arguments = [
+            "run.py",
+            "run",
+            "--function",
+            "0x300ec",
+            "--jobs",
+            "2",
+        ]
+        output = io.StringIO()
+        with mock.patch.object(sys, "argv", arguments):
+            with contextlib.redirect_stderr(output):
+                code = run.main()
+        self.assertEqual(code, 2)
+        self.assertIn(
+            "--jobs above 1 needs --toolchain-volumes", output.getvalue()
+        )
+
+    def test_worker_volume_reaches_the_build_only(self) -> None:
+        saved_args = list(run.HARNESS_ARGS)
+        run.HARNESS_ARGS[:] = ["--backend", "dosker"]
+        run.WORKER.toolchain_volume = "v1"
+        completed = mock.Mock(returncode=0, stdout="", stderr="")
+        try:
+            with mock.patch.object(
+                run.subprocess, "run", return_value=completed
+            ) as started:
+                run._harness("build", self.module(), False)
+            build_args = started.call_args[0][0]
+            self.assertIn("--toolchain-volume", build_args)
+            self.assertIn("v1", build_args)
+            with mock.patch.object(
+                run.subprocess, "run", return_value=completed
+            ) as started:
+                run._harness("run", self.module(), False)
+            run_args = started.call_args[0][0]
+            self.assertNotIn("v1", run_args)
+        finally:
+            run.HARNESS_ARGS[:] = saved_args
+            run.WORKER.toolchain_volume = None
+
+    def test_jobs_runs_records_in_parallel(self) -> None:
+        barrier = threading.Barrier(2)
+
+        def worker(
+            record: dict,
+            row: dict | None,
+            modules: dict[str, dict],
+            arguments: object,
+            log_lines: list[str],
+        ) -> tuple[dict[str, dict], str, str, bool]:
+            barrier.wait(timeout=5)
+            log_lines.append(f"worked {record['address']}")
+            return (
+                {"identity": {"verdict": "pass", "detail": "ok"}},
+                "PASS",
+                "ok",
+                False,
+            )
+
+        for address, name in (("0x300ec", "free"), ("0x300f8", "entry")):
+            record = self.record(
+                address,
+                name=name,
+                status="named",
+                module=name,
+                symbol=f"{name}_",
+                checks=["identity"],
+            )
+            self.write_record(int(address, 16), record)
+            self.write_module(name, self.module(name))
+        arguments = [
+            "run.py",
+            "run",
+            "--all",
+            "--jobs",
+            "2",
+            "--toolchain-volumes",
+            "v0,v1",
+            "--no-write",
+        ]
+        output = io.StringIO()
+        with mock.patch.object(run, "_run_record", side_effect=worker):
+            with mock.patch.object(sys, "argv", arguments):
+                with contextlib.redirect_stdout(output):
+                    code = run.main()
+        self.assertEqual(code, 0)
+        self.assertFalse(barrier.broken)
+        self.assertEqual(output.getvalue().count("PASS (ok)"), 2)
 
     def test_missing_original_exits_2(self) -> None:
         record = self.record(

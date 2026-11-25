@@ -345,6 +345,15 @@ _Future Extensions_ list their own requests.
   although `dosker run -v NAME:E:` records `E:`.
 - **Decision**: the toolchain is a named volume. The build image is the
   FreeDOS base. The setup copies the tree with `mcopy`.
+- **Evidence**: Dosker 0.1.5 attaches a named volume to one container.  A
+  second `dosker run` with the same volume fails with `volume
+  screamer-watcom-v2-tools is attached to container ...`, even when the volume
+  is mounted read-only.
+- **Decision**: a parallel build uses a pool of V2 volumes.
+  `dosker_setup.py --workers N` creates `screamer-watcom-v2-tools` and the
+  suffixed copies, and `run.py --jobs N --toolchain-volumes ...` assigns one
+  volume per worker.  The build mounts its volume read-only, so the shared
+  tree cannot change.
 - **Decision**: image and container names are flat. The image name pattern is
   `[a-z0-9][a-z0-9_.-]{0,62}`. A slash is invalid.
 

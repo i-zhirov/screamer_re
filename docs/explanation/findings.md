@@ -20172,3 +20172,38 @@ temporary `-od` recipe.
   --rebuilt-map work/rebuild/text_measure.map --rebuilt-symbol text_measure_`;
   `work/rebuild/txm.txt`; `tools/rebuild/text_measure.asm`,
   `text_measure.c`, and `text_measure_main.c`.
+
+## A parallel verification run uses one toolchain volume per worker
+
+- Observation: Dosker 0.1.5 attaches a named volume to one container at a
+  time.  A second start with the same volume fails with `volume
+  screamer-watcom-v2-tools is attached to container ...`.  The `:ro` mount
+  option does not remove the exclusive attachment.
+- Observation: the first parallel attempt used the one V2 volume for every
+  worker.  All but the first build failed with the attachment error, and the
+  failed result writes were reverted.
+- Observation: `dosker_setup.py --workers N` now creates the V2 volume and the
+  suffixed copies (`screamer-watcom-v2-tools-1`, and so on) with the toolchain
+  in each.  `run.py --jobs N --toolchain-volumes ...` takes one volume per
+  worker from a queue and appends its `--toolchain-volume` to the build only.
+  The build mounts the volume read-only.  The parent owns the record writes and
+  the log.  The container name and the host staging name carry a short digest
+  of the module name.
+- Observation: the 4-worker run with four volumes refreshed 252 stale records
+  with no volume conflict.  The result is 32 pass, 222 fail, and 694 skip.  The
+  222 failures are the expected identity failures of the rebuilt records, and
+  all 32 verified records pass.  One transient `video_block_swap_a` build read
+  an empty Dosker volume holder left by the earlier failed attempt; a
+  `--recheck-record 0x1075f` run passed and the record returned to `verified`.
+- Observation: two records of one module share the module EXE, the map, and
+  the behavior output.  A worker holds a per-module lock for the whole entry,
+  so the records of `exit` and `exit_flush` never build or run at the same
+  time.  The run left `exit_flush` stale; a `--recheck-record 0x300d6` run
+  passed and the record returned to `verified`.
+- Observation: the fingerprint check reports no stale record after the run.
+- Evidence: `python3 tools/rebuild/dosker_setup.py --workers 4 --toolchain
+  PATH`; `python3 tools/rebuild/dosker_setup.py --check --workers 4`;
+  `python3 tools/rebuild/run.py run --all --skip-unchanged --backend dosker
+  --jobs 4 --toolchain-volumes "screamer-watcom-v2-tools,screamer-watcom-v2-tools-1,screamer-watcom-v2-tools-2,screamer-watcom-v2-tools-3"`;
+  `work/rebuild/logs/run-20261125-191643.log`; `tools/rebuild/dosker.py`,
+  `harness.py`, `run.py`, and `dosker_setup.py`.
