@@ -121,7 +121,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the two hundred and sixty-two module recipes
+│   │   ├── modules/           # the two hundred and sixty-three module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -410,10 +410,11 @@ through the store.
   `render_runtime` holds the drawing, palette, sprite, PCX, HUD, camera, panel,
   and view entry points; it is inert as well.  `files_runtime` holds the file
   and stream entry points and the resource and table helpers; it is inert as
-  well.  `data_runtime` holds the global data definitions; it is a
-  compatibility layer as well.  Do not call these modules byte-faithful.  A new
-  run-time module enters the plan only when it is listed in
-  `image_plan.RUNTIME_MODULES`, which appends it to the seeded order.
+  well.  `data_runtime` holds the global data definitions and
+  `data_labels_runtime` holds the compiler data labels that the module sources
+  address by name; both are compatibility layers as well.  Do not call these
+  modules byte-faithful.  A new run-time module enters the plan only when it is
+  listed in `image_plan.RUNTIME_MODULES`, which appends it to the seeded order.
 - Stage 11 prints the coverage report when `--rebuilt-image` exists and
   `tools/rebuild/link.json` is present.  The report is a diagnostic: the
   whole-image check owns the pass or fail, so the coverage output adds no check

@@ -274,7 +274,8 @@
     "misc_runtime",
     "render_runtime",
     "files_runtime",
-    "data_runtime"
+    "data_runtime",
+    "data_labels_runtime"
   ],
   "unmodeled": [
     {

@@ -19911,3 +19911,41 @@ temporary `-od` recipe.
   `python3 tools/rebuild/image_plan.py seed` reports 261 modules;
   `python3 tools/rebuild/image_plan.py build --check` reports 337 unique
   sources.
+
+## The compiler data labels resolve in the whole-image link
+
+- Observation: the `data_labels_runtime` module defines the 693 data symbols
+  that the whole-image link still reports as undefined.  The set is 684
+  `DAT_*` address labels, one `PTR_DAT_*` label, and eight labels whose C
+  identifier starts with an underscore.  The module sources declare the labels
+  `extern`, and the stand-alone test harnesses define them, but the harnesses
+  are not part of the whole-image link.
+- Observation: each label is one object.  Its byte size is the widest size
+  that any module declaration or harness definition needs, and its element
+  width is the widest access.  The element width keeps a `double` access
+  eight-byte aligned and lets a scalar view and an array view share one
+  object.  The 693 objects hold 134,398 bytes.
+- Observation: after the rebuild, the linker reports 8 unique undefined
+  symbols, down from 701.  Exactly 693 symbols are new-resolved, and zero
+  symbols are new-undefined.  The remaining set is 0 functions, 0 globals, 0
+  data labels, and 8 run-time or library symbols: `main_`, `__int7`,
+  `__int7_pl3`, `__LpDllName`, `_EFG_Format_`, `__cnvs2d_`, `__doformat_`, and
+  `__vsprintf_`.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  Every object starts at zero, because the module carries no
+  initializer from the shipped image.  The module has no function record and
+  no behavior check, so it does not enter the verified count.
+- Observation: the `image_plan.py build` command still exits 1 on the 8
+  remaining symbols.  The Dosker client reports `control line exceeds the size
+  limit`, because the compile console output of the 338 sources (the DOS/4GW
+  banners and the compiler warnings, which the DOS `>>` redirection does not
+  capture) exceeds the control-line limit; the tool then prints the copied
+  `BUILD.LOG`.  The message does not hide a link error: the log holds the 8
+  remaining symbols and none of the 693 resolved labels.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` and
+  `work/rebuild/undefined_data_labels.txt` before and after the module;
+  `python3 tools/rebuild/image_plan.py seed` reports 262 modules;
+  `python3 tools/rebuild/image_plan.py build --check` reports 338 unique
+  sources.

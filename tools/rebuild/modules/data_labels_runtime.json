@@ -1,0 +1,11 @@
+{
+  "exe": "dlrt.exe",
+  "map": "data_labels_runtime.map",
+  "name": "data_labels_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "data_labels_runtime.c"
+    }
+  ]
+}
