@@ -363,7 +363,7 @@ class DoskerRunTestCase(unittest.TestCase):
         guest = [args[2].split(":", 1)[1] for args in copied]
         self.assertIn("C:\\FREE.EXE", guest)
         self.assertNotIn("C:\\RUN\\FREE.EXE", guest)
-        self.assertNotIn("C:\\DOS4GW.EXE", guest)
+        self.assertIn("C:\\DOS4GW.EXE", guest)
         execs = [call["args"] for call in self.calls() if call["args"][0] == "exec"]
         self.assertEqual(execs[-1][-1], "free.exe")
         self.assertIn("C:\\", execs[-1])

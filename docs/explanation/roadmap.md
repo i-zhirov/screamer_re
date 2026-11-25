@@ -405,8 +405,10 @@ The plan follows the size order, starting with the smallest functions.
     resolves through `misc_runtime`, the render and video cluster resolves
     through `render_runtime`, the files and streams cluster resolves through
     `files_runtime`, the global data cluster resolves through `data_runtime`,
-    the compiler data-label cluster resolves through `data_labels_runtime`, and
-    the compiler and run-time labels resolve through `compiler_runtime`; the
-    whole image now links.  The 10.0a Dosker backend, the unmodeled code and
-    data regions, and a byte-identical image remain).
+    the compiler data-label cluster resolves through `data_labels_runtime`, the
+    compiler and run-time labels resolve through `compiler_runtime`, and the
+    format engine resolves through the rebuilt `formatter`; the whole image now
+    links and the format path works.  The 10.0a Dosker backend, the
+    `__cnvs2d`/EFG stub, the unmodeled code and data regions, and a
+    byte-identical image remain).
 

@@ -357,6 +357,7 @@ def run_dosker(
     result = None
     try:
         client.start(RUN_IMAGE, container)
+        client.copy_in(container, EXTENDER_201, "C:\\DOS4GW.EXE")
         client.copy_in(container, exe, f"C:\\{module['exe'].upper()}")
         result = client.exec(
             container,

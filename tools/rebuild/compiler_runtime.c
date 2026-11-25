@@ -18,12 +18,13 @@
  * startup entry of `dllmncwd.c`.  The game is an EXE, so the entry is not
  * called.
  *
- * The functions are a compatibility layer, not a byte-faithful recovery.
- * The two format entry points return zero and do not format, the conversion
- * helper returns zero, and the EFG table holds 256 zero bytes.  The exact
- * signature of `__cnvs2d` and the byte size of the EFG table are unknown.  The
- * profiler pointer stays null.  The main entry calls the rebuilt main invoker,
- * which aligns the stack, grows the stack, calls the game main, and terminates.
+ * The two format entry points call the rebuilt formatter at 0xd68c0.  The
+ * string entry passes the string sink, and the stream entry passes the stream
+ * sink.  The conversion helper still returns zero, the EFG table holds 256
+ * zero bytes, and the profiler pointer stays null; the exact signature of
+ * `__cnvs2d` and the byte size of the EFG table are unknown.  The main entry
+ * calls the rebuilt main invoker, which aligns the stack, grows the stack,
+ * calls the game main, and terminates.
  *
  * The symbol names follow the Watcom conventions: a default C function gets a
  * trailing underscore, a data object gets a leading underscore, and an
@@ -36,27 +37,29 @@
  */
 #define EFG_TABLE_SIZE 0x100
 
+typedef void (*formatter_sink)(void *out, char ch);
+
 extern void main_invoker(void);
+extern int formatter(void *out, const char *format, void *args,
+    formatter_sink sink);
+extern void formatter_string_sink(void *out, char ch);
+extern void formatter_stream_sink(void *out, char ch);
 
 char *_LpDllName;
 unsigned char EFG_Format_[EFG_TABLE_SIZE];
 
 int __vsprintf(char *buffer, const char *format, void *args, void *file)
 {
-    (void)buffer;
-    (void)format;
-    (void)args;
+    char *cursor = buffer;
+
     (void)file;
-    return 0;
+    return formatter(&cursor, format, args, formatter_string_sink);
 }
 
 int __doformat(void *file, char *format, void *args, void *table)
 {
-    (void)file;
-    (void)format;
-    (void)args;
     (void)table;
-    return 0;
+    return formatter(file, format, args, formatter_stream_sink);
 }
 
 int __cnvs2d(void)

@@ -20005,3 +20005,106 @@ temporary `-od` recipe.
   reports 263 modules; `python3 tools/rebuild/image_plan.py build --check`
   reports 340 unique sources; `python3 tools/rebuild/store.py check` reports
   1199 records and 0 violations.
+
+## The folded format stubs are link-only and need the engine rebuild
+
+- Observation: the linker folds `__vsprintf_`, `__doformat_`, and `__cnvs2d_`
+  to one address because the three C stubs compile to the same return-zero
+  body.  `work/rebuild/STARTH.MAP` lists all three at `0001:00014ba8`.  The
+  folding is not a defect: the bodies are identical, the symbols stay distinct
+  in the map, and the fold disappears when the bodies differ.
+- Observation: the stubs are stack-safe for the calls they receive.  The
+  original `sprintf` at `0x4d32c` passes all four arguments in `eax`, `edx`,
+  `ebx`, and `ecx` and adjusts `esp` only for its own local; the original
+  `__fprtf` at `0xd429f` does the same.  A no-argument `int f(void)` body
+  consumes no stack argument and preserves the callee-saved registers.
+- Observation: `sprintf` uses the engine result as a buffer index.  The
+  rebuilt `sprintf` writes `buffer[ret] = 0` at `sprintf.c:27`, and the
+  original writes `mov byte ptr [edx + eax], 0` at `0x4d351`.  A zero result
+  makes the formatted string empty and a negative result would write before
+  the buffer.  The harness stub returns 4, so the behavior check does not
+  exercise this boundary.
+- Observation: the engine at `0xd68c0` is real code.  It holds 223 decoded
+  instructions and 641 bytes, parses the format through `0xd6b41`, and
+  dispatches the conversions at `0xd6e59`.  Both `sprintf` (call at
+  `0x4d348`) and `__fprtf` (call at `0xd42e7`) call it.  The store record is
+  `unknown`, so the image uses the stub instead of the engine.
+- Observation: the game does not format a floating-point value.  The rebuilt
+  sources hold 0 format strings with `%e`, `%E`, `%f`, `%F`, `%g`, or `%G`;
+  the formats are `%s`, `%c`, `%d`, `%x`, `%02d`, `%03d`, and `%.11s`.
+  `__cnvs2d_` and `_EFG_Format_` are referenced only by CLIB3R's EFG support,
+  not by a rebuilt call site or a game format.  The EFG path is therefore
+  unreachable from the current game code.
+- Observation: the format stubs are acceptable for the link and not acceptable
+  for a running game.  `sprintf` builds almost every file and member path, so a
+  zero result empties those paths; `printf` prints nothing because `__fprtf`
+  returns zero.  The faithful fix is to rebuild `0xd68c0` and point
+  `__vsprintf` and `__doformat` at it.  A library formatter restores behavior
+  but is not byte-faithful.
+- Observation: three separate stubs also affect the format path.  `report` is
+  an empty function in `data_runtime.c:315`, so the error-report messages never
+  reach the printer.  `net_race_lobby.c:89` declares the `__cdecl` `sprintf`,
+  which resolves to the empty stub in `data_runtime.c:342`, not to the rebuilt
+  wrapper.  `atof` returns 0.0 in `startup_runtime.c:28-32`, so the list-file
+  numbers parse as zero.
+- Evidence: `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d32c`,
+  `0xd429f`, and `0xd68c0`; `python3 tools/le.py calls` for the same three
+  addresses; the grep for the float format strings in `tools/rebuild/*.c`;
+  `work/rebuild/STARTH.MAP` lines 2400-2404; `tools/rebuild/sprintf.c`,
+  `fprtf.c`, `functions/0xd68c0.json`, `data_runtime.c`, and
+  `startup_runtime.c`.
+
+## The format engine at 0xd68c0 is rebuilt
+
+- Observation: the original engine is a driver, not one monolithic function.
+  It loops over the format, calls the field parser at `0xd6b41`, calls the
+  conversion dispatcher at `0xd6e59`, pads the field, and emits every
+  character through the sink function pointer in `ecx`.  The sink pointers are
+  code: the `sprintf` literal `0x3d319` resolves through the fixup at `0x4d33d`
+  to `0x4d319` (the string sink), and the `__fprtf` literal `0xc428e` resolves
+  through the fixup at `0xd42e1` to `0xd428e` (the stream sink).  They are not
+  data tables.
+- Observation: the rebuilt `sprintf` and `__fprtf` sources pass data pointers
+  in the fourth argument (`&__iob[0]` and `DAT_001c428e`).  The new
+  `__vsprintf` and `__doformat` wrappers therefore ignore that argument and
+  pass the correct rebuilt sink: the string sink for `__vsprintf` and the
+  stream sink for `__doformat`.  The original fourth argument is still a code
+  pointer, so the wrapper sources are a compatibility shim, not a byte-faithful
+  call sequence.
+- Observation: `formatter.c` rebuilds the driver, the field parser, and the
+  `s`, `c`, `d`, `i`, `u`, `x`, `X`, `o`, and `p` conversions, with the `-`,
+  `0`, `+`, space, and `#` flags and a numeric width and precision.  It handles
+  `%%`, unknown conversions, a null `%s`, `%s` precision truncation, the
+  padding order (spaces before the sign only for the space fill, zeros after
+  the sign), and the return count.  `formatter.asm` supplies the stream sink,
+  which writes the byte through the DOS handle at `FILE + 0x00`.
+- Observation: the float conversions are not rebuilt.  No game format uses
+  `%e`, `%E`, `%f`, `%F`, `%g`, or `%G`, so the module echoes the conversion
+  character for them and records the limit.  `__cnvs2d` and `_EFG_Format_`
+  remain zero stubs.
+- Observation: the harness checks 26 cases: the game's formats, width, left
+  alignment, zero fill, the sign flags, the `#` flag, octal, hexadecimal,
+  pointers, a null string, and a string precision.  The run reports 26 markers
+  and exit 0.  The record at `0xd68c0` is `rebuilt`: the build and behavior
+  pass, and the identity check stays open at 33 of 223 instructions and 14 of
+  641 bytes because the V2 C compiler cannot reproduce the 10.0a sequence.
+- Observation: the whole-image link now writes
+  `work/rebuild/STARTH.EXE` with SHA-256
+  `a6ff4e7f71b22b8f4eafdd4352b01cbc039ab1f3c2d50562d8f56ba63085706e` and
+  reports 0 undefined symbols.  The map lists `formatter_` at `0x14aed`,
+  `__vsprintf_` at `0x15104`, and `__doformat_` at `0x1511a`; the wrappers are
+  no longer folded with `__cnvs2d_` at `0x15124`.
+- Observation: the recreated `screamer-run:1` image did not project its
+  `C:\DOS4GW.EXE` onto the run container's disk.  `harness.py run_dosker` now
+  copies the 2.01a extender to `C:\DOS4GW.EXE` beside the module EXE, as the
+  Docker backend copies the shipped extender.  The formatter and `free`
+  behavior runs then pass.
+- Evidence: `python3 tools/rebuild/run.py run --function 0xd68c0 --backend
+  dosker`; `python3 tools/rebuild/harness.py run --module formatter --backend
+  dosker`; `work/rebuild/fmt_out.txt`; `work/rebuild/STARTH.MAP`;
+  `python3 tools/rebuild/image_plan.py build`;
+  `python3 tools/le.py disasm
+  ~/Documents/Screamer.app/Contents/Resources/game/STARTH.EXE 0x4d32c
+  0xd429f 0xd68c0`; `tools/rebuild/formatter.c`, `formatter.asm`, and
+  `formatter_main.c`.

@@ -1,9 +1,54 @@
 {
   "address": "0xd68c0",
-  "checks": [],
-  "evidence": [],
+  "checks": [
+    "build",
+    "identity",
+    "behavior"
+  ],
+  "confidence": "derived",
+  "evidence": [
+    {
+      "kind": "note",
+      "text": "the driver at 0xd68c0 loops over the format, parses the field at 0xd6b41, formats the conversion through 0xd6e59, pads the field, and emits every character through the caller sink"
+    },
+    {
+      "kind": "note",
+      "text": "the rebuilt wrappers __vsprintf and __doformat call this function with the string sink and the stream sink"
+    }
+  ],
+  "implementation": "c",
+  "module": "formatter",
+  "name": "formatter",
   "notes": [],
   "object_offset": "0xc68c0",
+  "result": {
+    "checks": {
+      "behavior": {
+        "detail": "the output holds every marker",
+        "verdict": "pass"
+      },
+      "build": {
+        "detail": "the module builds",
+        "verdict": "pass"
+      },
+      "identity": {
+        "bytes_equal": 14,
+        "bytes_total": 641,
+        "detail": "the instruction sequences differ",
+        "instructions_equal": 33,
+        "instructions_total": 223,
+        "verdict": "fail"
+      }
+    },
+    "command": "python3 tools/rebuild/run.py run --function 0xd68c0",
+    "date": "2026-11-25",
+    "fingerprint": "sha256:0663f220446bf56bf00dd722a495588b08ad436e1eb852c77f626ab8546dca18",
+    "source_digest": "sha256:b1081573d5ebe824b62ec76cf5dd1df9af7c0df2434bebfe36852587cf6bdb7e",
+    "tool": "run.py"
+  },
+  "role": "formats text through a caller-supplied output sink",
+  "section": "Resource loader",
   "size": 641,
-  "status": "unknown"
+  "status": "rebuilt",
+  "symbol": "formatter_"
 }

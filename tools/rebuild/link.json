@@ -265,6 +265,7 @@
     "fprtf",
     "main_invoker",
     "dpmi_int31_entry",
+    "formatter",
     "memory_runtime",
     "startup_runtime",
     "input_runtime",
@@ -791,6 +792,11 @@
     },
     {
       "start": "0xd4448",
+      "end": "0xd68c0",
+      "kind": "code"
+    },
+    {
+      "start": "0xd6b41",
       "end": "0xeba93",
       "kind": "code"
     },

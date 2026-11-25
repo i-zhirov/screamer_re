@@ -319,7 +319,8 @@ The `--backend dosker` behavior run uses the DOS/4G 2.01a extender, which
 `dosker_setup.py` extracts from the pinned DOSBox-X at `0x7cfc67` (353,668
 bytes, SHA-256 `87cb2fb20a83adde247e08b2dd98c3001392e7f5cca1faa17277ccd75186b919`).
 The setup also builds the `screamer-run:1` image with the extender.  The run
-copies the host extender into `C:\RUN`.
+copies the 2.01a extender to `C:\DOS4GW.EXE` beside the module EXE, so the
+run does not depend on the image tree projection.
 The 2.01a accepts the V2 test stub in the FreeDOS base; the shipped 1.95 and
 the V2 1.97 reject it with DOS/4GW error 1012.  The default Docker backend
 keeps the DOSBox-X behavior run and copies the shipped `DOS4GW.EXE` beside the
@@ -405,6 +406,9 @@ The files:
 | `fprintf_main.c` | the `fprintf` test harness: the `__iob` table and the print-engine stub |
 | `fprtf.c` | the rebuilt `__fprtf` run-time stream formatter: the file flags, the buffer allocation, the format call, and the restore |
 | `fprtf_main.c` | the `__fprtf` test harness: the file record, the allocate and format stubs, and the marker checks |
+| `formatter.c` | the rebuilt `formatter` at `0xd68c0`: the format loop, the field parser, the conversions, the padding, and the string sink |
+| `formatter.asm` | the stream sink of the `formatter` module: the DOS handle write |
+| `formatter_main.c` | the `formatter` test harness: the string sink and the 26 marker cases |
 | `default_data_copy.asm` | the rebuilt `default_data_copy` module: the 32-dword default data copy |
 | `default_data_copy_main.c` | the `default_data_copy` test harness: the source and target blocks |
 | `hud_update.asm` | the hand-written `hud_update` module: the two guards on the session state and the three overlay calls; the source pins the original `mov ebp,esp` encoding |
@@ -657,7 +661,7 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the two hundred and sixty-four module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and sixty-five module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -809,6 +813,14 @@ definition needs, and its element width is the widest access, so a scalar view
 and an array view share one object and a `double` access starts at an
 eight-byte boundary.  Every object starts at zero, so the module is a
 compatibility layer and does not enter the verified count.
+
+`formatter.c` and `formatter.asm` rebuild the Watcom format engine at
+`0xd68c0`: the format loop, the field parser, the `s`, `c`, `d`, `i`, `u`, `x`,
+`X`, `o`, and `p` conversions, the flags, the width, the precision, and the
+padding order.  The string sink writes through a `char **` cursor, and the
+stream sink writes each byte through the `FILE` handle.  The `__vsprintf` and
+`__doformat` labels in `compiler_runtime.c` call this function with the two
+sinks.  The C rebuild is not byte-faithful, so the record stays `rebuilt`.
 
 `compiler_runtime.c` and `compiler_runtime.asm` hold the compiler and run-time
 labels that the module sources and CLIB3R reference: the C main entry `main_`,
@@ -1156,10 +1168,10 @@ python3 tools/pipeline_check.py \
 ```
 
 A full run in the `cross-check` shell takes about 8 minutes plus the Ghidra
-import and reports 303 checks.  `--skip-cross` skips stage 8 and the tool
-preflight, so the run reports 299 checks.  `--skip-runtime` skips stages 5, 6,
-7, and 9 and still runs stage 8, so the run reports 288 checks.  Both flags
-report 284 checks and take about 16 seconds.  The whole-image check is a skip
+import and reports 304 checks.  `--skip-cross` skips stage 8 and the tool
+preflight, so the run reports 300 checks.  `--skip-runtime` skips stages 5, 6,
+7, and 9 and still runs stage 8, so the run reports 289 checks.  Both flags
+report 285 checks and take about 16 seconds.  The whole-image check is a skip
 until `--rebuilt-image` exists, so it does not change these counts; after
 `image_plan.py build` writes the default `work/rebuild/STARTH.EXE`, the check
 runs and fails for the compatibility image.

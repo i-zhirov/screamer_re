@@ -1,0 +1,29 @@
+{
+  "exe": "fmtmod.exe",
+  "map": "formatter.map",
+  "name": "formatter",
+  "run": {
+    "command": "fmtmod.exe > fmt_out.txt",
+    "expect": [
+      "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+      "k", "l", "m", "n", "o", "D"
+    ],
+    "output": "fmt_out.txt",
+    "timeout": 180
+  },
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "formatter.c"
+    },
+    {
+      "compiler": "wasm",
+      "file": "formatter.asm"
+    },
+    {
+      "compiler": "wcc386",
+      "file": "formatter_main.c"
+    }
+  ]
+}

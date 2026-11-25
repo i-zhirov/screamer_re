@@ -121,7 +121,7 @@ screamer_re/
 │   │   ├── callgraph.json     # the direct call edges between named records
 │   │   ├── contracts/         # the JSON Schema contracts of the records
 │   │   ├── functions/         # one record per function, 0x<address>.json
-│   │   ├── modules/           # the two hundred and sixty-four module recipes
+│   │   ├── modules/           # the two hundred and sixty-five module recipes
 │   │   └── tests/             # the unittest suite of the pure logic
 │   └── scripts/               # debugger session scripts (data, not code)
 └── work/                       # extracted artifacts and output (not in git)
@@ -179,10 +179,10 @@ python3 tools/rebuild/diff_module.py --original ~/Documents/Screamer.app/Content
 
 The full check runs every stage in the `cross-check` shell.  It needs Docker,
 DOSBox-X, a built driver artifact, and the installed Ghidra loader.  It takes
-about 8 minutes plus the Ghidra import and reports 303 checks.  `--skip-cross`
-skips stage 8 and the tool preflight, so the run reports 299 checks.
+about 8 minutes plus the Ghidra import and reports 304 checks.  `--skip-cross`
+skips stage 8 and the tool preflight, so the run reports 300 checks.
 `--skip-runtime` skips stages 5, 6, 7, and 9 and still runs stage 8, so the
-run reports 288 checks.  Both flags report 284 checks and take about 16
+run reports 289 checks.  Both flags report 285 checks and take about 16
 seconds.  Stage 11 also compares the rebuilt whole image when
 `--rebuilt-image` exists and prints the coverage report when
 `tools/rebuild/link.json` is present.  The image check is a skip until a whole
@@ -358,8 +358,8 @@ through the store.
   `python3 -m unittest discover -s tools/rebuild/tests`.  Every test uses a
   temporary directory, so the suite needs no Docker, no DOSBox-X, and no game
   directory.
-- The full check reports 303 checks in the `cross-check` shell.  `--skip-cross`
-  gives 299 checks, `--skip-runtime` gives 288 checks, and both flags give 284
+- The full check reports 304 checks in the `cross-check` shell.  `--skip-cross`
+  gives 300 checks, `--skip-runtime` gives 289 checks, and both flags give 285
   checks when no rebuilt image is at the default path.  `--skip-runtime` still
   runs stage 8.  `--skip-cross` skips stage 8 and the tool preflight.  After
   the whole-image build writes `work/rebuild/STARTH.EXE`, stage 11 adds the
@@ -425,7 +425,7 @@ through the store.
 - Stage 11 prints the coverage report when `--rebuilt-image` exists and
   `tools/rebuild/link.json` is present.  The report is a diagnostic: the
   whole-image check owns the pass or fail, so the coverage output adds no check
-  and the documented counts stay at 303, 299, 288, and 284.
+  and the documented counts stay at 304, 300, 289, and 285.
 - `tools/le.py` is a fingerprint input (`store.TOOL_FILES`).  The helper change
   updates every computed fingerprint, so the next verification run re-verifies
   every record once.  The record files stay unchanged.

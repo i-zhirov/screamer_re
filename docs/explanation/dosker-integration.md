@@ -243,7 +243,7 @@ A contributor prepares the environments.
 - The tools write only under `work/` or an explicit output path.
 - A harness output name stays within the 8.3 limit.
 - `work/` is disposable.
-- The full check reports 303 checks. The flag variants report 299, 288, and
+- The full check reports 304 checks. The flag variants report 300, 289, and
   284.
 
 ### Dosker Change Requests
@@ -907,11 +907,14 @@ repeatable test.
 ### Whole-Image Completion
 
 The current store holds 935 function records: 30 `verified`, 1 `matching`,
-221 `rebuilt`, 31 `named`, and 652 `unknown`. It holds 264 module recipes.
+222 `rebuilt`, 31 `named`, and 651 `unknown`. It holds 265 module recipes.
 The records cover code functions only. The whole-image link now resolves
 every symbol and writes `work/rebuild/STARTH.EXE`; the coverage verdict is
 `unmodeled`, because the compatibility modules and the unmodeled code and data
-regions differ from the shipped image. A byte-identical image needs:
+regions differ from the shipped image.  The format engine at `0xd68c0` is
+rebuilt and the `__vsprintf`/`__doformat` labels call it, so the string and
+stream paths format text; the `__cnvs2d`/EFG stub remains. A byte-identical
+image needs:
 
 - the data objects, the compiler data-label values, and the string table; the
   labels link through zero-filled placeholders, so the shipped bytes are still
