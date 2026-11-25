@@ -1,0 +1,11 @@
+{
+  "exe": "datart.exe",
+  "map": "data_runtime.map",
+  "name": "data_runtime",
+  "sources": [
+    {
+      "compiler": "wcc386",
+      "file": "data_runtime.c"
+    }
+  ]
+}

@@ -657,7 +657,7 @@ The files:
 | `body_point_collision_detect.c` | the rebuilt `body_point_collision_detect` module: the two absolute cosines, the four body slots, the two scaled and truncated offsets, the rotation, the two screen positions, and the contact flags |
 | `body_point_collision_detect_main.c` | the `body_point_collision_detect` test harness: the player object, the four body slots, the two cosines, the yaw, the two view offsets, the two position globals, the two stubs, and the six paths |
 | `body_point_collision_detect_fpu.asm` | the `body_point_collision_detect` FPU run-time stubs: the no-op init, the truncating `__CHP`, `cos`, and `fabs` |
-| `modules/*.json` | the two hundred and sixty-one module records: the sources, the compiler, the link, and the run expectations |
+| `modules/*.json` | the two hundred and sixty-two module records: the sources, the compiler, the link, and the run expectations |
 | `store.py` | the record store: the schema, the read, the write, the validation, the seed, the edits, the input fingerprint, the extent guard, the optional implementation marker, and the 8.3 output-name check |
 | `schema.py` | validate a record against the subset of JSON Schema used by the contracts |
 | `harness.py` | the pinned container build and the DOSBox-X run of one module |
@@ -791,6 +791,12 @@ the member open, the rename and delete, the resource cache and release, the
 stream alloc, release, restore, and seek, the stream setup cases, the replay
 helpers, and the table entry and read helpers.  The entry points are inert, so
 the module does not enter the verified count.
+
+`data_runtime.c` holds the global data definitions that the whole-image link
+reports as undefined: the scalars, the arrays, the pointers, the structures,
+the three exit hooks, and the four cdecl functions.  The definitions come from
+the top-level declarations of the module test harnesses.  The module is a
+compatibility layer, so it does not enter the verified count.
 
 The link needs `system dos4g`, `option start=_cstart_`, and the `STACK` segment.
 The driver output holds the eight register pairs `20 0F`, `40 3F`, `60 01`, `80 3E`,

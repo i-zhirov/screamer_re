@@ -64,6 +64,7 @@ RUNTIME_MODULES = (
     "misc_runtime",
     "render_runtime",
     "files_runtime",
+    "data_runtime",
 )
 SHARED_OBJECTS = ("CHK.OBJ", "CSTART.OBJ", "STACK.OBJ")
 SHARED_FILES = ("CHK.ASM", "CSTART.C", "STACK.ASM")

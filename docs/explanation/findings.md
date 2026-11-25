@@ -19887,3 +19887,27 @@ temporary `-od` recipe.
   `python3 tools/rebuild/image_plan.py seed` still reports 260 modules;
   `python3 tools/rebuild/image_plan.py build --check` still reports 336 unique
   sources.
+
+## The global data symbols resolve in the whole-image link
+
+- Observation: the `data_runtime` module defines the 324 global data symbols
+  that the whole-image link reports as undefined.  The 317 symbols with a
+  harness declaration copy the top-level type, name, array size, and
+  initializer.  The module also emits the three exit hooks and the four cdecl
+  functions `net_player_default`, `net_player_register`, `report`, and
+  `sprintf`, so that the linker sees the leading-underscore symbols.
+- Observation: after the rebuild, the linker reports 701 unique undefined
+  symbols, down from 1,025.  Exactly 324 symbols are new-resolved, and zero
+  symbols are new-undefined.
+- Observation: the remaining open set is 0 functions, 0 globals, 693
+  `_DAT_*`/`_PTR_DAT_*` labels, and 8 run-time or library symbols.
+- Observation: the module is a compatibility layer, not a byte-faithful
+  recovery.  Most globals have no initializer, so they start at zero.  The
+  module has no function record and no behavior check, so it does not enter
+  the verified count.
+- Evidence: `python3 tools/rebuild/image_plan.py build`;
+  `work/rebuild/BUILD.LOG`; the comparison of
+  `work/rebuild/undefined_symbols.txt` before and after the module;
+  `python3 tools/rebuild/image_plan.py seed` reports 261 modules;
+  `python3 tools/rebuild/image_plan.py build --check` reports 337 unique
+  sources.
